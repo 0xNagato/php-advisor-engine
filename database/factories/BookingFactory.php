@@ -1,0 +1,33 @@
+<?php
+
+namespace Database\Factories;
+
+use App\Models\Booking;
+use App\Models\ConciergeProfile;
+use App\Models\Reservation;
+use Illuminate\Database\Eloquent\Factories\Factory;
+use Illuminate\Support\Carbon;
+
+class BookingFactory extends Factory
+{
+    protected $model = Booking::class;
+
+    public function definition(): array
+    {
+        return [
+            'guest_user_id' => $this->faker->randomNumber(),
+            'guest_name' => $this->faker->name(),
+            'guest_email' => $this->faker->unique()->safeEmail(),
+            'guest_phone' => $this->faker->phoneNumber(),
+            'guest_count' => $this->faker->randomNumber(),
+            'total_fee' => $this->faker->randomNumber(),
+            'currency' => $this->faker->word(),
+            'status' => $this->faker->word(),
+            'created_at' => Carbon::now(),
+            'updated_at' => Carbon::now(),
+
+            'reservation_id' => Reservation::factory(),
+            'concierge_user_id' => ConciergeProfile::factory(),
+        ];
+    }
+}
