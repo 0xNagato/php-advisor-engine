@@ -23,9 +23,14 @@ return [
         'intercept_gate' => 'before', // after
     ],
 
-    'panel_user' => [
+    'concierge' => [
         'enabled' => true,
-        'name' => 'panel_user',
+        'name' => 'concierge',
+    ],
+
+    'restaurant' => [
+        'enabled' => true,
+        'name' => 'restaurant',
     ],
 
     'permission_prefixes' => [
