@@ -41,20 +41,6 @@ class RestaurantProfileResource extends Resource
                     ->required(),
                 Forms\Components\TextInput::make('price_range')
                     ->required(),
-                Forms\Components\TextInput::make('sunday_hours_of_operation')
-                    ->required(),
-                Forms\Components\TextInput::make('monday_hours_of_operation')
-                    ->required(),
-                Forms\Components\TextInput::make('tuesday_hours_of_operation')
-                    ->required(),
-                Forms\Components\TextInput::make('wednesday_hours_of_operation')
-                    ->required(),
-                Forms\Components\TextInput::make('thursday_hours_of_operation')
-                    ->required(),
-                Forms\Components\TextInput::make('friday_hours_of_operation')
-                    ->required(),
-                Forms\Components\TextInput::make('saturday_hours_of_operation')
-                    ->required(),
                 Forms\Components\TextInput::make('address_line_1')
                     ->required()
                     ->maxLength(255),
@@ -81,20 +67,6 @@ class RestaurantProfileResource extends Resource
                     ->numeric()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('restaurant_name')
-                    ->searchable(),
-                Tables\Columns\TextColumn::make('contact_phone')
-                    ->searchable(),
-                Tables\Columns\TextColumn::make('website_url')
-                    ->searchable(),
-                Tables\Columns\TextColumn::make('address_line_1')
-                    ->searchable(),
-                Tables\Columns\TextColumn::make('address_line_2')
-                    ->searchable(),
-                Tables\Columns\TextColumn::make('city')
-                    ->searchable(),
-                Tables\Columns\TextColumn::make('state')
-                    ->searchable(),
-                Tables\Columns\TextColumn::make('zip')
                     ->searchable(),
                 Tables\Columns\TextColumn::make('created_at')
                     ->dateTime()
