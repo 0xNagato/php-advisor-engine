@@ -9,7 +9,7 @@ use NotificationChannels\Twilio\TwilioChannel;
 use NotificationChannels\Twilio\TwilioMessage;
 use NotificationChannels\Twilio\TwilioSmsMessage;
 
-class ConciergeCreated extends Notification
+class RestaurantCreated extends Notification
 {
     use Queueable;
 
@@ -49,6 +49,7 @@ class ConciergeCreated extends Notification
     }
 
     /**
+     * Get the array representation of the notification.
      *
      * @return array<string, mixed>
      */
