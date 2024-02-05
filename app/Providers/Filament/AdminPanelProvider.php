@@ -2,6 +2,7 @@
 
 namespace App\Providers\Filament;
 
+use App\Livewire\CustomPersonalInfo;
 use BezhanSalleh\FilamentShield\FilamentShieldPlugin;
 use Blade;
 use Filament\Http\Middleware\Authenticate;
@@ -62,7 +63,9 @@ class AdminPanelProvider extends PanelProvider
             ->plugins([
                 FilamentShieldPlugin::make(),
                 BreezyCore::make()
-                    ->myProfile(hasAvatars: true),
+                    ->enableTwoFactorAuthentication()
+                    ->myProfile(shouldRegisterNavigation: true, hasAvatars: false, navigationGroup: 'Settings')
+                    ->myProfileComponents(['personal_info' => CustomPersonalInfo::class]),
             ])
             ->spa();
 

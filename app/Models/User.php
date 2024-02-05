@@ -25,6 +25,7 @@ class User extends Authenticatable implements FilamentUser, HasAvatar
     use HasProfilePhoto;
     use HasRoles;
     use HasTeams;
+    use \Jeffgreco13\FilamentBreezy\Traits\TwoFactorAuthenticatable;
     use Notifiable;
     use TwoFactorAuthenticatable;
 
