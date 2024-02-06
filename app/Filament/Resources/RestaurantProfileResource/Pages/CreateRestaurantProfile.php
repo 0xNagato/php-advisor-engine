@@ -13,8 +13,6 @@ use Filament\Forms\Components\TextInput;
 use Filament\Forms\Form;
 use Filament\Resources\Pages\CreateRecord;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Facades\Password;
-use Illuminate\Support\Facades\URL;
 use Str;
 use Ysfkaya\FilamentPhoneInput\Forms\PhoneInput;
 
@@ -129,11 +127,7 @@ class CreateRestaurantProfile extends CreateRecord
         ]);
 
         $user->assignRole('concierge');
-
-        $token = Password::createToken($user);
-        $passwordResetUrl = URL::route('password.reset', ['token' => $token, 'email' => $user->email]);
-
-        $user->notify(new RestaurantCreated($passwordResetUrl));
+        $user->notify(new RestaurantCreated($user));
 
         return $user->restaurantProfile()->create([
             'restaurant_name' => $data['restaurant_name'],

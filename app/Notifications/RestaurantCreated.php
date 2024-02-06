@@ -2,9 +2,12 @@
 
 namespace App\Notifications;
 
+use App\Models\User;
+use Filament\Facades\Filament;
 use Illuminate\Bus\Queueable;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
+use Illuminate\Support\Facades\Password;
 use NotificationChannels\Twilio\TwilioChannel;
 use NotificationChannels\Twilio\TwilioMessage;
 use NotificationChannels\Twilio\TwilioSmsMessage;
@@ -13,12 +16,21 @@ class RestaurantCreated extends Notification
 {
     use Queueable;
 
+    private string $passwordResetUrl;
+
     /**
      * Create a new notification instance.
      */
-    public function __construct()
+    public function __construct(public User $user)
     {
-        //
+        $this->passwordResetUrl = $this->passwordResetUrl();
+    }
+
+    protected function passwordResetUrl(): string
+    {
+        $token = Password::createToken($this->user);
+
+        return Filament::getResetPasswordUrl($token, $this->user);
     }
 
     /**
@@ -34,18 +46,19 @@ class RestaurantCreated extends Notification
     /**
      * Get the mail representation of the notification.
      */
-    public function toMail(string $passwordResetUrl): MailMessage
+    public function toMail(object $notifiable): MailMessage
     {
         return (new MailMessage)
+            ->greeting('Welcome to the Concierge App!')
             ->line('Welcome to the Concierge App!')
-            ->action('Setup Password', $passwordResetUrl)
+            ->action('Setup Password', $this->passwordResetUrl)
             ->line('If you did not expect to receive an invitation to the Concierge App, you may discard this email.');
     }
 
-    public function toTwilio(string $passwordResetUrl): TwilioSmsMessage|TwilioMessage
+    public function toTwilio(object $notifiable): TwilioSmsMessage|TwilioMessage
     {
         return (new TwilioSmsMessage())
-            ->content("Welcome to the Concierge App! Setup your password at {$passwordResetUrl}");
+            ->content("Welcome to the Concierge App! Setup your password at {$this->passwordResetUrl}");
     }
 
     /**
