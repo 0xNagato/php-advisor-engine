@@ -25,13 +25,6 @@ class RestaurantProfile extends Model
         'description',
         'cuisines',
         'price_range',
-        'sunday_hours_of_operation',
-        'monday_hours_of_operation',
-        'tuesday_hours_of_operation',
-        'wednesday_hours_of_operation',
-        'thursday_hours_of_operation',
-        'friday_hours_of_operation',
-        'saturday_hours_of_operation',
         'address_line_1',
         'address_line_2',
         'city',
@@ -41,14 +34,6 @@ class RestaurantProfile extends Model
 
     protected $casts = [
         'cuisines' => AsArrayObject::class,
-        'price_range' => AsArrayObject::class,
-        'sunday_hours_of_operation' => AsArrayObject::class,
-        'monday_hours_of_operation' => AsArrayObject::class,
-        'tuesday_hours_of_operation' => AsArrayObject::class,
-        'wednesday_hours_of_operation' => AsArrayObject::class,
-        'thursday_hours_of_operation' => AsArrayObject::class,
-        'friday_hours_of_operation' => AsArrayObject::class,
-        'saturday_hours_of_operation' => AsArrayObject::class,
     ];
 
     public function user(): BelongsTo

@@ -49,8 +49,9 @@ class RestaurantCreated extends Notification
     public function toMail(object $notifiable): MailMessage
     {
         return (new MailMessage)
+            ->subject('Welcome to the Concierge App!')
             ->greeting('Welcome to the Concierge App!')
-            ->line('Welcome to the Concierge App!')
+            ->line('You have been invited to the Concierge App!')
             ->action('Setup Password', $this->passwordResetUrl)
             ->line('If you did not expect to receive an invitation to the Concierge App, you may discard this email.');
     }
