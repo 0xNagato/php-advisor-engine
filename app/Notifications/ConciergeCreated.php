@@ -39,6 +39,7 @@ class ConciergeCreated extends Notification
     public function toMail(object $notifiable): MailMessage
     {
         return (new MailMessage)
+            ->greeting('Welcome to the Concierge App!')
             ->line('Welcome to the Concierge App!')
             ->action('Setup Password', $this->passwordResetUrl())
             ->line('If you did not expect to receive an invitation to the Concierge App, you may discard this email.');
