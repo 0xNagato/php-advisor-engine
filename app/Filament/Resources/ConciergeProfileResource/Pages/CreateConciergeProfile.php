@@ -30,18 +30,18 @@ class CreateConciergeProfile extends CreateRecord
                             ->placeholder('Full Name')
                             ->autocomplete(false)
                             ->required(),
+                        TextInput::make('email')
+                            ->label('Email Address')
+                            ->placeholder('name@domain.com')
+                            ->autocomplete(false)
+                            ->email()
+                            ->required(),
                         PhoneInput::make('phone')
                             ->label('Phone Number')
                             ->placeholder('Phone Number')
                             ->hint('Used for SMS notifications')
                             ->onlyCountries(['US', 'CA'])
                             ->initialCountry('US')
-                            ->required(),
-                        TextInput::make('email')
-                            ->label('Email Address')
-                            ->placeholder('name@domain.com')
-                            ->autocomplete(false)
-                            ->email()
                             ->required(),
                     ]),
                 Section::make('Hotel Information')
@@ -64,7 +64,7 @@ class CreateConciergeProfile extends CreateRecord
                     ->schema([
                         TextInput::make('payout_percentage')
                             ->label('Payout Percentage')
-                            ->default(20)
+                            ->default(15)
                             ->hint('Percentage of the total booking')
                             ->numeric()
                             ->suffix('%')

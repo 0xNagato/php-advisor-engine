@@ -33,18 +33,18 @@ class CreateRestaurantProfile extends CreateRecord
                             ->placeholder('Full Name')
                             ->autocomplete(false)
                             ->required(),
+                        TextInput::make('email')
+                            ->label('Email Address')
+                            ->placeholder('name@domain.com')
+                            ->autocomplete(false)
+                            ->email()
+                            ->required(),
                         PhoneInput::make('phone')
                             ->label('Phone Number')
                             ->placeholder('Phone Number')
                             ->hint('Used for SMS notifications')
                             ->onlyCountries(['US', 'CA'])
                             ->initialCountry('US')
-                            ->required(),
-                        TextInput::make('email')
-                            ->label('Email Address')
-                            ->placeholder('name@domain.com')
-                            ->autocomplete(false)
-                            ->email()
                             ->required(),
                     ]),
                 Section::make('Restaurant Information')
@@ -60,15 +60,6 @@ class CreateRestaurantProfile extends CreateRecord
                             ->onlyCountries(['US'])
                             ->initialCountry('US')
                             ->required(),
-                        TextInput::make('website_url')
-                            ->label('Website URL')
-                            ->url()
-                            ->required()
-                            ->maxLength(255),
-                        Textarea::make('description')
-                            ->required()
-                            ->maxLength(65535)
-                            ->columnSpanFull(),
                         TagsInput::make('cuisines')
                             ->placeholder('New cuisine')
                             ->suggestions(['American', 'Italian', 'Mexican', 'Chinese', 'Japanese', 'Indian', 'Thai', 'Mediterranean', 'French', 'Greek', 'Korean', 'Vietnamese', 'Spanish', 'German', 'Brazilian', 'Caribbean', 'African', 'Middle Eastern', 'Other'])
@@ -83,23 +74,25 @@ class CreateRestaurantProfile extends CreateRecord
                                 5 => '$$$$$',
                             ])
                             ->required(),
+                        TextInput::make('website_url')
+                            ->label('Website URL')
+                            ->url()
+                            ->maxLength(255),
+                        Textarea::make('description')
+                            ->maxLength(65535)
+                            ->columnSpanFull(),
                         TextInput::make('address_line_1')
                             ->label('Address Line 1')
-                            ->required()
                             ->maxLength(255),
                         TextInput::make('address_line_2')
                             ->label('Address Line 2')
-                            ->required()
                             ->maxLength(255),
                         TextInput::make('city')
-                            ->required()
                             ->maxLength(255),
                         TextInput::make('state')
-                            ->required()
                             ->maxLength(255),
                         TextInput::make('zip')
                             ->label('Zip Code')
-                            ->required()
                             ->maxLength(255),
                     ]),
                 Section::make('Payout Information')
@@ -108,7 +101,7 @@ class CreateRestaurantProfile extends CreateRecord
                     ->schema([
                         TextInput::make('payout_percentage')
                             ->label('Payout Percentage')
-                            ->default(20)
+                            ->default(60)
                             ->hint('Percentage of the total booking')
                             ->numeric()
                             ->suffix('%')

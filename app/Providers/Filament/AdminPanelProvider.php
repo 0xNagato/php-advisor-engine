@@ -26,7 +26,7 @@ class AdminPanelProvider extends PanelProvider
     public function register(): void
     {
         parent::register();
-        FilamentView::registerRenderHook('panels::body.end', static fn (): string => Blade::render("@vite('resources/js/app.js')"));
+        FilamentView::registerRenderHook('panels::body.end', static fn(): string => Blade::render("@vite('resources/js/app.js')"));
     }
 
     public function panel(Panel $panel): Panel
@@ -64,7 +64,7 @@ class AdminPanelProvider extends PanelProvider
                 FilamentShieldPlugin::make(),
                 BreezyCore::make()
                     ->enableTwoFactorAuthentication()
-                    ->myProfile(shouldRegisterNavigation: true, hasAvatars: false, navigationGroup: 'Settings')
+                    ->myProfile(shouldRegisterNavigation: true, hasAvatars: true, navigationGroup: 'Settings')
                     ->myProfileComponents(['personal_info' => CustomPersonalInfo::class]),
             ])
             ->spa();

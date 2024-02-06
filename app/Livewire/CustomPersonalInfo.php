@@ -8,6 +8,8 @@ use Ysfkaya\FilamentPhoneInput\Forms\PhoneInput;
 
 class CustomPersonalInfo extends PersonalInfo
 {
+    public array $only = ['name', 'email', 'phone'];
+    
     protected function getProfileFormSchema(): array
     {
         $groupFields = Group::make([
