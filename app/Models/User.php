@@ -97,7 +97,8 @@ class User extends Authenticatable implements FilamentUser, HasAvatar
     protected function avatarUrl(): Attribute
     {
         return Attribute::make(
-            get: static fn(mixed $value, array $attributes) => $attributes['profile_photo_path']
+            get: fn(mixed $value, array $attributes) => $attributes['profile_photo_path'],
+            set: fn(mixed $value) => ['profile_photo_path' => $value],
         );
     }
 }

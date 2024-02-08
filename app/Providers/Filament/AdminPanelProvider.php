@@ -67,7 +67,8 @@ class AdminPanelProvider extends PanelProvider
                     ->myProfile(shouldRegisterNavigation: true, hasAvatars: true, navigationGroup: 'Settings')
                     ->myProfileComponents(['personal_info' => CustomPersonalInfo::class]),
             ])
-            ->spa();
+            ->spa()
+            ->viteTheme('resources/css/filament/admin/theme.css');
 
         return $panel;
     }

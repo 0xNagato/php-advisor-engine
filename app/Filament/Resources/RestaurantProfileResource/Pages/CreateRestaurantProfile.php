@@ -119,7 +119,7 @@ class CreateRestaurantProfile extends CreateRecord
             'password' => Str::random(8),
         ]);
 
-        $user->assignRole('concierge');
+        $user->assignRole('restaurant');
         $user->notify(new RestaurantCreated($user));
 
         return $user->restaurantProfile()->create([
