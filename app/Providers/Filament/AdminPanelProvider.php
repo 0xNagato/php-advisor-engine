@@ -64,7 +64,7 @@ class AdminPanelProvider extends PanelProvider
                 FilamentShieldPlugin::make(),
                 BreezyCore::make()
                     ->enableTwoFactorAuthentication()
-                    ->myProfile(shouldRegisterNavigation: true, hasAvatars: true, navigationGroup: 'Settings')
+                    ->myProfile(shouldRegisterNavigation: true, hasAvatars: false, navigationGroup: 'Settings')
                     ->myProfileComponents(['personal_info' => CustomPersonalInfo::class]),
             ])
             ->spa()
