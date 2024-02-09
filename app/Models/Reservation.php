@@ -21,6 +21,16 @@ class Reservation extends Model
         'date',
         'start_time',
         'end_time',
+        'is_closed',
+    ];
+
+    /**
+     * The attributes that should be cast to native types.
+     *
+     * @var array<string, string>
+     */
+    protected $casts = [
+        'is_closed' => 'boolean',
     ];
 
     public function restaurantProfile(): BelongsTo
