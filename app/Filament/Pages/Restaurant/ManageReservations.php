@@ -9,11 +9,12 @@ use Filament\Forms\Components\Section;
 use Filament\Forms\Form;
 use Filament\Pages\Page;
 
-
 class ManageReservations extends Page
 {
     protected static ?string $navigationIcon = 'heroicon-o-calendar';
+
     protected static string $view = 'filament.pages.restaurant.manage-reservations';
+
     public ?array $data = [];
 
     public static function canAccess(): bool
@@ -25,6 +26,7 @@ class ManageReservations extends Page
     {
         $dates = collect(range(0, 6))->map(function ($day) {
             $date = now()->addDays($day);
+
             return [
                 'date' => $date->format('Y-m-d'),
                 'startTime' => '18:00',
@@ -48,12 +50,12 @@ class ManageReservations extends Page
                     ->deletable(false)
                     ->reorderable(false)
                     ->addActionLabel('Add New Date')
-                    ->itemLabel(fn(array $state): string => Carbon::make($state['date'])?->format('l, F j'))
+                    ->itemLabel(fn (array $state): string => Carbon::make($state['date'])?->format('l, F j'))
                     ->simple(
                         TimeRange::make('day')
                             ->hiddenLabel()
                             ->required()
-                    )
+                    ),
             ]);
 
         return $form

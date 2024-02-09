@@ -17,15 +17,10 @@ class Reservation extends Model
      * @var array<int, string>
      */
     protected $fillable = [
-        'concierge_user_id',
-        'guest_user_id',
-        'guest_name',
-        'guest_email',
-        'guest_phone',
-        'guest_count',
-        'total_fee',
-        'currency',
-        'status',
+        'restaurant_profile_id',
+        'date',
+        'start_time',
+        'end_time',
     ];
 
     public function restaurantProfile(): BelongsTo
