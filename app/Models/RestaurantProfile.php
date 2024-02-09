@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\AsArrayObject;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -30,6 +31,7 @@ class RestaurantProfile extends Model
         'city',
         'state',
         'zip',
+        'payout_percentage',
     ];
 
     protected $casts = [
@@ -44,5 +46,40 @@ class RestaurantProfile extends Model
     public function reservations(): HasMany
     {
         return $this->hasMany(Reservation::class);
+    }
+
+    /**
+     * Scope a query to only include open restaurants.
+     *
+     * @param Builder $query
+     * @return Builder
+     */
+    public function scopeOpenRestaurants(Builder $query): Builder
+    {
+        $currentTime = now()->toTimeString();
+
+        return $query->whereHas('reservations', function ($query) use ($currentTime) {
+            $query->where('is_closed', false)
+                ->whereTime('start_time', '<=', $currentTime)
+                ->whereTime('end_time', '>=', $currentTime);
+        });
+    }
+
+    /**
+     * Scope a query to only include restaurants open later today.
+     *
+     * @param Builder $query
+     * @return Builder
+     */
+    public function scopeOpenLaterToday(Builder $query): Builder
+    {
+        $currentTime = now()->toTimeString();
+        $currentDate = now()->toDateString();
+
+        return $query->whereHas('reservations', function ($query) use ($currentTime, $currentDate) {
+            $query->where('is_closed', false)
+                ->whereDate('date', $currentDate)
+                ->whereTime('start_time', '>', $currentTime);
+        });
     }
 }

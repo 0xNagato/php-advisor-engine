@@ -134,6 +134,7 @@ class CreateRestaurantProfile extends CreateRecord
             'city' => $data['city'],
             'state' => $data['state'],
             'zip' => $data['zip'],
+            'payout_percentage' => $data['payout_percentage'],
         ]);
     }
 }

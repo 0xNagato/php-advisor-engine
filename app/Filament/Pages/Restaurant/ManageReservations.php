@@ -29,7 +29,7 @@ class ManageReservations extends Page
             $date = now()->addDays($day);
 
             $reservation = Reservation::where('date', $date->format('Y-m-d'))
-                ->where('restaurant_profile_id', auth()->user()->restaurantProfile->id)
+                ->where('restaurant_profile_id', auth()->user()->restaurantProfile?->id)
                 ->first();
 
             if ($reservation) {
@@ -48,8 +48,6 @@ class ManageReservations extends Page
                 'closed' => false,
             ];
         });
-
-        clock($dates);
 
         $this->form->fill([
             'dates' => $dates,
