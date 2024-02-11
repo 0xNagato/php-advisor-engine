@@ -31,7 +31,7 @@ class Booking extends Model
 
     public function reservation(): BelongsTo
     {
-        return $this->belongsTo(Reservation::class);
+        return $this->belongsTo(TimeSlot::class);
     }
 
     public function conciergeProfile(): BelongsTo

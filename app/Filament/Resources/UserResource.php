@@ -32,29 +32,6 @@ class UserResource extends Resource
                     ->email()
                     ->required()
                     ->maxLength(255),
-                Forms\Components\DateTimePicker::make('email_verified_at'),
-                // Forms\Components\TextInput::make('password')
-                //     ->password()
-                //     ->required()
-                //     ->maxLength(255),
-                Forms\Components\Textarea::make('two_factor_secret')
-                    ->maxLength(65535)
-                    ->columnSpanFull(),
-                Forms\Components\Textarea::make('two_factor_recovery_codes')
-                    ->maxLength(65535)
-                    ->columnSpanFull(),
-                Forms\Components\DateTimePicker::make('two_factor_confirmed_at'),
-                Forms\Components\TextInput::make('current_team_id')
-                    ->numeric(),
-                Forms\Components\TextInput::make('profile_photo_path')
-                    ->maxLength(2048),
-                Forms\Components\TextInput::make('stripe_id')
-                    ->maxLength(255),
-                Forms\Components\TextInput::make('pm_type')
-                    ->maxLength(255),
-                Forms\Components\TextInput::make('pm_last_four')
-                    ->maxLength(4),
-                Forms\Components\DateTimePicker::make('trial_ends_at'),
                 Forms\Components\TextInput::make('phone')
                     ->tel()
                     ->maxLength(255),
@@ -72,6 +49,11 @@ class UserResource extends Resource
                     ->searchable()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
+                Tables\Columns\TextColumn::make('roles.name')
+                    ->label('Role')
+                    ->badge()
+                    ->sortable()
+                    ->searchable(),
                 Tables\Columns\TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()

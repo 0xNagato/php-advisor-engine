@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 
-class Reservation extends Model
+class TimeSlot extends Model
 {
     use HasFactory;
 
@@ -21,7 +21,7 @@ class Reservation extends Model
         'date',
         'start_time',
         'end_time',
-        'is_closed',
+        'available_slots',
     ];
 
     /**

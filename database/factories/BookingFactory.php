@@ -4,7 +4,7 @@ namespace Database\Factories;
 
 use App\Models\Booking;
 use App\Models\ConciergeProfile;
-use App\Models\Reservation;
+use App\Models\TimeSlot;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Carbon;
 
@@ -21,12 +21,12 @@ class BookingFactory extends Factory
             'guest_phone' => $this->faker->phoneNumber(),
             'guest_count' => $this->faker->randomNumber(),
             'total_fee' => $this->faker->randomNumber(),
-            'currency' => $this->faker->word(),
-            'status' => $this->faker->word(),
+            'currency' => 'USD',
+            'status' => 'pending',
             'created_at' => Carbon::now(),
             'updated_at' => Carbon::now(),
 
-            'reservation_id' => Reservation::factory(),
+            'reservation_id' => TimeSlot::factory(),
             'concierge_user_id' => ConciergeProfile::factory(),
         ];
     }

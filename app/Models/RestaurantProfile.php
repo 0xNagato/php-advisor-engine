@@ -31,7 +31,11 @@ class RestaurantProfile extends Model
         'city',
         'state',
         'zip',
-        'payout_percentage',
+        'payout_restaurant',
+        'payout_charity',
+        'payout_concierge',
+        'payout_platform',
+        'secondary_contact_phone',
     ];
 
     protected $casts = [
@@ -43,22 +47,19 @@ class RestaurantProfile extends Model
         return $this->belongsTo(User::class);
     }
 
-    public function reservations(): HasMany
+    public function timeSlots(): HasMany
     {
-        return $this->hasMany(Reservation::class);
+        return $this->hasMany(TimeSlot::class);
     }
 
     /**
      * Scope a query to only include open restaurants.
-     *
-     * @param Builder $query
-     * @return Builder
      */
     public function scopeOpenRestaurants(Builder $query): Builder
     {
         $currentTime = now()->toTimeString();
 
-        return $query->whereHas('reservations', function ($query) use ($currentTime) {
+        return $query->whereHas('timeSlots', function ($query) use ($currentTime) {
             $query->where('is_closed', false)
                 ->whereTime('start_time', '<=', $currentTime)
                 ->whereTime('end_time', '>=', $currentTime);
@@ -67,16 +68,13 @@ class RestaurantProfile extends Model
 
     /**
      * Scope a query to only include restaurants open later today.
-     *
-     * @param Builder $query
-     * @return Builder
      */
     public function scopeOpenLaterToday(Builder $query): Builder
     {
         $currentTime = now()->toTimeString();
         $currentDate = now()->toDateString();
 
-        return $query->whereHas('reservations', function ($query) use ($currentTime, $currentDate) {
+        return $query->whereHas('timeSlots', function ($query) use ($currentTime, $currentDate) {
             $query->where('is_closed', false)
                 ->whereDate('date', $currentDate)
                 ->whereTime('start_time', '>', $currentTime);

@@ -2,7 +2,7 @@
 
 namespace App\Policies;
 
-use App\Models\Reservation;
+use App\Models\TimeSlot;
 use App\Models\User;
 use Illuminate\Auth\Access\HandlesAuthorization;
 
@@ -21,7 +21,7 @@ class ReservationPolicy
     /**
      * Determine whether the user can view the model.
      */
-    public function view(User $user, Reservation $reservation): bool
+    public function view(User $user, TimeSlot $reservation): bool
     {
         return $user->can('view_reservation');
     }
@@ -37,7 +37,7 @@ class ReservationPolicy
     /**
      * Determine whether the user can update the model.
      */
-    public function update(User $user, Reservation $reservation): bool
+    public function update(User $user, TimeSlot $reservation): bool
     {
         return $user->can('update_reservation');
     }
@@ -45,7 +45,7 @@ class ReservationPolicy
     /**
      * Determine whether the user can delete the model.
      */
-    public function delete(User $user, Reservation $reservation): bool
+    public function delete(User $user, TimeSlot $reservation): bool
     {
         return $user->can('delete_reservation');
     }
@@ -61,7 +61,7 @@ class ReservationPolicy
     /**
      * Determine whether the user can permanently delete.
      */
-    public function forceDelete(User $user, Reservation $reservation): bool
+    public function forceDelete(User $user, TimeSlot $reservation): bool
     {
         return $user->can('force_delete_reservation');
     }
@@ -77,7 +77,7 @@ class ReservationPolicy
     /**
      * Determine whether the user can restore.
      */
-    public function restore(User $user, Reservation $reservation): bool
+    public function restore(User $user, TimeSlot $reservation): bool
     {
         return $user->can('restore_reservation');
     }
@@ -93,7 +93,7 @@ class ReservationPolicy
     /**
      * Determine whether the user can replicate.
      */
-    public function replicate(User $user, Reservation $reservation): bool
+    public function replicate(User $user, TimeSlot $reservation): bool
     {
         return $user->can('replicate_reservation');
     }

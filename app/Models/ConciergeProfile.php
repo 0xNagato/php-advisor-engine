@@ -19,8 +19,8 @@ class ConciergeProfile extends Model
     protected $fillable = [
         'user_id',
         'hotel_name',
-        'hotel_phone',
-        'payout_percentage',
+        'payout_type',
+        'payout_account',
     ];
 
     public function user(): BelongsTo

@@ -3,7 +3,7 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\ReservationResource\Pages;
-use App\Models\Reservation;
+use App\Models\TimeSlot;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
@@ -12,7 +12,7 @@ use Filament\Tables\Table;
 
 class ReservationResource extends Resource
 {
-    protected static ?string $model = Reservation::class;
+    protected static ?string $model = TimeSlot::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
 

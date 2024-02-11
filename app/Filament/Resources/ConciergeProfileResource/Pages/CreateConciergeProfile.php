@@ -52,23 +52,6 @@ class CreateConciergeProfile extends CreateRecord
                             ->label('Hotel Name')
                             ->placeholder('Hotel Name')
                             ->required(),
-                        PhoneInput::make('hotel_phone')
-                            ->label('Hotel Phone Number')
-                            ->onlyCountries(['US', 'CA'])
-                            ->initialCountry('US')
-                            ->required(),
-                    ]),
-                Section::make('Payout Information')
-                    ->description('This will be the payout information for the concierge.')
-                    ->icon('heroicon-m-currency-dollar')
-                    ->schema([
-                        TextInput::make('payout_percentage')
-                            ->label('Payout Percentage')
-                            ->default(15)
-                            ->hint('Percentage of the total booking')
-                            ->numeric()
-                            ->suffix('%')
-                            ->required(),
                     ]),
             ]);
     }
@@ -87,8 +70,6 @@ class CreateConciergeProfile extends CreateRecord
 
         return $user->conciergeProfile()->create([
             'hotel_name' => $data['hotel_name'],
-            'hotel_phone' => $data['hotel_phone'],
-            'payout_percentage' => $data['payout_percentage'],
         ]);
     }
 }
