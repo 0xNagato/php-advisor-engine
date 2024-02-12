@@ -61,13 +61,11 @@ class CreateRestaurant extends CreateRecord
                             ->required(),
                         TextInput::make('secondary_contact_name')
                             ->label('Secondary Contact Name')
-                            ->required()
                             ->maxLength(255),
                         PhoneInput::make('secondary_contact_phone')
                             ->label('Secondary Contact Number')
                             ->onlyCountries(['US'])
-                            ->initialCountry('US')
-                            ->required(),
+                            ->initialCountry('US'),
                     ]),
                 Section::make('Payout Information')
                     ->icon('heroicon-m-currency-dollar')

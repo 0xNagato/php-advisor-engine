@@ -4,7 +4,6 @@ namespace Database\Seeders;
 
 use App\Models\Restaurant;
 use App\Models\TimeSlot;
-use Faker\Factory as Faker;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Carbon;
 
@@ -15,35 +14,24 @@ class TimeSlotSeeder extends Seeder
      */
     public function run(): void
     {
-        $faker = Faker::create();
+        $restaurants = Restaurant::all();
 
-        // Get all restaurant profiles
-        $restaurantProfiles = Restaurant::all();
+        $restaurants->each(function ($restaurant) {
+            for ($day = 0; $day < 7; $day++) {
+                $date = Carbon::now()->addDays($day);
+                $startTime = Carbon::createFromTime(17, 0, 0); // 5pm
+                $endTime = Carbon::createFromTime(20, 30, 0); // 8:30pm
 
-        // Determine the number of restaurant profiles to create reservations for (e.g., 80% of them)
-        $percentageToSeed = 0.8;
-        $countToSeed = (int)($restaurantProfiles->count() * $percentageToSeed);
-
-        // Get a random subset of restaurant profiles
-        $restaurantProfilesToSeed = $restaurantProfiles->random($countToSeed);
-
-        // Define the date range for the last month
-        $startDate = Carbon::now()->subMonth()->startOfMonth();
-        $endDate = Carbon::now()->subMonth()->endOfMonth();
-
-        // Create reservations for the selected restaurant profiles
-        foreach ($restaurantProfilesToSeed as $restaurantProfile) {
-            // Generate a random date and time within the last month
-            $randomDate = Carbon::createFromTimestamp($faker->dateTimeBetween($startDate, $endDate)->getTimestamp());
-
-            // Create a reservation using the factory
-            TimeSlot::create([
-                'date' => $randomDate,
-                'start_time' => '18:00:00',
-                'end_time' => '20:00:00',
-                'is_closed' => false,
-                'restaurant_profile_id' => $restaurantProfile->id,
-            ]);
-        }
+                for ($time = $startTime; $time->lessThan($endTime); $time->addMinutes(30)) {
+                    TimeSlot::factory()->create([
+                        'date' => $date->format('Y-m-d'),
+                        'start_time' => $time->format('H:i:s'),
+                        'end_time' => $time->copy()->addMinutes(30)->format('H:i:s'),
+                        'available_slots' => 5,
+                        'restaurant_id' => $restaurant->id,
+                    ]);
+                }
+            }
+        });
     }
 }

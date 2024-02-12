@@ -30,12 +30,6 @@ class ConciergeResource extends Resource
                     ->tel()
                     ->required()
                     ->maxLength(255),
-                Forms\Components\TextInput::make('hotel_phone')
-                    ->tel()
-                    ->maxLength(255),
-                Forms\Components\TextInput::make('payout_percentage')
-                    ->required()
-                    ->numeric(),
             ]);
     }
 
@@ -48,11 +42,6 @@ class ConciergeResource extends Resource
                     ->sortable(),
                 Tables\Columns\TextColumn::make('hotel_name')
                     ->searchable(),
-                Tables\Columns\TextColumn::make('hotel_phone')
-                    ->searchable(),
-                Tables\Columns\TextColumn::make('payout_percentage')
-                    ->numeric()
-                    ->sortable(),
                 Tables\Columns\TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()

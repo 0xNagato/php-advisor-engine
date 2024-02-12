@@ -2,8 +2,8 @@
 
 namespace Database\Seeders;
 
+use App\Models\Concierge;
 use App\Models\User;
-use Faker\Factory as Faker;
 use Illuminate\Database\Seeder;
 
 class ConciergeSeeder extends Seeder
@@ -36,23 +36,14 @@ class ConciergeSeeder extends Seeder
             'Lunar Valley Inn',
         ]);
 
-        $faker = Faker::create();
-
-        $hotelNames->each(function ($hotelName) use ($faker) {
-            $user = User::create([
-                'name' => $faker->name,
-                'email' => $faker->unique()->safeEmail,
-                'password' => bcrypt('password'),
-                'phone' => $faker->phoneNumber,
-            ]);
+        $hotelNames->each(function ($hotelName) {
+            $user = User::factory()
+                ->has(Concierge::factory([
+                    'hotel_name' => $hotelName,
+                ]))
+                ->create();
 
             $user->assignRole('concierge');
-
-            $user->conciergeProfile()->create([
-                'hotel_name' => $hotelName,
-                'hotel_phone' => $faker->phoneNumber,
-                'payout_percentage' => 15,
-            ]);
         });
     }
 }

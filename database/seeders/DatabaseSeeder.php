@@ -3,7 +3,9 @@
 namespace Database\Seeders;
 
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
+use Artisan;
 use Illuminate\Database\Seeder;
+use Spatie\Permission\Models\Role;
 
 class DatabaseSeeder extends Seeder
 {
@@ -12,11 +14,38 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // \App\Models\User::factory(10)->create();
+        Artisan::call('migrate:fresh');
 
-        // \App\Models\User::factory()->create([
-        //     'name' => 'Test User',
-        //     'email' => 'test@example.com',
-        // ]);
+        Artisan::call('make:filament-user', [
+            '--name' => 'Andrew Weir',
+            '--email' => 'andru.weir@gmail.com',
+            '--password' => 'password',
+        ]);
+
+        Artisan::call('make:filament-user', [
+            '--name' => 'Alex Zhardanovsky',
+            '--email' => 'alex.zhard@gmail.com',
+            '--password' => 'password',
+        ]);
+
+        Artisan::call('shield:super-admin', [
+            '--user' => 1
+        ]);
+
+        Artisan::call('shield:super-admin', [
+            '--user' => 2
+        ]);
+
+        Role::create(['name' => 'concierge']);
+        Role::create(['name' => 'restaurant']);
+
+        $this->call([
+            ConciergeSeeder::class,
+            RestaurantSeeder::class,
+            TimeSlotSeeder::class,
+            BookingSeeder::class,
+        ]);
+
+        Artisan::call('shield:generate --all');
     }
 }

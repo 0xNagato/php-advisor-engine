@@ -60,31 +60,40 @@ class BookingResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('reservation.id')
+
+                Tables\Columns\TextColumn::make('concierge.user.name')
+                    ->label('Concierge')
                     ->numeric()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('concierge_user_id')
-                    ->numeric()
+                Tables\Columns\TextColumn::make('timeSlot.restaurant.restaurant_name')
+                    ->label('Restaurant')
+                    ->searchable()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('guest_user_id')
-                    ->numeric()
+                Tables\Columns\TextColumn::make('timeSlot.start_time')
+                    ->label('When')
+                    ->dateTime()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('guest_name')
                     ->searchable(),
                 Tables\Columns\TextColumn::make('guest_email')
-                    ->searchable(),
+                    ->searchable()
+                    ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('guest_phone')
-                    ->searchable(),
+                    ->searchable()
+                    ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('guest_count')
                     ->numeric()
-                    ->sortable(),
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('total_fee')
-                    ->numeric()
+                    ->currency('USD')
                     ->sortable(),
                 Tables\Columns\TextColumn::make('currency')
-                    ->searchable(),
+                    ->searchable()
+                    ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('status')
-                    ->searchable(),
+                    ->searchable()
+                    ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()

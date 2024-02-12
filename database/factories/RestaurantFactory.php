@@ -15,7 +15,9 @@ class RestaurantFactory extends Factory
     {
         return [
             'restaurant_name' => $this->faker->name(),
+            'primary_contact_name' => $this->faker->name(),
             'contact_phone' => $this->faker->phoneNumber(),
+            'secondary_contact_name' => $this->faker->name(),
             'secondary_contact_phone' => $this->faker->phoneNumber(),
             'payout_platform' => 20,
             'payout_restaurant' => 60,

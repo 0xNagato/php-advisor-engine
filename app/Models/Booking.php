@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 
+
 class Booking extends Model
 {
     use HasFactory;
@@ -17,17 +18,36 @@ class Booking extends Model
      * @var array<int, string>
      */
     protected $fillable = [
-        'reservation_id',
+        'time_slot_id',
         'concierge_user_id',
-        'guest_user_id',
         'guest_name',
         'guest_email',
         'guest_phone',
         'guest_count',
-        'total_fee',
         'currency',
         'status',
+        'total_fee',
     ];
+
+    protected static function boot(): void
+    {
+        parent::boot();
+
+        static::saving(function (Booking $booking) {
+            $booking->total_fee = $booking->totalFee();
+        });
+    }
+
+    public function totalFee(): int
+    {
+        $total_fee = 200;
+
+        if ($this->guest_count > 2) {
+            $total_fee += 50 * ($this->guest_count - 2);
+        }
+
+        return $total_fee * 100;
+    }
 
     public function timeSlot(): BelongsTo
     {
@@ -36,7 +56,7 @@ class Booking extends Model
 
     public function concierge(): BelongsTo
     {
-        return $this->belongsTo(Concierge::class, 'concierge_user_id');
+        return $this->belongsTo(Concierge::class);
     }
 
     public function payment(): HasOne

@@ -21,7 +21,7 @@ class TimeSlotFactory extends Factory
             'created_at' => Carbon::now(),
             'updated_at' => Carbon::now(),
 
-            'restaurant_profile_id' => Restaurant::factory(),
+            'restaurant_id' => Restaurant::factory(),
         ];
     }
 }

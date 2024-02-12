@@ -4,8 +4,77 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "5ce59d49201b79c29d23e509347c607f",
+    "content-hash": "d05f14bcc78b4854cedcf2d64e59521e",
     "packages": [
+        {
+            "name": "akaunting/laravel-money",
+            "version": "5.1.3",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/akaunting/laravel-money.git",
+                "reference": "3e3a4326b252c1a9ecaf0e43ff75e7262d6f28d5"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/akaunting/laravel-money/zipball/3e3a4326b252c1a9ecaf0e43ff75e7262d6f28d5",
+                "reference": "3e3a4326b252c1a9ecaf0e43ff75e7262d6f28d5",
+                "shasum": ""
+            },
+            "require": {
+                "illuminate/contracts": "^9.0|^10.0",
+                "illuminate/support": "^9.0|^10.0",
+                "illuminate/validation": "^9.0|^10.0",
+                "illuminate/view": "^9.0|^10.0",
+                "php": "^8.0",
+                "vlucas/phpdotenv": "^5.4.1"
+            },
+            "require-dev": {
+                "orchestra/testbench": "^7.4|^8.0",
+                "phpunit/phpunit": "^9.5|^10.0",
+                "vimeo/psalm": "^4.23"
+            },
+            "type": "library",
+            "extra": {
+                "laravel": {
+                    "providers": [
+                        "Akaunting\\Money\\Provider"
+                    ]
+                }
+            },
+            "autoload": {
+                "files": [
+                    "src/helpers.php"
+                ],
+                "psr-4": {
+                    "Akaunting\\Money\\": "src"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Denis Duliçi",
+                    "email": "info@akaunting.com",
+                    "homepage": "https://akaunting.com",
+                    "role": "Developer"
+                }
+            ],
+            "description": "Currency formatting and conversion package for Laravel",
+            "keywords": [
+                "convert",
+                "currency",
+                "format",
+                "laravel",
+                "money"
+            ],
+            "support": {
+                "issues": "https://github.com/akaunting/laravel-money/issues",
+                "source": "https://github.com/akaunting/laravel-money/tree/5.1.3"
+            },
+            "time": "2023-12-10T14:47:48+00:00"
+        },
         {
             "name": "anourvalar/eloquent-serialize",
             "version": "1.2.17",
@@ -71,6 +140,86 @@
                 "source": "https://github.com/AnourValar/eloquent-serialize/tree/1.2.17"
             },
             "time": "2023-12-06T15:54:01+00:00"
+        },
+        {
+            "name": "ariaieboy/filament-currency",
+            "version": "1.2.2",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/ariaieboy/filament-currency.git",
+                "reference": "0d861b7d8d997805e1d6ee602528b5d4839c8423"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/ariaieboy/filament-currency/zipball/0d861b7d8d997805e1d6ee602528b5d4839c8423",
+                "reference": "0d861b7d8d997805e1d6ee602528b5d4839c8423",
+                "shasum": ""
+            },
+            "require": {
+                "akaunting/laravel-money": "^1.2|^2.0|^3.0|^4.0|^5.1",
+                "filament/tables": "^3.0",
+                "illuminate/contracts": "^10.0",
+                "php": "~8.1|~8.2|~8.3",
+                "spatie/laravel-package-tools": "^1.15.0"
+            },
+            "require-dev": {
+                "larastan/larastan": "^2.7.0",
+                "laravel/pint": "^1.0",
+                "nunomaduro/collision": "^7.9",
+                "orchestra/testbench": "^8.0",
+                "pestphp/pest": "^2.0",
+                "pestphp/pest-plugin-arch": "^2.0",
+                "pestphp/pest-plugin-laravel": "^2.0",
+                "phpstan/extension-installer": "^1.1",
+                "phpstan/phpstan-deprecation-rules": "^1.0",
+                "phpstan/phpstan-phpunit": "^1.0"
+            },
+            "type": "library",
+            "extra": {
+                "laravel": {
+                    "providers": [
+                        "Ariaieboy\\FilamentCurrency\\FilamentCurrencyServiceProvider"
+                    ],
+                    "aliases": {
+                        "FilamentCurrency": "Ariaieboy\\FilamentCurrency\\Facades\\FilamentCurrency"
+                    }
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "Ariaieboy\\FilamentCurrency\\": "src/",
+                    "Ariaieboy\\FilamentCurrency\\Database\\Factories\\": "database/factories/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "AriaieBOY",
+                    "email": "ariaieboy.ir@gmail.com",
+                    "role": "Developer"
+                }
+            ],
+            "description": "This is my package filament-currency",
+            "homepage": "https://github.com/ariaieboy/filament-currency",
+            "keywords": [
+                "ariaieboy",
+                "filament-currency",
+                "laravel"
+            ],
+            "support": {
+                "issues": "https://github.com/ariaieboy/filament-currency/issues",
+                "source": "https://github.com/ariaieboy/filament-currency"
+            },
+            "funding": [
+                {
+                    "url": "https://github.com/ariaieboy",
+                    "type": "github"
+                }
+            ],
+            "time": "2023-12-15T15:03:14+00:00"
         },
         {
             "name": "bacon/bacon-qr-code",
