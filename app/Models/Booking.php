@@ -19,7 +19,7 @@ class Booking extends Model
      */
     protected $fillable = [
         'time_slot_id',
-        'concierge_user_id',
+        'concierge_id',
         'guest_name',
         'guest_email',
         'guest_phone',

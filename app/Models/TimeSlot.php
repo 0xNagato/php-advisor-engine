@@ -17,7 +17,7 @@ class TimeSlot extends Model
      * @var array<int, string>
      */
     protected $fillable = [
-        'restaurant_profile_id',
+        'restaurant_id',
         'date',
         'start_time',
         'end_time',

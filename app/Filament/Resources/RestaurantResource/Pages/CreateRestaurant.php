@@ -110,7 +110,7 @@ class CreateRestaurant extends CreateRecord
         $user->assignRole('restaurant');
         $user->notify(new RestaurantCreated($user));
 
-        return $user->restaurantProfile()->create([
+        return $user->restaurant()->create([
             'restaurant_name' => $data['restaurant_name'],
             'contact_phone' => $data['contact_phone'],
             'website_url' => $data['website_url'],
