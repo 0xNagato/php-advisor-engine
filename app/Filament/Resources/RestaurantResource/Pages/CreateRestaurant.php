@@ -72,10 +72,27 @@ class CreateRestaurant extends CreateRecord
                 Section::make('Payout Information')
                     ->icon('heroicon-m-currency-dollar')
                     ->schema([
-                        TextInput::make('payout_percentage')
-                            ->label('Payout Percentage')
+                        TextInput::make('payout_restaurant')
+                            ->label('Payout Restaurant')
                             ->default(60)
-                            ->hint('Percentage of the total booking')
+                            ->numeric()
+                            ->suffix('%')
+                            ->required(),
+                        TextInput::make('payout_charity')
+                            ->label('Payout Charity')
+                            ->default(5)
+                            ->numeric()
+                            ->suffix('%')
+                            ->required(),
+                        TextInput::make('payout_concierge')
+                            ->label('Payout Concierge')
+                            ->default(15)
+                            ->numeric()
+                            ->suffix('%')
+                            ->required(),
+                        TextInput::make('payout_platform')
+                            ->label('Payout Platform')
+                            ->default(20)
                             ->numeric()
                             ->suffix('%')
                             ->required(),
