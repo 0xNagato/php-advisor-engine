@@ -2,7 +2,7 @@
 
 namespace Database\Factories;
 
-use App\Models\RestaurantProfile;
+use App\Models\Restaurant;
 use App\Models\TimeSlot;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Carbon;
@@ -21,7 +21,7 @@ class TimeSlotFactory extends Factory
             'created_at' => Carbon::now(),
             'updated_at' => Carbon::now(),
 
-            'restaurant_profile_id' => RestaurantProfile::factory(),
+            'restaurant_profile_id' => Restaurant::factory(),
         ];
     }
 }

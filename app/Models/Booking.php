@@ -29,14 +29,14 @@ class Booking extends Model
         'status',
     ];
 
-    public function reservation(): BelongsTo
+    public function timeSlot(): BelongsTo
     {
         return $this->belongsTo(TimeSlot::class);
     }
 
-    public function conciergeProfile(): BelongsTo
+    public function concierge(): BelongsTo
     {
-        return $this->belongsTo(ConciergeProfile::class, 'concierge_user_id');
+        return $this->belongsTo(Concierge::class, 'concierge_user_id');
     }
 
     public function payment(): HasOne

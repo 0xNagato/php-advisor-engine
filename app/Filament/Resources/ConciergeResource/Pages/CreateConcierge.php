@@ -1,0 +1,91 @@
+<?php
+
+namespace App\Filament\Resources\ConciergeResource\Pages;
+
+use App\Filament\Resources\ConciergeResource;
+use App\Models\User;
+use App\Notifications\ConciergeCreated;
+use Filament\Forms\Components\Section;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\TextInput;
+use Filament\Forms\Form;
+use Filament\Resources\Pages\CreateRecord;
+use Illuminate\Database\Eloquent\Model;
+use Str;
+use Ysfkaya\FilamentPhoneInput\Forms\PhoneInput;
+
+class CreateConcierge extends CreateRecord
+{
+    protected static string $resource = ConciergeResource::class;
+
+    public function form(Form $form): Form
+    {
+        return $form
+            ->schema([
+                Section::make('User Registration')
+                    ->icon('heroicon-m-user')
+                    ->schema([
+                        TextInput::make('name')
+                            ->label('Full Name')
+                            ->placeholder('Full Name')
+                            ->autocomplete(false)
+                            ->required(),
+                        TextInput::make('email')
+                            ->label('Email Address')
+                            ->placeholder('name@domain.com')
+                            ->autocomplete(false)
+                            ->email()
+                            ->required(),
+                        PhoneInput::make('phone')
+                            ->label('Phone Number')
+                            ->placeholder('Phone Number')
+                            ->hint('Used for SMS notifications')
+                            ->onlyCountries(['US', 'CA'])
+                            ->initialCountry('US')
+                            ->required(),
+                    ]),
+                Section::make('Hotel Information')
+                    ->icon('heroicon-m-building-office')
+                    ->schema([
+                        TextInput::make('hotel_name')
+                            ->label('Hotel Name')
+                            ->placeholder('Hotel Name')
+                            ->required(),
+                    ]),
+                Section::make('Payment Information')
+                    ->icon('heroicon-m-currency-dollar')
+                    ->columns(2)
+                    ->schema([
+                        Select::make('payout_type')
+                            ->label('Payout Type')
+                            ->options([
+                                'ach' => 'ACH',
+                                'paypal' => 'PayPal',
+                                'zelle' => 'Zelle',
+                                'venmo' => 'Venmo',
+                            ])
+                            ->columns(1),
+                        TextInput::make('payout_account')
+                            ->label('Payout Account')
+                            ->columns(1),
+                    ]),
+            ]);
+    }
+
+    protected function handleRecordCreation(array $data): Model
+    {
+        $user = User::create([
+            'name' => $data['name'],
+            'email' => $data['email'],
+            'phone' => $data['phone'],
+            'password' => Str::random(8),
+        ]);
+
+        $user->assignRole('concierge');
+        $user->notify(new ConciergeCreated($user));
+
+        return $user->conciergeProfile()->create([
+            'hotel_name' => $data['hotel_name'],
+        ]);
+    }
+}

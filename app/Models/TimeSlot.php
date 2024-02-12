@@ -33,9 +33,9 @@ class TimeSlot extends Model
         'is_closed' => 'boolean',
     ];
 
-    public function restaurantProfile(): BelongsTo
+    public function restaurant(): BelongsTo
     {
-        return $this->belongsTo(RestaurantProfile::class);
+        return $this->belongsTo(Restaurant::class);
     }
 
     public function booking(): HasOne

@@ -3,7 +3,7 @@
 namespace Database\Factories;
 
 use App\Models\Booking;
-use App\Models\ConciergeProfile;
+use App\Models\Concierge;
 use App\Models\TimeSlot;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Carbon;
@@ -27,7 +27,7 @@ class BookingFactory extends Factory
             'updated_at' => Carbon::now(),
 
             'reservation_id' => TimeSlot::factory(),
-            'concierge_user_id' => ConciergeProfile::factory(),
+            'concierge_user_id' => Concierge::factory(),
         ];
     }
 }

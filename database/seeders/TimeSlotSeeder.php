@@ -2,7 +2,7 @@
 
 namespace Database\Seeders;
 
-use App\Models\RestaurantProfile;
+use App\Models\Restaurant;
 use App\Models\TimeSlot;
 use Faker\Factory as Faker;
 use Illuminate\Database\Seeder;
@@ -18,11 +18,11 @@ class TimeSlotSeeder extends Seeder
         $faker = Faker::create();
 
         // Get all restaurant profiles
-        $restaurantProfiles = RestaurantProfile::all();
+        $restaurantProfiles = Restaurant::all();
 
         // Determine the number of restaurant profiles to create reservations for (e.g., 80% of them)
         $percentageToSeed = 0.8;
-        $countToSeed = (int) ($restaurantProfiles->count() * $percentageToSeed);
+        $countToSeed = (int)($restaurantProfiles->count() * $percentageToSeed);
 
         // Get a random subset of restaurant profiles
         $restaurantProfilesToSeed = $restaurantProfiles->random($countToSeed);

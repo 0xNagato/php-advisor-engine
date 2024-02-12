@@ -69,14 +69,14 @@ class User extends Authenticatable implements FilamentUser, HasAvatar
         'profile_photo_url',
     ];
 
-    public function conciergeProfile(): HasOne
+    public function concierge(): HasOne
     {
-        return $this->hasOne(ConciergeProfile::class);
+        return $this->hasOne(Concierge::class);
     }
 
-    public function restaurantProfile(): HasOne
+    public function restaurant(): HasOne
     {
-        return $this->hasOne(RestaurantProfile::class);
+        return $this->hasOne(Restaurant::class);
     }
 
     public function canAccessPanel(Panel $panel): bool
@@ -97,8 +97,8 @@ class User extends Authenticatable implements FilamentUser, HasAvatar
     protected function avatarUrl(): Attribute
     {
         return Attribute::make(
-            get: fn (mixed $value, array $attributes) => $attributes['profile_photo_path'],
-            set: fn (mixed $value) => ['profile_photo_path' => $value],
+            get: fn(mixed $value, array $attributes) => $attributes['profile_photo_path'],
+            set: fn(mixed $value) => ['profile_photo_path' => $value],
         );
     }
 }
