@@ -25,7 +25,7 @@ class BookingFactory extends Factory
             'updated_at' => Carbon::now(),
 
             'time_slot_id' => TimeSlot::factory(),
-            'concierge_user_id' => Concierge::factory(),
+            'concierge_id' => Concierge::factory(),
         ];
     }
 }

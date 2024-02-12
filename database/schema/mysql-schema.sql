@@ -224,8 +224,8 @@ CREATE TABLE `restaurants` (
   `payout_charity` int NOT NULL DEFAULT '5',
   `payout_platform` int NOT NULL DEFAULT '20',
   `secondary_contact_phone` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `primary_contact_name` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `secondary_contact_name` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `primary_contact_name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `secondary_contact_name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `restaurant_profiles_user_id_foreign` (`user_id`),
   CONSTRAINT `restaurant_profiles_user_id_foreign` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`)
@@ -363,6 +363,7 @@ CREATE TABLE `time_slots` (
   `start_time` time DEFAULT NULL,
   `end_time` time DEFAULT NULL,
   `available_slots` int NOT NULL DEFAULT '0',
+  `is_available` tinyint(1) NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`),
   KEY `reservations_restaurant_profile_id_foreign` (`restaurant_id`),
   CONSTRAINT `reservations_restaurant_profile_id_foreign` FOREIGN KEY (`restaurant_id`) REFERENCES `restaurants` (`id`)
@@ -435,3 +436,4 @@ INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES (143,'2024_02_12_11
 INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES (144,'2024_02_12_121151_add_contact_names_to_restaurants',6);
 INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES (145,'2024_02_12_150712_remove_guest_id_from_bookings',6);
 INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES (146,'2024_02_12_152651_rename_restaurant_profile_id_to_restaurant_id_bookings',6);
+INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES (147,'2024_02_12_182005_add_is_available_to_time_slots',7);

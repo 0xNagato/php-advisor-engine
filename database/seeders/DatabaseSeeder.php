@@ -29,11 +29,11 @@ class DatabaseSeeder extends Seeder
         ]);
 
         Artisan::call('shield:super-admin', [
-            '--user' => 1
+            '--user' => 1,
         ]);
 
         Artisan::call('shield:super-admin', [
-            '--user' => 2
+            '--user' => 2,
         ]);
 
         Role::create(['name' => 'concierge']);
@@ -44,6 +44,7 @@ class DatabaseSeeder extends Seeder
             RestaurantSeeder::class,
             TimeSlotSeeder::class,
             BookingSeeder::class,
+            ShieldSeeder::class,
         ]);
 
         Artisan::call('shield:generate --all');

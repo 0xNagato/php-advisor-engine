@@ -27,7 +27,6 @@ class TimeSlotSeeder extends Seeder
                         'date' => $date->format('Y-m-d'),
                         'start_time' => $time->format('H:i:s'),
                         'end_time' => $time->copy()->addMinutes(30)->format('H:i:s'),
-                        'available_slots' => 5,
                         'restaurant_id' => $restaurant->id,
                     ]);
                 }

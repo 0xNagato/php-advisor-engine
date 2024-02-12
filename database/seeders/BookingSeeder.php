@@ -25,7 +25,7 @@ class BookingSeeder extends Seeder
         $timeSlots->each(function ($timeSlot) use ($concierges) {
             Booking::factory()->create([
                 'time_slot_id' => $timeSlot->id,
-                'concierge_user_id' => $concierges->random()->id,
+                'concierge_id' => $concierges->random()->id,
             ]);
         });
     }

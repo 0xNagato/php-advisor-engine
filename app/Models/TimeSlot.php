@@ -22,6 +22,7 @@ class TimeSlot extends Model
         'start_time',
         'end_time',
         'available_slots',
+        'is_available',
     ];
 
     /**
@@ -30,7 +31,7 @@ class TimeSlot extends Model
      * @var array<string, string>
      */
     protected $casts = [
-        'is_closed' => 'boolean',
+        'is_available' => 'boolean',
     ];
 
     public function restaurant(): BelongsTo
