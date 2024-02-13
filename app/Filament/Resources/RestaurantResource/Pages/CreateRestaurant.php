@@ -113,16 +113,13 @@ class CreateRestaurant extends CreateRecord
         return $user->restaurant()->create([
             'restaurant_name' => $data['restaurant_name'],
             'contact_phone' => $data['contact_phone'],
-            'website_url' => $data['website_url'],
-            'description' => $data['description'],
-            'cuisines' => $data['cuisines'],
-            'price_range' => $data['price_range'],
-            'address_line_1' => $data['address_line_1'],
-            'address_line_2' => $data['address_line_2'],
-            'city' => $data['city'],
-            'state' => $data['state'],
-            'zip' => $data['zip'],
-            'payout_percentage' => $data['payout_percentage'],
+            'primary_contact_name' => $data['primary_contact_name'],
+            'secondary_contact_name' => $data['secondary_contact_name'],
+            'secondary_contact_phone' => $data['secondary_contact_phone'],
+            'payout_restaurant' => $data['payout_restaurant'],
+            'payout_charity' => $data['payout_charity'],
+            'payout_concierge' => $data['payout_concierge'],
+            'payout_platform' => $data['payout_platform'],
         ]);
     }
 }
