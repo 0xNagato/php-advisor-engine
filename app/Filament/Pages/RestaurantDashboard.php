@@ -15,7 +15,7 @@ class RestaurantDashboard extends Dashboard
 
     protected static string $routePath = 'restaurant';
 
-    public static function canAccess(): bool
+    public static function canView(): bool
     {
         return auth()->user()?->hasRole('restaurant');
     }

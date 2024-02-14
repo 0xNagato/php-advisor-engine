@@ -23,6 +23,7 @@ class RestaurantFactory extends Factory
             'payout_restaurant' => 60,
             'payout_charity' => 15,
             'payout_concierge' => 5,
+
             'created_at' => Carbon::now(),
             'updated_at' => Carbon::now(),
 

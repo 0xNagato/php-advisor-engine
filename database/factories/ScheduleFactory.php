@@ -3,30 +3,35 @@
 namespace Database\Factories;
 
 use App\Models\Restaurant;
-use App\Models\TimeSlot;
+use App\Models\Schedule;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Carbon;
 
-class TimeSlotFactory extends Factory
+/**
+ * @extends Factory<Schedule>
+ */
+class ScheduleFactory extends Factory
 {
-    protected $model = TimeSlot::class;
-
+    /**
+     * Define the model's default state.
+     *
+     * @return array<string, mixed>
+     */
     public function definition(): array
     {
         $is_available = $this->faker->boolean;
 
         if ($is_available) {
-            $available_slots = $this->faker->numberBetween(1, 10);
+            $available_tables = $this->faker->numberBetween(4, 20);
         } else {
-            $available_slots = 0;
+            $available_tables = 0;
         }
 
         return [
-            'date' => Carbon::now(),
             'start_time' => '17:00:00',
             'end_time' => '17:30:00',
             'is_available' => $is_available,
-            'available_slots' => $available_slots,
+            'available_tables' => $available_tables,
             'created_at' => Carbon::now(),
             'updated_at' => Carbon::now(),
 

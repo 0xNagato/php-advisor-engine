@@ -15,8 +15,6 @@ class ConciergeFactory extends Factory
     {
         return [
             'hotel_name' => $this->faker->name(),
-            'payout_type' => 'paypal',
-            'payout_account' => $this->faker->unique()->safeEmail(),
             'created_at' => Carbon::now(),
             'updated_at' => Carbon::now(),
 

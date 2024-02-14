@@ -2,12 +2,15 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Casts\AsArrayObject;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
+/**
+ * Class Restaurant
+ */
 class Restaurant extends Model
 {
     use HasFactory;
@@ -21,15 +24,6 @@ class Restaurant extends Model
         'user_id',
         'restaurant_name',
         'contact_phone',
-        'website_url',
-        'description',
-        'cuisines',
-        'price_range',
-        'address_line_1',
-        'address_line_2',
-        'city',
-        'state',
-        'zip',
         'payout_restaurant',
         'payout_charity',
         'payout_concierge',
@@ -39,17 +33,33 @@ class Restaurant extends Model
         'secondary_contact_name',
     ];
 
-    protected $casts = [
-        'cuisines' => AsArrayObject::class,
-    ];
-
+    /**
+     * Get the user that owns the restaurant.
+     */
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
     }
 
-    public function timeSlots(): HasMany
+    /**
+     * Get the schedules for the restaurant.
+     */
+    public function schedules(): HasMany
     {
-        return $this->hasMany(TimeSlot::class);
+        return $this->hasMany(Schedule::class);
+    }
+
+    /**
+     * Scope a query to only include restaurants that are available at a specific time.
+     *
+     * @param  mixed  $time
+     */
+    public function scopeAvailableAt(Builder $query, $time): Builder
+    {
+        return $query->whereHas('schedules', function ($query) use ($time) {
+            $query->availableAt($time);
+        })->with(['schedules' => function ($query) use ($time) {
+            $query->availableAt($time);
+        }]);
     }
 }

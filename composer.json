@@ -25,6 +25,7 @@
         "leandrocfe/filament-apex-charts": "^3.0",
         "livewire/livewire": "^3.0",
         "pelmered/filament-money-field": "^1.0",
+        "spatie/laravel-data": "^4.0",
         "spatie/opening-hours": "^3.0",
         "staudenmeir/eloquent-has-many-deep": "^1.7",
         "stechstudio/filament-impersonate": "^3.6",

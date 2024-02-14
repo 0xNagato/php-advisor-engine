@@ -62,11 +62,11 @@ class BookingResource extends Resource
                     ->label('Concierge')
                     ->numeric()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('timeSlot.restaurant.restaurant_name')
+                Tables\Columns\TextColumn::make('schedule.restaurant.restaurant_name')
                     ->label('Restaurant')
                     ->searchable()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('timeSlot.start_time')
+                Tables\Columns\TextColumn::make('schedule.start_time')
                     ->label('When')
                     ->dateTime()
                     ->sortable(),

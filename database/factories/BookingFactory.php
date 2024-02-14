@@ -4,7 +4,7 @@ namespace Database\Factories;
 
 use App\Models\Booking;
 use App\Models\Concierge;
-use App\Models\TimeSlot;
+use App\Models\Schedule;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Carbon;
 
@@ -24,7 +24,7 @@ class BookingFactory extends Factory
             'created_at' => Carbon::now(),
             'updated_at' => Carbon::now(),
 
-            'time_slot_id' => TimeSlot::factory(),
+            'schedule_id' => Schedule::factory(),
             'concierge_id' => Concierge::factory(),
         ];
     }

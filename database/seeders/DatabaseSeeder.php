@@ -42,7 +42,7 @@ class DatabaseSeeder extends Seeder
         $this->call([
             ConciergeSeeder::class,
             RestaurantSeeder::class,
-            TimeSlotSeeder::class,
+            ScheduleSeeder::class,
             BookingSeeder::class,
             ShieldSeeder::class,
         ]);

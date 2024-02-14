@@ -17,7 +17,7 @@ class Booking extends Model
      * @var array<int, string>
      */
     protected $fillable = [
-        'time_slot_id',
+        'schedule_id',
         'concierge_id',
         'guest_name',
         'guest_email',
@@ -48,9 +48,9 @@ class Booking extends Model
         return $total_fee * 100;
     }
 
-    public function timeSlot(): BelongsTo
+    public function schedule(): BelongsTo
     {
-        return $this->belongsTo(TimeSlot::class);
+        return $this->belongsTo(Schedule::class);
     }
 
     public function concierge(): BelongsTo
