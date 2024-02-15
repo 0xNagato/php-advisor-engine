@@ -35,7 +35,7 @@ class CreateConcierge extends CreateRecord
                             ->placeholder('name@domain.com')
                             ->autocomplete(false)
                             ->email()
-                            ->unique()
+                            ->unique(User::class, 'email')
                             ->required(),
                         PhoneInput::make('phone')
                             ->label('Phone Number')
