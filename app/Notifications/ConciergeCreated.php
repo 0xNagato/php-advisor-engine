@@ -39,11 +39,12 @@ class ConciergeCreated extends Notification
     public function toMail(object $notifiable): MailMessage
     {
         return (new MailMessage)
-            ->subject('Welcome to the Concierge App!')
-            ->greeting('Welcome to the Concierge App!')
-            ->line('You have been invited to the Concierge App!')
+            ->from('info@primavip.co')
+            ->subject('Welcome to the Prima!')
+            ->greeting('Welcome to the Prima!')
+            ->line('You have been invited to the Prima!')
             ->action('Setup Password', $this->passwordResetUrl())
-            ->line('If you did not expect to receive an invitation to the Concierge App, you may discard this email.');
+            ->line('If you did not expect to receive an invitation to the Prima, you may discard this email.');
     }
 
     protected function passwordResetUrl(): string
@@ -56,7 +57,7 @@ class ConciergeCreated extends Notification
     public function toTwilio(object $notifiable): TwilioSmsMessage|TwilioMessage
     {
         return (new TwilioSmsMessage())
-            ->content("Welcome to the Concierge App! Setup your password at {$this->passwordResetUrl()}");
+            ->content("Welcome to the Prima! Setup your password at {$this->passwordResetUrl()}");
     }
 
     /**
