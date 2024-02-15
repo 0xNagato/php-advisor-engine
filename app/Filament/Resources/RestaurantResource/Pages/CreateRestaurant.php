@@ -67,6 +67,12 @@ class CreateRestaurant extends CreateRecord
                             ->label('Secondary Contact Number')
                             ->onlyCountries(['US'])
                             ->initialCountry('US'),
+                        TextInput::make('booking_fee')
+                            ->label('Booking Fee')
+                            ->prefix('$')
+                            ->default(200)
+                            ->numeric()
+                            ->required()
                     ]),
                 Section::make('Payout Information')
                     ->icon('heroicon-m-currency-dollar')
@@ -121,6 +127,7 @@ class CreateRestaurant extends CreateRecord
             'payout_charity' => $data['payout_charity'],
             'payout_concierge' => $data['payout_concierge'],
             'payout_platform' => $data['payout_platform'],
+            'booking_fee' => $data['booking_fee'] * 100,
         ]);
     }
 }
