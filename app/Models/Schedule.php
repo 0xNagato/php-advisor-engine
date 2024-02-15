@@ -35,7 +35,11 @@ class Schedule extends Model
 
     public function getComputedAvailableTablesAttribute(): int
     {
-        return $this->attributes['available_tables'] - $this->bookings()->count();
+        $bookingsTodayCount = $this->bookings()
+            ->whereDate('created_at', now()->toDateString())
+            ->count();
+
+        return $this->attributes['available_tables'] - $bookingsTodayCount;
     }
 
     public function bookings(): HasMany
@@ -50,10 +54,11 @@ class Schedule extends Model
         return $query->whereBetween('start_time', [$time, $endOfDay])
             ->where('is_available', true)
             ->where(function ($query) {
-                $query->where('available_tables', '>', function ($query) {
+                $query->where('available_tables', '>', function (\Illuminate\Database\Query\Builder $query) {
                     $query->selectRaw('COUNT(*)')
                         ->from('bookings')
-                        ->whereColumn('bookings.schedule_id', 'schedules.id');
+                        ->whereColumn('bookings.schedule_id', 'schedules.id')
+                        ->whereDate('bookings.created_at', now()->toDateString()); // Only consider bookings for the current day
                 });
             });
     }

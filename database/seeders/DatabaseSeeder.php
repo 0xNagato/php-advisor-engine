@@ -44,7 +44,7 @@ class DatabaseSeeder extends Seeder
             RestaurantSeeder::class,
             ScheduleSeeder::class,
             BookingSeeder::class,
-            ShieldSeeder::class,
+            // ShieldSeeder::class,
         ]);
 
         Artisan::call('shield:generate --all');

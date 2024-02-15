@@ -1,6 +1,6 @@
 <x-filament-breezy::grid-section
     md=2
-    title="Schedule"
+    title="Manage Schedule"
     description="Use the form to select availability and number of tables."
 >
     <x-filament::card>
