@@ -7,6 +7,8 @@ use Filament\Widgets\StatsOverviewWidget\Stat;
 
 class ConciergeStatsOverview extends BaseWidget
 {
+    protected string|int|array $columnSpan = 'full';
+
     public static function canView(): bool
     {
         return auth()->user()?->hasRole('concierge');
@@ -25,11 +27,6 @@ class ConciergeStatsOverview extends BaseWidget
                 ->descriptionIcon('heroicon-m-arrow-trending-up')
                 ->chart([7, 2, 10, 3, 15, 4, 17])
                 ->color('success'),
-            Stat::make('Cancellations', '10')
-                ->description('25% decrease')
-                ->descriptionIcon('heroicon-m-arrow-trending-down')
-                ->chart([7, 2, 10, 3, 15, 4, 17])
-                ->color('danger'),
         ];
     }
 }
