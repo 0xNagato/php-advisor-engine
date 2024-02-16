@@ -39,6 +39,23 @@ class Restaurant extends Model
         'open_days' => 'array'
     ];
 
+    protected static function boot(): void
+    {
+        parent::boot();
+
+        static::creating(function (Restaurant $restaurant) {
+            $restaurant->open_days = [
+                'monday' => 'open',
+                'tuesday' => 'open',
+                'wednesday' => 'open',
+                'thursday' => 'open',
+                'friday' => 'open',
+                'saturday' => 'open',
+                'sunday' => 'open',
+            ];
+        });
+    }
+
     /**
      * Get the user that owns the restaurant.
      */

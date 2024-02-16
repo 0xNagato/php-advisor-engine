@@ -23,14 +23,24 @@ class DayManager extends MyProfileComponent
         // get restaurant for current user
         $restaurant = auth()->user()->restaurant;
 
+        $days = $restaurant->open_days ?? [
+            'monday' => 'open',
+            'tuesday' => 'open',
+            'wednesday' => 'open',
+            'thursday' => 'open',
+            'friday' => 'open',
+            'saturday' => 'open',
+            'sunday' => 'open',
+        ];
+
         $this->form->fill([
-            'monday' => $restaurant->open_days['monday'] === 'open',
-            'tuesday' => $restaurant->open_days['tuesday'] === 'open',
-            'wednesday' => $restaurant->open_days['wednesday'] === 'open',
-            'thursday' => $restaurant->open_days['thursday'] === 'open',
-            'friday' => $restaurant->open_days['friday'] === 'open',
-            'saturday' => $restaurant->open_days['saturday'] === 'open',
-            'sunday' => $restaurant->open_days['sunday'] === 'open',
+            'monday' => $days['monday'] === 'open',
+            'tuesday' => $days['tuesday'] === 'open',
+            'wednesday' => $days['wednesday'] === 'open',
+            'thursday' => $days['thursday'] === 'open',
+            'friday' => $days['friday'] === 'open',
+            'saturday' => $days['saturday'] === 'open',
+            'sunday' => $days['sunday'] === 'open',
         ]);
     }
 
