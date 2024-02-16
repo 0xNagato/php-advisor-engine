@@ -3,6 +3,7 @@
 namespace App\Providers\Filament;
 
 use App\Livewire\CustomPersonalInfo;
+use App\Livewire\DayManager;
 use App\Livewire\ScheduleManager;
 use BezhanSalleh\FilamentShield\FilamentShieldPlugin;
 use Blade;
@@ -27,7 +28,7 @@ class AdminPanelProvider extends PanelProvider
     public function register(): void
     {
         parent::register();
-        FilamentView::registerRenderHook('panels::body.end', static fn (): string => Blade::render("@vite('resources/js/app.js')"));
+        FilamentView::registerRenderHook('panels::body.end', static fn(): string => Blade::render("@vite('resources/js/app.js')"));
         ScheduleManager::setSort(10);
     }
 
@@ -67,7 +68,7 @@ class AdminPanelProvider extends PanelProvider
                 BreezyCore::make()
                     ->enableTwoFactorAuthentication()
                     ->myProfile(shouldRegisterNavigation: true, hasAvatars: false, navigationGroup: 'Settings')
-                    ->myProfileComponents(['personal_info' => CustomPersonalInfo::class, ScheduleManager::class]),
+                    ->myProfileComponents(['personal_info' => CustomPersonalInfo::class, DayManager::class, ScheduleManager::class]),
             ])
             ->spa()
             ->viteTheme('resources/css/filament/admin/theme.css');

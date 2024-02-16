@@ -23,6 +23,15 @@ class RestaurantFactory extends Factory
             'payout_restaurant' => 60,
             'payout_charity' => 15,
             'payout_concierge' => 5,
+            'open_days' => [
+                'monday' => 'closed',
+                'tuesday' => 'closed',
+                'wednesday' => 'open',
+                'thursday' => 'open',
+                'friday' => 'open',
+                'saturday' => 'open',
+                'sunday' => 'open',
+            ],
 
             'created_at' => Carbon::now(),
             'updated_at' => Carbon::now(),
