@@ -26,6 +26,10 @@ class Booking extends Model
         'currency',
         'status',
         'total_fee',
+        'payout_restaurant',
+        'payout_charity',
+        'payout_concierge',
+        'payout_platform',
     ];
 
     protected static function boot(): void
@@ -34,12 +38,16 @@ class Booking extends Model
 
         static::saving(function (Booking $booking) {
             $booking->total_fee = $booking->totalFee();
+            $booking->payout_restaurant = $booking->schedule->restaurant->payout_restaurant;
+            $booking->payout_charity = $booking->schedule->restaurant->payout_charity;
+            $booking->payout_concierge = $booking->schedule->restaurant->payout_concierge;
+            $booking->payout_platform = $booking->schedule->restaurant->payout_platform;
         });
     }
 
     public function totalFee(): int
     {
-        $total_fee = 200;
+        $total_fee = $this->schedule->restaurant->booking_fee;
 
         if ($this->guest_count > 2) {
             $total_fee += 50 * ($this->guest_count - 2);

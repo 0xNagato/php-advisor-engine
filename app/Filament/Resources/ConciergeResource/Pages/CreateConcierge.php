@@ -25,9 +25,14 @@ class CreateConcierge extends CreateRecord
                 Section::make('User Registration')
                     ->icon('heroicon-m-user')
                     ->schema([
-                        TextInput::make('name')
-                            ->label('Full Name')
-                            ->placeholder('Full Name')
+                        TextInput::make('first_name')
+                            ->label('First Name')
+                            ->placeholder('First Name')
+                            ->autocomplete(false)
+                            ->required(),
+                        TextInput::make('last_name')
+                            ->label('Last Name')
+                            ->placeholder('Last Name')
                             ->autocomplete(false)
                             ->required(),
                         TextInput::make('email')
@@ -76,7 +81,8 @@ class CreateConcierge extends CreateRecord
     protected function handleRecordCreation(array $data): Model
     {
         $user = User::create([
-            'name' => $data['name'],
+            'first_name' => $data['first_name'],
+            'last_name' => $data['last_name'],
             'email' => $data['email'],
             'phone' => $data['phone'],
             'password' => Str::random(8),

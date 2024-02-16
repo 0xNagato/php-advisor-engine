@@ -36,7 +36,7 @@ class User extends Authenticatable implements FilamentUser, HasAvatar
      * @var array<int, string>
      */
     protected $fillable = [
-        'name', 'email', 'password', 'phone', 'profile_photo_path',
+        'first_name', 'last_name', 'email', 'password', 'phone', 'profile_photo_path',
     ];
 
     /**
@@ -94,11 +94,21 @@ class User extends Authenticatable implements FilamentUser, HasAvatar
         return $this->phone;
     }
 
+    public function getNameAttribute(): string
+    {
+        return $this->getFilamentName();
+    }
+
+    public function getFilamentName(): string
+    {
+        return "{$this->first_name} {$this->last_name}";
+    }
+
     protected function avatarUrl(): Attribute
     {
         return Attribute::make(
-            get: fn (mixed $value, array $attributes) => $attributes['profile_photo_path'],
-            set: fn (mixed $value) => ['profile_photo_path' => $value],
+            get: fn(mixed $value, array $attributes) => $attributes['profile_photo_path'],
+            set: fn(mixed $value) => ['profile_photo_path' => $value],
         );
     }
 }

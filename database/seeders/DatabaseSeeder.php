@@ -3,6 +3,7 @@
 namespace Database\Seeders;
 
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
+use App\Models\User;
 use Artisan;
 use Illuminate\Database\Seeder;
 use Spatie\Permission\Models\Role;
@@ -16,17 +17,19 @@ class DatabaseSeeder extends Seeder
     {
         Artisan::call('migrate:fresh');
 
-        Artisan::call('make:filament-user', [
-            '--name' => 'Andrew Weir',
-            '--email' => 'andru.weir@gmail.com',
-            '--password' => 'password',
-        ]);
+        User::factory([
+            'first_name' => 'Andrew',
+            'last_name' => 'Weir',
+            'email' => 'andru.weir@gmail.com',
+            'password' => bcrypt('password'),
+        ])->create();
 
-        Artisan::call('make:filament-user', [
-            '--name' => 'Alex Zhardanovsky',
-            '--email' => 'alex.zhard@gmail.com',
-            '--password' => 'password',
-        ]);
+        User::factory([
+            'first_name' => 'Alex',
+            'last_name' => 'Zhardanovsky',
+            'email' => 'alex.zhard@gmail.com',
+            'password' => bcrypt('password'),
+        ])->create();
 
         Artisan::call('shield:super-admin', [
             '--user' => 1,
