@@ -77,7 +77,7 @@ class CreateRestaurant extends CreateRecord
                             ->prefix('$')
                             ->default(200)
                             ->numeric()
-                            ->required()
+                            ->required(),
                     ]),
                 Section::make('Payout Information')
                     ->icon('heroicon-m-currency-dollar')

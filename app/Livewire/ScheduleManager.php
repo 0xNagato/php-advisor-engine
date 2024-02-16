@@ -42,7 +42,7 @@ class ScheduleManager extends MyProfileComponent
                     ->deletable(false)
                     ->simple(
                         TimeSlot::make('schedule')
-                    )
+                    ),
             ])
             ->statePath('data');
     }

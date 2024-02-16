@@ -32,11 +32,11 @@ class Restaurant extends Model
         'primary_contact_name',
         'secondary_contact_name',
         'booking_fee',
-        'open_days'
+        'open_days',
     ];
 
     protected $casts = [
-        'open_days' => 'array'
+        'open_days' => 'array',
     ];
 
     protected static function boot(): void
@@ -75,7 +75,7 @@ class Restaurant extends Model
     /**
      * Scope a query to only include restaurants that are available at a specific time.
      *
-     * @param mixed $time
+     * @param  mixed  $time
      */
     public function scopeAvailableAt(Builder $query, string $time): Builder
     {
@@ -84,8 +84,8 @@ class Restaurant extends Model
         return $query->whereHas('schedules', function ($query) use ($time) {
             $query->availableAt($time);
         })->where("days_open->$dayOfWeek", 'open') // Check if the restaurant is open on that day
-        ->with(['schedules' => function ($query) use ($time) {
-            $query->availableAt($time);
-        }]);
+            ->with(['schedules' => function ($query) use ($time) {
+                $query->availableAt($time);
+            }]);
     }
 }

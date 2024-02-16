@@ -8,9 +8,9 @@ use Filament\Notifications\Notification;
 use Jeffgreco13\FilamentBreezy\Livewire\MyProfileComponent;
 
 class DayManager extends MyProfileComponent
-
 {
     public array $data;
+
     protected string $view = 'livewire.day-manager';
 
     public static function canView(): bool
@@ -54,7 +54,7 @@ class DayManager extends MyProfileComponent
             'friday',
             'saturday',
             'sunday',
-        ])->map(fn($day) => Checkbox::make($day)
+        ])->map(fn ($day) => Checkbox::make($day)
             ->label(ucfirst($day)));
 
         return $form
