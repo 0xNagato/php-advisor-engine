@@ -11,6 +11,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Str;
 use Laravel\Fortify\TwoFactorAuthenticatable;
 use Laravel\Jetstream\HasProfilePhoto;
 use Laravel\Jetstream\HasTeams;
@@ -67,6 +68,7 @@ class User extends Authenticatable implements FilamentUser, HasAvatar
      */
     protected $appends = [
         'profile_photo_url',
+        'main_role',
     ];
 
     public function concierge(): HasOne
@@ -104,11 +106,17 @@ class User extends Authenticatable implements FilamentUser, HasAvatar
         return "{$this->first_name} {$this->last_name}";
     }
 
+    public function getMainRoleAttribute(): string
+    {
+        $role = $this->roles->firstWhere('name', '!=', 'panel_user');
+        return Str::of($role?->name)->snake()->replace('_', ' ')->title();
+    }
+
     protected function avatarUrl(): Attribute
     {
         return Attribute::make(
-            get: fn (mixed $value, array $attributes) => $attributes['profile_photo_path'],
-            set: fn (mixed $value) => ['profile_photo_path' => $value],
+            get: fn(mixed $value, array $attributes) => $attributes['profile_photo_path'],
+            set: fn(mixed $value) => ['profile_photo_path' => $value],
         );
     }
 }

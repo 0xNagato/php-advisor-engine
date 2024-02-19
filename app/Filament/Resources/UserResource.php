@@ -55,8 +55,13 @@ class UserResource extends Resource
                     ->searchable()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
-                Tables\Columns\TextColumn::make('roles.name')
+                Tables\Columns\TextColumn::make('main_role')
                     ->label('Role')
+                    ->color(fn(string $state): string => match ($state) {
+                        'Super Admin' => 'danger',
+                        'Concierge' => 'info',
+                        'Restaurant' => 'success',
+                    })
                     ->badge()
                     ->sortable()
                     ->searchable(),
