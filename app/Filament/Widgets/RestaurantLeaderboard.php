@@ -13,6 +13,10 @@ class RestaurantLeaderboard extends BaseWidget
 {
     protected static ?int $sort = 2;
 
+    public static function canView(): bool
+    {
+        return auth()->user()->hasRole('super_admin');
+    }
 
     public function table(Table $table): Table
     {

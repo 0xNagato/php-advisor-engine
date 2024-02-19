@@ -13,6 +13,11 @@ class ConciergeLeaderboard extends BaseWidget
 {
     protected static ?int $sort = 2;
 
+    public static function canView(): bool
+    {
+        return auth()->user()->hasRole('super_admin') || auth()->user()->hasRole('concierge');
+    }
+
     public function table(Table $table): Table
     {
         $startDate = $this->filters['startDate'] ?? now()->subDays(30);
