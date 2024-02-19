@@ -69,6 +69,7 @@ class User extends Authenticatable implements FilamentUser, HasAvatar
     protected $appends = [
         'profile_photo_url',
         'main_role',
+        'name',
     ];
 
     public function concierge(): HasOne

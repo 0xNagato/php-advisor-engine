@@ -23,40 +23,11 @@ class RestaurantResource extends Resource
     {
         return $form
             ->schema([
-                Forms\Components\Select::make('user_id')
-                    ->relationship('user', 'name')
-                    ->required(),
                 Forms\Components\TextInput::make('restaurant_name')
                     ->required()
                     ->maxLength(255),
                 Forms\Components\TextInput::make('contact_phone')
                     ->tel()
-                    ->required()
-                    ->maxLength(255),
-                Forms\Components\TextInput::make('website_url')
-                    ->required()
-                    ->maxLength(255),
-                Forms\Components\Textarea::make('description')
-                    ->required()
-                    ->maxLength(65535)
-                    ->columnSpanFull(),
-                Forms\Components\TextInput::make('cuisines')
-                    ->required(),
-                Forms\Components\TextInput::make('price_range')
-                    ->required(),
-                Forms\Components\TextInput::make('address_line_1')
-                    ->required()
-                    ->maxLength(255),
-                Forms\Components\TextInput::make('address_line_2')
-                    ->required()
-                    ->maxLength(255),
-                Forms\Components\TextInput::make('city')
-                    ->required()
-                    ->maxLength(255),
-                Forms\Components\TextInput::make('state')
-                    ->required()
-                    ->maxLength(255),
-                Forms\Components\TextInput::make('zip')
                     ->required()
                     ->maxLength(255),
             ]);
