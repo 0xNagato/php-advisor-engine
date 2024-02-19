@@ -3,8 +3,9 @@
 namespace App\Filament\Resources\ConciergeResource\Pages;
 
 use App\Filament\Resources\ConciergeResource;
-use Filament\Actions;
+use Filament\Actions\EditAction;
 use Filament\Resources\Pages\ViewRecord;
+use STS\FilamentImpersonate\Pages\Actions\Impersonate;
 
 class ViewConcierge extends ViewRecord
 {
@@ -13,7 +14,8 @@ class ViewConcierge extends ViewRecord
     protected function getHeaderActions(): array
     {
         return [
-            Actions\EditAction::make(),
+            Impersonate::make()->record($this->getRecord()->user),
+            EditAction::make(),
         ];
     }
 }
