@@ -36,7 +36,18 @@ class ConciergeLeaderboard extends BaseWidget
             ->paginated(false)
             ->columns([
                 Tables\Columns\TextColumn::make('user_name')
-                    ->label('Concierge Name'),
+                    ->label('Concierge Name')
+                    ->formatStateUsing(function ($state, $record) {
+                        // current user is concierge display their name if not display the name of the ******* else display names
+                        if (auth()->user()->hasRole('concierge')) {
+                            if (auth()->user()->concierge->user_id === $record->user_id) {
+                                return 'You';
+                            }
+                            return '*********';
+                        }
+
+                        return $state;
+                    }),
                 Tables\Columns\TextColumn::make('total_earned')
                     ->label('Total Earned')
                     ->currency('USD')
