@@ -3,8 +3,9 @@
 namespace App\Filament\Pages;
 
 use Filament\Forms\Components\DatePicker;
+use Filament\Forms\Components\Section;
+use Filament\Forms\Form;
 use Filament\Pages\Dashboard;
-use Filament\Pages\Dashboard\Actions\FilterAction;
 use Filament\Pages\Dashboard\Concerns\HasFiltersForm;
 
 class RestaurantDashboard extends Dashboard
@@ -20,14 +21,26 @@ class RestaurantDashboard extends Dashboard
         return auth()->user()?->hasRole('restaurant');
     }
 
-    protected function getHeaderActions(): array
+    public function mount(): void
     {
-        return [
-            FilterAction::make()
-                ->form([
-                    DatePicker::make('startDate'),
-                    DatePicker::make('endDate'),
-                ]),
+        $this->filters = [
+            'startDate' => $this->filters['startDate'] ?? now()->subDays(30),
+            'endDate' => $this->filters['endDate'] ?? now(),
         ];
+    }
+
+    public function filtersForm(Form $form): Form
+    {
+        return $form
+            ->schema([
+                Section::make()
+                    ->schema([
+                        DatePicker::make('startDate')
+                            ->default(now()->subDays(30)),
+                        DatePicker::make('endDate')
+                            ->default(now()),
+                    ])
+                    ->columns(2),
+            ]);
     }
 }
