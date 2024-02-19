@@ -16,7 +16,7 @@ class RecentBookings extends BaseWidget
 
     protected static ?string $pollingInterval = null;
 
-    protected static ?int $sort = 2;
+    protected static ?int $sort = 3;
 
     protected string|int|array $columnSpan = 'full';
 
@@ -49,11 +49,11 @@ class RecentBookings extends BaseWidget
                 TextColumn::make('concierge.user.name')
                     ->label('Concierge')
                     ->numeric()
-                    ->hidden((bool) auth()->user()?->hasRole('concierge'))
+                    ->hidden((bool)auth()->user()?->hasRole('concierge'))
                     ->sortable(),
                 TextColumn::make('schedule.restaurant.restaurant_name')
                     ->label('Restaurant')
-                    ->hidden((bool) auth()->user()?->hasRole('restaurant'))
+                    ->hidden((bool)auth()->user()?->hasRole('restaurant'))
                     ->searchable()
                     ->sortable(),
                 TextColumn::make('booking_at')
