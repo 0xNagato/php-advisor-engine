@@ -52,12 +52,12 @@ class AdminDashboard extends Dashboard
                 ->label('Concierge')
                 ->link()
                 ->icon('heroicon-m-plus-circle')
-                ->url(fn(): string => route('filament.admin.resources.concierges.create')),
+                ->url(fn (): string => route('filament.admin.resources.concierges.create')),
             Action::Make('addRestaurant')
                 ->label('Restaurant')
                 ->link()
                 ->icon('heroicon-m-plus-circle')
-                ->url(fn(): string => route('filament.admin.resources.restaurants.create')),
+                ->url(fn (): string => route('filament.admin.resources.restaurants.create')),
         ];
     }
 }

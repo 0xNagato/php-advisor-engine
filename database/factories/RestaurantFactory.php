@@ -21,8 +21,8 @@ class RestaurantFactory extends Factory
             'secondary_contact_phone' => $this->faker->phoneNumber(),
             'payout_platform' => 20,
             'payout_restaurant' => 60,
-            'payout_charity' => 15,
-            'payout_concierge' => 5,
+            'payout_charity' => 5,
+            'payout_concierge' => 15,
             'open_days' => [
                 'monday' => 'closed',
                 'tuesday' => 'closed',

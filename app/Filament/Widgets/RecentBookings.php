@@ -13,13 +13,16 @@ class RecentBookings extends BaseWidget
     use InteractsWithPageFilters;
 
     protected static bool $isLazy = true;
+
     protected static ?string $pollingInterval = null;
+
     protected static ?int $sort = 2;
+
     protected string|int|array $columnSpan = 'full';
 
     public function table(Table $table): Table
     {
-        $query = Booking::orderByDesc('booking_at');
+        $query = Booking::query();
 
         // check if user is concierge and get all bookings for their hotel
         if (auth()->user()?->hasRole('concierge')) {
@@ -33,14 +36,12 @@ class RecentBookings extends BaseWidget
             });
         }
 
-
         // Get startDate and endDate from page filters
         $startDate = $this->filters['startDate'] ?? now()->subDays(30);
         $endDate = $this->filters['endDate'] ?? now();
 
         // Use startDate and endDate in the query
-        $query = $query->whereBetween('created_at', [$startDate, $endDate]);
-
+        $query = $query->whereBetween('created_at', [$startDate, $endDate])->orderByDesc('created_at');
 
         return $table
             ->query($query)
@@ -48,11 +49,11 @@ class RecentBookings extends BaseWidget
                 TextColumn::make('concierge.user.name')
                     ->label('Concierge')
                     ->numeric()
-                    ->hidden((bool)auth()->user()?->hasRole('concierge'))
+                    ->hidden((bool) auth()->user()?->hasRole('concierge'))
                     ->sortable(),
                 TextColumn::make('schedule.restaurant.restaurant_name')
                     ->label('Restaurant')
-                    ->hidden((bool)auth()->user()?->hasRole('restaurant'))
+                    ->hidden((bool) auth()->user()?->hasRole('restaurant'))
                     ->searchable()
                     ->sortable(),
                 TextColumn::make('booking_at')

@@ -57,7 +57,7 @@ class UserResource extends Resource
                     ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('main_role')
                     ->label('Role')
-                    ->color(fn(string $state): string => match ($state) {
+                    ->color(fn (string $state): string => match ($state) {
                         'Super Admin' => 'danger',
                         'Concierge' => 'info',
                         'Restaurant' => 'success',

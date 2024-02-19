@@ -33,7 +33,12 @@ class Booking extends Model
         'payout_platform',
     ];
 
-    protected $appends = ['when'];
+    protected $appends = [
+        'restaurant_fee',
+        'charity_fee',
+        'concierge_fee',
+        'platform_fee',
+    ];
 
     protected static function boot(): void
     {
@@ -72,5 +77,25 @@ class Booking extends Model
     public function payment(): HasOne
     {
         return $this->hasOne(Payment::class);
+    }
+
+    public function getRestaurantFeeAttribute(): int
+    {
+        return $this->total_fee * $this->payout_restaurant / 100;
+    }
+
+    public function getCharityFeeAttribute(): int
+    {
+        return $this->total_fee * $this->payout_charity / 100;
+    }
+
+    public function getConciergeFeeAttribute(): int
+    {
+        return $this->total_fee * $this->payout_concierge / 100;
+    }
+
+    public function getPlatformFeeAttribute(): int
+    {
+        return $this->total_fee * $this->payout_platform / 100;
     }
 }
