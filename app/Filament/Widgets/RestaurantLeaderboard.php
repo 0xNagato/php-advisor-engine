@@ -35,6 +35,9 @@ class RestaurantLeaderboard extends BaseWidget
             ->query($query)
             ->paginated(false)
             ->columns([
+                Tables\Columns\TextColumn::make('rank')
+                    ->label('Rank')
+                    ->rowIndex(),
                 Tables\Columns\TextColumn::make('restaurant_name')
                     ->label('Restaurant Name'),
                 Tables\Columns\TextColumn::make('total_earned')

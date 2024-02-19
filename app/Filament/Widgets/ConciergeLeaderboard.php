@@ -35,6 +35,9 @@ class ConciergeLeaderboard extends BaseWidget
             ->query($query)
             ->paginated(false)
             ->columns([
+                Tables\Columns\TextColumn::make('rank')
+                    ->label('Rank')
+                    ->rowIndex(),
                 Tables\Columns\TextColumn::make('user_name')
                     ->label('Concierge Name')
                     ->formatStateUsing(function ($state, $record) {
