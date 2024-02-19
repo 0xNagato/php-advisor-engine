@@ -20,7 +20,17 @@ class ConciergeStatsOverview extends StatsOverviewWidget
 
     public static function canView(): bool
     {
-        return auth()->user()?->hasRole('concierge');
+        $currentRoute = request()?->route()?->getName();
+
+        if (($currentRoute === 'filament.admin.pages.concierge-dashboard') && auth()->user()->hasRole('concierge')) {
+            return true;
+        }
+
+        if ($currentRoute === 'filament.admin.resources.concierges.view' && auth()->user()->hasRole('super_admin')) {
+            return true;
+        }
+
+        return false;
     }
 
     protected function getStats(): array

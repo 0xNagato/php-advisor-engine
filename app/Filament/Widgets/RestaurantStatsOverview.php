@@ -20,7 +20,17 @@ class RestaurantStatsOverview extends StatsOverviewWidget
 
     public static function canView(): bool
     {
-        return auth()->user()?->hasRole('restaurant');
+        $currentRoute = request()?->route()?->getName();
+
+        if (($currentRoute === 'filament.admin.pages.restaurant-dashboard') && auth()->user()->hasRole('restaurant')) {
+            return true;
+        }
+
+        if ($currentRoute === 'filament.admin.resources.restaurants.view' && auth()->user()->hasRole('super_admin')) {
+            return true;
+        }
+
+        return false;
     }
 
     protected function getStats(): array
