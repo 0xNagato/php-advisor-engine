@@ -5,17 +5,20 @@ namespace App\Filament\Widgets;
 use App\Models\Booking;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
+use Filament\Widgets\Concerns\InteractsWithPageFilters;
 use Filament\Widgets\TableWidget as BaseWidget;
-use Illuminate\Support\Carbon;
 
 class RecentBookings extends BaseWidget
 {
+    use InteractsWithPageFilters;
+
+    protected static bool $isLazy = false;
 
     protected string|int|array $columnSpan = 'full';
 
     public function table(Table $table): Table
     {
-        $query = Booking::query();
+        $query = Booking::orderByDesc('booking_at');
 
         // check if user is concierge and get all bookings for their hotel
         if (auth()->user()?->hasRole('concierge')) {
@@ -23,18 +26,23 @@ class RecentBookings extends BaseWidget
         }
 
         // check if user is restaurant manager and get all bookings for their restaurant
-        if (auth()->user()?->hasRole('restaurant-manager')) {
-            $query = Booking::where('schedule.restaurant_id', auth()->user()->restaurant->id);
+        if (auth()->user()?->hasRole('restaurant')) {
+            $query = Booking::whereHas('schedule', function ($query) {
+                $query->where('restaurant_id', auth()->user()->restaurant->id);
+            });
         }
 
 
-        $query = $query->whereDate('created_at', '>=', Carbon::now()->subDays(30));
+        // Get startDate and endDate from page filters
+        $startDate = $this->filters['startDate'] ?? now()->subDays(30);
+        $endDate = $this->filters['endDate'] ?? now();
+
+        // Use startDate and endDate in the query
+        $query = $query->whereBetween('created_at', [$startDate, $endDate]);
 
 
         return $table
-            ->query(
-                $query
-            )
+            ->query($query)
             ->columns([
                 TextColumn::make('concierge.user.name')
                     ->label('Concierge')
@@ -46,11 +54,12 @@ class RecentBookings extends BaseWidget
                     ->hidden((bool)auth()->user()?->hasRole('restaurant'))
                     ->searchable()
                     ->sortable(),
-                TextColumn::make('schedule.start_time')
+                TextColumn::make('booking_at')
                     ->label('When')
-                    ->dateTime()
+                    ->dateTime('D, M j')
                     ->sortable(),
                 TextColumn::make('guest_name')
+                    ->toggleable(isToggledHiddenByDefault: true)
                     ->searchable(),
                 TextColumn::make('guest_email')
                     ->searchable()

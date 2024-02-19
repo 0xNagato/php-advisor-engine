@@ -32,6 +32,7 @@ class RestaurantFactory extends Factory
                 'saturday' => 'open',
                 'sunday' => 'open',
             ],
+            'booking_fee' => 200,
 
             'created_at' => Carbon::now(),
             'updated_at' => Carbon::now(),

@@ -20,9 +20,6 @@ class BookingResource extends Resource
     {
         return $form
             ->schema([
-                // Forms\Components\Select::make('time_slot_id')
-                //     ->relationship('reservation', 'id')
-                //     ->required(),
                 Forms\Components\TextInput::make('concierge_id')
                     ->required()
                     ->numeric(),

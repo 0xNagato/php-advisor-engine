@@ -7,6 +7,10 @@ use Filament\Widgets\StatsOverviewWidget\Stat;
 
 class AdminStatsOverview extends BaseWidget
 {
+
+    protected static bool $isLazy = false;
+
+
     public static function canView(): bool
     {
         return auth()->user()?->hasRole('super_admin');

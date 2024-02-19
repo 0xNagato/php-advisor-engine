@@ -8,7 +8,7 @@
     ],
     "license": "MIT",
     "require": {
-        "php": "^8.1",
+        "php": "^8.2",
         "ariaieboy/filament-currency": "^1.2",
         "bezhansalleh/filament-shield": "^3.1",
         "filament/filament": "^3.1",

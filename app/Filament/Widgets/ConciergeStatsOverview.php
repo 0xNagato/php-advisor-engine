@@ -7,6 +7,7 @@ use Filament\Widgets\StatsOverviewWidget\Stat;
 
 class ConciergeStatsOverview extends BaseWidget
 {
+    protected static bool $isLazy = false;
     protected string|int|array $columnSpan = 'full';
 
     public static function canView(): bool

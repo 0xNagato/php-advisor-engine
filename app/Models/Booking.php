@@ -26,11 +26,14 @@ class Booking extends Model
         'currency',
         'status',
         'total_fee',
+        'booking_at',
         'payout_restaurant',
         'payout_charity',
         'payout_concierge',
         'payout_platform',
     ];
+
+    protected $appends = ['when'];
 
     protected static function boot(): void
     {
