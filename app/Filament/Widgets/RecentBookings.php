@@ -12,8 +12,9 @@ class RecentBookings extends BaseWidget
 {
     use InteractsWithPageFilters;
 
-    protected static bool $isLazy = false;
-
+    protected static bool $isLazy = true;
+    protected static ?string $pollingInterval = null;
+    protected static ?int $sort = 2;
     protected string|int|array $columnSpan = 'full';
 
     public function table(Table $table): Table
