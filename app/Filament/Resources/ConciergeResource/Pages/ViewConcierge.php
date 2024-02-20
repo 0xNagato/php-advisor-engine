@@ -4,6 +4,7 @@ namespace App\Filament\Resources\ConciergeResource\Pages;
 
 use App\Filament\Resources\ConciergeResource;
 use App\Filament\Widgets\ConciergeStatsOverview;
+use App\Filament\Widgets\RecentBookings;
 use Filament\Actions\EditAction;
 use Filament\Resources\Pages\ViewRecord;
 use STS\FilamentImpersonate\Pages\Actions\Impersonate;
@@ -26,6 +27,10 @@ class ViewConcierge extends ViewRecord
         return [
             ConciergeStatsOverview::make([
                 'concierge' => $this->getRecord(),
+            ]),
+            RecentBookings::make([
+                'type' => 'concierge',
+                'id' => $this->getRecord()->id,
             ]),
         ];
     }

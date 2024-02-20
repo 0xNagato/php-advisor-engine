@@ -17,31 +17,37 @@ class RecentBookings extends BaseWidget
     protected static ?string $pollingInterval = null;
 
     protected static ?int $sort = 3;
-
+    public ?string $type = null;
+    public ?int $id = null;
     protected string|int|array $columnSpan = 'full';
 
     public function table(Table $table): Table
     {
         $query = Booking::query();
 
-        // check if user is concierge and get all bookings for their hotel
-        if (auth()->user()?->hasRole('concierge')) {
-            $query = Booking::where('concierge_id', auth()->user()->concierge->id);
-        }
-
-        // check if user is restaurant manager and get all bookings for their restaurant
-        if (auth()->user()?->hasRole('restaurant')) {
+        if ($this->type === 'concierge' && $this->id) {
+            $query = Booking::where('concierge_id', $this->id);
+        } elseif ($this->type === 'restaurant' && $this->id) {
             $query = Booking::whereHas('schedule', function ($query) {
-                $query->where('restaurant_id', auth()->user()->restaurant->id);
+                $query->where('restaurant_id', $this->id);
             });
+        } else {
+            if (auth()->user()?->hasRole('concierge')) {
+                $query = Booking::where('concierge_id', auth()->user()->concierge->id);
+            }
+
+            if (auth()->user()?->hasRole('restaurant')) {
+                $query = Booking::whereHas('schedule', function ($query) {
+                    $query->where('restaurant_id', auth()->user()->restaurant->id);
+                });
+            }
         }
 
-        // Get startDate and endDate from page filters
         $startDate = $this->filters['startDate'] ?? now()->subDays(30);
         $endDate = $this->filters['endDate'] ?? now();
 
-        // Use startDate and endDate in the query
         $query = $query->whereBetween('created_at', [$startDate, $endDate])->orderByDesc('created_at');
+
 
         return $table
             ->query($query)

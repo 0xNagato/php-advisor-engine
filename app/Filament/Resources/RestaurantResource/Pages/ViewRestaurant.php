@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\RestaurantResource\Pages;
 
 use App\Filament\Resources\RestaurantResource;
+use App\Filament\Widgets\RecentBookings;
 use App\Filament\Widgets\RestaurantStatsOverview;
 use Filament\Actions;
 use Filament\Resources\Pages\ViewRecord;
@@ -12,6 +13,7 @@ class ViewRestaurant extends ViewRecord
 {
     protected static string $resource = RestaurantResource::class;
     protected static string $view = 'filament.resources.restaurants.pages.view-restaurant';
+
 
     protected function getHeaderActions(): array
     {
@@ -26,6 +28,10 @@ class ViewRestaurant extends ViewRecord
         return [
             RestaurantStatsOverview::make([
                 'restaurant' => $this->getRecord(),
+            ]),
+            RecentBookings::make([
+                'type' => 'restaurant',
+                'id' => $this->getRecord()->id,
             ]),
         ];
     }
