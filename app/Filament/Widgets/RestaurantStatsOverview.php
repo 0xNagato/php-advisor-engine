@@ -3,6 +3,7 @@
 namespace App\Filament\Widgets;
 
 use App\Models\Booking;
+use App\Models\Restaurant;
 use Carbon\Carbon;
 use Filament\Widgets\Concerns\InteractsWithPageFilters;
 use Filament\Widgets\StatsOverviewWidget;
@@ -17,6 +18,8 @@ class RestaurantStatsOverview extends StatsOverviewWidget
     protected static ?string $pollingInterval = null;
 
     protected static ?int $sort = 1;
+
+    public ?Restaurant $restaurant;
 
     public static function canView(): bool
     {
@@ -35,12 +38,12 @@ class RestaurantStatsOverview extends StatsOverviewWidget
 
     protected function getStats(): array
     {
-        $startDate = Carbon::parse($this->filters['startDate']);
-        $endDate = Carbon::parse($this->filters['endDate']);
+        $startDate = now()->subDays(30);
+        $endDate = now();
         $daysInRange = $startDate->diffInDays($endDate);
         $dateRange = Carbon::parse($startDate)->format('M d') . ' - ' . Carbon::parse($endDate)->format('M d');
 
-        $currentRestaurantId = auth()->user()->restaurant->id;
+        $currentRestaurantId = $this->restaurant->id ?? auth()->user()->restaurant->id;
 
         $query = Booking::join('schedules', 'bookings.schedule_id', '=', 'schedules.id')
             ->where('schedules.restaurant_id', $currentRestaurantId)

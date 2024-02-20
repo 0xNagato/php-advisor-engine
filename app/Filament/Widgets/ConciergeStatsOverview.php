@@ -3,6 +3,7 @@
 namespace App\Filament\Widgets;
 
 use App\Models\Booking;
+use App\Models\Concierge;
 use Carbon\Carbon;
 use Filament\Widgets\Concerns\InteractsWithPageFilters;
 use Filament\Widgets\StatsOverviewWidget;
@@ -17,6 +18,8 @@ class ConciergeStatsOverview extends StatsOverviewWidget
     protected static ?string $pollingInterval = null;
 
     protected static ?int $sort = 1;
+
+    public ?Concierge $concierge;
 
     public static function canView(): bool
     {
@@ -33,14 +36,20 @@ class ConciergeStatsOverview extends StatsOverviewWidget
         return false;
     }
 
+    public function mount(): void
+    {
+
+    }
+
     protected function getStats(): array
     {
-        $startDate = Carbon::parse($this->filters['startDate']);
-        $endDate = Carbon::parse($this->filters['endDate']);
+        $startDate = now()->subDays(30);
+        $endDate = now();
         $daysInRange = $startDate->diffInDays($endDate);
         $dateRange = Carbon::parse($startDate)->format('M d') . ' - ' . Carbon::parse($endDate)->format('M d');
 
-        $currentConciergeId = auth()->user()->concierge->id;
+
+        $currentConciergeId = $this->concierge->id ?? auth()->user()->concierge->id;
 
         $query = Booking::where('concierge_id', $currentConciergeId)
             ->whereBetween('booking_at', [$startDate, $endDate]);
