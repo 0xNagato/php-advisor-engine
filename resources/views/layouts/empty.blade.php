@@ -8,6 +8,7 @@
     <title>{{ config('app.name', 'Prima') }}</title>
 
     <!-- Scripts -->
+    @stack('scripts')
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 
     <!-- Styles -->

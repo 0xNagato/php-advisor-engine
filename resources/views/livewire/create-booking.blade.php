@@ -32,7 +32,9 @@
     </div>
 </div>
 
-<script src="https://js.stripe.com/v3/"></script>
+@push('scripts')
+    <script src="https://js.stripe.com/v3/"></script>
+@endpush
 <script>
     var stripe = Stripe('{{ config('cashier.key') }}');
     var elements = stripe.elements();
