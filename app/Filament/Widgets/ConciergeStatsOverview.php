@@ -46,8 +46,7 @@ class ConciergeStatsOverview extends StatsOverviewWidget
         $startDate = now()->subDays(30);
         $endDate = now();
         $daysInRange = $startDate->diffInDays($endDate);
-        $dateRange = Carbon::parse($startDate)->format('M d') . ' - ' . Carbon::parse($endDate)->format('M d');
-
+        $dateRange = Carbon::parse($startDate)->format('M d').' - '.Carbon::parse($endDate)->format('M d');
 
         $currentConciergeId = $this->concierge->id ?? auth()->user()->concierge->id;
 
@@ -93,28 +92,28 @@ class ConciergeStatsOverview extends StatsOverviewWidget
         $prevBookings = $prevQuery->count();
 
         $overallEarningsPerDay = $query->get()
-            ->groupBy(fn($booking) => Carbon::parse($booking->booking_at)->format('Y-m-d'))
-            ->map(fn($bookings) => $bookings->sum('total_fee'));
+            ->groupBy(fn ($booking) => Carbon::parse($booking->booking_at)->format('Y-m-d'))
+            ->map(fn ($bookings) => $bookings->sum('total_fee'));
 
         $conciergeEarningsPerDay = $query->get()
-            ->groupBy(fn($booking) => Carbon::parse($booking->booking_at)->format('Y-m-d'))
-            ->map(fn($bookings) => $bookings->reduce(function ($carry, $booking) {
+            ->groupBy(fn ($booking) => Carbon::parse($booking->booking_at)->format('Y-m-d'))
+            ->map(fn ($bookings) => $bookings->reduce(function ($carry, $booking) {
                 $earnings = $booking->total_fee * ($booking->payout_concierge / 100);
 
                 return $carry + $earnings;
             }, 0));
 
         $charityEarningsPerDay = $query->get()
-            ->groupBy(fn($booking) => Carbon::parse($booking->booking_at)->format('Y-m-d'))
-            ->map(fn($bookings) => $bookings->reduce(function ($carry, $booking) {
+            ->groupBy(fn ($booking) => Carbon::parse($booking->booking_at)->format('Y-m-d'))
+            ->map(fn ($bookings) => $bookings->reduce(function ($carry, $booking) {
                 $earnings = $booking->total_fee * ($booking->payout_charity / 100);
 
                 return $carry + $earnings;
             }, 0));
 
         $bookingsPerDay = $query->get()
-            ->groupBy(fn($booking) => Carbon::parse($booking->booking_at)->format('Y-m-d'))
-            ->map(fn($bookings) => $bookings->count());
+            ->groupBy(fn ($booking) => Carbon::parse($booking->booking_at)->format('Y-m-d'))
+            ->map(fn ($bookings) => $bookings->count());
 
         // Compare current earnings with previous earnings
         $overallIncrease = $overallEarnings - $prevOverallEarnings;
@@ -122,20 +121,20 @@ class ConciergeStatsOverview extends StatsOverviewWidget
         $charityIncrease = $charityEarnings - $prevCharityEarnings;
 
         $overallEarningsPerDay = $query->get()
-            ->groupBy(fn($booking) => Carbon::parse($booking->booking_at)->format('Y-m-d'))
-            ->map(fn($bookings) => $bookings->sum('total_fee'));
+            ->groupBy(fn ($booking) => Carbon::parse($booking->booking_at)->format('Y-m-d'))
+            ->map(fn ($bookings) => $bookings->sum('total_fee'));
 
         $conciergeEarningsPerDay = $query->get()
-            ->groupBy(fn($booking) => Carbon::parse($booking->booking_at)->format('Y-m-d'))
-            ->map(fn($bookings) => $bookings->reduce(function ($carry, $booking) {
+            ->groupBy(fn ($booking) => Carbon::parse($booking->booking_at)->format('Y-m-d'))
+            ->map(fn ($bookings) => $bookings->reduce(function ($carry, $booking) {
                 $earnings = $booking->total_fee * ($booking->payout_concierge / 100);
 
                 return $carry + $earnings;
             }, 0));
 
         $charityEarningsPerDay = $query->get()
-            ->groupBy(fn($booking) => Carbon::parse($booking->booking_at)->format('Y-m-d'))
-            ->map(fn($bookings) => $bookings->reduce(function ($carry, $booking) {
+            ->groupBy(fn ($booking) => Carbon::parse($booking->booking_at)->format('Y-m-d'))
+            ->map(fn ($bookings) => $bookings->reduce(function ($carry, $booking) {
                 $earnings = $booking->total_fee * ($booking->payout_charity / 100);
 
                 return $carry + $earnings;
@@ -153,7 +152,7 @@ class ConciergeStatsOverview extends StatsOverviewWidget
                 ->descriptionIcon($charityIncrease >= 0 ? 'heroicon-m-arrow-trending-up' : 'heroicon-m-arrow-trending-down')
                 ->color($charityIncrease >= 0 ? 'success' : 'danger'),
             Stat::make("Bookings $dateRange", $currentBookings)
-                ->description(($bookingsIncrease >= 0 ? '+' : '') . $bookingsIncrease . ' bookings')
+                ->description(($bookingsIncrease >= 0 ? '+' : '').$bookingsIncrease.' bookings')
                 ->descriptionIcon($bookingsIncrease >= 0 ? 'heroicon-m-arrow-trending-up' : 'heroicon-m-arrow-trending-down')
                 ->color($bookingsIncrease >= 0 ? 'success' : 'danger'),
         ];

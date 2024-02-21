@@ -13,6 +13,7 @@ use STS\FilamentImpersonate\Pages\Actions\Impersonate;
 class ViewRestaurant extends ViewRecord
 {
     protected static string $resource = RestaurantResource::class;
+
     protected static string $view = 'filament.resources.restaurants.pages.view-restaurant';
 
     public function getHeading(): string|Htmlable

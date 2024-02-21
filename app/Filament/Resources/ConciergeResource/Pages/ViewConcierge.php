@@ -13,6 +13,7 @@ use STS\FilamentImpersonate\Pages\Actions\Impersonate;
 class ViewConcierge extends ViewRecord
 {
     protected static string $resource = ConciergeResource::class;
+
     protected static string $view = 'filament.resources.concierges.pages.view-concierge';
 
     public function getHeading(): string

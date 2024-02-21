@@ -17,9 +17,19 @@ class RecentBookings extends BaseWidget
     protected static ?string $pollingInterval = null;
 
     protected static ?int $sort = 3;
+
     public ?string $type = null;
+
     public ?int $id = null;
+
     protected string|int|array $columnSpan = 'full';
+
+    // public function mount(): void
+    // {
+    //     if (auth()->user()?->hasRole('concierge')) {
+    //         $this->columnSpan = 1;
+    //     }
+    // }
 
     public function table(Table $table): Table
     {
@@ -48,18 +58,17 @@ class RecentBookings extends BaseWidget
 
         $query = $query->whereBetween('created_at', [$startDate, $endDate])->orderByDesc('created_at');
 
-
         return $table
             ->query($query)
             ->columns([
                 TextColumn::make('concierge.user.name')
                     ->label('Concierge')
                     ->numeric()
-                    ->hidden((bool)auth()->user()?->hasRole('concierge'))
+                    ->hidden((bool) auth()->user()?->hasRole('concierge'))
                     ->sortable(),
                 TextColumn::make('schedule.restaurant.restaurant_name')
                     ->label('Restaurant')
-                    ->hidden((bool)auth()->user()?->hasRole('restaurant'))
+                    ->hidden((bool) auth()->user()?->hasRole('restaurant'))
                     ->searchable()
                     ->sortable(),
                 TextColumn::make('booking_at')

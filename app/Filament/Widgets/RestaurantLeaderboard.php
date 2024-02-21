@@ -42,7 +42,7 @@ class RestaurantLeaderboard extends BaseWidget
                     ->label('Restaurant Name'),
                 Tables\Columns\TextColumn::make('total_earned')
                     ->label('Total Earned')
-                    ->currency('USD')
+                    ->currency('USD'),
             ]);
     }
 

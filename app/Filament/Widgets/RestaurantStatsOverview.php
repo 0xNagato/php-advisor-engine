@@ -41,7 +41,7 @@ class RestaurantStatsOverview extends StatsOverviewWidget
         $startDate = now()->subDays(30);
         $endDate = now();
         $daysInRange = $startDate->diffInDays($endDate);
-        $dateRange = Carbon::parse($startDate)->format('M d') . ' - ' . Carbon::parse($endDate)->format('M d');
+        $dateRange = Carbon::parse($startDate)->format('M d').' - '.Carbon::parse($endDate)->format('M d');
 
         $currentRestaurantId = $this->restaurant->id ?? auth()->user()->restaurant->id;
 
@@ -89,28 +89,28 @@ class RestaurantStatsOverview extends StatsOverviewWidget
         $prevBookings = $prevQuery->count();
 
         $overallEarningsPerDay = $query->get()
-            ->groupBy(fn($booking) => Carbon::parse($booking->booking_at)->format('Y-m-d'))
-            ->map(fn($bookings) => $bookings->sum('total_fee'));
+            ->groupBy(fn ($booking) => Carbon::parse($booking->booking_at)->format('Y-m-d'))
+            ->map(fn ($bookings) => $bookings->sum('total_fee'));
 
         $restaurantEarningsPerDay = $query->get()
-            ->groupBy(fn($booking) => Carbon::parse($booking->booking_at)->format('Y-m-d'))
-            ->map(fn($bookings) => $bookings->reduce(function ($carry, $booking) {
+            ->groupBy(fn ($booking) => Carbon::parse($booking->booking_at)->format('Y-m-d'))
+            ->map(fn ($bookings) => $bookings->reduce(function ($carry, $booking) {
                 $earnings = $booking->total_fee * ($booking->payout_restaurant / 100);
 
                 return $carry + $earnings;
             }, 0));
 
         $charityEarningsPerDay = $query->get()
-            ->groupBy(fn($booking) => Carbon::parse($booking->booking_at)->format('Y-m-d'))
-            ->map(fn($bookings) => $bookings->reduce(function ($carry, $booking) {
+            ->groupBy(fn ($booking) => Carbon::parse($booking->booking_at)->format('Y-m-d'))
+            ->map(fn ($bookings) => $bookings->reduce(function ($carry, $booking) {
                 $earnings = $booking->total_fee * ($booking->payout_charity / 100);
 
                 return $carry + $earnings;
             }, 0));
 
         $bookingsPerDay = $query->get()
-            ->groupBy(fn($booking) => Carbon::parse($booking->booking_at)->format('Y-m-d'))
-            ->map(fn($bookings) => $bookings->count());
+            ->groupBy(fn ($booking) => Carbon::parse($booking->booking_at)->format('Y-m-d'))
+            ->map(fn ($bookings) => $bookings->count());
 
         // Compare current earnings with previous earnings
         $overallIncrease = $overallEarnings - $prevOverallEarnings;
@@ -128,7 +128,7 @@ class RestaurantStatsOverview extends StatsOverviewWidget
                 ->descriptionIcon($charityIncrease >= 0 ? 'heroicon-m-arrow-trending-up' : 'heroicon-m-arrow-trending-down')
                 ->color($charityIncrease >= 0 ? 'success' : 'danger'),
             Stat::make("Bookings $dateRange", $currentBookings)
-                ->description(($bookingsIncrease >= 0 ? '+' : '') . $bookingsIncrease . ' bookings')
+                ->description(($bookingsIncrease >= 0 ? '+' : '').$bookingsIncrease.' bookings')
                 ->descriptionIcon($bookingsIncrease >= 0 ? 'heroicon-m-arrow-trending-up' : 'heroicon-m-arrow-trending-down')
                 ->color($bookingsIncrease >= 0 ? 'success' : 'danger'),
         ];

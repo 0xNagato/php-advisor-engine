@@ -18,6 +18,13 @@ class ConciergeLeaderboard extends BaseWidget
         return auth()->user()->hasRole('super_admin') || auth()->user()->hasRole('concierge');
     }
 
+    public function mount(): void
+    {
+        if (auth()->user()?->hasRole('concierge')) {
+            $this->columnSpan = 'full';
+        }
+    }
+
     public function table(Table $table): Table
     {
         $startDate = $this->filters['startDate'] ?? now()->subDays(30);
@@ -46,6 +53,7 @@ class ConciergeLeaderboard extends BaseWidget
                             if (auth()->user()->concierge->user_id === $record->user_id) {
                                 return 'You';
                             }
+
                             return '*********';
                         }
 
@@ -53,7 +61,7 @@ class ConciergeLeaderboard extends BaseWidget
                     }),
                 Tables\Columns\TextColumn::make('total_earned')
                     ->label('Total Earned')
-                    ->currency('USD')
+                    ->currency('USD'),
             ]);
     }
 
