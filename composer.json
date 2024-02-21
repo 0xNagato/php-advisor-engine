@@ -11,6 +11,7 @@
         "php": "^8.2",
         "ariaieboy/filament-currency": "^1.2",
         "bezhansalleh/filament-shield": "^3.1",
+        "chillerlan/php-qrcode": "^5.0",
         "filament/filament": "^3.1",
         "guzzlehttp/guzzle": "^7.2",
         "itsgoingd/clockwork": "^5.1",
@@ -25,8 +26,10 @@
         "laravel/sanctum": "^3.3",
         "laravel/tinker": "^2.8",
         "leandrocfe/filament-apex-charts": "^3.0",
-        "livewire/livewire": "^3.0",
+        "livewire/livewire": "^3.4",
+        "livewire/volt": "^1.6",
         "pelmered/filament-money-field": "^1.0",
+        "robsontenorio/mary": "^1.21",
         "spatie/laravel-data": "^4.0",
         "spatie/opening-hours": "^3.0",
         "staudenmeir/eloquent-has-many-deep": "^1.7",
@@ -36,8 +39,11 @@
         "ysfkaya/filament-phone-input": "^2.3"
     },
     "require-dev": {
+        "roave/security-advisories": "dev-latest"
+        ,
         "barryvdh/laravel-debugbar": "^3.9",
         "fakerphp/faker": "^1.9.1",
+        "laradumps/laradumps": "^2.4",
         "laravel/pint": "^1.13",
         "laravel/sail": "^1.18",
         "mockery/mockery": "^1.4.4",

@@ -22,6 +22,8 @@ class Schedule extends Model
 
     protected $casts = [
         'is_available' => 'boolean',
+        'start_time' => 'datetime',
+        'end_time' => 'datetime',
     ];
 
     protected $appends = [

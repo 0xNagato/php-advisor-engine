@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Support\Str;
 
 class Booking extends Model
 {
@@ -19,7 +20,8 @@ class Booking extends Model
     protected $fillable = [
         'schedule_id',
         'concierge_id',
-        'guest_name',
+        'guest_first_name',
+        'guest_last_name',
         'guest_email',
         'guest_phone',
         'guest_count',
@@ -40,11 +42,16 @@ class Booking extends Model
         'platform_fee',
     ];
 
+    protected $casts = [
+        'booking_at' => 'datetime',
+    ];
+
     protected static function boot(): void
     {
         parent::boot();
 
         static::saving(function (Booking $booking) {
+            $booking->uuid = (string)Str::uuid();
             $booking->total_fee = $booking->totalFee();
             $booking->payout_restaurant = $booking->schedule->restaurant->payout_restaurant;
             $booking->payout_charity = $booking->schedule->restaurant->payout_charity;

@@ -24,3 +24,7 @@
 //         return view('dashboard');
 //     })->name('dashboard');
 // });
+
+use App\Livewire\CreateBooking;
+
+Route::get('/bookings/create/{token}', CreateBooking::class)->name('bookings.create');
