@@ -8,10 +8,16 @@ use Illuminate\Contracts\View\Factory;
 use Illuminate\View\View;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
+use Stripe\Charge;
+use Stripe\Customer;
+use Stripe\Exception\ApiErrorException;
+use Stripe\Stripe;
 
 class CreateBooking extends Component
 {
     public Booking $booking;
+    public bool $isLoading = false;
+    public bool $paymentSuccess = false;
 
     public function mount(string $token): void
     {
@@ -24,8 +30,28 @@ class CreateBooking extends Component
         return view('livewire.create-booking');
     }
 
-    public function save(): void
+    /**
+     * @throws ApiErrorException
+     */
+    public function completeBooking(array $form): void
     {
+        Stripe::setApiKey(config('cashier.secret'));
 
+        $stripeCustomer = Customer::create([
+            'name' => $form['firstName'] . ' ' . $form['lastName'],
+            'phone' => $form['phone'],
+            'source' => $form['token']['id'],
+        ]);
+
+        $stripeCharge = Charge::create([
+            'amount' => $this->booking->total_fee,
+            'currency' => 'usd',
+            'customer' => $stripeCustomer->id,
+            'description' => 'Booking for ' . $this->booking->schedule->restaurant->name,
+        ]);
+
+        ds($stripeCharge);
+        $this->isLoading = false;
+        $this->paymentSuccess = true;
     }
 }
