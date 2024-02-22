@@ -15,6 +15,7 @@
                 <div>Time Remaining:</div>
                 <div id="countdown"></div>
             </div>
+            
             <x-mary-form wire:submit="save">
                 <div class="flex gap-2">
                     <x-mary-input label="First Name" :label="false" placeholder="First Name"/>
