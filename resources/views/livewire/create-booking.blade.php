@@ -19,10 +19,12 @@
 
             <x-mary-form wire:submit="save" class="w-full">
                 <div class="flex gap-2">
-                    <input type="text" placeholder="Last Name" class="input input-primary w-full max-w-xs"/>
-                    <input type="text" placeholder="First Name" class="input input-primary w-full max-w-xs"/>
+                    <input type="text" placeholder="Last Name" class="input input-primary w-full max-w-xs text-sm"/>
+                    <input type="text" placeholder="First Name" class="input input-primary w-full max-w-xs text-sm"/>
                 </div>
-                <x-mary-input label="Phone Number" :label="false" placeholder="Cell Phone Number" class="w-full"/>
+                <x-mary-input label="Phone Number" :label="false" placeholder="Cell Phone Number"
+                              icon="o-device-phone-mobile"
+                              class="w-full text-sm"/>
                 <div id="card-element"
                      class="input input-primary w-full flex flex-col justify-center">
                     <!-- A Stripe Element will be inserted here. -->
