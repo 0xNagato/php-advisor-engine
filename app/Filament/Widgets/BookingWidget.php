@@ -32,6 +32,11 @@ class BookingWidget extends Widget
 
     public ?string $bookingUrl;
 
+    public static function canView(): bool
+    {
+        return auth()->user()->hasRole('concierge');
+    }
+
     public function mount(): void
     {
         $this->restaurants = Restaurant::openToday()->get();
