@@ -40,9 +40,9 @@
 
         <img src="{{ $qrCode }}" alt="QR Code" class="w-1/2 mx-auto">
 
-        <x-filament::link :href="$bookingUrl">
+        <a href="{{ $bookingUrl }}" target="_new">
             Booking Url
-        </x-filament::link>
+        </a>
     @endif
 
 </x-filament-widgets::widget>
