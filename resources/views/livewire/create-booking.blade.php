@@ -5,7 +5,7 @@
     </div>
     <div class="max-w-lg mx-auto flex flex-col justify-center">
 
-        <div class="flex flex-col items-center gap-4" id="form">
+        <div class="flex flex-col items-center gap-3" id="form">
             <h1 class="text-3xl text-center kaisei-opti-regular">Secure Your Reservation</h1>
 
             <h2 class="text-base text-center">
@@ -35,7 +35,7 @@
         </div>
 
         <!-- Invoice -->
-        <div class="bg-white flex shadow rounded-xl mt-6 p-3 gap-4 items-center">
+        <div class="bg-white flex shadow rounded-xl mt-4 p-3 gap-4 items-center">
             <x-mary-icon name="o-building-storefront" class="w-10 h-10 bg-orange-500 text-white p-2 rounded-full"/>
 
             <div class="flex flex-col gap-1">
