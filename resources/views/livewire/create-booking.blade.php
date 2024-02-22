@@ -1,4 +1,5 @@
-<div class="min-h-screen antialiased bg-gradient-to-b from-white to-indigo-200 p-6 flex flex-col justify-center">
+<div
+    class="min-h-screen wavy-background antialiased bg-gradient-to-b from-white to-indigo-200 p-6 flex flex-col justify-center">
     <div class="font-extrabold text-xl uppercase text-indigo-800 flex-grow">
         Prima
     </div>

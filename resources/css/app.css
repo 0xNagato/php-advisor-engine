@@ -11,3 +11,10 @@
     font-weight: 600;
     font-style: normal;
 }
+
+.wavy-background {
+    background-image: url('../../public/images/waves-8.svg');
+    background-repeat: repeat-x;
+    background-position: bottom;
+    background-color: white;
+}
