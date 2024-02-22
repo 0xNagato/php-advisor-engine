@@ -1,25 +1,20 @@
-<div class="min-h-screen antialiased bg-gradient-to-b from-white to-indigo-200 p-6 flex flex-col">
-    <div class="max-w-lg mx-auto flex flex-col flex-grow">
-        <div class="font-extrabold text-xl uppercase text-indigo-800">
-            Prima
-        </div>
+<div class="min-h-screen antialiased bg-gradient-to-b from-white to-indigo-200 p-6 flex flex-col justify-center">
+    <div class="font-extrabold text-xl uppercase text-indigo-800 flex-grow">
+        Prima
+    </div>
+    <div class="max-w-lg mx-auto flex flex-col justify-center">
 
         <div class="flex flex-col pt-24 items-center gap-4" id="form">
-            <h1 class="text-3xl font-bold">You're almost there!</h1>
-            <h2 class="text-xl text-center">
-                Complete the form guarantee your reservation
-                at <strong class="font-semibold">{{ $booking->schedule->restaurant->restaurant_name }}</strong>
-                at <strong class="font-semibold">{{ $booking->booking_at->format('g:i a') }}</strong>.
+            <h1 class="text-3xl kaisei-opti-regular">Secure Your Reservation</h1>
+            <h2 class="text-base text-center">
+                Enter your credit card information to confirm your reservation below.
             </h2>
             <x-mary-form wire:submit="save">
                 <div class="flex gap-2">
                     <x-mary-input label="First Name" :label="false" placeholder="First Name"/>
                     <x-mary-input label="Last Name" :label="false" placeholder="Last Name"/>
                 </div>
-                <div class="flex gap-2">
-                    <x-mary-input label="Email Address" :label="false" placeholder="Email Address"/>
-                    <x-mary-input label="Phone Number" :label="false" placeholder="Phone Number"/>
-                </div>
+                <x-mary-input label="Phone Number" :label="false" placeholder="Cell Phone Number" class="w-full"/>
                 <div id="card-element"
                      class="input input-primary w-full flex flex-col justify-center">
                     <!-- A Stripe Element will be inserted here. -->
@@ -30,31 +25,44 @@
         </div>
 
         <!-- Invoice -->
-        <div class="flex-grow mt-6">
-            <div class="bg-white shadow-md rounded px-8 pt-6 pb-8 flex flex-col my-2 w-full mx-auto">
-                <h2 class="text-center font-bold text-xl uppercase mb-6">Receipt</h2>
-                <div class="mb-4">
-                    <span class="text-gray-600">Restaurant:</span>
-                    <span class="float-right font-semibold">{{ $booking->schedule->restaurant->restaurant_name }}</span>
-                </div>
-                <div class="mb-4">
-                    <span class="text-gray-600">Time:</span>
-                    <span class="float-right font-semibold">{{ $booking->booking_at->format('g:i a') }}</span>
-                </div>
-                <div class="mb-4">
-                    <span class="text-gray-600">Guest Count:</span>
-                    <span class="float-right font-semibold">{{ $booking->guest_count }}</span>
-                </div>
-                <div class="mb-4">
-                    <span class="text-gray-600">Amount Due:</span>
-                    <span class="float-right font-semibold">{{ money($booking->total_fee) }}</span>
+        <div class="bg-white flex shadow rounded-xl mt-6 p-6 gap-4 items-center">
+            <x-mary-icon name="o-building-storefront" class="w-12 h-12 bg-orange-500 text-white p-2 rounded-full"/>
+
+            <div class="flex flex-col gap-1">
+                <div class="font-semibold">{{ $booking->schedule->restaurant->restaurant_name }}</div>
+                <div class="text-xs text-slate-600">
+                    Tonight {{ $booking->booking_at->format('g:i a') }}
                 </div>
             </div>
+            <div class="font-semibold flex-grow text-right">
+                {{ money($booking->total_fee) }}
+            </div>
         </div>
+        {{--        <div class="flex-grow mt-6">--}}
+        {{--            <div class="bg-white shadow-md rounded px-8 pt-6 pb-8 flex flex-col my-2 w-full mx-auto">--}}
+        {{--                <h2 class="text-center font-bold text-xl uppercase mb-6">Receipt</h2>--}}
+        {{--                <div class="mb-4">--}}
+        {{--                    <span class="text-gray-600">Restaurant:</span>--}}
+        {{--                    <span class="float-right font-semibold">{{ $booking->schedule->restaurant->restaurant_name }}</span>--}}
+        {{--                </div>--}}
+        {{--                <div class="mb-4">--}}
+        {{--                    <span class="text-gray-600">Time:</span>--}}
+        {{--                    <span class="float-right font-semibold">{{ $booking->booking_at->format('g:i a') }}</span>--}}
+        {{--                </div>--}}
+        {{--                <div class="mb-4">--}}
+        {{--                    <span class="text-gray-600">Guest Count:</span>--}}
+        {{--                    <span class="float-right font-semibold">{{ $booking->guest_count }}</span>--}}
+        {{--                </div>--}}
+        {{--                <div class="mb-4">--}}
+        {{--                    <span class="text-gray-600">Amount Due:</span>--}}
+        {{--                    <span class="float-right font-semibold">{{ money($booking->total_fee) }}</span>--}}
+        {{--                </div>--}}
+        {{--            </div>--}}
+        {{--        </div>--}}
         <!-- End of Invoice -->
 
     </div>
-    <div class="text-center text-sm">
+    <div class="text-center text-sm flex-grow flex items-end justify-center">
         &copy; {{ date('Y') }} {{ config('app.name', 'Prima') }}. All rights reserved.
     </div>
 </div>

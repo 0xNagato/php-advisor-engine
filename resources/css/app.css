@@ -5,3 +5,9 @@
 [x-cloak] {
     display: none;
 }
+
+.kaisei-opti-regular {
+    font-family: "Kaisei Opti", serif;
+    font-weight: 600;
+    font-style: normal;
+}
