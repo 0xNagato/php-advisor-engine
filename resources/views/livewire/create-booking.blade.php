@@ -6,7 +6,7 @@
     <div class="max-w-lg mx-auto flex flex-col justify-center">
 
         <div class="flex flex-col items-center gap-4" id="form">
-            <h1 class="text-3xl kaisei-opti-regular">Secure Your Reservation</h1>
+            <h1 class="text-3xl text-center kaisei-opti-regular">Secure Your Reservation</h1>
 
             <h2 class="text-base text-center">
                 Enter your credit card information to confirm your reservation below.
