@@ -1,6 +1,6 @@
 <div
-    class="min-h-screen wavy-background antialiased bg-gradient-to-b from-white to-indigo-200 p-6 flex flex-col justify-center">
-    <div class="font-extrabold text-xl uppercase text-indigo-800 flex-grow">
+    class="min-h-screen wavy-background antialiased p-6 flex flex-col justify-center">
+    <div class="font-extrabold text-2xl text-primary uppercase flex-grow poppins-medium">
         Prima
     </div>
     <div class="max-w-lg mx-auto flex flex-col justify-center">
