@@ -34,7 +34,7 @@
 
 
     @if ($guestCount)
-        <x-mary-button no-wire-navigate :link="$bookingUrl" class="btn btn-primary text-white">
+        <x-mary-button external :link="$bookingUrl" class="btn btn-primary text-white" icon="o-credit-card">
             Collect Guest's Credit Card
         </x-mary-button>
 
