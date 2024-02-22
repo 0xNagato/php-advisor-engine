@@ -34,15 +34,11 @@
 
 
     @if ($guestCount)
-        <x-filament::button wire:click="book" class="w-full">
+        <x-filament::button href="{{ $bookingUrl }}" tag="a" target="_new" class="w-full">
             Collect Guest's Credit Card
         </x-filament::button>
 
         <img src="{{ $qrCode }}" alt="QR Code" class="w-1/2 mx-auto">
-
-        <a href="{{ $bookingUrl }}" target="_new">
-            Booking Url
-        </a>
     @endif
 
 </x-filament-widgets::widget>
