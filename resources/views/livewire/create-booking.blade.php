@@ -4,7 +4,7 @@
     </div>
     <div class="max-w-lg mx-auto flex flex-col justify-center">
 
-        <div class="flex flex-col pt-24 items-center gap-4" id="form">
+        <div class="flex flex-col items-center gap-4" id="form">
             <h1 class="text-3xl kaisei-opti-regular">Secure Your Reservation</h1>
 
             <h2 class="text-base text-center">
@@ -15,7 +15,7 @@
                 <div>Time Remaining:</div>
                 <div id="countdown"></div>
             </div>
-            
+
             <x-mary-form wire:submit="save">
                 <div class="flex gap-2">
                     <x-mary-input label="First Name" :label="false" placeholder="First Name"/>
