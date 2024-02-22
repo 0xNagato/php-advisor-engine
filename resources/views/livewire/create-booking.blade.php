@@ -1,5 +1,5 @@
-<div class="min-h-screen antialiased bg-gradient-to-b from-white to-indigo-200 flex flex-col p-6">
-    <div class="max-w-lg mx-auto">
+<div class="min-h-screen antialiased bg-gradient-to-b from-white to-indigo-200 p-6 flex flex-col">
+    <div class="max-w-lg mx-auto flex flex-col flex-grow">
         <div class="font-extrabold text-xl uppercase text-indigo-800">
             Prima
         </div>
@@ -53,9 +53,9 @@
         </div>
         <!-- End of Invoice -->
 
-        <div class="text-center text-sm">
-            &copy; {{ date('Y') }} {{ config('app.name', 'Prima') }}. All rights reserved.
-        </div>
+    </div>
+    <div class="text-center text-sm">
+        &copy; {{ date('Y') }} {{ config('app.name', 'Prima') }}. All rights reserved.
     </div>
 </div>
 
