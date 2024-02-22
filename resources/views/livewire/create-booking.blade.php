@@ -6,9 +6,15 @@
 
         <div class="flex flex-col pt-24 items-center gap-4" id="form">
             <h1 class="text-3xl kaisei-opti-regular">Secure Your Reservation</h1>
+
             <h2 class="text-base text-center">
                 Enter your credit card information to confirm your reservation below.
             </h2>
+
+            <div class="flex items-center text-xl font-semibold gap-2">
+                <div>Time Remaining:</div>
+                <div id="countdown"></div>
+            </div>
             <x-mary-form wire:submit="save">
                 <div class="flex gap-2">
                     <x-mary-input label="First Name" :label="false" placeholder="First Name"/>
@@ -38,28 +44,6 @@
                 {{ money($booking->total_fee) }}
             </div>
         </div>
-        {{--        <div class="flex-grow mt-6">--}}
-        {{--            <div class="bg-white shadow-md rounded px-8 pt-6 pb-8 flex flex-col my-2 w-full mx-auto">--}}
-        {{--                <h2 class="text-center font-bold text-xl uppercase mb-6">Receipt</h2>--}}
-        {{--                <div class="mb-4">--}}
-        {{--                    <span class="text-gray-600">Restaurant:</span>--}}
-        {{--                    <span class="float-right font-semibold">{{ $booking->schedule->restaurant->restaurant_name }}</span>--}}
-        {{--                </div>--}}
-        {{--                <div class="mb-4">--}}
-        {{--                    <span class="text-gray-600">Time:</span>--}}
-        {{--                    <span class="float-right font-semibold">{{ $booking->booking_at->format('g:i a') }}</span>--}}
-        {{--                </div>--}}
-        {{--                <div class="mb-4">--}}
-        {{--                    <span class="text-gray-600">Guest Count:</span>--}}
-        {{--                    <span class="float-right font-semibold">{{ $booking->guest_count }}</span>--}}
-        {{--                </div>--}}
-        {{--                <div class="mb-4">--}}
-        {{--                    <span class="text-gray-600">Amount Due:</span>--}}
-        {{--                    <span class="float-right font-semibold">{{ money($booking->total_fee) }}</span>--}}
-        {{--                </div>--}}
-        {{--            </div>--}}
-        {{--        </div>--}}
-        <!-- End of Invoice -->
 
     </div>
     <div class="text-center text-sm flex-grow flex items-end justify-center">
@@ -76,4 +60,23 @@
     var elements = stripe.elements();
     var card = elements.create('card');
     card.mount('#card-element');
+
+    var countdownElement = document.getElementById('countdown');
+    var timeLeft = 120; // 2 minutes in seconds
+
+    function countdown() {
+        var minutes = Math.floor(timeLeft / 60);
+        var seconds = timeLeft % 60;
+
+        countdownElement.innerText = `${ minutes }:${ seconds < 10 ? '0' : '' }${ seconds }`;
+
+        if (timeLeft <= 0) {
+            clearInterval(countdownInterval);
+            countdownElement.innerText = 'Time\'s up!';
+        }
+
+        timeLeft--;
+    }
+
+    var countdownInterval = setInterval(countdown, 1000);
 </script>
