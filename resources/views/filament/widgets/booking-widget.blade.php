@@ -34,9 +34,9 @@
 
 
     @if ($guestCount)
-        <x-filament::button href="{{ $bookingUrl }}" tag="a" target="_new" class="w-full">
+        <x-mary-button no-wire-navigate :link="$bookingUrl" class="btn btn-primary text-white">
             Collect Guest's Credit Card
-        </x-filament::button>
+        </x-mary-button>
 
         <img src="{{ $qrCode }}" alt="QR Code" class="w-1/2 mx-auto">
     @endif

@@ -9,4 +9,5 @@ export default {
         './resources/views/livewire/**/*.blade.php',
         './vendor/filament/**/*.blade.php',
     ],
+    plugins: [require("daisyui")]
 }
