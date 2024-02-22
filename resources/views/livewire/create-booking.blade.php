@@ -17,10 +17,10 @@
                 <div id="countdown"></div>
             </div>
 
-            <x-mary-form wire:submit="save">
+            <x-mary-form wire:submit="save" class="w-full">
                 <div class="flex gap-2">
-                    <x-mary-input label="First Name" :label="false" placeholder="First Name"/>
-                    <x-mary-input label="Last Name" :label="false" placeholder="Last Name"/>
+                    <input type="text" placeholder="Last Name" class="input input-primary w-full max-w-xs"/>
+                    <input type="text" placeholder="First Name" class="input input-primary w-full max-w-xs"/>
                 </div>
                 <x-mary-input label="Phone Number" :label="false" placeholder="Cell Phone Number" class="w-full"/>
                 <div id="card-element"
@@ -33,8 +33,8 @@
         </div>
 
         <!-- Invoice -->
-        <div class="bg-white flex shadow rounded-xl mt-6 p-6 gap-4 items-center">
-            <x-mary-icon name="o-building-storefront" class="w-12 h-12 bg-orange-500 text-white p-2 rounded-full"/>
+        <div class="bg-white flex shadow rounded-xl mt-6 p-3 gap-4 items-center">
+            <x-mary-icon name="o-building-storefront" class="w-10 h-10 bg-orange-500 text-white p-2 rounded-full"/>
 
             <div class="flex flex-col gap-1">
                 <div class="font-semibold">{{ $booking->schedule->restaurant->restaurant_name }}</div>
