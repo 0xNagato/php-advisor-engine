@@ -2,6 +2,7 @@
 
 namespace App\Livewire;
 
+use App\Enums\BookingStatus;
 use App\Models\Booking;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Contracts\View\Factory;
@@ -16,12 +17,15 @@ use Stripe\Stripe;
 class CreateBooking extends Component
 {
     public Booking $booking;
+
     public bool $isLoading = false;
+
     public bool $paymentSuccess = false;
 
     public function mount(string $token): void
     {
         $this->booking = Booking::where('uuid', $token)->firstOrFail();
+        $this->booking->update(['status' => BookingStatus::GUEST_ON_PAGE]);
     }
 
     #[Layout('layouts.empty')]
@@ -47,10 +51,15 @@ class CreateBooking extends Component
             'amount' => $this->booking->total_fee,
             'currency' => 'usd',
             'customer' => $stripeCustomer->id,
-            'description' => 'Booking for ' . $this->booking->schedule->restaurant->name,
+            'description' => 'Booking for ' . $this->booking->schedule->restaurant->restaurant_name,
         ]);
 
-        ds($stripeCharge);
+        $this->booking->update([
+            'status' => BookingStatus::CONFIRMED,
+            'stripe_charge' => $stripeCharge->toArray(),
+            'stripe_charge_id' => $stripeCharge->id,
+        ]);
+
         $this->isLoading = false;
         $this->paymentSuccess = true;
     }

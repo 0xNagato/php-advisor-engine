@@ -32,6 +32,8 @@ class BookingWidget extends Widget
 
     public ?string $bookingUrl;
 
+    public ?Booking $booking;
+
     public static function canView(): bool
     {
         return auth()->user()->hasRole('concierge');
@@ -54,7 +56,12 @@ class BookingWidget extends Widget
 
     public function updatedGuestCount(): void
     {
-        $booking = Booking::create([
+
+    }
+
+    public function createBooking(): void
+    {
+        $this->booking = Booking::create([
             'schedule_id' => $this->selectedScheduleId,
             'guest_count' => $this->guestCount,
             'concierge_id' => auth()->user()->concierge->id,
@@ -62,7 +69,7 @@ class BookingWidget extends Widget
             'booking_at' => $this->selectedSchedule->start_time,
         ]);
 
-        $this->bookingUrl = route('bookings.create', ['token' => $booking->uuid]);
+        $this->bookingUrl = route('bookings.create', ['token' => $this->booking->uuid]);
 
         $this->qrCode = (new QRCode())->render($this->bookingUrl);
     }

@@ -75,7 +75,7 @@ class Restaurant extends Model
     /**
      * Scope a query to only include restaurants that are available at a specific time.
      *
-     * @param mixed $time
+     * @param  mixed  $time
      */
     public function scopeAvailableAt(Builder $query, string $time): Builder
     {
@@ -84,15 +84,14 @@ class Restaurant extends Model
         return $query->whereHas('schedules', function ($query) use ($time) {
             $query->availableAt($time);
         })->where("days_open->$dayOfWeek", 'open') // Check if the restaurant is open on that day
-        ->with(['schedules' => function ($query) use ($time) {
-            $query->availableAt($time);
-        }]);
+            ->with(['schedules' => function ($query) use ($time) {
+                $query->availableAt($time);
+            }]);
     }
 
     public function scopeOpenToday(Builder $query): Builder
     {
         $currentDay = strtolower(now()->format('l')); // Get the current day of the week in lowercase
-
 
         return $query->where("open_days->$currentDay", 'open'); // Check if the restaurant is open on that day
     }

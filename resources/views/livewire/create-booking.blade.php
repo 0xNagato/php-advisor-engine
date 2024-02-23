@@ -21,12 +21,15 @@
 
                 <div class="flex gap-2 w-full">
                     <input type="text" placeholder="First Name" class="input input-primary w-full max-w-xs text-sm"
-                           id="first-name-input"/>
+                           id="first-name-input" {{ $isLoading ? 'disabled="true"' : ''}}"/>
                     <input type="text" placeholder="Last Name" class="input input-primary w-full max-w-xs text-sm"
-                           id="last-name-input"/>
+                           id="last-name-input" {{ $isLoading ? 'disabled="true"' : ''}}"/>
                 </div>
 
-                <input type="text" placeholder="Cell Phone Number" class="input input-primary w-full text-sm"
+                <input type="text"
+                       placeholder="Cell Phone Number"
+                       {{ $isLoading ? 'disabled="true"' : ''}}
+                       class="input input-primary w-full text-sm"
                        id="phone-input"/>
 
                 <div id="card-element"
@@ -108,8 +111,6 @@
         }
 
         $wire.$call('completeBooking', form);
-
-        console.log({token, error});
     });
 
     // Countdown Timer

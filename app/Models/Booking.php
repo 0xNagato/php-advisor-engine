@@ -34,6 +34,8 @@ class Booking extends Model
         'payout_charity',
         'payout_concierge',
         'payout_platform',
+        'stripe_charge',
+        'stripe_charge_id',
     ];
 
     protected $appends = [
@@ -46,14 +48,18 @@ class Booking extends Model
     protected $casts = [
         'booking_at' => 'datetime',
         'status' => BookingStatus::class,
+        'stripe_charge' => 'array',
     ];
 
     protected static function boot(): void
     {
         parent::boot();
 
+        static::creating(function (Booking $booking) {
+            $booking->uuid = Str::uuid();
+        });
+
         static::saving(function (Booking $booking) {
-            $booking->uuid = (string)Str::uuid();
             $booking->total_fee = $booking->totalFee();
             $booking->payout_restaurant = $booking->schedule->restaurant->payout_restaurant;
             $booking->payout_charity = $booking->schedule->restaurant->payout_charity;
