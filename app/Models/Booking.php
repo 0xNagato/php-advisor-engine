@@ -79,6 +79,11 @@ class Booking extends Model
         return $total_fee * 100;
     }
 
+    public function scopeConfirmed($query)
+    {
+        return $query->where('status', BookingStatus::CONFIRMED);
+    }
+
     public function schedule(): BelongsTo
     {
         return $this->belongsTo(Schedule::class);
