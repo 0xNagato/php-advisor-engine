@@ -6,14 +6,15 @@
             const date = new Date(time);
             return date.toLocaleString('en-US', { hour: 'numeric', minute: 'numeric', hour12: true, timeZone: 'UTC' });
         }
-    }" class="flex items-center space-x-4 text-xs">
+    }" class="grid grid-cols-[24%_20%_auto] items-center">
 
 
-        <label x-text="formatTime(state.start_time)" class="font-semibold" for="{{ $getStatePath() }}">
-        </label>
-        <x-filament::input.checkbox x-model="state.is_available" id="{{ $getStatePath() }}" />
+        <label x-text="formatTime(state.start_time)" class="font-semibold" for="{{ $getStatePath() }}"></label>
+        <x-filament::input.checkbox x-model="state.is_available" id="{{ $getStatePath() }}"/>
+
+
         <x-filament::input.wrapper prefix-icon="heroicon-s-user-circle" class="flex-grow">
-            <x-filament::input type="number" x-model="state.available_tables" />
+            <x-filament::input type="number" x-model="state.available_tables"/>
         </x-filament::input.wrapper>
     </div>
 </x-dynamic-component>
