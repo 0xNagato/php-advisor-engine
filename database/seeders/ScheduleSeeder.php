@@ -18,7 +18,7 @@ class ScheduleSeeder extends Seeder
 
         $restaurants->each(function ($restaurant) {
             $startTime = Carbon::createFromTime(17, 0, 0); // 5pm
-            $endTime = Carbon::createFromTime(20, 30, 0); // 8:30pm
+            $endTime = Carbon::createFromTime(22, 30, 0); // 10:30pm
 
             for ($time = $startTime; $time->lessThan($endTime); $time->addMinutes(30)) {
                 Schedule::factory()->create([

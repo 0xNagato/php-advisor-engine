@@ -6,6 +6,11 @@
     display: none;
 }
 
+.inter-font {
+    font-family: "Inter", sans-serif;
+    font-style: normal;
+}
+
 .kaisei-opti-regular {
     font-family: "Kaisei Opti", serif;
     font-weight: 600;
@@ -120,9 +125,8 @@
     font-style: italic;
 }
 
-
 .wavy-background {
-    background-image: url('../../public/images/waves-8.svg');
+    background-image: url("../../public/images/waves-8.svg");
     background-repeat: repeat-x;
     background-position: bottom;
     background-color: white;

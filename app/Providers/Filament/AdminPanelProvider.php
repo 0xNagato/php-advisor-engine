@@ -6,7 +6,6 @@ use App\Livewire\CustomPersonalInfo;
 use App\Livewire\DayManager;
 use App\Livewire\ScheduleManager;
 use BezhanSalleh\FilamentShield\FilamentShieldPlugin;
-use Blade;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\DisableBladeIconComponents;
 use Filament\Http\Middleware\DispatchServingFilamentEvent;
@@ -20,6 +19,7 @@ use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
 use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\Session\Middleware\AuthenticateSession;
 use Illuminate\Session\Middleware\StartSession;
+use Illuminate\Support\Facades\Blade;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
 use Jeffgreco13\FilamentBreezy\BreezyCore;
 
@@ -47,8 +47,7 @@ class AdminPanelProvider extends PanelProvider
             ->discoverPages(in: app_path('Filament/Pages'), for: 'App\\Filament\\Pages')
             ->pages([])
             ->discoverWidgets(in: app_path('Filament/Widgets'), for: 'App\\Filament\\Widgets')
-            ->widgets([
-            ])
+            ->widgets([])
             ->middleware([
                 EncryptCookies::class,
                 AddQueuedCookiesToResponse::class,
@@ -71,6 +70,8 @@ class AdminPanelProvider extends PanelProvider
                     ->myProfileComponents(['personal_info' => CustomPersonalInfo::class, DayManager::class, ScheduleManager::class]),
             ])
             ->spa()
+            ->darkMode(false)
+            ->brandName('PRIMA')
             ->viteTheme('resources/css/filament/admin/theme.css');
 
         return $panel;

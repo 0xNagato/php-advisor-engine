@@ -4,8 +4,8 @@ namespace Database\Seeders;
 
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use App\Models\User;
-use Artisan;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\Artisan;
 use Spatie\Permission\Models\Role;
 
 class DatabaseSeeder extends Seeder
@@ -47,7 +47,7 @@ class DatabaseSeeder extends Seeder
             RestaurantSeeder::class,
             ScheduleSeeder::class,
             BookingSeeder::class,
-            ShieldSeeder::class,
+            // ShieldSeeder::class,
         ]);
 
         Artisan::call('shield:generate --all');
