@@ -4,6 +4,9 @@ namespace App\Livewire;
 
 use App\Enums\BookingStatus;
 use App\Models\Booking;
+use Illuminate\Contracts\Foundation\Application;
+use Illuminate\Contracts\View\Factory;
+use Illuminate\View\View;
 use Livewire\Component;
 
 class BookingStatusWidget extends Component
@@ -15,7 +18,7 @@ class BookingStatusWidget extends Component
         $this->booking = $booking;
     }
 
-    public function render()
+    public function render(): \Illuminate\Contracts\View\View|\Illuminate\Foundation\Application|Factory|View|Application
     {
         return view('livewire.booking-status-widget');
     }
@@ -23,23 +26,23 @@ class BookingStatusWidget extends Component
     public function status(): string
     {
         if ($this->booking->status === BookingStatus::PENDING) {
-            return 'Pending';
+            return 'The booking is currently pending. Please confirm it as soon as possible.';
         }
 
         if ($this->booking->status === BookingStatus::CONFIRMED) {
-            return 'Confirmed';
+            return 'The booking has been confirmed!';
         }
 
         if ($this->booking->status === BookingStatus::GUEST_ON_PAGE) {
-            return 'Guest on page';
+            return 'The guest is currently on the page. Please assist them with their booking.';
         }
 
         if ($this->booking->status === BookingStatus::COMPLETED) {
-            return 'Completed';
+            return 'The booking has been completed successfully.';
         }
 
         if ($this->booking->status === BookingStatus::CANCELLED) {
-            return 'Cancelled';
+            return 'The booking has been cancelled. Please check if there was a mistake.';
         }
     }
 
