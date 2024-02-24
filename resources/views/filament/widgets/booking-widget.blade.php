@@ -42,13 +42,22 @@
 
 
     @if ($booking)
+        <div class="text-base font-semibold">
+            Please let the guest scan the QR code to make a secure payment or collect the guest's card manually.
+        </div>
+
+        <img src="{{ $qrCode }}" alt="QR Code" class="w-1/2 mx-auto">
+
+
         <x-mary-button external :link="$bookingUrl" class="btn btn-primary text-white" icon="o-credit-card">
             Collect Guest's Credit Card
         </x-mary-button>
 
-        <img src="{{ $qrCode }}" alt="QR Code" class="w-1/2 mx-auto">
-
         <livewire:booking-status-widget :booking="$booking"/>
+
+        <x-mary-button wire:click="cancelBooking" class="btn bg-slate-300 border-none text-white">
+            Cancel Reservation
+        </x-mary-button>
     @endif
 
 </x-filament-widgets::widget>

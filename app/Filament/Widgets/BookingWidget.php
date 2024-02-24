@@ -8,6 +8,7 @@ use App\Models\Schedule;
 use chillerlan\QRCode\QRCode;
 use Filament\Widgets\Widget;
 use Illuminate\Database\Eloquent\Collection;
+use Livewire\Attributes\Session;
 
 class BookingWidget extends Widget
 {
@@ -27,11 +28,12 @@ class BookingWidget extends Widget
     public int|string|null $selectedScheduleId;
 
     public ?int $guestCount;
-
+    #[Session]
     public ?string $qrCode;
-
+    #[Session]
     public ?string $bookingUrl;
 
+    #[Session]
     public ?Booking $booking;
 
     public static function canView(): bool
@@ -69,8 +71,18 @@ class BookingWidget extends Widget
             'booking_at' => $this->selectedSchedule->start_time,
         ]);
 
+        // ds($this->booking);
+
         $this->bookingUrl = route('bookings.create', ['token' => $this->booking->uuid]);
 
         $this->qrCode = (new QRCode())->render($this->bookingUrl);
+    }
+
+    public function cancelBooking(): void
+    {
+        $this->booking->update(['status' => 'cancelled']);
+        $this->booking = null;
+        $this->qrCode = null;
+        $this->bookingUrl = null;
     }
 }
