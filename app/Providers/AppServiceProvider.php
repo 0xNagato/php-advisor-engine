@@ -22,7 +22,7 @@ class AppServiceProvider extends ServiceProvider
     {
         Filament::registerRenderHook(
             'panels::body.end',
-            fn(): string => <<<'HTML'
+            fn (): string => <<<'HTML'
                 <div x-data="" x-init="
                     if (!localStorage.getItem('sidebar_initialized')) {
                         localStorage.setItem('sidebar_initialized', true);
