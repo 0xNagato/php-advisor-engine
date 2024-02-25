@@ -60,7 +60,7 @@ class DayManager extends MyProfileComponent
         return $form
             ->schema($days->toArray())
             ->statePath('data')
-            ->columns(3); // Set the number of columns to 3
+            ->columns(3);
     }
 
     public function submit(): void

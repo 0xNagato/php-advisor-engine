@@ -13,7 +13,7 @@
         <x-filament::input.checkbox x-model="state.is_available" id="{{ $getStatePath() }}"/>
 
 
-        <x-filament::input.wrapper prefix-icon="heroicon-s-user-circle" class="flex-grow">
+        <x-filament::input.wrapper prefix-icon="fas-people-group" class="flex-grow">
             <x-filament::input type="number" x-model="state.available_tables"/>
         </x-filament::input.wrapper>
     </div>

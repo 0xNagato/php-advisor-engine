@@ -29,6 +29,7 @@
         "livewire/livewire": "^3.4",
         "livewire/volt": "^1.6",
         "lorisleiva/laravel-actions": "^2.7",
+        "owenvoke/blade-fontawesome": "^2.5",
         "pelmered/filament-money-field": "^1.0",
         "robsontenorio/mary": "^1.21",
         "spatie/laravel-data": "^4.0",
