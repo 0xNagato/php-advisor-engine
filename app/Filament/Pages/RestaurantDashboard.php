@@ -12,7 +12,7 @@ class RestaurantDashboard extends Dashboard
 {
     use HasFiltersForm;
 
-    protected static ?string $title = 'Restaurant Dashboard';
+    protected static ?string $title = 'Dashboard';
 
     protected static string $routePath = 'restaurant';
 

@@ -2,8 +2,6 @@
 
 namespace App\Providers\Filament;
 
-use App\Livewire\CustomPersonalInfo;
-use App\Livewire\DayManager;
 use App\Livewire\ScheduleManager;
 use BezhanSalleh\FilamentShield\FilamentShieldPlugin;
 use Filament\Http\Middleware\Authenticate;
@@ -21,7 +19,6 @@ use Illuminate\Session\Middleware\AuthenticateSession;
 use Illuminate\Session\Middleware\StartSession;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
-use Jeffgreco13\FilamentBreezy\BreezyCore;
 
 class AdminPanelProvider extends PanelProvider
 {
@@ -65,10 +62,10 @@ class AdminPanelProvider extends PanelProvider
             ])
             ->plugins([
                 FilamentShieldPlugin::make(),
-                BreezyCore::make()
-                    ->enableTwoFactorAuthentication()
-                    ->myProfile(shouldRegisterNavigation: true, hasAvatars: false)
-                    ->myProfileComponents(['personal_info' => CustomPersonalInfo::class, DayManager::class, ScheduleManager::class]),
+                // BreezyCore::make()
+                //     ->enableTwoFactorAuthentication()
+                //     ->myProfile(shouldRegisterNavigation: true, hasAvatars: false)
+                //     ->myProfileComponents(['personal_info' => CustomPersonalInfo::class, DayManager::class, ScheduleManager::class]),
             ])
             ->spa()
             ->darkMode(false)
