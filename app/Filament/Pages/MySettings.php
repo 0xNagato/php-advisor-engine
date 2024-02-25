@@ -11,4 +11,9 @@ class MySettings extends Page
     protected static string $view = 'filament.pages.my-settings';
 
     protected static ?int $navigationSort = 101;
+
+    public static function canAccess(): bool
+    {
+        return true;
+    }
 }
