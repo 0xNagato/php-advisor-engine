@@ -2,6 +2,7 @@
 
 namespace App\Filament\Pages;
 
+use App\Filament\Widgets\ScheduleManager;
 use Filament\Pages\Page;
 
 class MyRestaurant extends Page
@@ -20,7 +21,7 @@ class MyRestaurant extends Page
     public function getHeaderWidgets(): array
     {
         return [
-
+            ScheduleManager::make()
         ];
     }
 }

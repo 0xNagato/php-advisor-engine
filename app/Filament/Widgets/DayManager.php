@@ -1,21 +1,25 @@
 <?php
 
-namespace App\Livewire;
+namespace App\Filament\Widgets;
 
 use Filament\Forms\Components\Checkbox;
+use Filament\Forms\Concerns\InteractsWithForms;
+use Filament\Forms\Contracts\HasForms;
 use Filament\Forms\Form;
 use Filament\Notifications\Notification;
-use Jeffgreco13\FilamentBreezy\Livewire\MyProfileComponent;
+use Filament\Widgets\Widget;
 
-class DayManager extends MyProfileComponent
+class DayManager extends Widget implements HasForms
 {
-    public array $data;
+    use InteractsWithForms;
 
-    protected string $view = 'livewire.day-manager';
+    protected static string $view = 'filament.widgets.day-manager';
+    public array $data;
 
     public static function canView(): bool
     {
-        return auth()->user()?->hasRole('restaurant');
+        // return auth()->user()?->hasRole('restaurant');
+        return false;
     }
 
     public function mount(): void
@@ -54,7 +58,7 @@ class DayManager extends MyProfileComponent
             'friday',
             'saturday',
             'sunday',
-        ])->map(fn ($day) => Checkbox::make($day)
+        ])->map(fn($day) => Checkbox::make($day)
             ->label(ucfirst($day)));
 
         return $form
