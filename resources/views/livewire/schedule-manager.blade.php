@@ -10,7 +10,7 @@
 
             <div class="text-right">
                 <x-filament::button type="submit" form="submit" class="align-right">
-                    Save Times
+                    Save Profile
                 </x-filament::button>
             </div>
         </form>

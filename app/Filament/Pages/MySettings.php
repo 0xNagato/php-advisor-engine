@@ -2,6 +2,8 @@
 
 namespace App\Filament\Pages;
 
+use App\Livewire\PasswordSettings;
+use App\Livewire\ProfileSettings;
 use Filament\Pages\Page;
 
 class MySettings extends Page
@@ -11,4 +13,12 @@ class MySettings extends Page
     protected static string $view = 'filament.pages.my-settings';
 
     protected static ?int $navigationSort = 101;
+
+    public function getHeaderWidgets(): array
+    {
+        return [
+            ProfileSettings::make(),
+            PasswordSettings::make(),
+        ];
+    }
 }
