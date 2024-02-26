@@ -12,20 +12,24 @@
                     Enter your credit card information to confirm your reservation below.
                 </h2>
 
-                <div class="flex items-center gap-2 text-xl font-semibold">
+                <div class="flex items-center gap-1 text-xl font-semibold">
                     <div>Time Remaining:</div>
-                    <div id="countdown"></div>
+                    <div id="countdown">2:00</div>
                 </div>
 
 
                 <div class="flex w-full gap-2">
-                    <input type="text" placeholder="First Name" class="w-full max-w-xs text-sm input input-primary"
-                           id="first-name-input" {{ $isLoading ? 'disabled="true"' : '' }}" />
-                    <input type="text" placeholder="Last Name" class="w-full max-w-xs text-sm input input-primary"
-                           id="last-name-input" {{ $isLoading ? 'disabled="true"' : '' }}" />
+                    <input
+                        required
+                        type="text" placeholder="First Name" class="w-full max-w-xs text-sm input input-primary"
+                        id="first-name-input" {{ $isLoading ? 'disabled="true"' : '' }}" />
+                    <input
+                        required
+                        type="text" placeholder="Last Name" class="w-full max-w-xs text-sm input input-primary"
+                        id="last-name-input" {{ $isLoading ? 'disabled="true"' : '' }}" />
                 </div>
 
-                <input type="text" placeholder="Cell Phone Number" {{ $isLoading ? 'disabled="true"' : '' }}
+                <input required type="text" placeholder="Cell Phone Number" {{ $isLoading ? 'disabled="true"' : '' }}
                 class="w-full text-sm input input-primary" id="phone-input"/>
 
                 <div id="card-element" class="flex flex-col justify-center w-full input input-primary">
