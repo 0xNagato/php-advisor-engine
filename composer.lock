@@ -935,28 +935,28 @@
         },
         {
             "name": "anourvalar/eloquent-serialize",
-            "version": "1.2.17",
+            "version": "1.2.18",
             "source": {
                 "type": "git",
                 "url": "https://github.com/AnourValar/eloquent-serialize.git",
-                "reference": "1fcfdd5f41a0d2e7c8cf1d37e7227357bb827aef"
+                "reference": "ea37278f305215bb763d8e901cd8fd448462a8af"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/AnourValar/eloquent-serialize/zipball/1fcfdd5f41a0d2e7c8cf1d37e7227357bb827aef",
-                "reference": "1fcfdd5f41a0d2e7c8cf1d37e7227357bb827aef",
+                "url": "https://api.github.com/repos/AnourValar/eloquent-serialize/zipball/ea37278f305215bb763d8e901cd8fd448462a8af",
+                "reference": "ea37278f305215bb763d8e901cd8fd448462a8af",
                 "shasum": ""
             },
             "require": {
-                "laravel/framework": "^6.0|^7.0|^8.0|^9.0|^10.0",
+                "laravel/framework": "^6.0|^7.0|^8.0|^9.0|^10.0|^11.0",
                 "php": "^7.1|^8.0"
             },
             "require-dev": {
                 "friendsofphp/php-cs-fixer": "^3.26",
                 "laravel/legacy-factories": "^1.1",
-                "orchestra/testbench": "~3.6.0|~3.7.0|~3.8.0|^4.0|^5.0|^6.0|^7.0|^8.0",
+                "orchestra/testbench": "~3.6.0|~3.7.0|~3.8.0|^4.0|^5.0|^6.0|^7.0|^8.0|^9.0",
                 "phpstan/phpstan": "^1.10",
-                "phpunit/phpunit": "^9.5",
+                "phpunit/phpunit": "^10.5",
                 "psalm/plugin-laravel": "^2.8",
                 "squizlabs/php_codesniffer": "^3.7"
             },
@@ -995,9 +995,9 @@
             ],
             "support": {
                 "issues": "https://github.com/AnourValar/eloquent-serialize/issues",
-                "source": "https://github.com/AnourValar/eloquent-serialize/tree/1.2.17"
+                "source": "https://github.com/AnourValar/eloquent-serialize/tree/1.2.18"
             },
-            "time": "2023-12-06T15:54:01+00:00"
+            "time": "2024-02-25T11:04:10+00:00"
         },
         {
             "name": "ariaieboy/filament-currency",
@@ -2567,7 +2567,7 @@
         },
         {
             "name": "filament/actions",
-            "version": "v3.2.36",
+            "version": "v3.2.37",
             "source": {
                 "type": "git",
                 "url": "https://github.com/filamentphp/actions.git",
@@ -2620,7 +2620,7 @@
         },
         {
             "name": "filament/filament",
-            "version": "v3.2.36",
+            "version": "v3.2.37",
             "source": {
                 "type": "git",
                 "url": "https://github.com/filamentphp/panels.git",
@@ -2685,7 +2685,7 @@
         },
         {
             "name": "filament/forms",
-            "version": "v3.2.36",
+            "version": "v3.2.37",
             "source": {
                 "type": "git",
                 "url": "https://github.com/filamentphp/forms.git",
@@ -2741,7 +2741,7 @@
         },
         {
             "name": "filament/infolists",
-            "version": "v3.2.36",
+            "version": "v3.2.37",
             "source": {
                 "type": "git",
                 "url": "https://github.com/filamentphp/infolists.git",
@@ -2792,7 +2792,7 @@
         },
         {
             "name": "filament/notifications",
-            "version": "v3.2.36",
+            "version": "v3.2.37",
             "source": {
                 "type": "git",
                 "url": "https://github.com/filamentphp/notifications.git",
@@ -2844,16 +2844,16 @@
         },
         {
             "name": "filament/support",
-            "version": "v3.2.36",
+            "version": "v3.2.37",
             "source": {
                 "type": "git",
                 "url": "https://github.com/filamentphp/support.git",
-                "reference": "e2d2a0cf90098822c6262914dc809eab48e28759"
+                "reference": "b9283eca3b999c35afc2e3cb0d69f6acb77e011a"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/filamentphp/support/zipball/e2d2a0cf90098822c6262914dc809eab48e28759",
-                "reference": "e2d2a0cf90098822c6262914dc809eab48e28759",
+                "url": "https://api.github.com/repos/filamentphp/support/zipball/b9283eca3b999c35afc2e3cb0d69f6acb77e011a",
+                "reference": "b9283eca3b999c35afc2e3cb0d69f6acb77e011a",
                 "shasum": ""
             },
             "require": {
@@ -2897,11 +2897,11 @@
                 "issues": "https://github.com/filamentphp/filament/issues",
                 "source": "https://github.com/filamentphp/filament"
             },
-            "time": "2024-02-23T22:26:32+00:00"
+            "time": "2024-02-24T06:52:20+00:00"
         },
         {
             "name": "filament/tables",
-            "version": "v3.2.36",
+            "version": "v3.2.37",
             "source": {
                 "type": "git",
                 "url": "https://github.com/filamentphp/tables.git",
@@ -2954,7 +2954,7 @@
         },
         {
             "name": "filament/widgets",
-            "version": "v3.2.36",
+            "version": "v3.2.37",
             "source": {
                 "type": "git",
                 "url": "https://github.com/filamentphp/widgets.git",
@@ -3069,16 +3069,16 @@
         },
         {
             "name": "giggsey/libphonenumber-for-php",
-            "version": "8.13.30",
+            "version": "8.13.31",
             "source": {
                 "type": "git",
                 "url": "https://github.com/giggsey/libphonenumber-for-php.git",
-                "reference": "e09260a4a470b3737877c0f04f964e8a4938ebbd"
+                "reference": "a4934bddda4672d12f21728e08bd575913bdc310"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/giggsey/libphonenumber-for-php/zipball/e09260a4a470b3737877c0f04f964e8a4938ebbd",
-                "reference": "e09260a4a470b3737877c0f04f964e8a4938ebbd",
+                "url": "https://api.github.com/repos/giggsey/libphonenumber-for-php/zipball/a4934bddda4672d12f21728e08bd575913bdc310",
+                "reference": "a4934bddda4672d12f21728e08bd575913bdc310",
                 "shasum": ""
             },
             "require": {
@@ -3137,7 +3137,7 @@
                 "issues": "https://github.com/giggsey/libphonenumber-for-php/issues",
                 "source": "https://github.com/giggsey/libphonenumber-for-php"
             },
-            "time": "2024-02-09T12:16:23+00:00"
+            "time": "2024-02-26T08:31:45+00:00"
         },
         {
             "name": "giggsey/locale",
@@ -4056,16 +4056,16 @@
         },
         {
             "name": "joshembling/laragenie",
-            "version": "v1.0.63",
+            "version": "v1.1.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/joshembling/laragenie.git",
-                "reference": "7958988359c5c740841e64f00fb6a30e88e55b84"
+                "reference": "74f4d9f073f0d01b0b6585a16ffddba4c88f47d4"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/joshembling/laragenie/zipball/7958988359c5c740841e64f00fb6a30e88e55b84",
-                "reference": "7958988359c5c740841e64f00fb6a30e88e55b84",
+                "url": "https://api.github.com/repos/joshembling/laragenie/zipball/74f4d9f073f0d01b0b6585a16ffddba4c88f47d4",
+                "reference": "74f4d9f073f0d01b0b6585a16ffddba4c88f47d4",
                 "shasum": ""
             },
             "require": {
@@ -4074,7 +4074,7 @@
                 "openai-php/client": "^0.8.0",
                 "openai-php/laravel": "^0.8.0",
                 "php": "^8.1",
-                "probots-io/pinecone-php": "^0.0.3",
+                "probots-io/pinecone-php": "^1.0.1",
                 "spatie/laravel-package-tools": "^1.14.0"
             },
             "require-dev": {
@@ -4128,9 +4128,9 @@
             ],
             "support": {
                 "issues": "https://github.com/joshembling/laragenie/issues",
-                "source": "https://github.com/joshembling/laragenie/tree/v1.0.63"
+                "source": "https://github.com/joshembling/laragenie/tree/v1.1.0"
             },
-            "time": "2024-02-17T15:07:47+00:00"
+            "time": "2024-02-25T14:16:10+00:00"
         },
         {
             "name": "kelunik/certificate",
@@ -7835,21 +7835,21 @@
         },
         {
             "name": "probots-io/pinecone-php",
-            "version": "0.0.3",
+            "version": "1.0.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/probots-io/pinecone-php.git",
-                "reference": "cc469cbb66cf77feb0660db8538f6a80142606d1"
+                "reference": "94fc6ec2e7f8ae4fbd80a7abb667e5c4e6000136"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/probots-io/pinecone-php/zipball/cc469cbb66cf77feb0660db8538f6a80142606d1",
-                "reference": "cc469cbb66cf77feb0660db8538f6a80142606d1",
+                "url": "https://api.github.com/repos/probots-io/pinecone-php/zipball/94fc6ec2e7f8ae4fbd80a7abb667e5c4e6000136",
+                "reference": "94fc6ec2e7f8ae4fbd80a7abb667e5c4e6000136",
                 "shasum": ""
             },
             "require": {
-                "php": "^8.1",
-                "sammyjo20/saloon": "^2.5"
+                "php": "^8.2",
+                "saloonphp/saloon": "^3.6"
             },
             "require-dev": {
                 "pestphp/pest": "^2.4",
@@ -7887,9 +7887,9 @@
             ],
             "support": {
                 "issues": "https://github.com/probots-io/pinecone-php/issues",
-                "source": "https://github.com/probots-io/pinecone-php/tree/0.0.3"
+                "source": "https://github.com/probots-io/pinecone-php/tree/1.0.1"
             },
-            "time": "2023-04-19T15:15:22+00:00"
+            "time": "2024-02-21T16:15:43+00:00"
         },
         {
             "name": "propaganistas/laravel-phone",
@@ -8955,37 +8955,44 @@
             "time": "2023-02-14T16:54:54+00:00"
         },
         {
-            "name": "sammyjo20/saloon",
-            "version": "v2.12.1",
+            "name": "saloonphp/saloon",
+            "version": "v3.6.4",
             "source": {
                 "type": "git",
                 "url": "https://github.com/saloonphp/saloon.git",
-                "reference": "b36bb7a451539536a4d36b96444175ab64fb3b5d"
+                "reference": "e74c30ae495a5b01f32103c37628363aca2e2938"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/saloonphp/saloon/zipball/b36bb7a451539536a4d36b96444175ab64fb3b5d",
-                "reference": "b36bb7a451539536a4d36b96444175ab64fb3b5d",
+                "url": "https://api.github.com/repos/saloonphp/saloon/zipball/e74c30ae495a5b01f32103c37628363aca2e2938",
+                "reference": "e74c30ae495a5b01f32103c37628363aca2e2938",
                 "shasum": ""
             },
             "require": {
-                "guzzlehttp/guzzle": "^7.5",
+                "guzzlehttp/guzzle": "^7.6",
                 "guzzlehttp/promises": "^1.5 || ^2.0",
+                "guzzlehttp/psr7": "^2.0",
                 "php": "^8.1",
+                "psr/http-factory": "^1.0",
                 "psr/http-message": "^1.1 || ^2.0"
+            },
+            "conflict": {
+                "sammyjo20/saloon": "*"
             },
             "require-dev": {
                 "ext-simplexml": "*",
                 "friendsofphp/php-cs-fixer": "^3.5",
                 "illuminate/collections": "^9.39 || ^10.0",
                 "league/flysystem": "^3.0",
-                "pestphp/pest": "^2.2.3",
+                "pestphp/pest": "^2.6",
                 "phpstan/phpstan": "^1.9",
+                "saloonphp/xml-wrangler": "^1.1",
                 "spatie/ray": "^1.33",
                 "symfony/dom-crawler": "^6.0"
             },
             "suggest": {
                 "illuminate/collections": "Required for the response collect() method.",
+                "saloonphp/xml-wrangler": "Required for the response xmlReader() method.",
                 "symfony/dom-crawler": "Required for the response dom() method."
             },
             "type": "library",
@@ -9016,20 +9023,15 @@
             ],
             "support": {
                 "issues": "https://github.com/saloonphp/saloon/issues",
-                "source": "https://github.com/saloonphp/saloon/tree/v2.12.1"
+                "source": "https://github.com/saloonphp/saloon/tree/v3.6.4"
             },
             "funding": [
                 {
                     "url": "https://github.com/sammyjo20",
                     "type": "github"
-                },
-                {
-                    "url": "https://ko-fi.com/sammyjo20",
-                    "type": "ko_fi"
                 }
             ],
-            "abandoned": "saloonphp/saloon",
-            "time": "2023-11-12T11:05:47+00:00"
+            "time": "2024-02-25T14:17:16+00:00"
         },
         {
             "name": "spatie/color",
@@ -12805,16 +12807,16 @@
         },
         {
             "name": "ysfkaya/filament-phone-input",
-            "version": "v2.3.2",
+            "version": "v2.3.3",
             "source": {
                 "type": "git",
                 "url": "https://github.com/ysfkaya/filament-phone-input.git",
-                "reference": "ae609d9712a8cbafb7e2f3daca842b35e6944f17"
+                "reference": "c6c93f73c4352d3dd13cda13566b8b031c61f239"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/ysfkaya/filament-phone-input/zipball/ae609d9712a8cbafb7e2f3daca842b35e6944f17",
-                "reference": "ae609d9712a8cbafb7e2f3daca842b35e6944f17",
+                "url": "https://api.github.com/repos/ysfkaya/filament-phone-input/zipball/c6c93f73c4352d3dd13cda13566b8b031c61f239",
+                "reference": "c6c93f73c4352d3dd13cda13566b8b031c61f239",
                 "shasum": ""
             },
             "require": {
@@ -12863,9 +12865,9 @@
             ],
             "support": {
                 "issues": "https://github.com/ysfkaya/filament-phone-input/issues",
-                "source": "https://github.com/ysfkaya/filament-phone-input/tree/v2.3.2"
+                "source": "https://github.com/ysfkaya/filament-phone-input/tree/v2.3.3"
             },
-            "time": "2024-02-03T20:32:23+00:00"
+            "time": "2024-02-24T14:06:33+00:00"
         }
     ],
     "packages-dev": [
@@ -13644,22 +13646,22 @@
         },
         {
             "name": "laradumps/laradumps",
-            "version": "v2.4.0",
+            "version": "v2.5.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/laradumps/laradumps.git",
-                "reference": "4c3d0b415652cbb4df9b5b5145e4573f7d9d572f"
+                "reference": "174521c6ae839c2b13c85ce4be8cae692ab21f26"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/laradumps/laradumps/zipball/4c3d0b415652cbb4df9b5b5145e4573f7d9d572f",
-                "reference": "4c3d0b415652cbb4df9b5b5145e4573f7d9d572f",
+                "url": "https://api.github.com/repos/laradumps/laradumps/zipball/174521c6ae839c2b13c85ce4be8cae692ab21f26",
+                "reference": "174521c6ae839c2b13c85ce4be8cae692ab21f26",
                 "shasum": ""
             },
             "require": {
                 "illuminate/mail": "^10.0|^11.0",
                 "illuminate/support": "^10.0|^11.0",
-                "laradumps/laradumps-core": "^1.1.2",
+                "laradumps/laradumps-core": "^1.2",
                 "nunomaduro/termwind": "^1.15.1|^2.0.0",
                 "php": "^8.1"
             },
@@ -13703,7 +13705,7 @@
             "homepage": "https://github.com/laradumps/laradumps",
             "support": {
                 "issues": "https://github.com/laradumps/laradumps/issues",
-                "source": "https://github.com/laradumps/laradumps/tree/v2.4.0"
+                "source": "https://github.com/laradumps/laradumps/tree/v2.5.0"
             },
             "funding": [
                 {
@@ -13711,20 +13713,20 @@
                     "type": "github"
                 }
             ],
-            "time": "2024-02-03T14:18:16+00:00"
+            "time": "2024-02-24T13:39:44+00:00"
         },
         {
             "name": "laradumps/laradumps-core",
-            "version": "v1.1.3",
+            "version": "v1.2.4",
             "source": {
                 "type": "git",
                 "url": "https://github.com/laradumps/laradumps-core.git",
-                "reference": "e976cdf04473ff3c69f8e82632209915893bca77"
+                "reference": "96f4f0cfe75ff0293d4fbcc455d7695431b4fb69"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/laradumps/laradumps-core/zipball/e976cdf04473ff3c69f8e82632209915893bca77",
-                "reference": "e976cdf04473ff3c69f8e82632209915893bca77",
+                "url": "https://api.github.com/repos/laradumps/laradumps-core/zipball/96f4f0cfe75ff0293d4fbcc455d7695431b4fb69",
+                "reference": "96f4f0cfe75ff0293d4fbcc455d7695431b4fb69",
                 "shasum": ""
             },
             "require": {
@@ -13732,10 +13734,11 @@
                 "nunomaduro/termwind": "^1.15|^2.0",
                 "php": "^8.1",
                 "ramsey/uuid": "^4.7.5",
-                "symfony/console": "^6.4|^7.0",
-                "symfony/finder": "^6.4|^7.0",
-                "symfony/process": "^6.4|^7.0",
-                "symfony/var-dumper": "^6.4|^7.0",
+                "spatie/backtrace": "^1.5",
+                "symfony/console": "^5.4|^6.4|^7.0",
+                "symfony/finder": "^5.4|^6.4|^7.0",
+                "symfony/process": "^5.4|^6.4|^7.0",
+                "symfony/var-dumper": "^5.4|^6.4|^7.0",
                 "vlucas/phpdotenv": "^5.6"
             },
             "require-dev": {
@@ -13771,7 +13774,7 @@
             "homepage": "https://github.com/laradumps/laradumps-core",
             "support": {
                 "issues": "https://github.com/laradumps/laradumps-core/issues",
-                "source": "https://github.com/laradumps/laradumps-core/tree/v1.1.3"
+                "source": "https://github.com/laradumps/laradumps-core/tree/v1.2.4"
             },
             "funding": [
                 {
@@ -13779,7 +13782,7 @@
                     "type": "github"
                 }
             ],
-            "time": "2024-02-11T18:12:43+00:00"
+            "time": "2024-02-25T17:46:35+00:00"
         },
         {
             "name": "laravel/pint",

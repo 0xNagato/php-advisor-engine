@@ -4,6 +4,7 @@ namespace App\Providers\Filament;
 
 use App\Livewire\ScheduleManager;
 use BezhanSalleh\FilamentShield\FilamentShieldPlugin;
+use Exception;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\DisableBladeIconComponents;
 use Filament\Http\Middleware\DispatchServingFilamentEvent;
@@ -27,6 +28,9 @@ class AdminPanelProvider extends PanelProvider
         ScheduleManager::setSort(10);
     }
 
+    /**
+     * @throws Exception
+     */
     public function panel(Panel $panel): Panel
     {
         $panel
