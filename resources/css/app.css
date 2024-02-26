@@ -11,6 +11,11 @@
     font-style: normal;
 }
 
+.sanomat-font {
+    font-family: "Sanomat Web Regular Regular", serif;
+    font-style: normal;
+}
+
 .kaisei-opti-regular {
     font-family: "Kaisei Opti", serif;
     font-weight: 600;

@@ -6,7 +6,7 @@
 
         @if (!$paymentSuccess)
             <div class="flex flex-col items-center gap-3" id="form">
-                <h1 class="text-3xl text-center kaisei-opti-regular">Secure Your Reservation</h1>
+                <h1 class="text-3xl text-center sanomat-font font-semibold">Secure Your Reservation</h1>
 
                 <h2 class="text-base text-center">
                     Enter your credit card information to confirm your reservation below.
@@ -20,13 +20,13 @@
 
                 <div class="flex w-full gap-2">
                     <input type="text" placeholder="First Name" class="w-full max-w-xs text-sm input input-primary"
-                        id="first-name-input" {{ $isLoading ? 'disabled="true"' : '' }}" />
+                           id="first-name-input" {{ $isLoading ? 'disabled="true"' : '' }}" />
                     <input type="text" placeholder="Last Name" class="w-full max-w-xs text-sm input input-primary"
-                        id="last-name-input" {{ $isLoading ? 'disabled="true"' : '' }}" />
+                           id="last-name-input" {{ $isLoading ? 'disabled="true"' : '' }}" />
                 </div>
 
                 <input type="text" placeholder="Cell Phone Number" {{ $isLoading ? 'disabled="true"' : '' }}
-                    class="w-full text-sm input input-primary" id="phone-input" />
+                class="w-full text-sm input input-primary" id="phone-input"/>
 
                 <div id="card-element" class="flex flex-col justify-center w-full input input-primary">
                     <!-- A Stripe Element will be inserted here. -->
@@ -50,7 +50,7 @@
 
         <!-- Invoice -->
         <div class="flex items-center w-full gap-4 p-3 mt-4 bg-white shadow rounded-xl">
-            <x-mary-icon name="o-building-storefront" class="w-10 h-10 p-2 text-white bg-orange-500 rounded-full" />
+            <x-mary-icon name="o-building-storefront" class="w-10 h-10 p-2 text-white bg-orange-500 rounded-full"/>
 
             <div class="flex flex-col gap-1">
                 <div class="font-semibold">{{ $booking->schedule->restaurant->restaurant_name }}</div>
@@ -75,57 +75,57 @@
 @endpush
 
 @script
-    <script>
-        const stripe = Stripe('{{ config('cashier.key') }}');
-        const elements = stripe.elements();
-        const card = elements.create('card');
-        card.mount('#card-element');
+<script>
+    const stripe = Stripe('{{ config('cashier.key') }}');
+    const elements = stripe.elements();
+    const card = elements.create('card');
+    card.mount('#card-element');
 
-        const submitButton = document.getElementById('submit-button');
-        const firstNameInput = document.getElementById('first-name-input');
-        const lastNameInput = document.getElementById('last-name-input');
-        const phoneInput = document.getElementById('phone-input');
+    const submitButton = document.getElementById('submit-button');
+    const firstNameInput = document.getElementById('first-name-input');
+    const lastNameInput = document.getElementById('last-name-input');
+    const phoneInput = document.getElementById('phone-input');
 
-        submitButton.addEventListener('click', async (e) => {
-            $wire.$set('isLoading', true);
-            const {
-                token,
-                error
-            } = await stripe.createToken(card)
+    submitButton.addEventListener('click', async (e) => {
+        $wire.$set('isLoading', true);
+        const {
+            token,
+            error
+        } = await stripe.createToken(card)
 
-            if (error) {
-                $wire.$set('isLoading', false);
-                return alert(error.message);
-            }
-
-            const form = {
-                token,
-                firstName: firstNameInput.value,
-                lastName: lastNameInput.value,
-                phone: phoneInput.value
-            }
-
-            $wire.$call('completeBooking', form);
-        });
-
-        // Countdown Timer
-        const countdownElement = document.getElementById('countdown');
-        let timeLeft = 120; // 2 minutes in seconds
-
-        function countdown() {
-            const minutes = Math.floor(timeLeft / 60);
-            const seconds = timeLeft % 60;
-
-            countdownElement.innerText = `${ minutes }:${ seconds < 10 ? '0' : '' }${ seconds }`;
-
-            if (timeLeft <= 0) {
-                clearInterval(countdownInterval);
-                countdownElement.innerText = 'Time\'s up!';
-            }
-
-            timeLeft--;
+        if (error) {
+            $wire.$set('isLoading', false);
+            return alert(error.message);
         }
 
-        const countdownInterval = setInterval(countdown, 1000);
-    </script>
+        const form = {
+            token,
+            firstName: firstNameInput.value,
+            lastName: lastNameInput.value,
+            phone: phoneInput.value
+        }
+
+        $wire.$call('completeBooking', form);
+    });
+
+    // Countdown Timer
+    const countdownElement = document.getElementById('countdown');
+    let timeLeft = 120; // 2 minutes in seconds
+
+    function countdown() {
+        const minutes = Math.floor(timeLeft / 60);
+        const seconds = timeLeft % 60;
+
+        countdownElement.innerText = `${ minutes }:${ seconds < 10 ? '0' : '' }${ seconds }`;
+
+        if (timeLeft <= 0) {
+            clearInterval(countdownInterval);
+            countdownElement.innerText = 'Time\'s up!';
+        }
+
+        timeLeft--;
+    }
+
+    const countdownInterval = setInterval(countdown, 1000);
+</script>
 @endscript

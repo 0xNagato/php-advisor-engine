@@ -19,7 +19,10 @@
         rel="stylesheet">
 
     <link rel="preconnect" href="https://fonts.bunny.net">
-    <link href="https://fonts.bunny.net/css?family=inter:400,500,600,700&display=swap" rel="stylesheet" />
+    <link href="https://fonts.bunny.net/css?family=inter:400,500,600,700&display=swap" rel="stylesheet"/>
+
+    <link href="https://db.onlinewebfonts.com/c/5b381abe79163202b03f53ed0eab3065?family=Sanomat+Web+Regular+Regular"
+          rel="stylesheet">
 
 
     <!-- Styles -->
@@ -27,8 +30,8 @@
 </head>
 
 <body>
-    {{ $slot }}
-    @livewireScripts
+{{ $slot }}
+@livewireScripts
 </body>
 
 </html>

@@ -102,11 +102,12 @@ class ScheduleManager extends Widget implements HasForms
         $restaurant->open_days = $days;
         $restaurant->save();
 
-        collect($this->data['schedules'])->map(fn(array $data) => $data['schedule'])
+        collect($this->data['schedules'])
+            ->map(fn(array $data) => $data['schedule'])
             ->each(fn(array $schedule) => Schedule::find($schedule['id'])
                 ?->update(['is_available' => $schedule['is_available'], 'available_tables' => $schedule['available_tables']])
             );
-        
+
         Notification::make()
             ->title('Schedule updated successfully')
             ->success()
