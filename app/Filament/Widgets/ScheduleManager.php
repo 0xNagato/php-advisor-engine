@@ -17,7 +17,9 @@ class ScheduleManager extends Widget implements HasForms
     use InteractsWithForms;
 
     protected static string $view = 'filament.widgets.schedule-manager';
+
     public array $data;
+
     protected string|int|array $columnSpan = 'full';
 
     public static function canView(): bool
@@ -44,7 +46,7 @@ class ScheduleManager extends Widget implements HasForms
         ];
 
         $days_closed = collect($days)
-            ->filter(fn($day) => $day === 'closed')
+            ->filter(fn ($day) => $day === 'closed')
             ->keys()
             ->toArray();
 
@@ -103,8 +105,8 @@ class ScheduleManager extends Widget implements HasForms
         $restaurant->save();
 
         collect($this->data['schedules'])
-            ->map(fn(array $data) => $data['schedule'])
-            ->each(fn(array $schedule) => Schedule::find($schedule['id'])
+            ->map(fn (array $data) => $data['schedule'])
+            ->each(fn (array $schedule) => Schedule::find($schedule['id'])
                 ?->update(['is_available' => $schedule['is_available'], 'available_tables' => $schedule['available_tables']])
             );
 
