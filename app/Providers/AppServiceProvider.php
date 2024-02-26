@@ -3,7 +3,10 @@
 namespace App\Providers;
 
 use Filament\Facades\Filament;
+use Filament\Notifications\Notification;
+use Filament\Pages\Page;
 use Illuminate\Support\ServiceProvider;
+use Illuminate\Validation\ValidationException;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -31,5 +34,12 @@ class AppServiceProvider extends ServiceProvider
                 "></div>
             HTML
         );
+
+        Page::$reportValidationErrorUsing = function (ValidationException $exception) {
+            Notification::make()
+                ->title($exception->getMessage())
+                ->danger()
+                ->send();
+        };
     }
 }
