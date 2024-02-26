@@ -52,15 +52,13 @@ class ScheduleManager extends MyProfileComponent
         $this->validate();
 
         $schedules = collect($this->data['schedules'])
-            ->map(function ($schedule) {
-                return [
-                    'restaurant_id' => auth()->user()->restaurant->id,
-                    'start_time' => $schedule['schedule']['start_time'],
-                    'end_time' => $schedule['schedule']['end_time'],
-                    'is_available' => $schedule['schedule']['is_available'],
-                    'available_tables' => $schedule['schedule']['available_tables'],
-                ];
-            });
+            ->map(fn ($schedule) => [
+                'restaurant_id' => auth()->user()->restaurant->id,
+                'start_time' => $schedule['schedule']['start_time'],
+                'end_time' => $schedule['schedule']['end_time'],
+                'is_available' => $schedule['schedule']['is_available'],
+                'available_tables' => $schedule['schedule']['available_tables'],
+            ]);
 
         foreach ($schedules as $schedule) {
             Schedule::updateOrCreate(

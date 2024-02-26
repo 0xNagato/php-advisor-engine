@@ -28,8 +28,10 @@ class BookingWidget extends Widget
     public int|string|null $selectedScheduleId;
 
     public ?int $guestCount;
+
     #[Session]
     public ?string $qrCode;
+
     #[Session]
     public ?string $bookingUrl;
 
