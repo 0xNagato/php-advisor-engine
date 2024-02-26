@@ -16,4 +16,11 @@ class MyRestaurant extends Page
     {
         return auth()->user()->hasRole('restaurant');
     }
+
+    public function getHeaderWidgets(): array
+    {
+        return [
+
+        ];
+    }
 }
