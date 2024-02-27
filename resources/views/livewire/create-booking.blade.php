@@ -74,9 +74,9 @@
 </div>
 
 
-@push('scripts')
+@pushOnce('scripts')
     <script src="https://js.stripe.com/v3/"></script>
-@endpush
+@endpushonce
 
 @script
 <script>

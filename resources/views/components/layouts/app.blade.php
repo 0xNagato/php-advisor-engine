@@ -1,30 +1,45 @@
 <!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
-    <head>
-        <meta charset="utf-8" />
+<head>
+    <meta charset="utf-8"/>
 
-        <meta name="application-name" content="{{ config('app.name') }}" />
-        <meta name="csrf-token" content="{{ csrf_token() }}" />
-        <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="application-name" content="{{ config('app.name') }}"/>
+    <meta name="csrf-token" content="{{ csrf_token() }}"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+    <link rel="manifest" href="/site.webmanifest">
 
-        <title>{{ config('app.name') }}</title>
+    <title>{{ config('app.name') }}</title>
 
-        <style>
-            [x-cloak] {
-                display: none !important;
-            }
-        </style>
+    <style>
+        [x-cloak] {
+            display: none !important;
+        }
+    </style>
 
-        @filamentStyles
-        @vite('resources/css/app.css')
-    </head>
+    <link rel="preconnect" href="https://fonts.bunny.net">
+    <link href="https://fonts.bunny.net/css?family=inter:400,500,600,700&display=swap" rel="stylesheet"/>
 
-    <body class="antialiased">
-        {{ $slot }}
+    <link
+        href="https://db.onlinewebfonts.com/c/5b381abe79163202b03f53ed0eab3065?family=Sanomat+Web+Regular+Regular"
+        rel="stylesheet">
 
-        @livewire('notifications')
+    <link href="https://db.onlinewebfonts.com/c/e48e18fc2422049eaba9fc43548b664b?family=Melete+Bold" rel="stylesheet"
+          type="text/css"/>
 
-        @filamentScripts
-        @vite('resources/js/app.js')
-    </body>
+    @filamentStyles
+    @vite('resources/css/app.css')
+
+    @stack('scripts')
+</head>
+
+<body class="antialiased">
+{{ $slot }}
+
+@livewire('notifications')
+@filamentScripts
+@vite('resources/js/app.js')
+</body>
 </html>
