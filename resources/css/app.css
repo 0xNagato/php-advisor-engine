@@ -11,6 +11,16 @@
     font-style: normal;
 }
 
+.melete-font-bold {
+    font-family: "Melete Bold", sans-serif;
+    font-style: normal;
+}
+
+.melete-font {
+    font-family: "Melete", sans-serif;
+    font-style: normal;
+}
+
 .sanomat-font {
     font-family: "Sanomat Web Regular Regular", serif;
     font-style: normal;

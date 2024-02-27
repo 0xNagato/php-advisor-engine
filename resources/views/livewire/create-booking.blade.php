@@ -1,5 +1,6 @@
 <div class="flex flex-col justify-center min-h-screen p-6 antialiased wavy-background">
-    <div class="flex text-xl font-extrabold tracking-tight text-black uppercase inter-font">
+    <div
+        class="flex text-xl font-extrabold tracking-tight text-black uppercase melete-font-bold font-bold tracking-tighter">
         Prima
     </div>
     <div class="flex flex-col items-center justify-center flex-grow max-w-lg mx-auto">
