@@ -35,13 +35,13 @@ class AdminStatsOverview extends StatsOverviewWidget
         $overallEarnings = $query->sum('total_fee');
 
         $platformEarnings = $query->get()->reduce(function (int $carry, $booking) {
-            $earnings = $booking->total_fee * ($booking->payout_platform / 100);
+            $earnings = $booking->total_fee * $booking->payout_platform / 100;
 
             return $carry + $earnings;
         }, 0);
 
         $charityEarnings = $query->get()->reduce(function (int $carry, $booking) {
-            $earnings = $booking->total_fee * ($booking->payout_charity / 100);
+            $earnings = $booking->total_fee * $booking->payout_charity / 100;
 
             return $carry + $earnings;
         }, 0);
@@ -54,13 +54,13 @@ class AdminStatsOverview extends StatsOverviewWidget
         $prevOverallEarnings = $prevQuery->sum('total_fee');
 
         $prevPlatformEarnings = $prevQuery->get()->reduce(function (int $carry, $booking) {
-            $earnings = $booking->total_fee * ($booking->payout_platform / 100);
+            $earnings = $booking->total_fee * $booking->payout_platform / 100;
 
             return $carry + $earnings;
         }, 0);
 
         $prevCharityEarnings = $prevQuery->get()->reduce(function (int $carry, $booking) {
-            $earnings = $booking->total_fee * ($booking->payout_charity / 100);
+            $earnings = $booking->total_fee * $booking->payout_charity / 100;
 
             return $carry + $earnings;
         }, 0);
@@ -77,19 +77,19 @@ class AdminStatsOverview extends StatsOverviewWidget
         $charityIncrease = $charityEarnings - $prevCharityEarnings;
 
         return [
-            Stat::make("Overall $dateRange", money($overallEarnings))
+            Stat::make("Overall {$dateRange}", money($overallEarnings))
                 ->description(money($overallIncrease))
                 ->descriptionIcon($overallIncrease >= 0 ? 'heroicon-m-arrow-trending-up' : 'heroicon-m-arrow-trending-down')
                 ->color($overallIncrease >= 0 ? 'success' : 'danger'),
-            Stat::make("Platform $dateRange", money($platformEarnings))
+            Stat::make("Platform {$dateRange}", money($platformEarnings))
                 ->description(money($platformIncrease))
                 ->descriptionIcon($platformIncrease >= 0 ? 'heroicon-m-arrow-trending-up' : 'heroicon-m-arrow-trending-down')
                 ->color($platformIncrease >= 0 ? 'success' : 'danger'),
-            Stat::make("Charity $dateRange", money($charityEarnings))
+            Stat::make("Charity {$dateRange}", money($charityEarnings))
                 ->description(money($charityIncrease))
                 ->descriptionIcon($charityIncrease >= 0 ? 'heroicon-m-arrow-trending-up' : 'heroicon-m-arrow-trending-down')
                 ->color($charityIncrease >= 0 ? 'success' : 'danger'),
-            Stat::make("Bookings $dateRange", $currentBookings)
+            Stat::make("Bookings {$dateRange}", $currentBookings)
                 ->description(($bookingsIncrease >= 0 ? '+' : '').$bookingsIncrease.' bookings')
                 ->descriptionIcon($bookingsIncrease >= 0 ? 'heroicon-m-arrow-trending-up' : 'heroicon-m-arrow-trending-down')
                 ->color($bookingsIncrease >= 0 ? 'success' : 'danger'),

@@ -26,13 +26,6 @@ class RestaurantCreated extends Notification
         $this->passwordResetUrl = $this->passwordResetUrl();
     }
 
-    protected function passwordResetUrl(): string
-    {
-        $token = Password::createToken($this->user);
-
-        return Filament::getResetPasswordUrl($token, $this->user);
-    }
-
     /**
      * Get the notification's delivery channels.
      *
@@ -48,7 +41,7 @@ class RestaurantCreated extends Notification
      */
     public function toMail(object $notifiable): MailMessage
     {
-        return (new MailMessage)
+        return (new MailMessage())
             ->from('info@primavip.co')
             ->subject('Welcome to the Prima!')
             ->greeting('Welcome to the Prima!')
@@ -71,7 +64,14 @@ class RestaurantCreated extends Notification
     public function toArray(object $notifiable): array
     {
         return [
-            //
+
         ];
+    }
+
+    protected function passwordResetUrl(): string
+    {
+        $token = Password::createToken($this->user);
+
+        return Filament::getResetPasswordUrl($token, $this->user);
     }
 }

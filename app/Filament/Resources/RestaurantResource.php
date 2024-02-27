@@ -52,7 +52,7 @@ class RestaurantResource extends Resource
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
-                //
+
             ])
             ->actions([
                 Tables\Actions\ViewAction::make(),
@@ -68,7 +68,7 @@ class RestaurantResource extends Resource
     public static function getRelations(): array
     {
         return [
-            //
+
         ];
     }
 

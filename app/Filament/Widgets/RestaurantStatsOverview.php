@@ -13,13 +13,13 @@ class RestaurantStatsOverview extends StatsOverviewWidget
 {
     use InteractsWithPageFilters;
 
+    public ?Restaurant $restaurant;
+
     protected static bool $isLazy = true;
 
     protected static ?string $pollingInterval = null;
 
     protected static ?int $sort = 1;
-
-    public ?Restaurant $restaurant;
 
     public static function canView(): bool
     {
@@ -52,13 +52,13 @@ class RestaurantStatsOverview extends StatsOverviewWidget
         $overallEarnings = $query->sum('total_fee');
 
         $restaurantEarnings = $query->get()->reduce(function (int $carry, $booking) {
-            $earnings = $booking->total_fee * ($booking->payout_restaurant / 100);
+            $earnings = $booking->total_fee * $booking->payout_restaurant / 100;
 
             return $carry + $earnings;
         }, 0);
 
         $charityEarnings = $query->get()->reduce(function (int $carry, $booking) {
-            $earnings = $booking->total_fee * ($booking->payout_charity / 100);
+            $earnings = $booking->total_fee * $booking->payout_charity / 100;
 
             return $carry + $earnings;
         }, 0);
@@ -75,13 +75,13 @@ class RestaurantStatsOverview extends StatsOverviewWidget
         $prevOverallEarnings = $prevQuery->sum('total_fee');
 
         $prevRestaurantEarnings = $prevQuery->get()->reduce(function (int $carry, $booking) {
-            $earnings = $booking->total_fee * ($booking->payout_restaurant / 100);
+            $earnings = $booking->total_fee * $booking->payout_restaurant / 100;
 
             return $carry + $earnings;
         }, 0);
 
         $prevCharityEarnings = $prevQuery->get()->reduce(function (int $carry, $booking) {
-            $earnings = $booking->total_fee * ($booking->payout_charity / 100);
+            $earnings = $booking->total_fee * $booking->payout_charity / 100;
 
             return $carry + $earnings;
         }, 0);
@@ -95,7 +95,7 @@ class RestaurantStatsOverview extends StatsOverviewWidget
         $restaurantEarningsPerDay = $query->get()
             ->groupBy(fn ($booking) => Carbon::parse($booking->booking_at)->format('Y-m-d'))
             ->map(fn ($bookings) => $bookings->reduce(function ($carry, $booking) {
-                $earnings = $booking->total_fee * ($booking->payout_restaurant / 100);
+                $earnings = $booking->total_fee * $booking->payout_restaurant / 100;
 
                 return $carry + $earnings;
             }, 0));
@@ -103,7 +103,7 @@ class RestaurantStatsOverview extends StatsOverviewWidget
         $charityEarningsPerDay = $query->get()
             ->groupBy(fn ($booking) => Carbon::parse($booking->booking_at)->format('Y-m-d'))
             ->map(fn ($bookings) => $bookings->reduce(function ($carry, $booking) {
-                $earnings = $booking->total_fee * ($booking->payout_charity / 100);
+                $earnings = $booking->total_fee * $booking->payout_charity / 100;
 
                 return $carry + $earnings;
             }, 0));
@@ -119,15 +119,15 @@ class RestaurantStatsOverview extends StatsOverviewWidget
         $bookingsIncrease = $currentBookings - $prevBookings;
 
         return [
-            Stat::make("Earnings $dateRange", money($restaurantEarnings))
+            Stat::make("Earnings {$dateRange}", money($restaurantEarnings))
                 ->description(money($restaurantIncrease))
                 ->descriptionIcon($restaurantIncrease >= 0 ? 'heroicon-m-arrow-trending-up' : 'heroicon-m-arrow-trending-down')
                 ->color($restaurantIncrease >= 0 ? 'success' : 'danger'),
-            Stat::make("Charity $dateRange", money($charityEarnings))
+            Stat::make("Charity {$dateRange}", money($charityEarnings))
                 ->description(money($charityIncrease))
                 ->descriptionIcon($charityIncrease >= 0 ? 'heroicon-m-arrow-trending-up' : 'heroicon-m-arrow-trending-down')
                 ->color($charityIncrease >= 0 ? 'success' : 'danger'),
-            Stat::make("Bookings $dateRange", $currentBookings)
+            Stat::make("Bookings {$dateRange}", $currentBookings)
                 ->description(($bookingsIncrease >= 0 ? '+' : '').$bookingsIncrease.' bookings')
                 ->descriptionIcon($bookingsIncrease >= 0 ? 'heroicon-m-arrow-trending-up' : 'heroicon-m-arrow-trending-down')
                 ->color($bookingsIncrease >= 0 ? 'success' : 'danger'),

@@ -16,9 +16,9 @@ class ScheduleManager extends Widget implements HasForms
 {
     use InteractsWithForms;
 
-    protected static string $view = 'filament.widgets.schedule-manager';
-
     public array $data;
+
+    protected static string $view = 'filament.widgets.schedule-manager';
 
     protected string|int|array $columnSpan = 'full';
 
@@ -106,8 +106,9 @@ class ScheduleManager extends Widget implements HasForms
 
         collect($this->data['schedules'])
             ->map(fn (array $data) => $data['schedule'])
-            ->each(fn (array $schedule) => Schedule::find($schedule['id'])
-                ?->update(['is_available' => $schedule['is_available'], 'available_tables' => $schedule['available_tables']])
+            ->each(
+                fn (array $schedule) => Schedule::find($schedule['id'])
+                    ?->update(['is_available' => $schedule['is_available'], 'available_tables' => $schedule['available_tables']])
             );
 
         Notification::make()

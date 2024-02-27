@@ -49,7 +49,7 @@ class ConciergeResource extends Resource
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
-                //
+
             ])
             ->actions([
                 Tables\Actions\ViewAction::make(),
@@ -65,7 +65,7 @@ class ConciergeResource extends Resource
     public static function getRelations(): array
     {
         return [
-            //
+
         ];
     }
 

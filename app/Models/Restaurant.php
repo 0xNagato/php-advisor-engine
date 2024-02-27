@@ -39,23 +39,6 @@ class Restaurant extends Model
         'open_days' => 'array',
     ];
 
-    protected static function boot(): void
-    {
-        parent::boot();
-
-        static::creating(function (Restaurant $restaurant) {
-            $restaurant->open_days = [
-                'monday' => 'open',
-                'tuesday' => 'open',
-                'wednesday' => 'open',
-                'thursday' => 'open',
-                'friday' => 'open',
-                'saturday' => 'open',
-                'sunday' => 'open',
-            ];
-        });
-    }
-
     /**
      * Get the user that owns the restaurant.
      */
@@ -83,16 +66,34 @@ class Restaurant extends Model
 
         return $query->whereHas('schedules', function ($query) use ($time) {
             $query->availableAt($time);
-        })->where("days_open->$dayOfWeek", 'open') // Check if the restaurant is open on that day
+        })->where("days_open->{$dayOfWeek}", 'open') // Check if the restaurant is open on that day
             ->with(['schedules' => function ($query) use ($time) {
                 $query->availableAt($time);
-            }]);
+            },
+            ]);
     }
 
     public function scopeOpenToday(Builder $query): Builder
     {
         $currentDay = strtolower(now()->format('l')); // Get the current day of the week in lowercase
 
-        return $query->where("open_days->$currentDay", 'open'); // Check if the restaurant is open on that day
+        return $query->where("open_days->{$currentDay}", 'open'); // Check if the restaurant is open on that day
+    }
+
+    protected static function boot(): void
+    {
+        parent::boot();
+
+        static::creating(function (Restaurant $restaurant) {
+            $restaurant->open_days = [
+                'monday' => 'open',
+                'tuesday' => 'open',
+                'wednesday' => 'open',
+                'thursday' => 'open',
+                'friday' => 'open',
+                'saturday' => 'open',
+                'sunday' => 'open',
+            ];
+        });
     }
 }

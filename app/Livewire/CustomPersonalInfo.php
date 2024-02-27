@@ -29,7 +29,7 @@ class CustomPersonalInfo extends PersonalInfo
                 ->required(),
         ])->columnSpan(2);
 
-        return ($this->hasAvatars)
+        return $this->hasAvatars
             ? [filament('filament-breezy')->getAvatarUploadComponent(), $groupFields]
             : [$groupFields];
     }

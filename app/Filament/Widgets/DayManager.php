@@ -13,9 +13,9 @@ class DayManager extends Widget implements HasForms
 {
     use InteractsWithForms;
 
-    protected static string $view = 'filament.widgets.day-manager';
-
     public array $data;
+
+    protected static string $view = 'filament.widgets.day-manager';
 
     public static function canView(): bool
     {

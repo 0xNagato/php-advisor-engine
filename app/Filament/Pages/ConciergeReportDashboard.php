@@ -10,13 +10,13 @@ use Filament\Pages\Dashboard\Concerns\HasFiltersForm;
 
 class ConciergeReportDashboard extends Dashboard
 {
+    use HasFiltersForm;
+
     protected static ?string $title = 'My Earnings';
 
     protected static string $routePath = 'concierge/report';
 
     protected static ?string $navigationIcon = 'heroicon-o-currency-dollar';
-
-    use HasFiltersForm;
 
     public static function canAccess(): bool
     {

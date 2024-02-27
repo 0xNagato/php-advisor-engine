@@ -38,20 +38,13 @@ class ConciergeCreated extends Notification
      */
     public function toMail(object $notifiable): MailMessage
     {
-        return (new MailMessage)
+        return (new MailMessage())
             ->from('info@primavip.co')
             ->subject('Welcome to the Prima!')
             ->greeting('Welcome to the Prima!')
             ->line('You have been invited to the Prima!')
             ->action('Setup Password', $this->passwordResetUrl())
             ->line('If you did not expect to receive an invitation to the Prima, you may discard this email.');
-    }
-
-    protected function passwordResetUrl(): string
-    {
-        $token = Password::createToken($this->user);
-
-        return Filament::getResetPasswordUrl($token, $this->user);
     }
 
     public function toTwilio(object $notifiable): TwilioSmsMessage|TwilioMessage
@@ -66,7 +59,14 @@ class ConciergeCreated extends Notification
     public function toArray(object $notifiable): array
     {
         return [
-            //
+
         ];
+    }
+
+    protected function passwordResetUrl(): string
+    {
+        $token = Password::createToken($this->user);
+
+        return Filament::getResetPasswordUrl($token, $this->user);
     }
 }
