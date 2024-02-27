@@ -12,24 +12,15 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Str;
-use Laravel\Fortify\TwoFactorAuthenticatable;
-use Laravel\Jetstream\HasProfilePhoto;
-use Laravel\Jetstream\HasTeams;
-use Laravel\Sanctum\HasApiTokens;
 use Spatie\Permission\Traits\HasRoles;
 use Storage;
 
 class User extends Authenticatable implements FilamentUser, HasAvatar
 {
-    use HasApiTokens;
     use HasFactory;
     use HasPanelShield;
-    use HasProfilePhoto;
     use HasRoles;
-    use HasTeams;
-    use \Jeffgreco13\FilamentBreezy\Traits\TwoFactorAuthenticatable;
     use Notifiable;
-    use TwoFactorAuthenticatable;
 
     /**
      * The attributes that are mass assignable.
@@ -117,8 +108,8 @@ class User extends Authenticatable implements FilamentUser, HasAvatar
     protected function avatarUrl(): Attribute
     {
         return Attribute::make(
-            get: fn (mixed $value, array $attributes) => $attributes['profile_photo_path'],
-            set: fn (mixed $value) => ['profile_photo_path' => $value],
+            get: fn(mixed $value, array $attributes) => $attributes['profile_photo_path'],
+            set: fn(mixed $value) => ['profile_photo_path' => $value],
         );
     }
 }
