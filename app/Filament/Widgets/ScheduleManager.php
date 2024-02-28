@@ -64,7 +64,6 @@ class ScheduleManager extends Widget implements HasForms
         return $form
             ->schema([
                 Select::make('days_closed')
-                    ->hiddenLabel()
                     ->options([
                         'monday' => 'Monday',
                         'tuesday' => 'Tuesday',
@@ -75,17 +74,14 @@ class ScheduleManager extends Widget implements HasForms
                         'sunday' => 'Sunday',
                     ])
                     ->multiple()
-                    ->label('Days Unavailable')
                     ->placeholder('Select days closed')
-                    ->helperText('Please select any days which are unavailable for bookings'),
+                    ->label('Select any days which are unavailable for bookings'),
 
                 Select::make('schedules')
-                    ->hiddenLabel()
                     ->options($schedules)
                     ->multiple()
-                    ->label('Unavailable Times')
                     ->placeholder('Select unavailable times')
-                    ->helperText('Please select any times which are unavailable for bookings'),
+                    ->label('Select any times which are unavailable for bookings'),
             ])
             ->statePath('data');
     }
