@@ -34,7 +34,11 @@
         </x-filament::input.wrapper>
 
 
-        <x-filament::button wire:click="createBooking" class="w-full" :disabled="!$guestCount">
+        <x-filament::button
+            wire:click="createBooking"
+            class="w-full bg-[#421fff]"
+            :disabled="!$guestCount"
+            icon="gmdi-table-bar-r">
             Hold Reservation
         </x-filament::button>
 
