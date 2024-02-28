@@ -2,24 +2,22 @@
 
 namespace App\Filament\Widgets;
 
-use App\Forms\Components\TimeSlot;
 use App\Models\Schedule;
-use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
 use Filament\Forms\Form;
 use Filament\Notifications\Notification;
 use Filament\Widgets\Widget;
+use Illuminate\Database\Eloquent\Collection;
 
 class ScheduleManager extends Widget implements HasForms
 {
     use InteractsWithForms;
 
-    public array $data;
-
     protected static string $view = 'filament.widgets.schedule-manager';
-
+    public array $data;
+    protected ?Collection $schedules;
     protected string|int|array $columnSpan = 'full';
 
     public static function canView(): bool
@@ -46,18 +44,23 @@ class ScheduleManager extends Widget implements HasForms
         ];
 
         $days_closed = collect($days)
-            ->filter(fn ($day) => $day === 'closed')
+            ->filter(fn($day) => $day === 'closed')
             ->keys()
             ->toArray();
 
         $this->form->fill([
-            'schedules' => $schedules->toArray(),
+            'schedules' => [],
             'days_closed' => $days_closed,
         ]);
     }
 
     public function form(Form $form): Form
     {
+        $schedules = Schedule::where('restaurant_id', auth()->user()->restaurant->id)
+            ->orderBy('start_time')
+            ->get()
+            ->mapWithKeys(fn($schedule) => [$schedule->id => date('g:i a', strtotime($schedule->start_time))]);
+
         return $form
             ->schema([
                 Select::make('days_closed')
@@ -76,14 +79,13 @@ class ScheduleManager extends Widget implements HasForms
                     ->placeholder('Select days closed')
                     ->helperText('Please select any days which are unavailable for bookings'),
 
-                Repeater::make('schedules')
+                Select::make('schedules')
                     ->hiddenLabel()
-                    ->addable(false)
-                    ->reorderable(false)
-                    ->deletable(false)
-                    ->simple(
-                        TimeSlot::make('schedule')
-                    ),
+                    ->options($schedules)
+                    ->multiple()
+                    ->label('Unavailable Times')
+                    ->placeholder('Select unavailable times')
+                    ->helperText('Please select any times which are unavailable for bookings'),
             ])
             ->statePath('data');
     }
@@ -105,9 +107,9 @@ class ScheduleManager extends Widget implements HasForms
         $restaurant->save();
 
         collect($this->data['schedules'])
-            ->map(fn (array $data) => $data['schedule'])
+            ->map(fn(array $data) => $data['schedule'])
             ->each(
-                fn (array $schedule) => Schedule::find($schedule['id'])
+                fn(array $schedule) => Schedule::find($schedule['id'])
                     ?->update(['is_available' => $schedule['is_available'], 'available_tables' => $schedule['available_tables']])
             );
 
