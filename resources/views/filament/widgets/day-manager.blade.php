@@ -9,7 +9,7 @@
             {{ $this->form }}
 
             <div class="text-right">
-                <x-filament::button type="submit" form="submit" class="align-right">
+                <x-filament::button type="submit" form="submit" class="w-full">
                     Save Days
                 </x-filament::button>
             </div>

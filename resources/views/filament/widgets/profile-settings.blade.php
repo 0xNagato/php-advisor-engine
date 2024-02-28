@@ -6,7 +6,7 @@
         <form wire:submit="save">
             {{ $this->form }}
             <div class="text-right mt-6">
-                <x-filament::button type="submit" form="submit" class="align-right">
+                <x-filament::button type="submit" form="submit" class="w-full">
                     Update Profile
                 </x-filament::button>
             </div>
