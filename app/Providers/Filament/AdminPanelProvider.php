@@ -65,10 +65,11 @@ class AdminPanelProvider extends PanelProvider
                 FilamentShieldPlugin::make(),
             ])
             ->spa()
+            ->favicon('/favicon.ico')
             ->darkMode(false)
             ->brandName('PRIMA')
             ->brandLogo(fn() => view('filament.admin.logo'))
-            ->sidebarCollapsibleOnDesktop()
+            // ->sidebarCollapsibleOnDesktop()
             ->viteTheme('resources/css/filament/admin/theme.css');
 
         return $panel;

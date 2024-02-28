@@ -2,7 +2,7 @@
 
 namespace App\Filament\Pages;
 
-use App\Filament\Widgets\BookingWidget;
+use App\Livewire\BookingWidget;
 use Filament\Pages\Page;
 use Illuminate\Contracts\Support\Htmlable;
 
@@ -25,7 +25,7 @@ class ConciergeReservationHub extends Page
 
     public function getHeading(): string|Htmlable
     {
-        return 'Welcome, '.auth()->user()->name;
+        return 'Welcome, ' . auth()->user()->name;
     }
 
     public function getHeaderWidgets(): array

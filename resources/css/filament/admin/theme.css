@@ -18,6 +18,12 @@ body {
     background-color: rgba(255, 255, 255, 0.9) !important;
 }
 
+.fi-header-heading {
+    font-family: "Sanomat Web Regular Regular", serif;
+    font-style: normal;
+    @apply tracking-normal text-center !important;
+}
+
 [x-persist="topbar.end"] {
     margin: 0 !important;
     @apply w-full flex items-center !important;
