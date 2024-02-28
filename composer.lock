@@ -8686,16 +8686,16 @@
         },
         {
             "name": "spatie/laravel-permission",
-            "version": "6.3.0",
+            "version": "6.4.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/spatie/laravel-permission.git",
-                "reference": "4d119986c862ac0168b77338c85d8236bb559a88"
+                "reference": "05cce017fe3ac78f60a3fce78c07fe6e8e6e6e52"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/spatie/laravel-permission/zipball/4d119986c862ac0168b77338c85d8236bb559a88",
-                "reference": "4d119986c862ac0168b77338c85d8236bb559a88",
+                "url": "https://api.github.com/repos/spatie/laravel-permission/zipball/05cce017fe3ac78f60a3fce78c07fe6e8e6e6e52",
+                "reference": "05cce017fe3ac78f60a3fce78c07fe6e8e6e6e52",
                 "shasum": ""
             },
             "require": {
@@ -8706,7 +8706,7 @@
                 "php": "^8.0"
             },
             "require-dev": {
-                "laravel/passport": "^11.0",
+                "laravel/passport": "^11.0|^12.0",
                 "orchestra/testbench": "^6.23|^7.0|^8.0|^9.0",
                 "phpunit/phpunit": "^9.4|^10.1"
             },
@@ -8756,7 +8756,7 @@
             ],
             "support": {
                 "issues": "https://github.com/spatie/laravel-permission/issues",
-                "source": "https://github.com/spatie/laravel-permission/tree/6.3.0"
+                "source": "https://github.com/spatie/laravel-permission/tree/6.4.0"
             },
             "funding": [
                 {
@@ -8764,7 +8764,7 @@
                     "type": "github"
                 }
             ],
-            "time": "2023-12-24T06:58:02+00:00"
+            "time": "2024-02-28T08:11:20+00:00"
         },
         {
             "name": "spatie/opening-hours",
@@ -15303,12 +15303,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/Roave/SecurityAdvisories.git",
-                "reference": "de4aeda76503091f0d7b6f8a493f87994d6736a9"
+                "reference": "cca68bc8c5e35d0bc657c6c47bd40d28184abd87"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/Roave/SecurityAdvisories/zipball/de4aeda76503091f0d7b6f8a493f87994d6736a9",
-                "reference": "de4aeda76503091f0d7b6f8a493f87994d6736a9",
+                "url": "https://api.github.com/repos/Roave/SecurityAdvisories/zipball/cca68bc8c5e35d0bc657c6c47bd40d28184abd87",
+                "reference": "cca68bc8c5e35d0bc657c6c47bd40d28184abd87",
                 "shasum": ""
             },
             "conflict": {
@@ -15667,7 +15667,7 @@
                 "open-web-analytics/open-web-analytics": "<1.7.4",
                 "opencart/opencart": "<=3.0.3.7|>=4,<4.0.2.3-dev",
                 "openid/php-openid": "<2.3",
-                "openmage/magento-lts": "<20.2",
+                "openmage/magento-lts": "<20.5",
                 "opensource-workshop/connect-cms": "<1.7.2|>=2,<2.3.2",
                 "orchid/platform": ">=9,<9.4.4|>=14.0.0.0-alpha4,<14.5",
                 "oro/calendar-bundle": ">=4.2,<=4.2.6|>=5,<=5.0.6|>=5.1,<5.1.1",
@@ -16035,7 +16035,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2024-02-26T23:04:41+00:00"
+            "time": "2024-02-27T22:04:41+00:00"
         },
         {
             "name": "sebastian/cli-parser",
