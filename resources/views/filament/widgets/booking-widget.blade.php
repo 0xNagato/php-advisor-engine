@@ -36,7 +36,7 @@
 
         <x-filament::button
             wire:click="createBooking"
-            class="w-full bg-[#421fff]"
+            class="w-full bg-[#421fff] h-[48px]"
             :disabled="!$guestCount"
             icon="gmdi-table-bar-r">
             Hold Reservation
