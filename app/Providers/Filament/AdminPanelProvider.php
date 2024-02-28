@@ -71,6 +71,7 @@ class AdminPanelProvider extends PanelProvider
             ->spa()
             ->darkMode(false)
             ->brandName('PRIMA')
+            ->sidebarFullyCollapsibleOnDesktop()
             ->viteTheme('resources/css/filament/admin/theme.css');
 
         return $panel;

@@ -4,6 +4,7 @@
         Prima
     </div>
     <div class="flex flex-col items-center justify-center flex-grow max-w-lg mx-auto">
+        <x-filament-panels::logo/>
         @if (!$paymentSuccess)
             <div class="flex flex-col items-center gap-3" id="form">
                 <h1 class="text-3xl text-center sanomat-font font-semibold">Secure Your Reservation</h1>
