@@ -38,7 +38,7 @@
             wire:click="createBooking"
             class="w-full bg-[#421fff] h-[48px]"
             :disabled="!$guestCount"
-            icon="gmdi-table-bar-r">
+            icon="gmdi-restaurant-menu">
             Hold Reservation
         </x-filament::button>
 
