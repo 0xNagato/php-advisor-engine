@@ -10,7 +10,9 @@ class AdminDashboard extends Dashboard
     // use HasFiltersForm;
 
     protected static ?string $title = 'Admin Dashboard';
+
     protected static string $routePath = 'admin';
+
     protected ?string $heading = '';
 
     public static function canAccess(): bool
@@ -48,12 +50,12 @@ class AdminDashboard extends Dashboard
                 ->label('Concierge')
                 ->link()
                 ->icon('heroicon-m-plus-circle')
-                ->url(fn(): string => route('filament.admin.resources.concierges.create')),
+                ->url(fn (): string => route('filament.admin.resources.concierges.create')),
             Action::Make('addRestaurant')
                 ->label('Restaurant')
                 ->link()
                 ->icon('heroicon-m-plus-circle')
-                ->url(fn(): string => route('filament.admin.resources.restaurants.create')),
+                ->url(fn (): string => route('filament.admin.resources.restaurants.create')),
         ];
     }
 }

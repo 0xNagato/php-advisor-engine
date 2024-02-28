@@ -15,8 +15,10 @@ class PasswordSettings extends Widget implements HasForms
 {
     use InteractsWithForms;
 
-    protected static string $view = 'filament.widgets.password-settings';
     public ?array $data = [];
+
+    protected static string $view = 'filament.widgets.password-settings';
+
     protected int|string|array $columnSpan = 'full';
 
     public function mount(): void
@@ -59,7 +61,7 @@ class PasswordSettings extends Widget implements HasForms
             'password' => Hash::make($data['new_password']),
         ]);
 
-        session()->forget('password_hash_' . Filament::getCurrentPanel()->getAuthGuard());
+        session()->forget('password_hash_'.Filament::getCurrentPanel()->getAuthGuard());
 
         Filament::auth()->login($this->user);
 

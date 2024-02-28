@@ -12,22 +12,31 @@ use Livewire\Attributes\Session;
 
 class BookingWidget extends Widget
 {
-    protected static string $view = 'filament.widgets.booking-widget';
+
     /**
      * @var Collection<Restaurant>|null
      */
     public ?Collection $restaurants;
+
     public ?Restaurant $selectedRestaurant;
+
     public int|string|null $selectedRestaurantId;
+
     public ?Schedule $selectedSchedule;
+
     public int|string|null $selectedScheduleId;
+
     public ?int $guestCount;
+
     #[Session]
     public ?string $qrCode;
+
     #[Session]
     public ?string $bookingUrl;
+
     #[Session]
     public ?Booking $booking;
+    protected static string $view = 'filament.widgets.booking-widget';
 
     public static function canView(): bool
     {
@@ -62,8 +71,6 @@ class BookingWidget extends Widget
             'status' => 'pending',
             'booking_at' => $this->selectedSchedule->start_time,
         ]);
-
-        // ds($this->booking);
 
         $this->bookingUrl = route('bookings.create', ['token' => $this->booking->uuid]);
 

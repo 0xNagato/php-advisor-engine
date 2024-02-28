@@ -10,7 +10,9 @@ class MyRestaurant extends Page
     protected static ?string $navigationIcon = 'heroicon-o-building-storefront';
 
     protected static string $view = 'filament.pages.my-restaurant';
+
     protected static ?int $navigationSort = 100;
+
     protected ?string $subheading = 'Please edit restaurant availablity here.';
 
     public static function canAccess(): bool

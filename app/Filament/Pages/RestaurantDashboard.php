@@ -9,8 +9,11 @@ class RestaurantDashboard extends Dashboard
     // use HasFiltersForm;
 
     protected static ?string $navigationIcon = 'heroicon-o-currency-dollar';
+
     protected static ?string $title = 'My Earnings';
+
     protected static string $routePath = 'restaurant';
+
     protected ?string $heading = 'My Earnings';
 
     public static function canAccess(): bool
