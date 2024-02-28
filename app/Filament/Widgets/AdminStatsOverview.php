@@ -25,10 +25,10 @@ class AdminStatsOverview extends StatsOverviewWidget
 
     protected function getStats(): array
     {
-        $startDate = Carbon::parse($this->filters['startDate']);
-        $endDate = Carbon::parse($this->filters['endDate']);
+        $startDate = Carbon::parse($this->filters['startDate'] ?? now()->subDays(30));
+        $endDate = Carbon::parse($this->filters['endDate'] ?? now());
         $daysInRange = $startDate->diffInDays($endDate);
-        $dateRange = Carbon::parse($startDate)->format('M d').' - '.Carbon::parse($endDate)->format('M d');
+        $dateRange = Carbon::parse($startDate)->format('M d') . ' - ' . Carbon::parse($endDate)->format('M d');
 
         $query = Booking::whereBetween('booking_at', [$startDate, $endDate]);
 
@@ -90,7 +90,7 @@ class AdminStatsOverview extends StatsOverviewWidget
                 ->descriptionIcon($charityIncrease >= 0 ? 'heroicon-m-arrow-trending-up' : 'heroicon-m-arrow-trending-down')
                 ->color($charityIncrease >= 0 ? 'success' : 'danger'),
             Stat::make("Bookings {$dateRange}", $currentBookings)
-                ->description(($bookingsIncrease >= 0 ? '+' : '').$bookingsIncrease.' bookings')
+                ->description(($bookingsIncrease >= 0 ? '+' : '') . $bookingsIncrease . ' bookings')
                 ->descriptionIcon($bookingsIncrease >= 0 ? 'heroicon-m-arrow-trending-up' : 'heroicon-m-arrow-trending-down')
                 ->color($bookingsIncrease >= 0 ? 'success' : 'danger'),
         ];

@@ -6,7 +6,6 @@ use BezhanSalleh\FilamentShield\Traits\HasPanelShield;
 use Filament\Models\Contracts\FilamentUser;
 use Filament\Models\Contracts\HasAvatar;
 use Filament\Panel;
-use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -95,7 +94,7 @@ class User extends Authenticatable implements FilamentUser, HasAvatar
 
     public function getFilamentName(): string
     {
-        return "{$this->first_name} {$this->last_name}";
+        return "$this->first_name $this->last_name";
     }
 
     public function getMainRoleAttribute(): string
@@ -103,13 +102,5 @@ class User extends Authenticatable implements FilamentUser, HasAvatar
         $role = $this->roles->firstWhere('name', '!=', 'panel_user');
 
         return Str::of($role?->name)->snake()->replace('_', ' ')->title();
-    }
-
-    protected function avatarUrl(): Attribute
-    {
-        return Attribute::make(
-            get: fn (mixed $value, array $attributes) => $attributes['profile_photo_path'],
-            set: fn (mixed $value) => ['profile_photo_path' => $value],
-        );
     }
 }

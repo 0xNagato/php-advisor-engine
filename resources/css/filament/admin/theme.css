@@ -2,8 +2,50 @@
 
 @config 'tailwind.config.js';
 
+[x-cloak] {
+    display: none;
+}
+
+body {
+    background-image: url("../../../../public/images/waves-8.svg");
+    background-repeat: repeat-x;
+    background-position: bottom;
+    background-attachment: fixed;
+    background-color: white;
+}
+
+.fi-wi-stats-overview-stat, .fi-ta-ctn, .fi-section-content {
+    background-color: rgba(255, 255, 255, 0.9) !important;
+}
+
+[x-persist="topbar.end"] {
+    margin: 0 !important;
+    @apply w-full flex items-center !important;
+}
+
+.inter-font {
+    font-family: "Inter", sans-serif;
+    font-style: normal;
+}
+
+.melete-font-bold {
+    font-family: "Melete Bold", sans-serif;
+    font-style: normal;
+}
+
+.melete-font {
+    font-family: "Melete", sans-serif;
+    font-style: normal;
+}
+
+.sanomat-font {
+    font-family: "Sanomat Web Regular Regular", serif;
+    font-style: normal;
+}
+
 .wavy-background {
-    background-image: url('../../../../public/images/waves-1.svg');
-    background-color: rgba(99, 102, 241, 0.5); /* indigo-500 with 50% opacity */
-    background-repeat: repeat;
+    background-image: url("../../../../public/images/waves-8.svg");
+    background-repeat: repeat-x;
+    background-position: bottom;
+    background-color: white;
 }

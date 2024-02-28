@@ -6,6 +6,11 @@
     display: none;
 }
 
+body {
+    font-family: "Inter", sans-serif;
+    font-style: normal;
+}
+
 .inter-font {
     font-family: "Inter", sans-serif;
     font-style: normal;

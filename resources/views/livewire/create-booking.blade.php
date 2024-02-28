@@ -1,10 +1,7 @@
 <div class="flex flex-col justify-center min-h-screen p-6 antialiased wavy-background">
-    <div
-        class="flex text-xl font-extrabold tracking-tight text-black uppercase melete-font-bold">
-        Prima
-    </div>
+    <x-filament-panels::logo/>
     <div class="flex flex-col items-center justify-center flex-grow max-w-lg mx-auto">
-        <x-filament-panels::logo/>
+
         @if (!$paymentSuccess)
             <div class="flex flex-col items-center gap-3" id="form">
                 <h1 class="text-3xl text-center sanomat-font font-semibold">Secure Your Reservation</h1>
@@ -44,7 +41,7 @@
             </div>
         @else
             <div class="flex flex-col items-center gap-3" id="form">
-                <h1 class="text-3xl text-center kaisei-opti-regular">Thank you for your reservation!</h1>
+                <h1 class="text-3xl text-center sanomat-font">Thank you for your reservation!</h1>
 
                 <h2 class="text-base text-center">
                     Your reservation is confirmed. You will receive a confirmation SMS shortly.
@@ -91,7 +88,7 @@
     const lastNameInput = document.getElementById('last-name-input');
     const phoneInput = document.getElementById('phone-input');
 
-    submitButton.addEventListener('click', async (e) => {
+    submitButton.addEventListener('click', async (_e) => {
         $wire.$set('isLoading', true);
         const {
             token,

@@ -63,15 +63,12 @@ class AdminPanelProvider extends PanelProvider
             ])
             ->plugins([
                 FilamentShieldPlugin::make(),
-                // BreezyCore::make()
-                //     ->enableTwoFactorAuthentication()
-                //     ->myProfile(shouldRegisterNavigation: true, hasAvatars: false)
-                //     ->myProfileComponents(['personal_info' => CustomPersonalInfo::class, DayManager::class, ScheduleManager::class]),
             ])
             ->spa()
             ->darkMode(false)
             ->brandName('PRIMA')
-            ->sidebarFullyCollapsibleOnDesktop()
+            ->brandLogo(fn() => view('filament.admin.logo'))
+            ->sidebarCollapsibleOnDesktop()
             ->viteTheme('resources/css/filament/admin/theme.css');
 
         return $panel;
