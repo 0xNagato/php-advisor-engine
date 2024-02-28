@@ -2,13 +2,6 @@ import preset from '../../../../vendor/filament/filament/tailwind.config.preset'
 
 export default {
     presets: [preset],
-    theme: {
-        extend: {
-            screens: {
-                'custom': '1023px',
-            },
-        },
-    },
     content: [
         './app/Filament/**/*.php',
         './resources/views/filament/**/*.blade.php',
