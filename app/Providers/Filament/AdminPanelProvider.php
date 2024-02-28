@@ -68,7 +68,6 @@ class AdminPanelProvider extends PanelProvider
             ->favicon('/favicon.ico')
             ->darkMode(false)
             ->brandName('PRIMA')
-            ->brandLogo(fn() => view('filament.admin.logo'))
             // ->sidebarCollapsibleOnDesktop()
             ->viteTheme('resources/css/filament/admin/theme.css');
 
