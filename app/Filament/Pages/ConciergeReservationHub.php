@@ -4,7 +4,6 @@ namespace App\Filament\Pages;
 
 use App\Livewire\BookingWidget;
 use Filament\Pages\Page;
-use Illuminate\Contracts\Support\Htmlable;
 
 class ConciergeReservationHub extends Page
 {
@@ -18,14 +17,11 @@ class ConciergeReservationHub extends Page
 
     protected static ?string $slug = 'concierge/reservation-hub';
 
+    protected ?string $heading = 'Table Request and Confirmation';
+
     public static function canAccess(): bool
     {
         return auth()->user()?->hasRole('concierge');
-    }
-
-    public function getHeading(): string|Htmlable
-    {
-        return 'Welcome, ' . auth()->user()->name;
     }
 
     public function getHeaderWidgets(): array

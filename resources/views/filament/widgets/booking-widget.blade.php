@@ -33,31 +33,33 @@
             </x-filament::input.select>
         </x-filament::input.wrapper>
 
-        @if ($guestCount)
-            <x-mary-button wire:click="createBooking" class="btn btn-primary text-white">
-                Hold Reservation
-            </x-mary-button>
-        @endif
+
+        <x-filament::button wire:click="createBooking" class="w-full" :disabled="!$guestCount">
+            Hold Reservation
+        </x-filament::button>
+
     @endif
 
 
     @if ($booking)
-        <div class="text-base font-semibold">
-            Please let the guest scan the QR code to make a secure payment or collect the guest's card manually.
-        </div>
 
-        <img src="{{ $qrCode }}" alt="QR Code" class="w-1/2 mx-auto">
-
-
-        <x-mary-button external :link="$bookingUrl" class="btn btn-primary text-white" icon="o-credit-card">
+        <x-mary-button external :link="$bookingUrl" class="btn bg-[#421fff] text-white" icon="o-credit-card">
             Collect Guest's Credit Card
         </x-mary-button>
 
-        <livewire:booking-status-widget :booking="$booking"/>
+        <div class="divider divider-neutral text-xl text-black font-semibold">OR</div>
 
-        <x-mary-button wire:click="cancelBooking" class="btn bg-slate-300 border-none text-white">
-            Cancel Reservation
+        <div class="text-base">
+            Let the guest scan the QR code to make a secure payment.
+        </div>
+
+        <img src="{{ $qrCode }}" alt="QR Code" class="w-1/2 mx-auto shadow-lg">
+
+        <x-mary-button wire:click="cancelBooking" class="btn bg-slate-300 border-none text-slate-600">
+            Abandon Reservation
         </x-mary-button>
+
+        <livewire:booking-status-widget :booking="$booking"/>
     @endif
 
 </x-filament-widgets::widget>

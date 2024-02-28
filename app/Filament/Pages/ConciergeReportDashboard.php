@@ -11,7 +11,7 @@ class ConciergeReportDashboard extends Dashboard
     protected static ?string $title = 'My Earnings';
     protected static string $routePath = 'concierge/report';
     protected static ?string $navigationIcon = 'heroicon-o-currency-dollar';
-    protected ?string $heading = '';
+    protected ?string $heading = 'My Earnings';
 
     public static function canAccess(): bool
     {

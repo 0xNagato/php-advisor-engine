@@ -21,7 +21,7 @@ body {
 .fi-header-heading {
     font-family: "Sanomat Web Regular Regular", serif;
     font-style: normal;
-    @apply tracking-normal text-center !important;
+    @apply tracking-wide text-3xl text-center !important;
 }
 
 [x-persist="topbar.end"] {

@@ -28,7 +28,7 @@ class BookingStatusWidget extends Component
     public function status(): string
     {
         if ($this->booking->status === BookingStatus::PENDING) {
-            return 'The booking is currently pending. Please confirm it as soon as possible.';
+            return 'The booking is currently pending. Confirm it as soon as possible.';
         }
 
         if ($this->booking->status === BookingStatus::CONFIRMED) {
@@ -36,7 +36,7 @@ class BookingStatusWidget extends Component
         }
 
         if ($this->booking->status === BookingStatus::GUEST_ON_PAGE) {
-            return 'The guest is currently on the page. Please assist them with their booking.';
+            return 'The guest is currently on the page. Assist them with their booking.';
         }
 
         if ($this->booking->status === BookingStatus::COMPLETED) {
@@ -44,7 +44,7 @@ class BookingStatusWidget extends Component
         }
 
         if ($this->booking->status === BookingStatus::CANCELLED) {
-            return 'The booking has been cancelled. Please check if there was a mistake.';
+            return 'The booking has been cancelled. Check if there was a mistake.';
         }
     }
 }
