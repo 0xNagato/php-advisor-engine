@@ -23,6 +23,26 @@ body {
     }
 }
 
+body::before {
+    content: "";
+    position: fixed;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    background-image: url("../../../../public/images/new-waves.svg");
+    background-repeat: repeat-x;
+    background-position: bottom;
+    z-index: -1;
+}
+
+@media (max-width: 1024px) {
+    body::before {
+        background-repeat: no-repeat;
+        background-size: cover;
+    }
+}
+
 .fi-wi-stats-overview-stat, .fi-ta-ctn, .fi-section-content {
     background-color: rgba(255, 255, 255, 0.9) !important;
 }
