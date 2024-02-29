@@ -30,16 +30,20 @@
                 <input required type="text" placeholder="Cell Phone Number" {{ $isLoading ? 'disabled="true"' : '' }}
                 class="w-full text-sm input input-primary" id="phone-input"/>
 
-                <div id="card-element" class="flex flex-col justify-center w-full input input-primary">
-                    <!-- A Stripe Element will be inserted here. -->
+                {{--                <div id="card-element" class="flex flex-col justify-center w-full input input-primary">--}}
+                {{--                    <!-- A Stripe Element will be inserted here. -->--}}
+                {{--                </div>--}}
+
+                <div id="payment-element">
+                    <!-- Mount the Payment Element here -->
                 </div>
 
-                <div class="flex items-center gap-2">
-                    <input type="checkbox" wire:model="agreeTerms" class="checkbox checkbox-primary"/>
-                    <div class="label-text underline font-semibold" @click="$wire.showModal = true">
-                        Accept Terms & Conditions
-                    </div>
-                </div>
+                {{--                <div class="flex items-center gap-2">--}}
+                {{--                    <input type="checkbox" wire:model="agreeTerms" class="checkbox checkbox-primary"/>--}}
+                {{--                    <div class="label-text underline font-semibold" @click="$wire.showModal = true">--}}
+                {{--                        Accept Terms & Conditions--}}
+                {{--                    </div>--}}
+                {{--                </div>--}}
 
                 <x-mary-button :disabled="$isLoading" class="w-full text-white btn-primary" id="submit-button">
                     Complete Reservation
@@ -93,36 +97,51 @@
 @script
 <script>
     const stripe = Stripe('{{ config('cashier.key') }}');
-    const elements = stripe.elements();
-    const card = elements.create('card');
-    card.mount('#card-element');
+
+    function cardElement() {
+        const elements = stripe.elements();
+        const card = elements.create('card');
+        card.mount('#card-element');
+    }
+
+    function paymentElement() {
+        const options = {
+            mode: 'setup',
+            currency: 'usd',
+        };
+        const elements = stripe.elements(options);
+        const paymentElement = elements.create('payment', options);
+        paymentElement.mount('#payment-element');
+    }
+
+    paymentElement();
 
     const submitButton = document.getElementById('submit-button');
     const firstNameInput = document.getElementById('first-name-input');
     const lastNameInput = document.getElementById('last-name-input');
     const phoneInput = document.getElementById('phone-input');
 
-    submitButton.addEventListener('click', async (_e) => {
-        $wire.$set('isLoading', true);
-        const {
-            token,
-            error
-        } = await stripe.createToken(card)
-
-        if (error) {
-            $wire.$set('isLoading', false);
-            return alert(error.message);
-        }
-
-        const form = {
-            token,
-            firstName: firstNameInput.value,
-            lastName: lastNameInput.value,
-            phone: phoneInput.value
-        }
-
-        $wire.$call('completeBooking', form);
-    });
+    // submitButton.addEventListener('click', async (_e) => {
+    //     $wire.$set('isLoading', true);
+    //     const {
+    //         token,
+    //         error
+    //     } = await stripe.createToken(card)
+    //
+    //     if (error) {
+    //         $wire.$set('isLoading', false);
+    //         return alert(error.message);
+    //     }
+    //
+    //     const form = {
+    //         token,
+    //         firstName: firstNameInput.value,
+    //         lastName: lastNameInput.value,
+    //         phone: phoneInput.value
+    //     }
+    //
+    //     $wire.$call('completeBooking', form);
+    // });
 
     // Countdown Timer
     const countdownElement = document.getElementById('countdown');
