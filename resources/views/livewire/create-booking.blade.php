@@ -34,6 +34,13 @@
                     <!-- A Stripe Element will be inserted here. -->
                 </div>
 
+                <div class="flex items-center gap-2">
+                    <input type="checkbox" wire:model="agreeTerms" class="checkbox checkbox-primary"/>
+                    <div class="label-text underline font-semibold" @click="$wire.showModal = true">
+                        Accept Terms & Conditions
+                    </div>
+                </div>
+
                 <x-mary-button :disabled="$isLoading" class="w-full text-white btn-primary" id="submit-button">
                     Complete Reservation
                 </x-mary-button>
@@ -69,6 +76,13 @@
     <div class="flex items-end justify-center text-sm text-center">
         &copy; {{ date('Y') }} {{ config('app.name', 'Prima') }}. All rights reserved.
     </div>
+
+    <x-mary-modal wire:model="showModal" title="Terms & Conditions" class="backdrop-blur">
+        @markdown(file_get_contents(resource_path('markdown/terms-and-conditions.md')))
+        <x-slot:actions>
+            <x-mary-button label="Close" @click="$wire.showModal = false"/>
+        </x-slot:actions>
+    </x-mary-modal>
 </div>
 
 
