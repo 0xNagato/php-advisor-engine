@@ -7,11 +7,20 @@
 }
 
 body {
+    /* Default styles for "extra large" screens and above */
     background-image: url("../../../../public/images/new-waves.svg");
     background-repeat: repeat-x;
     background-position: bottom;
     background-attachment: fixed;
     background-color: white;
+
+    /* Styles for "large" screens and below */
+    @screen lg {
+        background-image: url("../../../../public/images/new-waves.svg");
+        background-repeat: no-repeat;
+        background-size: cover;
+        background-attachment: fixed;
+    }
 }
 
 .fi-wi-stats-overview-stat, .fi-ta-ctn, .fi-section-content {
