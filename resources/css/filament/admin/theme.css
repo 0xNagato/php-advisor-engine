@@ -8,11 +8,11 @@
 
 body {
     /* Default styles for "extra large" screens and above */
-    background-image: url("../../../../public/images/new-waves.svg");
-    background-repeat: repeat-x;
-    background-position: bottom;
-    background-attachment: fixed;
-    background-color: white;
+    /*background-image: url("../../../../public/images/new-waves.svg");*/
+    /*background-repeat: repeat-x;*/
+    /*background-position: bottom;*/
+    /*background-attachment: fixed;*/
+    /*background-color: white;*/
 
     /* Styles for "large" screens and below */
     @screen lg {
