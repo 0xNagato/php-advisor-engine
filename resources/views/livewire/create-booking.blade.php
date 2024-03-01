@@ -34,10 +34,6 @@
                     <!-- A Stripe Element will be inserted here. -->
                 </div>
 
-                <div id="payment-element">
-                    <!-- Mount the Payment Element here -->
-                </div>
-
                 {{--                <div class="flex items-center gap-2">--}}
                 {{--                    <input type="checkbox" wire:model="agreeTerms" class="checkbox checkbox-primary"/>--}}
                 {{--                    <div class="label-text underline font-semibold" @click="$wire.showModal = true">--}}
@@ -114,53 +110,13 @@
         paymentElement.mount('#payment-element');
     }
 
-    paymentElement();
+    cardElement();
 
     const submitButton = document.getElementById('submit-button');
     const firstNameInput = document.getElementById('first-name-input');
     const lastNameInput = document.getElementById('last-name-input');
     const phoneInput = document.getElementById('phone-input');
 
-    // submitButton.addEventListener('click', async (_e) => {
-    //     $wire.$set('isLoading', true);
-    //     const {
-    //         token,
-    //         error
-    //     } = await stripe.createToken(card)
-    //
-    //     if (error) {
-    //         $wire.$set('isLoading', false);
-    //         return alert(error.message);
-    //     }
-    //
-    //     const form = {
-    //         token,
-    //         firstName: firstNameInput.value,
-    //         lastName: lastNameInput.value,
-    //         phone: phoneInput.value
-    //     }
-    //
-    //     $wire.$call('completeBooking', form);
-    // });
 
-    // Countdown Timer
-    const countdownElement = document.getElementById('countdown');
-    let timeLeft = 120; // 2 minutes in seconds
-
-    function countdown() {
-        const minutes = Math.floor(timeLeft / 60);
-        const seconds = timeLeft % 60;
-
-        countdownElement.innerText = `${ minutes }:${ seconds < 10 ? '0' : '' }${ seconds }`;
-
-        if (timeLeft <= 0) {
-            clearInterval(countdownInterval);
-            countdownElement.innerText = 'Time\'s up!';
-        }
-
-        timeLeft--;
-    }
-
-    const countdownInterval = setInterval(countdown, 1000);
 </script>
 @endscript
