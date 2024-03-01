@@ -97,7 +97,7 @@
     function cardElement() {
         const elements = stripe.elements();
         const card = elements.create('card', {
-            disableLinks: true,
+            disableLink: true,
             hidePostalCode: true,
         });
         card.mount('#card-element');
