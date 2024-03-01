@@ -30,9 +30,9 @@ body::before {
     }
 }
 
-.fi-wi-stats-overview-stat, .fi-ta-ctn, .fi-section-content {
-    background-color: rgba(255, 255, 255, 0.9) !important;
-}
+/*.fi-wi-stats-overview-stat, .fi-ta-ctn, .fi-section-content {*/
+/*    background-color: rgba(255, 255, 255, 0.9) !important;*/
+/*}*/
 
 .fi-header-heading {
     font-family: "Sanomat Web Regular Regular", serif;
