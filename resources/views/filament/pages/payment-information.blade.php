@@ -1,6 +1,9 @@
 <x-filament-panels::page>
     <p>Payments are made on the 15th of every month for earnings generated in the previous month.</p>
     <x-filament::section>
+        <div class="text-sm text-black font-semibold pb-4">
+            Select your preferred payment choice below:
+        </div>
         <form wire:submit="save" class="flex flex-col gap-3">
 
             <x-filament::input.wrapper>
