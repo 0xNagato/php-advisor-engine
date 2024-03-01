@@ -1,7 +1,7 @@
 <div class="flex flex-col justify-center min-h-screen p-6 antialiased wavy-background">
     <x-filament-panels::logo/>
     {{--    <div class="flex flex-col items-center justify-center flex-grow max-w-lg mx-auto">--}}
-    <div class="flex flex-col items-center mt-32 sm:mt-0 sm:justify-center flex-grow max-w-lg mx-auto">
+    <div class="flex flex-col items-center mt-20 sm:mt-0 sm:justify-center flex-grow max-w-lg mx-auto">
 
         @if (!$paymentSuccess)
             <div class="flex flex-col items-center gap-3">
