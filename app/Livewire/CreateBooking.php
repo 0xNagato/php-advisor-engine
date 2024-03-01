@@ -22,6 +22,7 @@ class CreateBooking extends Component
     public bool $paymentSuccess = false;
 
     public bool $agreeTerms = true;
+
     public bool $showModal = false;
 
     public function mount(string $token): void
@@ -38,21 +39,22 @@ class CreateBooking extends Component
     /**
      * @throws ApiErrorException
      */
-    public function completeBooking(array $form): void
+    public function completeBooking($form): void
     {
+        ds($form);
         Stripe::setApiKey(config('cashier.secret'));
 
         $stripeCustomer = Customer::create([
-            'name' => $form['firstName'] . ' ' . $form['lastName'],
+            'name' => $form['first_name'].' '.$form['last_name'],
             'phone' => $form['phone'],
-            'source' => $form['token']['id'],
+            'source' => $form['token'],
         ]);
 
         $stripeCharge = Charge::create([
             'amount' => $this->booking->total_fee,
             'currency' => 'usd',
             'customer' => $stripeCustomer->id,
-            'description' => 'Booking for ' . $this->booking->schedule->restaurant->restaurant_name,
+            'description' => 'Booking for '.$this->booking->schedule->restaurant->restaurant_name,
         ]);
 
         $this->booking->update([

@@ -12,7 +12,6 @@ use Livewire\Attributes\Session;
 
 class BookingWidget extends Widget
 {
-
     /**
      * @var Collection<Restaurant>|null
      */
@@ -36,6 +35,7 @@ class BookingWidget extends Widget
 
     #[Session]
     public ?Booking $booking;
+
     protected static string $view = 'filament.widgets.booking-widget';
 
     public static function canView(): bool
