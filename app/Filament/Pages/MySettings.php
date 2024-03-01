@@ -2,7 +2,6 @@
 
 namespace App\Filament\Pages;
 
-use App\Livewire\PasswordSettings;
 use App\Livewire\ProfileSettings;
 use Filament\Pages\Page;
 
@@ -18,7 +17,6 @@ class MySettings extends Page
     {
         return [
             ProfileSettings::make(),
-            PasswordSettings::make(),
         ];
     }
 }
