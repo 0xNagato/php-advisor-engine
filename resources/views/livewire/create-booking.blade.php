@@ -1,4 +1,4 @@
-<div class="flex flex-col justify-center min-h-screen p-6 antialiased wavy-background">
+<div class="flex flex-col justify-center min-h-screen p-6 antialiased wavy-background h-screen">
     <x-filament-panels::logo/>
     <div class="flex flex-col items-center pt-20 flex-grow max-w-lg mx-auto">
         {{--    <div class="flex flex-col items-center pt-20 sm:pt-0 sm:justify-center flex-grow max-w-lg mx-auto">--}}
