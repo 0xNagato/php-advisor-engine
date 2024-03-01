@@ -31,3 +31,7 @@ Route::get('/bookings/create/{token}', CreateBooking::class)->name('bookings.cre
 Route::get('/.well-known/apple-developer-merchantid-domain-association', function () {
     return response()->file(public_path('.well-known/apple-developer-merchantid-domain-association'));
 });
+
+Route::get('/test-cc', function () {
+    return view('test-cc');
+});

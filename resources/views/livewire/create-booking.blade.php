@@ -30,9 +30,9 @@
                 <input required type="text" placeholder="Cell Phone Number" {{ $isLoading ? 'disabled="true"' : '' }}
                 class="w-full text-sm input input-primary" id="phone-input"/>
 
-                {{--                <div id="card-element" class="flex flex-col justify-center w-full input input-primary">--}}
-                {{--                    <!-- A Stripe Element will be inserted here. -->--}}
-                {{--                </div>--}}
+                <div id="card-element" class="flex flex-col justify-center w-full input input-primary">
+                    <!-- A Stripe Element will be inserted here. -->
+                </div>
 
                 <div id="payment-element">
                     <!-- Mount the Payment Element here -->
