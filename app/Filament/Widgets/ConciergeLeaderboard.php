@@ -15,7 +15,8 @@ class ConciergeLeaderboard extends BaseWidget
 
     public static function canView(): bool
     {
-        return auth()->user()->hasRole('super_admin') || auth()->user()->hasRole('concierge');
+        // return auth()->user()->hasRole('super_admin') || auth()->user()->hasRole('concierge');
+        return auth()->user()->hasRole('super_admin');
     }
 
     public function mount(): void

@@ -8,7 +8,7 @@ use Filament\Pages\Page;
 
 class PaymentInformation extends Page
 {
-    protected static ?string $navigationIcon = 'heroicon-o-currency-dollar';
+    protected static ?string $navigationIcon = 'gmdi-payment-o';
 
     protected static string $view = 'filament.pages.payment-information';
 
@@ -52,7 +52,7 @@ class PaymentInformation extends Page
                 'routing_number' => $this->routing_number,
                 'account_number' => $this->account_number,
                 'account_type' => $this->account_type,
-            ]
+            ],
         ]);
 
         Notification::make()

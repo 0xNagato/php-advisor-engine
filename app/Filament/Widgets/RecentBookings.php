@@ -12,15 +12,15 @@ class RecentBookings extends BaseWidget
 {
     use InteractsWithPageFilters;
 
-    public ?string $type = null;
-
-    public ?int $id = null;
-
     protected static bool $isLazy = true;
 
     protected static ?string $pollingInterval = null;
 
     protected static ?int $sort = 3;
+
+    public ?string $type = null;
+
+    public ?int $id = null;
 
     protected string|int|array $columnSpan = 'full';
 
@@ -64,17 +64,14 @@ class RecentBookings extends BaseWidget
                 TextColumn::make('concierge.user.name')
                     ->label('Concierge')
                     ->numeric()
-                    ->hidden((bool) auth()->user()?->hasRole('concierge'))
-                    ->sortable(),
+                    ->hidden((bool) auth()->user()?->hasRole('concierge')),
                 TextColumn::make('schedule.restaurant.restaurant_name')
                     ->label('Restaurant')
                     ->hidden((bool) auth()->user()?->hasRole('restaurant'))
-                    ->searchable()
-                    ->sortable(),
+                    ->searchable(),
                 TextColumn::make('booking_at')
                     ->label('When')
-                    ->dateTime('D, M j')
-                    ->sortable(),
+                    ->dateTime('D, M j'),
                 TextColumn::make('guest_name')
                     ->toggleable(isToggledHiddenByDefault: true)
                     ->searchable(),
@@ -86,11 +83,9 @@ class RecentBookings extends BaseWidget
                     ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('guest_count')
                     ->numeric()
-                    ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('total_fee')
-                    ->currency('USD')
-                    ->sortable(),
+                    ->currency('USD'),
             ]);
     }
 }
