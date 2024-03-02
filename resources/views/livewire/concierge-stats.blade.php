@@ -9,10 +9,6 @@
                         $1.2k
                     </div>
 
-                    <div
-                        class="inline-flex items-baseline rounded-full px-2.5 py-0.5 text-xs font-medium bg-green-100 text-green-800 mt-2 lg:mt-0">
-                        $300
-                    </div>
                 </dd>
             </div>
 
@@ -23,10 +19,7 @@
                         $400
                     </div>
 
-                    <div
-                        class="inline-flex items-baseline rounded-full px-2.5 py-0.5 text-xs font-medium bg-green-100 text-green-800 mt-2 lg:mt-0">
-                        $100
-                    </div>
+
                 </dd>
             </div>
 
@@ -37,10 +30,7 @@
                         22
                     </div>
 
-                    <div
-                        class="inline-flex items-baseline rounded-full px-2.5 py-0.5 text-xs font-medium bg-red-100 text-red-800 mt-2 lg:mt-0">
-                        -6
-                    </div>
+
                 </dd>
             </div>
 

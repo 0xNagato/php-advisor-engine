@@ -50,6 +50,7 @@ class ViewConcierge extends ViewRecord
             // ]),
             RecentBookings::make([
                 'type' => 'concierge',
+                'hideConcierge' => true,
                 'id' => $this->getRecord()->id,
             ]),
         ];
