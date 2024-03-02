@@ -65,10 +65,10 @@ class RecentBookings extends BaseWidget
                 TextColumn::make('concierge.user.name')
                     ->label('Concierge')
                     ->numeric()
-                    ->hidden((bool)auth()->user()?->hasRole('concierge')),
+                    ->hidden((bool) auth()->user()?->hasRole('concierge')),
                 TextColumn::make('schedule.restaurant.restaurant_name')
                     ->label('Restaurant')
-                    ->hidden((bool)auth()->user()?->hasRole('restaurant'))
+                    ->hidden((bool) auth()->user()?->hasRole('restaurant'))
                     ->searchable(),
                 TextColumn::make('booking_at')
                     ->label('When')
@@ -88,22 +88,22 @@ class RecentBookings extends BaseWidget
                 TextColumn::make('total_fee')
                     ->alignRight()
                     ->currency('USD')
-                    ->hidden((bool)!auth()->user()?->hasRole('super_admin'))
+                    ->hidden((bool) ! auth()->user()?->hasRole('super_admin'))
                     ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('concierge_fee')
                     ->alignRight()
                     ->label('Earnings')
                     ->currency('USD')
-                    ->hidden((bool)!auth()->user()?->hasRole('concierge')),
+                    ->hidden((bool) ! auth()->user()?->hasRole('concierge')),
                 TextColumn::make('restaurant_fee')
                     ->alignRight()
                     ->label('Earnings')
                     ->currency('USD')
-                    ->hidden((bool)!auth()->user()?->hasRole('restaurant')),
+                    ->hidden((bool) ! auth()->user()?->hasRole('restaurant')),
                 TextColumn::make('platform_fee')
                     ->alignRight()
                     ->currency('USD')
-                    ->hidden((bool)!auth()->user()?->hasRole('super_admin')),
+                    ->hidden((bool) ! auth()->user()?->hasRole('super_admin')),
                 TextColumn::make('charity_fee')
                     ->alignRight()
                     ->currency('USD')

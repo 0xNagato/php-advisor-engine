@@ -3,8 +3,8 @@
 namespace App\Filament\Resources\ConciergeResource\Pages;
 
 use App\Filament\Resources\ConciergeResource;
-use App\Filament\Widgets\ConciergeStatsOverview;
 use App\Filament\Widgets\RecentBookings;
+use App\Livewire\ConciergeStats;
 use Filament\Actions\EditAction;
 use Filament\Resources\Pages\ViewRecord;
 use STS\FilamentImpersonate\Pages\Actions\Impersonate;
@@ -33,16 +33,21 @@ class ViewConcierge extends ViewRecord
                 ->record($this->getRecord()->user),
             EditAction::make()
                 ->icon('heroicon-s-pencil')
-                ->iconButton()
+                ->iconButton(),
         ];
     }
 
     protected function getHeaderWidgets(): array
     {
         return [
-            ConciergeStatsOverview::make([
-                'concierge' => $this->getRecord(),
-            ]),
+            ConciergeStats::make(
+                [
+                    'concierge' => $this->getRecord(),
+                ]
+            ),
+            // ConciergeStatsOverview::make([
+            //     'concierge' => $this->getRecord(),
+            // ]),
             RecentBookings::make([
                 'type' => 'concierge',
                 'id' => $this->getRecord()->id,
