@@ -60,6 +60,7 @@ class RecentBookings extends BaseWidget
 
         return $table
             ->query($query)
+            ->searchable(false)
             ->columns([
                 TextColumn::make('concierge.user.name')
                     ->label('Concierge')
@@ -85,21 +86,26 @@ class RecentBookings extends BaseWidget
                     ->numeric()
                     ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('total_fee')
+                    ->alignRight()
                     ->currency('USD')
                     ->hidden((bool)!auth()->user()?->hasRole('super_admin'))
                     ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('concierge_fee')
+                    ->alignRight()
                     ->label('Earnings')
                     ->currency('USD')
                     ->hidden((bool)!auth()->user()?->hasRole('concierge')),
                 TextColumn::make('restaurant_fee')
+                    ->alignRight()
                     ->label('Earnings')
                     ->currency('USD')
                     ->hidden((bool)!auth()->user()?->hasRole('restaurant')),
                 TextColumn::make('platform_fee')
+                    ->alignRight()
                     ->currency('USD')
                     ->hidden((bool)!auth()->user()?->hasRole('super_admin')),
                 TextColumn::make('charity_fee')
+                    ->alignRight()
                     ->currency('USD')
                     ->toggleable(isToggledHiddenByDefault: true),
             ]);
