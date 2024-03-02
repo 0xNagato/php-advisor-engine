@@ -11,7 +11,7 @@ class MyRestaurant extends Page
 
     protected static string $view = 'filament.pages.my-restaurant';
 
-    protected static ?int $navigationSort = 100;
+    protected static ?int $navigationSort = 20;
 
     protected ?string $subheading = 'Please edit restaurant availablity here.';
 

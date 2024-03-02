@@ -7,7 +7,6 @@ use App\Filament\Widgets\ConciergeStatsOverview;
 use App\Filament\Widgets\RecentBookings;
 use Filament\Actions\EditAction;
 use Filament\Resources\Pages\ViewRecord;
-use Illuminate\Contracts\Support\Htmlable;
 use STS\FilamentImpersonate\Pages\Actions\Impersonate;
 
 class ViewConcierge extends ViewRecord
@@ -21,16 +20,20 @@ class ViewConcierge extends ViewRecord
         return $this->getRecord()->user->name;
     }
 
-    public function getSubheading(): string|Htmlable|null
-    {
-        return $this->getRecord()->hotel_name;
-    }
+    // public function getSubheading(): string|Htmlable|null
+    // {
+    //     return $this->getRecord()->hotel_name;
+    // }
 
     protected function getHeaderActions(): array
     {
         return [
-            Impersonate::make()->record($this->getRecord()->user),
-            EditAction::make(),
+            Impersonate::make()
+                ->iconButton()
+                ->record($this->getRecord()->user),
+            EditAction::make()
+                ->icon('heroicon-s-pencil')
+                ->iconButton()
         ];
     }
 
