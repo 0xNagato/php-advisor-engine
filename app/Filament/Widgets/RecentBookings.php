@@ -12,15 +12,17 @@ class RecentBookings extends BaseWidget
 {
     use InteractsWithPageFilters;
 
-    public ?string $type = null;
-
-    public ?int $id = null;
-
     protected static bool $isLazy = true;
 
     protected static ?string $pollingInterval = null;
 
     protected static ?int $sort = 3;
+
+    public ?string $type = null;
+
+    public ?int $id = null;
+
+    public ?bool $hideConcierge = false;
 
     protected string|int|array $columnSpan = 'full';
 
@@ -58,23 +60,23 @@ class RecentBookings extends BaseWidget
 
         $query = $query->whereBetween('created_at', [$startDate, $endDate])->orderByDesc('created_at');
 
+        $currentRoute = request()?->route()?->getName();
+
         return $table
             ->query($query)
+            ->searchable(false)
             ->columns([
                 TextColumn::make('concierge.user.name')
                     ->label('Concierge')
                     ->numeric()
-                    ->hidden((bool) auth()->user()?->hasRole('concierge'))
-                    ->sortable(),
+                    ->hidden((bool)auth()->user()?->hasRole('concierge') || $this->hideConcierge),
                 TextColumn::make('schedule.restaurant.restaurant_name')
                     ->label('Restaurant')
-                    ->hidden((bool) auth()->user()?->hasRole('restaurant'))
-                    ->searchable()
-                    ->sortable(),
+                    ->hidden((bool)auth()->user()?->hasRole('restaurant'))
+                    ->searchable(),
                 TextColumn::make('booking_at')
                     ->label('When')
-                    ->dateTime('D, M j')
-                    ->sortable(),
+                    ->dateTime('D, M j'),
                 TextColumn::make('guest_name')
                     ->toggleable(isToggledHiddenByDefault: true)
                     ->searchable(),
@@ -86,11 +88,31 @@ class RecentBookings extends BaseWidget
                     ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('guest_count')
                     ->numeric()
-                    ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('total_fee')
+                    ->alignRight()
                     ->currency('USD')
-                    ->sortable(),
+                    ->hidden((bool)!auth()->user()?->hasRole('super_admin'))
+                    ->toggleable(isToggledHiddenByDefault: true),
+                TextColumn::make('concierge_fee')
+                    ->alignRight()
+                    ->label('Earnings')
+                    ->currency('USD')
+                    ->hidden((bool)!auth()->user()?->hasRole('concierge') && !$this->hideConcierge),
+                TextColumn::make('restaurant_fee')
+                    ->alignRight()
+                    ->label('Earnings')
+                    ->currency('USD')
+                    ->hidden((bool)!auth()->user()?->hasRole('restaurant')),
+                TextColumn::make('platform_fee')
+                    ->alignRight()
+                    ->currency('USD')
+                    ->toggleable(isToggledHiddenByDefault: true)
+                    ->hidden((bool)!auth()->user()?->hasRole('super_admin')),
+                TextColumn::make('charity_fee')
+                    ->alignRight()
+                    ->currency('USD')
+                    ->toggleable(isToggledHiddenByDefault: true),
             ]);
     }
 }

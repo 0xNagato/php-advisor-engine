@@ -1,9 +1,10 @@
-<div class="flex flex-col justify-center min-h-screen p-6 antialiased wavy-background">
+<div class="flex flex-col justify-center min-h-screen p-6 antialiased wavy-background h-screen">
     <x-filament-panels::logo/>
-    <div class="flex flex-col items-center justify-center flex-grow max-w-lg mx-auto">
+    <div class="flex flex-col items-center pt-20 flex-grow max-w-lg mx-auto">
+        {{--    <div class="flex flex-col items-center pt-20 sm:pt-0 sm:justify-center flex-grow max-w-lg mx-auto">--}}
 
         @if (!$paymentSuccess)
-            <div class="flex flex-col items-center gap-3" id="form">
+            <div class="flex flex-col items-center gap-3">
                 <h1 class="text-3xl text-center sanomat-font font-semibold">Secure Your Reservation</h1>
 
                 <h2 class="text-base text-center">
@@ -12,42 +13,67 @@
 
                 <div class="flex items-center gap-1 text-xl font-semibold">
                     <div>Time Remaining:</div>
-                    <div id="countdown">2:00</div>
+
+                    <span class="countdown font-mono text-xl">
+                        <span id="minutes" style="--value:2;"></span>:
+                        <span id="seconds" style="--value:00;"></span>
+                    </span>
                 </div>
 
 
-                <div class="flex w-full gap-2">
-                    <input
-                        required
-                        type="text" placeholder="First Name" class="w-full max-w-xs text-sm input input-primary"
-                        id="first-name-input" {{ $isLoading ? 'disabled="true"' : '' }}" />
-                    <input
-                        required
-                        type="text" placeholder="Last Name" class="w-full max-w-xs text-sm input input-primary"
-                        id="last-name-input" {{ $isLoading ? 'disabled="true"' : '' }}" />
-                </div>
+                <form id="form">
+                    <fieldset
+                        {{ $isLoading ? 'disabled' : '' }} class="flex flex-col items-center gap-2 disabled:opacity-50">
+                        <div class="flex w-full gap-2 items-center">
+                            <label class="w-full">
+                                <input
+                                    name="first_name"
+                                    type="text"
+                                    class="w-full rounded-lg border border-indigo-600 text-sm h-[40px]"
+                                    placeholder="First Name"
+                                    required
+                                >
+                            </label>
 
-                <input required type="text" placeholder="Cell Phone Number" {{ $isLoading ? 'disabled="true"' : '' }}
-                class="w-full text-sm input input-primary" id="phone-input"/>
+                            <label class="w-full">
+                                <input
+                                    name="last_name"
+                                    type="text"
+                                    class="w-full rounded-lg border border-indigo-600 text-sm h-[40px]"
+                                    placeholder="Last Name"
+                                    required
+                                >
+                            </label>
 
-                <div id="card-element" class="flex flex-col justify-center w-full input input-primary">
-                    <!-- A Stripe Element will be inserted here. -->
-                </div>
+                        </div>
 
-                <div id="payment-element">
-                    <!-- Mount the Payment Element here -->
-                </div>
+                        <label class="w-full">
+                            <input
+                                name="phone"
+                                type="text"
+                                class="w-full rounded-lg border border-indigo-600 text-sm h-[40px]"
+                                placeholder="Cell Phone Number"
+                                required
+                            >
+                        </label>
 
-                {{--                <div class="flex items-center gap-2">--}}
-                {{--                    <input type="checkbox" wire:model="agreeTerms" class="checkbox checkbox-primary"/>--}}
-                {{--                    <div class="label-text underline font-semibold" @click="$wire.showModal = true">--}}
-                {{--                        Accept Terms & Conditions--}}
-                {{--                    </div>--}}
-                {{--                </div>--}}
+                        <div id="card-element"
+                             class="w-full rounded-lg border border-indigo-600 text-sm bg-white px-2 py-3 h-[40px]">
+                            <!-- A Stripe Element will be inserted here. -->
+                        </div>
 
-                <x-mary-button :disabled="$isLoading" class="w-full text-white btn-primary" id="submit-button">
-                    Complete Reservation
-                </x-mary-button>
+                        {{--                <div class="flex items-center gap-2">--}}
+                        {{--                    <input type="checkbox" wire:model="agreeTerms" class="checkbox checkbox-primary"/>--}}
+                        {{--                    <div class="label-text underline font-semibold" @click="$wire.showModal = true">--}}
+                        {{--                        Accept Terms & Conditions--}}
+                        {{--                    </div>--}}
+                        {{--                </div>--}}
+
+                        <x-filament::button class="w-full" type="submit" color="indigo" size="xl">
+                            Complete Reservation
+                        </x-filament::button>
+                    </fieldset>
+                </form>
 
             </div>
         @else
@@ -98,69 +124,68 @@
 <script>
     const stripe = Stripe('{{ config('cashier.key') }}');
 
-    function cardElement() {
-        const elements = stripe.elements();
-        const card = elements.create('card');
-        card.mount('#card-element');
-    }
+    const elements = stripe.elements();
+    const card = elements.create('card', {
+        disableLink: true,
+        hidePostalCode: true,
+    });
 
-    function paymentElement() {
-        const options = {
-            mode: 'setup',
-            currency: 'usd',
-        };
-        const elements = stripe.elements(options);
-        const paymentElement = elements.create('payment', options);
-        paymentElement.mount('#payment-element');
-    }
+    card.mount('#card-element');
 
-    paymentElement();
+    const form = document.getElementById('form');
 
-    const submitButton = document.getElementById('submit-button');
-    const firstNameInput = document.getElementById('first-name-input');
-    const lastNameInput = document.getElementById('last-name-input');
-    const phoneInput = document.getElementById('phone-input');
+    form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        card.update({disabled: true});
+        $wire.$set('isLoading', true);
 
-    // submitButton.addEventListener('click', async (_e) => {
-    //     $wire.$set('isLoading', true);
-    //     const {
-    //         token,
-    //         error
-    //     } = await stripe.createToken(card)
-    //
-    //     if (error) {
-    //         $wire.$set('isLoading', false);
-    //         return alert(error.message);
-    //     }
-    //
-    //     const form = {
-    //         token,
-    //         firstName: firstNameInput.value,
-    //         lastName: lastNameInput.value,
-    //         phone: phoneInput.value
-    //     }
-    //
-    //     $wire.$call('completeBooking', form);
-    // });
+        const {
+            token,
+            error
+        } = await stripe.createToken(card)
 
-    // Countdown Timer
-    const countdownElement = document.getElementById('countdown');
-    let timeLeft = 120; // 2 minutes in seconds
-
-    function countdown() {
-        const minutes = Math.floor(timeLeft / 60);
-        const seconds = timeLeft % 60;
-
-        countdownElement.innerText = `${ minutes }:${ seconds < 10 ? '0' : '' }${ seconds }`;
-
-        if (timeLeft <= 0) {
-            clearInterval(countdownInterval);
-            countdownElement.innerText = 'Time\'s up!';
+        if (error) {
+            $wire.$set('isLoading', false);
+            card.update({disabled: false});
+            return alert(error.message);
         }
 
-        timeLeft--;
+        const formData = {
+            first_name: document.querySelector('input[name="first_name"]').value,
+            last_name: document.querySelector('input[name="last_name"]').value,
+            phone: document.querySelector('input[name="phone"]').value,
+            token: token.id
+        }
+
+        $wire.$call('completeBooking', formData);
+    });
+
+    const minuteElement = document.querySelector('#minutes');
+    const secondElement = document.querySelector('#seconds');
+
+    // Set the initial countdown time (2 minutes = 120 seconds)
+    let countdownTime = 120;
+
+    // Function to update the countdown
+    function updateCountdown() {
+        // Calculate minutes and seconds
+        const minutes = Math.floor(countdownTime / 60);
+        const seconds = countdownTime % 60;
+
+        // Update the --value CSS variable of the minute and second elements
+        minuteElement.style.setProperty('--value', minutes);
+        secondElement.style.setProperty('--value', seconds < 10 ? '0' + seconds : seconds);
+
+        // Decrease the countdown time
+        countdownTime--;
+
+        // If the countdown reaches zero, stop the countdown
+        if (countdownTime < 0) {
+            clearInterval(countdownInterval);
+        }
     }
 
-    const countdownInterval = setInterval(countdown, 1000);
+    // Start the countdown
+    const countdownInterval = setInterval(updateCountdown, 1000);
 </script>
 @endscript

@@ -3,49 +3,43 @@
 namespace App\Filament\Pages;
 
 use Filament\Actions\Action;
+use Filament\Forms\Components\DatePicker;
 use Filament\Pages\Dashboard;
 
 class AdminDashboard extends Dashboard
 {
-    // use HasFiltersForm;
+    use Dashboard\Concerns\HasFiltersAction;
 
     protected static ?string $title = 'Admin Dashboard';
 
     protected static string $routePath = 'admin';
 
-    protected ?string $heading = '';
+    // protected ?string $heading = '';
 
     public static function canAccess(): bool
     {
         return auth()->user()?->hasRole('super_admin');
     }
 
-    // public function mount(): void
-    // {
-    //     $this->filters = [
-    //         'startDate' => $this->filters['startDate'] ?? now()->subDays(30),
-    //         'endDate' => $this->filters['endDate'] ?? now(),
-    //     ];
-    // }
-
-    // public function filtersForm(Form $form): Form
-    // {
-    //     return $form
-    //         ->schema([
-    //             Section::make()
-    //                 ->schema([
-    //                     DatePicker::make('startDate')
-    //                         ->default(now()->subDays(30)),
-    //                     DatePicker::make('endDate')
-    //                         ->default(now()),
-    //                 ])
-    //                 ->columns(2),
-    //         ]);
-    // }
+    public function mount(): void
+    {
+        $this->filters = [
+            'startDate' => $this->filters['startDate'] ?? now()->subDays(30),
+            'endDate' => $this->filters['endDate'] ?? now(),
+        ];
+    }
 
     protected function getHeaderActions(): array
     {
         return [
+            Dashboard\Actions\FilterAction::make()
+                ->label('Date Range')
+                ->icon('heroicon-o-calendar')
+                ->form([
+                    DatePicker::make('startDate'),
+                    DatePicker::make('endDate'),
+                    // ...
+                ]),
             Action::Make('addConcierge')
                 ->label('Concierge')
                 ->link()
