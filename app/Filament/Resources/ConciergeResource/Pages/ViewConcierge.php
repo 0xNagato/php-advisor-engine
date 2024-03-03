@@ -5,6 +5,7 @@ namespace App\Filament\Resources\ConciergeResource\Pages;
 use App\Filament\Resources\ConciergeResource;
 use App\Filament\Widgets\RecentBookings;
 use App\Livewire\ConciergeStats;
+use App\Livewire\ConciergeViewHeader;
 use Filament\Actions\EditAction;
 use Filament\Resources\Pages\ViewRecord;
 use STS\FilamentImpersonate\Pages\Actions\Impersonate;
@@ -15,10 +16,13 @@ class ViewConcierge extends ViewRecord
 
     protected static string $view = 'filament.resources.concierges.pages.view-concierge';
 
-    public function getHeading(): string
-    {
-        return $this->getRecord()->user->name;
-    }
+    protected ?string $heading = '';
+
+    //
+    // public function getHeading(): string
+    // {
+    //     return $this->getRecord()->user->name;
+    // }
 
     // public function getSubheading(): string|Htmlable|null
     // {
@@ -40,14 +44,16 @@ class ViewConcierge extends ViewRecord
     protected function getHeaderWidgets(): array
     {
         return [
+            ConciergeViewHeader::make([
+                'concierge' => $this->getRecord(),
+            ]),
+
             ConciergeStats::make(
                 [
                     'concierge' => $this->getRecord(),
                 ]
             ),
-            // ConciergeStatsOverview::make([
-            //     'concierge' => $this->getRecord(),
-            // ]),
+
             RecentBookings::make([
                 'type' => 'concierge',
                 'hideConcierge' => true,
