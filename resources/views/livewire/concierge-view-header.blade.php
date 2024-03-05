@@ -10,9 +10,8 @@
         </div>
 
         <div>
-            {{ $this->impersonateUser() }}
-
-            {{ $this->editConcierge() }}
+            {{ $this->impersonateUser }}
+            {{ $this->editConcierge }}
         </div>
     </div>
     {{--    <x-filament-actions::modals/>--}}
