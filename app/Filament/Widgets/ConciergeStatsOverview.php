@@ -13,16 +13,17 @@ class ConciergeStatsOverview extends StatsOverviewWidget
 {
     use InteractsWithPageFilters;
 
-    public ?Concierge $concierge;
-
     protected static bool $isLazy = true;
 
     protected static ?string $pollingInterval = null;
 
     protected static ?int $sort = 1;
 
+    public ?Concierge $concierge;
+
     public static function canView(): bool
     {
+        return false;
         $currentRoute = request()?->route()?->getName();
 
         if (($currentRoute === 'filament.admin.pages.concierge-report-dashboard') && auth()->user()->hasRole('concierge')) {

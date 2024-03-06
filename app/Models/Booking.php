@@ -3,11 +3,13 @@
 namespace App\Models;
 
 use App\Enums\BookingStatus;
+use Exception;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Support\Str;
+use RuntimeException;
 
 class Booking extends Model
 {
@@ -27,22 +29,14 @@ class Booking extends Model
         'guest_phone',
         'guest_count',
         'currency',
-        'status',
         'total_fee',
         'booking_at',
-        'payout_restaurant',
-        'payout_charity',
-        'payout_concierge',
-        'payout_platform',
         'stripe_charge',
         'stripe_charge_id',
     ];
 
     protected $appends = [
-        'restaurant_fee',
-        'charity_fee',
-        'concierge_fee',
-        'platform_fee',
+        'guest_name',
     ];
 
     protected $casts = [
@@ -61,10 +55,6 @@ class Booking extends Model
 
         static::saving(function (Booking $booking) {
             $booking->total_fee = $booking->totalFee();
-            $booking->payout_restaurant = $booking->schedule->restaurant->payout_restaurant;
-            $booking->payout_charity = $booking->schedule->restaurant->payout_charity;
-            $booking->payout_concierge = $booking->schedule->restaurant->payout_concierge;
-            $booking->payout_platform = $booking->schedule->restaurant->payout_platform;
 
             $payouts = $booking->calculatePayouts();
             $booking->restaurant_earnings = $payouts['restaurant'];
@@ -85,27 +75,74 @@ class Booking extends Model
         return $total_fee * 100;
     }
 
+    /**
+     * Calculates the payouts for the restaurant, platform, concierge and charity.
+     *
+     * The total fee of the booking is divided among the restaurant, platform and concierge.
+     * The restaurant gets 60% of the total fee, and the platform gets 40%.
+     * The concierge's share is calculated as 25% of the platform's share.
+     *
+     * A charity percentage is defined for each party (restaurant, platform and concierge), which is currently set to 5%.
+     * The charity's share from each party is calculated as this percentage of the party's share.
+     * This charity amount is then subtracted from the respective party's share.
+     *
+     * The total charity's share is the sum of the charity amounts from each party.
+     *
+     * The method returns an associative array with the final calculated payouts for the restaurant, platform, concierge, and charity.
+     *
+     * If the sum of all payouts does not equal the total fee, an exception is thrown.
+     *
+     * @return array<string, int> The payouts for the restaurant, platform, concierge and charity.
+     *
+     * @throws Exception If the sum of all payouts does not equal the total fee.
+     */
     public function calculatePayouts(): array
     {
         $totalFee = $this->total_fee;
 
-        $restaurantShare = $this->payout_restaurant / 100;
-        $conciergeShare = $this->payout_concierge / 100;
+        $restaurantPercentage = $this->schedule->restaurant->payout_restaurant / 100;
+        $platformPercentage = 1 - $restaurantPercentage;
+        $conciergePercentage = 0.25;
 
-        $restaurantPayout = $totalFee * $restaurantShare;
-        $conciergePayout = $totalFee * $conciergeShare;
+        $restaurantPayout = (int) ($totalFee * $restaurantPercentage);
+        $platformPayout = (int) ($totalFee * $platformPercentage);
 
-        $charityPayout = ($restaurantPayout * ($this->schedule->restaurant->user->charity_percentage / 100)) +
-            ($conciergePayout * ($this->concierge->user->charity_percentage / 100));
+        // Calculate the concierge's share and subtract it from the platform's share.
+        $conciergePayout = (int) ($platformPayout * $conciergePercentage); // Concierge gets 25% of platform's share
+        $platformPayout -= $conciergePayout;
 
-        $platformPayout = $totalFee * 0.05;
+        // Define the charity percentages for each party
+        $restaurantCharityPercentage = $this->schedule->restaurant->user->charity_percentage / 100;
+        $conciergeCharityPercentage = $this->concierge->user->charity_percentage / 100;
+        $platformCharityPercentage = 0.05;
 
-        return [
+        // Calculate the charity's share from each party
+        $restaurantCharityPayout = (int) ($restaurantPayout * $restaurantCharityPercentage);  // 5% of restaurant's share
+        $platformCharityPayout = (int) ($platformPayout * $platformCharityPercentage);  // 5% of platform's share
+        $conciergeCharityPayout = (int) ($conciergePayout * $conciergeCharityPercentage);  // 5% of concierge's share
+
+        // Subtract the charity's share from the restaurant's, platform's, and concierge's shares
+        $restaurantPayout -= $restaurantCharityPayout;
+        $platformPayout -= $platformCharityPayout;
+        $conciergePayout -= $conciergeCharityPayout;
+
+        // Calculate the total charity's share
+        $charityPayout = $restaurantCharityPayout + $platformCharityPayout + $conciergeCharityPayout;
+
+        $payouts = [
             'restaurant' => $restaurantPayout,
+            'platform' => $platformPayout,
             'concierge' => $conciergePayout,
             'charity' => $charityPayout,
-            'platform' => $platformPayout,
         ];
+
+        // Check if the sum of all payouts equals the total fee
+        $totalPayouts = array_sum($payouts);
+        if ($totalPayouts !== $totalFee) {
+            throw new RuntimeException('The sum of all payouts does not equal the total fee.');
+        }
+
+        return $payouts;
     }
 
     public function scopeConfirmed($query)
@@ -128,28 +165,8 @@ class Booking extends Model
         return $this->hasOne(Payment::class);
     }
 
-    public function getRestaurantFeeAttribute(): int
-    {
-        return $this->total_fee * $this->payout_restaurant / 100;
-    }
-
-    public function getCharityFeeAttribute(): int
-    {
-        return $this->total_fee * $this->payout_charity / 100;
-    }
-
-    public function getConciergeFeeAttribute(): int
-    {
-        return $this->total_fee * $this->payout_concierge / 100;
-    }
-
-    public function getPlatformFeeAttribute(): int
-    {
-        return $this->total_fee * $this->payout_platform / 100;
-    }
-
     public function getGuestNameAttribute(): string
     {
-        return $this->guest_first_name . ' ' . $this->guest_last_name;
+        return $this->guest_first_name.' '.$this->guest_last_name;
     }
 }
