@@ -60,7 +60,7 @@ class RecentBookings extends BaseWidget
 
         $query = $query->whereBetween('created_at', [$startDate, $endDate])->orderByDesc('created_at');
 
-        $currentRoute = request()?->route()?->getName();
+        ds(!auth()->user()?->hasRole('restaurant'));
 
         return $table
             ->query($query)
@@ -76,7 +76,8 @@ class RecentBookings extends BaseWidget
                     ->hidden((bool)auth()->user()?->hasRole('concierge') || !auth()->user()->hasRole('restaurant') || $this->hideConcierge),
                 TextColumn::make('schedule.restaurant.restaurant_name')
                     ->label('Restaurant')
-                    ->hidden((bool)!auth()->user()?->hasRole('restaurant'))
+                    ->hidden((bool)auth()->user()?->hasRole('restaurant'))
+                    ->toggleable(isToggledHiddenByDefault: true)
                     ->searchable(),
                 TextColumn::make('booking_at')
                     ->label('When')
