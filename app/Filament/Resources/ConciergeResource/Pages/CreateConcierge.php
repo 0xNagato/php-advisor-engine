@@ -6,7 +6,6 @@ use App\Filament\Resources\ConciergeResource;
 use App\Models\User;
 use App\Notifications\ConciergeCreated;
 use Filament\Forms\Components\Section;
-use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Form;
 use Filament\Resources\Pages\CreateRecord;
@@ -58,23 +57,23 @@ class CreateConcierge extends CreateRecord
                             ->placeholder('Hotel Name')
                             ->required(),
                     ]),
-                Section::make('Payment Information')
-                    ->icon('heroicon-m-currency-dollar')
-                    ->columns(2)
-                    ->schema([
-                        Select::make('payout_type')
-                            ->label('Payout Type')
-                            ->options([
-                                'ach' => 'ACH',
-                                'paypal' => 'PayPal',
-                                'zelle' => 'Zelle',
-                                'venmo' => 'Venmo',
-                            ])
-                            ->columns(1),
-                        TextInput::make('payout_account')
-                            ->label('Payout Account')
-                            ->columns(1),
-                    ]),
+                // Section::make('Payment Information')
+                //     ->icon('heroicon-m-currency-dollar')
+                //     ->columns(2)
+                //     ->schema([
+                //         Select::make('payout_type')
+                //             ->label('Payout Type')
+                //             ->options([
+                //                 'ach' => 'ACH',
+                //                 'paypal' => 'PayPal',
+                //                 'zelle' => 'Zelle',
+                //                 'venmo' => 'Venmo',
+                //             ])
+                //             ->columns(1),
+                //         TextInput::make('payout_account')
+                //             ->label('Payout Account')
+                //             ->columns(1),
+                //     ]),
             ]);
     }
 
