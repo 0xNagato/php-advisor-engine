@@ -88,24 +88,6 @@ class CreateRestaurant extends CreateRecord
                             ->numeric()
                             ->suffix('%')
                             ->required(),
-                        TextInput::make('payout_charity')
-                            ->label('Payout Charity')
-                            ->default(5)
-                            ->numeric()
-                            ->suffix('%')
-                            ->required(),
-                        TextInput::make('payout_concierge')
-                            ->label('Payout Concierge')
-                            ->default(15)
-                            ->numeric()
-                            ->suffix('%')
-                            ->required(),
-                        TextInput::make('payout_platform')
-                            ->label('Payout Platform')
-                            ->default(20)
-                            ->numeric()
-                            ->suffix('%')
-                            ->required(),
                     ]),
             ]);
     }
