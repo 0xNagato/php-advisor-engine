@@ -59,7 +59,7 @@ class PartnerResource extends Resource
                 //
             ])
             ->actions([
-                
+
             ]);
     }
 

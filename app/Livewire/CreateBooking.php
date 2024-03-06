@@ -41,11 +41,10 @@ class CreateBooking extends Component
      */
     public function completeBooking($form): void
     {
-        ds($form);
         Stripe::setApiKey(config('cashier.secret'));
 
         $stripeCustomer = Customer::create([
-            'name' => $form['first_name'].' '.$form['last_name'],
+            'name' => $form['first_name'] . ' ' . $form['last_name'],
             'phone' => $form['phone'],
             'source' => $form['token'],
         ]);
@@ -54,7 +53,7 @@ class CreateBooking extends Component
             'amount' => $this->booking->total_fee,
             'currency' => 'usd',
             'customer' => $stripeCustomer->id,
-            'description' => 'Booking for '.$this->booking->schedule->restaurant->restaurant_name,
+            'description' => 'Booking for ' . $this->booking->schedule->restaurant->restaurant_name,
         ]);
 
         $this->booking->update([
