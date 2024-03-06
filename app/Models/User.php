@@ -28,7 +28,15 @@ class User extends Authenticatable implements FilamentUser, HasAvatar
      * @var array<int, string>
      */
     protected $fillable = [
-        'first_name', 'last_name', 'email', 'password', 'phone', 'profile_photo_path', 'payout', 'charity_percentage',
+        'first_name',
+        'last_name',
+        'email',
+        'password',
+        'phone',
+        'profile_photo_path',
+        'payout',
+        'charity_percentage',
+        'partner_referral_id',
     ];
 
     /**
@@ -103,5 +111,10 @@ class User extends Authenticatable implements FilamentUser, HasAvatar
         $role = $this->roles->firstWhere('name', '!=', 'panel_user');
 
         return Str::of($role?->name)->snake()->replace('_', ' ')->title();
+    }
+
+    public function partner(): HasOne
+    {
+        return $this->hasOne(Partner::class, 'id', 'partner_referral_id');
     }
 }
