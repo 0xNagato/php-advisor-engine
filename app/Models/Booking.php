@@ -160,6 +160,22 @@ class Booking extends Model
         return $this->belongsTo(Concierge::class);
     }
 
+    public function partner(): ?BelongsTo
+    {
+        // Check if the concierge's user has a partner_referral_id
+        if ($this->concierge->user->partner_referral_id) {
+            return $this->concierge->user->belongsTo(Partner::class, 'partner_referral_id');
+        }
+
+        // Check if the restaurant's user has a partner_referral_id
+        if ($this->schedule->restaurant->user->partner_referral_id) {
+            return $this->schedule->restaurant->user->belongsTo(Partner::class, 'partner_referral_id');
+        }
+
+        // Return null if neither the concierge's user nor the restaurant's user has a partner_referral_id
+        return null;
+    }
+
     public function payment(): HasOne
     {
         return $this->hasOne(Payment::class);
