@@ -32,6 +32,11 @@ class PaymentInformation extends Page
 
     public User $user;
 
+    public static function canAccess(): bool
+    {
+        return auth()->user()->hasRole('concierge') || auth()->user()->hasRole('restaurant');
+    }
+
     public function mount(): void
     {
         $this->user = User::find(auth()->id());
