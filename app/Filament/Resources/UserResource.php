@@ -60,6 +60,7 @@ class UserResource extends Resource
                         'Super Admin' => 'danger',
                         'Concierge' => 'info',
                         'Restaurant' => 'success',
+                        'Partner' => 'warning',
                     })
                     ->badge()
                     ->searchable(),
