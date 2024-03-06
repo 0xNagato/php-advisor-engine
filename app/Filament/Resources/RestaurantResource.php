@@ -40,6 +40,7 @@ class RestaurantResource extends Resource
                 Tables\Columns\TextColumn::make('restaurant_name')
                     ->searchable(),
                 Tables\Columns\TextColumn::make('user.name')
+                    ->searchable(['first_name', 'last_name'])
                     ->numeric()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('created_at')
@@ -53,15 +54,6 @@ class RestaurantResource extends Resource
             ])
             ->filters([
 
-            ])
-            ->actions([
-                Tables\Actions\ViewAction::make(),
-                Tables\Actions\EditAction::make(),
-            ])
-            ->bulkActions([
-                Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
-                ]),
             ]);
     }
 

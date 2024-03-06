@@ -36,7 +36,7 @@ class ConciergeResource extends Resource
             ->columns([
                 Tables\Columns\TextColumn::make('user.name')
                     ->numeric()
-                    ->sortable(),
+                    ->searchable(['first_name', 'last_name']),
                 Tables\Columns\TextColumn::make('hotel_name')
                     ->searchable(),
                 Tables\Columns\TextColumn::make('created_at')
@@ -52,13 +52,8 @@ class ConciergeResource extends Resource
 
             ])
             ->actions([
-                Tables\Actions\ViewAction::make(),
-                Tables\Actions\EditAction::make(),
-            ])
-            ->bulkActions([
-                Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
-                ]),
+                // Tables\Actions\ViewAction::make(),
+                // Tables\Actions\EditAction::make(),
             ]);
     }
 
