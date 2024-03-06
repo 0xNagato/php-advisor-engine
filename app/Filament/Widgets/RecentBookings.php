@@ -66,20 +66,22 @@ class RecentBookings extends BaseWidget
             ->query($query)
             ->searchable(false)
             ->columns([
+                TextColumn::make('guest_name')
+                    ->label('Guest')
+                    ->toggleable(isToggledHiddenByDefault: (bool)auth()->user()?->hasRole('restaurant'))
+                    ->searchable(),
                 TextColumn::make('concierge.user.name')
                     ->label('Concierge')
                     ->numeric()
-                    ->hidden((bool)auth()->user()?->hasRole('concierge') || $this->hideConcierge),
+                    ->hidden((bool)auth()->user()?->hasRole('concierge') || !auth()->user()->hasRole('restaurant') || $this->hideConcierge),
                 TextColumn::make('schedule.restaurant.restaurant_name')
                     ->label('Restaurant')
-                    ->hidden((bool)auth()->user()?->hasRole('restaurant'))
+                    ->hidden((bool)!auth()->user()?->hasRole('restaurant'))
                     ->searchable(),
                 TextColumn::make('booking_at')
                     ->label('When')
                     ->dateTime('D, M j'),
-                TextColumn::make('guest_name')
-                    ->toggleable(isToggledHiddenByDefault: true)
-                    ->searchable(),
+
                 TextColumn::make('guest_email')
                     ->searchable()
                     ->toggleable(isToggledHiddenByDefault: true),

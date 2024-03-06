@@ -51,6 +51,23 @@ class Booking extends Model
         'stripe_charge' => 'array',
     ];
 
+    protected static function boot(): void
+    {
+        parent::boot();
+
+        static::creating(function (Booking $booking) {
+            $booking->uuid = Str::uuid();
+        });
+
+        static::saving(function (Booking $booking) {
+            $booking->total_fee = $booking->totalFee();
+            $booking->payout_restaurant = $booking->schedule->restaurant->payout_restaurant;
+            $booking->payout_charity = $booking->schedule->restaurant->payout_charity;
+            $booking->payout_concierge = $booking->schedule->restaurant->payout_concierge;
+            $booking->payout_platform = $booking->schedule->restaurant->payout_platform;
+        });
+    }
+
     public function totalFee(): int
     {
         $total_fee = $this->schedule->restaurant->booking_fee;
@@ -102,20 +119,8 @@ class Booking extends Model
         return $this->total_fee * $this->payout_platform / 100;
     }
 
-    protected static function boot(): void
+    public function getGuestNameAttribute(): string
     {
-        parent::boot();
-
-        static::creating(function (Booking $booking) {
-            $booking->uuid = Str::uuid();
-        });
-
-        static::saving(function (Booking $booking) {
-            $booking->total_fee = $booking->totalFee();
-            $booking->payout_restaurant = $booking->schedule->restaurant->payout_restaurant;
-            $booking->payout_charity = $booking->schedule->restaurant->payout_charity;
-            $booking->payout_concierge = $booking->schedule->restaurant->payout_concierge;
-            $booking->payout_platform = $booking->schedule->restaurant->payout_platform;
-        });
+        return $this->guest_first_name . ' ' . $this->guest_last_name;
     }
 }

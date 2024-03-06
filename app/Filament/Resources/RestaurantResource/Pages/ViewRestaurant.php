@@ -4,7 +4,7 @@ namespace App\Filament\Resources\RestaurantResource\Pages;
 
 use App\Filament\Resources\RestaurantResource;
 use App\Filament\Widgets\RecentBookings;
-use App\Filament\Widgets\RestaurantStatsOverview;
+use App\Livewire\RestaurantStats;
 use Filament\Actions;
 use Filament\Resources\Pages\ViewRecord;
 use Illuminate\Contracts\Support\Htmlable;
@@ -21,23 +21,27 @@ class ViewRestaurant extends ViewRecord
         return $this->getRecord()->restaurant_name;
     }
 
-    public function getSubheading(): string|Htmlable|null
-    {
-        return $this->getRecord()->user->name;
-    }
+    // public function getSubheading(): string|Htmlable|null
+    // {
+    //     return $this->getRecord()->user->name;
+    // }
 
     protected function getHeaderActions(): array
     {
         return [
-            Impersonate::make()->record($this->getRecord()->user),
-            Actions\EditAction::make(),
+            Impersonate::make()
+                ->iconButton()
+                ->record($this->getRecord()->user),
+            Actions\EditAction::make()
+                ->icon('heroicon-m-pencil-square')
+                ->iconButton(),
         ];
     }
 
     protected function getHeaderWidgets(): array
     {
         return [
-            RestaurantStatsOverview::make([
+            RestaurantStats::make([
                 'restaurant' => $this->getRecord(),
             ]),
             RecentBookings::make([
