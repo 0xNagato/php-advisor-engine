@@ -72,16 +72,17 @@ class CreateRestaurant extends CreateRecord
                             ->label('Secondary Contact Number')
                             ->onlyCountries(['US'])
                             ->initialCountry('US'),
+
+                    ]),
+                Section::make('Payout Information')
+                    ->icon('heroicon-m-currency-dollar')
+                    ->schema([
                         TextInput::make('booking_fee')
                             ->label('Booking Fee')
                             ->prefix('$')
                             ->default(200)
                             ->numeric()
                             ->required(),
-                    ]),
-                Section::make('Payout Information')
-                    ->icon('heroicon-m-currency-dollar')
-                    ->schema([
                         TextInput::make('payout_restaurant')
                             ->label('Payout Restaurant')
                             ->default(60)
