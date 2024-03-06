@@ -60,7 +60,6 @@ class UserResource extends Resource
                         'Restaurant' => 'success',
                     })
                     ->badge()
-                    ->sortable()
                     ->searchable(),
                 Tables\Columns\TextColumn::make('created_at')
                     ->dateTime()
