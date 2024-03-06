@@ -30,6 +30,8 @@ class PaymentInformation extends Page
         'Venmo',
     ];
 
+    public int $charity_percentage;
+
     public User $user;
 
     public static function canAccess(): bool
@@ -46,6 +48,7 @@ class PaymentInformation extends Page
         $this->routing_number = $this->user->payout?->routing_number ?? '';
         $this->account_number = $this->user->payout?->account_number ?? '';
         $this->account_type = $this->user->payout?->account_type ?? '';
+        $this->charity_percentage = $this->user->charity_percentage ?? 5;
     }
 
     public function save(): void

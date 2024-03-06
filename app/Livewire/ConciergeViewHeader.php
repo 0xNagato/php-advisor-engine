@@ -11,13 +11,13 @@ use Filament\Forms\Contracts\HasForms;
 use Filament\Widgets\Widget;
 use STS\FilamentImpersonate\Pages\Actions\Impersonate;
 
-class ConciergeViewHeader extends Widget implements HasForms, HasActions
+class ConciergeViewHeader extends Widget implements HasActions, HasForms
 {
     use InteractsWithActions;
     use InteractsWithForms;
 
-
     protected static string $view = 'livewire.concierge-view-header';
+
     public ?Concierge $concierge;
 
     public function getHeaderWidgets(): array
@@ -29,7 +29,7 @@ class ConciergeViewHeader extends Widget implements HasForms, HasActions
                 ->iconButton(),
             Impersonate::make()
                 ->iconButton()
-                ->record($this->concierge->user)
+                ->record($this->concierge->user),
         ];
     }
 }

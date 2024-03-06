@@ -49,6 +49,21 @@
             @endif
 
 
+            <x-filament::input.wrapper>
+                <x-filament::input
+                    type="text"
+                    wire:model="charity_percentage"
+                    hint="Donation to Charity (% of Fee Collected)"
+                />
+                <x-slot name="suffix">
+                    %
+                </x-slot>
+            </x-filament::input.wrapper>
+            <x-filament-forms::field-wrapper.hint>
+                Donation to Charity (% of Fee Collected)
+            </x-filament-forms::field-wrapper.hint>
+
+
             <div class="text-right">
                 <x-filament::button type="submit" form="submit" class="w-full">
                     Update Payment Info

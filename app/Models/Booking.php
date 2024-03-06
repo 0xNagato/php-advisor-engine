@@ -65,6 +65,12 @@ class Booking extends Model
             $booking->payout_charity = $booking->schedule->restaurant->payout_charity;
             $booking->payout_concierge = $booking->schedule->restaurant->payout_concierge;
             $booking->payout_platform = $booking->schedule->restaurant->payout_platform;
+
+            $payouts = $booking->calculatePayouts();
+            $booking->restaurant_earnings = $payouts['restaurant'];
+            $booking->concierge_earnings = $payouts['concierge'];
+            $booking->charity_earnings = $payouts['charity'];
+            $booking->platform_earnings = $payouts['platform'];
         });
     }
 
@@ -77,6 +83,29 @@ class Booking extends Model
         }
 
         return $total_fee * 100;
+    }
+
+    public function calculatePayouts(): array
+    {
+        $totalFee = $this->total_fee;
+
+        $restaurantShare = $this->payout_restaurant / 100;
+        $conciergeShare = $this->payout_concierge / 100;
+
+        $restaurantPayout = $totalFee * $restaurantShare;
+        $conciergePayout = $totalFee * $conciergeShare;
+
+        $charityPayout = ($restaurantPayout * ($this->schedule->restaurant->user->charity_percentage / 100)) +
+            ($conciergePayout * ($this->concierge->user->charity_percentage / 100));
+
+        $platformPayout = $totalFee * 0.05;
+
+        return [
+            'restaurant' => $restaurantPayout,
+            'concierge' => $conciergePayout,
+            'charity' => $charityPayout,
+            'platform' => $platformPayout,
+        ];
     }
 
     public function scopeConfirmed($query)

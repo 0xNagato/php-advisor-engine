@@ -13,6 +13,8 @@ class MyRestaurant extends Page
 
     protected static ?int $navigationSort = 20;
 
+    protected static ?string $title = 'Edit Availability';
+
     protected ?string $subheading = 'Please edit restaurant availablity here.';
 
     public static function canAccess(): bool
