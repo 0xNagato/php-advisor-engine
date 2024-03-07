@@ -37,7 +37,7 @@ class ConciergeSeeder extends Seeder
         ]);
 
         $hotelNames->each(function ($hotelName) {
-            $user = User::factory()
+            $user = User::factory(['first_name' => 'Concierge'])
                 ->has(Concierge::factory([
                     'hotel_name' => $hotelName,
                 ]))

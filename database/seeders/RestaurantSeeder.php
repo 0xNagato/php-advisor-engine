@@ -37,7 +37,7 @@ class RestaurantSeeder extends Seeder
         ]);
 
         $restaurantNames->each(function ($restaurantName) {
-            $user = User::factory()
+            $user = User::factory(['first_name' => 'Restaurant'])
                 ->has(Restaurant::factory([
                     'restaurant_name' => $restaurantName,
                 ]))

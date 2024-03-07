@@ -41,10 +41,12 @@ class DatabaseSeeder extends Seeder
 
         Role::create(['name' => 'concierge']);
         Role::create(['name' => 'restaurant']);
+        Role::create(['name' => 'partner']);
 
         $this->call([
             ConciergeSeeder::class,
             RestaurantSeeder::class,
+            PartnerSeeder::class,
             ScheduleSeeder::class,
             BookingSeeder::class,
             // ShieldSeeder::class,
