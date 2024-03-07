@@ -3,8 +3,9 @@
 namespace App\Filament\Resources\RestaurantResource\Pages;
 
 use App\Filament\Resources\RestaurantResource;
-use App\Filament\Widgets\RecentBookings;
-use App\Livewire\RestaurantStats;
+use App\Livewire\Restaurant\RestaurantLeaderboard;
+use App\Livewire\Restaurant\RestaurantRecentBookings;
+use App\Livewire\Restaurant\RestaurantStats;
 use Filament\Actions;
 use Filament\Resources\Pages\ViewRecord;
 use Illuminate\Contracts\Support\Htmlable;
@@ -41,13 +42,9 @@ class ViewRestaurant extends ViewRecord
     protected function getHeaderWidgets(): array
     {
         return [
-            RestaurantStats::make([
-                'restaurant' => $this->getRecord(),
-            ]),
-            RecentBookings::make([
-                'type' => 'restaurant',
-                'id' => $this->getRecord()->id,
-            ]),
+            RestaurantStats::make(['restaurant' => $this->getRecord(), 'columnSpan' => 'full']),
+            RestaurantRecentBookings::make(['restaurant' => $this->getRecord(), 'columnSpan' => '1']),
+            RestaurantLeaderboard::make(['restaurant' => $this->getRecord(), 'columnSpan' => '1']),
         ];
     }
 }

@@ -3,8 +3,9 @@
 namespace App\Filament\Resources\ConciergeResource\Pages;
 
 use App\Filament\Resources\ConciergeResource;
-use App\Filament\Widgets\RecentBookings;
-use App\Livewire\ConciergeStats;
+use App\Livewire\Concierge\ConciergeLeaderboard;
+use App\Livewire\Concierge\ConciergeRecentBookings;
+use App\Livewire\Concierge\ConciergeStats;
 use Filament\Actions\EditAction;
 use Filament\Resources\Pages\ViewRecord;
 use Illuminate\Contracts\Support\Htmlable;
@@ -49,16 +50,19 @@ class ViewConcierge extends ViewRecord
     protected function getHeaderWidgets(): array
     {
         return [
-            ConciergeStats::make(
-                [
-                    'concierge' => $this->getRecord(),
-                ]
-            ),
-
-            RecentBookings::make([
-                'type' => 'concierge',
+            ConciergeStats::make([
+                'concierge' => $this->getRecord(),
+                'columnSpan' => 'full',
+            ]),
+            ConciergeRecentBookings::make([
+                'concierge' => $this->getRecord(),
                 'hideConcierge' => true,
-                'id' => $this->getRecord()->id,
+                'columnSpan' => '1',
+            ]),
+            ConciergeLeaderboard::make([
+                'concierge' => $this->getRecord(),
+                'showFilters' => false,
+                'columnSpan' => '1',
             ]),
         ];
     }

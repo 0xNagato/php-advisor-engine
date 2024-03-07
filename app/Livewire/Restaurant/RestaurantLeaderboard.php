@@ -1,18 +1,18 @@
 <?php
 
-namespace App\Livewire\Concierge;
+namespace App\Livewire\Restaurant;
 
 use App\Models\Booking;
-use App\Models\Concierge;
+use App\Models\Restaurant;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Filament\Widgets\TableWidget as BaseWidget;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
 
-class ConciergeLeaderboard extends BaseWidget
+class RestaurantLeaderboard extends BaseWidget
 {
-    public ?Concierge $concierge;
+    public ?Restaurant $restaurant;
 
     public bool $showFilters = false;
 
@@ -28,11 +28,12 @@ class ConciergeLeaderboard extends BaseWidget
         $startDate = $this->filters['startDate'] ?? now()->subDays(30);
         $endDate = $this->filters['endDate'] ?? now();
 
-        $query = Booking::select('concierges.user_id', DB::raw('sum(concierge_earnings) as total_earned'), DB::raw("CONCAT(users.first_name, ' ', users.last_name) as user_name"))
-            ->join('concierges', 'concierges.id', '=', 'bookings.concierge_id')
-            ->join('users', 'users.id', '=', 'concierges.user_id')
+        $query = Booking::select('restaurants.user_id', DB::raw('sum(restaurant_earnings) as total_earned'), 'restaurants.restaurant_name')
+            ->join('schedules', 'schedules.id', '=', 'bookings.schedule_id')
+            ->join('restaurants', 'restaurants.id', '=', 'schedules.restaurant_id')
+            ->join('users', 'users.id', '=', 'restaurants.user_id')
             ->whereBetween('booking_at', [$startDate, $endDate])
-            ->groupBy('concierges.user_id')
+            ->groupBy('restaurants.user_id', 'restaurants.restaurant_name')
             ->orderBy('total_earned', 'desc')
             ->limit(10);
 
@@ -43,12 +44,12 @@ class ConciergeLeaderboard extends BaseWidget
                 Tables\Columns\TextColumn::make('rank')
                     ->label('Rank')
                     ->rowIndex(),
-                Tables\Columns\TextColumn::make('user_name')
-                    ->label('Concierge Name')
+                Tables\Columns\TextColumn::make('restaurant_name')
+                    ->label('Restaurant Name')
                     ->formatStateUsing(function ($state, $record) {
-                        // current user is concierge display their name if not display the name of the ******* else display names
+                        // current user is restaurant display their name if not display the name of the ******* else display names
                         if ($this->showFilters) {
-                            if (auth()->user()->concierge->user_id === $record->user_id) {
+                            if (auth()->user()->restaurant->user_id === $record->user_id) {
                                 return 'You';
                             }
 
@@ -65,6 +66,6 @@ class ConciergeLeaderboard extends BaseWidget
 
     public function getTableRecordKey(Model $record): string
     {
-        return 'concierges.user_id';
+        return 'restaurants.user_id';
     }
 }

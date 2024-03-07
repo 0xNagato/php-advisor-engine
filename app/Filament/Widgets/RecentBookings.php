@@ -66,15 +66,15 @@ class RecentBookings extends BaseWidget
             ->columns([
                 TextColumn::make('guest_name')
                     ->label('Guest')
-                    ->toggleable(isToggledHiddenByDefault: (bool)auth()->user()?->hasRole('restaurant'))
+                    ->toggleable(isToggledHiddenByDefault: (bool) auth()->user()?->hasRole('restaurant'))
                     ->searchable(),
                 TextColumn::make('concierge.user.name')
                     ->label('Concierge')
                     ->numeric()
-                    ->hidden((bool)auth()->user()?->hasRole('concierge') || !auth()->user()->hasRole('restaurant') || $this->hideConcierge),
+                    ->hidden((bool) auth()->user()?->hasRole('concierge') || ! auth()->user()->hasRole('restaurant') || $this->hideConcierge),
                 TextColumn::make('schedule.restaurant.restaurant_name')
                     ->label('Restaurant')
-                    ->hidden((bool)auth()->user()?->hasRole('restaurant'))
+                    ->hidden((bool) auth()->user()?->hasRole('restaurant'))
                     ->toggleable(isToggledHiddenByDefault: true)
                     ->searchable(),
                 TextColumn::make('booking_at')
@@ -93,23 +93,23 @@ class RecentBookings extends BaseWidget
                 TextColumn::make('total_fee')
                     ->alignRight()
                     ->currency('USD')
-                    ->hidden((bool)!auth()->user()?->hasRole('super_admin'))
+                    ->hidden((bool) ! auth()->user()?->hasRole('super_admin'))
                     ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('concierge_fee')
                     ->alignRight()
                     ->label('Earnings')
                     ->currency('USD')
-                    ->hidden((bool)!auth()->user()?->hasRole('concierge') && !$this->hideConcierge),
+                    ->hidden((bool) ! auth()->user()?->hasRole('concierge') && ! $this->hideConcierge),
                 TextColumn::make('restaurant_fee')
                     ->alignRight()
                     ->label('Earnings')
                     ->currency('USD')
-                    ->hidden((bool)!auth()->user()?->hasRole('restaurant')),
+                    ->hidden((bool) ! auth()->user()?->hasRole('restaurant')),
                 TextColumn::make('platform_fee')
                     ->alignRight()
                     ->currency('USD')
                     ->toggleable(isToggledHiddenByDefault: true)
-                    ->hidden((bool)!auth()->user()?->hasRole('super_admin')),
+                    ->hidden((bool) ! auth()->user()?->hasRole('super_admin')),
                 TextColumn::make('charity_fee')
                     ->alignRight()
                     ->currency('USD')

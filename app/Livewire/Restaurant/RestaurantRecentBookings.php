@@ -1,15 +1,15 @@
 <?php
 
-namespace App\Livewire\Concierge;
+namespace App\Livewire\Restaurant;
 
 use App\Models\Booking;
-use App\Models\Concierge;
+use App\Models\Restaurant;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Filament\Widgets\Concerns\InteractsWithPageFilters;
 use Filament\Widgets\TableWidget as BaseWidget;
 
-class ConciergeRecentBookings extends BaseWidget
+class RestaurantRecentBookings extends BaseWidget
 {
     use InteractsWithPageFilters;
 
@@ -19,9 +19,9 @@ class ConciergeRecentBookings extends BaseWidget
 
     protected static ?int $sort = 3;
 
-    public ?Concierge $concierge;
+    public ?Restaurant $restaurant;
 
-    public bool $hideConcierge = false;
+    public bool $hideRestaurant = false;
 
     public int|string|array $columnSpan;
 
@@ -32,7 +32,9 @@ class ConciergeRecentBookings extends BaseWidget
 
     public function table(Table $table): Table
     {
-        $query = Booking::where('concierge_id', $this->concierge->id);
+        $query = Booking::whereHas('schedule', function ($query) {
+            $query->where('restaurant_id', $this->restaurant->id);
+        });
 
         $startDate = $this->filters['startDate'] ?? now()->subDays(30);
         $endDate = $this->filters['endDate'] ?? now();
@@ -45,19 +47,14 @@ class ConciergeRecentBookings extends BaseWidget
             ->columns([
                 TextColumn::make('guest_name')
                     ->label('Guest')
-                    ->toggleable(isToggledHiddenByDefault: true)
-                    ->searchable(),
-                TextColumn::make('schedule.restaurant.restaurant_name')
-                    ->label('Restaurant')
                     ->searchable(),
                 TextColumn::make('booking_at')
                     ->label('Date')
                     ->dateTime('D, M j'),
-                TextColumn::make('concierge_earnings')
+                TextColumn::make('restaurant_earnings')
                     ->alignRight()
                     ->label('Earnings')
-                    ->currency('USD')
-                    ->hidden((bool) ! auth()->user()?->hasRole('concierge') && ! $this->hideConcierge),
+                    ->currency('USD'),
                 TextColumn::make('charity_earnings')
                     ->alignRight()
                     ->currency('USD')

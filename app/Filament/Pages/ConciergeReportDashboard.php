@@ -67,5 +67,4 @@ class ConciergeReportDashboard extends Dashboard
                 ]),
         ];
     }
-
 }

@@ -18,6 +18,7 @@
                 position: relative !important;
                 justify-content: end !important;
                 top: -48px;
+                margin-bottom: -68px;
             }
         }
     </style>

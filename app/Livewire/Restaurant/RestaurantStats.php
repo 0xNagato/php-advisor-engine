@@ -1,28 +1,23 @@
 <?php
 
-namespace App\Livewire\Concierge;
+namespace App\Livewire\Restaurant;
 
-use App\Data\ConciergeStatData;
+use App\Data\RestaurantStatData;
 use App\Models\Booking;
-use App\Models\Concierge;
-use Filament\Widgets\Concerns\InteractsWithPageFilters;
+use App\Models\Restaurant;
 use Filament\Widgets\Widget;
 
-class ConciergeStats extends Widget
+class RestaurantStats extends Widget
 {
-    use InteractsWithPageFilters;
+    protected static string $view = 'livewire.restaurant.restaurant-stats';
 
-    protected static string $view = 'livewire.concierge.concierge-stats';
+    public ?Restaurant $restaurant;
 
-    public ?Concierge $concierge;
-
-    public ConciergeStatData $stats;
-
-    public int|string|array $columnSpan;
+    public RestaurantStatData $stats;
 
     public function getColumnSpan(): int|string|array
     {
-        return $this->columnSpan ?? 'full';
+        return 'full';
     }
 
     public function mount(): void
@@ -30,75 +25,78 @@ class ConciergeStats extends Widget
         $startDate = $this->filters['startDate'] ?? now()->subDays(30);
         $endDate = $this->filters['endDate'] ?? now();
 
+        // Get all schedule IDs related to the restaurant
+        $scheduleIds = $this->restaurant->schedules->pluck('id');
+
         // Calculate for the current time frame
-        $bookingsQuery = Booking::where('concierge_id', $this->concierge->id)
+        $bookingsQuery = Booking::whereIn('schedule_id', $scheduleIds)
             ->whereBetween('created_at', [$startDate, $endDate]);
 
-        $conciergeEarnings = $bookingsQuery->sum('concierge_earnings');
+        $restaurantEarnings = $bookingsQuery->sum('restaurant_earnings');
         $charityEarnings = $bookingsQuery->sum('charity_earnings');
         $numberOfBookings = $bookingsQuery->count();
 
-        // Calculate the concierge's contribution to the charity
-        $charityPercentage = $this->concierge->user->charity_percentage / 100;
-        $originalEarnings = $conciergeEarnings / (1 - $charityPercentage);
-        $conciergeContribution = $originalEarnings - $conciergeEarnings;
+        // Calculate the restaurant's contribution to the charity
+        $charityPercentage = $this->restaurant->user->charity_percentage / 100;
+        $originalEarnings = $restaurantEarnings / (1 - $charityPercentage);
+        $restaurantContribution = $originalEarnings - $restaurantEarnings;
 
         // Calculate for the previous time frame
         $timeFrameLength = $startDate->diffInDays($endDate);
         $prevStartDate = $startDate->copy()->subDays($timeFrameLength);
         $prevEndDate = $endDate->copy()->subDays($timeFrameLength);
 
-        $prevBookingsQuery = Booking::where('concierge_id', $this->concierge->id)
+        $prevBookingsQuery = Booking::whereIn('schedule_id', $scheduleIds)
             ->whereBetween('created_at', [$prevStartDate, $prevEndDate]);
 
-        $prevConciergeEarnings = $prevBookingsQuery->sum('concierge_earnings');
+        $prevRestaurantEarnings = $prevBookingsQuery->sum('restaurant_earnings');
         $prevCharityEarnings = $prevBookingsQuery->sum('charity_earnings');
         $prevNumberOfBookings = $prevBookingsQuery->count();
 
-        // Calculate the concierge's contribution to the charity for the previous time frame.
-        $prevOriginalEarnings = $prevConciergeEarnings / (1 - $charityPercentage);
-        $prevConciergeContribution = $prevOriginalEarnings - $prevConciergeEarnings;
+        // Calculate the restaurant's contribution to the charity for the previous time frame.
+        $prevOriginalEarnings = $prevRestaurantEarnings / (1 - $charityPercentage);
+        $prevRestaurantContribution = $prevOriginalEarnings - $prevRestaurantEarnings;
 
         // Calculate the difference for each point and add a new property indicating if it was up or down from the previous time frame.
-        $this->stats = new ConciergeStatData([
+        $this->stats = new RestaurantStatData([
             'current' => [
                 'original_earnings' => $originalEarnings,
-                'concierge_earnings' => $conciergeEarnings,
+                'restaurant_earnings' => $restaurantEarnings,
                 'charity_earnings' => $charityEarnings,
                 'number_of_bookings' => $numberOfBookings,
-                'concierge_contribution' => $conciergeContribution,
+                'restaurant_contribution' => $restaurantContribution,
             ],
             'previous' => [
                 'original_earnings' => $prevOriginalEarnings,
-                'concierge_earnings' => $prevConciergeEarnings,
+                'restaurant_earnings' => $prevRestaurantEarnings,
                 'charity_earnings' => $prevCharityEarnings,
                 'number_of_bookings' => $prevNumberOfBookings,
-                'concierge_contribution' => $prevConciergeContribution,
+                'restaurant_contribution' => $prevRestaurantContribution,
             ],
             'difference' => [
                 'original_earnings' => $originalEarnings - $prevOriginalEarnings,
                 'original_earnings_up' => $originalEarnings >= $prevOriginalEarnings,
-                'concierge_earnings' => $conciergeEarnings - $prevConciergeEarnings,
-                'concierge_earnings_up' => $conciergeEarnings >= $prevConciergeEarnings,
+                'restaurant_earnings' => $restaurantEarnings - $prevRestaurantEarnings,
+                'restaurant_earnings_up' => $restaurantEarnings >= $prevRestaurantEarnings,
                 'charity_earnings' => $charityEarnings - $prevCharityEarnings,
                 'charity_earnings_up' => $charityEarnings >= $prevCharityEarnings,
                 'number_of_bookings' => $numberOfBookings - $prevNumberOfBookings,
                 'number_of_bookings_up' => $numberOfBookings >= $prevNumberOfBookings,
-                'concierge_contribution' => $conciergeContribution - $prevConciergeContribution,
-                'concierge_contribution_up' => $conciergeContribution >= $prevConciergeContribution,
+                'restaurant_contribution' => $restaurantContribution - $prevRestaurantContribution,
+                'restaurant_contribution_up' => $restaurantContribution >= $prevRestaurantContribution,
             ],
             'formatted' => [
                 'original_earnings' => $this->formatNumber($originalEarnings),
-                'concierge_earnings' => $this->formatNumber($conciergeEarnings),
+                'restaurant_earnings' => $this->formatNumber($restaurantEarnings),
                 'charity_earnings' => $this->formatNumber($charityEarnings),
                 'number_of_bookings' => $numberOfBookings, // Assuming this is an integer count, no need to format
-                'concierge_contribution' => $this->formatNumber($conciergeContribution),
+                'restaurant_contribution' => $this->formatNumber($restaurantContribution),
                 'difference' => [
                     'original_earnings' => $this->formatNumber($originalEarnings - $prevOriginalEarnings),
-                    'concierge_earnings' => $this->formatNumber($conciergeEarnings - $prevConciergeEarnings),
+                    'restaurant_earnings' => $this->formatNumber($restaurantEarnings - $prevRestaurantEarnings),
                     'charity_earnings' => $this->formatNumber($charityEarnings - $prevCharityEarnings),
                     'number_of_bookings' => $numberOfBookings - $prevNumberOfBookings, // Assuming this is an integer count, no need to format
-                    'concierge_contribution' => $this->formatNumber($conciergeContribution - $prevConciergeContribution),
+                    'restaurant_contribution' => $this->formatNumber($restaurantContribution - $prevRestaurantContribution),
                 ],
             ],
         ]);
@@ -108,9 +106,9 @@ class ConciergeStats extends Widget
     {
         $number = round($number / 100, 2); // Convert to dollars from cents and round to nearest two decimal places.
         if ($number >= 1000) {
-            return '$' . number_format($number / 1000, 1) . 'k'; // Convert to k if number is greater than or equal to 1000 and keep one decimal place.
+            return '$'.number_format($number / 1000, 1).'k'; // Convert to k if number is greater than or equal to 1000 and keep one decimal place.
         }
 
-        return '$' . $number; // Otherwise, return the number
+        return '$'.$number; // Otherwise, return the number
     }
 }
