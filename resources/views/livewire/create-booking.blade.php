@@ -2,7 +2,6 @@
     <x-filament-panels::logo/>
     <div class="flex flex-col items-center pt-20 flex-grow max-w-lg mx-auto">
         {{--    <div class="flex flex-col items-center pt-20 sm:pt-0 sm:justify-center flex-grow max-w-lg mx-auto">--}}
-
         @if (!$paymentSuccess)
             <div class="flex flex-col items-center gap-3">
                 <h1 class="text-3xl text-center sanomat-font font-semibold">Secure Your Reservation</h1>
@@ -21,7 +20,7 @@
                 </div>
 
 
-                <form id="form">
+                <form id="form" class="w-full">
                     <fieldset
                         {{ $isLoading ? 'disabled' : '' }} class="flex flex-col items-center gap-2 disabled:opacity-50">
                         <div class="flex w-full gap-2 items-center">

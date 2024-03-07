@@ -33,6 +33,7 @@ class Booking extends Model
         'booking_at',
         'stripe_charge',
         'stripe_charge_id',
+        'status',
     ];
 
     protected $appends = [
@@ -104,11 +105,11 @@ class Booking extends Model
         $platformPercentage = 1 - $restaurantPercentage;
         $conciergePercentage = 0.25;
 
-        $restaurantPayout = (int) ($totalFee * $restaurantPercentage);
-        $platformPayout = (int) ($totalFee * $platformPercentage);
+        $restaurantPayout = (int)($totalFee * $restaurantPercentage);
+        $platformPayout = (int)($totalFee * $platformPercentage);
 
         // Calculate the concierge's share and subtract it from the platform's share.
-        $conciergePayout = (int) ($platformPayout * $conciergePercentage); // Concierge gets 25% of platform's share
+        $conciergePayout = (int)($platformPayout * $conciergePercentage); // Concierge gets 25% of platform's share
         $platformPayout -= $conciergePayout;
 
         // Define the charity percentages for each party
@@ -117,9 +118,9 @@ class Booking extends Model
         $platformCharityPercentage = 0.05;
 
         // Calculate the charity's share from each party
-        $restaurantCharityPayout = (int) ($restaurantPayout * $restaurantCharityPercentage);  // 5% of restaurant's share
-        $platformCharityPayout = (int) ($platformPayout * $platformCharityPercentage);  // 5% of platform's share
-        $conciergeCharityPayout = (int) ($conciergePayout * $conciergeCharityPercentage);  // 5% of concierge's share
+        $restaurantCharityPayout = (int)($restaurantPayout * $restaurantCharityPercentage);  // 5% of restaurant's share
+        $platformCharityPayout = (int)($platformPayout * $platformCharityPercentage);  // 5% of platform's share
+        $conciergeCharityPayout = (int)($conciergePayout * $conciergeCharityPercentage);  // 5% of concierge's share
 
         // Subtract the charity's share from the restaurant's, platform's, and concierge's shares
         $restaurantPayout -= $restaurantCharityPayout;
@@ -183,6 +184,6 @@ class Booking extends Model
 
     public function getGuestNameAttribute(): string
     {
-        return $this->guest_first_name.' '.$this->guest_last_name;
+        return $this->guest_first_name . ' ' . $this->guest_last_name;
     }
 }

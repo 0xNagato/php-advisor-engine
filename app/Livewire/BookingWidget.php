@@ -2,6 +2,7 @@
 
 namespace App\Livewire;
 
+use App\Enums\BookingStatus;
 use App\Models\Booking;
 use App\Models\Restaurant;
 use App\Models\Schedule;
@@ -12,31 +13,22 @@ use Livewire\Attributes\Session;
 
 class BookingWidget extends Widget
 {
+    protected static string $view = 'filament.widgets.booking-widget';
     /**
      * @var Collection<Restaurant>|null
      */
     public ?Collection $restaurants;
-
     public ?Restaurant $selectedRestaurant;
-
     public int|string|null $selectedRestaurantId;
-
     public ?Schedule $selectedSchedule;
-
     public int|string|null $selectedScheduleId;
-
     public ?int $guestCount;
-
     #[Session]
     public ?string $qrCode;
-
     #[Session]
     public ?string $bookingUrl;
-
-    #[Session]
+    
     public ?Booking $booking;
-
-    protected static string $view = 'filament.widgets.booking-widget';
 
     public static function canView(): bool
     {
@@ -68,7 +60,7 @@ class BookingWidget extends Widget
             'schedule_id' => $this->selectedScheduleId,
             'guest_count' => $this->guestCount,
             'concierge_id' => auth()->user()->concierge->id,
-            'status' => 'pending',
+            'status' => BookingStatus::PENDING,
             'booking_at' => $this->selectedSchedule->start_time,
         ]);
 
