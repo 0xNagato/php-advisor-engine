@@ -27,7 +27,8 @@ class BookingWidget extends Widget
     public ?string $qrCode;
     #[Session]
     public ?string $bookingUrl;
-    
+
+    #[Session]
     public ?Booking $booking;
 
     public static function canView(): bool
