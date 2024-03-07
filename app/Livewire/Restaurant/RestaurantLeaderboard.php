@@ -39,7 +39,6 @@ class RestaurantLeaderboard extends BaseWidget
 
         return $table
             ->query($query)
-            ->paginated(false)
             ->columns(components: [
                 Tables\Columns\TextColumn::make('rank')
                     ->label('Rank')

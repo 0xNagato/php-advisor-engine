@@ -1,6 +1,6 @@
 <?php
 
-use App\Filament\Widgets\ScheduleManager;
+use App\Livewire\ScheduleManager;
 use Livewire\Livewire;
 
 it('renders successfully', function () {
