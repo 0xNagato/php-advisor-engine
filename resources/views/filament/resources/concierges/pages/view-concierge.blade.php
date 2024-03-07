@@ -2,7 +2,7 @@
     <style>
         .fi-header {
             @media only screen and (max-width: 640px) {
-                
+
             }
         }
 
@@ -18,6 +18,7 @@
                 position: relative !important;
                 justify-content: end !important;
                 top: -48px;
+                margin-bottom: -68px;
             }
         }
     </style>

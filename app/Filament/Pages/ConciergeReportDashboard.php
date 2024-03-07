@@ -2,6 +2,9 @@
 
 namespace App\Filament\Pages;
 
+use App\Livewire\Concierge\ConciergeLeaderboard;
+use App\Livewire\Concierge\ConciergeRecentBookings;
+use App\Livewire\Concierge\ConciergeStats;
 use Filament\Forms\Components\DatePicker;
 use Filament\Pages\Dashboard;
 
@@ -10,6 +13,8 @@ class ConciergeReportDashboard extends Dashboard
     use Dashboard\Concerns\HasFiltersAction;
 
     protected static ?string $title = 'My Earnings';
+
+    protected static string $view = 'filament.resources.concierges.pages.view-concierge';
 
     protected static string $routePath = 'concierge/report';
 
@@ -30,32 +35,37 @@ class ConciergeReportDashboard extends Dashboard
         ];
     }
 
+    public function getHeaderWidgets(): array
+    {
+        return [
+            ConciergeStats::make([
+                'concierge' => auth()->user()->concierge,
+                'columnSpan' => 'full',
+            ]),
+            ConciergeRecentBookings::make([
+                'concierge' => auth()->user()->concierge,
+                'columnSpan' => '1',
+            ]),
+            ConciergeLeaderboard::make([
+                'concierge' => auth()->user()->concierge,
+                'showFilters' => true,
+                'columnSpan' => 1,
+            ]),
+        ];
+    }
+
     protected function getHeaderActions(): array
     {
         return [
             Dashboard\Actions\FilterAction::make()
                 ->label('Date Range')
                 ->icon('heroicon-o-calendar')
+                ->iconButton()
                 ->form([
                     DatePicker::make('startDate'),
                     DatePicker::make('endDate'),
-                    // ...
                 ]),
         ];
     }
 
-    // public function filtersForm(Form $form): Form
-    // {
-    //     return $form
-    //         ->schema([
-    //             Section::make()
-    //                 ->schema([
-    //                     DatePicker::make('startDate')
-    //                         ->default(now()->subDays(30)),
-    //                     DatePicker::make('endDate')
-    //                         ->default(now()),
-    //                 ])
-    //                 ->columns(2),
-    //         ]);
-    // }
 }
