@@ -10,7 +10,9 @@ class AdminDashboard extends Dashboard
 {
     use Dashboard\Concerns\HasFiltersAction;
 
-    protected static ?string $title = 'Admin Dashboard';
+    protected static ?string $title = 'Dashboard';
+
+    protected static string $view = 'filament.resources.concierges.pages.view-concierge';
 
     protected static string $routePath = 'admin';
 
@@ -34,6 +36,7 @@ class AdminDashboard extends Dashboard
         return [
             Dashboard\Actions\FilterAction::make()
                 ->label('Date Range')
+                ->iconButton()
                 ->icon('heroicon-o-calendar')
                 ->form([
                     DatePicker::make('startDate'),
@@ -43,13 +46,21 @@ class AdminDashboard extends Dashboard
             Action::Make('addConcierge')
                 ->label('Concierge')
                 ->link()
-                ->icon('heroicon-m-plus-circle')
-                ->url(fn (): string => route('filament.admin.resources.concierges.create')),
+                ->icon('govicon-user-suit')
+                ->iconButton()
+                ->url(fn(): string => route('filament.admin.resources.concierges.create')),
             Action::Make('addRestaurant')
                 ->label('Restaurant')
                 ->link()
-                ->icon('heroicon-m-plus-circle')
-                ->url(fn (): string => route('filament.admin.resources.restaurants.create')),
+                ->iconButton()
+                ->icon('heroicon-o-building-storefront')
+                ->url(fn(): string => route('filament.admin.resources.restaurants.create')),
+            Action::Make('addPartner')
+                ->label('Partner')
+                ->link()
+                ->iconButton()
+                ->icon('gmdi-business-center-o')
+                ->url(fn(): string => route('filament.admin.resources.partners.create')),
         ];
     }
 }

@@ -13,6 +13,7 @@
         "bezhansalleh/filament-shield": "^3.1",
         "chillerlan/php-qrcode": "^5.0",
         "codeat3/blade-google-material-design-icons": "^1.19",
+        "codeat3/blade-govicons": "^1.4",
         "filament/filament": "^3.1",
         "guzzlehttp/guzzle": "^7.2",
         "itsgoingd/clockwork": "^5.1",

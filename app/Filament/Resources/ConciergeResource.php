@@ -17,7 +17,7 @@ class ConciergeResource extends Resource
 {
     protected static ?string $model = Concierge::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-building-office';
+    protected static ?string $navigationIcon = 'govicon-user-suit';
 
     public static function form(Form $form): Form
     {
