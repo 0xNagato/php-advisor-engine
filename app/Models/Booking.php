@@ -191,7 +191,6 @@ class Booking extends Model
         if ($totalPayouts !== $totalFee) {
             throw new RuntimeException('The sum of all payouts does not equal the total fee.');
         }
-        ds($payouts);
 
         return $payouts;
     }
@@ -242,7 +241,7 @@ class Booking extends Model
         if ($this->partnerConcierge && $this->concierge->user->partner_referral_id === $this->partnerConcierge->id) {
             $earnings += $this->partner_concierge_fee;
         }
-        
+
         if ($this->partnerRestaurant && $this->schedule->restaurant->user->partner_referral_id === $this->partnerRestaurant->id) {
             $earnings += $this->partner_restaurant_fee;
         }
