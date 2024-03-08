@@ -89,7 +89,6 @@ class PartnerStats extends Widget
                 ],
             ],
         ]);
-        ]);
     }
 
     private function formatNumber($number): string
