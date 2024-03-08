@@ -8,7 +8,6 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Support\Str;
-use Log;
 use RuntimeException;
 
 class Booking extends Model
@@ -143,19 +142,14 @@ class Booking extends Model
         $partnerConciergeFee = 0;
         $partnerRestaurantFee = 0;
 
-        if ($this->concierge->user->partner_referral_id) {
-            $partnerConcierge = User::find($this->concierge->user->partner_referral_id);
-            if ($partnerConcierge && $partnerConcierge->partner) {
-                $partnerConciergeFee = (int)($platformPayout * ($partnerConcierge->partner->percentage / 100));
-            }
+        if ($this->partnerConcierge && $this->partnerConcierge->partner) {
+            $partnerConciergeFee = (int)($platformPayout * ($this->partnerConcierge->partner->percentage / 100));
         }
 
-        if ($this->schedule->restaurant->user->partner_referral_id) {
-            $partnerRestaurant = User::find($this->schedule->restaurant->user->partner_referral_id);
-            if ($partnerRestaurant && $partnerRestaurant->partner) {
-                $partnerRestaurantFee = (int)($platformPayout * ($partnerRestaurant->partner->percentage / 100));
-            }
+        if ($this->partnerRestaurant && $this->partnerRestaurant->partner) {
+            $partnerRestaurantFee = (int)($totalFee * ($this->partnerRestaurant->partner->percentage / 100));
         }
+
         // Subtract the partner fees from the platform fee
         $platformPayout -= $partnerConciergeFee;
         $platformPayout -= $partnerRestaurantFee;
@@ -163,10 +157,22 @@ class Booking extends Model
         // If there is more than one partner, split the earnings proportionally based on their percentages
         if ($partnerConciergeFee > 0 && $partnerRestaurantFee > 0) {
             $totalPartnerFee = $partnerConciergeFee + $partnerRestaurantFee;
-            $totalPercentage = $partnerConcierge->partner->percentage + $partnerRestaurant->partner->percentage;
 
-            $partnerConciergeFee = (int)($totalPartnerFee * ($partnerConcierge->partner->percentage / $totalPercentage));
-            $partnerRestaurantFee = $totalPartnerFee - $partnerConciergeFee;
+            $totalPercentage = 0;
+
+            if ($this->partnerConcierge && $this->partnerConcierge->partner) {
+                $totalPercentage += $this->partnerConcierge->partner->percentage;
+            }
+
+            if ($this->partnerRestaurant && $this->partnerRestaurant->partner) {
+                $totalPercentage += $this->partnerRestaurant->partner->percentage;
+            }
+
+            if ($this->partnerConcierge && $this->partnerConcierge->partner && $this->partnerRestaurant && $this->partnerRestaurant->partner) {
+                $totalPercentage = $this->partnerConcierge->partner->percentage + $this->partnerRestaurant->partner->percentage;
+                $partnerConciergeFee = (int)($totalPartnerFee * ($this->partnerConcierge->partner->percentage / $totalPercentage));
+                $partnerRestaurantFee = $totalPartnerFee - $partnerConciergeFee;
+            }
         }
         // Calculate the total charity's share
         $charityPayout = $restaurantCharityPayout + $platformCharityPayout + $conciergeCharityPayout;
@@ -233,18 +239,12 @@ class Booking extends Model
     {
         $earnings = 0;
 
-        // Check if the partner is a concierge partner
-        if ($this->concierge->user->partner_referral_id == $this->partnerConcierge->id) {
+        if ($this->partnerConcierge && $this->concierge->user->partner_referral_id === $this->partnerConcierge->id) {
             $earnings += $this->partner_concierge_fee;
-        } else {
-            Log::info('Concierge partner condition not met for booking id: ' . $this->id);
         }
-
-        // Check if the partner is a restaurant partner
-        if ($this->schedule->restaurant->user->partner_referral_id == $this->partnerRestaurant->id) {
+        
+        if ($this->partnerRestaurant && $this->schedule->restaurant->user->partner_referral_id === $this->partnerRestaurant->id) {
             $earnings += $this->partner_restaurant_fee;
-        } else {
-            Log::info('Restaurant partner condition not met for booking id: ' . $this->id);
         }
 
         return $earnings;

@@ -35,10 +35,10 @@ class PartnerRecentBookings extends BaseWidget
         $startDate = $this->filters['startDate'] ?? now()->subDays(30);
         $endDate = $this->filters['endDate'] ?? now();
 
-        $query = Booking::whereHas('concierge.user', function ($query) {
-            $query->where('partner_referral_id', $this->partner->id);
-        })->orWhereHas('schedule.restaurant.user', function ($query) {
-            $query->where('partner_referral_id', $this->partner->id);
+        $partnerWithBookings = Partner::withAllBookings()->find($this->partner->id);
+
+        $query = Booking::where(function ($query) use ($partnerWithBookings) {
+            $query->whereIn('id', $partnerWithBookings->conciergeBookings->pluck('id')->concat($partnerWithBookings->restaurantBookings->pluck('id')));
         })->whereBetween('created_at', [$startDate, $endDate])->orderByDesc('created_at');
 
         return $table
