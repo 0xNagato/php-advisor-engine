@@ -47,6 +47,13 @@ class ConciergeCreated extends Notification
             ->line('If you did not expect to receive an invitation to the Prima, you may discard this email.');
     }
 
+    protected function passwordResetUrl(): string
+    {
+        $token = Password::createToken($this->user);
+
+        return Filament::getResetPasswordUrl($token, $this->user);
+    }
+
     public function toTwilio(object $notifiable): TwilioSmsMessage|TwilioMessage
     {
         return (new TwilioSmsMessage())
@@ -61,12 +68,5 @@ class ConciergeCreated extends Notification
         return [
 
         ];
-    }
-
-    protected function passwordResetUrl(): string
-    {
-        $token = Password::createToken($this->user);
-
-        return Filament::getResetPasswordUrl($token, $this->user);
     }
 }
