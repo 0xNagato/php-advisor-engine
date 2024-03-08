@@ -3,6 +3,7 @@
 namespace App\Filament\Pages;
 
 use App\Livewire\Concierge\ConciergeLeaderboard;
+use App\Livewire\Partner\PartnerLeaderboard;
 use App\Livewire\Restaurant\RestaurantLeaderboard;
 use Filament\Actions\Action;
 use Filament\Forms\Components\DatePicker;
@@ -38,6 +39,7 @@ class AdminDashboard extends Dashboard
         return [
             ConciergeLeaderboard::make(),
             RestaurantLeaderboard::make(),
+            PartnerLeaderboard::make()
         ];
     }
 
