@@ -17,7 +17,6 @@ class ListPartners extends ListRecords
 
     // protected static string $view = 'filament.resources.concierges.pages.view-concierge';
 
-
     public function mount(): void
     {
         $this->filters = [
@@ -25,7 +24,7 @@ class ListPartners extends ListRecords
             'endDate' => $this->filters['endDate'] ?? now(),
         ];
     }
-    
+
     protected function getHeaderActions(): array
     {
         return [

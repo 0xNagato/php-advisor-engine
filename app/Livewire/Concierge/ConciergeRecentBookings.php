@@ -57,7 +57,7 @@ class ConciergeRecentBookings extends BaseWidget
                     ->alignRight()
                     ->label('Earnings')
                     ->currency('USD')
-                    ->hidden((bool)!auth()->user()?->hasRole('concierge') && !$this->hideConcierge),
+                    ->hidden((bool) ! auth()->user()?->hasRole('concierge') && ! $this->hideConcierge),
                 TextColumn::make('charity_earnings')
                     ->alignRight()
                     ->currency('USD')

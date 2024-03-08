@@ -28,6 +28,7 @@ class Partner extends Model
     public function getLastMonthBookingsAttribute(): int
     {
         $startDate = now()->subDays(30);
+
         return Booking::where('partner_concierge_id', $this->id)
             ->orWhere('partner_restaurant_id', $this->id)
             ->where('created_at', '>=', $startDate)
