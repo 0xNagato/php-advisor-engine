@@ -65,14 +65,10 @@ class PartnerStats extends Widget
             'current' => [
                 'partner_earnings' => $partnerConciergeEarnings + $partnerRestaurantEarnings,
                 'number_of_bookings' => $numberOfConciergeBookings + $numberOfRestaurantBookings,
-                'partner_concierge_fee' => $partnerConciergeEarnings,
-                'partner_restaurant_fee' => $partnerRestaurantEarnings,
             ],
             'previous' => [
                 'partner_earnings' => $prevPartnerConciergeEarnings + $prevPartnerRestaurantEarnings,
                 'number_of_bookings' => $prevNumberOfConciergeBookings + $prevNumberOfRestaurantBookings,
-                'partner_concierge_fee' => $prevPartnerConciergeEarnings,
-                'partner_restaurant_fee' => $prevPartnerRestaurantEarnings,
             ],
             'difference' => [
                 'partner_earnings' => ($partnerConciergeEarnings + $partnerRestaurantEarnings) - ($prevPartnerConciergeEarnings + $prevPartnerRestaurantEarnings),
