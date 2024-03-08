@@ -1,15 +1,14 @@
 <?php
 
-namespace App\Livewire\Concierge;
+namespace App\Livewire\Admin;
 
 use App\Models\Booking;
-use App\Models\Concierge;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Filament\Widgets\Concerns\InteractsWithPageFilters;
 use Filament\Widgets\TableWidget as BaseWidget;
 
-class ConciergeRecentBookings extends BaseWidget
+class AdminRecentBookings extends BaseWidget
 {
     use InteractsWithPageFilters;
 
@@ -18,10 +17,6 @@ class ConciergeRecentBookings extends BaseWidget
     protected static ?string $pollingInterval = null;
 
     protected static ?int $sort = 3;
-
-    public ?Concierge $concierge;
-
-    public bool $hideConcierge = false;
 
     public int|string|array $columnSpan;
 
@@ -32,7 +27,7 @@ class ConciergeRecentBookings extends BaseWidget
 
     public function table(Table $table): Table
     {
-        $query = Booking::where('concierge_id', $this->concierge->id);
+        $query = Booking::query();
 
         $startDate = $this->filters['startDate'] ?? now()->subDays(30);
         $endDate = $this->filters['endDate'] ?? now();
@@ -53,11 +48,14 @@ class ConciergeRecentBookings extends BaseWidget
                 TextColumn::make('booking_at')
                     ->label('Date')
                     ->dateTime('D, M j'),
-                TextColumn::make('concierge_earnings')
+                TextColumn::make('platform_earnings')
                     ->alignRight()
                     ->label('Earnings')
+                    ->currency('USD'),
+                TextColumn::make('total_fee')
+                    ->alignRight()
                     ->currency('USD')
-                    ->hidden((bool)!auth()->user()?->hasRole('concierge') && !$this->hideConcierge),
+                    ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('charity_earnings')
                     ->alignRight()
                     ->currency('USD')

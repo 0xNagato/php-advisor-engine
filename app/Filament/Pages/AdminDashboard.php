@@ -2,6 +2,7 @@
 
 namespace App\Filament\Pages;
 
+use App\Livewire\Admin\AdminRecentBookings;
 use App\Livewire\Admin\AdminStats;
 use App\Livewire\Concierge\ConciergeLeaderboard;
 use App\Livewire\Partner\PartnerLeaderboard;
@@ -39,6 +40,7 @@ class AdminDashboard extends Dashboard
     {
         return [
             AdminStats::make(),
+            AdminRecentBookings::make(),
             ConciergeLeaderboard::make(),
             RestaurantLeaderboard::make(),
             PartnerLeaderboard::make()
