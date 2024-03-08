@@ -2,6 +2,7 @@
 
 namespace App\Filament\Pages;
 
+use App\Livewire\Admin\AdminStats;
 use App\Livewire\Concierge\ConciergeLeaderboard;
 use App\Livewire\Partner\PartnerLeaderboard;
 use App\Livewire\Restaurant\RestaurantLeaderboard;
@@ -37,6 +38,7 @@ class AdminDashboard extends Dashboard
     public function getHeaderWidgets(): array
     {
         return [
+            AdminStats::make(),
             ConciergeLeaderboard::make(),
             RestaurantLeaderboard::make(),
             PartnerLeaderboard::make()
