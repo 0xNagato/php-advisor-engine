@@ -3,7 +3,6 @@
 namespace App\Livewire\Partner;
 
 use App\Data\PartnerStatData;
-use App\Models\Booking;
 use App\Models\Partner;
 use Filament\Widgets\Widget;
 
@@ -25,17 +24,13 @@ class PartnerStats extends Widget
         $startDate = $this->filters['startDate'] ?? now()->subDays(30);
         $endDate = $this->filters['endDate'] ?? now();
 
-        // Get all booking IDs related to the partner
-        $partnerWithBookings = Partner::withAllBookings()->find($this->partner->id);
-        $bookingIds = $partnerWithBookings->conciergeBookings->pluck('id')->concat($partnerWithBookings->restaurantBookings->pluck('id'));
-
-        // Calculate for the current time frame
-        $bookingsQuery = Booking::whereIn('id', $bookingIds)
+        // Get all bookings related to the partner
+        $partnerWithBookings = Partner::with(['conciergeBookings', 'restaurantBookings'])->find($this->partner->id);
+        $bookingsQuery = $partnerWithBookings->conciergeBookings->concat($partnerWithBookings->restaurantBookings)
             ->whereBetween('created_at', [$startDate, $endDate]);
 
         // Calculate partner earnings as the sum of partner_concierge_fee and partner_restaurant_fee
-        $partnerEarnings = $bookingsQuery->where('partner_concierge_id', $this->partner->id)->sum('partner_concierge_fee')
-            + $bookingsQuery->where('partner_restaurant_id', $this->partner->id)->sum('partner_restaurant_fee');
+        $partnerEarnings = $bookingsQuery->sum('partner_concierge_fee') + $bookingsQuery->sum('partner_restaurant_fee');
 
         $numberOfBookings = $bookingsQuery->count();
 
@@ -44,12 +39,11 @@ class PartnerStats extends Widget
         $prevStartDate = $startDate->copy()->subDays($timeFrameLength);
         $prevEndDate = $endDate->copy()->subDays($timeFrameLength);
 
-        $prevBookingsQuery = Booking::whereIn('id', $bookingIds)
+        $prevBookingsQuery = $partnerWithBookings->conciergeBookings->concat($partnerWithBookings->restaurantBookings)
             ->whereBetween('created_at', [$prevStartDate, $prevEndDate]);
 
         // Calculate previous partner earnings as the sum of partner_concierge_fee and partner_restaurant_fee
-        $prevPartnerEarnings = $prevBookingsQuery->where('partner_concierge_id', $this->partner->id)->sum('partner_concierge_fee')
-            + $prevBookingsQuery->where('partner_restaurant_id', $this->partner->id)->sum('partner_restaurant_fee');
+        $prevPartnerEarnings = $prevBookingsQuery->sum('partner_concierge_fee') + $prevBookingsQuery->sum('partner_restaurant_fee');
 
         $prevNumberOfBookings = $prevBookingsQuery->count();
 
