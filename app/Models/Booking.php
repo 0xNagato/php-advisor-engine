@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Support\Str;
+use Log;
 use RuntimeException;
 
 class Booking extends Model
@@ -117,11 +118,11 @@ class Booking extends Model
         $platformPercentage = 1 - $restaurantPercentage;
         $conciergePercentage = 0.25;
 
-        $restaurantPayout = (int) ($totalFee * $restaurantPercentage);
-        $platformPayout = (int) ($totalFee * $platformPercentage);
+        $restaurantPayout = (int)($totalFee * $restaurantPercentage);
+        $platformPayout = (int)($totalFee * $platformPercentage);
 
         // Calculate the concierge's share and subtract it from the platform's share.
-        $conciergePayout = (int) ($platformPayout * $conciergePercentage); // Concierge gets 25% of platform's share
+        $conciergePayout = (int)($platformPayout * $conciergePercentage); // Concierge gets 25% of platform's share
         $platformPayout -= $conciergePayout;
 
         // Define the charity percentages for each party
@@ -130,9 +131,9 @@ class Booking extends Model
         $platformCharityPercentage = 0.05;
 
         // Calculate the charity's share from each party
-        $restaurantCharityPayout = (int) ($restaurantPayout * $restaurantCharityPercentage);  // 5% of restaurant's share
-        $platformCharityPayout = (int) ($platformPayout * $platformCharityPercentage);  // 5% of platform's share
-        $conciergeCharityPayout = (int) ($conciergePayout * $conciergeCharityPercentage);  // 5% of concierge's share
+        $restaurantCharityPayout = (int)($restaurantPayout * $restaurantCharityPercentage);  // 5% of restaurant's share
+        $platformCharityPayout = (int)($platformPayout * $platformCharityPercentage);  // 5% of platform's share
+        $conciergeCharityPayout = (int)($conciergePayout * $conciergeCharityPercentage);  // 5% of concierge's share
 
         // Subtract the charity's share from the restaurant's, platform's, and concierge's shares
         $restaurantPayout -= $restaurantCharityPayout;
@@ -145,14 +146,14 @@ class Booking extends Model
         if ($this->concierge->user->partner_referral_id) {
             $partnerConcierge = User::find($this->concierge->user->partner_referral_id);
             if ($partnerConcierge && $partnerConcierge->partner) {
-                $partnerConciergeFee = (int) ($platformPayout * ($partnerConcierge->partner->percentage / 100));
+                $partnerConciergeFee = (int)($platformPayout * ($partnerConcierge->partner->percentage / 100));
             }
         }
 
         if ($this->schedule->restaurant->user->partner_referral_id) {
             $partnerRestaurant = User::find($this->schedule->restaurant->user->partner_referral_id);
             if ($partnerRestaurant && $partnerRestaurant->partner) {
-                $partnerRestaurantFee = (int) ($platformPayout * ($partnerRestaurant->partner->percentage / 100));
+                $partnerRestaurantFee = (int)($platformPayout * ($partnerRestaurant->partner->percentage / 100));
             }
         }
         // Subtract the partner fees from the platform fee
@@ -164,7 +165,7 @@ class Booking extends Model
             $totalPartnerFee = $partnerConciergeFee + $partnerRestaurantFee;
             $totalPercentage = $partnerConcierge->partner->percentage + $partnerRestaurant->partner->percentage;
 
-            $partnerConciergeFee = (int) ($totalPartnerFee * ($partnerConcierge->partner->percentage / $totalPercentage));
+            $partnerConciergeFee = (int)($totalPartnerFee * ($partnerConcierge->partner->percentage / $totalPercentage));
             $partnerRestaurantFee = $totalPartnerFee - $partnerConciergeFee;
         }
         // Calculate the total charity's share
@@ -221,6 +222,31 @@ class Booking extends Model
 
     public function getGuestNameAttribute(): string
     {
-        return $this->guest_first_name.' '.$this->guest_last_name;
+        return $this->guest_first_name . ' ' . $this->guest_last_name;
+    }
+
+    // In Booking.php
+
+// In Booking.php
+
+    public function getPartnerEarningsAttribute()
+    {
+        $earnings = 0;
+
+        // Check if the partner is a concierge partner
+        if ($this->concierge->user->partner_referral_id == $this->partnerConcierge->id) {
+            $earnings += $this->partner_concierge_fee;
+        } else {
+            Log::info('Concierge partner condition not met for booking id: ' . $this->id);
+        }
+
+        // Check if the partner is a restaurant partner
+        if ($this->schedule->restaurant->user->partner_referral_id == $this->partnerRestaurant->id) {
+            $earnings += $this->partner_restaurant_fee;
+        } else {
+            Log::info('Restaurant partner condition not met for booking id: ' . $this->id);
+        }
+
+        return $earnings;
     }
 }
