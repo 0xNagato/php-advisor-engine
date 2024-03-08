@@ -37,9 +37,13 @@ class Partner extends Model
     public function getLastMonthsEarningsAttribute(): int
     {
         $startDate = now()->subDays(30);
-        return Booking::where('partner_concierge_id', $this->id)
+        $totalEarnings = Booking::where('partner_concierge_id', $this->id)
             ->orWhere('partner_restaurant_id', $this->id)
             ->where('created_at', '>=', $startDate)
-            ->sum('partner_concierge_fee', 'partner_restaurant_fee');
+            ->selectRaw('SUM(partner_concierge_fee) + SUM(partner_restaurant_fee) as total')
+            ->first()
+            ->total;
+
+        return $totalEarnings ?? 0;
     }
 }
