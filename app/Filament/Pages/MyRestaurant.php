@@ -25,7 +25,7 @@ class MyRestaurant extends Page
     public function getHeaderWidgets(): array
     {
         return [
-            ScheduleManager::make()
+            ScheduleManager::make(),
         ];
     }
 }

@@ -11,6 +11,24 @@ class Partner extends Model
 
     protected $fillable = [
         'user_id',
-        'percentage'
+        'percentage',
     ];
+
+    protected $appends = [
+        'last_months_earnings',
+    ];
+
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
+
+    public function getLastMonthsEarningsAttribute(): int
+    {
+        $startDate = now()->subDays(30);
+        return Booking::where('partner_concierge_id', $this->id)
+            ->orWhere('partner_restaurant_id', $this->id)
+            ->where('created_at', '>=', $startDate)
+            ->sum('partner_concierge_fee', 'partner_restaurant_fee');
+    }
 }

@@ -34,7 +34,7 @@ class Booking extends Model
         'stripe_charge_id',
         'status',
         'partner_concierge_id',
-        'partner_restaurant_id'
+        'partner_restaurant_id',
     ];
 
     protected $appends = [
@@ -87,7 +87,6 @@ class Booking extends Model
         return $total_fee * 100;
     }
 
-
     /**
      * Calculate the payouts for the booking.
      *
@@ -107,6 +106,7 @@ class Booking extends Model
      *     partner_concierge: int,
      *     partner_restaurant: int
      * } An associative array where the keys are the entities and the values are the payouts in cents.
+     *
      * @throws RuntimeException If the sum of all payouts does not equal the total fee.
      */
     public function calculatePayouts(): array
@@ -117,11 +117,11 @@ class Booking extends Model
         $platformPercentage = 1 - $restaurantPercentage;
         $conciergePercentage = 0.25;
 
-        $restaurantPayout = (int)($totalFee * $restaurantPercentage);
-        $platformPayout = (int)($totalFee * $platformPercentage);
+        $restaurantPayout = (int) ($totalFee * $restaurantPercentage);
+        $platformPayout = (int) ($totalFee * $platformPercentage);
 
         // Calculate the concierge's share and subtract it from the platform's share.
-        $conciergePayout = (int)($platformPayout * $conciergePercentage); // Concierge gets 25% of platform's share
+        $conciergePayout = (int) ($platformPayout * $conciergePercentage); // Concierge gets 25% of platform's share
         $platformPayout -= $conciergePayout;
 
         // Define the charity percentages for each party
@@ -130,9 +130,9 @@ class Booking extends Model
         $platformCharityPercentage = 0.05;
 
         // Calculate the charity's share from each party
-        $restaurantCharityPayout = (int)($restaurantPayout * $restaurantCharityPercentage);  // 5% of restaurant's share
-        $platformCharityPayout = (int)($platformPayout * $platformCharityPercentage);  // 5% of platform's share
-        $conciergeCharityPayout = (int)($conciergePayout * $conciergeCharityPercentage);  // 5% of concierge's share
+        $restaurantCharityPayout = (int) ($restaurantPayout * $restaurantCharityPercentage);  // 5% of restaurant's share
+        $platformCharityPayout = (int) ($platformPayout * $platformCharityPercentage);  // 5% of platform's share
+        $conciergeCharityPayout = (int) ($conciergePayout * $conciergeCharityPercentage);  // 5% of concierge's share
 
         // Subtract the charity's share from the restaurant's, platform's, and concierge's shares
         $restaurantPayout -= $restaurantCharityPayout;
@@ -142,18 +142,17 @@ class Booking extends Model
         $partnerConciergeFee = 0;
         $partnerRestaurantFee = 0;
 
-
         if ($this->concierge->user->partner_referral_id) {
             $partnerConcierge = User::find($this->concierge->user->partner_referral_id);
             if ($partnerConcierge && $partnerConcierge->partner) {
-                $partnerConciergeFee = (int)($platformPayout * ($partnerConcierge->partner->percentage / 100));
+                $partnerConciergeFee = (int) ($platformPayout * ($partnerConcierge->partner->percentage / 100));
             }
         }
 
         if ($this->schedule->restaurant->user->partner_referral_id) {
             $partnerRestaurant = User::find($this->schedule->restaurant->user->partner_referral_id);
             if ($partnerRestaurant && $partnerRestaurant->partner) {
-                $partnerRestaurantFee = (int)($platformPayout * ($partnerRestaurant->partner->percentage / 100));
+                $partnerRestaurantFee = (int) ($platformPayout * ($partnerRestaurant->partner->percentage / 100));
             }
         }
         // Subtract the partner fees from the platform fee
@@ -165,7 +164,7 @@ class Booking extends Model
             $totalPartnerFee = $partnerConciergeFee + $partnerRestaurantFee;
             $totalPercentage = $partnerConcierge->partner->percentage + $partnerRestaurant->partner->percentage;
 
-            $partnerConciergeFee = (int)($totalPartnerFee * ($partnerConcierge->partner->percentage / $totalPercentage));
+            $partnerConciergeFee = (int) ($totalPartnerFee * ($partnerConcierge->partner->percentage / $totalPercentage));
             $partnerRestaurantFee = $totalPartnerFee - $partnerConciergeFee;
         }
         // Calculate the total charity's share
@@ -185,7 +184,8 @@ class Booking extends Model
         if ($totalPayouts !== $totalFee) {
             throw new RuntimeException('The sum of all payouts does not equal the total fee.');
         }
-        
+        ds($payouts);
+
         return $payouts;
     }
 
@@ -221,6 +221,6 @@ class Booking extends Model
 
     public function getGuestNameAttribute(): string
     {
-        return $this->guest_first_name . ' ' . $this->guest_last_name;
+        return $this->guest_first_name.' '.$this->guest_last_name;
     }
 }
