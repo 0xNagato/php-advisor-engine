@@ -48,8 +48,13 @@ class PartnerResource extends Resource
                 Tables\Columns\TextColumn::make('percentage')
                     ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('last_months_earnings')
+                    ->label('Earned')
                     ->alignRight()
                     ->currency('USD'),
+                Tables\Columns\TextColumn::make('last_month_bookings')
+                    ->label('Bookings')
+                    ->alignRight()
+                    ->numeric(),
                 Tables\Columns\TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()
