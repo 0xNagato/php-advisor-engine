@@ -229,11 +229,7 @@ class Booking extends Model
     {
         return $this->guest_first_name . ' ' . $this->guest_last_name;
     }
-
-    // In Booking.php
-
-// In Booking.php
-
+    
     public function getPartnerEarningsAttribute()
     {
         $earnings = 0;
