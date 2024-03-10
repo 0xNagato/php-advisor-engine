@@ -143,11 +143,11 @@ class Booking extends Model
         $partnerRestaurantFee = 0;
 
         if ($this->partnerConcierge && $this->partnerConcierge->partner) {
-            $partnerConciergeFee = (int)($platformPayout * ($this->partnerConcierge->partner->percentage / 100));
+            $partnerConciergeFee = (int)($platformPayout * ((int)$this->partnerConcierge->partner->percentage / 100));
         }
 
         if ($this->partnerRestaurant && $this->partnerRestaurant->partner) {
-            $partnerRestaurantFee = (int)($totalFee * ($this->partnerRestaurant->partner->percentage / 100));
+            $partnerRestaurantFee = (int)($totalFee * ((int)$this->partnerRestaurant->partner->percentage / 100));
         }
 
         // Subtract the partner fees from the platform fee
@@ -161,16 +161,16 @@ class Booking extends Model
             $totalPercentage = 0;
 
             if ($this->partnerConcierge && $this->partnerConcierge->partner) {
-                $totalPercentage += $this->partnerConcierge->partner->percentage;
+                $totalPercentage += (int)$this->partnerConcierge->partner->percentage;
             }
 
             if ($this->partnerRestaurant && $this->partnerRestaurant->partner) {
-                $totalPercentage += $this->partnerRestaurant->partner->percentage;
+                $totalPercentage += (int)$this->partnerRestaurant->partner->percentage;
             }
 
             if ($this->partnerConcierge && $this->partnerConcierge->partner && $this->partnerRestaurant && $this->partnerRestaurant->partner) {
-                $totalPercentage = $this->partnerConcierge->partner->percentage + $this->partnerRestaurant->partner->percentage;
-                $partnerConciergeFee = (int)($totalPartnerFee * ($this->partnerConcierge->partner->percentage / $totalPercentage));
+                $totalPercentage = (int)$this->partnerConcierge->partner->percentage + (int)$this->partnerRestaurant->partner->percentage;
+                $partnerConciergeFee = (int)($totalPartnerFee * ((int)$this->partnerConcierge->partner->percentage / $totalPercentage));
                 $partnerRestaurantFee = $totalPartnerFee - $partnerConciergeFee;
             }
         }
@@ -212,12 +212,12 @@ class Booking extends Model
 
     public function partnerConcierge(): BelongsTo
     {
-        return $this->belongsTo(User::class, 'partner_concierge_id');
+        return $this->belongsTo(Partner::class, 'partner_concierge_id');
     }
 
     public function partnerRestaurant(): BelongsTo
     {
-        return $this->belongsTo(User::class, 'partner_restaurant_id');
+        return $this->belongsTo(Partner::class, 'partner_restaurant_id');
     }
 
     public function payment(): HasOne
@@ -229,11 +229,7 @@ class Booking extends Model
     {
         return $this->guest_first_name . ' ' . $this->guest_last_name;
     }
-
-    // In Booking.php
-
-// In Booking.php
-
+    
     public function getPartnerEarningsAttribute()
     {
         $earnings = 0;
