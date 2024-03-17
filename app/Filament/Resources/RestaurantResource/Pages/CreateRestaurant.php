@@ -113,9 +113,6 @@ class CreateRestaurant extends CreateRecord
             'secondary_contact_name' => $data['secondary_contact_name'],
             'secondary_contact_phone' => $data['secondary_contact_phone'],
             'payout_restaurant' => $data['payout_restaurant'],
-            'payout_charity' => $data['payout_charity'],
-            'payout_concierge' => $data['payout_concierge'],
-            'payout_platform' => $data['payout_platform'],
             'booking_fee' => $data['booking_fee'] * 100,
         ]);
     }

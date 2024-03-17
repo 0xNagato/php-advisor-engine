@@ -57,23 +57,6 @@ class CreateConcierge extends CreateRecord
                             ->placeholder('Hotel Name')
                             ->required(),
                     ]),
-                // Section::make('Payment Information')
-                //     ->icon('heroicon-m-currency-dollar')
-                //     ->columns(2)
-                //     ->schema([
-                //         Select::make('payout_type')
-                //             ->label('Payout Type')
-                //             ->options([
-                //                 'ach' => 'ACH',
-                //                 'paypal' => 'PayPal',
-                //                 'zelle' => 'Zelle',
-                //                 'venmo' => 'Venmo',
-                //             ])
-                //             ->columns(1),
-                //         TextInput::make('payout_account')
-                //             ->label('Payout Account')
-                //             ->columns(1),
-                //     ]),
             ]);
     }
 
