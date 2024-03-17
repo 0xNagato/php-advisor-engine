@@ -64,7 +64,7 @@ class AdminPanelProvider extends PanelProvider
             ->plugins([
                 FilamentShieldPlugin::make(),
             ])
-            ->spa()
+            // ->spa()
             ->favicon('/favicon.ico')
             ->darkMode(false)
             ->brandName('PRIMA')
