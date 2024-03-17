@@ -1,6 +1,3 @@
-Sure, you can set up the `PartnerCreated` notification similar to the `RestaurantCreated` notification. You need to import the necessary classes and define the `via`, `toMail`, `toTwilio`, `toArray`, and `passwordResetUrl` methods. Here's how you can do it:
-
-```php
 <?php
 
 namespace App\Notifications;
@@ -52,18 +49,15 @@ class PartnerCreated extends Notification
     public function toMail(object $notifiable): MailMessage
     {
         return (new MailMessage())
-            ->from('info@primavip.co')
-            ->subject('Welcome to the Prima!')
-            ->greeting('Welcome to the Prima!')
-            ->line('You have been invited to the Prima!')
-            ->action('Setup Password', $this->passwordResetUrl)
-            ->line('If you did not expect to receive an invitation to the Prima, you may discard this email.');
+            ->from('welcome@primavip.co')
+            ->subject('Welcome to PRIMA!')
+            ->markdown('mail.partner-welcome-mail', ['passwordResetUrl' => $this->passwordResetUrl]);
     }
 
     public function toTwilio(object $notifiable): TwilioSmsMessage|TwilioMessage
     {
         return (new TwilioSmsMessage())
-            ->content("Welcome to the Prima! Setup your password at {$this->passwordResetUrl}");
+            ->content("Welcome to PRIMA! Your concierge account has been created. Please click {$this->passwordResetUrl()} to login and update your payment info and begin making reservations. Thank you for joining us!");
     }
 
     /**

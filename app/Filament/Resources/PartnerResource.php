@@ -4,7 +4,6 @@ namespace App\Filament\Resources;
 
 use App\Filament\Resources\PartnerResource\Pages;
 use App\Models\Partner;
-use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
@@ -27,13 +26,13 @@ class PartnerResource extends Resource
     {
         return $form
             ->schema([
-                Forms\Components\TextInput::make('user_id')
-                    ->required()
-                    ->numeric(),
-                Forms\Components\TextInput::make('percentage')
-                    ->required()
-                    ->maxLength(255)
-                    ->default(10),
+                // Forms\Components\TextInput::make('user_id')
+                //     ->required()
+                //     ->numeric(),
+                // Forms\Components\TextInput::make('percentage')
+                //     ->required()
+                //     ->maxLength(255)
+                //     ->default(10),
             ]);
     }
 

@@ -31,12 +31,23 @@ class DatabaseSeeder extends Seeder
             'password' => bcrypt('password'),
         ])->create();
 
+        User::factory([
+            'first_name' => 'Demo',
+            'last_name' => 'Admin',
+            'email' => 'demo@primavip.co',
+            'password' => bcrypt('demo2024'),
+        ])->create();
+
         Artisan::call('shield:super-admin', [
             '--user' => 1,
         ]);
 
         Artisan::call('shield:super-admin', [
             '--user' => 2,
+        ]);
+
+        Artisan::call('shield:super-admin', [
+            '--user' => 3,
         ]);
 
         Role::create(['name' => 'concierge']);

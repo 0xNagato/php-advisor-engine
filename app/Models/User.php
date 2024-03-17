@@ -103,7 +103,7 @@ class User extends Authenticatable implements FilamentUser, HasAvatar
 
     public function getFilamentName(): string
     {
-        return "{$this->first_name} {$this->last_name}";
+        return "$this->first_name $this->last_name";
     }
 
     public function getMainRoleAttribute(): string

@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\PartnerResource\Pages;
 
 use App\Filament\Resources\PartnerResource;
+use App\Models\User;
 use App\Notifications\PartnerCreated;
 use Filament\Forms\Components\Section;
 use Filament\Forms\Components\TextInput;
@@ -77,6 +78,7 @@ class CreatePartner extends CreateRecord
 
         return $user->partner()->create([
             'percentage' => $data['percentage'],
+            'user_id' => $user->id,
         ]);
     }
 }
