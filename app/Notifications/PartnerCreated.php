@@ -1,6 +1,3 @@
-Sure, you can set up the `PartnerCreated` notification similar to the `RestaurantCreated` notification. You need to import the necessary classes and define the `via`, `toMail`, `toTwilio`, `toArray`, and `passwordResetUrl` methods. Here's how you can do it:
-
-```php
 <?php
 
 namespace App\Notifications;
