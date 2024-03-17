@@ -41,11 +41,11 @@ class Concierge extends Model
     {
         $sales = $this->sales;
 
-        if ($sales >= 0 && $sales <= 10) {
+        if ($sales >= 0 && $sales <= 30) {
             return 10;
         }
 
-        if ($sales >= 11 && $sales <= 20) {
+        if ($sales >= 31 && $sales <= 60) {
             return 12;
         }
 
