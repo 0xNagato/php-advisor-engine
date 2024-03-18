@@ -11,7 +11,7 @@ You can begin making reservations and earning immediately.
 If you have any questions, please do not hesitate to contact us, and we will do our best to get back to you as soon
 as possible.
 
-<x-mail::button :url="$passwordResetUrl">Secure Your Account</x-mail::button>
+<x-mail::button :url="$passwordResetUrl" color="brand">Secure Your Account</x-mail::button>
 
 Sincerely,
 Team PRIMA
