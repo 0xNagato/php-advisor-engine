@@ -16,11 +16,21 @@ class ConciergeCreated extends Notification
 {
     use Queueable;
 
+    protected string $passwordResetUrl;
+
     /**
      * Create a new notification instance.
      */
     public function __construct(public User $user)
     {
+        $this->passwordResetUrl = $this->passwordResetUrl();
+    }
+
+    protected function passwordResetUrl(): string
+    {
+        $token = Password::createToken($this->user);
+
+        return Filament::getResetPasswordUrl($token, $this->user);
     }
 
     /**
@@ -41,20 +51,13 @@ class ConciergeCreated extends Notification
         return (new MailMessage())
             ->from('welcome@primavip.co', 'PRIMA')
             ->subject('Welcome to PRIMA!')
-            ->markdown('mail.concierge-welcome-mail', ['passwordResetUrl' => $this->passwordResetUrl()]);
-    }
-
-    protected function passwordResetUrl(): string
-    {
-        $token = Password::createToken($this->user);
-
-        return Filament::getResetPasswordUrl($token, $this->user);
+            ->markdown('mail.concierge-welcome-mail', ['passwordResetUrl' => $this->passwordResetUrl]);
     }
 
     public function toTwilio(object $notifiable): TwilioSmsMessage|TwilioMessage
     {
         return (new TwilioSmsMessage())
-            ->content("Welcome to PRIMA! Your concierge account has been created. Please click {$this->passwordResetUrl()} to login and update your payment info and begin making reservations. Thank you for joining us!");
+            ->content("Welcome to PRIMA! Your concierge account has been created. Please click {$this->passwordResetUrl} to login and update your payment info and begin making reservations. Thank you for joining us!");
     }
 
     /**
