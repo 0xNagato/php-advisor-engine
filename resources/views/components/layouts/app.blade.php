@@ -12,7 +12,10 @@
     <link rel="manifest" href="/site.webmanifest">
     <meta meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 
-    <title>{{ config('app.name') }}</title>
+    <title>
+        {{ filled($title = strip_tags(($livewire ?? null)?->getTitle() ?? '')) ? "{$title} - " : null }}
+        {{ strip_tags(filament()->getBrandName()) }}
+    </title>
 
     <style>
         [x-cloak] {

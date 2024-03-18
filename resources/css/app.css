@@ -8,8 +8,6 @@
 
 body {
     background: none !important;
-    font-family: "Inter", sans-serif;
-    font-style: normal;
 }
 
 body::before {
@@ -23,13 +21,7 @@ body::before {
     background-repeat: repeat-x;
     background-position: center; /* Change this to 'top' if you want the image to start from the top */
     z-index: -1;
-}
-
-@media (max-width: 1024px) {
-    body::before {
-        background-repeat: no-repeat;
-        background-size: cover;
-    }
+    background-size: cover;
 }
 
 .inter-font {

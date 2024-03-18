@@ -2,6 +2,10 @@
 
 namespace App\Providers\Filament;
 
+use App\Filament\Auth\Login;
+use App\Filament\Auth\RequestPasswordReset;
+use App\Filament\Auth\ResetPassword;
+use App\Filament\Auth\SecureYourAccount;
 use BezhanSalleh\FilamentShield\FilamentShieldPlugin;
 use Exception;
 use Filament\Http\Middleware\Authenticate;
@@ -36,15 +40,20 @@ class AdminPanelProvider extends PanelProvider
             ->default()
             ->id('admin')
             ->path('')
-            ->login()
-            ->passwordReset()
+            ->login(Login::class)
+            ->passwordReset(RequestPasswordReset::class, ResetPassword::class)
+            ->passwordResetRoutePrefix('/')
+            ->passwordResetRequestRouteSlug('password-reset')
+            ->passwordResetRouteSlug('secure')
             ->colors([
                 'primary' => Color::Indigo,
             ])
             // ->sidebarFullyCollapsibleOnDesktop()
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\\Filament\\Resources')
             ->discoverPages(in: app_path('Filament/Pages'), for: 'App\\Filament\\Pages')
-            ->pages([])
+            ->pages([
+
+            ])
             // ->discoverWidgets(in: app_path('Filament/Widgets'), for: 'App\\Filament\\Widgets')
             ->widgets([])
             ->middleware([
