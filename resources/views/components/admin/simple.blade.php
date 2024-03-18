@@ -9,7 +9,7 @@
         PRIMA
     </div>
     <div class="sanomat-font text-2xl p-2 mb-4 text-center font-black">
-        Everybody Wins&trade;
+        Everybody Wins<sup>&trade;</sup>
     </div>
 
     <div class="bg-white px-6 pt-8 pb-12 shadow-sm ring-1 ring-gray-950/5 rounded mx-4 max-w-md sm:mx-auto">
