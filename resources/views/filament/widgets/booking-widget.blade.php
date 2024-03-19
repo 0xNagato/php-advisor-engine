@@ -1,16 +1,34 @@
 <x-filament-widgets::widget class="flex flex-col gap-4">
 
     @if(!$booking)
-        <div x-data="{ showCalendar: false }">
+        <div
+            x-data="{
+                showCalendar: false,
+                today: new Date().toISOString().split('T')[0],
+                tomorrow: new Date(new Date().setDate(new Date().getDate() + 1)).toISOString().split('T')[0]
+            }"
+        >
 
             <div class="flex space-x-4" x-bind:class="{'mb-4': showCalendar, 'mb-2': !showCalendar}">
                 <label class="inline-flex items-center">
-                    <input type="radio" class="form-radio" name="date" value="today" checked
-                           @click="showCalendar = false">
+                    <input
+                        checked
+                        type="radio"
+                        class="form-radio"
+                        name="date"
+                        value="today"
+                        @click="showCalendar = false; $wire.selectedDate = today"
+                    >
                     <span class="ml-2">Today</span>
                 </label>
                 <label class="inline-flex items-center">
-                    <input type="radio" class="form-radio" name="date" value="tomorrow" @click="showCalendar = false">
+                    <input
+                        type="radio"
+                        class="form-radio"
+                        name="date"
+                        value="tomorrow"
+                        @click="showCalendar = false; $wire.selectedDate = tomorrow"
+                    >
                     <span class="ml-2">Tomorrow</span>
                 </label>
                 <label class="inline-flex items-center">
@@ -19,13 +37,17 @@
                 </label>
             </div>
 
-
-            <x-filament::input.wrapper x-show="showCalendar" suffix-icon="heroicon-m-calendar">
+            <x-filament::input.wrapper
+                x-show="showCalendar"
+                @click="$refs.calendar.focus()"
+                suffix-icon="heroicon-m-calendar"
+            >
                 <x-filament::input
                     type="date"
+                    x-ref="calendar"
+                    wire:model="selectedDate"
                 />
             </x-filament::input.wrapper>
-
 
         </div>
 

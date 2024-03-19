@@ -7,6 +7,7 @@ use App\Models\Booking;
 use App\Models\Restaurant;
 use App\Models\Schedule;
 use chillerlan\QRCode\QRCode;
+use DateTime;
 use Filament\Widgets\Widget;
 use Illuminate\Database\Eloquent\Collection;
 use Livewire\Attributes\Session;
@@ -39,6 +40,8 @@ class BookingWidget extends Widget
     #[Session]
     public ?Booking $booking;
 
+    public string $selectedDate;
+
     public static function canView(): bool
     {
         return auth()->user()->hasRole('concierge');
@@ -47,6 +50,7 @@ class BookingWidget extends Widget
     public function mount(): void
     {
         $this->restaurants = Restaurant::openToday()->get();
+        $this->selectedDate = now()->format('Y-m-d');
     }
 
     public function updatedSelectedRestaurantId($value): void
@@ -65,12 +69,14 @@ class BookingWidget extends Widget
 
     public function createBooking(): void
     {
+
+
         $this->booking = Booking::create([
             'schedule_id' => $this->selectedScheduleId,
             'guest_count' => $this->guestCount,
             'concierge_id' => auth()->user()->concierge->id,
             'status' => BookingStatus::PENDING,
-            'booking_at' => $this->selectedSchedule->start_time,
+            'booking_at' => $this->selectedSchedule->start_time->setDateFrom(new DateTime($this->selectedDate)),
         ]);
 
         $this->bookingUrl = route('bookings.create', ['token' => $this->booking->uuid]);
