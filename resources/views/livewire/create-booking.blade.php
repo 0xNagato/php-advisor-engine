@@ -106,12 +106,12 @@
         &copy; {{ date('Y') }} {{ config('app.name', 'Prima') }}. All rights reserved.
     </div>
 
-    <x-mary-modal wire:model="showModal" title="Terms & Conditions" class="backdrop-blur">
-        @markdown(file_get_contents(resource_path('markdown/terms-and-conditions.md')))
-        <x-slot:actions>
-            <x-mary-button label="Close" @click="$wire.showModal = false"/>
-        </x-slot:actions>
-    </x-mary-modal>
+    {{--    <x-mary-modal wire:model="showModal" title="Terms & Conditions" class="backdrop-blur">--}}
+    {{--        @markdown(file_get_contents(resource_path('markdown/terms-and-conditions.md')))--}}
+    {{--        <x-slot:actions>--}}
+    {{--            <x-mary-button label="Close" @click="$wire.showModal = false"/>--}}
+    {{--        </x-slot:actions>--}}
+    {{--    </x-mary-modal>--}}
 </div>
 
 
