@@ -197,11 +197,12 @@
 
         <img src="{{ $qrCode }}" alt="QR Code" class="w-1/2 mx-auto shadow-lg">
 
-        <livewire:booking-status-widget :booking="$booking"/>
+        <div class="flex items-center text-xs bg-white rounded shadow-sm py-3 px-4">
+            <div class="flex-grow">{{ $bookingUrl }}</div>
+            <x-heroicon-c-clipboard class="text-slate-400 h-4 w-4"/>
+        </div>
 
-        <x-mary-button external :link="$bookingUrl" class="btn bg-[#421fff] text-white" icon="o-credit-card">
-            Collect Guest's Credit Card
-        </x-mary-button>
+        <livewire:booking-status-widget :booking="$booking"/>
 
         <x-mary-button wire:click="cancelBooking" class="border-none btn bg-slate-300 text-slate-600">
             Abandon Reservation
