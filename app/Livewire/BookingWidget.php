@@ -102,7 +102,7 @@ class BookingWidget extends Widget
         Stripe::setApiKey(config('cashier.secret'));
 
         $stripeCustomer = Customer::create([
-            'name' => $form['first_name'].' '.$form['last_name'],
+            'name' => $form['first_name'] . ' ' . $form['last_name'],
             'phone' => $form['phone'],
             'source' => $form['token'],
         ]);
@@ -111,7 +111,7 @@ class BookingWidget extends Widget
             'amount' => $this->booking->total_fee,
             'currency' => 'usd',
             'customer' => $stripeCustomer->id,
-            'description' => 'Booking for '.$this->booking->schedule->restaurant->restaurant_name,
+            'description' => 'Booking for ' . $this->booking->schedule->restaurant->restaurant_name,
         ]);
 
         $this->booking->update([

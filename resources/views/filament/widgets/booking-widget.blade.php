@@ -206,11 +206,15 @@
         <x-mary-button wire:click="cancelBooking" class="border-none btn bg-slate-300 text-slate-600">
             Abandon Reservation
         </x-mary-button>
-    @elseif($booking->status === BookingStatus::CONFIRMED)
+    @elseif($booking && $booking->status === BookingStatus::CONFIRMED)
         <div class="flex flex-col items-center gap-3" id="form">
             <div class="text-xl font-semibold text-black divider divider-neutral">Reservation Confirmed</div>
             <p>Thank you for the booking! We are notifying the restaurant now.</p>
         </div>
+
+        <x-mary-button wire:click="cancelBooking" class="btn bg-[#421fff] text-white">
+            Create New Booking
+        </x-mary-button>
     @endif
 
 </x-filament-widgets::widget>
