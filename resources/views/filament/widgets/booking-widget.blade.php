@@ -1,6 +1,35 @@
 <x-filament-widgets::widget class="flex flex-col gap-4">
 
     @if(!$booking)
+        <div x-data="{ showCalendar: false }">
+
+            <div class="flex space-x-4" x-bind:class="{'mb-4': showCalendar, 'mb-2': !showCalendar}">
+                <label class="inline-flex items-center">
+                    <input type="radio" class="form-radio" name="date" value="today" checked
+                           @click="showCalendar = false">
+                    <span class="ml-2">Today</span>
+                </label>
+                <label class="inline-flex items-center">
+                    <input type="radio" class="form-radio" name="date" value="tomorrow" @click="showCalendar = false">
+                    <span class="ml-2">Tomorrow</span>
+                </label>
+                <label class="inline-flex items-center">
+                    <input type="radio" class="form-radio" name="date" value="calendar" @click="showCalendar = true">
+                    <span class="ml-2">Select Date</span>
+                </label>
+            </div>
+
+
+            <x-filament::input.wrapper x-show="showCalendar" suffix-icon="heroicon-m-calendar">
+                <x-filament::input
+                    type="date"
+                />
+            </x-filament::input.wrapper>
+
+
+        </div>
+
+
         <x-filament::input.wrapper>
             <x-filament::input.select wire:model.live="selectedRestaurantId">
                 <option value="">Select a restaurant</option>

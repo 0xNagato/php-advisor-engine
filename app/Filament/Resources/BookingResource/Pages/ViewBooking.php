@@ -25,6 +25,7 @@ class ViewBooking extends ViewRecord
                 Section::make('Booking Information')
                     ->schema([
                         TextEntry::make('concierge.user.name')
+                            ->url(fn($record) => route('filament.resources.user-record', $record->concierge))
                             ->label('Booked By:')
                             ->inlineLabel(),
                         TextEntry::make('restaurant.restaurant_name')
