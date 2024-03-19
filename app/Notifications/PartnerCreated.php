@@ -70,4 +70,3 @@ class PartnerCreated extends Notification
         return [];
     }
 }
-

@@ -24,7 +24,7 @@ class Concierge extends Model
 
     protected $appends = [
         'payout_percentage',
-        'sales'
+        'sales',
     ];
 
     public function user(): BelongsTo

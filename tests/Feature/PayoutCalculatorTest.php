@@ -8,12 +8,10 @@ uses(RefreshDatabase::class);
 it('calculates payouts correctly', function () {
     // Guest count means the total fee will be $200 or 20000 cents.
     $booking = Booking::factory()->create([
-        'guest_count' => 2
+        'guest_count' => 2,
     ]);
 
-
     // dd($booking->partnerRestaurant);
-
 
     $payoutCalculator = new \App\Services\PayoutCalculator($booking);
     $calculationData = $payoutCalculator->calculate();
@@ -39,4 +37,3 @@ it('calculates payouts correctly', function () {
         ->and($calculationData->platformCharityEarned)->toBe(5)
         ->and($calculationData->charityTotalEarned)->toBe(95);
 });
-

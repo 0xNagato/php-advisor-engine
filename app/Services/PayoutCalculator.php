@@ -7,14 +7,20 @@ use App\Models\Booking;
 
 class PayoutCalculator
 {
-
     protected int $platformPayoutPercentage;
+
     protected int $platformCharityPercentage = 5;
+
     protected int $restaurantPayoutPercentage;
+
     protected int $restaurantCharityPercentage;
+
     protected int $conciergePayoutPercentage;
+
     protected int $conciergeCharityPercentage;
+
     protected int $partnerConciergePayoutPercentage;
+
     protected int $partnerRestaurantPayoutPercentage;
 
     public function __construct(private readonly Booking $booking)
@@ -89,7 +95,6 @@ class PayoutCalculator
     {
         return $this->booking->total_fee * ($this->partnerRestaurantPayoutPercentage / 100);
     }
-
 
     private function calculatePartnerConcierge(): int
     {
