@@ -12,7 +12,6 @@ use Exception;
 use Filament\Widgets\Widget;
 use Illuminate\Database\Eloquent\Collection;
 use Livewire\Attributes\Session;
-use Livewire\Features\SupportRedirects\Redirector;
 use Stripe\Charge;
 use Stripe\Customer;
 use Stripe\Exception\ApiErrorException;
@@ -26,7 +25,6 @@ class BookingWidget extends Widget
      * @var Collection<Restaurant>|null
      */
     public ?Collection $restaurants;
-
 
     public ?Restaurant $selectedRestaurant;
 
@@ -99,12 +97,12 @@ class BookingWidget extends Widget
     /**
      * @throws ApiErrorException
      */
-    public function completeBooking($form): Redirector
+    public function completeBooking($form): void
     {
         Stripe::setApiKey(config('cashier.secret'));
 
         $stripeCustomer = Customer::create([
-            'name' => $form['first_name'] . ' ' . $form['last_name'],
+            'name' => $form['first_name'].' '.$form['last_name'],
             'phone' => $form['phone'],
             'source' => $form['token'],
         ]);
@@ -113,10 +111,13 @@ class BookingWidget extends Widget
             'amount' => $this->booking->total_fee,
             'currency' => 'usd',
             'customer' => $stripeCustomer->id,
-            'description' => 'Booking for ' . $this->booking->schedule->restaurant->restaurant_name,
+            'description' => 'Booking for '.$this->booking->schedule->restaurant->restaurant_name,
         ]);
 
         $this->booking->update([
+            'guest_first_name' => $form['first_name'],
+            'guest_last_name' => $form['last_name'],
+            'guest_phone' => $form['phone'],
             'status' => BookingStatus::CONFIRMED,
             'stripe_charge' => $stripeCharge->toArray(),
             'stripe_charge_id' => $stripeCharge->id,
@@ -124,9 +125,6 @@ class BookingWidget extends Widget
 
         $this->isLoading = false;
         $this->paymentSuccess = true;
-
-        return redirect()->route('filament.admin.resources.bookings.view', ['record' => $this->booking->id]);
-
     }
 
     public function cancelBooking(): void

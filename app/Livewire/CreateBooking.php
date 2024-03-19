@@ -28,7 +28,9 @@ class CreateBooking extends Component
     public function mount(string $token): void
     {
         $this->booking = Booking::where('uuid', $token)->firstOrFail();
-        $this->booking->update(['status' => BookingStatus::GUEST_ON_PAGE]);
+        if ($this->booking->status === BookingStatus::PENDING) {
+            $this->booking->update(['status' => BookingStatus::GUEST_ON_PAGE]);
+        }
     }
 
     public function render(): \Illuminate\Contracts\View\View|\Illuminate\Foundation\Application|Factory|View|Application
@@ -57,6 +59,9 @@ class CreateBooking extends Component
         ]);
 
         $this->booking->update([
+            'guest_first_name' => $form['first_name'],
+            'guest_last_name' => $form['last_name'],
+            'guest_phone' => $form['phone'],
             'status' => BookingStatus::CONFIRMED,
             'stripe_charge' => $stripeCharge->toArray(),
             'stripe_charge_id' => $stripeCharge->id,

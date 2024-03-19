@@ -1,8 +1,9 @@
+@php use App\Enums\BookingStatus; @endphp
 <div class="flex flex-col justify-center min-h-screen p-6 antialiased wavy-background h-screen">
     <x-filament-panels::logo/>
     <div class="flex flex-col items-center pt-20 flex-grow max-w-lg mx-auto">
         {{--    <div class="flex flex-col items-center pt-20 sm:pt-0 sm:justify-center flex-grow max-w-lg mx-auto">--}}
-        @if (!$paymentSuccess)
+        @if ($booking->status === BookingStatus::GUEST_ON_PAGE)
             <div class="flex flex-col items-center gap-3">
                 <h1 class="text-3xl text-center sanomat-font font-semibold">Secure Your Reservation</h1>
 
@@ -75,12 +76,14 @@
                 </form>
 
             </div>
-        @else
+        @elseif($booking->status === BookingStatus::CONFIRMED)
             <div class="flex flex-col items-center gap-3" id="form">
                 <h1 class="text-3xl text-center sanomat-font">Thank you for your reservation!</h1>
 
                 <h2 class="text-base text-center">
-                    Your reservation is confirmed. You will receive a confirmation SMS shortly.
+                    <p>Your reservation request has been received. Please check your phone for a text confirmation.</p>
+                    <p>We are notifying the restaurant now.</p>
+                    <p class="mt-3 font-semibold">Thank you for using PRIMA!</p>
                 </h2>
             </div>
         @endif

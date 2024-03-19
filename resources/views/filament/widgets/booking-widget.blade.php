@@ -1,4 +1,5 @@
-<!--suppress JSUnresolvedReference, BadExpressionStatementJS -->
+@php use App\Enums\BookingStatus; @endphp
+    <!--suppress JSUnresolvedReference, BadExpressionStatementJS -->
 <x-filament-widgets::widget x-data="{}" x-init="() => {
     let script = document.createElement('script');
     script.src = 'https://js.stripe.com/v3/';
@@ -79,7 +80,7 @@
     @endif
 
 
-    @if ($booking)
+    @if ($booking && BookingStatus::PENDING === $booking->status)
         <!-- Invoice -->
         <div class="flex items-center w-full gap-4 p-3 bg-white bg-opacity-90 shadow rounded-xl">
             <x-mary-icon name="o-building-storefront" class="w-10 h-10 p-2 text-white bg-orange-500 rounded-full"/>
@@ -198,9 +199,18 @@
 
         <livewire:booking-status-widget :booking="$booking"/>
 
+        <x-mary-button external :link="$bookingUrl" class="btn bg-[#421fff] text-white" icon="o-credit-card">
+            Collect Guest's Credit Card
+        </x-mary-button>
+
         <x-mary-button wire:click="cancelBooking" class="border-none btn bg-slate-300 text-slate-600">
             Abandon Reservation
         </x-mary-button>
+    @elseif($booking->status === BookingStatus::CONFIRMED)
+        <div class="flex flex-col items-center gap-3" id="form">
+            <div class="text-xl font-semibold text-black divider divider-neutral">Reservation Confirmed</div>
+            <p>Thank you for the booking! We are notifying the restaurant now.</p>
+        </div>
     @endif
 
 </x-filament-widgets::widget>
