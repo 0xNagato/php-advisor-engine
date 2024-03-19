@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Eloquent\Relations\HasOneThrough;
 use Illuminate\Support\Str;
 
 class Booking extends Model
@@ -94,6 +95,18 @@ class Booking extends Model
     public function schedule(): BelongsTo
     {
         return $this->belongsTo(Schedule::class);
+    }
+
+    public function restaurant(): HasOneThrough
+    {
+        return $this->hasOneThrough(
+            Restaurant::class,
+            Schedule::class,
+            'id',
+            'id',
+            'schedule_id',
+            'restaurant_id'
+        );
     }
 
     public function concierge(): BelongsTo
