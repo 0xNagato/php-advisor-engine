@@ -87,7 +87,7 @@
     @if ($booking && (BookingStatus::PENDING === $booking->status || BookingStatus::GUEST_ON_PAGE === $booking->status))
         <livewire:invoice-small :booking="$booking"/>
 
-        <div x-data="{ tab: 'smsPayment' }">
+        <div x-data="{ tab: 'collectPayment' }">
             <div class="flex space-x-4">
                 <button :class="{ 'border-[#4736dd] text-[#4736dd] bg-white': tab === 'collectPayment' }"
                         @click="tab = 'collectPayment'"

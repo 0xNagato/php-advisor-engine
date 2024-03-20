@@ -44,7 +44,5 @@ class SMSInput extends Widget implements HasForms
                 'body' => $this->message,
             ]
         );
-
-        ds($message);
     }
 }
