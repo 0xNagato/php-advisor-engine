@@ -87,7 +87,7 @@
     @if ($booking && (BookingStatus::PENDING === $booking->status || BookingStatus::GUEST_ON_PAGE === $booking->status))
         <livewire:invoice-small :booking="$booking"/>
 
-        <div x-data="{ tab: 'collectPayment' }">
+        <div x-data="{ tab: 'smsPayment' }">
             <div class="flex space-x-4">
                 <button :class="{ 'border-[#4736dd] text-[#4736dd] bg-white': tab === 'collectPayment' }"
                         @click="tab = 'collectPayment'"
@@ -197,12 +197,10 @@
 
             <div x-show="tab === 'smsPayment'" class="mt-4 flex flex-col gap-4">
                 <!-- SMS Payment Link Tab Content -->
-                <div class="flex items-center text-xs bg-white rounded shadow-sm py-3 px-4"
-                     x-data="{ bookingUrl: '{{ $bookingUrl }}' }">
-                    <div class="flex-grow" x-text="bookingUrl"></div>
-                    <x-heroicon-c-clipboard class="text-slate-400 h-5 w-5 cursor-pointer"
-                                            @click="navigator.clipboard.writeText(bookingUrl)"/>
-                </div>
+                @php
+                    $message = "Your reservation at {$booking->restaurant->restaurant_name} is pending. Please click {$bookingUrl} to secure your booking within the next 5 minutes.";
+                @endphp
+                <livewire:s-m-s-input :message="$message"/>
             </div>
 
             <div x-show="tab === 'qrCode'" class="mt-4 flex flex-col gap-4">
