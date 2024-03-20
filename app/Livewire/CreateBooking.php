@@ -4,14 +4,12 @@ namespace App\Livewire;
 
 use App\Enums\BookingStatus;
 use App\Models\Booking;
+use App\Services\BookingService;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\View\View;
 use Livewire\Component;
-use Stripe\Charge;
-use Stripe\Customer;
 use Stripe\Exception\ApiErrorException;
-use Stripe\Stripe;
 
 class CreateBooking extends Component
 {
@@ -43,29 +41,7 @@ class CreateBooking extends Component
      */
     public function completeBooking($form): void
     {
-        Stripe::setApiKey(config('cashier.secret'));
-
-        $stripeCustomer = Customer::create([
-            'name' => $form['first_name'].' '.$form['last_name'],
-            'phone' => $form['phone'],
-            'source' => $form['token'],
-        ]);
-
-        $stripeCharge = Charge::create([
-            'amount' => $this->booking->total_fee,
-            'currency' => 'usd',
-            'customer' => $stripeCustomer->id,
-            'description' => 'Booking for '.$this->booking->schedule->restaurant->restaurant_name,
-        ]);
-
-        $this->booking->update([
-            'guest_first_name' => $form['first_name'],
-            'guest_last_name' => $form['last_name'],
-            'guest_phone' => $form['phone'],
-            'status' => BookingStatus::CONFIRMED,
-            'stripe_charge' => $stripeCharge->toArray(),
-            'stripe_charge_id' => $stripeCharge->id,
-        ]);
+        app(BookingService::class)->processBooking($this->booking, $form);
 
         $this->isLoading = false;
         $this->paymentSuccess = true;

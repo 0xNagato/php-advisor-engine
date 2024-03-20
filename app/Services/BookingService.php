@@ -1,0 +1,44 @@
+<?php
+
+namespace App\Services;
+
+use App\Enums\BookingStatus;
+use App\Models\Booking;
+use Stripe\Charge;
+use Stripe\Customer;
+use Stripe\Exception\ApiErrorException;
+use Stripe\Stripe;
+
+class BookingService
+{
+    /**
+     * @throws ApiErrorException
+     * @todo Add type hint for $form with DataTransferObject
+     */
+    public function processBooking(Booking $booking, $form): void
+    {
+        Stripe::setApiKey(config('cashier.secret'));
+
+        $stripeCustomer = Customer::create([
+            'name' => $form['first_name'] . ' ' . $form['last_name'],
+            'phone' => $form['phone'],
+            'source' => $form['token'],
+        ]);
+
+        $stripeCharge = Charge::create([
+            'amount' => $booking->total_fee,
+            'currency' => 'usd',
+            'customer' => $stripeCustomer->id,
+            'description' => 'Booking for ' . $booking->restaurant->restaurant_name,
+        ]);
+
+        $booking->update([
+            'guest_first_name' => $form['first_name'],
+            'guest_last_name' => $form['last_name'],
+            'guest_phone' => $form['phone'],
+            'status' => BookingStatus::CONFIRMED,
+            'stripe_charge' => $stripeCharge->toArray(),
+            'stripe_charge_id' => $stripeCharge->id,
+        ]);
+    }
+}

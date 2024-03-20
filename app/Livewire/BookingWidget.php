@@ -6,16 +6,14 @@ use App\Enums\BookingStatus;
 use App\Models\Booking;
 use App\Models\Restaurant;
 use App\Models\Schedule;
+use App\Services\BookingService;
 use chillerlan\QRCode\QRCode;
 use DateTime;
 use Exception;
 use Filament\Widgets\Widget;
 use Illuminate\Database\Eloquent\Collection;
 use Livewire\Attributes\Session;
-use Stripe\Charge;
-use Stripe\Customer;
 use Stripe\Exception\ApiErrorException;
-use Stripe\Stripe;
 
 class BookingWidget extends Widget
 {
@@ -99,29 +97,7 @@ class BookingWidget extends Widget
      */
     public function completeBooking($form): void
     {
-        Stripe::setApiKey(config('cashier.secret'));
-
-        $stripeCustomer = Customer::create([
-            'name' => $form['first_name'] . ' ' . $form['last_name'],
-            'phone' => $form['phone'],
-            'source' => $form['token'],
-        ]);
-
-        $stripeCharge = Charge::create([
-            'amount' => $this->booking->total_fee,
-            'currency' => 'usd',
-            'customer' => $stripeCustomer->id,
-            'description' => 'Booking for ' . $this->booking->schedule->restaurant->restaurant_name,
-        ]);
-
-        $this->booking->update([
-            'guest_first_name' => $form['first_name'],
-            'guest_last_name' => $form['last_name'],
-            'guest_phone' => $form['phone'],
-            'status' => BookingStatus::CONFIRMED,
-            'stripe_charge' => $stripeCharge->toArray(),
-            'stripe_charge_id' => $stripeCharge->id,
-        ]);
+        app(BookingService::class)->processBooking($this->booking, $form);
 
         $this->isLoading = false;
         $this->paymentSuccess = true;
