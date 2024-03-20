@@ -15,7 +15,7 @@
                     <div>Time Remaining:</div>
 
                     <span class="countdown font-mono text-xl">
-                        <span id="minutes" style="--value:2;"></span>:
+                        <span id="minutes" style="--value:5;"></span>:
                         <span id="seconds" style="--value:00;"></span>
                     </span>
                 </div>
@@ -90,18 +90,8 @@
 
 
         <!-- Invoice -->
-        <div class="flex items-center w-full gap-4 p-3 mt-4 bg-white bg-opacity-90 shadow rounded-xl">
-            <x-mary-icon name="o-building-storefront" class="w-10 h-10 p-2 text-white bg-orange-500 rounded-full"/>
-
-            <div class="flex flex-col gap-1">
-                <div class="font-semibold">{{ $booking->schedule->restaurant->restaurant_name }}</div>
-                <div class="text-xs text-slate-600">
-                    Tonight {{ $booking->booking_at->format('g:i a') }}
-                </div>
-            </div>
-            <div class="flex-grow font-semibold text-right">
-                {{ money($booking->total_fee) }}
-            </div>
+        <div class="w-full mt-4">
+            @livewire(InvoiceSmall::class, ['booking' => $booking])
         </div>
 
     </div>
@@ -166,7 +156,7 @@
     const secondElement = document.querySelector('#seconds');
 
     // Set the initial countdown time (2 minutes = 120 seconds)
-    let countdownTime = 120;
+    let countdownTime = 300;
 
     // Function to update the countdown
     function updateCountdown() {

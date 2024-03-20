@@ -1,4 +1,4 @@
-@php use App\Enums\BookingStatus; @endphp
+@php use App\Enums\BookingStatus;use App\Livewire\InvoiceSmall; @endphp
     <!--suppress JSUnresolvedReference, BadExpressionStatementJS -->
 <x-filament-widgets::widget
     x-data="{}"
@@ -85,40 +85,7 @@
 
 
     @if ($booking && (BookingStatus::PENDING === $booking->status || BookingStatus::GUEST_ON_PAGE === $booking->status))
-        <!-- Invoice -->
-        <!-- @todo Refactor this to a separate component -->
-        @php
-            $bookingDate = $booking->booking_at->format('Y-m-d');
-            $today = now()->format('Y-m-d');
-            $tomorrow = now()->addDay()->format('Y-m-d');
-            $dayDisplay = '';
-
-            if($bookingDate === $today) {
-                $dayDisplay = 'Today';
-            } elseif($bookingDate === $tomorrow) {
-                $dayDisplay = 'Tomorrow';
-            } else {
-                $dayDisplay = $booking->booking_at->format('l');
-            }
-        @endphp
-        <div class="flex items-center w-full gap-4 p-3 bg-white bg-opacity-90 shadow rounded-xl">
-            <x-mary-icon name="o-building-storefront" class="w-10 h-10 p-2 text-white bg-orange-500 rounded-full"/>
-
-            <div class="flex flex-col gap-1">
-                <div class="font-semibold">{{ $booking->schedule->restaurant->restaurant_name }}</div>
-                <div class="text-xs text-slate-600">
-                    {{ $dayDisplay }} {{ $booking->booking_at->format('g:i a') }}
-                </div>
-            </div>
-            <div class="flex-grow flex text-right flex-col gap-1">
-                <div class="font-semibold">
-                    {{ money($booking->total_fee) }}
-                </div>
-                <div class="text-xs text-slate-600">
-                    ({{ $booking->guest_count }} Guests)
-                </div>
-            </div>
-        </div>
+        @livewire(InvoiceSmall::class, ['booking' => $booking])
 
         <div x-data="{ tab: 'collectPayment' }">
             <div class="flex space-x-4">
@@ -144,52 +111,52 @@
 
                 <!-- @todo Refactor this to a separate component -->
                 <div class="flex flex-col items-center gap-3" x-data="{}" x-init="() => {
-            function initializeStripe() {
-                if (window.Stripe) {
-                    setupStripe();
-                } else {
-                    setTimeout(initializeStripe, 10);
-                }
-            }
-
-            function setupStripe() {
-                const stripe = Stripe('{{ config('cashier.key') }}');
-                const elements = stripe.elements();
-                const card = elements.create('card', {
-                    disableLink: true,
-                    hidePostalCode: true
-                });
-                card.mount('#card-element');
-
-                const form = document.getElementById('form');
-
-                form.addEventListener('submit', async (e) => {
-                    e.preventDefault();
-                    card.update({disabled: true});
-                    $wire.$set('isLoading', true);
-
-                    const {token, error} = await stripe.createToken(card);
-
-                    if (error) {
-                        card.update({disabled: false});
-                        $wire.$set('isLoading', false);
-                        alert(error.message);
+                    function initializeStripe() {
+                        if (window.Stripe) {
+                            setupStripe();
+                        } else {
+                            setTimeout(initializeStripe, 10);
+                        }
                     }
 
-                    const formData = {
-                        first_name: document.querySelector('input[name=first_name]').value,
-                        last_name: document.querySelector('input[name=last_name]').value,
-                        phone: document.querySelector('input[name=phone]').value,
-                        token: token.id
+                    function setupStripe() {
+                        const stripe = Stripe('{{ config('cashier.key') }}');
+                        const elements = stripe.elements();
+                        const card = elements.create('card', {
+                            disableLink: true,
+                            hidePostalCode: true
+                        });
+                        card.mount('#card-element');
+
+                        const form = document.getElementById('form');
+
+                        form.addEventListener('submit', async (e) => {
+                            e.preventDefault();
+                            card.update({disabled: true});
+                            $wire.$set('isLoading', true);
+
+                            const {token, error} = await stripe.createToken(card);
+
+                            if (error) {
+                                card.update({disabled: false});
+                                $wire.$set('isLoading', false);
+                                alert(error.message);
+                            }
+
+                            const formData = {
+                                first_name: document.querySelector('input[name=first_name]').value,
+                                last_name: document.querySelector('input[name=last_name]').value,
+                                phone: document.querySelector('input[name=phone]').value,
+                                token: token.id
+                            }
+
+                            $wire.$call('completeBooking', formData);
+                        });
+
                     }
 
-                    $wire.$call('completeBooking', formData);
-                });
-
-            }
-
-            initializeStripe();
-        }">
+                    initializeStripe();
+                }">
 
                     <form id="form" class="w-full">
                         <fieldset class="flex flex-col items-center gap-2 disabled:opacity-50">
@@ -236,8 +203,6 @@
                     <x-heroicon-c-clipboard class="text-slate-400 h-5 w-5 cursor-pointer"
                                             @click="navigator.clipboard.writeText(bookingUrl)"/>
                 </div>
-
-                <livewire:booking-status-widget :booking="$booking"/>
             </div>
 
             <div x-show="tab === 'qrCode'" class="mt-4 flex flex-col gap-4">
