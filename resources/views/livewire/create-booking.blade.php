@@ -91,7 +91,7 @@
 
         <!-- Invoice -->
         <div class="w-full mt-4">
-            @livewire(InvoiceSmall::class, ['booking' => $booking])
+            <livewire:invoice-small :booking="$booking"/>
         </div>
 
     </div>
