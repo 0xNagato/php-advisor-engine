@@ -199,7 +199,7 @@
                 <!-- SMS Payment Link Tab Content -->
                 @if($SMSSent)
                     <div class="flex flex-col gap-2 bg-white rounded shadow p-4">
-                        <p>Please advise customer to check their phone for reservation payment link. </p>
+                        <p>Please advise customer to check their phone for reservation payment link.</p>
                         <p>Sending message to customer now.</p>
                     </div>
                 @endif

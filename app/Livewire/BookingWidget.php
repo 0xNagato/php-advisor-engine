@@ -7,6 +7,7 @@ use App\Models\Booking;
 use App\Models\Restaurant;
 use App\Models\Schedule;
 use App\Services\BookingService;
+use AshAllenDesign\ShortURL\Facades\ShortURL;
 use chillerlan\QRCode\QRCode;
 use DateTime;
 use Exception;
@@ -90,7 +91,10 @@ class BookingWidget extends Widget
             'booking_at' => $this->selectedSchedule->start_time->setDateFrom(new DateTime($this->selectedDate)),
         ]);
 
-        $this->bookingUrl = route('bookings.create', ['token' => $this->booking->uuid]);
+        $shortUrl = ShortURL::destinationUrl(route('bookings.create', ['token' => $this->booking->uuid]))
+            ->make();
+
+        $this->bookingUrl = $shortUrl->default_short_url;
 
         $this->qrCode = (new QRCode())->render($this->bookingUrl);
     }

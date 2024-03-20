@@ -3,6 +3,7 @@
 namespace App\Notifications;
 
 use App\Models\User;
+use AshAllenDesign\ShortURL\Facades\ShortURL;
 use Filament\Facades\Filament;
 use Illuminate\Bus\Queueable;
 use Illuminate\Notifications\Messages\MailMessage;
@@ -29,8 +30,9 @@ class RestaurantCreated extends Notification
     protected function passwordResetUrl(): string
     {
         $token = Password::createToken($this->user);
+        $url = Filament::getResetPasswordUrl($token, $this->user);
 
-        return Filament::getResetPasswordUrl($token, $this->user);
+        return ShortURL::destinationUrl($url)->make()->default_short_url;
     }
 
     /**

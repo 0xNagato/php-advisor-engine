@@ -10,6 +10,7 @@
     "require": {
         "php": "^8.2",
         "ariaieboy/filament-currency": "^1.2",
+        "ashallendesign/short-url": "^7.10",
         "bezhansalleh/filament-shield": "^3.1",
         "chillerlan/php-qrcode": "^5.0",
         "codeat3/blade-google-material-design-icons": "^1.19",
