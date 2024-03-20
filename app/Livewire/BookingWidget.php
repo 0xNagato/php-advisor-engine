@@ -91,12 +91,15 @@ class BookingWidget extends Widget
             'booking_at' => $this->selectedSchedule->start_time->setDateFrom(new DateTime($this->selectedDate)),
         ]);
 
-        $shortUrl = ShortURL::destinationUrl(route('bookings.create', ['token' => $this->booking->uuid]))
+        $shortUrlQr = ShortURL::destinationUrl(route('bookings.create', ['token' => $this->booking->uuid, 'r' => 'qr']))
+            ->make();
+
+        $shortUrl = ShortURL::destinationUrl(route('bookings.create', ['token' => $this->booking->uuid, 'r' => 'sms']))
             ->make();
 
         $this->bookingUrl = $shortUrl->default_short_url;
 
-        $this->qrCode = (new QRCode())->render($this->bookingUrl);
+        $this->qrCode = (new QRCode())->render($shortUrlQr->default_short_url);
     }
 
     /**
@@ -105,6 +108,8 @@ class BookingWidget extends Widget
     public function completeBooking($form): void
     {
         app(BookingService::class)->processBooking($this->booking, $form);
+
+        $this->booking->update(['concierge_referral_type' => 'concierge']);
 
         $this->isLoading = false;
         $this->paymentSuccess = true;

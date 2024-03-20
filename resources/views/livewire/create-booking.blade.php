@@ -3,7 +3,19 @@
     <x-filament-panels::logo/>
     <div class="flex flex-col items-center pt-20 flex-grow max-w-lg mx-auto">
         {{--    <div class="flex flex-col items-center pt-20 sm:pt-0 sm:justify-center flex-grow max-w-lg mx-auto">--}}
-        @if ($booking->status === BookingStatus::GUEST_ON_PAGE)
+        @if(!$this->isValid())
+            <div class="flex flex-col items-center gap-3" id="form">
+                <h1 class="text-3xl text-center sanomat-font">Sorry!</h1>
+
+                <h2 class="text-base text-left">
+                    <p>
+                        Sorry, this payment link is expired. Please consult with your PRIMA Concierge to request a new
+                        payment link.
+                    </p>
+                    <p class="mt-3 font-semibold">Thank you for using PRIMA!</p>
+                </h2>
+            </div>
+        @elseif ($booking->status === BookingStatus::GUEST_ON_PAGE)
             <div class="flex flex-col items-center gap-3">
                 <h1 class="text-3xl text-center sanomat-font font-semibold">Secure Your Reservation</h1>
 

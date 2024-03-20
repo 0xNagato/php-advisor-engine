@@ -39,6 +39,7 @@ class BookingService
             'status' => BookingStatus::CONFIRMED,
             'stripe_charge' => $stripeCharge->toArray(),
             'stripe_charge_id' => $stripeCharge->id,
+            'confirmed_at' => now(),
         ]);
     }
 }
