@@ -64,7 +64,7 @@ class BookingWidget extends Widget
 
     public function updatedSelectedRestaurantId($value): void
     {
-        $this->selectedRestaurant = $this->restaurants->find($value);
+        $this->selectedRestaurant = Restaurant::openToday()->find($value);
     }
 
     public function updatedSelectedScheduleId($value): void

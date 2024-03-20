@@ -80,7 +80,7 @@
     @endif
 
 
-    @if ($booking && BookingStatus::PENDING === $booking->status)
+    @if ($booking && (BookingStatus::PENDING === $booking->status || BookingStatus::GUEST_ON_PAGE === $booking->status))
         <!-- Invoice -->
         <div class="flex items-center w-full gap-4 p-3 bg-white bg-opacity-90 shadow rounded-xl">
             <x-mary-icon name="o-building-storefront" class="w-10 h-10 p-2 text-white bg-orange-500 rounded-full"/>
@@ -197,9 +197,11 @@
 
         <img src="{{ $qrCode }}" alt="QR Code" class="w-1/2 mx-auto shadow-lg">
 
-        <div class="flex items-center text-xs bg-white rounded shadow-sm py-3 px-4">
-            <div class="flex-grow">{{ $bookingUrl }}</div>
-            <x-heroicon-c-clipboard class="text-slate-400 h-4 w-4"/>
+        <div class="flex items-center text-xs bg-white rounded shadow-sm py-3 px-4"
+             x-data="{ bookingUrl: '{{ $bookingUrl }}' }">
+            <div class="flex-grow" x-text="bookingUrl"></div>
+            <x-heroicon-c-clipboard class="text-slate-400 h-5 w-5 cursor-pointer"
+                                    @click="navigator.clipboard.writeText(bookingUrl)"/>
         </div>
 
         <livewire:booking-status-widget :booking="$booking"/>
