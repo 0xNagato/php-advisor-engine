@@ -124,15 +124,15 @@
             <div class="flex space-x-4">
                 <button :class="{ 'border-[#4736dd] text-[#4736dd] bg-white': tab === 'collectPayment' }"
                         @click="tab = 'collectPayment'"
-                        class="border border-transparent px-2 py-1 text-sm font-semibold rounded">Collect Payment
+                        class="border px-2 py-1 text-sm font-semibold rounded">Collect Payment
                 </button>
                 <button :class="{ 'border-[#4736dd] text-[#4736dd] bg-white': tab === 'smsPayment' }"
                         @click="tab = 'smsPayment'"
-                        class="border border-transparent px-2 py-1 text-sm font-semibold rounded">SMS Payment Link
+                        class="border px-2 py-1 text-sm font-semibold rounded">SMS Payment Link
                 </button>
                 <button :class="{ 'border-[#4736dd] text-[#4736dd] bg-white': tab === 'qrCode' }"
                         @click="tab = 'qrCode'"
-                        class="border border-transparent px-2 py-1 text-sm font-semibold rounded">QR Code
+                        class="border px-2 py-1 text-sm font-semibold rounded">QR Code
                 </button>
             </div>
 
@@ -228,7 +228,7 @@
                 </div>
             </div>
 
-            <div x-show="tab === 'smsPayment'" class="mt-4 flex flex-col gap-2">
+            <div x-show="tab === 'smsPayment'" class="mt-4 flex flex-col gap-4">
                 <!-- SMS Payment Link Tab Content -->
                 <div class="flex items-center text-xs bg-white rounded shadow-sm py-3 px-4"
                      x-data="{ bookingUrl: '{{ $bookingUrl }}' }">
@@ -240,9 +240,9 @@
                 <livewire:booking-status-widget :booking="$booking"/>
             </div>
 
-            <div x-show="tab === 'qrCode'" class="mt-4 flex flex-col gap-2">
+            <div x-show="tab === 'qrCode'" class="mt-4 flex flex-col gap-4">
                 <!-- QR Code Tab Content -->
-                <div class="text-base">
+                <div class="text-base font-semibold mb-2">
                     Show QR code below to customer to accept secure payment.
                 </div>
 
@@ -253,11 +253,11 @@
         </div>
 
 
-        <div class="fixed bottom-0 left-0 right-0 flex justify-center pb-4">
-            <x-mary-button wire:click="cancelBooking" class="border-none btn bg-slate-300 text-slate-600">
-                Abandon Reservation
-            </x-mary-button>
-        </div>
+
+        <x-mary-button wire:click="cancelBooking" class="border-none btn bg-slate-300 text-slate-600">
+            Abandon Reservation
+        </x-mary-button>
+
     @elseif($booking && $booking->status === BookingStatus::CONFIRMED)
         <div class="flex flex-col items-center gap-3" id="form">
             <div class="text-xl font-semibold text-black divider divider-neutral">Reservation Confirmed</div>
