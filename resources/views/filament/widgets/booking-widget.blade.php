@@ -1,10 +1,14 @@
 @php use App\Enums\BookingStatus; @endphp
     <!--suppress JSUnresolvedReference, BadExpressionStatementJS -->
-<x-filament-widgets::widget x-data="{}" x-init="() => {
-    let script = document.createElement('script');
-    script.src = 'https://js.stripe.com/v3/';
-    document.head.appendChild(script);
-}" class="flex flex-col gap-4">
+<x-filament-widgets::widget
+    x-data="{}"
+    x-init="() => {
+        let script = document.createElement('script');
+        script.src = 'https://js.stripe.com/v3/';
+        document.head.appendChild(script);
+    }"
+    class="flex flex-col gap-4"
+>
 
     @if (!$booking)
         <div x-data="{
@@ -82,13 +86,28 @@
 
     @if ($booking && (BookingStatus::PENDING === $booking->status || BookingStatus::GUEST_ON_PAGE === $booking->status))
         <!-- Invoice -->
+        <!-- @todo Refactor this to a separate component -->
+        @php
+            $bookingDate = $booking->booking_at->format('Y-m-d');
+            $today = now()->format('Y-m-d');
+            $tomorrow = now()->addDay()->format('Y-m-d');
+            $dayDisplay = '';
+
+            if($bookingDate === $today) {
+                $dayDisplay = 'Today';
+            } elseif($bookingDate === $tomorrow) {
+                $dayDisplay = 'Tomorrow';
+            } else {
+                $dayDisplay = $booking->booking_at->format('l');
+            }
+        @endphp
         <div class="flex items-center w-full gap-4 p-3 bg-white bg-opacity-90 shadow rounded-xl">
             <x-mary-icon name="o-building-storefront" class="w-10 h-10 p-2 text-white bg-orange-500 rounded-full"/>
 
             <div class="flex flex-col gap-1">
                 <div class="font-semibold">{{ $booking->schedule->restaurant->restaurant_name }}</div>
                 <div class="text-xs text-slate-600">
-                    Tonight {{ $booking->booking_at->format('g:i a') }}
+                    {{ $dayDisplay }} {{ $booking->booking_at->format('g:i a') }}
                 </div>
             </div>
             <div class="flex-grow flex text-right flex-col gap-1">
@@ -101,11 +120,30 @@
             </div>
         </div>
 
-        <div class="text-base font-semibold">
-            Please Enter Reservation Details
-        </div>
+        <div x-data="{ tab: 'collectPayment' }">
+            <div class="flex space-x-4">
+                <button :class="{ 'border-[#4736dd] text-[#4736dd] bg-white': tab === 'collectPayment' }"
+                        @click="tab = 'collectPayment'"
+                        class="border border-transparent px-2 py-1 text-sm font-semibold rounded">Collect Payment
+                </button>
+                <button :class="{ 'border-[#4736dd] text-[#4736dd] bg-white': tab === 'smsPayment' }"
+                        @click="tab = 'smsPayment'"
+                        class="border border-transparent px-2 py-1 text-sm font-semibold rounded">SMS Payment Link
+                </button>
+                <button :class="{ 'border-[#4736dd] text-[#4736dd] bg-white': tab === 'qrCode' }"
+                        @click="tab = 'qrCode'"
+                        class="border border-transparent px-2 py-1 text-sm font-semibold rounded">QR Code
+                </button>
+            </div>
 
-        <div class="flex flex-col items-center gap-3" x-data="{}" x-init="() => {
+            <div x-show="tab === 'collectPayment'" class="mt-4">
+                <!-- Collect Payment Tab Content -->
+                <div class="text-base font-semibold mb-2">
+                    Please Enter Reservation Details
+                </div>
+
+                <!-- @todo Refactor this to a separate component -->
+                <div class="flex flex-col items-center gap-3" x-data="{}" x-init="() => {
             function initializeStripe() {
                 if (window.Stripe) {
                     setupStripe();
@@ -153,62 +191,73 @@
             initializeStripe();
         }">
 
-            <form id="form" class="w-full">
-                <fieldset class="flex flex-col items-center gap-2 disabled:opacity-50">
-                    <div class="flex items-center w-full gap-2">
-                        <label class="w-full">
-                            <input name="first_name" type="text"
-                                   class="w-full rounded-lg border border-indigo-600 text-sm h-[40px]"
-                                   placeholder="First Name" required>
-                        </label>
+                    <form id="form" class="w-full">
+                        <fieldset class="flex flex-col items-center gap-2 disabled:opacity-50">
+                            <div class="flex items-center w-full gap-2">
+                                <label class="w-full">
+                                    <input name="first_name" type="text"
+                                           class="w-full rounded-lg border border-indigo-600 text-sm h-[40px]"
+                                           placeholder="First Name" required>
+                                </label>
 
-                        <label class="w-full">
-                            <input name="last_name" type="text"
-                                   class="w-full rounded-lg border border-indigo-600 text-sm h-[40px]"
-                                   placeholder="Last Name" required>
-                        </label>
+                                <label class="w-full">
+                                    <input name="last_name" type="text"
+                                           class="w-full rounded-lg border border-indigo-600 text-sm h-[40px]"
+                                           placeholder="Last Name" required>
+                                </label>
 
-                    </div>
+                            </div>
 
-                    <label class="w-full">
-                        <input name="phone" type="text"
-                               class="w-full rounded-lg border border-indigo-600 text-sm h-[40px]"
-                               placeholder="Cell Phone Number" required>
-                    </label>
+                            <label class="w-full">
+                                <input name="phone" type="text"
+                                       class="w-full rounded-lg border border-indigo-600 text-sm h-[40px]"
+                                       placeholder="Cell Phone Number" required>
+                            </label>
 
-                    <div id="card-element"
-                         class="w-full rounded-lg border border-indigo-600 text-sm bg-white px-2 py-3 h-[40px]">
-                        <!-- A Stripe Element will be inserted here. -->
-                    </div>
+                            <div id="card-element"
+                                 class="w-full rounded-lg border border-indigo-600 text-sm bg-white px-2 py-3 h-[40px]">
+                                <!-- A Stripe Element will be inserted here. -->
+                            </div>
 
-                    <x-filament::button class="w-full" type="submit" color="indigo" size="xl">
-                        Complete Reservation
-                    </x-filament::button>
-                </fieldset>
-            </form>
+                            <x-filament::button class="w-full" type="submit" color="indigo" size="xl">
+                                Complete Reservation
+                            </x-filament::button>
+                        </fieldset>
+                    </form>
 
+                </div>
+            </div>
+
+            <div x-show="tab === 'smsPayment'" class="mt-4 flex flex-col gap-2">
+                <!-- SMS Payment Link Tab Content -->
+                <div class="flex items-center text-xs bg-white rounded shadow-sm py-3 px-4"
+                     x-data="{ bookingUrl: '{{ $bookingUrl }}' }">
+                    <div class="flex-grow" x-text="bookingUrl"></div>
+                    <x-heroicon-c-clipboard class="text-slate-400 h-5 w-5 cursor-pointer"
+                                            @click="navigator.clipboard.writeText(bookingUrl)"/>
+                </div>
+
+                <livewire:booking-status-widget :booking="$booking"/>
+            </div>
+
+            <div x-show="tab === 'qrCode'" class="mt-4 flex flex-col gap-2">
+                <!-- QR Code Tab Content -->
+                <div class="text-base">
+                    Show QR code below to customer to accept secure payment.
+                </div>
+
+                <img src="{{ $qrCode }}" alt="QR Code" class="w-1/2 mx-auto shadow-lg">
+
+                <livewire:booking-status-widget :booking="$booking"/>
+            </div>
         </div>
 
-        <div class="text-xl font-semibold text-black divider divider-neutral">OR</div>
 
-        <div class="text-base">
-            Show QR code below to customer to accept secure payment.
+        <div class="fixed bottom-0 left-0 right-0 flex justify-center pb-4">
+            <x-mary-button wire:click="cancelBooking" class="border-none btn bg-slate-300 text-slate-600">
+                Abandon Reservation
+            </x-mary-button>
         </div>
-
-        <img src="{{ $qrCode }}" alt="QR Code" class="w-1/2 mx-auto shadow-lg">
-
-        <div class="flex items-center text-xs bg-white rounded shadow-sm py-3 px-4"
-             x-data="{ bookingUrl: '{{ $bookingUrl }}' }">
-            <div class="flex-grow" x-text="bookingUrl"></div>
-            <x-heroicon-c-clipboard class="text-slate-400 h-5 w-5 cursor-pointer"
-                                    @click="navigator.clipboard.writeText(bookingUrl)"/>
-        </div>
-
-        <livewire:booking-status-widget :booking="$booking"/>
-
-        <x-mary-button wire:click="cancelBooking" class="border-none btn bg-slate-300 text-slate-600">
-            Abandon Reservation
-        </x-mary-button>
     @elseif($booking && $booking->status === BookingStatus::CONFIRMED)
         <div class="flex flex-col items-center gap-3" id="form">
             <div class="text-xl font-semibold text-black divider divider-neutral">Reservation Confirmed</div>
