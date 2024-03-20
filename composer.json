@@ -23,6 +23,7 @@
         "laravel/cashier": "^15.1",
         "laravel/framework": "^10.10",
         "laravel/horizon": "^5.23",
+        "laravel/pulse": "^1.0@beta",
         "laravel/tinker": "^2.8",
         "leandrocfe/filament-apex-charts": "^3.0",
         "livewire/livewire": "^3.4",
@@ -99,6 +100,6 @@
             "dealerdirect/phpcodesniffer-composer-installer": true
         }
     },
-    "minimum-stability": "stable",
+    "minimum-stability": "beta",
     "prefer-stable": true
 }
