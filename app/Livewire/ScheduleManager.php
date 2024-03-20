@@ -109,6 +109,20 @@ class ScheduleManager extends Widget implements HasForms
         $restaurant->open_days = $days;
         $restaurant->save();
 
+        $schedulesData = collect($this->data['schedules'])
+            ->map(fn($time) => date('H:i:s', strtotime($time)))
+            ->toArray();
+
+        $schedules = Schedule::where('restaurant_id', auth()->user()->restaurant->id)
+            ->where(function ($query) use ($schedulesData) {
+                foreach ($schedulesData as $time) {
+                    $query->orWhere('start_time', $time);
+                }
+            })
+            ->get();
+
+        $schedules->each(fn($schedule) => $schedule->update(['is_available' => 0]));
+
         // Get all the schedules for the restaurant that are currently marked as unavailable.
         $unavailableSchedules = Schedule::where('restaurant_id', auth()->user()->restaurant->id)
             ->where('is_available', false)
