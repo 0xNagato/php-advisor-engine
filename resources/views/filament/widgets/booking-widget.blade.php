@@ -197,6 +197,12 @@
 
             <div x-show="tab === 'smsPayment'" class="mt-4 flex flex-col gap-4">
                 <!-- SMS Payment Link Tab Content -->
+                @if($SMSSent)
+                    <div class="flex flex-col gap-2 bg-white rounded shadow p-4">
+                        <p>Please advise customer to check their phone for reservation payment link. </p>
+                        <p>Sending message to customer now.</p>
+                    </div>
+                @endif
                 @php
                     $message = "Your reservation at {$booking->restaurant->restaurant_name} is pending. Please click {$bookingUrl} to secure your booking within the next 5 minutes.";
                 @endphp

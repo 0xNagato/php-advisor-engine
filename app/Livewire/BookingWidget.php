@@ -12,6 +12,7 @@ use DateTime;
 use Exception;
 use Filament\Widgets\Widget;
 use Illuminate\Database\Eloquent\Collection;
+use Livewire\Attributes\On;
 use Livewire\Attributes\Session;
 use Stripe\Exception\ApiErrorException;
 
@@ -48,6 +49,8 @@ class BookingWidget extends Widget
     public bool $isLoading = false;
 
     public bool $paymentSuccess = false;
+
+    public bool $SMSSent = false;
 
     public static function canView(): bool
     {
@@ -109,5 +112,11 @@ class BookingWidget extends Widget
         $this->booking = null;
         $this->qrCode = null;
         $this->bookingUrl = null;
+    }
+
+    #[On('sms-sent')]
+    public function SMSSent($messageId): void
+    {
+        $this->SMSSent = true;
     }
 }
