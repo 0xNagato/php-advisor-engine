@@ -5,6 +5,7 @@ namespace App\Livewire;
 use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
 use Filament\Forms\Form;
+use Filament\Notifications\Notification;
 use Filament\Widgets\Widget;
 use Twilio\Exceptions\ConfigurationException;
 use Twilio\Exceptions\TwilioException;
@@ -19,6 +20,7 @@ class SMSInput extends Widget implements HasForms
 
     public string $phoneNumber;
     public string $message;
+    public bool $messageSent = false;
 
     public function form(Form $form): Form
     {
@@ -44,5 +46,12 @@ class SMSInput extends Widget implements HasForms
                 'body' => $this->message,
             ]
         );
+
+        $this->dispatch('sms-sent', messageId: $message->sid);
+
+        Notification::make()
+            ->title('SMS Message Sent Successfully')
+            ->success()
+            ->send();
     }
 }
