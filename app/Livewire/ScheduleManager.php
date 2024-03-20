@@ -31,8 +31,11 @@ class ScheduleManager extends Widget implements HasForms
     public function mount(): void
     {
         $schedules = Schedule::where('restaurant_id', auth()->user()->restaurant->id)
+            ->where('is_available', false)
             ->orderBy('start_time')
-            ->get();
+            ->get()
+            ->map(fn($schedule) => date('g:i a', strtotime($schedule->start_time)))
+            ->toArray();
 
         $restaurant = auth()->user()->restaurant;
 
@@ -47,12 +50,12 @@ class ScheduleManager extends Widget implements HasForms
         ];
 
         $days_closed = collect($days)
-            ->filter(fn ($day) => $day === 'closed')
+            ->filter(fn($day) => $day === 'closed')
             ->keys()
             ->toArray();
 
         $this->form->fill([
-            'schedules' => [],
+            'schedules' => $schedules,
             'days_closed' => $days_closed,
         ]);
     }
@@ -60,9 +63,10 @@ class ScheduleManager extends Widget implements HasForms
     public function form(Form $form): Form
     {
         $schedules = Schedule::where('restaurant_id', auth()->user()->restaurant->id)
+            ->where('is_available', true)
             ->orderBy('start_time')
             ->get()
-            ->mapWithKeys(fn ($schedule) => [$schedule->id => date('g:i a', strtotime($schedule->start_time))]);
+            ->mapWithKeys(fn($schedule) => [date('g:i a', strtotime($schedule->start_time)) => date('g:i a', strtotime($schedule->start_time))]);
 
         return $form
             ->schema([
@@ -105,12 +109,29 @@ class ScheduleManager extends Widget implements HasForms
         $restaurant->open_days = $days;
         $restaurant->save();
 
-        collect($this->data['schedules'])
-            ->map(fn (array $data) => $data['schedule'])
-            ->each(
-                fn (array $schedule) => Schedule::find($schedule['id'])
-                    ?->update(['is_available' => $schedule['is_available'], 'available_tables' => $schedule['available_tables']])
-            );
+        $schedulesData = collect($this->data['schedules'])
+            ->map(fn($time) => date('H:i:s', strtotime($time)))
+            ->toArray();
+
+        // Get all the schedules for the restaurant that are currently marked as unavailable.
+        $unavailableSchedules = Schedule::where('restaurant_id', auth()->user()->restaurant->id)
+            ->where('is_available', false)
+            ->get()
+            ->map(fn($schedule) => date('H:i:s', strtotime($schedule->start_time)))
+            ->toArray();
+
+        // Convert the times in the $this->data['schedules'] array back to the 'H:i:s' format.
+        $submittedSchedules = collect($this->data['schedules'])
+            ->map(fn($time) => date('H:i:s', strtotime($time)))
+            ->toArray();
+
+        // Find the schedules that were originally unavailable but were removed from the list.
+        $schedulesToMakeAvailable = array_diff($unavailableSchedules, $submittedSchedules);
+
+        // Update these schedules as available again.
+        Schedule::where('restaurant_id', auth()->user()->restaurant->id)
+            ->whereIn('start_time', $schedulesToMakeAvailable)
+            ->update(['is_available' => true]);
 
         Notification::make()
             ->title('Schedule updated successfully')
