@@ -48,6 +48,8 @@ class CreateAdmin extends CreateRecord
                             ->initialCountry('US')
                             ->required(),
                         TextInput::make('password')
+                            ->placeholder('Password')
+                            ->hint('Minimum 8 characters')
                             ->required(),
                     ]),
             ]);

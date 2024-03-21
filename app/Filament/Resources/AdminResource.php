@@ -6,8 +6,7 @@ use App\Filament\Resources\AdminResource\Pages;
 use App\Models\User;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
-use Filament\Tables\Actions\BulkActionGroup;
-use Filament\Tables\Actions\DeleteBulkAction;
+use Filament\Tables\Actions\DeleteAction;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 
@@ -33,17 +32,16 @@ class AdminResource extends Resource
             ->query(User::role('super_admin'))
             ->columns([
                 TextColumn::make('name'),
-                TextColumn::make('email'),
+                TextColumn::make('email')->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
                 //
             ])
             ->actions([
+                DeleteAction::make()
             ])
             ->bulkActions([
-                BulkActionGroup::make([
-                    DeleteBulkAction::make(),
-                ]),
+
             ]);
     }
 
