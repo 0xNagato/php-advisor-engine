@@ -58,6 +58,10 @@
     </x-filament::section>
     <x-filament::section>
 
+        <div class="text-sm text-black font-semibold pb-4">
+            PRIMA donates 5% of proceeds to help feed the homeless.
+            How much would you like to donate?
+        </div>
         <form wire:submit="save" class="flex flex-col gap-3">
 
             <x-filament::input.wrapper>

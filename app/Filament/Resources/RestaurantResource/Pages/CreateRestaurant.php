@@ -5,6 +5,8 @@ namespace App\Filament\Resources\RestaurantResource\Pages;
 use App\Filament\Resources\RestaurantResource;
 use App\Models\User;
 use App\Notifications\RestaurantCreated;
+use Filament\Forms\Components\Checkbox;
+use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Section;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Form;
@@ -58,21 +60,27 @@ class CreateRestaurant extends CreateRecord
                             ->maxLength(255),
                         TextInput::make('primary_contact_name')
                             ->label('Primary Contact Name')
-                            ->required()
-                            ->maxLength(255),
-                        PhoneInput::make('contact_phone')
-                            ->label('Primary Contact Number')
-                            ->onlyCountries(['US'])
-                            ->initialCountry('US')
                             ->required(),
-                        TextInput::make('secondary_contact_name')
-                            ->label('Secondary Contact Name')
-                            ->maxLength(255),
-                        PhoneInput::make('secondary_contact_phone')
-                            ->label('Secondary Contact Number')
-                            ->onlyCountries(['US'])
+                        PhoneInput::make('contact_phone')
+                            ->label('Primary Contact Phone')
+                            ->required()
+                            ->onlyCountries(['US', 'CA'])
                             ->initialCountry('US'),
 
+                    ]),
+                Repeater::make('contacts')
+                    ->schema([
+                        TextInput::make('contact_name')
+                            ->label('Contact Name')
+                            ->required(),
+                        PhoneInput::make('contact_phone')
+                            ->label('Contact Phone')
+                            ->required()
+                            ->onlyCountries(['US', 'CA'])
+                            ->initialCountry('US'),
+                        Checkbox::make('use_for_contact')
+                            ->label('Use for Contact')
+                            ->default(true),
                     ]),
                 Section::make('Payout Information')
                     ->icon('heroicon-m-currency-dollar')
