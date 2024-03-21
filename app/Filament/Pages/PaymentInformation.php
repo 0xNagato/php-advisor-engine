@@ -54,6 +54,9 @@ class PaymentInformation extends Page
     public function updatedPayoutType($value): void
     {
         $this->payout_name = '';
+        // $this->routing_number = '';
+        // $this->account_number = '';
+        // $this->account_type = '';
     }
 
     public function save(): void

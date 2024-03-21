@@ -17,7 +17,7 @@ class ConciergeReservationHub extends Page
 
     protected static ?string $slug = 'concierge/reservation-hub';
 
-    protected ?string $heading = 'Table Request and Confirmation';
+    protected ?string $heading = 'Reservation Request';
 
     public static function canAccess(): bool
     {

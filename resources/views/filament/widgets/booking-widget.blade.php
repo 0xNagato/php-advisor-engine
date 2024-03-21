@@ -96,24 +96,29 @@
     @if ($booking && (BookingStatus::PENDING === $booking->status || BookingStatus::GUEST_ON_PAGE === $booking->status))
         <livewire:invoice-small :booking="$booking"/>
 
-        @env('local')
-            {{ $bookingUrl }}
-        @endenv
 
-        <div x-data="{ tab: 'collectPayment' }">
+        <div x-data="{ tab: 'collectPayment' }" id="tabs">
             <div class="flex space-x-4">
-                <button :class="{ 'border-[#4736dd] text-[#4736dd] bg-white': tab === 'collectPayment' }"
+                <div class="flex space-x-2 text-xs border-b-2 border-[#4736dd] w-full">
+                    <button
+                        :class="{ 'bg-[#4736dd] text-white': tab === 'collectPayment' }"
                         @click="tab = 'collectPayment'"
-                        class="border px-2 py-1 text-sm font-semibold rounded">Collect Payment
-                </button>
-                <button :class="{ 'border-[#4736dd] text-[#4736dd] bg-white': tab === 'smsPayment' }"
+                        class="px-4 py-2 text-xs font-semibold rounded-t bg-gray-50">
+                        Credit Card
+                    </button>
+                    <button
+                        :class="{ 'bg-[#4736dd] text-white': tab === 'smsPayment' }"
                         @click="tab = 'smsPayment'"
-                        class="border px-2 py-1 text-sm font-semibold rounded">SMS Payment Link
-                </button>
-                <button :class="{ 'border-[#4736dd] text-[#4736dd] bg-white': tab === 'qrCode' }"
+                        class="px-4 py-2 text-xs font-semibold rounded-t bg-gray-50">
+                        SMS Link
+                    </button>
+                    <button
+                        :class="{ 'bg-[#4736dd] text-white': tab === 'qrCode' }"
                         @click="tab = 'qrCode'"
-                        class="border px-2 py-1 text-sm font-semibold rounded">QR Code
-                </button>
+                        class="px-4 py-2 text-xs font-semibold rounded-t bg-gray-50">
+                        QR Code
+                    </button>
+                </div>
             </div>
 
             <div x-show="tab === 'collectPayment'" class="mt-4">
