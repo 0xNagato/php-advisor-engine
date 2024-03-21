@@ -2,12 +2,14 @@
 
 namespace App\Models;
 
+use App\Data\RestaurantContactData;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Spatie\LaravelData\DataCollection;
 
 /**
  * Class Restaurant
@@ -34,10 +36,12 @@ class Restaurant extends Model
         'secondary_contact_name',
         'booking_fee',
         'open_days',
+        'contacts',
     ];
 
     protected $casts = [
         'open_days' => 'array',
+        'contacts' => DataCollection::class.':'.RestaurantContactData::class,
     ];
 
     protected static function boot(): void

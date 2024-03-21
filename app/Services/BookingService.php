@@ -13,6 +13,7 @@ class BookingService
 {
     /**
      * @throws ApiErrorException
+     *
      * @todo Add type hint for $form with DataTransferObject
      */
     public function processBooking(Booking $booking, $form): void
@@ -20,7 +21,7 @@ class BookingService
         Stripe::setApiKey(config('cashier.secret'));
 
         $stripeCustomer = Customer::create([
-            'name' => $form['first_name'] . ' ' . $form['last_name'],
+            'name' => $form['first_name'].' '.$form['last_name'],
             'phone' => $form['phone'],
             'source' => $form['token'],
         ]);
@@ -29,7 +30,7 @@ class BookingService
             'amount' => $booking->total_fee,
             'currency' => 'usd',
             'customer' => $stripeCustomer->id,
-            'description' => 'Booking for ' . $booking->restaurant->restaurant_name,
+            'description' => 'Booking for '.$booking->restaurant->restaurant_name,
         ]);
 
         $booking->update([

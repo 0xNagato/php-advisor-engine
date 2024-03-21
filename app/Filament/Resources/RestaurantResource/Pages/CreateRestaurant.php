@@ -68,7 +68,9 @@ class CreateRestaurant extends CreateRecord
                             ->initialCountry('US'),
 
                     ]),
+
                 Repeater::make('contacts')
+                    ->label('Contacts')
                     ->schema([
                         TextInput::make('contact_name')
                             ->label('Contact Name')
@@ -78,10 +80,11 @@ class CreateRestaurant extends CreateRecord
                             ->required()
                             ->onlyCountries(['US', 'CA'])
                             ->initialCountry('US'),
-                        Checkbox::make('use_for_contact')
-                            ->label('Use for Contact')
+                        Checkbox::make('use_for_reservations')
+                            ->label('Use for Reservations')
                             ->default(true),
                     ]),
+
                 Section::make('Payout Information')
                     ->icon('heroicon-m-currency-dollar')
                     ->schema([
@@ -116,12 +119,11 @@ class CreateRestaurant extends CreateRecord
 
         return $user->restaurant()->create([
             'restaurant_name' => $data['restaurant_name'],
-            'contact_phone' => $data['contact_phone'],
             'primary_contact_name' => $data['primary_contact_name'],
-            'secondary_contact_name' => $data['secondary_contact_name'],
-            'secondary_contact_phone' => $data['secondary_contact_phone'],
+            'contact_phone' => $data['contact_phone'],
             'payout_restaurant' => $data['payout_restaurant'],
             'booking_fee' => $data['booking_fee'] * 100,
+            'contacts' => $data['contacts'],
         ]);
     }
 }

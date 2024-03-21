@@ -2,7 +2,6 @@
 
 namespace App\Filament\Pages;
 
-use App\Livewire\Restaurant\RestaurantLeaderboard;
 use App\Livewire\Restaurant\RestaurantRecentBookings;
 use App\Livewire\Restaurant\RestaurantStats;
 use Filament\Forms\Components\DatePicker;
@@ -52,7 +51,7 @@ class RestaurantDashboard extends Dashboard
         return [
             RestaurantStats::make(['restaurant' => auth()->user()->restaurant, 'columnSpan' => 'full']),
             RestaurantRecentBookings::make(['restaurant' => auth()->user()->restaurant, 'columnSpan' => '1']),
-            RestaurantLeaderboard::make(['restaurant' => auth()->user()->restaurant, 'columnSpan' => '1']),
+            // RestaurantLeaderboard::make(['restaurant' => auth()->user()->restaurant, 'columnSpan' => '1']),
         ];
     }
 }

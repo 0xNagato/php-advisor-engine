@@ -59,7 +59,7 @@ class ConciergeCreated extends Notification
     public function toTwilio(object $notifiable): TwilioSmsMessage|TwilioMessage
     {
         return (new TwilioSmsMessage())
-            ->content("Welcome to PRIMA! Your concierge account has been created. Please click {$this->passwordResetUrl} to login and update your payment info and begin making reservations. Thank you for joining us!");
+            ->content("Welcome to PRIMA! Your account has been created. Please click {$this->passwordResetUrl} to login and update your payment info and begin making reservations. Thank you for joining us!");
     }
 
     /**

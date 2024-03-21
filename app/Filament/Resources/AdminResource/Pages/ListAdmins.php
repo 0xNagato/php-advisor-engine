@@ -9,6 +9,7 @@ use Filament\Resources\Pages\ListRecords;
 class ListAdmins extends ListRecords
 {
     protected static string $resource = AdminResource::class;
+
     protected static ?string $title = 'Admins';
 
     protected function getHeaderActions(): array

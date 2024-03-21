@@ -13,10 +13,12 @@ use Filament\Tables\Table;
 class AdminResource extends Resource
 {
     protected static ?string $model = User::class;
-    protected static ?string $modelLabel = 'admin';
-    protected static ?string $navigationIcon = 'gmdi-shield-o';
-    protected static ?int $navigationSort = 20;
 
+    protected static ?string $modelLabel = 'admin';
+
+    protected static ?string $navigationIcon = 'gmdi-shield-o';
+
+    protected static ?int $navigationSort = 20;
 
     public static function form(Form $form): Form
     {
@@ -38,7 +40,7 @@ class AdminResource extends Resource
                 //
             ])
             ->actions([
-                DeleteAction::make()->iconButton()
+                DeleteAction::make()->iconButton(),
             ])
             ->bulkActions([
 

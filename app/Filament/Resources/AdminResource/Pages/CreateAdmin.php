@@ -14,6 +14,7 @@ use Ysfkaya\FilamentPhoneInput\Forms\PhoneInput;
 class CreateAdmin extends CreateRecord
 {
     protected static string $resource = AdminResource::class;
+
     protected static ?string $title = 'Create Admin';
 
     public function form(Form $form): Form
