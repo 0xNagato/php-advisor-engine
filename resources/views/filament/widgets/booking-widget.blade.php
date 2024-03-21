@@ -94,7 +94,9 @@
 
 
     @if ($booking && (BookingStatus::PENDING === $booking->status || BookingStatus::GUEST_ON_PAGE === $booking->status))
-        <livewire:invoice-small :booking="$booking"/>
+        <div class="w-full -mt-4">
+            <livewire:invoice-small :booking="$booking"/>
+        </div>
 
 
         <div x-data="{ tab: 'collectPayment' }" id="tabs">
