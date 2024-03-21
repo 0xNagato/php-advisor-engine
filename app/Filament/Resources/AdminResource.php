@@ -38,7 +38,7 @@ class AdminResource extends Resource
                 //
             ])
             ->actions([
-                DeleteAction::make()
+                DeleteAction::make()->iconButton()
             ])
             ->bulkActions([
 
