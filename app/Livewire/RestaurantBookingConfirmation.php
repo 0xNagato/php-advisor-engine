@@ -18,7 +18,6 @@ class RestaurantBookingConfirmation extends Component
         }
     }
 
-
     public function render()
     {
         return view('livewire.restaurant-booking-confirmation');

@@ -56,7 +56,7 @@
                 <div class="font-bold mb-2">Unavailable Times:</div>
                 <div class="grid grid-cols-4 gap-x-4">
                     @foreach($unavailableSchedules as $schedule)
-                        <div>{{ $schedule->start_time->format('g:i a') }}</div>
+                        <div>{{ $schedule->formatted_start_time }}</div>
                     @endforeach
                 </div>
             </div>
@@ -66,7 +66,7 @@
             <x-filament::input.select wire:model.live="selectedScheduleId" :disabled="!$selectedRestaurantId">
                 <option value="">Select a time</option>
                 @foreach ($schedules ?? [] as $schedule)
-                    <option value="{{ $schedule->id }}">{{ $schedule->start_time->format('g:i a') }}</option>
+                    <option value="{{ $schedule->id }}">{{ $schedule->formatted_start_time }}</option>
                 @endforeach
             </x-filament::input.select>
         </x-filament::input.wrapper>
@@ -225,7 +225,7 @@
                     </div>
                 @endif
                 @php
-                    $message = "Your reservation at {$booking->restaurant->restaurant_name} is pending. Please click {$bookingUrl} to secure your booking within the next 5 minutes.";
+                    $message = "Your reservation at {$booking->restaurant->restaurant_name} is pending. Please click $bookingUrl to secure your booking within the next 5 minutes.";
                 @endphp
                 <livewire:s-m-s-input :message="$message"/>
             </div>

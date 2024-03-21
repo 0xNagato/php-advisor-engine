@@ -146,7 +146,7 @@ class CreateRestaurant extends CreateRecord
                 'end_time' => $time->copy()->addMinutes(30)->format('H:i:s'),
                 'restaurant_id' => $restaurant->id,
                 'is_available' => true,
-                'available_tables' => 100
+                'available_tables' => 100,
             ]);
         }
 

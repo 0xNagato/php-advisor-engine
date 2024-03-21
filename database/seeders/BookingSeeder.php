@@ -37,7 +37,7 @@ class BookingSeeder extends Seeder
             for ($i = 0; $i < $bookingsCount; $i++) {
                 // Generate a random date within the last 60 days
                 $randomDate = Carbon::now()->subDays(random_int(0, 60))->toDateString();
-                $bookingAt = Carbon::parse("$randomDate ".$schedule->start_time->format('H:i:s'))->format('Y-m-d H:i:s');
+                $bookingAt = Carbon::parse("$randomDate ".$schedule->start_time)->format('Y-m-d H:i:s');
                 // Create a new booking using a factory
                 Booking::factory()->create([
                     'schedule_id' => $schedule->id,

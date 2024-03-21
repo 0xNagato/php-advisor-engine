@@ -11,7 +11,6 @@ use App\Models\Schedule;
 use App\Services\BookingService;
 use AshAllenDesign\ShortURL\Facades\ShortURL;
 use chillerlan\QRCode\QRCode;
-use DateTime;
 use Exception;
 use Filament\Widgets\Widget;
 use Illuminate\Database\Eloquent\Collection;
@@ -89,10 +88,14 @@ class BookingWidget extends Widget
     public function updatedSelectedRestaurantId($value): void
     {
         $this->selectedRestaurant = Restaurant::openOnDate($this->selectedDate)->find($value);
-        // $this->schedules = $this->selectedRestaurant->availableSchedules->where('start_time', '>=', now());
-        // $this->unavailableSchedules = $this->selectedRestaurant->unavailableSchedules->where('start_time', '>=', now());
-        $this->schedules = $this->selectedRestaurant->availableSchedules;
-        $this->unavailableSchedules = $this->selectedRestaurant->unavailableSchedules;
+
+        if ($this->selectedDate === now()->format('Y-m-d')) {
+            $this->schedules = $this->selectedRestaurant->availableSchedules->where('start_time', '>=', now());
+        } else {
+            $this->schedules = $this->selectedRestaurant->availableSchedules;
+        }
+
+        $this->unavailableSchedules = $this->selectedRestaurant->unavailableSchedules->where('start_time', '>=', now());
         $this->selectedScheduleId = null;
     }
 
@@ -115,7 +118,7 @@ class BookingWidget extends Widget
             'guest_count' => $this->guestCount,
             'concierge_id' => auth()->user()->concierge->id,
             'status' => BookingStatus::PENDING,
-            'booking_at' => $this->selectedSchedule->start_time->setDateFrom(new DateTime($this->selectedDate)),
+            'booking_at' => $this->selectedDate.' '.$this->selectedSchedule->start_time,
         ]);
 
         $shortUrlQr = ShortURL::destinationUrl(route('bookings.create', ['token' => $this->booking->uuid, 'r' => 'qr']))
@@ -160,6 +163,12 @@ class BookingWidget extends Widget
         $this->bookingUrl = null;
         $this->paymentSuccess = false;
         $this->SMSSent = false;
+
+        $this->selectedRestaurantId = null;
+        $this->selectedRestaurant = null;
+        $this->selectedScheduleId = null;
+        $this->selectedSchedule = null;
+        $this->guestCount = null;
     }
 
     #[On('sms-sent')]

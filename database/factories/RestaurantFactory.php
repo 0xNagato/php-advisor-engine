@@ -16,9 +16,7 @@ class RestaurantFactory extends Factory
         return [
             'restaurant_name' => $this->faker->name(),
             'primary_contact_name' => $this->faker->name(),
-            'contact_phone' => $this->faker->phoneNumber(),
-            'secondary_contact_name' => $this->faker->name(),
-            'secondary_contact_phone' => $this->faker->phoneNumber(),
+            'contact_phone' => $this->faker->e164PhoneNumber(),
             'payout_restaurant' => 60,
             'open_days' => [
                 'monday' => 'closed',
@@ -33,6 +31,19 @@ class RestaurantFactory extends Factory
 
             'created_at' => Carbon::now(),
             'updated_at' => Carbon::now(),
+
+            'contacts' => [
+                [
+                    'contact_name' => $this->faker->name(),
+                    'contact_phone' => $this->faker->e164PhoneNumber(),
+                    'use_for_reservations' => true,
+                ],
+                [
+                    'contact_name' => $this->faker->name(),
+                    'contact_phone' => $this->faker->e164PhoneNumber(),
+                    'use_for_reservations' => false,
+                ],
+            ],
 
             'user_id' => User::factory(),
         ];

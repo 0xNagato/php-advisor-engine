@@ -21,12 +21,14 @@ class Schedule extends Model
 
     protected $casts = [
         'is_available' => 'boolean',
-        'start_time' => 'datetime',
-        'end_time' => 'datetime',
+        'start_time',
+        'end_time',
     ];
 
     protected $appends = [
         'computed_available_tables',
+        'formatted_start_time',
+        'formatted_end_time',
     ];
 
     public function restaurant(): BelongsTo
@@ -46,5 +48,15 @@ class Schedule extends Model
     public function bookings(): HasMany
     {
         return $this->hasMany(Booking::class);
+    }
+
+    public function getFormattedStartTimeAttribute(): string
+    {
+        return date('g:i a', strtotime($this->attributes['start_time']));
+    }
+
+    public function getFormattedEndTimeAttribute(): string
+    {
+        return date('g:i a', strtotime($this->attributes['end_time']));
     }
 }

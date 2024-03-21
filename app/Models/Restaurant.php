@@ -36,12 +36,12 @@ class Restaurant extends Model
         'secondary_contact_name',
         'booking_fee',
         'open_days',
-        'contacts'
+        'contacts',
     ];
 
     protected $casts = [
         'open_days' => 'array',
-        'contacts' => DataCollection::class . ':' . RestaurantContactData::class,
+        'contacts' => DataCollection::class.':'.RestaurantContactData::class,
     ];
 
     protected static function boot(): void

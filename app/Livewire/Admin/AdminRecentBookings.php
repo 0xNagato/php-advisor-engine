@@ -60,6 +60,7 @@ class AdminRecentBookings extends BaseWidget
                     ->alignRight()
                     ->currency('USD')
                     ->toggleable(isToggledHiddenByDefault: true),
+
             ]);
     }
 }

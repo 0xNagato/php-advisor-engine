@@ -11,9 +11,8 @@ class RestaurantContactData extends Data
     public function __construct(
         public string $contact_name,
         public string $contact_phone,
-        public bool   $use_for_reservations,
-    )
-    {
+        public bool $use_for_reservations,
+    ) {
     }
 
     public function toNotifiable(): AnonymousNotifiable

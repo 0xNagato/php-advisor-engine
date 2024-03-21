@@ -8,16 +8,18 @@ use Filament\Forms\Contracts\HasForms;
 use Filament\Forms\Form;
 use Filament\Notifications\Notification;
 use Filament\Widgets\Widget;
+use Tapp\FilamentTimezoneField\Forms\Components\TimezoneSelect;
+use Ysfkaya\FilamentPhoneInput\Forms\PhoneInput;
 
 class ProfileSettings extends Widget implements HasForms
 {
     use InteractsWithForms;
 
+    protected static string $view = 'filament.widgets.profile-settings';
+
     public ?array $data = [];
 
     protected int|string|array $columnSpan = 'full';
-
-    protected static string $view = 'filament.widgets.profile-settings';
 
     public function mount(): void
     {
@@ -26,6 +28,7 @@ class ProfileSettings extends Widget implements HasForms
             'last_name' => auth()->user()->last_name,
             'email' => auth()->user()->email,
             'phone' => auth()->user()->phone,
+            'timezone' => auth()->user()->timezone ?? 'UTC',
         ]);
     }
 
@@ -43,9 +46,12 @@ class ProfileSettings extends Widget implements HasForms
                 ->label('Email')
                 ->unique('users', ignorable: auth()->user())
                 ->email(),
-            TextInput::make('phone')
+            PhoneInput::make('phone')
                 ->required()
                 ->label('Phone'),
+            TimezoneSelect::make('timezone')
+                ->searchable()
+                ->required(),
 
         ])->statePath('data');
     }

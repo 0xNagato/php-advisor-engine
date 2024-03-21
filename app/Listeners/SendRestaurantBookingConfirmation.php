@@ -22,6 +22,7 @@ class SendRestaurantBookingConfirmation implements ShouldQueue
 
     /**
      * Handle the event.
+     *
      * @throws ShortURLException
      */
     public function handle(BookingPaid $event): void
