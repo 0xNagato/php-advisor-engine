@@ -30,6 +30,16 @@ class BookingWidget extends Widget
 
     public int|string|null $selectedRestaurantId;
 
+    /**
+     * @var Collection<Schedule>|null
+     */
+    public ?Collection $schedules;
+
+    /**
+     * @var Collection<Schedule>|null
+     */
+    public ?Collection $unavailableSchedules;
+
     public ?Schedule $selectedSchedule;
 
     public int|string|null $selectedScheduleId;
@@ -64,9 +74,22 @@ class BookingWidget extends Widget
         $this->selectedDate = now()->format('Y-m-d');
     }
 
+    public function updatedSelectedDate($value): void
+    {
+        $this->selectedRestaurantId = null;
+        $this->selectedRestaurant = null;
+        $this->selectedScheduleId = null;
+        $this->selectedSchedule = null;
+
+        $this->restaurants = Restaurant::openOnDate($value)->get();
+    }
+
     public function updatedSelectedRestaurantId($value): void
     {
-        $this->selectedRestaurant = Restaurant::openToday()->find($value);
+        $this->selectedRestaurant = Restaurant::openOnDate($this->selectedDate)->find($value);
+        $this->schedules = $this->selectedRestaurant->availableSchedules->where('start_time', '>=', now());
+        $this->unavailableSchedules = $this->selectedRestaurant->unavailableSchedules->where('start_time', '>=', now());
+        $this->selectedScheduleId = null;
     }
 
     public function updatedSelectedScheduleId($value): void
@@ -124,7 +147,7 @@ class BookingWidget extends Widget
     }
 
     #[On('sms-sent')]
-    public function SMSSent($messageId): void
+    public function SMSSent(): void
     {
         $this->SMSSent = true;
     }

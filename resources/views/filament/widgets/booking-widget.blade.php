@@ -20,12 +20,12 @@
             <div class="flex space-x-4" x-bind:class="{ 'mb-4': showCalendar, 'mb-2': !showCalendar }">
                 <label class="inline-flex items-center">
                     <input checked type="radio" class="form-radio" name="date" value="today"
-                           @click="showCalendar = false; $wire.selectedDate = today">
+                           @click="showCalendar = false; $wire.set('selectedDate', today)">
                     <span class="ml-2">Today</span>
                 </label>
                 <label class="inline-flex items-center">
                     <input type="radio" class="form-radio" name="date" value="tomorrow"
-                           @click="showCalendar = false; $wire.selectedDate = tomorrow">
+                           @click="showCalendar = false; $wire.set('selectedDate', tomorrow)">
                     <span class="ml-2">Tomorrow</span>
                 </label>
                 <label class="inline-flex items-center">
@@ -37,11 +37,10 @@
 
             <x-filament::input.wrapper x-show="showCalendar" @click="$refs.calendar.focus()"
                                        suffix-icon="heroicon-m-calendar">
-                <x-filament::input type="date" x-ref="calendar" wire:model="selectedDate"/>
+                <x-filament::input type="date" x-ref="calendar" wire:model.live="selectedDate"/>
             </x-filament::input.wrapper>
 
         </div>
-
 
         <x-filament::input.wrapper>
             <x-filament::input.select wire:model.live="selectedRestaurantId">
@@ -52,11 +51,21 @@
             </x-filament::input.select>
         </x-filament::input.wrapper>
 
+        @if($unavailableSchedules && $unavailableSchedules->isNotEmpty())
+            <div class="bg-red-50 border border-red-400 text-red-700 p-4 rounded relative text-xs" role="alert">
+                <div class="font-bold mb-2">Unavailable Times:</div>
+                <div class="grid grid-cols-4 gap-x-4">
+                    @foreach($unavailableSchedules as $schedule)
+                        <div>{{ $schedule->start_time->format('g:i a') }}</div>
+                    @endforeach
+                </div>
+            </div>
+        @endif
 
         <x-filament::input.wrapper>
             <x-filament::input.select wire:model.live="selectedScheduleId" :disabled="!$selectedRestaurantId">
                 <option value="">Select a time</option>
-                @foreach ($selectedRestaurant?->schedules ?? [] as $schedule)
+                @foreach ($schedules ?? [] as $schedule)
                     <option value="{{ $schedule->id }}">{{ $schedule->start_time->format('g:i a') }}</option>
                 @endforeach
             </x-filament::input.select>

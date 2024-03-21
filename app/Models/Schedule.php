@@ -2,7 +2,6 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -47,21 +46,5 @@ class Schedule extends Model
     public function bookings(): HasMany
     {
         return $this->hasMany(Booking::class);
-    }
-
-    public function scopeAvailableAt(Builder $query, $time): Builder
-    {
-        $endOfDay = now()->endOfDay()->toTimeString();
-
-        return $query->whereBetween('start_time', [$time, $endOfDay])
-            ->where('is_available', true)
-            ->where(function ($query) {
-                $query->where('available_tables', '>', function (\Illuminate\Database\Query\Builder $query) {
-                    $query->selectRaw('COUNT(*)')
-                        ->from('bookings')
-                        ->whereColumn('bookings.schedule_id', 'schedules.id')
-                        ->whereDate('bookings.created_at', now()->toDateString()); // Only consider bookings for the current day
-                });
-            });
     }
 }

@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -39,6 +40,23 @@ class Restaurant extends Model
         'open_days' => 'array',
     ];
 
+    protected static function boot(): void
+    {
+        parent::boot();
+
+        static::creating(function (Restaurant $restaurant) {
+            $restaurant->open_days = [
+                'monday' => 'open',
+                'tuesday' => 'open',
+                'wednesday' => 'open',
+                'thursday' => 'open',
+                'friday' => 'open',
+                'saturday' => 'open',
+                'sunday' => 'open',
+            ];
+        });
+    }
+
     /**
      * Get the user that owns the restaurant.
      */
@@ -55,22 +73,14 @@ class Restaurant extends Model
         return $this->hasMany(Schedule::class);
     }
 
-    /**
-     * Scope a query to only include restaurants that are available at a specific time.
-     *
-     * @param  mixed  $time
-     */
-    public function scopeAvailableAt(Builder $query, string $time): Builder
+    public function availableSchedules(): HasMany
     {
-        $dayOfWeek = strtolower($time->format('l')); // Get the day of the week in lowercase
+        return $this->hasMany(Schedule::class)->where('is_available', true);
+    }
 
-        return $query->whereHas('schedules', function ($query) use ($time) {
-            $query->availableAt($time);
-        })->where("days_open->{$dayOfWeek}", 'open') // Check if the restaurant is open on that day
-            ->with(['schedules' => function ($query) use ($time) {
-                $query->availableAt($time);
-            },
-            ]);
+    public function unavailableSchedules(): HasMany
+    {
+        return $this->hasMany(Schedule::class)->where('is_available', false);
     }
 
     public function scopeOpenToday(Builder $query): Builder
@@ -80,20 +90,10 @@ class Restaurant extends Model
         return $query->where("open_days->{$currentDay}", 'open'); // Check if the restaurant is open on that day
     }
 
-    protected static function boot(): void
+    public function scopeOpenOnDate(Builder $query, string $date): Builder
     {
-        parent::boot();
+        $dayOfWeek = strtolower(Carbon::parse($date)->format('l')); // Convert the date to a day of the week
 
-        static::creating(function (Restaurant $restaurant) {
-            $restaurant->open_days = [
-                'monday' => 'open',
-                'tuesday' => 'open',
-                'wednesday' => 'open',
-                'thursday' => 'open',
-                'friday' => 'open',
-                'saturday' => 'open',
-                'sunday' => 'open',
-            ];
-        });
+        return $query->where("open_days->{$dayOfWeek}", 'open'); // Check if the restaurant is open on that day
     }
 }
