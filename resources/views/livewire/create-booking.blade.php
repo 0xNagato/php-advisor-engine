@@ -15,7 +15,7 @@
                     <p class="mt-3 font-semibold">Thank you for using PRIMA!</p>
                 </h2>
             </div>
-        @elseif ($booking->status === BookingStatus::GUEST_ON_PAGE)
+        @elseif ($this->isValid())
             <div class="flex flex-col items-center gap-3">
                 <h1 class="text-3xl text-center sanomat-font font-semibold">Secure Your Reservation</h1>
 
