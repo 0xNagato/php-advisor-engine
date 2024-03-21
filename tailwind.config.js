@@ -16,5 +16,13 @@ export default {
     daisyui: {
         themes: false,
         darkTheme: 'light'
-    }
+    },
+    
+    theme: {
+        extend: {
+            colors: {
+                brand: '#4736dd',
+            },
+        },
+    },
 };

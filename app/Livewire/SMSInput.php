@@ -2,6 +2,7 @@
 
 namespace App\Livewire;
 
+use App\Events\SMSMessageSent;
 use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
 use Filament\Forms\Form;
@@ -50,6 +51,8 @@ class SMSInput extends Widget implements HasForms
         );
 
         $this->dispatch('sms-sent', messageId: $message->sid);
+
+        SMSMessageSent::dispatch($message);
 
         Notification::make()
             ->title('SMS Message Sent Successfully')

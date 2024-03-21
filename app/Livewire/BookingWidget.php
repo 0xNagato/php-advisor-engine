@@ -3,6 +3,8 @@
 namespace App\Livewire;
 
 use App\Enums\BookingStatus;
+use App\Events\BookingCancelled;
+use App\Events\BookingCreated;
 use App\Models\Booking;
 use App\Models\Restaurant;
 use App\Models\Schedule;
@@ -123,6 +125,8 @@ class BookingWidget extends Widget
         $this->bookingUrl = $shortUrl->default_short_url;
 
         $this->qrCode = (new QRCode())->render($shortUrlQr->default_short_url);
+
+        BookingCreated::dispatch($this->booking);
     }
 
     /**
@@ -141,9 +145,19 @@ class BookingWidget extends Widget
     public function cancelBooking(): void
     {
         $this->booking->update(['status' => 'cancelled']);
+        BookingCancelled::dispatch($this->booking);
         $this->booking = null;
         $this->qrCode = null;
         $this->bookingUrl = null;
+    }
+
+    public function resetBooking(): void
+    {
+        $this->booking = null;
+        $this->qrCode = null;
+        $this->bookingUrl = null;
+        $this->paymentSuccess = false;
+        $this->SMSSent = false;
     }
 
     #[On('sms-sent')]

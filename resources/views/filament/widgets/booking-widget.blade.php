@@ -100,22 +100,23 @@
 
 
         <div x-data="{ tab: 'collectPayment' }" id="tabs">
+
             <div class="flex space-x-4">
-                <div class="flex space-x-2 text-xs border-b-2 border-[#4736dd] w-full">
+                <div class="flex space-x-1 text-xs border-b-2 border-brand w-full">
                     <button
-                        :class="{ 'bg-[#4736dd] text-white': tab === 'collectPayment' }"
+                        :class="{ 'bg-brand text-white': tab === 'collectPayment' }"
                         @click="tab = 'collectPayment'"
                         class="px-4 py-2 text-xs font-semibold rounded-t bg-gray-50">
                         Credit Card
                     </button>
                     <button
-                        :class="{ 'bg-[#4736dd] text-white': tab === 'smsPayment' }"
+                        :class="{ 'bg-brand text-white': tab === 'smsPayment' }"
                         @click="tab = 'smsPayment'"
                         class="px-4 py-2 text-xs font-semibold rounded-t bg-gray-50">
                         SMS Link
                     </button>
                     <button
-                        :class="{ 'bg-[#4736dd] text-white': tab === 'qrCode' }"
+                        :class="{ 'bg-brand text-white': tab === 'qrCode' }"
                         @click="tab = 'qrCode'"
                         class="px-4 py-2 text-xs font-semibold rounded-t bg-gray-50">
                         QR Code
@@ -253,7 +254,7 @@
             <p>Thank you for the booking! We are notifying the restaurant now.</p>
         </div>
 
-        <x-mary-button wire:click="cancelBooking" class="btn bg-[#421fff] text-white">
+        <x-mary-button wire:click="resetBooking" class="btn bg-[#421fff] text-white">
             Create New Booking
         </x-mary-button>
     @endif

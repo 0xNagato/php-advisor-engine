@@ -3,6 +3,7 @@
 namespace App\Notifications;
 
 use App\Models\User;
+use AshAllenDesign\ShortURL\Exceptions\ShortURLException;
 use AshAllenDesign\ShortURL\Facades\ShortURL;
 use Filament\Facades\Filament;
 use Illuminate\Bus\Queueable;
@@ -27,6 +28,9 @@ class ConciergeCreated extends Notification
         $this->passwordResetUrl = $this->passwordResetUrl();
     }
 
+    /**
+     * @throws ShortURLException
+     */
     protected function passwordResetUrl(): string
     {
         $token = Password::createToken($this->user);

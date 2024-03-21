@@ -38,6 +38,7 @@ class Booking extends Model
         'confirmed_at',
         'clicked_at',
         'concierge_referral_type',
+        'restaurant_confirmed_at',
     ];
 
     protected $appends = [
@@ -134,7 +135,7 @@ class Booking extends Model
 
     public function getGuestNameAttribute(): string
     {
-        return $this->guest_first_name.' '.$this->guest_last_name;
+        return $this->guest_first_name . ' ' . $this->guest_last_name;
     }
 
     public function getPartnerEarningsAttribute()

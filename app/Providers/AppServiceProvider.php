@@ -19,13 +19,18 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        if (auth()->check()) {
+            config('app.timezone', auth()->user()->timezone);
+        }
+
         FilamentColor::register([
             'indigo' => Color::Indigo,
+            'brand' => '#4736dd',
         ]);
 
         Filament::registerRenderHook(
             'panels::body.end',
-            static fn (): string => <<<'HTML'
+            static fn(): string => <<<'HTML'
                 <div x-data="" x-init="
                     if (!localStorage.getItem('sidebar_initialized')) {
                         localStorage.setItem('sidebar_initialized', true);
@@ -37,12 +42,12 @@ class AppServiceProvider extends ServiceProvider
 
         FilamentView::registerRenderHook(
             PanelsRenderHook::USER_MENU_BEFORE,
-            static fn () => view('filament.admin.logo')
+            static fn() => view('filament.admin.logo')
         );
 
         FilamentView::registerRenderHook(
             'panels::head.start',
-            static fn (): string => '<link href="https://db.onlinewebfonts.com/c/5b381abe79163202b03f53ed0eab3065?family=Sanomat+Web+Regular+Regular" rel="stylesheet">',
+            static fn(): string => '<link href="https://db.onlinewebfonts.com/c/5b381abe79163202b03f53ed0eab3065?family=Sanomat+Web+Regular+Regular" rel="stylesheet">',
         );
 
         Page::$reportValidationErrorUsing = static function (ValidationException $exception) {

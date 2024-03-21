@@ -3,8 +3,10 @@
 namespace App\Filament\Resources\RestaurantResource\Pages;
 
 use App\Filament\Resources\RestaurantResource;
+use App\Models\Schedule;
 use App\Models\User;
 use App\Notifications\RestaurantCreated;
+use Carbon\Carbon;
 use Filament\Forms\Components\Checkbox;
 use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Section;
@@ -117,13 +119,37 @@ class CreateRestaurant extends CreateRecord
         $user->assignRole('restaurant');
         $user->notify(new RestaurantCreated($user));
 
-        return $user->restaurant()->create([
+        $restaurant = $user->restaurant()->create([
             'restaurant_name' => $data['restaurant_name'],
             'primary_contact_name' => $data['primary_contact_name'],
             'contact_phone' => $data['contact_phone'],
             'payout_restaurant' => $data['payout_restaurant'],
             'booking_fee' => $data['booking_fee'] * 100,
             'contacts' => $data['contacts'],
+            'open_days' => [
+                'monday' => 'open',
+                'tuesday' => 'open',
+                'wednesday' => 'open',
+                'thursday' => 'open',
+                'friday' => 'open',
+                'saturday' => 'open',
+                'sunday' => 'open',
+            ],
         ]);
+
+        $startTime = Carbon::createFromTime(17, 0, 0); // 5pm
+        $endTime = Carbon::createFromTime(23, 30, 0); // 10:30pm
+
+        for ($time = $startTime; $time->lessThan($endTime); $time->addMinutes(30)) {
+            Schedule::create([
+                'start_time' => $time->format('H:i:s'),
+                'end_time' => $time->copy()->addMinutes(30)->format('H:i:s'),
+                'restaurant_id' => $restaurant->id,
+                'is_available' => true,
+                'available_tables' => 100
+            ]);
+        }
+
+        return $restaurant;
     }
 }

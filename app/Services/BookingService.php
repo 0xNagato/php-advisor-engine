@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Enums\BookingStatus;
+use App\Events\BookingPaid;
 use App\Models\Booking;
 use Stripe\Charge;
 use Stripe\Customer;
@@ -42,5 +43,7 @@ class BookingService
             'stripe_charge_id' => $stripeCharge->id,
             'confirmed_at' => now(),
         ]);
+
+        BookingPaid::dispatch($booking);
     }
 }
