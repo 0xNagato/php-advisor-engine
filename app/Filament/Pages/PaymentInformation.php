@@ -51,6 +51,11 @@ class PaymentInformation extends Page
         $this->charity_percentage = $this->user->charity_percentage ?? 5;
     }
 
+    public function updatedPayoutType($value): void
+    {
+        $this->payout_name = '';
+    }
+
     public function save(): void
     {
         $this->user->update([
