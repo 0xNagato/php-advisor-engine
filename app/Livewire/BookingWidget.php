@@ -89,8 +89,10 @@ class BookingWidget extends Widget
     public function updatedSelectedRestaurantId($value): void
     {
         $this->selectedRestaurant = Restaurant::openOnDate($this->selectedDate)->find($value);
-        $this->schedules = $this->selectedRestaurant->availableSchedules->where('start_time', '>=', now());
-        $this->unavailableSchedules = $this->selectedRestaurant->unavailableSchedules->where('start_time', '>=', now());
+        // $this->schedules = $this->selectedRestaurant->availableSchedules->where('start_time', '>=', now());
+        // $this->unavailableSchedules = $this->selectedRestaurant->unavailableSchedules->where('start_time', '>=', now());
+        $this->schedules = $this->selectedRestaurant->availableSchedules;
+        $this->unavailableSchedules = $this->selectedRestaurant->unavailableSchedules;
         $this->selectedScheduleId = null;
     }
 
