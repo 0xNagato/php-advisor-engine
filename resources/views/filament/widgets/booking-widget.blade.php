@@ -102,21 +102,21 @@
         <div x-data="{ tab: 'collectPayment' }" id="tabs">
 
             <div class="flex space-x-4">
-                <div class="flex space-x-1 text-xs border-b-2 border-brand w-full">
+                <div class="flex space-x-1 text-xs border-b-2 border-indigo-600 w-full">
                     <button
-                        :class="{ 'bg-brand text-white': tab === 'collectPayment' }"
+                        :class="{ 'bg-indigo-600 text-white': tab === 'collectPayment' }"
                         @click="tab = 'collectPayment'"
                         class="px-4 py-2 text-xs font-semibold rounded-t bg-gray-50">
                         Credit Card
                     </button>
                     <button
-                        :class="{ 'bg-brand text-white': tab === 'smsPayment' }"
+                        :class="{ 'bg-indigo-600 text-white': tab === 'smsPayment' }"
                         @click="tab = 'smsPayment'"
                         class="px-4 py-2 text-xs font-semibold rounded-t bg-gray-50">
                         SMS Link
                     </button>
                     <button
-                        :class="{ 'bg-brand text-white': tab === 'qrCode' }"
+                        :class="{ 'bg-indigo-600 text-white': tab === 'qrCode' }"
                         @click="tab = 'qrCode'"
                         class="px-4 py-2 text-xs font-semibold rounded-t bg-gray-50">
                         QR Code
