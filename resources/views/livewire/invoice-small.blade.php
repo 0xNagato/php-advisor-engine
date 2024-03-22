@@ -5,19 +5,20 @@
         <div class="flex flex-col gap-1">
             <div class="font-semibold">{{ $booking->schedule->restaurant->restaurant_name }}</div>
             <div class="text-xs text-slate-600">
-                {{ $this->dayDisplay }} {{ $booking->booking_at->format('g:i a') }} ({{ $booking->guest_count }} Guests)
+                <div>{{ $this->dayDisplay }} {{ $booking->booking_at->format('g:i a') }}</div>
+                <div>{{ $booking->guest_count }} Guests</div>
             </div>
         </div>
         <div class="flex-grow flex text-right flex-col gap-1">
             <div class="font-semibold">
                 {{ money($booking->total_with_tax_in_cents) }}
             </div>
-            <div class="text-xs text-slate-600">
-                <div>
-                    Subtotal: {{ money($booking->total_fee) }}
+            <div class="text-xs text-slate-600 font-mono">
+                <div class="flex justify-between">
+                    <span>Subtotal:</span> <span>{{ money($booking->total_fee) }}</span>
                 </div>
-                <div>
-                    {{ $booking->tax * 100 }}% Tax: {{ money($booking->tax_amount_in_cents) }}
+                <div class="flex justify-between">
+                    <span>Tax:</span> <span>{{ money($booking->tax_amount_in_cents) }}</span>
                 </div>
             </div>
         </div>
