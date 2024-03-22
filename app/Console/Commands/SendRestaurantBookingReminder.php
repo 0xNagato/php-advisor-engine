@@ -25,6 +25,7 @@ class SendRestaurantBookingReminder extends Command
 
     /**
      * Execute the console command.
+     *
      * @throws ShortURLException
      */
     public function handle(): void
@@ -38,4 +39,3 @@ class SendRestaurantBookingReminder extends Command
             });
     }
 }
-

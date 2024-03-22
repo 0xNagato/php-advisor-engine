@@ -125,7 +125,6 @@ class BookingWidget extends Widget implements HasForms
             $this->unavailableSchedules = $this->selectedRestaurant->unavailableSchedules;
         }
 
-
         $this->selectedScheduleId = null;
     }
 
@@ -148,7 +147,7 @@ class BookingWidget extends Widget implements HasForms
             'guest_count' => $this->guestCount,
             'concierge_id' => auth()->user()->concierge->id,
             'status' => BookingStatus::PENDING,
-            'booking_at' => $this->selectedDate . ' ' . $this->selectedSchedule->start_time,
+            'booking_at' => $this->selectedDate.' '.$this->selectedSchedule->start_time,
         ]);
 
         $shortUrlQr = ShortURL::destinationUrl(route('bookings.create', ['token' => $this->booking->uuid, 'r' => 'qr']))
