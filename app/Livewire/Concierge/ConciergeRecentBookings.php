@@ -55,7 +55,7 @@ class ConciergeRecentBookings extends BaseWidget
                     ->dateTime('D, M j'),
                 TextColumn::make('concierge_earnings')
                     ->alignRight()
-                    ->label('Earnings')
+                    ->label('Earned')
                     ->currency('USD')
                     ->hidden((bool)!auth()->user()?->hasRole('concierge') && !$this->hideConcierge),
                 TextColumn::make('charity_earnings')

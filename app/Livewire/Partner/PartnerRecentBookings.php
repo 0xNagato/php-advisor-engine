@@ -60,7 +60,7 @@ class PartnerRecentBookings extends BaseWidget
                     ->dateTime('D, M j'),
                 TextColumn::make('partner_earnings')
                     ->alignRight()
-                    ->label('Earnings')
+                    ->label('Earned')
                     ->currency('USD'),
                 TextColumn::make('charity_earnings')
                     ->alignRight()

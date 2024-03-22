@@ -50,7 +50,7 @@ class AdminRecentBookings extends BaseWidget
                     ->dateTime('D, M j'),
                 TextColumn::make('platform_earnings')
                     ->alignRight()
-                    ->label('Earnings')
+                    ->label('Earned')
                     ->currency('USD'),
                 TextColumn::make('total_fee')
                     ->alignRight()

@@ -53,7 +53,7 @@ class RestaurantRecentBookings extends BaseWidget
                     ->dateTime('D, M j'),
                 TextColumn::make('restaurant_earnings')
                     ->alignRight()
-                    ->label('Earnings')
+                    ->label('Earned')
                     ->currency('USD'),
                 TextColumn::make('charity_earnings')
                     ->alignRight()
