@@ -51,6 +51,7 @@ class ProfileSettings extends Widget implements HasForms
                 ->label('Phone'),
             TimezoneSelect::make('timezone')
                 ->searchable()
+                ->selectablePlaceholder(false)
                 ->required(),
 
         ])->statePath('data');
