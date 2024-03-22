@@ -91,6 +91,7 @@ class BookingWidget extends Widget implements HasForms
                     ->live()
                     ->hiddenLabel()
                     ->searchable()
+                    ->selectablePlaceholder(false)
             ])
             ->columns(1);
     }
