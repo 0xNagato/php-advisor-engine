@@ -3,7 +3,7 @@
 namespace App\Console\Commands;
 
 use App\Models\Booking;
-use App\Services\BookingConfirmationService;
+use App\Services\RestaurantContactBookingConfirmationService;
 use AshAllenDesign\ShortURL\Exceptions\ShortURLException;
 use Illuminate\Console\Command;
 
@@ -33,7 +33,7 @@ class SendRestaurantBookingReminder extends Command
             ->whereNull('resent_restaurant_confirmation_at')
             ->where('confirmed_at', '<=', now()->subMinutes(30))
             ->each(function ($booking) {
-                app(BookingConfirmationService::class)->sendConfirmation($booking);
+                app(RestaurantContactBookingConfirmationService::class)->sendConfirmation($booking);
                 $booking->update(['resent_restaurant_confirmation_at' => now()]);
             });
     }

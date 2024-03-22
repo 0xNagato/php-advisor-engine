@@ -9,7 +9,7 @@ use AshAllenDesign\ShortURL\Exceptions\ShortURLException;
 use Illuminate\Support\Collection;
 use ShortURL;
 
-class BookingConfirmationService
+class RestaurantContactBookingConfirmationService
 {
     /**
      * @throws ShortURLException

@@ -3,7 +3,7 @@
 namespace App\Listeners;
 
 use App\Events\BookingPaid;
-use App\Services\BookingConfirmationService;
+use App\Services\RestaurantContactBookingConfirmationService;
 use AshAllenDesign\ShortURL\Exceptions\ShortURLException;
 use Illuminate\Contracts\Queue\ShouldQueue;
 
@@ -24,7 +24,6 @@ class SendRestaurantBookingConfirmation implements ShouldQueue
      */
     public function handle(BookingPaid $event): void
     {
-        $service = new BookingConfirmationService();
-        $service->sendConfirmation($event->booking);
+        app(RestaurantContactBookingConfirmationService::class)->sendConfirmation($event->booking);
     }
 }
