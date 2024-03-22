@@ -124,7 +124,7 @@
                 </div>
 
                 <!-- @todo Refactor this to a separate component -->
-                <div class="flex flex-col items-center gap-3" x-data="{}" x-init="() => {
+                <div wire:ignore class="flex flex-col items-center gap-3" x-data="{}" x-init="() => {
                     function initializeStripe() {
                         if (window.Stripe) {
                             setupStripe();
@@ -146,15 +146,13 @@
 
                         form.addEventListener('submit', async (e) => {
                             e.preventDefault();
-                            card.update({disabled: true});
                             $wire.$set('isLoading', true);
 
                             const {token, error} = await stripe.createToken(card);
 
                             if (error) {
-                                card.update({disabled: false});
                                 $wire.$set('isLoading', false);
-                                alert(error.message);
+                                return;
                             }
 
                             const formData = {
@@ -234,12 +232,6 @@
                 <livewire:booking-status-widget :booking="$booking"/>
             </div>
         </div>
-
-
-
-        {{--        <x-mary-button wire:click="cancelBooking" class="border-none btn bg-slate-300 text-slate-600">--}}
-        {{--            Abandon Reservation--}}
-        {{--        </x-mary-button>--}}
 
         <x-filament::button wire:click="cancelBooking" class="w-full opacity-50" color="gray">
             Abandon Reservation

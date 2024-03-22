@@ -70,6 +70,7 @@
                         </label>
 
                         <div id="card-element"
+                             wire:ignore
                              class="w-full rounded-lg border border-indigo-600 text-sm bg-white px-2 py-3 h-[40px]">
                             <!-- A Stripe Element will be inserted here. -->
                         </div>
