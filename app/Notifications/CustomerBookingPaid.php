@@ -2,9 +2,13 @@
 
 namespace App\Notifications;
 
+use App\Models\Booking;
+use Carbon\CarbonInterface;
 use Illuminate\Bus\Queueable;
-use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
+use NotificationChannels\Twilio\TwilioChannel;
+use NotificationChannels\Twilio\TwilioMessage;
+use NotificationChannels\Twilio\TwilioSmsMessage;
 
 class CustomerBookingPaid extends Notification
 {
@@ -13,7 +17,7 @@ class CustomerBookingPaid extends Notification
     /**
      * Create a new notification instance.
      */
-    public function __construct()
+    public function __construct(public Booking $booking)
     {
         //
     }
@@ -25,18 +29,35 @@ class CustomerBookingPaid extends Notification
      */
     public function via(object $notifiable): array
     {
-        return ['mail'];
+        return [TwilioChannel::class];
     }
 
-    /**
-     * Get the mail representation of the notification.
-     */
-    public function toMail(object $notifiable): MailMessage
+    public function toTwilio(object $notifiable): TwilioSmsMessage|TwilioMessage
     {
-        return (new MailMessage)
-            ->line('The introduction to the notification.')
-            ->action('Notification Action', url('/'))
-            ->line('Thank you for using our application!');
+        $bookingDate = $this->getFormattedDate($this->booking->booking_at);
+
+        $bookingTime = $this->booking->booking_at->format('g:ia');
+
+        $message = "PRIMA reservation at {$this->booking->restaurant->restaurant_name} $bookingDate at $bookingTime with {$this->booking->guest_count} guests.";
+
+        return (new TwilioSmsMessage())
+            ->content($message);
+    }
+
+    private function getFormattedDate(CarbonInterface $date): string
+    {
+        $today = now();
+        $tomorrow = now()->addDay();
+
+        if ($date->isSameDay($today)) {
+            return 'today';
+        }
+
+        if ($date->isSameDay($tomorrow)) {
+            return 'tomorrow';
+        }
+
+        return $date->format('l \\t\\h\\e jS');
     }
 
     /**
