@@ -23,6 +23,8 @@ body::before {
     background-position: center; /* Change this to 'top' if you want the image to start from the top */
     z-index: -1;
     background-size: cover;
+    background-color: white;
+    @apply dark:bg-white;
 }
 
 /*@media (max-width: 1024px) {*/
