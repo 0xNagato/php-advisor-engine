@@ -44,15 +44,6 @@
 
         {{ $this->form }}
 
-        {{--        <x-filament::input.wrapper>--}}
-        {{--            <x-filament::input.select wire:model.live="selectedRestaurantId">--}}
-        {{--                <option value="">Select a restaurant</option>--}}
-        {{--                @foreach ($restaurants as $restaurant)--}}
-        {{--                    <option value="{{ $restaurant->id }}">{{ $restaurant->restaurant_name }}</option>--}}
-        {{--                @endforeach--}}
-        {{--            </x-filament::input.select>--}}
-        {{--        </x-filament::input.wrapper>--}}
-
         @if($unavailableSchedules && $unavailableSchedules->isNotEmpty())
             <div class="bg-red-50 border border-red-400 text-red-700 p-4 rounded relative text-xs" role="alert">
                 <div class="font-bold mb-2">Unavailable Times:</div>
@@ -246,9 +237,13 @@
 
 
 
-        <x-mary-button wire:click="cancelBooking" class="border-none btn bg-slate-300 text-slate-600">
+        {{--        <x-mary-button wire:click="cancelBooking" class="border-none btn bg-slate-300 text-slate-600">--}}
+        {{--            Abandon Reservation--}}
+        {{--        </x-mary-button>--}}
+
+        <x-filament::button wire:click="cancelBooking" class="w-full opacity-50" color="gray">
             Abandon Reservation
-        </x-mary-button>
+        </x-filament::button>
 
     @elseif($booking && $booking->status === BookingStatus::CONFIRMED)
         <div class="flex flex-col items-center gap-3" id="form">
