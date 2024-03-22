@@ -5,15 +5,15 @@
         <div class="flex flex-col gap-1">
             <div class="font-semibold">{{ $booking->schedule->restaurant->restaurant_name }}</div>
             <div class="text-xs text-slate-600">
-                {{ $this->dayDisplay }} {{ $booking->booking_at->format('g:i a') }}
+                {{ $this->dayDisplay }} {{ $booking->booking_at->format('g:i a') }} ({{ $booking->guest_count }} Guests)
             </div>
         </div>
         <div class="flex-grow flex text-right flex-col gap-1">
             <div class="font-semibold">
-                {{ money($booking->total_fee) }}
+                {{ money($booking->total_with_tax_in_cents) }}
             </div>
             <div class="text-xs text-slate-600">
-                ({{ $booking->guest_count }} Guests)
+                {{ $booking->tax * 100 }}% Tax: {{ money($booking->tax_amount_in_cents) }}
             </div>
         </div>
     </div>

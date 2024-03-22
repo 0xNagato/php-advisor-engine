@@ -40,6 +40,10 @@ class Booking extends Model
         'concierge_referral_type',
         'restaurant_confirmed_at',
         'resent_restaurant_confirmation_at',
+        'tax',
+        'tax_amount_in_cents',
+        'city',
+        'total_with_tax_in_cents',
     ];
 
     protected $appends = [
@@ -67,8 +71,8 @@ class Booking extends Model
                 $booking->partner_concierge_id = $booking->concierge->user->partner_referral_id;
             }
 
-            if ($booking->schedule->restaurant->user->partner_referral_id) {
-                $booking->partner_restaurant_id = $booking->schedule->restaurant->user->partner_referral_id;
+            if ($booking->restaurant->user->partner_referral_id) {
+                $booking->partner_restaurant_id = $booking->restaurant->user->partner_referral_id;
             }
 
             // $payouts = $booking->calculatePayouts();
@@ -136,7 +140,7 @@ class Booking extends Model
 
     public function getGuestNameAttribute(): string
     {
-        return $this->guest_first_name.' '.$this->guest_last_name;
+        return $this->guest_first_name . ' ' . $this->guest_last_name;
     }
 
     public function getPartnerEarningsAttribute()

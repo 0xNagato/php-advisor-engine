@@ -9,6 +9,7 @@ use App\Models\Booking;
 use App\Models\Restaurant;
 use App\Models\Schedule;
 use App\Services\BookingService;
+use App\Services\SalesTaxService;
 use AshAllenDesign\ShortURL\Facades\ShortURL;
 use chillerlan\QRCode\QRCode;
 use Exception;
@@ -147,7 +148,17 @@ class BookingWidget extends Widget implements HasForms
             'guest_count' => $this->guestCount,
             'concierge_id' => auth()->user()->concierge->id,
             'status' => BookingStatus::PENDING,
-            'booking_at' => $this->selectedDate.' '.$this->selectedSchedule->start_time,
+            'booking_at' => $this->selectedDate . ' ' . $this->selectedSchedule->start_time,
+        ]);
+
+        $taxData = app(SalesTaxService::class)->calculateTax('miami', $this->booking->total_fee);
+        $totalWithTaxInCents = $this->booking->total_fee + $taxData->amountInCents;
+
+        $this->booking->update([
+            'tax' => $taxData->tax,
+            'tax_amount_in_cents' => $taxData->amountInCents,
+            'city' => $taxData->city,
+            'total_with_tax_in_cents' => $totalWithTaxInCents,
         ]);
 
         $shortUrlQr = ShortURL::destinationUrl(route('bookings.create', ['token' => $this->booking->uuid, 'r' => 'qr']))

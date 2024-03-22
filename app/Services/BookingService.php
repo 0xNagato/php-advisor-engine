@@ -22,16 +22,16 @@ class BookingService
         Stripe::setApiKey(config('cashier.secret'));
 
         $stripeCustomer = Customer::create([
-            'name' => $form['first_name'].' '.$form['last_name'],
+            'name' => $form['first_name'] . ' ' . $form['last_name'],
             'phone' => $form['phone'],
             'source' => $form['token'],
         ]);
 
         $stripeCharge = Charge::create([
-            'amount' => $booking->total_fee,
+            'amount' => $booking->total_with_tax_in_cents,
             'currency' => 'usd',
             'customer' => $stripeCustomer->id,
-            'description' => 'Booking for '.$booking->restaurant->restaurant_name,
+            'description' => 'Booking for ' . $booking->restaurant->restaurant_name,
         ]);
 
         $booking->update([
