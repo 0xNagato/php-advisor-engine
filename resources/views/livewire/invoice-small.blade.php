@@ -2,22 +2,22 @@
     <div class="flex items-center w-full gap-4 p-3 bg-white bg-opacity-90 shadow rounded-xl">
         <x-mary-icon name="o-building-storefront" class="w-10 h-10 p-2 text-white bg-orange-500 rounded-full"/>
 
-        <div class="flex flex-col gap-1">
+        <div class="flex flex-col gap-1 flex-grow">
             <div class="font-semibold">{{ $booking->schedule->restaurant->restaurant_name }}</div>
             <div class="text-xs text-slate-600">
                 <div>{{ $this->dayDisplay }} {{ $booking->booking_at->format('g:i a') }}</div>
                 <div>{{ $booking->guest_count }} Guests</div>
             </div>
         </div>
-        <div class="flex-grow flex text-right flex-col gap-1">
+        <div class="flex text-right flex-col gap-1">
             <div class="font-semibold">
                 {{ money($booking->total_with_tax_in_cents) }}
             </div>
-            <div class="text-xs text-slate-600 font-mono">
-                <div class="flex justify-between">
+            <div class="text-xs text-slate-700 font-mono">
+                <div class="flex justify-between gap-x-1">
                     <span>Subtotal:</span> <span>{{ money($booking->total_fee) }}</span>
                 </div>
-                <div class="flex justify-between">
+                <div class="flex justify-between gap-x-1">
                     <span>Tax {{ $booking->tax * 100 }}%:</span> <span>{{ money($booking->tax_amount_in_cents) }}</span>
                 </div>
             </div>
