@@ -8,7 +8,7 @@
 
 body {
     background: none !important;
-    @apply dark:bg-transparent !important;
+    @apply dark:bg-none !important;
 }
 
 body::before {
