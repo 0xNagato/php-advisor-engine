@@ -27,7 +27,7 @@ class AdminRecentBookings extends BaseWidget
 
     public function table(Table $table): Table
     {
-        $query = Booking::query();
+        $query = Booking::confirmed();
 
         $startDate = $this->filters['startDate'] ?? now()->subDays(30);
         $endDate = $this->filters['endDate'] ?? now();

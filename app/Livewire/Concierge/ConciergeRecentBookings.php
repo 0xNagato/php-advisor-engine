@@ -32,7 +32,7 @@ class ConciergeRecentBookings extends BaseWidget
 
     public function table(Table $table): Table
     {
-        $query = Booking::where('concierge_id', $this->concierge->id);
+        $query = Booking::confirmed()->where('concierge_id', $this->concierge->id);
 
         $startDate = $this->filters['startDate'] ?? now()->subDays(30);
         $endDate = $this->filters['endDate'] ?? now();
@@ -57,7 +57,7 @@ class ConciergeRecentBookings extends BaseWidget
                     ->alignRight()
                     ->label('Earnings')
                     ->currency('USD')
-                    ->hidden((bool) ! auth()->user()?->hasRole('concierge') && ! $this->hideConcierge),
+                    ->hidden((bool)!auth()->user()?->hasRole('concierge') && !$this->hideConcierge),
                 TextColumn::make('charity_earnings')
                     ->alignRight()
                     ->currency('USD')

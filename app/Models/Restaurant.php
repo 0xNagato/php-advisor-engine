@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 use Spatie\LaravelData\DataCollection;
 
 /**
@@ -41,7 +42,7 @@ class Restaurant extends Model
 
     protected $casts = [
         'open_days' => 'array',
-        'contacts' => DataCollection::class.':'.RestaurantContactData::class,
+        'contacts' => DataCollection::class . ':' . RestaurantContactData::class,
     ];
 
     protected static function boot(): void
@@ -75,6 +76,11 @@ class Restaurant extends Model
     public function schedules(): HasMany
     {
         return $this->hasMany(Schedule::class);
+    }
+    
+    public function bookings(): HasManyThrough
+    {
+        return $this->hasManyThrough(Booking::class, Schedule::class);
     }
 
     public function availableSchedules(): HasMany

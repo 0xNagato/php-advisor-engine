@@ -32,7 +32,7 @@ class RestaurantRecentBookings extends BaseWidget
 
     public function table(Table $table): Table
     {
-        $query = Booking::whereHas('schedule', function ($query) {
+        $query = Booking::confirmed()->whereHas('schedule', function ($query) {
             $query->where('restaurant_id', $this->restaurant->id);
         });
 

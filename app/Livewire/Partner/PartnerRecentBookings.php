@@ -37,7 +37,7 @@ class PartnerRecentBookings extends BaseWidget
 
         $partnerWithBookings = Partner::withAllBookings()->find($this->partner->id);
 
-        $query = Booking::where(function ($query) use ($partnerWithBookings) {
+        $query = Booking::confirmed()->where(function ($query) use ($partnerWithBookings) {
             $query->whereIn('id', $partnerWithBookings->conciergeBookings->pluck('id')->concat($partnerWithBookings->restaurantBookings->pluck('id')));
         })->whereBetween('created_at', [$startDate, $endDate])->orderByDesc('created_at');
 
