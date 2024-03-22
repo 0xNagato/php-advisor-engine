@@ -103,6 +103,7 @@ class BookingWidget extends Widget implements HasForms
         $this->selectedRestaurant = null;
         $this->selectedScheduleId = null;
         $this->selectedSchedule = null;
+        $this->unavailableSchedules = null;
 
         $this->restaurants = Restaurant::openOnDate($value)->get();
     }
@@ -118,11 +119,13 @@ class BookingWidget extends Widget implements HasForms
 
         if ($selectedDateInUserTimezone === now()->setTimezone($userTimezone)->format('Y-m-d')) {
             $this->schedules = $this->selectedRestaurant->availableSchedules->where('start_time', '>=', $currentTime);
+            $this->unavailableSchedules = $this->selectedRestaurant->unavailableSchedules->where('start_time', '>=', $currentTime);
         } else {
             $this->schedules = $this->selectedRestaurant->availableSchedules;
+            $this->unavailableSchedules = $this->selectedRestaurant->unavailableSchedules;
         }
 
-        $this->unavailableSchedules = $this->selectedRestaurant->unavailableSchedules->where('start_time', '>=', $currentTime);
+
         $this->selectedScheduleId = null;
     }
 
@@ -145,7 +148,7 @@ class BookingWidget extends Widget implements HasForms
             'guest_count' => $this->guestCount,
             'concierge_id' => auth()->user()->concierge->id,
             'status' => BookingStatus::PENDING,
-            'booking_at' => $this->selectedDate.' '.$this->selectedSchedule->start_time,
+            'booking_at' => $this->selectedDate . ' ' . $this->selectedSchedule->start_time,
         ]);
 
         $shortUrlQr = ShortURL::destinationUrl(route('bookings.create', ['token' => $this->booking->uuid, 'r' => 'qr']))
