@@ -13,7 +13,12 @@
                 {{ money($booking->total_with_tax_in_cents) }}
             </div>
             <div class="text-xs text-slate-600">
-                {{ $booking->tax * 100 }}% Tax: {{ money($booking->tax_amount_in_cents) }}
+                <div>
+                    Subtotal: {{ money($booking->total_fee) }}
+                </div>
+                <div>
+                    {{ $booking->tax * 100 }}% Tax: {{ money($booking->tax_amount_in_cents) }}
+                </div>
             </div>
         </div>
     </div>
