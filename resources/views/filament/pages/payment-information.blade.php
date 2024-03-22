@@ -7,7 +7,7 @@
         <form wire:submit="save" class="flex flex-col gap-3">
 
             <x-filament::input.wrapper>
-                <x-filament::input.select wire:model.live="payout_type">
+                <x-filament::input.select wire:model.live="payout_type" required>
                     <option>Select Payout Type</option>
                     @foreach($payoutOptions as $option)
                         <option value="{{ $option }}">{{ $option }}</option>
@@ -19,6 +19,7 @@
                 <x-filament::input.wrapper>
                     <x-filament::input
                         type="text"
+                        required
                         wire:model="payout_name"
                         placeholder="{{ $payout_type === 'PayPal' ? 'PayPal Email' : 'Venmo Username' }}"
                     />
@@ -27,6 +28,7 @@
                 <x-filament::input.wrapper>
                     <x-filament::input
                         type="text"
+                        required
                         wire:model="routing_number"
                         placeholder="Routing Number"
                     />
@@ -34,13 +36,14 @@
                 <x-filament::input.wrapper>
                     <x-filament::input
                         type="text"
+                        required
                         wire:model="account_number"
                         placeholder="Account Number"
                     />
                 </x-filament::input.wrapper>
 
                 <x-filament::input.wrapper>
-                    <x-filament::input.select wire:model="account_type">
+                    <x-filament::input.select wire:model="account_type" required>
                         <option>Select Account Type</option>
                         <option value="checking">Checking</option>
                         <option value="savings">Savings</option>
