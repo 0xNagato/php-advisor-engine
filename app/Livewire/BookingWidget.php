@@ -91,7 +91,7 @@ class BookingWidget extends Widget implements HasForms
                     ->live()
                     ->hiddenLabel()
                     ->searchable()
-                    ->selectablePlaceholder(false)
+                    ->selectablePlaceholder(false),
             ])
             ->columns(1);
     }
@@ -139,7 +139,7 @@ class BookingWidget extends Widget implements HasForms
             'guest_count' => $this->guestCount,
             'concierge_id' => auth()->user()->concierge->id,
             'status' => BookingStatus::PENDING,
-            'booking_at' => $this->selectedDate . ' ' . $this->selectedSchedule->start_time,
+            'booking_at' => $this->selectedDate.' '.$this->selectedSchedule->start_time,
         ]);
 
         $shortUrlQr = ShortURL::destinationUrl(route('bookings.create', ['token' => $this->booking->uuid, 'r' => 'qr']))

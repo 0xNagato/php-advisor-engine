@@ -41,6 +41,11 @@ class AppServiceProvider extends ServiceProvider
             static fn () => view('filament.admin.logo')
         );
 
+        Filament::registerRenderHook(
+            'panels::head.start',
+            static fn (): string => '<meta name="viewport" content="width=device-width, initial-scale=1" />',
+        );
+
         FilamentView::registerRenderHook(
             'panels::head.start',
             static fn (): string => '<link href="https://db.onlinewebfonts.com/c/5b381abe79163202b03f53ed0eab3065?family=Sanomat+Web+Regular+Regular" rel="stylesheet">',
