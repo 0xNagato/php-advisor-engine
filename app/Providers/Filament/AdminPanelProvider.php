@@ -27,8 +27,6 @@ class AdminPanelProvider extends PanelProvider
     public function register(): void
     {
         parent::register();
-        // FilamentView::registerRenderHook('panels::body.end', static fn(): string => Blade::render("@vite('resources/js/app.js')"));
-        // ScheduleManager::setSort(10);
     }
 
     /**
@@ -50,13 +48,9 @@ class AdminPanelProvider extends PanelProvider
             ->colors([
                 'primary' => Color::Indigo,
             ])
-            // ->sidebarFullyCollapsibleOnDesktop()
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\\Filament\\Resources')
             ->discoverPages(in: app_path('Filament/Pages'), for: 'App\\Filament\\Pages')
-            ->pages([
-
-            ])
-            // ->discoverWidgets(in: app_path('Filament/Widgets'), for: 'App\\Filament\\Widgets')
+            ->pages([])
             ->widgets([])
             ->middleware([
                 EncryptCookies::class,
@@ -75,14 +69,12 @@ class AdminPanelProvider extends PanelProvider
             ->plugins([
                 FilamentShieldPlugin::make(),
             ])
-            // ->spa()
             ->favicon('/favicon.ico')
             ->darkMode(false)
             ->brandName('PRIMA')
-            // ->sidebarCollapsibleOnDesktop()
             ->viteTheme('resources/css/filament/admin/theme.css');
 
-        if (! $agent->isSafari()) {
+        if (!$agent->isSafari()) {
             $panel->spa();
         }
 
