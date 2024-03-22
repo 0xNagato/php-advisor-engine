@@ -15,17 +15,19 @@
 
     {{ FilamentView::renderHook(PanelsRenderHook::AUTH_PASSWORD_RESET_RESET_FORM_AFTER, scopes: $this->getRenderHookScopes()) }}
 
-    <x-filament::modal id="restaurant-modal">
-        <x-slot name="heading">
+    <div class="h-0">
+        <x-filament::modal id="restaurant-modal">
+            <x-slot name="heading">
 
-        </x-slot>
-        @include('terms.restaurant-terms')
-    </x-filament::modal>
+            </x-slot>
+            @include('terms.restaurant-terms')
+        </x-filament::modal>
 
-    <x-filament::modal id="concierge-modal">
-        <x-slot name="heading">
-            
-        </x-slot>
-        @include('terms.concierge-terms')
-    </x-filament::modal>
+        <x-filament::modal id="concierge-modal">
+            <x-slot name="heading">
+
+            </x-slot>
+            @include('terms.concierge-terms')
+        </x-filament::modal>
+    </div>
 </x-admin.simple>
