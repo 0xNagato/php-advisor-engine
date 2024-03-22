@@ -12,14 +12,20 @@ use App\Services\BookingService;
 use AshAllenDesign\ShortURL\Facades\ShortURL;
 use chillerlan\QRCode\QRCode;
 use Exception;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Concerns\InteractsWithForms;
+use Filament\Forms\Contracts\HasForms;
+use Filament\Forms\Form;
 use Filament\Widgets\Widget;
 use Illuminate\Database\Eloquent\Collection;
 use Livewire\Attributes\On;
 use Livewire\Attributes\Session;
 use Stripe\Exception\ApiErrorException;
 
-class BookingWidget extends Widget
+class BookingWidget extends Widget implements HasForms
 {
+    use InteractsWithForms;
+
     protected static string $view = 'filament.widgets.booking-widget';
 
     /**
@@ -75,6 +81,20 @@ class BookingWidget extends Widget
         $this->selectedDate = now()->format('Y-m-d');
     }
 
+    public function form(Form $form): Form
+    {
+        return $form
+            ->schema([
+                Select::make('selectedRestaurantId')
+                    ->options($this->restaurants->pluck('restaurant_name', 'id'))
+                    ->placeholder('Select a restaurant')
+                    ->live()
+                    ->hiddenLabel()
+                    ->searchable()
+            ])
+            ->columns(1);
+    }
+
     public function updatedSelectedDate($value): void
     {
         $this->selectedRestaurantId = null;
@@ -118,7 +138,7 @@ class BookingWidget extends Widget
             'guest_count' => $this->guestCount,
             'concierge_id' => auth()->user()->concierge->id,
             'status' => BookingStatus::PENDING,
-            'booking_at' => $this->selectedDate.' '.$this->selectedSchedule->start_time,
+            'booking_at' => $this->selectedDate . ' ' . $this->selectedSchedule->start_time,
         ]);
 
         $shortUrlQr = ShortURL::destinationUrl(route('bookings.create', ['token' => $this->booking->uuid, 'r' => 'qr']))

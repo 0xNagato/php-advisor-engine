@@ -42,14 +42,16 @@
 
         </div>
 
-        <x-filament::input.wrapper>
-            <x-filament::input.select wire:model.live="selectedRestaurantId">
-                <option value="">Select a restaurant</option>
-                @foreach ($restaurants as $restaurant)
-                    <option value="{{ $restaurant->id }}">{{ $restaurant->restaurant_name }}</option>
-                @endforeach
-            </x-filament::input.select>
-        </x-filament::input.wrapper>
+        {{ $this->form }}
+
+        {{--        <x-filament::input.wrapper>--}}
+        {{--            <x-filament::input.select wire:model.live="selectedRestaurantId">--}}
+        {{--                <option value="">Select a restaurant</option>--}}
+        {{--                @foreach ($restaurants as $restaurant)--}}
+        {{--                    <option value="{{ $restaurant->id }}">{{ $restaurant->restaurant_name }}</option>--}}
+        {{--                @endforeach--}}
+        {{--            </x-filament::input.select>--}}
+        {{--        </x-filament::input.wrapper>--}}
 
         @if($unavailableSchedules && $unavailableSchedules->isNotEmpty())
             <div class="bg-red-50 border border-red-400 text-red-700 p-4 rounded relative text-xs" role="alert">
