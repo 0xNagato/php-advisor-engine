@@ -6,6 +6,7 @@ use App\Models\User;
 use Filament\Actions\Action;
 use Filament\Forms\Components\Placeholder;
 use Filament\Forms\Form;
+use Filament\Http\Responses\Auth\Contracts\PasswordResetResponse;
 use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Support\HtmlString;
 
@@ -63,6 +64,20 @@ class ResetPassword extends \Filament\Pages\Auth\PasswordReset\ResetPassword
             ->hidden(function () use ($user, $lowercaseRole) {
                 return !($user && empty($user->secured_at) && in_array($lowercaseRole, ['concierge', 'restaurant']));
             });
+    }
+
+    public function resetPassword(): ?PasswordResetResponse
+    {
+        $response = parent::resetPassword();
+
+        $user = User::where('email', $this->email)->firstOrFail();
+
+        if ($user->secured_at === null) {
+            $user->secured_at = now();
+            $user->save();
+        }
+
+        return $response;
     }
 
     public function getResetPasswordFormAction(): Action
