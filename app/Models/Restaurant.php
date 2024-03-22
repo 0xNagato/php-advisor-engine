@@ -42,7 +42,7 @@ class Restaurant extends Model
 
     protected $casts = [
         'open_days' => 'array',
-        'contacts' => DataCollection::class . ':' . RestaurantContactData::class,
+        'contacts' => DataCollection::class.':'.RestaurantContactData::class,
     ];
 
     protected static function boot(): void
@@ -77,7 +77,7 @@ class Restaurant extends Model
     {
         return $this->hasMany(Schedule::class);
     }
-    
+
     public function bookings(): HasManyThrough
     {
         return $this->hasManyThrough(Booking::class, Schedule::class);

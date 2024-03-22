@@ -82,7 +82,7 @@ class AdminPanelProvider extends PanelProvider
             // ->sidebarCollapsibleOnDesktop()
             ->viteTheme('resources/css/filament/admin/theme.css');
 
-        if (!$agent->isSafari()) {
+        if (! $agent->isSafari()) {
             $panel->spa();
         }
 

@@ -18,6 +18,7 @@ use Filament\Forms\Contracts\HasForms;
 use Filament\Forms\Form;
 use Filament\Widgets\Widget;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Support\Carbon;
 use Livewire\Attributes\On;
 use Livewire\Attributes\Session;
 use Stripe\Exception\ApiErrorException;
@@ -110,13 +111,18 @@ class BookingWidget extends Widget implements HasForms
     {
         $this->selectedRestaurant = Restaurant::openOnDate($this->selectedDate)->find($value);
 
-        if ($this->selectedDate === now()->format('Y-m-d')) {
-            $this->schedules = $this->selectedRestaurant->availableSchedules->where('start_time', '>=', now());
+        $userTimezone = auth()->user()->timezone; // assuming the timezone column is named 'timezone'
+        $currentTime = now()->setTimezone($userTimezone)->format('H:i:s');
+
+        $selectedDateInUserTimezone = Carbon::createFromFormat('Y-m-d', $this->selectedDate)->setTimezone($userTimezone)->format('Y-m-d');
+
+        if ($selectedDateInUserTimezone === now()->setTimezone($userTimezone)->format('Y-m-d')) {
+            $this->schedules = $this->selectedRestaurant->availableSchedules->where('start_time', '>=', $currentTime);
         } else {
             $this->schedules = $this->selectedRestaurant->availableSchedules;
         }
 
-        $this->unavailableSchedules = $this->selectedRestaurant->unavailableSchedules->where('start_time', '>=', now());
+        $this->unavailableSchedules = $this->selectedRestaurant->unavailableSchedules->where('start_time', '>=', $currentTime);
         $this->selectedScheduleId = null;
     }
 

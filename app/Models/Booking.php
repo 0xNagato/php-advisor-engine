@@ -113,7 +113,6 @@ class Booking extends Model
         );
     }
 
-
     public function concierge(): BelongsTo
     {
         return $this->belongsTo(Concierge::class);
@@ -136,7 +135,7 @@ class Booking extends Model
 
     public function getGuestNameAttribute(): string
     {
-        return $this->guest_first_name . ' ' . $this->guest_last_name;
+        return $this->guest_first_name.' '.$this->guest_last_name;
     }
 
     public function getPartnerEarningsAttribute()
