@@ -1,11 +1,7 @@
 <x-mail::message>
-# Introduction
+# PRIMA Invoice #{{ $booking->id }}
 
-The body of your message.
-
-<x-mail::button :url="''">
-Button Text
-</x-mail::button>
+Thank you for using PRIMA, please find your invoice attached.
 
 Thanks,<br>
 {{ config('app.name') }}
