@@ -14,11 +14,11 @@
                 {{ money($booking->total_with_tax_in_cents) }}
             </div>
             <div class="text-xs text-slate-700 font-mono">
-                <div class="flex justify-between gap-x-1">
+                <div class="flex justify-between gap-x-2">
                     <span>Subtotal:</span> <span>{{ money($booking->total_fee) }}</span>
                 </div>
-                <div class="flex justify-between gap-x-1">
-                    <span>Tax {{ $booking->tax * 100 }}%:</span> <span>{{ money($booking->tax_amount_in_cents) }}</span>
+                <div class="flex justify-between gap-x-2">
+                    <span>Tax:</span> <span>{{ money($booking->tax_amount_in_cents) }}</span>
                 </div>
             </div>
         </div>

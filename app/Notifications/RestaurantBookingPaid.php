@@ -40,9 +40,6 @@ class RestaurantBookingPaid extends Notification
 
         $message = "PRIMA reservation for {$this->booking->guest_name} $bookingDate at $bookingTime with {$this->booking->guest_count} guests. Confirm reservation by clicking here $this->confirmationUrl.";
 
-        logger($message);
-        ds($message);
-
         return (new TwilioSmsMessage())
             ->content($message);
     }
