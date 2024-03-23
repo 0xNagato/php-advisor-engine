@@ -21,8 +21,11 @@ class CustomerInvoice extends Component implements HasForms
     public Booking $booking;
 
     public $download = false;
+
     public bool $emailed = false;
+
     public bool $emailOpen = false;
+
     public string $email;
 
     public function mount(string $token): void
@@ -45,13 +48,13 @@ class CustomerInvoice extends Component implements HasForms
                     ->email()
                     ->placeholder('Enter your email address')
                     ->hiddenLabel()
-                    ->required()
+                    ->required(),
             ]);
     }
 
     public function showEmailForm(): void
     {
-        $this->emailOpen = !$this->emailOpen;
+        $this->emailOpen = ! $this->emailOpen;
     }
 
     public function emailInvoice(): void
@@ -66,7 +69,7 @@ class CustomerInvoice extends Component implements HasForms
         $this->emailed = true;
 
         Notification::make()
-            ->title('Invoice sent to ' . $this->email)
+            ->title('Invoice sent to '.$this->email)
             ->success()
             ->send();
     }

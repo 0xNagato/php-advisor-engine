@@ -12,7 +12,11 @@ use Illuminate\Contracts\Support\Htmlable;
 class ViewBooking extends ViewRecord
 {
     protected static string $resource = BookingResource::class;
-    
+
+    public static function canAccess(array $parameters = []): bool
+    {
+    }
+
     public function getHeading(): string|Htmlable
     {
         return '';
@@ -50,8 +54,6 @@ class ViewBooking extends ViewRecord
 
     protected function getHeaderActions(): array
     {
-        return [
-
-        ];
+        return [];
     }
 }

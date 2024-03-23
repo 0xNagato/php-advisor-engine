@@ -15,10 +15,10 @@ class DownloadInvoiceController extends Controller
         $booking = Booking::where('uuid', $uuid)->firstOrFail();
 
         $invoicePath = $booking->invoice_path;
-        
+
         $disk = Storage::disk('do');
 
-        if (!$disk->exists($invoicePath)) {
+        if (! $disk->exists($invoicePath)) {
             abort(404, 'File not found.');
         }
 
