@@ -17,7 +17,7 @@ class RestaurantContactBookingConfirmationService
     public function sendConfirmation(Booking $booking): void
     {
         /** @var Collection<RestaurantContactData> $contacts */
-        $contacts = $booking->restaurant->contacts;
+        $contacts = $booking->restaurant->contacts ?? [];
 
         $url = route('restaurants.confirm', ['token' => $booking->uuid]);
         $confirmationUrl = ShortURL::destinationUrl($url)->make()->default_short_url;
