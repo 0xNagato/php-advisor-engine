@@ -34,7 +34,7 @@ class ResetPassword extends \Filament\Pages\Auth\PasswordReset\ResetPassword
             $this->getEmailFormComponent(),
             $this->getPasswordFormComponent(),
             $this->getPasswordConfirmationFormComponent(),
-            $this->getTermsAndConditionsFormComponent()
+            $this->getTermsAndConditionsFormComponent(),
         ];
 
         return $form->schema($formSchema);
@@ -62,7 +62,7 @@ class ResetPassword extends \Filament\Pages\Auth\PasswordReset\ResetPassword
             ->content($label)
             ->hiddenLabel()
             ->hidden(function () use ($user, $lowercaseRole) {
-                return !($user && empty($user->secured_at) && in_array($lowercaseRole, ['concierge', 'restaurant']));
+                return ! ($user && empty($user->secured_at) && in_array($lowercaseRole, ['concierge', 'restaurant']));
             });
     }
 

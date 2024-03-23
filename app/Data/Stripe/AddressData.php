@@ -17,7 +17,6 @@ class AddressData extends Data implements Wireable
         public null $state,
         public null $country,
         public null $postalCode
-    )
-    {
+    ) {
     }
 }

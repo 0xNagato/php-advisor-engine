@@ -25,11 +25,13 @@
 //     })->name('dashboard');
 // });
 
+use App\Http\Controllers\DownloadInvoiceController;
 use App\Livewire\CreateBooking;
 use App\Livewire\CustomerInvoice;
 use App\Livewire\RestaurantBookingConfirmation;
 
-
+Route::get('/invoice/download/{uuid}', DownloadInvoiceController::class)
+    ->name('customer.invoice.download');
 Route::get('/invoice/{token}', CustomerInvoice::class)->name('customer.invoice');
 Route::get('/restaurants/confirm/{token}', RestaurantBookingConfirmation::class)
     ->name('restaurants.confirm');

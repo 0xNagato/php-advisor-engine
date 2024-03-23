@@ -243,9 +243,10 @@
             <p>Thank you for the booking! We are notifying the restaurant now.</p>
         </div>
 
-        <x-mary-button wire:click="resetBooking" class="btn bg-[#421fff] text-white">
+        <x-filament::button wire:click="resetBooking" class="w-full bg-[#421fff] h-[48px]"
+                            icon="gmdi-restaurant-menu">
             Create New Booking
-        </x-mary-button>
+        </x-filament::button>
     @endif
 
 </x-filament-widgets::widget>

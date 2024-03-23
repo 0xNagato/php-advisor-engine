@@ -19,10 +19,10 @@ class SalesTaxService
         $taxRate = $this->taxRates[$city] ?? throw new RuntimeException("Tax rate for city $city not found.");
 
         return new SalesTaxData(
-            amountInCents: (int)round($amountInCents * $taxRate),
+            amountInCents: (int) round($amountInCents * $taxRate),
             city: $city,
             tax: $taxRate,
-            taxWhole: (int)($taxRate * 100),
+            taxWhole: (int) ($taxRate * 100),
         );
     }
 }

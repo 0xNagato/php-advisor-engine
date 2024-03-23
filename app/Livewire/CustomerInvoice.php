@@ -12,6 +12,8 @@ class CustomerInvoice extends Component
 {
     public Booking $booking;
 
+    public $download = false;
+
     public function mount(string $token): void
     {
         $this->booking = Booking::where('uuid', $token)->firstOrFail();

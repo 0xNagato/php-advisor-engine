@@ -37,6 +37,7 @@
         "robsontenorio/mary": "^1.21",
         "spatie/laravel-data": "^4.0",
         "spatie/laravel-markdown": "^2.5",
+        "spatie/laravel-pdf": "^1.4",
         "spatie/opening-hours": "^3.0",
         "staudenmeir/eloquent-has-many-deep": "^1.7",
         "stechstudio/filament-impersonate": "^3.6",

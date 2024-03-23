@@ -6,17 +6,23 @@
     }
 </style>
 <div class="p-6">
-    <div class="flex gap-x-2 lg:mx-auto max-w-3xl mb-4" x-data="{}">
-        <x-filament::button color="indigo" class="w-1/2" size="sm" icon="gmdi-email-o"
-                            @click="$dispatch('open-modal', { id: 'email-invoice' })">
-            Email Invoice
-        </x-filament::button>
-        <x-filament::button color="indigo" class="w-1/2" size="sm" icon="gmdi-file-download-o">
-            Download PDF
-        </x-filament::button>
-    </div>
+    @if(!$download)
+        <div class="flex gap-x-2 lg:mx-auto max-w-3xl mb-4" x-data="{}">
+            <x-filament::button color="indigo" class="w-1/2" size="sm" icon="gmdi-email-o"
+                                @click="$dispatch('open-modal', { id: 'email-invoice' })">
+                Email Invoice
+            </x-filament::button>
+            <x-filament::button color="indigo" class="w-1/2" size="sm" icon="gmdi-file-download-o"
+                                tag="a"
+                                :href="route('customer.invoice.download', ['uuid' => $booking->uuid])"
+            >
+                Download PDF
+            </x-filament::button>
+        </div>
+    @endif
     <div
-        class="bg-white rounded-xl shadow sm:max-w-3xl lg:mx-auto lg:min-h-[11in] invoice-container flex flex-col">
+        class=" bg-white rounded-xl shadow sm:max-w-3xl lg:mx-auto lg:min-h-[11in] invoice-container flex flex-col
+            ">
         <div class="relative overflow-hidden text-center bg-gray-800 min-h-32 rounded-t-xl">
             <!-- SVG Background Element -->
             <figure class="absolute inset-x-0 bottom-0 -mb-px ">
@@ -140,27 +146,30 @@
             Contact information goes here 1-888-555-5555.
         </div>
     </div>
+    @if(!$download)
+        <x-filament::modal id="email-invoice">
+            <x-slot name="heading">
+                Email Invoice
+            </x-slot>
 
-    <x-filament::modal id="email-invoice">
-        <x-slot name="heading">
-            Email Invoice
-        </x-slot>
-
-        {{-- Modal content --}}
-        <div class="space-y-4">
-            <div class="space-y-2">
-                <label for="email" class="sr-only">Email Address</label>
-                <input type="email" id="email" name="email"
-                       class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                       placeholder="
-Email address">
+            {{-- Modal content --}}
+            <div class="space-y-4">
+                <div class="space-y-2">
+                    <label for="email" class="sr-only">Email Address</label>
+                    <input
+                        type="email" id="email" name="email"
+                        class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                        placeholder="Email address"
+                    >
+                </div>
             </div>
-        </div>
 
-        <x-slot name="footer">
-            <x-filament::button color="indigo" wire:click="sendInvoice" class="w-full">
-                Send Invoice
-            </x-filament::button>
-        </x-slot>
-    </x-filament::modal>
+            <x-slot name="footer">
+                <x-filament::button color="indigo" wire:click="sendInvoice" class="w-full">
+                    Send Invoice
+                </x-filament::button>
+            </x-slot>
+        </x-filament::modal>
+    @endif
+
 </div>

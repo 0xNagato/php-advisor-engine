@@ -20,10 +20,10 @@ class SourceData extends Data implements Wireable
         public ?string $country,
         public ?string $funding,
         public ?string $customer,
-        public ?int    $expYear,
-        public ?array  $metadata,
+        public ?int $expYear,
+        public ?array $metadata,
         public ?string $cvcCheck,
-        public ?int    $expMonth,
+        public ?int $expMonth,
         public ?string $addressZip,
         public ?string $fingerprint,
         public ?string $addressCity,
@@ -35,7 +35,6 @@ class SourceData extends Data implements Wireable
         public ?string $addressZipCheck,
         public ?string $addressLine1Check,
         public ?string $tokenizationMethod
-    )
-    {
+    ) {
     }
 }
