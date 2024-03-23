@@ -9,6 +9,7 @@
     "license": "MIT",
     "require": {
         "php": "^8.2",
+        "andreiio/blade-remix-icon": "^3.2",
         "ariaieboy/filament-currency": "^1.2",
         "ashallendesign/short-url": "^7.10",
         "bezhansalleh/filament-shield": "^3.1",
@@ -31,7 +32,7 @@
         "livewire/livewire": "^3.4",
         "livewire/volt": "^1.6",
         "lorisleiva/laravel-actions": "^2.7",
-        "owenvoke/blade-fontawesome": "^2.5",
+        "owenvoke/blade-fontawesome": "^2.6",
         "pelmered/filament-money-field": "^1.0",
         "robsontenorio/mary": "^1.21",
         "spatie/laravel-data": "^4.0",

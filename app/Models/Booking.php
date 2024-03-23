@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Data\Stripe\StripeChargeData;
 use App\Enums\BookingStatus;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -53,7 +54,11 @@ class Booking extends Model
     protected $casts = [
         'booking_at' => 'datetime',
         'status' => BookingStatus::class,
-        'stripe_charge' => 'array',
+        'stripe_charge' => StripeChargeData::class,
+        'confirmed_at' => 'datetime',
+        'clicked_at' => 'datetime',
+        'restaurant_confirmed_at' => 'datetime',
+        'resent_restaurant_confirmation_at' => 'datetime',
     ];
 
     protected static function boot(): void
