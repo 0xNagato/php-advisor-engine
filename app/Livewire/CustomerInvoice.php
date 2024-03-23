@@ -58,8 +58,10 @@ class CustomerInvoice extends Component implements HasForms
     {
         $invoicePath = $this->booking->invoice_path;
         $mailable = new \App\Mail\CustomerInvoice($this->booking);
-        $mailable->attachFromStorageDisk('do', $invoicePath);
-        Mail::to($this->email)->send($mailable);
+        $mailable->attachFromStorageDisk('do', $invoicePath)
+            ->from('welcome@primavip.co', 'PRIMA');
+        Mail::to($this->email)
+            ->send($mailable);
         $this->emailOpen = false;
         $this->emailed = true;
 
