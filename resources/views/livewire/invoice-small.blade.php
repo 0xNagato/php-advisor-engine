@@ -13,7 +13,7 @@
             <div class="font-semibold">
                 {{ money($booking->total_with_tax_in_cents) }}
             </div>
-            <div class="text-xs text-slate-700 font-mono">
+            <div class="text-xs text-slate-700">
                 <div class="flex justify-between gap-x-2">
                     <span>Subtotal:</span> <span>{{ money($booking->total_fee) }}</span>
                 </div>

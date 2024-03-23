@@ -148,7 +148,7 @@ class BookingWidget extends Widget implements HasForms
             'guest_count' => $this->guestCount,
             'concierge_id' => auth()->user()->concierge->id,
             'status' => BookingStatus::PENDING,
-            'booking_at' => $this->selectedDate.' '.$this->selectedSchedule->start_time,
+            'booking_at' => $this->selectedDate . ' ' . $this->selectedSchedule->start_time,
         ]);
 
         $taxData = app(SalesTaxService::class)->calculateTax('miami', $this->booking->total_fee);
@@ -194,6 +194,13 @@ class BookingWidget extends Widget implements HasForms
         $this->booking = null;
         $this->qrCode = null;
         $this->bookingUrl = null;
+
+        $this->selectedRestaurantId = null;
+        $this->selectedRestaurant = null;
+        $this->selectedScheduleId = null;
+        $this->selectedSchedule = null;
+        $this->guestCount = null;
+        $this->unavailableSchedules = null;
     }
 
     public function resetBooking(): void
@@ -209,6 +216,7 @@ class BookingWidget extends Widget implements HasForms
         $this->selectedScheduleId = null;
         $this->selectedSchedule = null;
         $this->guestCount = null;
+        $this->unavailableSchedules = null;
     }
 
     #[On('sms-sent')]

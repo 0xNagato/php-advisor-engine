@@ -119,8 +119,8 @@
 
             <div x-show="tab === 'collectPayment'" class="mt-4">
                 <!-- Collect Payment Tab Content -->
-                <div class="text-base font-semibold mb-2">
-                    Please Enter Reservation Details
+                <div class="text-base font-semibold mb-3 text-center">
+                    Enter Reservation Details
                 </div>
 
                 <!-- @todo Refactor this to a separate component -->
@@ -211,7 +211,7 @@
                 <!-- SMS Payment Link Tab Content -->
                 @if($SMSSent)
                     <div class="flex flex-col gap-2 bg-white rounded shadow p-4">
-                        <p>Please advise customer to check their phone for reservation payment link.</p>
+                        <p>Advise customer to check their phone for reservation payment link.</p>
                         <p>Sending message to customer now.</p>
                     </div>
                 @endif
@@ -247,6 +247,20 @@
                             icon="gmdi-restaurant-menu">
             Create New Booking
         </x-filament::button>
+
+        <div class="flex gap-4">
+
+            <x-filament::button tag="a" class="w-1/2" color="gray"
+                                :href="route('filament.admin.resources.bookings.view', ['record' => $booking])">
+                View Booking
+            </x-filament::button>
+
+            <x-filament::button tag="a" class="w-1/2" color="gray"
+                                :href="route('customer.invoice', ['token' => $booking->uuid])">
+                View Invoice
+            </x-filament::button>
+
+        </div>
     @endif
 
 </x-filament-widgets::widget>

@@ -12,7 +12,7 @@ use Illuminate\Contracts\Support\Htmlable;
 class ViewBooking extends ViewRecord
 {
     protected static string $resource = BookingResource::class;
-
+    
     public function getHeading(): string|Htmlable
     {
         return '';

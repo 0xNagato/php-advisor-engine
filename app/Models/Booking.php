@@ -45,6 +45,7 @@ class Booking extends Model
         'tax_amount_in_cents',
         'city',
         'total_with_tax_in_cents',
+        'invoice_path',
     ];
 
     protected $appends = [
@@ -145,7 +146,7 @@ class Booking extends Model
 
     public function getGuestNameAttribute(): string
     {
-        return $this->guest_first_name.' '.$this->guest_last_name;
+        return $this->guest_first_name . ' ' . $this->guest_last_name;
     }
 
     public function getPartnerEarningsAttribute()

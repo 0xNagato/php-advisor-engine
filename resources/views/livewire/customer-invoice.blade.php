@@ -1,15 +1,16 @@
-<style>
-    @media (max-width: 1024px) {
-        .invoice-container {
-            height: calc(100vh - 88px);
-        }
-    }
-</style>
 <div class="p-6">
+    <style>
+        @media (max-width: 1024px) {
+            .invoice-container {
+                height: calc(100vh - 88px);
+            }
+        }
+    </style>
+
     @if(!$download)
-        <div class="flex gap-x-2 lg:mx-auto max-w-3xl mb-4" x-data="{}">
+        <div class="flex gap-x-2 lg:mx-auto max-w-3xl mb-4">
             <x-filament::button color="indigo" class="w-1/2" size="sm" icon="gmdi-email-o"
-                                @click="$dispatch('open-modal', { id: 'email-invoice' })">
+                                wire:click="showEmailForm">
                 Email Invoice
             </x-filament::button>
             <x-filament::button color="indigo" class="w-1/2" size="sm" icon="gmdi-file-download-o"
@@ -19,7 +20,20 @@
                 Download PDF
             </x-filament::button>
         </div>
+
+
+        @if(isset($emailOpen) && $emailOpen)
+            <form wire:submit="emailInvoice" class="my-4 bg-gray-100 p-4 rounded-lg border max-w-3xl mx-auto">
+                {{ $this->form }}
+                <button type="submit"
+                        class="bg-indigo-600 w-full text-white px-4 py-2 rounded-lg text-sm font-semibold mt-4">
+                    Send Email
+                </button>
+            </form>
+        @endif
+
     @endif
+
     <div
         class=" bg-white rounded-xl shadow sm:max-w-3xl lg:mx-auto lg:min-h-[11in] invoice-container flex flex-col
             ">
@@ -56,12 +70,19 @@
                     PRIMA
                 </h3>
                 <p class="text-sm text-gray-500">
-                    Invoice #3682303
+                    Invoice #{{ $booking->id }}
                 </p>
             </div>
 
             <!-- Grid -->
-            <div class="grid grid-cols-2 gap-5 mt-5 sm:mt-10 sm:grid-cols-3">
+            <div class="grid grid-cols-2 gap-5 mt-5 sm:mt-10 sm:grid-cols-4">
+                <div>
+                    <span class="block text-xs text-gray-500 uppercase">Customer:</span>
+                    <span class="block text-sm font-medium text-gray-800 dark:text-gray-200">
+                    {{ $booking->guest_name }}
+                </span>
+                </div>
+
                 <div>
                     <span class="block text-xs text-gray-500 uppercase">Amount Paid:</span>
                     <span class="block text-sm font-medium text-gray-800 dark:text-gray-200">
@@ -122,7 +143,7 @@
                     <li
                         class="inline-flex items-center px-4 py-3 -mt-px text-sm text-gray-800 border gap-x-2 first:rounded-t-lg first:mt-0 last:rounded-b-lg dark:border-gray-700 dark:text-gray-200">
                         <div class="flex items-center justify-between w-full">
-                            <span>Tax</span>
+                            <span>Tax ({{ $booking->tax * 100 }}%)</span>
                             <span>
                             {{ money($booking->tax_amount_in_cents) }}
                         </span>
@@ -146,30 +167,4 @@
             Contact information goes here 1-888-555-5555.
         </div>
     </div>
-    @if(!$download)
-        <x-filament::modal id="email-invoice">
-            <x-slot name="heading">
-                Email Invoice
-            </x-slot>
-
-            {{-- Modal content --}}
-            <div class="space-y-4">
-                <div class="space-y-2">
-                    <label for="email" class="sr-only">Email Address</label>
-                    <input
-                        type="email" id="email" name="email"
-                        class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                        placeholder="Email address"
-                    >
-                </div>
-            </div>
-
-            <x-slot name="footer">
-                <x-filament::button color="indigo" wire:click="sendInvoice" class="w-full">
-                    Send Invoice
-                </x-filament::button>
-            </x-slot>
-        </x-filament::modal>
-    @endif
-
 </div>
