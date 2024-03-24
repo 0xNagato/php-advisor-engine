@@ -38,6 +38,10 @@ class ConciergeLeaderboard extends BaseWidget
 
         return $table
             ->query($query)
+            ->recordUrl(function (Model $record) {
+                $record = Concierge::find($record->user_id);
+                return route('filament.admin.resources.concierges.view', ['record' => $record]);
+            })
             ->paginated(false)
             ->columns(components: [
                 Tables\Columns\TextColumn::make('rank')

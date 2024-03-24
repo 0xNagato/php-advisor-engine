@@ -41,6 +41,10 @@ class PartnerLeaderboard extends BaseWidget
 
         return $table
             ->query($query)
+            ->recordUrl(function (Model $record) {
+                $record = Partner::where(['user_id' => $record->user_id])->first();
+                return route('filament.admin.resources.partners.view', ['record' => $record]);
+            })
             ->paginated(false)
             ->columns(components: [
                 Tables\Columns\TextColumn::make('rank')

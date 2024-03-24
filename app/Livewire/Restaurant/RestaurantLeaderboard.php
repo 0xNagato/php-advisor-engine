@@ -39,6 +39,10 @@ class RestaurantLeaderboard extends BaseWidget
 
         return $table
             ->query($query)
+            ->recordUrl(function (Model $record) {
+                $restaurant = Restaurant::where('user_id', $record->user_id)->first();
+                return route('filament.admin.resources.restaurants.view', ['record' => $restaurant]);
+            })
             ->paginated(false)
             ->columns(components: [
                 Tables\Columns\TextColumn::make('rank')
