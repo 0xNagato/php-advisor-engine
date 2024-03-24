@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\BookingResource\Pages;
 
 use App\Filament\Resources\BookingResource;
+use App\Models\Booking;
 use Filament\Actions\Action;
 use Filament\Infolists\Components\Section;
 use Filament\Infolists\Components\TextEntry;
@@ -13,6 +14,22 @@ use Filament\Tables\Actions\Link;
 class ViewBooking extends ViewRecord
 {
     protected static string $resource = BookingResource::class;
+    protected static string $view = 'livewire.customer-invoice';
+    public $download = true;
+    public Booking $booking;
+
+    public function mount(int|string $record): void
+    {
+        $this->record = $this->resolveRecord($record);
+
+        $this->authorizeAccess();
+
+        if (!$this->hasInfolist()) {
+            $this->fillForm();
+        }
+
+        $this->booking = $this->record;
+    }
 
     public function infolist(Infolist $infolist): Infolist
     {
