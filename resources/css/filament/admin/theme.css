@@ -77,7 +77,7 @@ a
 
 
 .fi-header {
-
+    @apply flex flex-row items-center;
     @media only screen and (max-width: 640px) {
 
     }
@@ -87,6 +87,7 @@ a
     font-family: "Sanomat Web Regular Regular", serif;
     font-style: normal;
 
+
     @media only screen and (max-width: 640px) {
         font-size: 22px !important;
     }
@@ -94,10 +95,8 @@ a
 
 .fi-ac {
     top: 0;
+    @apply flex-grow text-right justify-end;
     @media only screen and (max-width: 640px) {
-        position: relative !important;
-        justify-content: end !important;
-        top: -48px;
-        margin-bottom: -68px;
+
     }
 }
