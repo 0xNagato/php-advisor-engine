@@ -122,7 +122,7 @@ class BookingWidget extends Widget implements HasForms
             $this->schedules = $this->selectedRestaurant->availableSchedules->where('start_time', '>=', $currentTime);
             $this->unavailableSchedules = $this->selectedRestaurant->unavailableSchedules->where('start_time', '>=', $currentTime);
         } else {
-            $this->schedules = $this->selectedRestaurant->availableSchedules ?? collect();
+            $this->schedules = $this->selectedRestaurant->availableSchedules ?? Schedule::find([]);
             $this->unavailableSchedules = $this->selectedRestaurant->unavailableSchedules;
         }
 
