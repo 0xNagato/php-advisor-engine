@@ -2,7 +2,7 @@
     <style>
         @media (max-width: 1024px) {
             .invoice-container {
-                height: calc(100vh - 88px);
+                height: calc(100vh - 108px);
             }
         }
     </style>
