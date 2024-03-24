@@ -8,6 +8,7 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Filament\Widgets\Concerns\InteractsWithPageFilters;
 use Filament\Widgets\TableWidget as BaseWidget;
+use Illuminate\Contracts\Support\Htmlable;
 
 class ConciergeRecentBookings extends BaseWidget
 {
@@ -28,6 +29,11 @@ class ConciergeRecentBookings extends BaseWidget
     public function getColumnSpan(): int|string|array
     {
         return $this->columnSpan ?? 'full';
+    }
+
+    public function getTableHeading(): string|Htmlable|null
+    {
+        return auth()->user()?->hasRole('super_admin') ? 'Concierge Recent Bookings' : 'Your Recent Bookings';
     }
 
     public function table(Table $table): Table
@@ -57,7 +63,7 @@ class ConciergeRecentBookings extends BaseWidget
                     ->alignRight()
                     ->label('Earned')
                     ->currency('USD')
-                    ->hidden((bool) ! auth()->user()?->hasRole('concierge') && ! $this->hideConcierge),
+                    ->hidden((bool)!auth()->user()?->hasRole('concierge') && !$this->hideConcierge),
                 TextColumn::make('charity_earnings')
                     ->alignRight()
                     ->currency('USD')

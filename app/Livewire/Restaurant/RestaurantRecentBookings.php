@@ -8,6 +8,7 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Filament\Widgets\Concerns\InteractsWithPageFilters;
 use Filament\Widgets\TableWidget as BaseWidget;
+use Illuminate\Contracts\Support\Htmlable;
 
 class RestaurantRecentBookings extends BaseWidget
 {
@@ -28,6 +29,11 @@ class RestaurantRecentBookings extends BaseWidget
     public function getColumnSpan(): int|string|array
     {
         return $this->columnSpan ?? 'full';
+    }
+
+    public function getTableHeading(): string|Htmlable|null
+    {
+        return auth()->user()?->hasRole('super_admin') ? 'Restaurant Recent Bookings' : 'Your Recent Bookings';
     }
 
     public function table(Table $table): Table

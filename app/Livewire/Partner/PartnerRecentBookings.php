@@ -8,6 +8,7 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Filament\Widgets\Concerns\InteractsWithPageFilters;
 use Filament\Widgets\TableWidget as BaseWidget;
+use Illuminate\Contracts\Support\Htmlable;
 
 class PartnerRecentBookings extends BaseWidget
 {
@@ -24,6 +25,11 @@ class PartnerRecentBookings extends BaseWidget
     public bool $hidePartner = false;
 
     public int|string|array $columnSpan;
+
+    public function getTableHeading(): string|Htmlable|null
+    {
+        return auth()->user()?->hasRole('super_admin') ? 'Partner Recent Bookings' : 'Your Recent Bookings';
+    }
 
     public function getColumnSpan(): int|string|array
     {
