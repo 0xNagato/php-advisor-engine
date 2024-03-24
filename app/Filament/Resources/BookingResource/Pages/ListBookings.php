@@ -8,7 +8,6 @@ use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 
-
 class ListBookings extends ListRecords
 {
     protected static string $resource = BookingResource::class;
@@ -28,6 +27,7 @@ class ListBookings extends ListRecords
                         $query->where('id', auth()->user()->restaurant->id);
                     });
                 }
+
                 return $query;
             })
             ->columns([

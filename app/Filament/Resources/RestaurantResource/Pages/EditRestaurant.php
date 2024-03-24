@@ -39,6 +39,7 @@ class EditRestaurant extends EditRecord
                     ]),
 
                 Repeater::make('contacts')
+                    ->addActionLabel('Add Contact')
                     ->label('Contacts')
                     ->schema([
                         TextInput::make('contact_name')
@@ -69,6 +70,26 @@ class EditRestaurant extends EditRecord
                             ->numeric()
                             ->suffix('%')
                             ->required(),
+                    ]),
+                Section::make('Special Pricing')
+                    ->icon('heroicon-m-currency-dollar')
+                    ->schema([
+                        Repeater::make('special_pricing')
+                            ->hiddenLabel()
+                            ->relationship('specialPricing')
+                            ->addActionLabel('Add Day')
+                            ->label('Special Pricing')
+                            ->schema([
+                                TextInput::make('date')
+                                    ->label('Date')
+                                    ->type('date')
+                                    ->required(),
+                                TextInput::make('fee')
+                                    ->label('Fee')
+                                    ->prefix('$')
+                                    ->numeric()
+                                    ->required(),
+                            ]),
                     ]),
             ]);
     }

@@ -43,6 +43,7 @@ class PartnerLeaderboard extends BaseWidget
             ->query($query)
             ->recordUrl(function (Model $record) {
                 $record = Partner::where(['user_id' => $record->user_id])->first();
+
                 return route('filament.admin.resources.partners.view', ['record' => $record]);
             })
             ->paginated(false)

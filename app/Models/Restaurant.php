@@ -106,4 +106,9 @@ class Restaurant extends Model
 
         return $query->where("open_days->{$dayOfWeek}", 'open'); // Check if the restaurant is open on that day
     }
+
+    public function specialPricing(): HasMany
+    {
+        return $this->hasMany(SpecialPricingRestaurant::class);
+    }
 }

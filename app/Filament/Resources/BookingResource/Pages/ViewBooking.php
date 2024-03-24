@@ -45,7 +45,7 @@ class ViewBooking extends ViewRecord
                     ->schema([
                         TextEntry::make('guest_name')->hiddenLabel(),
                         TextEntry::make('guest_phone')
-                            ->formatStateUsing(fn($state) => formatPhoneNumber($state))
+                            ->formatStateUsing(fn ($state) => formatPhoneNumber($state))
                             ->hiddenLabel(),
                         TextEntry::make('guest_count')
                             ->label('Guest Count:')

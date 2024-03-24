@@ -41,6 +41,7 @@ class RestaurantLeaderboard extends BaseWidget
             ->query($query)
             ->recordUrl(function (Model $record) {
                 $restaurant = Restaurant::where('user_id', $record->user_id)->first();
+
                 return route('filament.admin.resources.restaurants.view', ['record' => $restaurant]);
             })
             ->paginated(false)

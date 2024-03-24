@@ -1,6 +1,6 @@
 <?php
 
-if (!function_exists('formatPhoneNumber')) {
+if (! function_exists('formatPhoneNumber')) {
     function formatPhoneNumber($phoneNumber)
     {
         // Remove any non-digit character
@@ -17,7 +17,8 @@ if (!function_exists('formatPhoneNumber')) {
             $prefix = substr($phoneNumber, 3, 3);
             $lineNumber = substr($phoneNumber, 6, 4);
 
-            $formattedPhoneNumber = '(' . $areaCode . ') ' . $prefix . '-' . $lineNumber;
+            $formattedPhoneNumber = '('.$areaCode.') '.$prefix.'-'.$lineNumber;
+
             return $formattedPhoneNumber;
         }
 
