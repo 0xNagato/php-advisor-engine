@@ -38,7 +38,10 @@ class ProfileSettings extends Widget implements HasForms
         return $form->schema([
             FileUpload::make('profile_photo_path')
                 ->label('Profile Photo')
-                ->disk('do'),
+                ->disk('do')
+                ->hidden(function () {
+                    return !auth()->user()->hasRole('concierge');
+                }),
             TextInput::make('first_name')
                 ->required()
                 ->label('First Name'),
