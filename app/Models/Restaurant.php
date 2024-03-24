@@ -38,6 +38,7 @@ class Restaurant extends Model
         'booking_fee',
         'open_days',
         'contacts',
+        'is_suspended',
     ];
 
     protected $casts = [
