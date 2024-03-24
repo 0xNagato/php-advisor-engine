@@ -93,13 +93,14 @@ class Booking extends Model
 
     public function totalFee(): int
     {
-        $total_fee = $this->schedule->restaurant->booking_fee;
+        $specialPrice = $this->schedule->restaurant->specialPricing()
+            ->where('date', $this->booking_at->format('Y-m-d'))
+            ->first()
+            ->fee ?? $this->schedule->restaurant->booking_fee;
 
-        if ($this->guest_count > 2) {
-            $total_fee += 50 * ($this->guest_count - 2);
-        }
+        $extraGuestFee = max(0, $this->guest_count - 2) * 50;
 
-        return $total_fee * 100;
+        return ($specialPrice + $extraGuestFee) * 100;
     }
 
     public function scopeConfirmed($query)
@@ -146,7 +147,7 @@ class Booking extends Model
 
     public function getGuestNameAttribute(): string
     {
-        return $this->guest_first_name.' '.$this->guest_last_name;
+        return $this->guest_first_name . ' ' . $this->guest_last_name;
     }
 
     public function getPartnerEarningsAttribute()

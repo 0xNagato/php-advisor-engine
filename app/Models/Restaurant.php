@@ -42,7 +42,7 @@ class Restaurant extends Model
 
     protected $casts = [
         'open_days' => 'array',
-        'contacts' => DataCollection::class.':'.RestaurantContactData::class,
+        'contacts' => DataCollection::class . ':' . RestaurantContactData::class,
     ];
 
     protected static function boot(): void
@@ -105,6 +105,17 @@ class Restaurant extends Model
         $dayOfWeek = strtolower(Carbon::parse($date)->format('l')); // Convert the date to a day of the week
 
         return $query->where("open_days->{$dayOfWeek}", 'open'); // Check if the restaurant is open on that day
+    }
+
+    public function getPriceForDate(string $date): float
+    {
+        // Parse the date
+        $date = Carbon::parse($date)->format('Y-m-d');
+
+        // Check if there's a special price for the given date
+        $specialPrice = $this->specialPricing()->where('date', $date)->first();
+
+        return $specialPrice->fee ?? $this->booking_fee;
     }
 
     public function specialPricing(): HasMany

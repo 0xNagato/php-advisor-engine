@@ -70,7 +70,11 @@
                 <option value="">How many guests?</option>
                 @for ($i = 2; $i <= 8; $i++)
                     @php
-                        $price = 200 + ($i - 2) * 50;
+                        if ($selectedRestaurant) {
+                            $price = $selectedRestaurant->getPriceForDate($selectedDate) + ($i - 2) * 50;
+                        } else {
+                            $price = 0;
+                        }
                     @endphp
                     <option value="{{ $i }}">{{ $i }} Guests (${{ $price }})</option>
                 @endfor
