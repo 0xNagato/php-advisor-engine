@@ -15,8 +15,6 @@ class ListPartners extends ListRecords
 
     protected static string $resource = PartnerResource::class;
 
-    // protected static string $view = 'filament.resources.concierges.pages.view-concierge';
-
     public function mount(): void
     {
         $this->filters = [

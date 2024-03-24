@@ -13,7 +13,7 @@ class ListConcierges extends ListRecords
     protected function getHeaderActions(): array
     {
         return [
-            Actions\CreateAction::make(),
+            Actions\CreateAction::make()->iconButton()->icon('heroicon-s-plus-circle'),
         ];
     }
 }
