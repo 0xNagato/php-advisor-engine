@@ -28,7 +28,7 @@ class CustomerInvoice extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: 'PRIMA Invoice',
+            subject: 'PRIMA Invoice #' . $this->booking->id,
         );
     }
 
