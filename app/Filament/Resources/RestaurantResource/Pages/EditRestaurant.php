@@ -8,6 +8,7 @@ use Filament\Forms\Components\Button;
 use Filament\Forms\Components\Checkbox;
 use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Section;
+use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Form;
 use Filament\Resources\Pages\EditRecord;
@@ -25,6 +26,20 @@ class EditRestaurant extends EditRecord
 
     public function form(Form $form): Form
     {
+
+        $halfHourSteps = range(720, 1380, 30); // Minutes from 12:00 to 23:30
+        $timeOptions = array_combine(
+            $halfHourSteps,
+            array_map(
+                function ($minutes) {
+                    $hour = floor($minutes / 60);
+                    $minutes = ($minutes % 60);
+                    return sprintf('%02d:%02d', $hour, $minutes);
+                },
+                $halfHourSteps
+            )
+        );
+
         return $form
             ->schema([
                 Section::make('Restaurant Information')
@@ -98,6 +113,22 @@ class EditRestaurant extends EditRecord
                                     ->required(),
                             ]),
                     ]),
+
+
+                Section::make('Non Prime Time')
+                    ->icon('heroicon-m-clock')
+                    ->schema([
+                        Repeater::make('non_prime_time')
+                            ->addActionLabel('Add Time Block')
+                            ->label('Non Prime Time')
+                            ->schema([
+                                Select::make('time')
+                                    ->label('Time')
+                                    ->placeholder('Select Time')
+                                    ->options($timeOptions)
+                                    ->required(),
+                            ]),
+                    ])
             ]);
     }
 
