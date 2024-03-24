@@ -3,17 +3,25 @@
 namespace App\Filament\Resources\RestaurantResource\Pages;
 
 use App\Filament\Resources\RestaurantResource;
+use Filament\Actions\Action;
+use Filament\Forms\Components\Button;
 use Filament\Forms\Components\Checkbox;
 use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Section;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Form;
 use Filament\Resources\Pages\EditRecord;
+use Illuminate\Contracts\Support\Htmlable;
 use Ysfkaya\FilamentPhoneInput\Forms\PhoneInput;
 
 class EditRestaurant extends EditRecord
 {
     protected static string $resource = RestaurantResource::class;
+
+    public function getHeading(): string|Htmlable
+    {
+        return $this->getRecord()->restaurant_name;
+    }
 
     public function form(Form $form): Form
     {
@@ -93,9 +101,20 @@ class EditRestaurant extends EditRecord
             ]);
     }
 
+    public function toggleSuspend(): void
+    {
+        $this->getRecord()->update([
+            'is_suspended' => !$this->getRecord()->is_suspended,
+        ]);
+    }
+
     protected function getHeaderActions(): array
     {
         return [
+            Action::make($this->getRecord()->is_suspended ? 'Restore' : 'Suspend')
+                ->action('toggleSuspend')
+                ->requiresConfirmation()
+                ->color($this->getRecord()->is_suspended ? 'success' : 'danger')
         ];
     }
 }
