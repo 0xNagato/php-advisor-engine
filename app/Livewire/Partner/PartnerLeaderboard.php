@@ -61,7 +61,7 @@ class PartnerLeaderboard extends BaseWidget
                         return $state;
                     }),
                 Tables\Columns\TextColumn::make('total_earned')
-                    ->label('Total Earned')
+                    ->label('Earned')
                     ->currency('USD'),
             ]);
     }
