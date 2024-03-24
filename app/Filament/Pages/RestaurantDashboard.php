@@ -16,7 +16,7 @@ class RestaurantDashboard extends Dashboard
     protected static ?string $title = 'My Earnings';
 
     protected static string $routePath = 'restaurant';
-
+    protected static string $view = 'filament.resources.restaurants.pages.dashboard';
     protected ?string $heading = 'My Earnings';
 
     public static function canAccess(): bool
@@ -38,6 +38,7 @@ class RestaurantDashboard extends Dashboard
             Dashboard\Actions\FilterAction::make()
                 ->label('Date Range')
                 ->icon('heroicon-o-calendar')
+                ->iconButton()
                 ->form([
                     DatePicker::make('startDate'),
                     DatePicker::make('endDate'),

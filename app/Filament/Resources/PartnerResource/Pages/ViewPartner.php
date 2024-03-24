@@ -9,10 +9,13 @@ use App\Livewire\Partner\PartnerStats;
 use Filament\Actions;
 use Filament\Resources\Pages\ViewRecord;
 use Illuminate\Contracts\Support\Htmlable;
+use STS\FilamentImpersonate\Pages\Actions\Impersonate;
 
 class ViewPartner extends ViewRecord
 {
     protected static string $resource = PartnerResource::class;
+
+    protected static string $view = 'filament.resources.partners.pages.view-partner';
 
     public function getHeading(): string|Htmlable
     {
@@ -40,7 +43,12 @@ class ViewPartner extends ViewRecord
     protected function getHeaderActions(): array
     {
         return [
-            Actions\EditAction::make(),
+            Impersonate::make()
+                ->iconButton()
+                ->record($this->getRecord()->user),
+            Actions\EditAction::make()
+                ->icon('heroicon-m-pencil-square')
+                ->iconButton(),
         ];
     }
 }
