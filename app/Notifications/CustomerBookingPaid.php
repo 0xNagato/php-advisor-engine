@@ -3,12 +3,14 @@
 namespace App\Notifications;
 
 use App\Models\Booking;
+use AshAllenDesign\ShortURL\Exceptions\ShortURLException;
 use Carbon\CarbonInterface;
 use Illuminate\Bus\Queueable;
 use Illuminate\Notifications\Notification;
 use NotificationChannels\Twilio\TwilioChannel;
 use NotificationChannels\Twilio\TwilioMessage;
 use NotificationChannels\Twilio\TwilioSmsMessage;
+use ShortURL;
 
 class CustomerBookingPaid extends Notification
 {
@@ -32,13 +34,18 @@ class CustomerBookingPaid extends Notification
         return [TwilioChannel::class];
     }
 
+    /**
+     * @throws ShortURLException
+     */
     public function toTwilio(object $notifiable): TwilioSmsMessage|TwilioMessage
     {
         $bookingDate = $this->getFormattedDate($this->booking->booking_at);
 
         $bookingTime = $this->booking->booking_at->format('g:ia');
 
-        $message = "PRIMA reservation at {$this->booking->restaurant->restaurant_name} $bookingDate at $bookingTime with {$this->booking->guest_count} guests.";
+        $invoiceUrl = ShortURL::destinationUrl(route('customer.invoice', $this->booking->uuid))->make()->default_short_url;
+
+        $message = "PRIMA reservation at {$this->booking->restaurant->restaurant_name} $bookingDate at $bookingTime with {$this->booking->guest_count} guests. View your invoice at $invoiceUrl.";
 
         return (new TwilioSmsMessage())
             ->content($message);
