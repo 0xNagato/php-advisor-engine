@@ -48,6 +48,7 @@ class PartnerRecentBookings extends BaseWidget
         })->whereBetween('created_at', [$startDate, $endDate])->orderByDesc('created_at');
 
         return $table
+            ->recordUrl(fn(Booking $booking) => route('filament.admin.resources.bookings.view', $booking))
             ->query($query)
             ->searchable(false)
             ->columns([
