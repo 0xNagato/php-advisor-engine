@@ -7,8 +7,6 @@ use App\Filament\Resources\RestaurantResource\Pages\EditRestaurant;
 use App\Filament\Resources\RestaurantResource\Pages\ListRestaurants;
 use App\Filament\Resources\RestaurantResource\Pages\ViewRestaurant;
 use App\Models\Restaurant;
-use Filament\Forms;
-use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
@@ -20,20 +18,6 @@ class RestaurantResource extends Resource
     protected static ?string $navigationIcon = 'heroicon-o-building-storefront';
 
     protected static ?int $navigationSort = -1;
-
-    public static function form(Form $form): Form
-    {
-        return $form
-            ->schema([
-                Forms\Components\TextInput::make('restaurant_name')
-                    ->required()
-                    ->maxLength(255),
-                Forms\Components\TextInput::make('contact_phone')
-                    ->tel()
-                    ->required()
-                    ->maxLength(255),
-            ]);
-    }
 
     public static function table(Table $table): Table
     {

@@ -7,8 +7,6 @@ use App\Filament\Resources\ConciergeResource\Pages\EditConcierge;
 use App\Filament\Resources\ConciergeResource\Pages\ListConcierges;
 use App\Filament\Resources\ConciergeResource\Pages\ViewConcierge;
 use App\Models\Concierge;
-use Filament\Forms;
-use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
@@ -18,17 +16,6 @@ class ConciergeResource extends Resource
     protected static ?string $model = Concierge::class;
 
     protected static ?string $navigationIcon = 'govicon-user-suit';
-
-    public static function form(Form $form): Form
-    {
-        return $form
-            ->schema([
-                Forms\Components\TextInput::make('hotel_name')
-                    ->tel()
-                    ->required()
-                    ->maxLength(255),
-            ]);
-    }
 
     public static function table(Table $table): Table
     {

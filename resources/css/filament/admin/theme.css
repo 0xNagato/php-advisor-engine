@@ -27,17 +27,16 @@ body::before {
     @apply dark:bg-white;
 }
 
-/*@media (max-width: 1024px) {*/
-/*    body::before {*/
-/*        background-repeat: no-repeat;*/
-/*        background-size: cover;*/
-/*    }*/
-/*}*/
-
-/*.fi-wi-stats-overview-stat, .fi-ta-ctn, .fi-section-content {*/
-/*    background-color: rgba(255, 255, 255, 0.9) !important;*/
-/*}*/
-
+a
+    /*@media (max-width: 1024px) {*/
+    /*    body::before {*/
+    /*        background-repeat: no-repeat;*/
+    /*        background-size: cover;*/
+    /*    }*/
+    /*}*/
+    /*.fi-wi-stats-overview-stat, .fi-ta-ctn, .fi-section-content {*/
+    /*    background-color: rgba(255, 255, 255, 0.9) !important;*/
+    /*}*/
 .fi-header-heading {
     font-family: "Sanomat Web Regular Regular", serif;
     font-style: normal;
@@ -78,12 +77,16 @@ body::before {
 
 
 .fi-header {
+
     @media only screen and (max-width: 640px) {
 
     }
 }
 
 .fi-header-heading {
+    font-family: "Sanomat Web Regular Regular", serif;
+    font-style: normal;
+
     @media only screen and (max-width: 640px) {
         font-size: 22px !important;
     }

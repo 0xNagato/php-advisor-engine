@@ -1,6 +1,6 @@
 <x-filament-widgets::widget>
     <div class="sm:mt-0">
-        <dl class="mt-5 grid divide-gray-200 overflow-hidden rounded-lg bg-white shadow grid-cols-3 divide-x divide-y-0">
+        <dl class="grid divide-gray-200 overflow-hidden rounded-lg bg-white shadow grid-cols-3 divide-x divide-y-0">
             <!-- Earnings -->
             <div class="px-4 py-5 sm:p-6">
                 <dt class="text-xs font-semibold text-slate-900">Earnings</dt>

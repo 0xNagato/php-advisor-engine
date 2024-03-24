@@ -15,7 +15,7 @@ class ListAdmins extends ListRecords
     protected function getHeaderActions(): array
     {
         return [
-            Actions\CreateAction::make()->label('Create Admin'),
+            Actions\CreateAction::make()->iconButton()->icon('heroicon-s-plus-circle'),
         ];
     }
 }

@@ -35,9 +35,7 @@ class ListPartners extends ListRecords
                     DatePicker::make('endDate'),
                     // ...
                 ]),
-            Actions\CreateAction::make()
-                ->icon('gmdi-business-center-o')
-                ->iconButton(),
+            Actions\CreateAction::make()->iconButton()->icon('heroicon-s-plus-circle'),
         ];
     }
 }

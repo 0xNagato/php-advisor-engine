@@ -15,8 +15,6 @@ class ViewPartner extends ViewRecord
 {
     protected static string $resource = PartnerResource::class;
 
-    protected static string $view = 'filament.resources.partners.pages.view-partner';
-
     public function getHeading(): string|Htmlable
     {
         return $this->record->user->name;

@@ -15,8 +15,6 @@ class ViewConcierge extends ViewRecord
 {
     protected static string $resource = ConciergeResource::class;
 
-    protected static string $view = 'filament.resources.concierges.pages.view-concierge';
-
     // protected ?string $heading = '';
 
     public function getHeading(): string|Htmlable

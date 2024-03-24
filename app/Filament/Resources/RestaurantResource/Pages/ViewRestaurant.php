@@ -15,8 +15,6 @@ class ViewRestaurant extends ViewRecord
 {
     protected static string $resource = RestaurantResource::class;
 
-    protected static string $view = 'filament.resources.restaurants.pages.view-restaurant';
-
     public function getHeading(): string|Htmlable
     {
         return $this->getRecord()->restaurant_name;
