@@ -2,6 +2,7 @@
 
 namespace App\Livewire;
 
+use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
@@ -35,6 +36,9 @@ class ProfileSettings extends Widget implements HasForms
     public function form(Form $form): Form
     {
         return $form->schema([
+            FileUpload::make('profile_photo_path')
+                ->label('Profile Photo')
+                ->disk('do'),
             TextInput::make('first_name')
                 ->required()
                 ->label('First Name'),

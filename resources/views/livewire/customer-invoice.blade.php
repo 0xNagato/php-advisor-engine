@@ -159,12 +159,16 @@
                         </div>
                     </li>
                 </ul>
+
+                <div class="font-semibold mt-4 text-center">
+                    Fees paid are for reservation only. Not applicable towards restaurant bill.
+                </div>
             </div>
         </div>
         <!-- End Body -->
         <!-- Footer -->
         <div class="text-xs text-gray-500 flex-grow flex items-end justify-center p-4">
-            Contact information goes here 1-888-555-5555.
+
         </div>
     </div>
 </div>
