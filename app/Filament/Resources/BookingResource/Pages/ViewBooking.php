@@ -3,20 +3,16 @@
 namespace App\Filament\Resources\BookingResource\Pages;
 
 use App\Filament\Resources\BookingResource;
+use Filament\Actions\Action;
 use Filament\Infolists\Components\Section;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Infolists\Infolist;
 use Filament\Resources\Pages\ViewRecord;
-use Illuminate\Contracts\Support\Htmlable;
+use Filament\Tables\Actions\Link;
 
 class ViewBooking extends ViewRecord
 {
     protected static string $resource = BookingResource::class;
-
-    public function getHeading(): string|Htmlable
-    {
-        return '';
-    }
 
     public function infolist(Infolist $infolist): Infolist
     {
@@ -45,7 +41,7 @@ class ViewBooking extends ViewRecord
                     ->schema([
                         TextEntry::make('guest_name')->hiddenLabel(),
                         TextEntry::make('guest_phone')
-                            ->formatStateUsing(fn ($state) => formatPhoneNumber($state))
+                            ->formatStateUsing(fn($state) => formatPhoneNumber($state))
                             ->hiddenLabel(),
                         TextEntry::make('guest_count')
                             ->label('Guest Count:')
@@ -60,6 +56,14 @@ class ViewBooking extends ViewRecord
 
     protected function getHeaderActions(): array
     {
-        return [];
+        $actions = [];
+
+        if ($this->record->confirmed_at) {
+            $actions[] = Action::make('View Invoice')
+                ->icon('heroicon-o-document-text')
+                ->url(route('customer.invoice', ['token' => $this->record->uuid]));
+        }
+
+        return $actions;
     }
 }
