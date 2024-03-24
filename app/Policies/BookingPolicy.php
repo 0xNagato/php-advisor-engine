@@ -15,6 +15,14 @@ class BookingPolicy
      */
     public function viewAny(User $user): bool
     {
+        if ($user->hasRole('concierge')) {
+            return true;
+        }
+
+        if ($user->hasRole('restaurant')) {
+            return true;
+        }
+
         return $user->can('view_any_booking');
     }
 
@@ -23,6 +31,14 @@ class BookingPolicy
      */
     public function view(User $user, Booking $booking): bool
     {
+        if ($user->hasRole('concierge')) {
+            return $user->id === $booking->concierge->user_id;
+        }
+
+        if ($user->hasRole('restaurant')) {
+            return $user->id === $booking->restaurant->user_id;
+        }
+
         return $user->can('view_booking');
     }
 
@@ -39,6 +55,7 @@ class BookingPolicy
      */
     public function update(User $user, Booking $booking): bool
     {
+
         return $user->can('update_booking');
     }
 

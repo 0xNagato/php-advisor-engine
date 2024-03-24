@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "e1432915bd59a50bf025c867d22b7b1f",
+    "content-hash": "f2c21cfe26f4db9dd2cdbc2aeb69d7af",
     "packages": [
         {
             "name": "akaunting/laravel-money",
@@ -1653,6 +1653,112 @@
             "time": "2023-01-15T23:15:59+00:00"
         },
         {
+            "name": "brick/phonenumber",
+            "version": "0.5.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/brick/phonenumber.git",
+                "reference": "6286a218375a46a6f4d0fd361323f22313882814"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/brick/phonenumber/zipball/6286a218375a46a6f4d0fd361323f22313882814",
+                "reference": "6286a218375a46a6f4d0fd361323f22313882814",
+                "shasum": ""
+            },
+            "require": {
+                "ext-json": "*",
+                "giggsey/libphonenumber-for-php": "^7.0 || ^8.0",
+                "php": "^7.4 || ^8.0"
+            },
+            "require-dev": {
+                "php-coveralls/php-coveralls": "^2.0",
+                "phpunit/phpunit": "^9.0",
+                "vimeo/psalm": "5.7.5"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Brick\\PhoneNumber\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "description": "Phone number library",
+            "keywords": [
+                "brick",
+                "phone",
+                "phone number",
+                "phonenumber"
+            ],
+            "support": {
+                "issues": "https://github.com/brick/phonenumber/issues",
+                "source": "https://github.com/brick/phonenumber/tree/0.5.0"
+            },
+            "funding": [
+                {
+                    "url": "https://github.com/BenMorel",
+                    "type": "github"
+                }
+            ],
+            "time": "2023-02-23T21:41:31+00:00"
+        },
+        {
+            "name": "calebporzio/sushi",
+            "version": "v2.5.1",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/calebporzio/sushi.git",
+                "reference": "20aad4e9d9ea74df64a86f6d327e55bdfc92d204"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/calebporzio/sushi/zipball/20aad4e9d9ea74df64a86f6d327e55bdfc92d204",
+                "reference": "20aad4e9d9ea74df64a86f6d327e55bdfc92d204",
+                "shasum": ""
+            },
+            "require": {
+                "ext-sqlite3": "*",
+                "illuminate/database": "^5.8 || ^6.0 || ^7.0 || ^8.0 || ^9.0 || ^10.0 || ^11.0",
+                "illuminate/support": "^5.8 || ^6.0 || ^7.0 || ^8.0 || ^9.0 || ^10.0 || ^11.0",
+                "php": "^7.1.3|^8.0"
+            },
+            "require-dev": {
+                "doctrine/dbal": "^2.9 || ^3.1.4",
+                "orchestra/testbench": "3.8.* || 3.9.* || ^4.0 || ^6.0 || ^7.0 || ^8.0 || ^9.0",
+                "phpunit/phpunit": "^7.5 || ^8.4 || ^9.0 || ^10.0"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Sushi\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Caleb Porzio",
+                    "email": "calebporzio@gmail.com"
+                }
+            ],
+            "description": "Eloquent's missing \"array\" driver.",
+            "support": {
+                "source": "https://github.com/calebporzio/sushi/tree/v2.5.1"
+            },
+            "funding": [
+                {
+                    "url": "https://github.com/calebporzio",
+                    "type": "github"
+                }
+            ],
+            "time": "2024-02-05T14:40:50+00:00"
+        },
+        {
             "name": "carbonphp/carbon-doctrine-types",
             "version": "2.1.0",
             "source": {
@@ -1720,6 +1826,85 @@
                 }
             ],
             "time": "2023-12-11T17:09:12+00:00"
+        },
+        {
+            "name": "cheesegrits/filament-phone-numbers",
+            "version": "v1.0.2",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/cheesegrits/filament-phone-numbers.git",
+                "reference": "ad6b3e98fffba5257d8a6c26f3d1341d364c78a6"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/cheesegrits/filament-phone-numbers/zipball/ad6b3e98fffba5257d8a6c26f3d1341d364c78a6",
+                "reference": "ad6b3e98fffba5257d8a6c26f3d1341d364c78a6",
+                "shasum": ""
+            },
+            "require": {
+                "brick/phonenumber": "^0.5.0",
+                "calebporzio/sushi": "^2.4",
+                "filament/filament": "^3.0",
+                "illuminate/contracts": "^10.0",
+                "php": "^8.1",
+                "spatie/laravel-package-tools": "^1.15.0"
+            },
+            "require-dev": {
+                "laravel/pint": "^1.0",
+                "nunomaduro/collision": "^7.9",
+                "orchestra/testbench": "^8.0",
+                "pestphp/pest": "^2.0",
+                "pestphp/pest-plugin-arch": "^2.0",
+                "pestphp/pest-plugin-laravel": "^2.0",
+                "pestphp/pest-plugin-livewire": "^2.1"
+            },
+            "type": "library",
+            "extra": {
+                "laravel": {
+                    "providers": [
+                        "Cheesegrits\\FilamentPhoneNumbers\\FilamentPhoneNumbersServiceProvider"
+                    ],
+                    "aliases": {
+                        "FilamentPhoneNumbers": "Cheesegrits\\FilamentPhoneNumbers\\Facades\\FilamentPhoneNumbers"
+                    }
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "Cheesegrits\\FilamentPhoneNumbers\\": "src/",
+                    "Cheesegrits\\FilamentPhoneNumbers\\Tests\\": "tests/src",
+                    "Cheesegrits\\FilamentPhoneNumbers\\Tests\\Database\\Factories\\": "tests/database/factories"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Hugh Messenger",
+                    "email": "hugh.messenger@gmail.com",
+                    "role": "Developer"
+                }
+            ],
+            "description": "A Filament PHP plugin for normalizing phone numbers",
+            "homepage": "https://github.com/cheesegrits/filament-phone-numbers",
+            "keywords": [
+                "cheesegrits",
+                "filament-phone-numbers",
+                "laravel"
+            ],
+            "support": {
+                "issues": "https://github.com/cheesegrits/filament-phone-numbers/issues",
+                "source": "https://github.com/cheesegrits/filament-phone-numbers"
+            },
+            "funding": [
+                {
+                    "url": "https://github.com/cheesegrits",
+                    "type": "github"
+                }
+            ],
+            "time": "2023-10-11T22:12:03+00:00"
         },
         {
             "name": "chillerlan/php-qrcode",

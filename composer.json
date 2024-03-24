@@ -13,6 +13,7 @@
         "ariaieboy/filament-currency": "^1.2",
         "ashallendesign/short-url": "^7.10",
         "bezhansalleh/filament-shield": "^3.1",
+        "cheesegrits/filament-phone-numbers": "^1.0",
         "chillerlan/php-qrcode": "^5.0",
         "codeat3/blade-google-material-design-icons": "^1.19",
         "codeat3/blade-govicons": "^1.4",
@@ -36,6 +37,7 @@
         "lorisleiva/laravel-actions": "^2.7",
         "owenvoke/blade-fontawesome": "^2.6",
         "pelmered/filament-money-field": "^1.0",
+        "propaganistas/laravel-phone": "^5.2",
         "robsontenorio/mary": "^1.21",
         "sentry/sentry-laravel": "^4.3",
         "spatie/laravel-data": "^4.0",
@@ -71,7 +73,10 @@
             "App\\": "app/",
             "Database\\Factories\\": "database/factories/",
             "Database\\Seeders\\": "database/seeders/"
-        }
+        },
+        "files": [
+            "app/helpers.php"
+        ]
     },
     "autoload-dev": {
         "psr-4": {

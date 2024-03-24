@@ -13,10 +13,6 @@ class ViewBooking extends ViewRecord
 {
     protected static string $resource = BookingResource::class;
 
-    public static function canAccess(array $parameters = []): bool
-    {
-    }
-
     public function getHeading(): string|Htmlable
     {
         return '';
@@ -28,6 +24,15 @@ class ViewBooking extends ViewRecord
             ->schema([
                 Section::make('Booking Information')
                     ->schema([
+                        TextEntry::make('created_at')
+                            ->dateTime('D, M j g:i a')
+                            ->timezone(auth()->user()->timezone)
+                            ->inlineLabel(),
+                        TextEntry::make('booking_at')
+                            ->label('Reservation Time:')
+                            ->dateTime('D, M j g:i a')
+                            ->timezone(auth()->user()->timezone)
+                            ->inlineLabel(),
                         TextEntry::make('concierge.user.name')
                             ->label('Booked By:')
                             ->inlineLabel(),
@@ -39,8 +44,9 @@ class ViewBooking extends ViewRecord
                 Section::make('Guest Information')
                     ->schema([
                         TextEntry::make('guest_name')->hiddenLabel(),
-                        TextEntry::make('guest_email')->hiddenLabel(),
-                        TextEntry::make('guest_phone')->hiddenLabel(),
+                        TextEntry::make('guest_phone')
+                            ->formatStateUsing(fn($state) => formatPhoneNumber($state))
+                            ->hiddenLabel(),
                         TextEntry::make('guest_count')
                             ->label('Guest Count:')
                             ->inlineLabel(),
