@@ -34,7 +34,9 @@ class EditRestaurant extends EditRecord
                 function ($minutes) {
                     $hour = floor($minutes / 60);
                     $minutes = ($minutes % 60);
-                    return sprintf('%02d:%02d', $hour, $minutes);
+                    $suffix = $hour >= 12 ? 'pm' : 'am';
+                    $hour = $hour > 12 ? $hour - 12 : $hour;
+                    return sprintf('%d:%02d%s', $hour, $minutes, $suffix);
                 },
                 $halfHourSteps
             )
