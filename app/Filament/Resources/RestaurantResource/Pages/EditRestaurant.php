@@ -123,6 +123,7 @@ class EditRestaurant extends EditRecord
                         Repeater::make('non_prime_time')
                             ->addActionLabel('Add Time Block')
                             ->label('Non Prime Time')
+                            ->hiddenLabel()
                             ->schema([
                                 Select::make('time')
                                     ->label('Time')
