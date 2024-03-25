@@ -4,7 +4,6 @@ namespace App\Filament\Resources\RestaurantResource\Pages;
 
 use App\Filament\Resources\RestaurantResource;
 use Filament\Actions\Action;
-use Filament\Forms\Components\Button;
 use Filament\Forms\Components\Checkbox;
 use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Section;
@@ -36,6 +35,7 @@ class EditRestaurant extends EditRecord
                     $minutes = ($minutes % 60);
                     $suffix = $hour >= 12 ? 'pm' : 'am';
                     $hour = $hour > 12 ? $hour - 12 : $hour;
+
                     return sprintf('%d:%02d%s', $hour, $minutes, $suffix);
                 },
                 $halfHourSteps
@@ -116,7 +116,6 @@ class EditRestaurant extends EditRecord
                             ]),
                     ]),
 
-
                 Section::make('Non Prime Time')
                     ->icon('heroicon-m-clock')
                     ->schema([
@@ -131,14 +130,14 @@ class EditRestaurant extends EditRecord
                                     ->options($timeOptions)
                                     ->required(),
                             ]),
-                    ])
+                    ]),
             ]);
     }
 
     public function toggleSuspend(): void
     {
         $this->getRecord()->update([
-            'is_suspended' => !$this->getRecord()->is_suspended,
+            'is_suspended' => ! $this->getRecord()->is_suspended,
         ]);
     }
 
@@ -148,7 +147,7 @@ class EditRestaurant extends EditRecord
             Action::make($this->getRecord()->is_suspended ? 'Restore' : 'Suspend')
                 ->action('toggleSuspend')
                 ->requiresConfirmation()
-                ->color($this->getRecord()->is_suspended ? 'success' : 'danger')
+                ->color($this->getRecord()->is_suspended ? 'success' : 'danger'),
         ];
     }
 }

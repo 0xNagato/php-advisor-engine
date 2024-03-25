@@ -9,13 +9,15 @@ use Filament\Infolists\Components\Section;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Infolists\Infolist;
 use Filament\Resources\Pages\ViewRecord;
-use Filament\Tables\Actions\Link;
 
 class ViewBooking extends ViewRecord
 {
     protected static string $resource = BookingResource::class;
+
     protected static string $view = 'livewire.customer-invoice';
+
     public $download = true;
+
     public Booking $booking;
 
     public function mount(int|string $record): void
@@ -24,7 +26,7 @@ class ViewBooking extends ViewRecord
 
         $this->authorizeAccess();
 
-        if (!$this->hasInfolist()) {
+        if (! $this->hasInfolist()) {
             $this->fillForm();
         }
 
@@ -58,7 +60,7 @@ class ViewBooking extends ViewRecord
                     ->schema([
                         TextEntry::make('guest_name')->hiddenLabel(),
                         TextEntry::make('guest_phone')
-                            ->formatStateUsing(fn($state) => formatPhoneNumber($state))
+                            ->formatStateUsing(fn ($state) => formatPhoneNumber($state))
                             ->hiddenLabel(),
                         TextEntry::make('guest_count')
                             ->label('Guest Count:')
