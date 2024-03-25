@@ -6,6 +6,7 @@ use App\Enums\BookingStatus;
 use App\Models\Booking;
 use App\Models\Concierge;
 use App\Models\Schedule;
+use App\Services\SalesTaxService;
 use Carbon\Carbon;
 use Illuminate\Database\Seeder;
 use Random\RandomException;
@@ -31,15 +32,15 @@ class BookingSeeder extends Seeder
             $bookingRate = random_int(20, 70) / 100;
 
             // Calculate the amount bookings to be created
-            $bookingsCount = (int) ($schedule->computed_available_tables * $bookingRate);
+            $bookingsCount = (int)($schedule->computed_available_tables * $bookingRate);
 
             // For each booking to be created
             for ($i = 0; $i < $bookingsCount; $i++) {
                 // Generate a random date within the last 60 days
                 $randomDate = Carbon::now()->subDays(random_int(0, 60))->toDateString();
-                $bookingAt = Carbon::parse("$randomDate ".$schedule->start_time)->format('Y-m-d H:i:s');
+                $bookingAt = Carbon::parse("$randomDate " . $schedule->start_time)->format('Y-m-d H:i:s');
                 // Create a new booking using a factory
-                Booking::factory()->create([
+                $booking = Booking::factory()->create([
                     'schedule_id' => $schedule->id,
                     'concierge_id' => $concierges->random()->id,
                     'status' => BookingStatus::CONFIRMED,
@@ -47,6 +48,18 @@ class BookingSeeder extends Seeder
                     'created_at' => $bookingAt,
                     'updated_at' => $bookingAt,
                 ]);
+
+                $taxData = app(SalesTaxService::class)->calculateTax('miami', $booking->total_fee);
+                $totalWithTaxInCents = $booking->total_fee + $taxData->amountInCents;
+
+                $booking->update([
+                    'tax' => $taxData->tax,
+                    'tax_amount_in_cents' => $taxData->amountInCents,
+                    'city' => $taxData->city,
+                    'total_with_tax_in_cents' => $totalWithTaxInCents,
+                    'confirmed_at' => $bookingAt,
+                ]);
+
             }
         }
     }

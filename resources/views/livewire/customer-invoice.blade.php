@@ -105,20 +105,22 @@
 
                         {{-- amex, diners, discover, eftpos_au, jcb, mastercard, unionpay, visa, or unknown --}}
 
-                        @if($booking->stripe_charge->paymentMethodDetails->card->brand === 'visa')
-                            <x-fab-cc-visa class="h-6 w-6"/>
-                        @endif
-                        @if($booking->stripe_charge->paymentMethodDetails->card->brand === 'mastercard')
-                            <x-fab-cc-mastercard class="h-6 w-6"/>
-                        @endif
-                        @if($booking->stripe_charge->paymentMethodDetails->card->brand === 'amex')
-                            <x-fab-cc-amex class="h-6 w-6"/>
-                        @endif
-                        <span
-                            class="block text-sm font-medium text-gray-800 dark:text-gray-200"
-                        >
+                        @if($booking->stripe_charge)
+                            @if($booking->stripe_charge->paymentMethodDetails->card->brand === 'visa')
+                                <x-fab-cc-visa class="h-6 w-6"/>
+                            @endif
+                            @if($booking->stripe_charge->paymentMethodDetails->card->brand === 'mastercard')
+                                <x-fab-cc-mastercard class="h-6 w-6"/>
+                            @endif
+                            @if($booking->stripe_charge->paymentMethodDetails->card->brand === 'amex')
+                                <x-fab-cc-amex class="h-6 w-6"/>
+                            @endif
+                            <span
+                                class="block text-sm font-medium text-gray-800 dark:text-gray-200"
+                            >
                         ••••{{ $booking->stripe_charge->paymentMethodDetails->card->last4 }}
-                    </span>
+                        @endif
+                    
                     </div>
                 </div>
                 <!-- End Col -->
