@@ -137,7 +137,7 @@ class EditRestaurant extends EditRecord
     public function toggleSuspend(): void
     {
         $this->getRecord()->update([
-            'is_suspended' => ! $this->getRecord()->is_suspended,
+            'is_suspended' => !$this->getRecord()->is_suspended,
         ]);
     }
 
