@@ -37,7 +37,7 @@
     <div
         class=" bg-white rounded-xl shadow sm:max-w-3xl lg:mx-auto lg:min-h-[11in] invoice-container flex flex-col
             ">
-        <div class="relative overflow-hidden text-center bg-gray-800 min-h-32 rounded-t-xl">
+        <div class="relative overflow-hidden text-center bg-indigo-800 min-h-32 rounded-t-xl">
             <!-- SVG Background Element -->
             <figure class="absolute inset-x-0 bottom-0 -mb-px ">
                 <svg preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg" x="0px" y="0px"
