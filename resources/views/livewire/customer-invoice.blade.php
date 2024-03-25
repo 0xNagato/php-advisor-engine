@@ -118,9 +118,12 @@
                             <span
                                 class="block text-sm font-medium text-gray-800 dark:text-gray-200"
                             >
-                        ••••{{ $booking->stripe_charge->paymentMethodDetails->card->last4 }}
+                                ••••{{ $booking->stripe_charge->paymentMethodDetails->card->last4 }}</span>
+                        @else
+                            <span class="text-xs mt-1">Unknown</span>
+
                         @endif
-                    
+
                     </div>
                 </div>
                 <!-- End Col -->
