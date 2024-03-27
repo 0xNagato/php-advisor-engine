@@ -14,6 +14,7 @@ use Ysfkaya\FilamentPhoneInput\Forms\PhoneInput;
 class ManageContacts extends Page
 {
     protected static ?string $navigationIcon = 'gmdi-people-o';
+
     protected static ?int $navigationSort = 30;
 
     protected static string $view = 'filament.pages.manage-contacts';
@@ -55,7 +56,7 @@ class ManageContacts extends Page
                         ]),
 
                 ]
-            )
+            ),
         ])->statePath('data');
     }
 

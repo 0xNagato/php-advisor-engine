@@ -37,10 +37,15 @@ class PaymentInformation extends Page
     public User $user;
 
     public string $address_1;
+
     public string $address_2;
+
     public string $city;
+
     public string $state;
+
     public string $zip;
+
     public string $country;
 
     public static function canAccess(): bool
@@ -58,7 +63,6 @@ class PaymentInformation extends Page
         $this->account_number = $this->user->payout?->account_number ?? '';
         $this->account_type = $this->user->payout?->account_type ?? '';
         $this->charity_percentage = $this->user->charity_percentage ?? 5;
-
 
         $this->address_1 = $this->user->address_1 ?? '';
         $this->address_2 = $this->user->address_2 ?? '';
