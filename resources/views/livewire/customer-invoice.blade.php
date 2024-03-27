@@ -33,6 +33,12 @@
         @endif
 
     @endif
+    
+    @if(url()->previous() !== url()->current())
+        <x-filament::button size="sm" tag="a" :href="url()->previous()" icon="gmdi-arrow-back-o" class="mb-4">
+            Back
+        </x-filament::button>
+    @endif
 
     <div
         class=" bg-white rounded-xl shadow sm:max-w-3xl lg:mx-auto lg:min-h-[11in] invoice-container flex flex-col
