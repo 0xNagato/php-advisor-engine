@@ -59,6 +59,23 @@
             </div>
         </form>
     </x-filament::section>
+
+    <x-filament::section>
+        <x-filament::section.heading>
+            Payment Address
+        </x-filament::section.heading>
+        <form wire:submit="save" class="flex flex-col gap-3 mt-4">
+
+            {{ $this->form }}
+
+            <div class="text-right">
+                <x-filament::button type="submit" form="submit" class="w-full">
+                    Update Address
+                </x-filament::button>
+            </div>
+        </form>
+    </x-filament::section>
+
     <x-filament::section>
 
         <div class="text-sm text-black font-semibold pb-4">

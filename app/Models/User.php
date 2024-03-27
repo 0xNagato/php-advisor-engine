@@ -39,6 +39,12 @@ class User extends Authenticatable implements FilamentUser, HasAvatar
         'partner_referral_id',
         'timezone',
         'secured_at',
+        'address_1',
+        'address_2',
+        'city',
+        'state',
+        'zip',
+        'country',
     ];
 
     /**
