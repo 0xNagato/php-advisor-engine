@@ -35,12 +35,12 @@ class RestaurantFactory extends Factory
             'contacts' => [
                 [
                     'contact_name' => $this->faker->name(),
-                    'contact_phone' => '6473823326',
+                    'contact_phone' => '9176644415',
                     'use_for_reservations' => true,
                 ],
                 [
                     'contact_name' => $this->faker->name(),
-                    'contact_phone' => '6473823326',
+                    'contact_phone' => '9176644415',
                     'use_for_reservations' => false,
                 ],
             ],
