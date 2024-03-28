@@ -96,7 +96,7 @@ class User extends Authenticatable implements FilamentUser, HasAvatar
 
     public function getFilamentAvatarUrl(): ?string
     {
-        return $this->profile_photo_path ? Storage::url($this->profile_photo_path) : null;
+        return !blank($this->profile_photo_path) ? Storage::url($this->profile_photo_path) : null;
     }
 
     public function routeNotificationForTwilio(): string
