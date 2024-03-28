@@ -1,14 +1,6 @@
 @php use libphonenumber\PhoneNumberFormat; @endphp
-<div class="py-4">
-    <style>
-        @media (max-width: 1024px) {
-            .invoice-container {
-                height: calc(100vh - 208px);
-            }
-        }
-    </style>
-
-    @if(!$download)
+<div @class(['py-4', 'px-4' => !$download])>
+    @if(!$download && isset($customerInvoice))
         <div class="flex gap-x-2 lg:mx-auto max-w-3xl mb-4">
             <x-filament::button color="indigo" class="w-1/2" size="sm" icon="gmdi-email-o"
                                 wire:click="showEmailForm">
@@ -35,9 +27,9 @@
 
     @endif
 
-    @if(url()->previous() !== url()->current())
+    @if(!isset($customerInvoice) && url()->previous() !== url()->current())
         <x-filament::button size="sm" tag="a" :href="url()->previous()" icon="gmdi-arrow-back-o"
-                            class="mb-4 bg-[#b6aae5]"
+                            class="mb-4 bg-indigo-800"
         >
             Back
         </x-filament::button>
