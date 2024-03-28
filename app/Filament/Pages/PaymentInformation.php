@@ -77,22 +77,36 @@ class PaymentInformation extends Page
         return $form
             ->schema([
                 TextInput::make('address_1')
-                    ->label('Address Line 1')
-                    ->required(),
+                    ->placeholder('Address Line 1')
+                    ->required()
+                    ->columnSpan(2)
+                    ->hiddenLabel(),
                 TextInput::make('address_2')
-                    ->label('Address Line 2'),
+                    ->placeholder('Address Line 2')
+                    ->columnSpan(2)
+                    ->hiddenLabel(),
                 TextInput::make('city')
-                    ->label('City')
-                    ->required(),
+                    ->placeholder('City')
+                    ->required()
+                    ->columnSpan(1)
+                    ->hiddenLabel(),
                 TextInput::make('state')
-                    ->label('State')
-                    ->required(),
+                    ->placeholder('State')
+                    ->required()
+                    ->columnSpan(1)
+                    ->hiddenLabel(),
                 TextInput::make('zip')
-                    ->label('Zip')
-                    ->required(),
+                    ->placeholder('Zip Code')
+                    ->required()
+                    ->hiddenLabel(),
                 TextInput::make('country')
-                    ->label('Country')
-                    ->required(),
+                    ->placeholder('Country')
+                    ->required()
+                    ->hiddenLabel(),
+            ])
+            ->extraAttributes(['class' => 'inline-form'])
+            ->columns([
+                'default' => 2,
             ]);
     }
 
