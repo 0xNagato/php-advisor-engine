@@ -64,11 +64,11 @@
         <x-filament::section.heading>
             Payment Address
         </x-filament::section.heading>
-        <form wire:submit="save" class="flex flex-col gap-3 mt-4">
+        <form wire:submit="save" class="mt-4">
 
             {{ $this->form }}
 
-            <div class="text-right">
+            <div class="text-right mt-4">
                 <x-filament::button type="submit" form="submit" class="w-full">
                     Update Address
                 </x-filament::button>
@@ -94,10 +94,6 @@
                     %
                 </x-slot>
             </x-filament::input.wrapper>
-            <x-filament-forms::field-wrapper.hint>
-                Donation to Charity (% of Fee Collected)
-            </x-filament-forms::field-wrapper.hint>
-
 
             <div class="text-right">
                 <x-filament::button type="submit" form="submit" class="w-full">

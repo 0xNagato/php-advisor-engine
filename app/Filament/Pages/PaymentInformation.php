@@ -74,25 +74,26 @@ class PaymentInformation extends Page
 
     public function form(Form $form): Form
     {
-        return $form->schema([
-            TextInput::make('address_1')
-                ->label('Address Line 1')
-                ->required(),
-            TextInput::make('address_2')
-                ->label('Address Line 2'),
-            TextInput::make('city')
-                ->label('City')
-                ->required(),
-            TextInput::make('state')
-                ->label('State')
-                ->required(),
-            TextInput::make('zip')
-                ->label('Zip')
-                ->required(),
-            TextInput::make('country')
-                ->label('Country')
-                ->required(),
-        ]);
+        return $form
+            ->schema([
+                TextInput::make('address_1')
+                    ->label('Address Line 1')
+                    ->required(),
+                TextInput::make('address_2')
+                    ->label('Address Line 2'),
+                TextInput::make('city')
+                    ->label('City')
+                    ->required(),
+                TextInput::make('state')
+                    ->label('State')
+                    ->required(),
+                TextInput::make('zip')
+                    ->label('Zip')
+                    ->required(),
+                TextInput::make('country')
+                    ->label('Country')
+                    ->required(),
+            ]);
     }
 
     public function updatedPayoutType($value): void

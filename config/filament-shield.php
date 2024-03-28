@@ -1,8 +1,10 @@
 <?php
 
+$shouldRegisterNavigation = env('APP_ENV') === 'local';
+
 return [
     'shield_resource' => [
-        'should_register_navigation' => false,
+        'should_register_navigation' => $shouldRegisterNavigation,
         'slug' => 'shield/roles',
         'navigation_sort' => -1,
         'navigation_badge' => true,
@@ -29,6 +31,11 @@ return [
     ],
 
     'restaurant' => [
+        'enabled' => true,
+        'name' => 'restaurant',
+    ],
+
+    'partner' => [
         'enabled' => true,
         'name' => 'restaurant',
     ],

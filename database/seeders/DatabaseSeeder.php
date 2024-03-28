@@ -73,7 +73,7 @@ class DatabaseSeeder extends Seeder
             PartnerSeeder::class,
             ScheduleSeeder::class,
             BookingSeeder::class,
-            // ShieldSeeder::class,
+            ShieldSeeder::class,
         ]);
 
         Artisan::call('shield:generate --all');
