@@ -163,6 +163,7 @@
                                 first_name: document.querySelector('input[name=first_name]').value,
                                 last_name: document.querySelector('input[name=last_name]').value,
                                 phone: document.querySelector('input[name=phone]').value,
+                                email: document.querySelector('input[name=email]').value,
                                 token: token.id
                             }
 
@@ -195,6 +196,12 @@
                                 <input name="phone" type="text"
                                        class="w-full rounded-lg border border-indigo-600 text-sm h-[40px]"
                                        placeholder="Cell Phone Number" required>
+                            </label>
+
+                            <label class="w-full">
+                                <input name="email" type="email"
+                                       class="w-full rounded-lg border border-indigo-600 text-sm h-[40px]"
+                                       placeholder="Email Address (optional)">
                             </label>
 
                             <div id="card-element"
