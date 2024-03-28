@@ -114,7 +114,7 @@
 
     </div>
     <div class="flex items-end justify-center text-sm text-center">
-        &copy; {{ date('Y') }} {{ config('app.name', 'Prima') }}. All rights reserved.
+        &copy; {{ date('Y') }} {{ config('app.name', 'Prima') }} VIP. All rights reserved.
     </div>
 
     {{--    <x-mary-modal wire:model="showModal" title="Terms & Conditions" class="backdrop-blur">--}}

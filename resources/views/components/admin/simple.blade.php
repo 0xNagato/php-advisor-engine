@@ -4,7 +4,7 @@
     'subheading' => null,
 ])
 
-<div>
+<div class="pb-4">
     <div class="w-full text-3xl font-black text-center pt-4">
         PRIMA
     </div>
@@ -19,11 +19,12 @@
 
         {{ $slot }}
     </div>
-    {{--    <section class="grid auto-cols-fr gap-y-6">--}}
-    {{--        --}}
-    {{--    </section>--}}
 
-    {{--    @if (! $this instanceof HasTable)--}}
-    {{--        <x-filament-actions::modals/>--}}
-    {{--    @endif--}}
+    @if (! $this instanceof HasTable)
+        <x-filament-actions::modals/>
+    @endif
+
+    <div class="flex items-end justify-center text-sm text-center mt-4">
+        &copy; {{ date('Y') }} {{ config('app.name', 'Prima') }} VIP. All rights reserved.
+    </div>
 </div>

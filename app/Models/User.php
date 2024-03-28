@@ -37,6 +37,7 @@ class User extends Authenticatable implements FilamentUser, HasAvatar
         'payout',
         'charity_percentage',
         'partner_referral_id',
+        'concierge_referral_id',
         'timezone',
         'secured_at',
         'address_1',
@@ -66,6 +67,7 @@ class User extends Authenticatable implements FilamentUser, HasAvatar
      */
     protected $casts = [
         'email_verified_at' => 'datetime',
+        'secured_at' => 'datetime',
         'payout' => AsArrayObject::class,
     ];
 
@@ -77,6 +79,8 @@ class User extends Authenticatable implements FilamentUser, HasAvatar
     protected $appends = [
         'main_role',
         'name',
+        'has_secured',
+        'label',
     ];
 
     public function concierge(): HasOne
@@ -118,11 +122,24 @@ class User extends Authenticatable implements FilamentUser, HasAvatar
     {
         $role = $this->roles->firstWhere('name', '!=', 'panel_user');
 
-        return Str::of($role?->name)->snake()->replace('_', ' ')->title();
+        return Str::of($role?->name)
+            ->snake()
+            ->replace('_', ' ')
+            ->title();
     }
 
     public function partner(): HasOne
     {
         return $this->hasOne(Partner::class, 'id', 'partner_referral_id');
+    }
+
+    public function getHasSecuredAttribute(): bool
+    {
+        return !blank($this->secured_at);
+    }
+
+    public function getLabelAttribute(): string
+    {
+        return $this->has_secured ? $this->getFilamentName() : $this->email;
     }
 }

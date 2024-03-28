@@ -10,6 +10,10 @@ body {
     background: none !important;
 }
 
+.inline-form {
+    @apply gap-4 !important;
+}
+
 body::before {
     content: "";
     position: fixed;
