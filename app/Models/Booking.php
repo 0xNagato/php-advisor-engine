@@ -73,21 +73,24 @@ class Booking extends Model
         static::saving(function (Booking $booking) {
             $booking->total_fee = $booking->totalFee();
 
+            $booking->restaurant_earnings = $booking->total_fee * ($booking->restaurant->payout_restaurant / 100);
+            $booking->concierge_earnings = $booking->total_fee * ($booking->concierge->payout_percentage / 100);
+
+            $remainder = $booking->total_fee - $booking->restaurant_earnings - $booking->concierge_earnings;
+
             if ($booking->concierge->user->partner_referral_id) {
                 $booking->partner_concierge_id = $booking->concierge->user->partner_referral_id;
+                $booking->partner_concierge_fee = $remainder * ($booking->partnerConcierge->percentage / 100);
+                $remainder -= $booking->partner_concierge_fee;
             }
 
             if ($booking->restaurant->user->partner_referral_id) {
                 $booking->partner_restaurant_id = $booking->restaurant->user->partner_referral_id;
+                $booking->partner_restaurant_fee = $remainder * ($booking->partnerRestaurant->percentage / 100);
+                $remainder -= $booking->partner_restaurant_fee;
             }
 
-            // $payouts = $booking->calculatePayouts();
-            // $booking->restaurant_earnings = $payouts['restaurant'];
-            // $booking->concierge_earnings = $payouts['concierge'];
-            // $booking->charity_earnings = $payouts['charity'];
-            // $booking->platform_earnings = $payouts['platform'];
-            // $booking->partner_concierge_fee = $payouts['partner_concierge'];
-            // $booking->partner_restaurant_fee = $payouts['partner_restaurant'];
+            $booking->platform_earnings = $remainder;
         });
     }
 

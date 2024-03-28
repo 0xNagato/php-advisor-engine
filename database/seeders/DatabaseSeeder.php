@@ -3,6 +3,7 @@
 namespace Database\Seeders;
 
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
+use App\Models\Restaurant;
 use App\Models\User;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Artisan;
@@ -53,6 +54,18 @@ class DatabaseSeeder extends Seeder
         Role::create(['name' => 'concierge']);
         Role::create(['name' => 'restaurant']);
         Role::create(['name' => 'partner']);
+
+        $restaurant = User::factory([
+            'first_name' => 'Demo',
+            'last_name' => 'Restaurant',
+            'email' => 'restaurant@primavip.co',
+            'password' => bcrypt('demo2024'),
+        ])
+            ->has(Restaurant::factory([
+                'restaurant_name' => 'Demo Restaurant',
+            ]))
+            ->create()
+            ->assignRole('restaurant');
 
         $this->call([
             ConciergeSeeder::class,

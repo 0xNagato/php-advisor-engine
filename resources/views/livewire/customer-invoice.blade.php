@@ -1,4 +1,4 @@
-<div class="p-6">
+<div class="p-4">
     <style>
         @media (max-width: 1024px) {
             .invoice-container {
@@ -33,16 +33,16 @@
         @endif
 
     @endif
-    
+
     @if(url()->previous() !== url()->current())
-        <x-filament::button size="sm" tag="a" :href="url()->previous()" icon="gmdi-arrow-back-o" class="mb-4">
+        <x-filament::button size="sm" tag="a" :href="url()->previous()" icon="gmdi-arrow-back-o" class="mb-2">
             Back
         </x-filament::button>
     @endif
 
     <div
-        class=" bg-white rounded-xl shadow sm:max-w-3xl lg:mx-auto lg:min-h-[11in] invoice-container flex flex-col
-            ">
+        class=" bg-white rounded-xl shadow sm:max-w-3xl lg:mx-auto lg:min-h-[11in] invoice-container flex flex-col"
+    >
         <div class="relative overflow-hidden text-center bg-indigo-800 min-h-32 rounded-t-xl">
             <!-- SVG Background Element -->
             <figure class="absolute inset-x-0 bottom-0 -mb-px ">
