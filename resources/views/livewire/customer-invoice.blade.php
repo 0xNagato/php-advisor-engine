@@ -1,4 +1,5 @@
-<div class="p-4">
+@php use libphonenumber\PhoneNumberFormat; @endphp
+<div class="py-4">
     <style>
         @media (max-width: 1024px) {
             .invoice-container {
@@ -35,7 +36,9 @@
     @endif
 
     @if(url()->previous() !== url()->current())
-        <x-filament::button size="sm" tag="a" :href="url()->previous()" icon="gmdi-arrow-back-o" class="mb-2">
+        <x-filament::button size="sm" tag="a" :href="url()->previous()" icon="gmdi-arrow-back-o"
+                            class="mb-4 bg-[#b6aae5]"
+        >
             Back
         </x-filament::button>
     @endif
@@ -70,7 +73,7 @@
         </div>
 
         <!-- Body -->
-        <div class="p-4 overflow-y-auto sm:p-7">
+        <div class="p-4 sm:p-7">
             <div class="text-center">
                 <h3 class="text-xl font-bold leading-5 tracking-tight text-gray-950">
                     PRIMA
@@ -84,9 +87,11 @@
             <div class="grid grid-cols-2 gap-5 mt-5 sm:mt-10 sm:grid-cols-4">
                 <div>
                     <span class="block text-xs text-gray-500 uppercase">Customer:</span>
-                    <span class="block text-sm font-medium text-gray-800 dark:text-gray-200">
-                    {{ $booking->guest_name }}
-                </span>
+                    <div class="block text-sm font-medium text-gray-800 dark:text-gray-200">
+                        {{ $booking->guest_name }}
+                        <br/>
+                        {{ phone($booking->guest_phone, 'US', PhoneNumberFormat::NATIONAL) }}
+                    </div>
                 </div>
 
                 <div>
