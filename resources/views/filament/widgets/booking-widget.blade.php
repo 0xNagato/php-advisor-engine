@@ -96,6 +96,13 @@
         </div>
 
 
+        @env('local')
+            <x-filament::button tag="a" :href="$bookingUrl">
+                Customer Booking Link
+            </x-filament::button>
+        @endenv
+
+
         <div x-data="{ tab: 'collectPayment' }" id="tabs">
 
             <div class="flex space-x-4">

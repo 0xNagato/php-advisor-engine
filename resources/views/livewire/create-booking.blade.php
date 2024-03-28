@@ -3,7 +3,17 @@
     <x-filament-panels::logo/>
     <div class="flex flex-col items-center pt-20 flex-grow max-w-lg mx-auto">
         {{--    <div class="flex flex-col items-center pt-20 sm:pt-0 sm:justify-center flex-grow max-w-lg mx-auto">--}}
-        @if(!$this->isValid())
+        @if($booking->status === BookingStatus::CONFIRMED)
+            <div class="flex flex-col items-center gap-3" id="form">
+                <h1 class="text-3xl text-center sanomat-font">Thank you for your reservation!</h1>
+
+                <h2 class="text-base text-center">
+                    <p>Your reservation request has been received. Please check your phone for a text confirmation.</p>
+                    <p>We are notifying the restaurant now.</p>
+                    <p class="mt-3 font-semibold">Thank you for using PRIMA!</p>
+                </h2>
+            </div>
+        @elseif(!$this->isValid())
             <div class="flex flex-col items-center gap-3" id="form">
                 <h1 class="text-3xl text-center sanomat-font">Sorry!</h1>
 
@@ -69,6 +79,12 @@
                             >
                         </label>
 
+                        <label class="w-full">
+                            <input name="email" type="email"
+                                   class="w-full rounded-lg border border-indigo-600 text-sm h-[40px]"
+                                   placeholder="Email Address (optional)">
+                        </label>
+
                         <div id="card-element"
                              wire:ignore
                              class="w-full rounded-lg border border-indigo-600 text-sm bg-white px-2 py-3 h-[40px]">
@@ -87,17 +103,6 @@
                         </x-filament::button>
                     </fieldset>
                 </form>
-
-            </div>
-        @elseif($booking->status === BookingStatus::CONFIRMED)
-            <div class="flex flex-col items-center gap-3" id="form">
-                <h1 class="text-3xl text-center sanomat-font">Thank you for your reservation!</h1>
-
-                <h2 class="text-base text-center">
-                    <p>Your reservation request has been received. Please check your phone for a text confirmation.</p>
-                    <p>We are notifying the restaurant now.</p>
-                    <p class="mt-3 font-semibold">Thank you for using PRIMA!</p>
-                </h2>
             </div>
         @endif
 
@@ -159,6 +164,7 @@
             first_name: document.querySelector('input[name="first_name"]').value,
             last_name: document.querySelector('input[name="last_name"]').value,
             phone: document.querySelector('input[name="phone"]').value,
+            email: document.querySelector('input[name="email"]').value,
             token: token.id
         }
 
