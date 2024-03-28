@@ -9,10 +9,10 @@
                             {{ $stats->formatted['concierge_earnings'] }}
                         </div>
                         <div
-                            @class(['flex items-center', 'text-[11px]', 'text-green-600' => $stats->difference['concierge_contribution_up'], 'text-red-600' => !$stats->difference['concierge_contribution_up']])>
-                            <div>{{ money($stats->difference['concierge_earnings']) }}</div>
+                            @class(['flex items-center', 'text-[11px]', 'text-green-600' => $stats->difference['concierge_earnings_up'], 'text-red-600' => !$stats->difference['concierge_earnings_up']])>
+                            <div>{{ $stats->formatted['difference']['concierge_earnings'] }}</div>
 
-                            @if ($stats->difference['concierge_contribution_up'])
+                            @if ($stats->difference['concierge_earnings_up'])
                                 <x-filament::icon icon="heroicon-o-arrow-up-right" class="w-4 h-4"/>
                             @else
                                 <x-filament::icon icon="heroicon-o-arrow-down-right" class="w-4 h-4"/>
@@ -32,10 +32,10 @@
                             {{ $stats->formatted['concierge_contribution'] }}
                         </div>
                         <div
-                            @class(['flex items-center', 'text-[11px]', 'text-green-600' => $stats->difference['charity_earnings_up'], 'text-red-600' => !$stats->difference['charity_earnings_up']])>
+                            @class(['flex items-center', 'text-[11px]', 'text-green-600' => true, 'text-red-600' => !true])>
                             <div>{{ money($stats->difference['concierge_contribution']) }}</div>
 
-                            @if ($stats->difference['charity_earnings_up'])
+                            @if (true)
                                 <x-filament::icon icon="heroicon-o-arrow-up-right" class="w-4 h-4"/>
                             @else
                                 <x-filament::icon icon="heroicon-o-arrow-down-right" class="w-4 h-4"/>
