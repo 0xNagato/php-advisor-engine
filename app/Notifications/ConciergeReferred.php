@@ -19,6 +19,7 @@ class ConciergeReferred extends Notification
     use Queueable;
 
     protected string $passwordResetUrl;
+    protected User $referrer;
 
     /**
      * Create a new notification instance.
@@ -27,6 +28,7 @@ class ConciergeReferred extends Notification
      */
     public function __construct(public User $user)
     {
+        $this->referrer = $user->referrer->user;
         $this->passwordResetUrl = $this->passwordResetUrl();
     }
 
@@ -59,12 +61,12 @@ class ConciergeReferred extends Notification
         return (new MailMessage())
             ->from('welcome@primavip.co', 'PRIMA')
             ->subject('Welcome to PRIMA!')
-            ->markdown('mail.concierge-welcome-mail', ['passwordResetUrl' => $this->passwordResetUrl]);
+            ->markdown('mail.concierge-referral-mail', ['passwordResetUrl' => $this->passwordResetUrl, 'referrer' => $this->referrer->name]);
     }
 
     public function toTwilio(object $notifiable): TwilioSmsMessage|TwilioMessage
     {
-        $name = 'PRIMA';
+        $name = $this->referrer->name;
 
         return (new TwilioSmsMessage())
             ->content("You've been invited to PRIMA by $name. Please click $this->passwordResetUrl to create your profile and start earning! Welcome aboard!");
@@ -75,8 +77,6 @@ class ConciergeReferred extends Notification
      */
     public function toArray(object $notifiable): array
     {
-        return [
-
-        ];
+        return [];
     }
 }
