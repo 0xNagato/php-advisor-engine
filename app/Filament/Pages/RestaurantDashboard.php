@@ -51,7 +51,7 @@ class RestaurantDashboard extends Dashboard
     {
         return [
             RestaurantStats::make(['restaurant' => auth()->user()->restaurant, 'columnSpan' => 'full']),
-            RestaurantRecentBookings::make(['restaurant' => auth()->user()->restaurant, 'columnSpan' => '1']),
+            RestaurantRecentBookings::make(['restaurant' => auth()->user()->restaurant, 'columnSpan' => 'full']),
             // RestaurantLeaderboard::make(['restaurant' => auth()->user()->restaurant, 'columnSpan' => '1']),
         ];
     }
