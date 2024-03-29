@@ -4,7 +4,7 @@
             User details
         </x-slot>
 
-        <form wire:submit="sendInviteViaEmail">
+        <form wire:submit="sendInvite">
             {{ $this->form }}
             <x-filament::button type="submit" class="w-full mt-4">
                 Send Invitation
