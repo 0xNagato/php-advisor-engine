@@ -156,6 +156,12 @@
                         const form = document.getElementById('form');
 
                         form.addEventListener('submit', async (e) => {
+                            const agreeCheckbox = document.querySelector('input[name=agree]');
+                            if (!agreeCheckbox.checked) {
+                                alert('You must agree to receive your reservation confirmation via text message.');
+                                e.preventDefault();
+                                return;
+                            }
                             e.preventDefault();
                             $wire.$set('isLoading', true);
 
@@ -214,6 +220,13 @@
                             <div id="card-element"
                                  class="w-full rounded-lg border border-indigo-600 text-sm bg-white px-2 py-3 h-[40px]">
                                 <!-- A Stripe Element will be inserted here. -->
+                            </div>
+
+                            <div class="flex items-center gap-2">
+                                <label class="text-[11px] flex items-center gap-1">
+                                    <x-filament::input.checkbox checked name="agree"/>
+                                    <span>I agree to receive my reservation confirmation via text message.</span>
+                                </label>
                             </div>
 
                             <x-filament::button class="w-full" type="submit" color="indigo" size="xl">

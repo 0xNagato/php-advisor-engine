@@ -24,6 +24,9 @@ use Livewire\Attributes\On;
 use Livewire\Attributes\Session;
 use Stripe\Exception\ApiErrorException;
 
+/**
+ * @property Form $form
+ */
 class BookingWidget extends Widget implements HasForms
 {
     use InteractsWithForms;
@@ -148,7 +151,7 @@ class BookingWidget extends Widget implements HasForms
             'guest_count' => $this->guestCount,
             'concierge_id' => auth()->user()->concierge->id,
             'status' => BookingStatus::PENDING,
-            'booking_at' => $this->selectedDate.' '.$this->selectedSchedule->start_time,
+            'booking_at' => $this->selectedDate . ' ' . $this->selectedSchedule->start_time,
         ]);
 
         $taxData = app(SalesTaxService::class)->calculateTax('miami', $this->booking->total_fee);

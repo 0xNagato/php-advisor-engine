@@ -1,5 +1,5 @@
 @php use App\Enums\BookingStatus; @endphp
-<div class="flex flex-col justify-center min-h-screen p-6 antialiased wavy-background h-screen">
+<div class="flex flex-col justify-center min-h-screen p-4 antialiased wavy-background h-screen">
     <x-filament-panels::logo/>
     <div class="flex flex-col items-center pt-20 flex-grow max-w-lg mx-auto">
         {{--    <div class="flex flex-col items-center pt-20 sm:pt-0 sm:justify-center flex-grow max-w-lg mx-auto">--}}
@@ -91,12 +91,19 @@
                             <!-- A Stripe Element will be inserted here. -->
                         </div>
 
-                        {{--                <div class="flex items-center gap-2">--}}
-                        {{--                    <input type="checkbox" wire:model="agreeTerms" class="checkbox checkbox-primary"/>--}}
-                        {{--                    <div class="label-text underline font-semibold" @click="$wire.showModal = true">--}}
-                        {{--                        Accept Terms & Conditions--}}
-                        {{--                    </div>--}}
-                        {{--                </div>--}}
+                        <div class="flex items-center gap-2">
+                            <label class="text-[11px] flex items-center gap-1">
+                                <x-filament::input.checkbox checked name="agree"/>
+                                <span>I agree to receive my reservation confirmation via text message.</span>
+                            </label>
+                        </div>
+
+                        {{--                        <div class="flex items-center gap-2">--}}
+                        {{--                            <input type="checkbox" wire:model="agreeTerms" class="checkbox checkbox-primary"/>--}}
+                        {{--                            <div class="label-text underline font-semibold" @click="$wire.showModal = true">--}}
+                        {{--                                Accept Terms & Conditions--}}
+                        {{--                            </div>--}}
+                        {{--                        </div>--}}
 
                         <x-filament::button class="w-full" type="submit" color="indigo" size="xl">
                             Complete Reservation
@@ -145,6 +152,12 @@
     const form = document.getElementById('form');
 
     form.addEventListener('submit', async (e) => {
+        const agreeCheckbox = document.querySelector('input[name=agree]');
+        if (!agreeCheckbox.checked) {
+            alert('You must agree to receive your reservation confirmation via text message.');
+            e.preventDefault();
+            return;
+        }
         e.preventDefault();
         card.update({disabled: true});
         $wire.$set('isLoading', true);
