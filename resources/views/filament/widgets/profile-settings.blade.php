@@ -1,5 +1,5 @@
 <x-filament-widgets::widget>
-    <x-filament::section :aside="true">
+    <x-filament::section>
         <x-slot name="heading">
             Personal Details
         </x-slot>
