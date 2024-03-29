@@ -23,7 +23,9 @@ class ResetPassword extends \Filament\Pages\Auth\PasswordReset\ResetPassword
     protected static string $view = 'filament.pages.auth.reset-password';
 
     public string $first_name = '';
+
     public string $last_name = '';
+
     public string $hotel_name = '';
 
     #[Url(as: 'email')]
@@ -61,7 +63,8 @@ class ResetPassword extends \Filament\Pages\Auth\PasswordReset\ResetPassword
 
         // Add fields for first_name, last_name, and hotel_name if they are blank.
         if (empty($this->user->first_name) && empty($this->user->last_name)) {
-            array_unshift($formSchema,
+            array_unshift(
+                $formSchema,
                 TextInput::make('first_name')
                     ->hiddenLabel()
                     ->placeholder('First Name')
@@ -100,8 +103,8 @@ class ResetPassword extends \Filament\Pages\Auth\PasswordReset\ResetPassword
         $lowercaseRole = strtolower($role);
 
         $label = new HtmlString("
-            <div class='text-indigo-800 underline cursor-pointer' x-data='{}' @click='\$dispatch(\"open-modal\", { id: \"$lowercaseRole-modal\" })'>
-                Terms and Conditions of PRIMA $role Program – Secure Account to Accept
+            <div class='font-bold text-center text-indigo-800 underline cursor-pointer' x-data='{}' @click='\$dispatch(\"open-modal\", { id: \"$lowercaseRole-modal\" })'>
+                Secure Your Account to Accept PRIMA $role Terms and Conditions
             </div>
         ");
 
@@ -109,7 +112,7 @@ class ResetPassword extends \Filament\Pages\Auth\PasswordReset\ResetPassword
             ->content($label)
             ->hiddenLabel()
             ->hidden(function () use ($lowercaseRole) {
-                return !(empty($this->user->secured_at) && in_array($lowercaseRole, ['concierge', 'restaurant']));
+                return ! (empty($this->user->secured_at) && in_array($lowercaseRole, ['concierge', 'restaurant']));
             });
     }
 

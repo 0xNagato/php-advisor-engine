@@ -43,6 +43,10 @@ All commissions earned are paid out on the 15th of every month, for commissions 
 
 We look forward to working with you and are excited to have you on our team.
 
+<div align="center" style="font-weight:bold">
+To activate your concierge account, please click below
+</div>
+
 <x-mail::button :url="$passwordResetUrl" color="brand">Secure Your Account</x-mail::button>
 
 Welcome aboard!

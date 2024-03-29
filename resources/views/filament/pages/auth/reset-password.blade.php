@@ -7,10 +7,7 @@
     <x-filament-panels::form wire:submit="resetPassword">
         {{ $this->form }}
 
-        <x-filament-panels::form.actions
-            :actions="$this->getCachedFormActions()"
-            :full-width="$this->hasFullWidthFormActions()"
-        />
+        <x-filament-panels::form.actions :actions="$this->getCachedFormActions()" :full-width="$this->hasFullWidthFormActions()" />
     </x-filament-panels::form>
 
     {{ FilamentView::renderHook(PanelsRenderHook::AUTH_PASSWORD_RESET_RESET_FORM_AFTER, scopes: $this->getRenderHookScopes()) }}
@@ -23,7 +20,7 @@
             @include('terms.restaurant-terms')
         </x-filament::modal>
 
-        <x-filament::modal id="concierge-modal">
+        <x-filament::modal id="concierge-modal" width="3xl">
             <x-slot name="heading">
 
             </x-slot>

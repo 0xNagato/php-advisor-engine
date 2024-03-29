@@ -3,15 +3,16 @@
 body,
 body *:not(html):not(style):not(br):not(tr):not(code) {
     box-sizing: border-box;
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif,
-    'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol';
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+        Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji",
+        "Segoe UI Symbol";
     position: relative;
 }
 
 body {
     -webkit-text-size-adjust: none;
     background-color: #ffffff;
-    color: #718096;
+    color: #000000;
     height: 100%;
     line-height: 1.4;
     margin: 0;
@@ -35,7 +36,7 @@ blockquote {
 }
 
 a {
-    color: #3869d4;
+    color: #4736dd;
 }
 
 a img {
@@ -45,7 +46,7 @@ a img {
 /* Typography */
 
 h1 {
-    color: #3d4852;
+    color: #000000;
     font-size: 18px;
     font-weight: bold;
     margin-top: 0;
@@ -111,7 +112,7 @@ img {
 }
 
 .header a {
-    color: #3d4852;
+    color: #4736dd;
     font-size: 19px;
     font-weight: bold;
     text-decoration: none;
@@ -208,7 +209,7 @@ img {
 }
 
 .table td {
-    color: #74787e;
+    color: #000000;
     font-size: 15px;
     line-height: 18px;
     margin: 0;
@@ -276,7 +277,6 @@ img {
     border-right: 18px solid #4736dd;
     border-top: 8px solid #4736dd;
 }
-
 
 /* Panels */
 
