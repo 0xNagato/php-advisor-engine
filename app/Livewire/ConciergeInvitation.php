@@ -47,7 +47,6 @@ class ConciergeInvitation extends SimplePage
 
     public function mount(ConciergeReferral $conciergeReferral): void
     {
-        clock($conciergeReferral); // ConciergeReferral {#1234}
         $this->conciergeReferral = $conciergeReferral;
         $this->form->fill([
             'email' => $conciergeReferral->email,

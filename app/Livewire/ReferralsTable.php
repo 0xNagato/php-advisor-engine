@@ -35,20 +35,21 @@ class ReferralsTable extends BaseWidget
                     ->color(fn(string $state): string => empty($state) ? 'danger' : 'success'),
             ])
             ->actions([
-                Action::make('resend')
-                    ->icon('gmdi-refresh-o')
+                Action::make('resendInvitation')
+                    ->icon('ri-refresh-line')
                     ->iconButton()
+                    ->color('indigo')
                     ->requiresConfirmation()
                     ->hidden(fn(ConciergeReferral $record) => $record->has_secured)
                     ->action(function (ConciergeReferral $record) {
                         if (!blank($record->phone)) {
                             $record->notify(new ConciergeReferredText($record));
-                        } else {
+                        } elseif (!blank($record->email)) {
                             $record->notify(new ConciergeReferredEmail($record));
                         }
 
                         Notification::make()
-                            ->title('Notification sent successfully')
+                            ->title('Invite sent successfully.')
                             ->success()
                             ->send();
                     })
