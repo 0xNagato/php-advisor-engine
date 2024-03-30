@@ -31,6 +31,18 @@ body::before {
     @apply gap-4 !important;
 }
 
+.single-col-tabs .fi-fo-component-ctn {
+    @apply gap-x-0 gap-y-4;
+}
+
+.fi-tabs-item {
+    @apply font-semibold text-slate-500;
+}
+
+.fi-tabs-item-active {
+    @apply text-indigo-600;
+}
+
 .fi-header-heading {
     font-family: "Sanomat Web Regular Regular", serif;
     font-style: normal;

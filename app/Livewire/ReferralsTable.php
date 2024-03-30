@@ -23,7 +23,7 @@ class ReferralsTable extends BaseWidget
     {
         return $table
             ->query(
-                Auth::user()?->concierge->referrals()->getQuery()
+                Auth::user()?->concierge->referrals()->orderBy('created_at', 'desc')->getQuery()
             )
             ->columns([
                 TextColumn::make('label')
