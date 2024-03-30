@@ -2,6 +2,11 @@
 
 namespace App\Livewire;
 
+use App\Models\ConciergeReferral;
+use App\Notifications\ConciergeReferredEmail;
+use App\Notifications\ConciergeReferredText;
+use Filament\Notifications\Notification;
+use Filament\Tables\Actions\Action;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
@@ -26,8 +31,27 @@ class ReferralsTable extends BaseWidget
                 IconColumn::make('has_secured')
                     ->label('Active')
                     ->alignCenter()
-                    ->icon(fn (string $state): string => empty($state) ? 'heroicon-o-x-circle' : 'heroicon-o-check-circle')
-                    ->color(fn (string $state): string => empty($state) ? 'danger' : 'success'),
+                    ->icon(fn(string $state): string => empty($state) ? 'heroicon-o-x-circle' : 'heroicon-o-check-circle')
+                    ->color(fn(string $state): string => empty($state) ? 'danger' : 'success'),
+            ])
+            ->actions([
+                Action::make('resend')
+                    ->icon('gmdi-refresh-o')
+                    ->iconButton()
+                    ->requiresConfirmation()
+                    ->hidden(fn(ConciergeReferral $record) => $record->has_secured)
+                    ->action(function (ConciergeReferral $record) {
+                        if (!blank($record->phone)) {
+                            $record->notify(new ConciergeReferredText($record));
+                        } else {
+                            $record->notify(new ConciergeReferredEmail($record));
+                        }
+
+                        Notification::make()
+                            ->title('Notification sent successfully')
+                            ->success()
+                            ->send();
+                    })
             ]);
     }
 }
