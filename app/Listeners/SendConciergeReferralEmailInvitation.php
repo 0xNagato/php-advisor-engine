@@ -17,7 +17,6 @@ class SendConciergeReferralEmailInvitation
 
     /**
      * Handle the event.
-     *
      */
     public function handle(ConciergeReferredViaEmail $event): void
     {

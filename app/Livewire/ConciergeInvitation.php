@@ -28,9 +28,11 @@ class ConciergeInvitation extends SimplePage
     use WithRateLimiting;
 
     protected static string $view = 'livewire.concierge-invitation';
+
     protected static string $layout = 'components.layouts.app';
 
     public ConciergeReferral $conciergeReferral;
+
     public ?array $data = [];
 
     public function getTitle(): string|Htmlable
@@ -144,6 +146,12 @@ class ConciergeInvitation extends SimplePage
             'phone' => $data['phone'],
             'password' => bcrypt($data['password']),
             'concierge_referral_id' => $this->conciergeReferral->concierge_id,
+            'secured_at' => now(),
+        ]);
+
+        $this->conciergeReferral->update([
+            'user_id' => $user->id,
+            'secured_at' => now(),
         ]);
 
         $user->assignRole('concierge');
@@ -163,7 +171,7 @@ class ConciergeInvitation extends SimplePage
             Action::make('secureAccount')
                 ->label(__('Secure Account'))
                 ->color('indigo')
-                ->submit('secureAccount')
+                ->submit('secureAccount'),
         ];
     }
 

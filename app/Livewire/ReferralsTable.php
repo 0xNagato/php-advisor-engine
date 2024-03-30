@@ -26,8 +26,8 @@ class ReferralsTable extends BaseWidget
                 IconColumn::make('has_secured')
                     ->label('Active')
                     ->alignCenter()
-                    ->icon(fn(string $state): string => empty($state) ? 'heroicon-o-x-circle' : 'heroicon-o-check-circle')
-                    ->color(fn(string $state): string => empty($state) ? 'danger' : 'success'),
+                    ->icon(fn (string $state): string => empty($state) ? 'heroicon-o-x-circle' : 'heroicon-o-check-circle')
+                    ->color(fn (string $state): string => empty($state) ? 'danger' : 'success'),
             ]);
     }
 }

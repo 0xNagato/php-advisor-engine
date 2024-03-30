@@ -28,6 +28,7 @@ class ConciergeReferral extends Page
     protected static ?string $title = 'My Referrals';
 
     public ?array $emailData = [];
+
     public ?array $phoneData = [];
 
     public static function canAccess(): bool

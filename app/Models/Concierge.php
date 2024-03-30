@@ -69,6 +69,6 @@ class Concierge extends Model
 
     public function referrals(): HasMany
     {
-        return $this->hasMany(User::class, 'concierge_referral_id');
+        return $this->hasMany(ConciergeReferral::class);
     }
 }
