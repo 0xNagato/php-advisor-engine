@@ -2,7 +2,8 @@
 
 namespace App\Filament\Pages\Concierge;
 
-use App\Events\ConciergeReferred;
+use App\Events\ConciergeReferredViaEmail;
+use App\Events\ConciergeReferredViaText;
 use App\Models\User;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Form;
@@ -13,7 +14,8 @@ use Illuminate\Validation\ValidationException;
 use Ysfkaya\FilamentPhoneInput\Forms\PhoneInput;
 
 /**
- * @property Form $form
+ * @property Form $textForm
+ * @property Form $emailForm
  */
 class ConciergeReferral extends Page
 {
@@ -25,7 +27,8 @@ class ConciergeReferral extends Page
 
     protected static ?string $title = 'My Referrals';
 
-    public ?array $data = [];
+    public ?array $emailData = [];
+    public ?array $phoneData = [];
 
     public static function canAccess(): bool
     {
@@ -34,10 +37,11 @@ class ConciergeReferral extends Page
 
     public function mount(): void
     {
-        $this->form->fill();
+        $this->emailForm->fill();
+        $this->textForm->fill();
     }
 
-    public function form(Form $form): Form
+    public function emailForm(Form $form): Form
     {
         return $form
             ->schema([
@@ -48,6 +52,18 @@ class ConciergeReferral extends Page
                     ->columnSpan(2)
                     ->required()
                     ->hiddenLabel(),
+            ])
+            ->extraAttributes(['class' => 'inline-form'])
+            ->columns([
+                'default' => 2,
+            ])
+            ->statePath('emailData');
+    }
+
+    public function textForm(Form $form): Form
+    {
+        return $form
+            ->schema([
                 PhoneInput::make('phone')
                     ->placeholder('Phone Number')
                     ->validateFor(['US', 'CA'])
@@ -59,31 +75,21 @@ class ConciergeReferral extends Page
             ->columns([
                 'default' => 2,
             ])
-            ->statePath('data');
+            ->statePath('phoneData');
     }
 
-    public function sendInvite(): void
+    public function sendInviteViaEmail(): void
     {
-        $data = $this->form->getState();
-        
-        $user = User::create([
-            'first_name' => '',
-            'last_name' => '',
+        $data = $this->emailForm->getState();
+
+        $conciergeReferral = \App\Models\ConciergeReferral::create([
+            'concierge_id' => auth()->user()->concierge->id,
             'email' => $data['email'],
-            'phone' => $data['phone'],
-            'password' => bcrypt(Str::random(8)),
-            'concierge_referral_id' => auth()->user()->concierge->id,
         ]);
 
-        $user->assignRole('concierge');
+        $this->emailForm->fill();
 
-        $user->concierge()->create([
-            'hotel_name' => '',
-        ]);
-
-        $this->form->fill();
-
-        ConciergeReferred::dispatch($user);
+        ConciergeReferredViaEmail::dispatch($conciergeReferral);
 
         $this->dispatch('concierge-referred');
 
@@ -91,7 +97,63 @@ class ConciergeReferral extends Page
             ->title('Invite sent successfully.')
             ->success()
             ->send();
+    }
 
+    public function sendInviteViaText(): void
+    {
+        $data = $this->textForm->getState();
+
+        $conciergeReferral = \App\Models\ConciergeReferral::create([
+            'concierge_id' => auth()->user()->concierge->id,
+            'phone' => $data['phone'],
+        ]);
+
+        $this->emailForm->fill();
+
+        ConciergeReferredViaText::dispatch($conciergeReferral);
+
+        $this->dispatch('concierge-referred');
+
+        Notification::make()
+            ->title('Invite sent successfully.')
+            ->success()
+            ->send();
+    }
+
+    protected function createUser(array $data): User
+    {
+        $userData = [
+            'first_name' => '',
+            'last_name' => '',
+            'password' => bcrypt(Str::random(8)),
+            'concierge_referral_id' => auth()->user()->concierge->id,
+        ];
+
+        if (isset($data['email'])) {
+            $userData['email'] = $data['email'];
+        }
+
+        if (isset($data['phone'])) {
+            $userData['phone'] = $data['phone'];
+        }
+
+        $user = User::create($userData);
+
+        $user->assignRole('concierge');
+
+        $user->concierge()->create([
+            'hotel_name' => '',
+        ]);
+
+        return $user;
+    }
+
+    protected function getForms(): array
+    {
+        return [
+            'emailForm',
+            'textForm',
+        ];
     }
 
     protected function onValidationError(ValidationException $exception): void

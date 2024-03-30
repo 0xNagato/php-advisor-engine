@@ -1,13 +1,26 @@
 <x-filament-panels::page>
     <x-filament::section>
         <x-slot name="heading">
-            User details
+            Invite via Email
         </x-slot>
 
-        <form wire:submit="sendInvite">
-            {{ $this->form }}
+        <form wire:submit="sendInviteViaEmail">
+            {{ $this->emailForm }}
             <x-filament::button type="submit" class="w-full mt-4">
-                Send Invitation
+                Send Invitation Email
+            </x-filament::button>
+        </form>
+    </x-filament::section>
+
+    <x-filament::section>
+        <x-slot name="heading">
+            Invite via SMS
+        </x-slot>
+
+        <form wire:submit="sendInviteViaText">
+            {{ $this->textForm }}
+            <x-filament::button type="submit" class="w-full mt-4">
+                Send Invitation SMS
             </x-filament::button>
         </form>
     </x-filament::section>
