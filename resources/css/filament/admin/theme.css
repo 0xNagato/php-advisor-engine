@@ -6,6 +6,10 @@
     display: none;
 }
 
+.fi-topbar, .fi-sidebar-nav, .fi-header {
+    @apply prima-native:hidden;
+}
+
 body {
     background: none !important;
     @apply dark:bg-none !important;

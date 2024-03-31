@@ -1,4 +1,5 @@
 import preset from './vendor/filament/support/tailwind.config.preset'
+import plugin from "tailwindcss/plugin";
 
 export default {
     presets: [preset],
@@ -10,14 +11,17 @@ export default {
     ],
 
     plugins: [
-        require("daisyui")
+        require("daisyui"),
+        plugin(function ({addVariant}) {
+            return addVariant('prima-native', ['&.prima-native', '.prima-native &']);
+        }),
     ],
 
     daisyui: {
         themes: false,
         darkTheme: 'light'
     },
-    
+
     theme: {
         extend: {
             colors: {

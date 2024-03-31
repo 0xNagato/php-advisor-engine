@@ -15,11 +15,11 @@ class AdminDashboard extends Dashboard
 {
     use Dashboard\Concerns\HasFiltersAction;
 
-    protected static ?string $title = 'Dashboard';
+    protected static ?string $title = 'Dashboards';
 
     protected static string $routePath = 'admin';
 
-    // protected ?string $heading = '';
+    protected static string $view = 'filament.pages.admin-dashboard';
 
     public static function canAccess(): bool
     {
@@ -47,9 +47,9 @@ class AdminDashboard extends Dashboard
                 ]
             ),
             RestaurantLeaderboard::make([
-                'columnSpan' => '1', ]),
+                'columnSpan' => '1',]),
             PartnerLeaderboard::make([
-                'columnSpan' => '1', ]),
+                'columnSpan' => '1',]),
         ];
     }
 
@@ -70,19 +70,19 @@ class AdminDashboard extends Dashboard
                 ->link()
                 ->icon('govicon-user-suit')
                 ->iconButton()
-                ->url(fn (): string => route('filament.admin.resources.concierges.create')),
+                ->url(fn(): string => route('filament.admin.resources.concierges.create')),
             Action::Make('addRestaurant')
                 ->label('Restaurant')
                 ->link()
                 ->iconButton()
                 ->icon('heroicon-o-building-storefront')
-                ->url(fn (): string => route('filament.admin.resources.restaurants.create')),
+                ->url(fn(): string => route('filament.admin.resources.restaurants.create')),
             Action::Make('addPartner')
                 ->label('Partner')
                 ->link()
                 ->iconButton()
                 ->icon('gmdi-business-center-o')
-                ->url(fn (): string => route('filament.admin.resources.partners.create')),
+                ->url(fn(): string => route('filament.admin.resources.partners.create')),
         ];
     }
 }

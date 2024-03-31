@@ -20,3 +20,5 @@ yarn-error.log
 /.vscode
 .DS_Store
 /storage/pail
+/prima.test.pem
+/prima.test-key.pem

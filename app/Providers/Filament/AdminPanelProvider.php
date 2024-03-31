@@ -25,11 +25,6 @@ use Jenssegers\Agent\Agent;
 
 class AdminPanelProvider extends PanelProvider
 {
-    public function register(): void
-    {
-        parent::register();
-    }
-
     /**
      * @throws Exception
      */
@@ -89,9 +84,6 @@ class AdminPanelProvider extends PanelProvider
             ->brandName('PRIMA')
             ->viteTheme('resources/css/filament/admin/theme.css');
 
-        if (!$agent->isSafari()) {
-            $panel->spa();
-        }
 
         return $panel;
     }
