@@ -7,6 +7,8 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasManyThrough;
+use Illuminate\Database\Eloquent\Relations\HasOneThrough;
 
 class Concierge extends Model
 {
@@ -23,8 +25,7 @@ class Concierge extends Model
     ];
 
     protected $appends = [
-        'payout_percentage',
-        'sales',
+        //
     ];
 
     public function user(): BelongsTo
@@ -41,11 +42,11 @@ class Concierge extends Model
     {
         $sales = $this->sales;
 
-        if ($sales >= 0 && $sales <= 30) {
+        if ($sales >= 0 && $sales <= 20) {
             return 10;
         }
 
-        if ($sales >= 31 && $sales <= 60) {
+        if ($sales >= 21 && $sales <= 50) {
             return 12;
         }
 
@@ -70,5 +71,26 @@ class Concierge extends Model
     public function referrals(): HasMany
     {
         return $this->hasMany(ConciergeReferral::class);
+    }
+
+    public function referringConcierge(): HasOneThrough
+    {
+        return $this->hasOneThrough(
+            __CLASS__,
+            User::class,
+            'id',
+            'id',
+            'user_id',
+            'concierge_referral_id'
+        );
+    }
+
+    public function concierges(): HasManyThrough
+    {
+        return $this->hasManyThrough(
+            __CLASS__,
+            User::class,
+            'concierge_referral_id',
+        );
     }
 }

@@ -48,7 +48,7 @@ class PartnerRecentBookings extends BaseWidget
         })->whereBetween('created_at', [$startDate, $endDate])->orderByDesc('created_at');
 
         return $table
-            ->recordUrl(fn (Booking $booking) => route('filament.admin.resources.bookings.view', $booking))
+            ->recordUrl(fn(Booking $booking) => route('filament.admin.resources.bookings.view', $booking))
             ->query($query)
             ->searchable(false)
             ->columns([
@@ -69,10 +69,6 @@ class PartnerRecentBookings extends BaseWidget
                     ->alignRight()
                     ->label('Earned')
                     ->currency('USD'),
-                TextColumn::make('charity_earnings')
-                    ->alignRight()
-                    ->currency('USD')
-                    ->toggleable(isToggledHiddenByDefault: true),
             ]);
     }
 }

@@ -40,14 +40,29 @@ class Partner extends Model
     public function getLastMonthsEarningsAttribute(): int
     {
         $startDate = now()->subDays(30);
-        $totalEarnings = Booking::where('partner_concierge_id', $this->id)
-            ->orWhere('partner_restaurant_id', $this->id)
-            ->where('created_at', '>=', $startDate)
-            ->selectRaw('SUM(partner_concierge_fee) + SUM(partner_restaurant_fee) as total')
-            ->first()
-            ->total;
 
-        return $totalEarnings ?? 0;
+        // Calculate the earnings for the concierge bookings
+        $conciergeEarnings = Booking::where('partner_concierge_id', $this->id)
+            ->where('created_at', '>=', $startDate)
+            ->sum('partner_concierge_fee');
+
+        // Calculate the earnings for the restaurant bookings
+        $restaurantEarnings = Booking::where('partner_restaurant_id', $this->id)
+            ->where('created_at', '>=', $startDate)
+            ->sum('partner_restaurant_fee');
+
+        // If the partner is a concierge
+        if ($conciergeEarnings > 0 && $restaurantEarnings === 0) {
+            return $conciergeEarnings;
+        }
+
+        // If the partner is a restaurant
+        if ($restaurantEarnings > 0 && $conciergeEarnings === 0) {
+            return $restaurantEarnings;
+        }
+
+        // If the partner is neither a concierge nor a restaurant
+        return 0;
     }
 
     public function conciergeBookings(): HasMany

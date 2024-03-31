@@ -26,7 +26,7 @@ class ConciergeReferral extends Page
 
     protected static string $view = 'filament.pages.concierge.concierge-referral';
 
-    protected static ?int $navigationSort = 30;
+    protected static ?int $navigationSort = 2;
 
     protected static ?string $title = 'My Referrals';
 
@@ -67,9 +67,9 @@ class ConciergeReferral extends Page
                                         ->label('Send Email')
                                         ->action(function () {
                                             $this->sendInviteViaEmail();
-                                        })
+                                        }),
                                 ])
-                                    ->fullWidth()
+                                    ->fullWidth(),
                             ])
                             ->statePath('emailData')
                             ->columns([
@@ -89,15 +89,15 @@ class ConciergeReferral extends Page
                                         ->label('Send SMS')
                                         ->action(function () {
                                             $this->sendInviteViaText();
-                                        })
+                                        }),
                                 ])
-                                    ->fullWidth()
+                                    ->fullWidth(),
                             ])
                             ->statePath('phoneData')
                             ->columns([
                                 'default' => '1',
-                            ])
-                    ])
+                            ]),
+                    ]),
             ]);
     }
 

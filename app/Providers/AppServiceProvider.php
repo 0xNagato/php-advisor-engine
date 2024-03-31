@@ -23,6 +23,8 @@ class AppServiceProvider extends ServiceProvider
         FilamentColor::register([
             'indigo' => Color::Indigo,
             'brand' => '#4736dd',
+            'gold' => '#DAA520',
+            'silver' => '#A9A9A9',
         ]);
 
         Filament::registerRenderHook(

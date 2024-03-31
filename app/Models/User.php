@@ -8,6 +8,7 @@ use Filament\Models\Contracts\HasAvatar;
 use Filament\Panel;
 use Illuminate\Database\Eloquent\Casts\AsArrayObject;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -146,5 +147,10 @@ class User extends Authenticatable implements FilamentUser, HasAvatar
     public function getLabelAttribute(): string
     {
         return $this->has_secured ? $this->getFilamentName() : $this->email;
+    }
+
+    public function earnings(): HasMany
+    {
+        return $this->hasMany(Earning::class);
     }
 }

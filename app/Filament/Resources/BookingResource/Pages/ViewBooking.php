@@ -16,7 +16,7 @@ class ViewBooking extends ViewRecord
 
     protected static string $view = 'livewire.customer-invoice';
 
-    public $download = true;
+    public bool $download = false;
 
     public Booking $booking;
 

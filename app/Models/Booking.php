@@ -7,8 +7,10 @@ use App\Enums\BookingStatus;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\HasOneThrough;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
 class Booking extends Model
@@ -66,44 +68,130 @@ class Booking extends Model
     {
         parent::boot();
 
-        static::creating(function (Booking $booking) {
+        static::creating(static function (Booking $booking) {
             $booking->uuid = Str::uuid();
         });
 
-        static::saving(function (Booking $booking) {
+        static::updated(static function (Booking $booking) {
+            if ($booking->status === BookingStatus::CONFIRMED && $booking->wasChanged('status')) {
+                DB::table('earnings')
+                    ->where('booking_id', $booking->id)
+                    ->update(['confirmed_at' => now()]);
+            }
+        });
+
+        static::saving(static function (Booking $booking) {
             $booking->total_fee = $booking->totalFee();
 
             $booking->restaurant_earnings = $booking->total_fee * ($booking->restaurant->payout_restaurant / 100);
             $booking->concierge_earnings = $booking->total_fee * ($booking->concierge->payout_percentage / 100);
+        });
 
+        static::created(static function (Booking $booking) {
             $remainder = $booking->total_fee - $booking->restaurant_earnings - $booking->concierge_earnings;
+            $platform = $remainder;
+
+            Earning::create([
+                'booking_id' => $booking->id,
+                'user_id' => $booking->restaurant->user->id,
+                'type' => 'restaurant',
+                'amount' => $booking->restaurant_earnings,
+                'percentage' => $booking->restaurant->payout_restaurant,
+                'percentage_of' => 'total_fee',
+            ]);
+
+            Earning::create([
+                'booking_id' => $booking->id,
+                'user_id' => $booking->concierge->user->id,
+                'type' => 'concierge',
+                'amount' => $booking->concierge_earnings,
+                'percentage' => $booking->concierge->payout_percentage,
+                'percentage_of' => 'total_fee',
+            ]);
 
             if ($booking->concierge->user->partner_referral_id) {
                 $booking->partner_concierge_id = $booking->concierge->user->partner_referral_id;
                 $booking->partner_concierge_fee = $remainder * ($booking->partnerConcierge->percentage / 100);
-                $remainder -= $booking->partner_concierge_fee;
+                $platform -= $booking->partner_concierge_fee;
+
+                Earning::create([
+                    'booking_id' => $booking->id,
+                    'user_id' => $booking->concierge->user->partner_referral_id,
+                    'type' => 'partner_concierge',
+                    'amount' => $booking->partner_concierge_fee,
+                    'percentage' => $booking->partnerConcierge->percentage,
+                    'percentage_of' => 'platform',
+                ]);
             }
 
             if ($booking->restaurant->user->partner_referral_id) {
                 $booking->partner_restaurant_id = $booking->restaurant->user->partner_referral_id;
                 $booking->partner_restaurant_fee = $remainder * ($booking->partnerRestaurant->percentage / 100);
-                $remainder -= $booking->partner_restaurant_fee;
+                $platform -= $booking->partner_restaurant_fee;
+
+                Earning::create([
+                    'booking_id' => $booking->id,
+                    'user_id' => $booking->restaurant->user->partner_referral_id,
+                    'type' => 'partner_restaurant',
+                    'amount' => $booking->partner_restaurant_fee,
+                    'percentage' => $booking->partnerRestaurant->percentage,
+                    'percentage_of' => 'platform',
+                ]);
             }
 
-            $booking->platform_earnings = $remainder;
+            if ($booking->concierge->referringConcierge) {
+                $user_id = $booking->concierge->referringConcierge->user->id;
+                $referralPercentage = 10;
+                $amount = $remainder * ($referralPercentage / 100);
+                $platform -= $amount;
+
+                Earning::create([
+                    'booking_id' => $booking->id,
+                    'user_id' => $user_id,
+                    'type' => 'concierge_referral_1',
+                    'amount' => $amount,
+                    'percentage' => $referralPercentage,
+                    'percentage_of' => 'platform',
+                ]);
+            }
+
+            if ($booking->concierge->referringConcierge && $booking->concierge->referringConcierge->referringConcierge) {
+                $user_id = $booking->concierge->referringConcierge->referringConcierge->user->id;
+                $referralPercentage = 5;
+                $amount = $remainder * ($referralPercentage / 100);
+                $platform -= $amount;
+
+                Earning::create([
+                    'booking_id' => $booking->id,
+                    'user_id' => $user_id,
+                    'type' => 'concierge_referral_2',
+                    'amount' => $amount,
+                    'percentage' => $referralPercentage,
+                    'percentage_of' => 'platform',
+                ]);
+            }
+
+            $booking->platform_earnings = $platform;
+
+            $booking->save();
         });
     }
 
     public function totalFee(): int
     {
-        $specialPrice = $this->schedule->restaurant->specialPricing()
+        $bookingFee = $this->schedule->restaurant->specialPricing()
             ->where('date', $this->booking_at->format('Y-m-d'))
             ->first()
             ->fee ?? $this->schedule->restaurant->booking_fee;
 
         $extraGuestFee = max(0, $this->guest_count - 2) * 50;
 
-        return ($specialPrice + $extraGuestFee) * 100;
+        return ($bookingFee + $extraGuestFee) * 100;
+    }
+
+    public function earnings(): HasMany
+    {
+        return $this->hasMany(Earning::class);
     }
 
     public function scopeConfirmed($query)
@@ -150,7 +238,7 @@ class Booking extends Model
 
     public function getGuestNameAttribute(): string
     {
-        return $this->guest_first_name.' '.$this->guest_last_name;
+        return $this->guest_first_name . ' ' . $this->guest_last_name;
     }
 
     public function getPartnerEarningsAttribute()
