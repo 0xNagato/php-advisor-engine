@@ -1,5 +1,5 @@
 @php use libphonenumber\PhoneNumberFormat; @endphp
-<div @class(['py-4', 'px-4' => !$download])>
+<div @class(['px-4', 'py-4' => !$download, 'mt-4' => $download])>
     @if(!$download && isset($customerInvoice))
         <div class="flex gap-x-2 lg:mx-auto max-w-3xl mb-4">
             <x-filament::button color="indigo" class="w-1/2" size="sm" icon="gmdi-email-o"
@@ -35,9 +35,9 @@
             Back
         </x-filament::button>
     @endif
-        
+
     <div
-        class="bg-white rounded-xl shadow sm:max-w-3xl lg:mx-auto invoice-container flex flex-col @if($download) min-h-[11in] @endif"
+        class="bg-white rounded-xl shadow sm:max-w-3xl lg:mx-auto invoice-container flex flex-col @if($download) min-h-[10in] @endif"
     >
         <div class="relative overflow-hidden text-center bg-indigo-800 min-h-32 rounded-t-xl">
             <!-- SVG Background Element -->
