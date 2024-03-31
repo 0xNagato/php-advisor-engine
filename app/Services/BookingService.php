@@ -19,7 +19,7 @@ class BookingService
      */
     public function processBooking(Booking $booking, $form): void
     {
-        Stripe::setApiKey(config('cashier.secret'));
+        Stripe::setApiKey(config('services.stripe.secret'));
 
         $stripeCustomer = Customer::create([
             'name' => $form['first_name'] . ' ' . $form['last_name'],

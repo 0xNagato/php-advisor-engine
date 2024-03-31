@@ -139,7 +139,7 @@
 
 @script
 <script>
-    const stripe = Stripe('{{ config('cashier.key') }}');
+    const stripe = Stripe('{{ config('services.stripe.key') }}');
 
     const elements = stripe.elements();
     const card = elements.create('card', {
