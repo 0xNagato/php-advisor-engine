@@ -19,6 +19,13 @@ class ConciergeReferralBookingsTable extends BaseWidget
 
     public Concierge $concierge;
 
+    public int|string|array $columnSpan;
+
+    public function getColumnSpan(): int|string|array
+    {
+        return $this->columnSpan ?? 'full';
+    }
+
     public function getTableHeading(): string|Htmlable|null
     {
         return 'Booking Referrals';
@@ -47,7 +54,7 @@ class ConciergeReferralBookingsTable extends BaseWidget
         return $table
             ->paginationPageOptions([10, 25, 50])
             ->query($bookingsQuery)
-            ->recordUrl(fn(Earning $record) => ViewBooking::getUrl([$record->booking]))
+            ->recordUrl(fn (Earning $record) => ViewBooking::getUrl([$record->booking]))
             ->columns([
                 IconColumn::make('type')
                     ->label('Level')

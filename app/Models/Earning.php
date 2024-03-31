@@ -15,7 +15,7 @@ class Earning extends Model
         'amount',
         'percentage',
         'percentage_of',
-        'confirmed_at'
+        'confirmed_at',
     ];
 
     public function user(): BelongsTo

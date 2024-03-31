@@ -18,7 +18,14 @@ class ReferralsTable extends BaseWidget
 {
     public static ?string $heading = 'Referrals';
 
+    public int|string|array $columnSpan;
+
     protected $listeners = ['concierge-referred' => '$refresh'];
+
+    public function getColumnSpan(): int|string|array
+    {
+        return $this->columnSpan ?? 'full';
+    }
 
     public function table(Table $table): Table
     {

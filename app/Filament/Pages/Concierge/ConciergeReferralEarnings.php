@@ -63,9 +63,11 @@ class ConciergeReferralEarnings extends Page
         return [
             ConciergeReferralStats::make([
                 'concierge' => $concierge,
+                'columnSpan' => 'full',
             ]),
             ConciergeReferralBookingsTable::make([
                 'concierge' => $concierge,
+                'columnSpan' => 'full',
             ]),
         ];
     }

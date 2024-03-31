@@ -25,6 +25,13 @@ class ConciergeReferralStats extends Widget
         'referralsDifference' => 0,
     ];
 
+    public int|string|array $columnSpan;
+
+    public function getColumnSpan(): int|string|array
+    {
+        return $this->columnSpan ?? 'full';
+    }
+
     public function mount(): void
     {
         $userId = auth()->id();

@@ -15,6 +15,8 @@ class BookingFactory extends Factory
 
     public function definition(): array
     {
+        $partners = Partner::all(); // Get all partners
+
         return [
             'guest_first_name' => $this->faker->firstName(),
             'guest_last_name' => $this->faker->lastName(),
@@ -29,8 +31,8 @@ class BookingFactory extends Factory
             'schedule_id' => Schedule::factory(),
             'concierge_id' => Concierge::factory(),
 
-            'partner_concierge_id' => Partner::factory(),
-            'partner_restaurant_id' => Partner::factory(),
+            'partner_concierge_id' => $partners->random()->id, // Assign a random partner
+            'partner_restaurant_id' => $partners->random()->id, // Assign a random partner
         ];
     }
 }
