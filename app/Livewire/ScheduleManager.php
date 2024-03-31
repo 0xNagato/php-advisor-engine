@@ -16,7 +16,7 @@ class ScheduleManager extends Widget implements HasForms
     use InteractsWithForms;
 
     protected static string $view = 'filament.widgets.schedule-manager';
-    protected static bool $isLazy = false;
+    protected static bool $isLazy = true;
 
     public array $data;
 

@@ -17,7 +17,7 @@ use Illuminate\Support\Facades\Auth;
 class ReferralsTable extends BaseWidget
 {
     public static ?string $heading = 'Referrals';
-    protected static bool $isLazy = false;
+    protected static bool $isLazy = true;
 
     public int|string|array $columnSpan;
 

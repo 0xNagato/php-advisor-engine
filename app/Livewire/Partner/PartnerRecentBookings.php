@@ -14,7 +14,7 @@ class PartnerRecentBookings extends BaseWidget
 {
     use InteractsWithPageFilters;
 
-    protected static bool $isLazy = false;
+    protected static bool $isLazy = true;
 
     protected static ?string $pollingInterval = null;
 

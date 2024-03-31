@@ -12,7 +12,7 @@ use Illuminate\Support\Facades\DB;
 
 class RestaurantLeaderboard extends BaseWidget
 {
-    protected static bool $isLazy = false;
+    protected static bool $isLazy = true;
 
     public ?Restaurant $restaurant;
 
