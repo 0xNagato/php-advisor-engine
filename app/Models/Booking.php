@@ -8,7 +8,6 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\HasOneThrough;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
@@ -231,14 +230,9 @@ class Booking extends Model
         return $this->belongsTo(Partner::class, 'partner_restaurant_id');
     }
 
-    public function payment(): HasOne
-    {
-        return $this->hasOne(Payment::class);
-    }
-
     public function getGuestNameAttribute(): string
     {
-        return $this->guest_first_name.' '.$this->guest_last_name;
+        return $this->guest_first_name . ' ' . $this->guest_last_name;
     }
 
     public function getPartnerEarningsAttribute()

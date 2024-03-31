@@ -13,6 +13,7 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Str;
+use Spatie\Permission\Models\Role;
 use Spatie\Permission\Traits\HasRoles;
 use Storage;
 
@@ -101,7 +102,7 @@ class User extends Authenticatable implements FilamentUser, HasAvatar
 
     public function getFilamentAvatarUrl(): ?string
     {
-        return ! blank($this->profile_photo_path) ? Storage::url($this->profile_photo_path) : null;
+        return !blank($this->profile_photo_path) ? Storage::url($this->profile_photo_path) : null;
     }
 
     public function routeNotificationForTwilio(): string
@@ -121,9 +122,12 @@ class User extends Authenticatable implements FilamentUser, HasAvatar
 
     public function getMainRoleAttribute(): string
     {
+        /**
+         * @var Role $role
+         */
         $role = $this->roles->firstWhere('name', '!=', 'panel_user');
 
-        return Str::of($role?->name)
+        return Str::of($role->name)
             ->snake()
             ->replace('_', ' ')
             ->title();
@@ -141,7 +145,7 @@ class User extends Authenticatable implements FilamentUser, HasAvatar
 
     public function getHasSecuredAttribute(): bool
     {
-        return ! blank($this->secured_at);
+        return !blank($this->secured_at);
     }
 
     public function getLabelAttribute(): string

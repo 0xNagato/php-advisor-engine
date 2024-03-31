@@ -10,6 +10,7 @@ use Exception;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\DisableBladeIconComponents;
 use Filament\Http\Middleware\DispatchServingFilamentEvent;
+use Filament\Navigation\NavigationItem;
 use Filament\Panel;
 use Filament\PanelProvider;
 use Filament\Support\Colors\Color;
@@ -48,6 +49,20 @@ class AdminPanelProvider extends PanelProvider
             ->colors([
                 'primary' => Color::Indigo,
             ])
+            ->navigationItems([
+
+                NavigationItem::make('Horizon')
+                    ->url('/horizon')
+                    ->icon('heroicon-o-sun')
+                    ->sort(1000)
+                    ->visible(fn() => auth()->user()->email === 'andru.weir@gmail.com'),
+                NavigationItem::make('Pulse')
+                    ->url('/pulse')
+                    ->icon('ri-pulse-line')
+                    ->sort(999)
+                    ->visible(fn() => auth()->user()->email === 'andru.weir@gmail.com'),
+
+            ])
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\\Filament\\Resources')
             ->discoverPages(in: app_path('Filament/Pages'), for: 'App\\Filament\\Pages')
             ->pages([])
@@ -74,7 +89,7 @@ class AdminPanelProvider extends PanelProvider
             ->brandName('PRIMA')
             ->viteTheme('resources/css/filament/admin/theme.css');
 
-        if (! $agent->isSafari()) {
+        if (!$agent->isSafari()) {
             $panel->spa();
         }
 
