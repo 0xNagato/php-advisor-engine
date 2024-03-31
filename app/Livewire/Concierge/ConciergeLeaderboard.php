@@ -43,7 +43,7 @@ class ConciergeLeaderboard extends BaseWidget
             ->recordUrl(function (Model $record) {
                 $record = Concierge::find($record->concierge_id);
 
-                if (!$record) {
+                if (! $record) {
                     return null;
                 }
 

@@ -16,6 +16,7 @@ class ScheduleManager extends Widget implements HasForms
     use InteractsWithForms;
 
     protected static string $view = 'filament.widgets.schedule-manager';
+
     protected static bool $isLazy = true;
 
     public array $data;
@@ -35,7 +36,7 @@ class ScheduleManager extends Widget implements HasForms
             ->where('is_available', false)
             ->orderBy('start_time')
             ->get()
-            ->map(fn($schedule) => date('g:i a', strtotime($schedule->start_time)))
+            ->map(fn ($schedule) => date('g:i a', strtotime($schedule->start_time)))
             ->toArray();
 
         $restaurant = auth()->user()->restaurant;
@@ -51,7 +52,7 @@ class ScheduleManager extends Widget implements HasForms
         ];
 
         $days_closed = collect($days)
-            ->filter(fn($day) => $day === 'closed')
+            ->filter(fn ($day) => $day === 'closed')
             ->keys()
             ->toArray();
 
@@ -67,7 +68,7 @@ class ScheduleManager extends Widget implements HasForms
             ->where('is_available', true)
             ->orderBy('start_time')
             ->get()
-            ->mapWithKeys(fn($schedule) => [date('g:i a', strtotime($schedule->start_time)) => date('g:i a', strtotime($schedule->start_time))]);
+            ->mapWithKeys(fn ($schedule) => [date('g:i a', strtotime($schedule->start_time)) => date('g:i a', strtotime($schedule->start_time))]);
 
         return $form
             ->schema([
@@ -111,7 +112,7 @@ class ScheduleManager extends Widget implements HasForms
         $restaurant->save();
 
         $schedulesData = collect($this->data['schedules'])
-            ->map(fn($time) => date('H:i:s', strtotime($time)))
+            ->map(fn ($time) => date('H:i:s', strtotime($time)))
             ->toArray();
 
         $schedules = Schedule::where('restaurant_id', auth()->user()->restaurant->id)
@@ -122,18 +123,18 @@ class ScheduleManager extends Widget implements HasForms
             })
             ->get();
 
-        $schedules->each(fn($schedule) => $schedule->update(['is_available' => 0]));
+        $schedules->each(fn ($schedule) => $schedule->update(['is_available' => 0]));
 
         // Get all the schedules for the restaurant that are currently marked as unavailable.
         $unavailableSchedules = Schedule::where('restaurant_id', auth()->user()->restaurant->id)
             ->where('is_available', false)
             ->get()
-            ->map(fn($schedule) => date('H:i:s', strtotime($schedule->start_time)))
+            ->map(fn ($schedule) => date('H:i:s', strtotime($schedule->start_time)))
             ->toArray();
 
         // Convert the times in the $this->data['schedules'] array back to the 'H:i:s' format.
         $submittedSchedules = collect($this->data['schedules'])
-            ->map(fn($time) => date('H:i:s', strtotime($time)))
+            ->map(fn ($time) => date('H:i:s', strtotime($time)))
             ->toArray();
 
         // Find the schedules that were originally unavailable but were removed from the list.

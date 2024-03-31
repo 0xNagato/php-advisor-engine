@@ -18,6 +18,7 @@ class SMSInput extends Widget implements HasForms
     use InteractsWithForms;
 
     protected static string $view = 'livewire.s-m-s-input';
+
     protected static bool $isLazy = false;
 
     public string $phoneNumber;

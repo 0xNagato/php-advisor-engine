@@ -39,6 +39,6 @@ return [
             'tolerance' => env('STRIPE_WEBHOOK_TOLERANCE', 300),
         ],
         'publishable_key' => env('STRIPE_PUBLISHABLE_KEY'),
-    ]
+    ],
 
 ];

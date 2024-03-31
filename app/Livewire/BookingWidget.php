@@ -32,6 +32,7 @@ class BookingWidget extends Widget implements HasForms
     use InteractsWithForms;
 
     protected static string $view = 'filament.widgets.booking-widget';
+
     protected static bool $isLazy = false;
 
     /**
@@ -152,7 +153,7 @@ class BookingWidget extends Widget implements HasForms
             'guest_count' => $this->guestCount,
             'concierge_id' => auth()->user()->concierge->id,
             'status' => BookingStatus::PENDING,
-            'booking_at' => $this->selectedDate . ' ' . $this->selectedSchedule->start_time,
+            'booking_at' => $this->selectedDate.' '.$this->selectedSchedule->start_time,
         ]);
 
         $taxData = app(SalesTaxService::class)->calculateTax('miami', $this->booking->total_fee);
