@@ -17,6 +17,7 @@ class ConciergeViewHeader extends Widget implements HasActions, HasForms
     use InteractsWithForms;
 
     protected static string $view = 'livewire.concierge-view-header';
+    protected static bool $isLazy = false;
 
     public ?Concierge $concierge;
 

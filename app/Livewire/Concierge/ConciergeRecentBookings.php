@@ -14,7 +14,7 @@ class ConciergeRecentBookings extends BaseWidget
 {
     use InteractsWithPageFilters;
 
-    protected static bool $isLazy = true;
+    protected static bool $isLazy = false;
 
     protected static ?string $pollingInterval = null;
 
@@ -46,7 +46,7 @@ class ConciergeRecentBookings extends BaseWidget
         $query = $query->whereBetween('created_at', [$startDate, $endDate])->orderByDesc('created_at');
 
         return $table
-            ->recordUrl(fn (Booking $booking) => route('filament.admin.resources.bookings.view', $booking))
+            ->recordUrl(fn(Booking $booking) => route('filament.admin.resources.bookings.view', $booking))
             ->query($query)
             ->searchable(false)
             ->columns([
@@ -64,7 +64,7 @@ class ConciergeRecentBookings extends BaseWidget
                     ->alignRight()
                     ->label('Earned')
                     ->currency('USD')
-                    ->hidden((bool) ! auth()->user()?->hasRole('concierge') && ! $this->hideConcierge),
+                    ->hidden((bool)!auth()->user()?->hasRole('concierge') && !$this->hideConcierge),
                 TextColumn::make('charity_earnings')
                     ->alignRight()
                     ->currency('USD')

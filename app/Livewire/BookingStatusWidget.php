@@ -11,6 +11,8 @@ use Livewire\Component;
 
 class BookingStatusWidget extends Component
 {
+    protected static bool $isLazy = false;
+    
     public Booking $booking;
 
     public function mount(Booking $booking): void

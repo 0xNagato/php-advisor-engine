@@ -12,7 +12,7 @@ class AdminRecentBookings extends BaseWidget
 {
     use InteractsWithPageFilters;
 
-    protected static bool $isLazy = true;
+    protected static bool $isLazy = false;
 
     protected static ?string $pollingInterval = null;
 
@@ -35,7 +35,7 @@ class AdminRecentBookings extends BaseWidget
         $query = $query->whereBetween('created_at', [$startDate, $endDate])->orderByDesc('created_at');
 
         return $table
-            ->recordUrl(fn (Booking $booking) => route('filament.admin.resources.bookings.view', $booking))
+            ->recordUrl(fn(Booking $booking) => route('filament.admin.resources.bookings.view', $booking))
             ->query($query)
             ->searchable(false)
             ->columns([

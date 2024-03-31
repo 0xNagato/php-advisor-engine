@@ -10,6 +10,7 @@ use Filament\Widgets\Widget;
 class PartnerStats extends Widget
 {
     protected static string $view = 'livewire.partner.partner-stats';
+    protected static bool $isLazy = false;
 
     public ?Partner $partner;
 
@@ -91,9 +92,9 @@ class PartnerStats extends Widget
     {
         $number = round($number / 100, 2); // Convert to dollars from cents and round to nearest two decimal places.
         if ($number >= 1000) {
-            return '$'.number_format($number / 1000, 1).'k'; // Convert to k if number is greater than or equal to 1000 and keep one decimal place.
+            return '$' . number_format($number / 1000, 1) . 'k'; // Convert to k if number is greater than or equal to 1000 and keep one decimal place.
         }
 
-        return '$'.$number; // Otherwise, return the number
+        return '$' . $number; // Otherwise, return the number
     }
 }

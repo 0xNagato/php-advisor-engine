@@ -1,5 +1,5 @@
 @php use libphonenumber\PhoneNumberFormat; @endphp
-<div @class(['px-4 relative', 'py-4' => !$download, 'mt-4' => $download])>
+<div @class(['relative', 'py-4' => !$download, 'mt-4' => $download, 'px-4' => isset($customerInvoice)])>
     @if(!$download && isset($customerInvoice))
         <div class="flex gap-x-2 lg:mx-auto max-w-3xl mb-4">
             <x-filament::button color="indigo" class="w-1/2" size="sm" icon="gmdi-email-o"
@@ -28,7 +28,8 @@
     @endif
 
     @if(!isset($customerInvoice) && !$download)
-        <button class="absolute left-10 top-10 z-50 text-white font-bold" onclick="window.history.back();">
+        <button class="absolute left-10 top-10 z-50 text-white font-bold prima-native:hidden"
+                onclick="window.history.back();">
             &#x276E;&nbsp; Back
         </button>
     @endif

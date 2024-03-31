@@ -15,6 +15,8 @@ use Stripe\Exception\ApiErrorException;
 
 class CreateBooking extends Component
 {
+    protected static bool $isLazy = false;
+    
     public Booking $booking;
 
     public bool $isLoading = false;

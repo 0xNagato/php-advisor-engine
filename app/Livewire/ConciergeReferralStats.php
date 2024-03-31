@@ -13,6 +13,7 @@ class ConciergeReferralStats extends Widget
     use InteractsWithPageFilters;
 
     protected static string $view = 'livewire.concierge-referral-stats';
+    protected static bool $isLazy = false;
 
     public Concierge $concierge;
 

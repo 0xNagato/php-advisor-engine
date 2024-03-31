@@ -12,6 +12,8 @@ use Illuminate\Support\Facades\DB;
 
 class PartnerLeaderboard extends BaseWidget
 {
+    protected static bool $isLazy = false;
+    
     public ?Partner $partner;
 
     public bool $showFilters = false;

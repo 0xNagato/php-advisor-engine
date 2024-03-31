@@ -9,6 +9,7 @@ use Livewire\Attributes\Computed;
 class InvoiceSmall extends Widget
 {
     protected static string $view = 'livewire.invoice-small';
+    protected static bool $isLazy = false;
 
     public Booking $booking;
 

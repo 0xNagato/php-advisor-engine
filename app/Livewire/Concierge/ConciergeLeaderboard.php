@@ -12,6 +12,8 @@ use Illuminate\Support\Facades\DB;
 
 class ConciergeLeaderboard extends BaseWidget
 {
+    protected static bool $isLazy = false;
+
     public ?Concierge $concierge;
 
     public bool $showFilters = false;
@@ -41,7 +43,7 @@ class ConciergeLeaderboard extends BaseWidget
             ->recordUrl(function (Model $record) {
                 $record = Concierge::find($record->concierge_id);
 
-                if (! $record) {
+                if (!$record) {
                     return null;
                 }
 
