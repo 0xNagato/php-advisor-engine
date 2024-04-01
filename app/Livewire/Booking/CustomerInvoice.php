@@ -56,7 +56,7 @@ class CustomerInvoice extends Component implements HasForms
 
     public function showEmailForm(): void
     {
-        $this->emailOpen = !$this->emailOpen;
+        $this->emailOpen = ! $this->emailOpen;
     }
 
     public function emailInvoice(): void
@@ -73,7 +73,7 @@ class CustomerInvoice extends Component implements HasForms
         $this->emailed = true;
 
         Notification::make()
-            ->title('Invoice sent to ' . $this->email)
+            ->title('Invoice sent to '.$this->email)
             ->success()
             ->send();
     }

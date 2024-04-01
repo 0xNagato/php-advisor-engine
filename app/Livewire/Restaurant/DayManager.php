@@ -61,7 +61,7 @@ class DayManager extends Widget implements HasForms
             'friday',
             'saturday',
             'sunday',
-        ])->map(fn($day) => Checkbox::make($day)
+        ])->map(fn ($day) => Checkbox::make($day)
             ->label(ucfirst($day)));
 
         return $form

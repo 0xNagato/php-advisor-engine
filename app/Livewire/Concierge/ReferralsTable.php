@@ -48,8 +48,8 @@ class ReferralsTable extends BaseWidget
                 IconColumn::make('has_secured')
                     ->label('Active')
                     ->alignCenter()
-                    ->icon(fn(string $state): string => empty($state) ? 'heroicon-o-x-circle' : 'heroicon-o-check-circle')
-                    ->color(fn(string $state): string => empty($state) ? 'danger' : 'success'),
+                    ->icon(fn (string $state): string => empty($state) ? 'heroicon-o-x-circle' : 'heroicon-o-check-circle')
+                    ->color(fn (string $state): string => empty($state) ? 'danger' : 'success'),
             ])
             ->actions([
                 Action::make('resendInvitation')
@@ -57,11 +57,11 @@ class ReferralsTable extends BaseWidget
                     ->iconButton()
                     ->color('indigo')
                     ->requiresConfirmation()
-                    ->hidden(fn(ConciergeReferral $record) => $record->has_secured)
+                    ->hidden(fn (ConciergeReferral $record) => $record->has_secured)
                     ->action(function (ConciergeReferral $record) {
-                        if (!blank($record->phone)) {
+                        if (! blank($record->phone)) {
                             $record->notify(new ConciergeReferredText($record));
-                        } elseif (!blank($record->email)) {
+                        } elseif (! blank($record->email)) {
                             $record->notify(new ConciergeReferredEmail($record));
                         }
 
