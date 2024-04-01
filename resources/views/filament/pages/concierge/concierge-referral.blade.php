@@ -27,7 +27,7 @@
     {{--        </form>--}}
     {{--    </x-filament::section>--}}
 
-    <livewire:referrals-table/>
+    <livewire:concierge.referrals-table/>
 
     <div class="h-0">
         <x-filament-actions::modals/>

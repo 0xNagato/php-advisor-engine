@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Filament\Pages;
+namespace App\Filament\Pages\Restaurant;
 
 use App\Livewire\Restaurant\RestaurantRecentBookings;
 use App\Livewire\Restaurant\RestaurantStats;

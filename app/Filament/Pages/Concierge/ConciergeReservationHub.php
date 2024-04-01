@@ -1,8 +1,8 @@
 <?php
 
-namespace App\Filament\Pages;
+namespace App\Filament\Pages\Concierge;
 
-use App\Livewire\BookingWidget;
+use App\Livewire\Booking\BookingWidget;
 use Filament\Pages\Page;
 
 class ConciergeReservationHub extends Page

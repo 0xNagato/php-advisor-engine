@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Livewire;
+namespace App\Livewire\Restaurant;
 
 use Filament\Forms\Components\Checkbox;
 use Filament\Forms\Concerns\InteractsWithForms;
@@ -61,7 +61,7 @@ class DayManager extends Widget implements HasForms
             'friday',
             'saturday',
             'sunday',
-        ])->map(fn ($day) => Checkbox::make($day)
+        ])->map(fn($day) => Checkbox::make($day)
             ->label(ucfirst($day)));
 
         return $form

@@ -50,12 +50,12 @@ class AdminPanelProvider extends PanelProvider
                     ->url('/horizon')
                     ->icon('heroicon-o-sun')
                     ->sort(1000)
-                    ->visible(fn () => auth()->user()->email === 'andru.weir@gmail.com'),
+                    ->visible(fn() => auth()->user()->email === 'andru.weir@gmail.com'),
                 NavigationItem::make('Pulse')
                     ->url('/pulse')
                     ->icon('ri-pulse-line')
                     ->sort(999)
-                    ->visible(fn () => auth()->user()->email === 'andru.weir@gmail.com'),
+                    ->visible(fn() => auth()->user()->email === 'andru.weir@gmail.com'),
 
             ])
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\\Filament\\Resources')

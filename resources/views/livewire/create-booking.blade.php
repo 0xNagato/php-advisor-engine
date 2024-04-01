@@ -116,7 +116,7 @@
 
         <!-- Invoice -->
         <div class="w-full mt-4">
-            <livewire:invoice-small :booking="$booking"/>
+            <livewire:booking.invoice-small :booking="$booking"/>
         </div>
 
     </div>

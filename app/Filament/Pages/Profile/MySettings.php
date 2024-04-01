@@ -1,8 +1,8 @@
 <?php
 
-namespace App\Filament\Pages;
+namespace App\Filament\Pages\Profile;
 
-use App\Livewire\ProfileSettings;
+use App\Livewire\Profile\ProfileSettings;
 use Filament\Pages\Page;
 
 class MySettings extends Page

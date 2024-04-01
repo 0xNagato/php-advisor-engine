@@ -1,8 +1,8 @@
 <?php
 
-namespace App\Filament\Pages;
+namespace App\Filament\Pages\Restaurant;
 
-use App\Livewire\ScheduleManager;
+use App\Livewire\Restaurant\ScheduleManager;
 use Filament\Pages\Page;
 
 class MyRestaurant extends Page

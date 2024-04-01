@@ -1,6 +1,6 @@
 <?php
 
-use App\Livewire\ConciergeInvitation;
+use App\Livewire\Concierge\ConciergeInvitation;
 use Livewire\Livewire;
 
 it('renders successfully', function () {

@@ -28,7 +28,7 @@
     @endif
 
     @if(!isset($customerInvoice) && !$download)
-        <button class="absolute left-10 top-10 z-50 text-white font-bold prima-native:hidden"
+        <button class="absolute left-10 top-10 z-10 text-white font-bold prima-native:hidden"
                 onclick="window.history.back();">
             &#x276E;&nbsp; Back
         </button>

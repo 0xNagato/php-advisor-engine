@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Livewire;
+namespace App\Livewire\Booking;
 
 use App\Models\Booking;
 use Filament\Widgets\Widget;

@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Livewire;
+namespace App\Livewire\Restaurant;
 
 use App\Models\Booking;
 use Livewire\Component;

@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Filament\Pages;
+namespace App\Filament\Pages\Profile;
 
 use App\Models\User;
 use Filament\Forms\Components\TextInput;

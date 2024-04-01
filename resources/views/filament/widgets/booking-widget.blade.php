@@ -1,4 +1,4 @@
-@php use App\Enums\BookingStatus;use App\Livewire\InvoiceSmall; @endphp
+@php use App\Enums\BookingStatus; @endphp
     <!--suppress JSUnresolvedReference, BadExpressionStatementJS -->
 <x-filament-widgets::widget
     x-data="{}"
@@ -92,7 +92,7 @@
 
     @if ($booking && (BookingStatus::PENDING === $booking->status || BookingStatus::GUEST_ON_PAGE === $booking->status))
         <div class="w-full -mt-4">
-            <livewire:invoice-small :booking="$booking"/>
+            <livewire:booking.invoice-small :booking="$booking"/>
         </div>
 
 
@@ -260,7 +260,7 @@
 
                 <img src="{{ $qrCode }}" alt="QR Code" class="w-1/2 mx-auto shadow-lg">
 
-                <livewire:booking-status-widget :booking="$booking"/>
+                <livewire:booking.booking-status-widget :booking="$booking"/>
             </div>
         </div>
 

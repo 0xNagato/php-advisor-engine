@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Livewire;
+namespace App\Livewire\Profile;
 
 use Filament\Facades\Filament;
 use Filament\Forms\Components\TextInput;
@@ -67,7 +67,7 @@ class PasswordSettings extends Widget implements HasForms
             'password' => Hash::make($data['new_password']),
         ]);
 
-        session()->forget('password_hash_'.Filament::getCurrentPanel()->getAuthGuard());
+        session()->forget('password_hash_' . Filament::getCurrentPanel()->getAuthGuard());
 
         Filament::auth()->login($this->user);
 

@@ -2,8 +2,8 @@
 
 namespace App\Filament\Pages\Concierge;
 
-use App\Livewire\ConciergeReferralBookingsTable;
-use App\Livewire\ConciergeReferralStats;
+use App\Livewire\Concierge\ConciergeReferralBookingsTable;
+use App\Livewire\Concierge\ConciergeReferralStats;
 use App\Models\Concierge;
 use Filament\Forms\Components\DatePicker;
 use Filament\Pages\Dashboard\Actions\FilterAction;

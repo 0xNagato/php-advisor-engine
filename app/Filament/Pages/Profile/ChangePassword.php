@@ -1,8 +1,8 @@
 <?php
 
-namespace App\Filament\Pages;
+namespace App\Filament\Pages\Profile;
 
-use App\Livewire\PasswordSettings;
+use App\Livewire\Profile\PasswordSettings;
 use Filament\Pages\Page;
 
 class ChangePassword extends Page

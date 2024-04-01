@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Filament\Pages;
+namespace App\Filament\Pages\Restaurant;
 
 use Filament\Forms\Components\Checkbox;
 use Filament\Forms\Components\Repeater;

@@ -1,10 +1,10 @@
 <?php
 
 use App\Http\Controllers\DownloadInvoiceController;
-use App\Livewire\ConciergeInvitation;
-use App\Livewire\CreateBooking;
-use App\Livewire\CustomerInvoice;
-use App\Livewire\RestaurantBookingConfirmation;
+use App\Livewire\Booking\CreateBooking;
+use App\Livewire\Booking\CustomerInvoice;
+use App\Livewire\Concierge\ConciergeInvitation;
+use App\Livewire\Restaurant\RestaurantBookingConfirmation;
 
 Route::get('/invoice/download/{uuid}', DownloadInvoiceController::class)
     ->name('customer.invoice.download');

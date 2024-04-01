@@ -1,6 +1,6 @@
 <?php
 
-use App\Livewire\RestaurantBookingConfirmation;
+use App\Livewire\Restaurant\RestaurantBookingConfirmation;
 use Livewire\Livewire;
 
 it('renders successfully', function () {

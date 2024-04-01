@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Livewire;
+namespace App\Livewire\Profile;
 
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\TextInput;
@@ -42,7 +42,7 @@ class ProfileSettings extends Widget implements HasForms
                 ->label('Profile Photo')
                 ->disk('do')
                 ->hidden(function () {
-                    return ! auth()->user()->hasRole('concierge');
+                    return !auth()->user()->hasRole('concierge');
                 }),
             TextInput::make('first_name')
                 ->required()

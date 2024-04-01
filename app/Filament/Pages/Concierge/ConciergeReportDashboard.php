@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Filament\Pages;
+namespace App\Filament\Pages\Concierge;
 
 use App\Livewire\Concierge\ConciergeLeaderboard;
 use App\Livewire\Concierge\ConciergeRecentBookings;

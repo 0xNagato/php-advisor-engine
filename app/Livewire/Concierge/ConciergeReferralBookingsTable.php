@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Livewire;
+namespace App\Livewire\Concierge;
 
 use App\Filament\Resources\BookingResource\Pages\ViewBooking;
 use App\Models\Concierge;
@@ -56,7 +56,7 @@ class ConciergeReferralBookingsTable extends BaseWidget
         return $table
             ->paginationPageOptions([10, 25, 50])
             ->query($bookingsQuery)
-            ->recordUrl(fn (Earning $record) => ViewBooking::getUrl([$record->booking]))
+            ->recordUrl(fn(Earning $record) => ViewBooking::getUrl([$record->booking]))
             ->columns([
                 IconColumn::make('type')
                     ->label('Level')
