@@ -52,6 +52,7 @@ class ManageContacts extends Page
                                 ->initialCountry('US'),
                             Checkbox::make('use_for_reservations')
                                 ->label('Use for Reservations')
+                                ->extraAttributes(['class' => 'text-indigo-600'])
                                 ->default(true),
                         ]),
 

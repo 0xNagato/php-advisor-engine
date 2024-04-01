@@ -50,6 +50,7 @@ body::before {
 .fi-header-heading {
     font-family: "Sanomat Web Regular Regular", serif;
     font-style: normal;
+    /*@apply -my-4 tracking-wide text-3xl !important;*/
     @apply tracking-wide text-3xl !important;
 }
 

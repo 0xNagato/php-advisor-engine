@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\BookingResource\Pages;
 
+use App\Enums\BookingStatus;
 use App\Filament\Resources\BookingResource;
 use Filament\Resources\Pages\ListRecords;
 use Filament\Tables;
@@ -16,7 +17,7 @@ class ListBookings extends ListRecords
     {
         return $table
             ->modifyQueryUsing(function ($query) {
-                $query = $query->orderByDesc('created_at');
+                $query = $query->orderByDesc('created_at')->where('status', BookingStatus::CONFIRMED);
 
                 if (auth()->user()->hasRole('concierge')) {
                     return $query->where('concierge_id', auth()->user()->concierge->id);

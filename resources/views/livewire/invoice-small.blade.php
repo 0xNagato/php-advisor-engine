@@ -1,6 +1,6 @@
 <x-filament-widgets::widget>
     <div class="flex items-center w-full gap-4 p-3 bg-white bg-opacity-90 shadow rounded-xl">
-        <x-mary-icon name="o-building-storefront" class="w-10 h-10 p-2 text-white bg-orange-500 rounded-full"/>
+        <x-heroicon-o-building-storefront class="w-10 h-10 p-2 text-white bg-orange-500 rounded-full"/>
 
         <div class="flex flex-col gap-1 flex-grow">
             <div class="font-semibold">{{ $booking->schedule->restaurant->restaurant_name }}</div>
