@@ -13,6 +13,8 @@ class MySettings extends Page
 
     protected static ?int $navigationSort = 101;
 
+    protected static bool $shouldRegisterNavigation = false;
+
     protected static ?string $title = 'My Profile';
 
     public function getHeaderWidgets(): array

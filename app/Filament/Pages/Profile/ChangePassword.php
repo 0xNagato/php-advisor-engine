@@ -13,6 +13,8 @@ class ChangePassword extends Page
 
     protected static ?int $navigationSort = 100;
 
+    protected static bool $shouldRegisterNavigation = false;
+
     public function getHeaderWidgets(): array
     {
         return [

@@ -2,9 +2,9 @@
 
 namespace App\Filament\Resources\BookingResource\Pages;
 
+use App\Enums\BookingStatus;
 use App\Filament\Resources\BookingResource;
 use App\Models\Booking;
-use Filament\Actions\Action;
 use Filament\Infolists\Components\Section;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Infolists\Infolist;
@@ -20,15 +20,19 @@ class ViewBooking extends ViewRecord
 
     public Booking $booking;
 
-    public function mount(int|string $record): void
+    public bool $showConcierges = false;
+
+    public function mount(string|int $record): void
     {
         $this->record = $this->resolveRecord($record);
 
-        $this->authorizeAccess();
+        abort_if($this->record->status !== BookingStatus::CONFIRMED, 404);
 
-        if (! $this->hasInfolist()) {
-            $this->fillForm();
+        if (auth()->user()->hasRole('super_admin') || auth()->user()->hasRole('partner') || auth()->user()->hasRole('concierge')) {
+            $this->showConcierges = true;
         }
+
+        $this->authorizeAccess();
 
         $this->booking = $this->record;
     }
@@ -60,7 +64,7 @@ class ViewBooking extends ViewRecord
                     ->schema([
                         TextEntry::make('guest_name')->hiddenLabel(),
                         TextEntry::make('guest_phone')
-                            ->formatStateUsing(fn ($state) => formatPhoneNumber($state))
+                            ->formatStateUsing(fn($state) => formatPhoneNumber($state))
                             ->hiddenLabel(),
                         TextEntry::make('guest_count')
                             ->label('Guest Count:')
@@ -71,18 +75,5 @@ class ViewBooking extends ViewRecord
                             ->inlineLabel(),
                     ]),
             ]);
-    }
-
-    protected function getHeaderActions(): array
-    {
-        $actions = [];
-
-        if ($this->record->confirmed_at) {
-            $actions[] = Action::make('View Invoice')
-                ->icon('heroicon-o-document-text')
-                ->url(route('customer.invoice', ['token' => $this->record->uuid]));
-        }
-
-        return $actions;
     }
 }

@@ -10,6 +10,7 @@ use Exception;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\DisableBladeIconComponents;
 use Filament\Http\Middleware\DispatchServingFilamentEvent;
+use Filament\Navigation\MenuItem;
 use Filament\Navigation\NavigationItem;
 use Filament\Panel;
 use Filament\PanelProvider;
@@ -50,12 +51,21 @@ class AdminPanelProvider extends PanelProvider
                     ->url('/horizon')
                     ->icon('heroicon-o-sun')
                     ->sort(1000)
-                    ->visible(fn () => auth()->user()->email === 'andru.weir@gmail.com'),
+                    ->visible(fn() => auth()->user()->email === 'andru.weir@gmail.com'),
                 NavigationItem::make('Pulse')
                     ->url('/pulse')
                     ->icon('ri-pulse-line')
                     ->sort(999)
-                    ->visible(fn () => auth()->user()->email === 'andru.weir@gmail.com'),
+                    ->visible(fn() => auth()->user()->email === 'andru.weir@gmail.com'),
+
+            ])
+            ->userMenuItems([
+                'profile' => MenuItem::make()
+                    ->url('/my-settings'),
+                'change-password' => MenuItem::make()
+                    ->label('Change Password')
+                    ->icon('heroicon-o-lock-closed')
+                    ->url('/change-password'),
 
             ])
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\\Filament\\Resources')

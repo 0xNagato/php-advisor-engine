@@ -28,7 +28,7 @@
     @endif
 
     @if(!isset($customerInvoice) && !$download)
-        <button class="absolute left-10 top-10 z-10 text-white font-bold prima-native:hidden"
+        <button class="absolute left-4 top-8 z-10 text-white font-bold prima-native:hidden"
                 onclick="window.history.back();">
             &#x276E;&nbsp; Back
         </button>
@@ -100,8 +100,8 @@
                 <div>
                     <span class="block text-xs text-gray-500 uppercase">Date Paid:</span>
                     <span class="block text-sm font-medium text-gray-800 dark:text-gray-200">
-                    {{ $booking->confirmed_at->format('M d, Y') }}
-                </span>
+                        {{ $booking->confirmed_at->format('M d, Y') }}
+                    </span>
                 </div>
                 <!-- End Col -->
 
@@ -126,7 +126,7 @@
                             >
                                 ••••{{ $booking->stripe_charge->paymentMethodDetails->card->last4 }}</span>
                         @else
-                            <span class="text-xs mt-1">Unknown</span>
+                            <span class="block text-sm font-medium text-gray-800 dark:text-gray-200">Unknown</span>
 
                         @endif
 
@@ -135,6 +135,7 @@
                 <!-- End Col -->
             </div>
             <!-- End Grid -->
+
 
             <div class="mt-5 sm:mt-10">
                 <h4 class="text-xs font-semibold text-gray-800 uppercase dark:text-gray-200">Summary</h4>
@@ -171,15 +172,19 @@
                     </li>
                 </ul>
 
-                <div class="font-semibold mt-4 text-center">
-                    Fees paid are for reservation only. Not applicable towards restaurant bill.
-                </div>
+                @if(isset($customerInvoice))
+                    <div class="font-semibold mt-4 text-center">
+                        Fees paid are for reservation only. Not applicable towards restaurant bill.
+                    </div>
+                @endif
             </div>
         </div>
         <!-- End Body -->
-        <!-- Footer -->
-        <div class="text-xs text-gray-500 flex-grow flex items-end justify-center p-4">
 
+        <div class="text-xs text-gray-500 flex-grow flex items-end justify-center p-4">
+            @if(isset($showConcierges) && $showConcierges)
+                <x-booking.concierges :booking="$booking"/>
+            @endif
         </div>
     </div>
 </div>

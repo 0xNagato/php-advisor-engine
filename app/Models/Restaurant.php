@@ -40,12 +40,14 @@ class Restaurant extends Model
         'contacts',
         'is_suspended',
         'non_prime_time',
+        'business_hours',
     ];
 
     protected $casts = [
         'open_days' => 'array',
-        'contacts' => DataCollection::class.':'.RestaurantContactData::class,
+        'contacts' => DataCollection::class . ':' . RestaurantContactData::class,
         'non_prime_time' => 'array',
+        'business_hours' => 'array',
     ];
 
     protected static function boot(): void
@@ -63,14 +65,32 @@ class Restaurant extends Model
                 'sunday' => 'open',
             ];
         });
+
+        static::created(function (Restaurant $restaurant) {
+            $restaurant->createDefaultSchedules();
+        });
     }
 
-    /**
-     * Get the user that owns the restaurant.
-     */
-    public function user(): BelongsTo
+    public function createDefaultSchedules(): void
     {
-        return $this->belongsTo(User::class);
+        $daysOfWeek = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
+
+        foreach ($daysOfWeek as $day) {
+            $startTime = Carbon::createFromTime(0, 0); // Start of the day
+            $endTime = Carbon::createFromTime(23, 59); // End of the day
+
+            while ($startTime->lessThanOrEqualTo($endTime)) {
+                $isAvailable = $startTime->hour >= 12 && $startTime->hour < 22; // Available from 12pm to 10pm
+
+                $this->schedules()->create([
+                    'start_time' => $startTime->format('H:i:s'),
+                    'end_time' => $startTime->addMinutes(30)->format('H:i:s'),
+                    'is_available' => $isAvailable,
+                    'available_tables' => $isAvailable ? 10 : 0, // Set available tables to 10 if available, 0 otherwise
+                    'day_of_week' => $day,
+                ]);
+            }
+        }
     }
 
     /**
@@ -79,6 +99,14 @@ class Restaurant extends Model
     public function schedules(): HasMany
     {
         return $this->hasMany(Schedule::class);
+    }
+
+    /**
+     * Get the user that owns the restaurant.
+     */
+    public function user(): BelongsTo
+    {
+        return $this->belongsTo(User::class);
     }
 
     public function bookings(): HasManyThrough

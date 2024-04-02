@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -17,6 +18,7 @@ class Schedule extends Model
         'end_time',
         'is_available',
         'available_tables',
+        'day_of_week',
     ];
 
     protected $casts = [
@@ -48,6 +50,13 @@ class Schedule extends Model
     public function bookings(): HasMany
     {
         return $this->hasMany(Booking::class);
+    }
+
+    public function scopeAvailable(Builder $query): Builder
+    {
+        return $query
+            ->where('is_available', true)
+            ->where('available_tables', '>', 0);
     }
 
     public function getFormattedStartTimeAttribute(): string

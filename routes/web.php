@@ -19,3 +19,7 @@ Route::get('/bookings/create/{token}', CreateBooking::class)->name('bookings.cre
 Route::get('/invitation/{conciergeReferral}', ConciergeInvitation::class)
     ->name('concierge.invitation')
     ->middleware('signed');
+
+Route::get('/debug-sentry', function () {
+    throw new RuntimeException('My first Sentry error!');
+});
