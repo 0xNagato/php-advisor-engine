@@ -17,6 +17,29 @@ class ScheduleWidget extends Widget
 
     protected $listeners = ['business-hours-updated' => '$refresh'];
 
+    public function updateTableAvailability($date, $time, $tables): void
+    {
+        $this->schedules[$date][$time] = $tables;
+    }
+
+    public function updated($propertyName, $value)
+    {
+        // Split the property name into schedules, date and time
+        [$schedules, $date, $time] = explode('.', $propertyName);
+
+        // Check if the keys exist in the schedules array
+        if (isset($this->schedules[$date][$time])) {
+            // Get the new number of tables
+            $tables = $value;
+
+            // Update the corresponding schedule in the database
+            auth()->user()->restaurant->schedules()
+                ->where('day_of_week', $date)
+                ->where('start_time', $time)
+                ->update(['available_tables' => $tables]);
+        }
+    }
+
     #[On('business-hours-updated')]
     public function update(): void
     {
@@ -44,14 +67,9 @@ class ScheduleWidget extends Widget
         $schedules = $this->restaurant->schedules()->where('day_of_week', $day)->where('is_available', true)->get();
 
         foreach ($schedules as $schedule) {
-            $times[$schedule->start_time] = $schedule->is_available;
+            $times[$schedule->start_time] = $schedule->available_tables;
         }
 
         return $times;
-    }
-
-    public function updateTableAvailability($date, $time, $tables): void
-    {
-        $this->schedules[$date][$time] = $tables;
     }
 }
