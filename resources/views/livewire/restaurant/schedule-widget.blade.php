@@ -32,7 +32,7 @@
                                 <div class="w-1/2">{{ Carbon::createFromFormat('H:i:s', $time)->format('g:ia') }}</div>
                                 <label class="w-1/2">
                                     <input type="number" name="schedule" value="10"
-                                           wire:model.live.debounce.500ms="schedules.{{ $date }}.{{ $time }}"
+                                           wire:model.live.debounce.1200ms="schedules.{{ $date }}.{{ $time }}"
                                            min="0" max="50"
                                         @class([
                                             'w-3/4 bg-gray-50 border leading-none border-gray-300 text-gray-900 text-xs rounded-lg focus:ring-indigo-500 focus:border-indigo-500 block px-2 p-1.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-indigo-500 dark:focus:border-indigo-500 text-center',
@@ -40,7 +40,7 @@
                                         ])
                                     >
                                     @error('schedules.'.$date.'.'.$time)
-                                    
+
                                     @enderror
                                 </label>
                             </div>
