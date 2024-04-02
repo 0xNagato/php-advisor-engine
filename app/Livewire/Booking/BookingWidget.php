@@ -116,19 +116,38 @@ class BookingWidget extends Widget implements HasForms
 
     public function updatedSelectedRestaurantId($value): void
     {
-        $this->selectedRestaurant = Restaurant::openOnDate($this->selectedDate)->find($value);
+        $this->selectedRestaurant = Restaurant::find($value);
 
-        $userTimezone = auth()->user()->timezone; // assuming the timezone column is named 'timezone'
-        $currentTime = now()->setTimezone($userTimezone)->format('H:i:s');
-
+        $userTimezone = auth()->user()->timezone;
         $selectedDateInUserTimezone = Carbon::createFromFormat('Y-m-d', $this->selectedDate)->setTimezone($userTimezone)->format('Y-m-d');
+        $dayOfWeek = strtolower(Carbon::parse($selectedDateInUserTimezone)->format('l')); // Convert the date to a day of the week
 
-        if ($selectedDateInUserTimezone === now()->setTimezone($userTimezone)->format('Y-m-d')) {
-            $this->schedules = $this->selectedRestaurant->availableSchedules->where('start_time', '>=', $currentTime);
-            $this->unavailableSchedules = $this->selectedRestaurant->unavailableSchedules->where('start_time', '>=', $currentTime);
+        $currentTime = Carbon::now($userTimezone)->addMinutes(30)->format('H:i:s'); // Add a 30-minute buffer to the current time
+
+        if ($selectedDateInUserTimezone === Carbon::now($userTimezone)->format('Y-m-d')) {
+            // If the selected date is the current day, apply the time restrictions
+            $this->schedules = $this->selectedRestaurant->schedules()
+                ->where('day_of_week', $dayOfWeek)
+                ->where('is_available', true)
+                ->where('end_time', '>', $currentTime)
+                ->get();
+
+            $this->unavailableSchedules = $this->selectedRestaurant->schedules()
+                ->where('day_of_week', $dayOfWeek)
+                ->where('is_available', false)
+                ->where('end_time', '>', $currentTime)
+                ->get();
         } else {
-            $this->schedules = Restaurant::find($this->selectedRestaurantId)->availableSchedules;
-            $this->unavailableSchedules = Restaurant::find($this->selectedRestaurantId)->unavailableSchedules;
+            // If the selected date is in the future, show all available schedules for that day of the week
+            $this->schedules = $this->selectedRestaurant->schedules()
+                ->where('day_of_week', $dayOfWeek)
+                ->where('is_available', true)
+                ->get();
+
+            $this->unavailableSchedules = $this->selectedRestaurant->schedules()
+                ->where('day_of_week', $dayOfWeek)
+                ->where('is_available', false)
+                ->get();
         }
 
         $this->selectedScheduleId = null;
@@ -137,10 +156,6 @@ class BookingWidget extends Widget implements HasForms
     public function updatedSelectedScheduleId($value): void
     {
         $this->selectedSchedule = Schedule::find($value);
-    }
-
-    public function updatedGuestCount(): void
-    {
     }
 
     /**
@@ -153,7 +168,7 @@ class BookingWidget extends Widget implements HasForms
             'guest_count' => $this->guestCount,
             'concierge_id' => auth()->user()->concierge->id,
             'status' => BookingStatus::PENDING,
-            'booking_at' => $this->selectedDate.' '.$this->selectedSchedule->start_time,
+            'booking_at' => $this->selectedDate . ' ' . $this->selectedSchedule->start_time,
         ]);
 
         $taxData = app(SalesTaxService::class)->calculateTax('miami', $this->booking->total_fee);

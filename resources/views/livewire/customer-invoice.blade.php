@@ -172,7 +172,7 @@
                     </li>
                 </ul>
 
-                @if(isset($customerInvoice))
+                @if(isset($customerInvoice) || $download)
                     <div class="font-semibold mt-4 text-center">
                         Fees paid are for reservation only. Not applicable towards restaurant bill.
                     </div>
