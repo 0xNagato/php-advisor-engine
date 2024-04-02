@@ -45,8 +45,6 @@ class ScheduleWidget extends Widget
                     ->send();
 
                 $this->schedules[$date][$time] = 30;
-
-                return;
             }
 
 
