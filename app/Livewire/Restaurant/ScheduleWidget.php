@@ -3,7 +3,10 @@
 namespace App\Livewire\Restaurant;
 
 use App\Models\Restaurant;
+use Carbon\Carbon;
+use Filament\Notifications\Notification;
 use Filament\Widgets\Widget;
+use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\On;
 
 class ScheduleWidget extends Widget
@@ -14,7 +17,6 @@ class ScheduleWidget extends Widget
 
     public $schedules = [];
     protected Restaurant $restaurant;
-
     protected $listeners = ['business-hours-updated' => '$refresh'];
 
     public function updateTableAvailability($date, $time, $tables): void
@@ -22,21 +24,45 @@ class ScheduleWidget extends Widget
         $this->schedules[$date][$time] = $tables;
     }
 
-    public function updated($propertyName, $value)
+    public function updated($propertyName, $value): void
     {
         // Split the property name into schedules, date and time
         [$schedules, $date, $time] = explode('.', $propertyName);
-
         // Check if the keys exist in the schedules array
         if (isset($this->schedules[$date][$time])) {
-            // Get the new number of tables
-            $tables = $value;
+            try {
+                $this->validate([
+                    $propertyName => 'numeric|min:0|max:30',
+                ]);
+            } catch (ValidationException $e) {
+                // Format the time to 12-hour format
+                $formattedTime = Carbon::createFromFormat('H:i:s', $time)->format('g:ia');
 
-            // Update the corresponding schedule in the database
+                // Send a notification
+                Notification::make()
+                    ->title('Max tables (30) exceeded on ' . ucfirst($date) . ' at ' . $formattedTime)
+                    ->danger()
+                    ->send();
+
+                $this->schedules[$date][$time] = 30;
+
+                return;
+            }
+
+
+            if ($value === '') {
+                return;
+            }
+
             auth()->user()->restaurant->schedules()
                 ->where('day_of_week', $date)
                 ->where('start_time', $time)
-                ->update(['available_tables' => $tables]);
+                ->update(['available_tables' => $value]);
+
+            Notification::make()
+                ->title('Table availability updated successfully')
+                ->success()
+                ->send();
         }
     }
 

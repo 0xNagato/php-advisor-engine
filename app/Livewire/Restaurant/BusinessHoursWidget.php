@@ -27,6 +27,7 @@ class BusinessHoursWidget extends Widget
 
     public array $daysOfWeek = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
 
+
     protected Restaurant $restaurant;
     protected BusinessHoursService $businessHoursService;
 
