@@ -123,6 +123,8 @@ class BookingWidget extends Widget implements HasForms
         $dayOfWeek = strtolower(Carbon::parse($selectedDateInUserTimezone)->format('l')); // Convert the date to a day of the week
 
         $currentTime = Carbon::now($userTimezone)->addMinutes(30)->format('H:i:s'); // Add a 30-minute buffer to the current time
+        $noonTime = Carbon::createFromTime(12, 0, 0, $userTimezone)->format('H:i:s'); // Define noon time
+        $endTime = Carbon::createFromTime(22, 0, 0, $userTimezone)->format('H:i:s'); // Define end time
 
         if ($selectedDateInUserTimezone === Carbon::now($userTimezone)->format('Y-m-d')) {
             // If the selected date is the current day, apply the time restrictions
@@ -135,7 +137,7 @@ class BookingWidget extends Widget implements HasForms
             $this->unavailableSchedules = $this->selectedRestaurant->schedules()
                 ->where('day_of_week', $dayOfWeek)
                 ->where('is_available', false)
-                ->where('end_time', '>', $currentTime)
+                ->whereBetween('end_time', [$noonTime, $endTime])
                 ->get();
         } else {
             // If the selected date is in the future, show all available schedules for that day of the week
@@ -147,6 +149,7 @@ class BookingWidget extends Widget implements HasForms
             $this->unavailableSchedules = $this->selectedRestaurant->schedules()
                 ->where('day_of_week', $dayOfWeek)
                 ->where('is_available', false)
+                ->whereBetween('end_time', [$noonTime, $endTime])
                 ->get();
         }
 
