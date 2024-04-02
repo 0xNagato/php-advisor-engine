@@ -137,7 +137,7 @@ class BookingWidget extends Widget implements HasForms
             $this->unavailableSchedules = $this->selectedRestaurant->schedules()
                 ->where('day_of_week', $dayOfWeek)
                 ->where('is_available', false)
-                ->whereBetween('end_time', [$noonTime, $endTime])
+                ->whereBetween('start_time', [$noonTime, $endTime])
                 ->get();
         } else {
             // If the selected date is in the future, show all available schedules for that day of the week
@@ -149,7 +149,7 @@ class BookingWidget extends Widget implements HasForms
             $this->unavailableSchedules = $this->selectedRestaurant->schedules()
                 ->where('day_of_week', $dayOfWeek)
                 ->where('is_available', false)
-                ->whereBetween('end_time', [$noonTime, $endTime])
+                ->whereBetween('start_time', [$noonTime, $endTime])
                 ->get();
         }
 
