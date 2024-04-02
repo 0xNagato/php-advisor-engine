@@ -44,9 +44,17 @@ class ScheduleWidget extends Widget
                     ->danger()
                     ->send();
 
+                // Set the field to 30
                 $this->schedules[$date][$time] = 30;
-            }
 
+                // Update the available_tables field in the database to 30
+                auth()->user()->restaurant->schedules()
+                    ->where('day_of_week', $date)
+                    ->where('start_time', $time)
+                    ->update(['available_tables' => 30]);
+
+                return;
+            }
 
             if ($value === '') {
                 return;
