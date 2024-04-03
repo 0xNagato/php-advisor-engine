@@ -104,24 +104,24 @@
             <div class="flex space-x-4">
                 <div class="flex space-x-4 text-xs w-full">
                     <button
-                        :class="{ 'bg-gray-800 text-white': tab === 'collectPayment', 'bg-gray-100': tab !== 'collectPayment' }"
+                        :class="{ 'bg-indigo-600 text-white': tab === 'collectPayment', 'bg-gray-100': tab !== 'collectPayment' }"
                         @click="tab = 'collectPayment'"
-                        class="px-4 py-2 text-xs font-semibold rounded-lg shadow-lg shadow-gray-400 bg-gray-100">
-                        <x-gmdi-credit-card class="h-14 w-14 text-center font-semibold"/>
+                        class="px-4 py-2 text-xs font-semibold rounded-lg shadow-lg shadow-gray-400 bg-gray-100  flex items-center gap-1">
+                        <x-gmdi-credit-card class="h-6 w-6 text-center font-semibold"/>
                         <div>Credit Card</div>
                     </button>
                     <button
-                        :class="{ 'bg-gray-800 text-white': tab === 'smsPayment', 'bg-gray-100': tab !== 'smsPayment' }"
+                        :class="{ 'bg-indigo-600 text-white': tab === 'smsPayment', 'bg-gray-100': tab !== 'smsPayment' }"
                         @click="tab = 'smsPayment'"
-                        class="px-4 py-2 text-xs font-semibold rounded-lg shadow-lg shadow-gray-400 bg-gray-100">
-                        <x-gmdi-phone-android-r class="h-14 w-14 font-semibold"/>
+                        class="px-4 py-2 text-xs font-semibold rounded-lg shadow-lg shadow-gray-400 bg-gray-100  flex items-center gap-1">
+                        <x-gmdi-phone-android-r class="h-6 w-6 font-semibold"/>
                         <div>SMS</div>
                     </button>
                     <button
-                        :class="{ 'bg-gray-800 text-white': tab === 'qrCode', 'bg-gray-100': tab !== 'qrCode' }"
+                        :class="{ 'bg-indigo-600 text-white': tab === 'qrCode', 'bg-gray-100': tab !== 'qrCode' }"
                         @click="tab = 'qrCode'"
-                        class="px-4 py-2 text-xs font-semibold rounded-lg shadow-lg shadow-gray-400 bg-gray-100">
-                        <x-gmdi-qr-code class="h-14 w-14 font-semibold"/>
+                        class="px-4 py-2 text-xs font-semibold rounded-lg shadow-lg shadow-gray-400 bg-gray-100  flex items-center gap-1">
+                        <x-gmdi-qr-code class="h-6 w-6 font-semibold"/>
                         <div>QR Code</div>
                     </button>
                 </div>
@@ -155,12 +155,12 @@
                         const form = document.getElementById('form');
 
                         form.addEventListener('submit', async (e) => {
-                            const agreeCheckbox = document.querySelector('input[name=agree]');
-                            if (!agreeCheckbox.checked) {
-                                alert('You must agree to receive your reservation confirmation via text message.');
-                                e.preventDefault();
-                                return;
-                            }
+                            //const agreeCheckbox = document.querySelector('input[name=agree]');
+                            //if (!agreeCheckbox.checked) {
+                             //   alert('You must agree to receive your reservation confirmation via text message.');
+                              //  e.preventDefault();
+                               // return;
+                            //}
                             e.preventDefault();
                             $wire.$set('isLoading', true);
 
@@ -221,12 +221,12 @@
                                 <!-- A Stripe Element will be inserted here. -->
                             </div>
 
-                            <div class="flex items-center gap-2">
-                                <label class="text-[11px] flex items-center gap-1">
-                                    <x-filament::input.checkbox checked name="agree"/>
-                                    <span>I agree to receive my reservation confirmation via text message.</span>
-                                </label>
-                            </div>
+                            {{--                            <div class="flex items-center gap-2">--}}
+                            {{--                                <label class="text-[11px] flex items-center gap-1">--}}
+                            {{--                                    <x-filament::input.checkbox checked name="agree"/>--}}
+                            {{--                                    <span>I agree to receive my reservation confirmation via text message.</span>--}}
+                            {{--                                </label>--}}
+                            {{--                            </div>--}}
 
                             <x-filament::button class="w-full" type="submit" size="xl">
                                 Complete Reservation
