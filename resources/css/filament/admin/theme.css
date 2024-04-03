@@ -47,11 +47,14 @@ body::before {
     @apply text-indigo-600;
 }
 
+.fi-header {
+    @apply -my-4 !important;
+}
+
 .fi-header-heading {
     font-family: "Sanomat Web Regular Regular", serif;
     font-style: normal;
     /*@apply -my-4 tracking-wide text-3xl !important;*/
-    @apply tracking-wide text-3xl !important;
 }
 
 [x-persist="topbar.end"] {

@@ -104,23 +104,23 @@
             <div class="flex space-x-4">
                 <div class="flex space-x-4 text-xs w-full">
                     <button
-                        :class="{ 'bg-gray-800 text-white': tab === 'collectPayment', 'bg-gray-200': tab !== 'collectPayment' }"
+                        :class="{ 'bg-gray-800 text-white': tab === 'collectPayment', 'bg-gray-100': tab !== 'collectPayment' }"
                         @click="tab = 'collectPayment'"
-                        class="px-4 py-2 text-xs font-semibold rounded-lg shadow-lg shadow-gray-400 bg-gray-200">
+                        class="px-4 py-2 text-xs font-semibold rounded-lg shadow-lg shadow-gray-400 bg-gray-100">
                         <x-gmdi-credit-card class="h-14 w-14 text-center font-semibold"/>
                         <div>Credit Card</div>
                     </button>
                     <button
-                        :class="{ 'bg-gray-800 text-white': tab === 'smsPayment', 'bg-gray-200': tab !== 'smsPayment' }"
+                        :class="{ 'bg-gray-800 text-white': tab === 'smsPayment', 'bg-gray-100': tab !== 'smsPayment' }"
                         @click="tab = 'smsPayment'"
-                        class="px-4 py-2 text-xs font-semibold rounded-lg shadow-lg shadow-gray-400 bg-gray-200">
+                        class="px-4 py-2 text-xs font-semibold rounded-lg shadow-lg shadow-gray-400 bg-gray-100">
                         <x-gmdi-phone-android-r class="h-14 w-14 font-semibold"/>
                         <div>SMS</div>
                     </button>
                     <button
-                        :class="{ 'bg-gray-800 text-white': tab === 'qrCode', 'bg-gray-200': tab !== 'qrCode' }"
+                        :class="{ 'bg-gray-800 text-white': tab === 'qrCode', 'bg-gray-100': tab !== 'qrCode' }"
                         @click="tab = 'qrCode'"
-                        class="px-4 py-2 text-xs font-semibold rounded-lg shadow-lg shadow-gray-400 bg-gray-200">
+                        class="px-4 py-2 text-xs font-semibold rounded-lg shadow-lg shadow-gray-400 bg-gray-100">
                         <x-gmdi-qr-code class="h-14 w-14 font-semibold"/>
                         <div>QR Code</div>
                     </button>
