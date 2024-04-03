@@ -4,8 +4,8 @@ body,
 body *:not(html):not(style):not(br):not(tr):not(code) {
     box-sizing: border-box;
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
-        Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji",
-        "Segoe UI Symbol";
+    Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji",
+    "Segoe UI Symbol";
     position: relative;
 }
 
@@ -21,7 +21,7 @@ body {
 }
 
 body {
-    background-image: url("https://dev.primavip.co/images/new-waves.png");
+    background-image: url("https://dev.primavip.co/images/colors.jpeg");
     background-repeat: no-repeat;
     background-position: center;
     background-size: cover;
