@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Models\SmsResponse;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\GuzzleException;
 use JsonException;
@@ -62,6 +63,12 @@ class SimpleTextingAdapter
                 'fallbackText' => $fallbackText,
                 'mediaItems' => $mediaItems,
             ]
+        ]);
+
+        SmsResponse::create([
+            'phone_number' => $contactPhone,
+            'response' => $response->getBody()->getContents(),
+            'message' => $text,
         ]);
 
         return json_decode($response->getBody(), false, 512, JSON_THROW_ON_ERROR);

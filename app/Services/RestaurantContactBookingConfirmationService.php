@@ -37,7 +37,7 @@ class RestaurantContactBookingConfirmationService
 
         app(SimpleTextingAdapter::class)->sendMessage(
             $contact->contact_phone,
-            "PRIMA reservation for $booking->guest_name $bookingDate at $bookingTime with $booking->guest_count guests. Confirm reservation by clicking here $confirmationUrl."
+            "PRIMA Reservation - $bookingDate at $bookingTime, $booking->guest_name, $booking->guest_count guests, $booking->guest_phone."
         );
 
     }

@@ -91,48 +91,47 @@
 
 
     @if ($booking && (BookingStatus::PENDING === $booking->status || BookingStatus::GUEST_ON_PAGE === $booking->status))
-        <div class="w-full -mt-4">
-            <livewire:booking.invoice-small :booking="$booking"/>
-        </div>
 
-
-        @env('local')
-            <x-filament::button tag="a" :href="$bookingUrl">
-                Customer Booking Link
-            </x-filament::button>
-        @endenv
+        {{--        @env('local')--}}
+        {{--            <x-filament::button tag="a" :href="$bookingUrl">--}}
+        {{--                Customer Booking Link--}}
+        {{--            </x-filament::button>--}}
+        {{--        @endenv--}}
 
 
         <div x-data="{ tab: 'collectPayment' }" id="tabs">
 
             <div class="flex space-x-4">
-                <div class="flex space-x-1 text-xs border-b-2 border-indigo-600 w-full">
+                <div class="flex space-x-4 text-xs w-full">
                     <button
-                        :class="{ 'bg-indigo-600 text-white': tab === 'collectPayment' }"
+                        :class="{ 'bg-gray-800 text-white': tab === 'collectPayment', 'bg-gray-200': tab !== 'collectPayment' }"
                         @click="tab = 'collectPayment'"
-                        class="px-4 py-2 text-xs font-semibold rounded-t bg-gray-50">
-                        Credit Card
+                        class="px-4 py-2 text-xs font-semibold rounded-lg shadow-lg shadow-gray-400 bg-gray-200">
+                        <x-gmdi-credit-card class="h-14 w-14 text-center font-semibold"/>
+                        <div>Credit Card</div>
                     </button>
                     <button
-                        :class="{ 'bg-indigo-600 text-white': tab === 'smsPayment' }"
+                        :class="{ 'bg-gray-800 text-white': tab === 'smsPayment', 'bg-gray-200': tab !== 'smsPayment' }"
                         @click="tab = 'smsPayment'"
-                        class="px-4 py-2 text-xs font-semibold rounded-t bg-gray-50">
-                        SMS Link
+                        class="px-4 py-2 text-xs font-semibold rounded-lg shadow-lg shadow-gray-400 bg-gray-200">
+                        <x-gmdi-phone-android-r class="h-14 w-14 font-semibold"/>
+                        <div>SMS</div>
                     </button>
                     <button
-                        :class="{ 'bg-indigo-600 text-white': tab === 'qrCode' }"
+                        :class="{ 'bg-gray-800 text-white': tab === 'qrCode', 'bg-gray-200': tab !== 'qrCode' }"
                         @click="tab = 'qrCode'"
-                        class="px-4 py-2 text-xs font-semibold rounded-t bg-gray-50">
-                        QR Code
+                        class="px-4 py-2 text-xs font-semibold rounded-lg shadow-lg shadow-gray-400 bg-gray-200">
+                        <x-gmdi-qr-code class="h-14 w-14 font-semibold"/>
+                        <div>QR Code</div>
                     </button>
                 </div>
             </div>
 
-            <div x-show="tab === 'collectPayment'" class="mt-4">
+            <div x-show="tab === 'collectPayment'" class="mt-6">
                 <!-- Collect Payment Tab Content -->
-                <div class="text-base font-semibold mb-3 text-center">
-                    Enter Reservation Details
-                </div>
+                {{--                <div class="text-base font-semibold mb-3 text-center">--}}
+                {{--                    Enter Reservation Details--}}
+                {{--                </div>--}}
 
                 <!-- @todo Refactor this to a separate component -->
                 <div wire:ignore class="flex flex-col items-center gap-3" x-data="{}" x-init="() => {
@@ -193,13 +192,13 @@
                             <div class="flex items-center w-full gap-2">
                                 <label class="w-full">
                                     <input name="first_name" type="text"
-                                           class="w-full rounded-lg border border-indigo-600 text-sm h-[40px]"
+                                           class="w-full rounded-lg border border-gray-400 text-sm h-[40px]"
                                            placeholder="First Name" required>
                                 </label>
 
                                 <label class="w-full">
                                     <input name="last_name" type="text"
-                                           class="w-full rounded-lg border border-indigo-600 text-sm h-[40px]"
+                                           class="w-full rounded-lg border border-gray-400 text-sm h-[40px]"
                                            placeholder="Last Name" required>
                                 </label>
 
@@ -207,18 +206,18 @@
 
                             <label class="w-full">
                                 <input name="phone" type="text"
-                                       class="w-full rounded-lg border border-indigo-600 text-sm h-[40px]"
+                                       class="w-full rounded-lg border border-gray-400 text-sm h-[40px]"
                                        placeholder="Cell Phone Number" required>
                             </label>
 
                             <label class="w-full">
                                 <input name="email" type="email"
-                                       class="w-full rounded-lg border border-indigo-600 text-sm h-[40px]"
+                                       class="w-full rounded-lg border border-gray-400 text-sm h-[40px]"
                                        placeholder="Email Address (optional)">
                             </label>
 
                             <div id="card-element"
-                                 class="w-full rounded-lg border border-indigo-600 text-sm bg-white px-2 py-3 h-[40px]">
+                                 class="w-full rounded-lg border border-gray-400 text-sm bg-white px-2 py-3 h-[40px]">
                                 <!-- A Stripe Element will be inserted here. -->
                             </div>
 
@@ -229,11 +228,15 @@
                                 </label>
                             </div>
 
-                            <x-filament::button class="w-full" type="submit" color="indigo" size="xl">
+                            <x-filament::button class="w-full" type="submit" size="xl">
                                 Complete Reservation
                             </x-filament::button>
                         </fieldset>
                     </form>
+
+                    <div class="w-full">
+                        <livewire:booking.invoice-small :booking="$booking"/>
+                    </div>
 
                 </div>
             </div>
