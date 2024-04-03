@@ -129,8 +129,8 @@ class BookingWidget extends Widget implements HasForms
         if ($selectedDateInUserTimezone === Carbon::now($userTimezone)->format('Y-m-d')) {
             // If the selected date is the current day, apply the time restrictions
             $this->schedules = $this->selectedRestaurant->schedules()
+                ->available() // Use the 'available' scope
                 ->where('day_of_week', $dayOfWeek)
-                ->where('is_available', true)
                 ->where('end_time', '>', $currentTime)
                 ->get();
 
@@ -142,8 +142,8 @@ class BookingWidget extends Widget implements HasForms
         } else {
             // If the selected date is in the future, show all available schedules for that day of the week
             $this->schedules = $this->selectedRestaurant->schedules()
+                ->available() // Use the 'available' scope
                 ->where('day_of_week', $dayOfWeek)
-                ->where('is_available', true)
                 ->get();
 
             $this->unavailableSchedules = $this->selectedRestaurant->schedules()
