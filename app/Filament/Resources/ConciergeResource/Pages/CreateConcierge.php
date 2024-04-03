@@ -73,8 +73,13 @@ class CreateConcierge extends CreateRecord
         $user->assignRole('concierge');
         $user->notify(new ConciergeCreated($user));
 
-        return $user->concierge()->create([
+
+        $concierge = $user->concierge()->create([
             'hotel_name' => $data['hotel_name'],
         ]);
+
+        \App\Events\ConciergeCreated::dispatch($concierge);
+
+        return $concierge;
     }
 }

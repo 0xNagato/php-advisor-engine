@@ -10,9 +10,6 @@ use Illuminate\Bus\Queueable;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 use Illuminate\Support\Facades\Password;
-use NotificationChannels\Twilio\TwilioChannel;
-use NotificationChannels\Twilio\TwilioMessage;
-use NotificationChannels\Twilio\TwilioSmsMessage;
 
 class ConciergeCreated extends Notification
 {
@@ -46,7 +43,7 @@ class ConciergeCreated extends Notification
      */
     public function via(object $notifiable): array
     {
-        return ['mail', TwilioChannel::class];
+        return ['mail'];
     }
 
     /**
@@ -58,12 +55,6 @@ class ConciergeCreated extends Notification
             ->from('welcome@primavip.co', 'PRIMA')
             ->subject('Welcome to PRIMA!')
             ->markdown('mail.concierge-welcome-mail', ['passwordResetUrl' => $this->passwordResetUrl]);
-    }
-
-    public function toTwilio(object $notifiable): TwilioSmsMessage|TwilioMessage
-    {
-        return (new TwilioSmsMessage())
-            ->content("Welcome to PRIMA! Your account has been created. Please click {$this->passwordResetUrl} to login and update your payment info and begin making reservations. Thank you for joining us!");
     }
 
     /**

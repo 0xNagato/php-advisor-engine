@@ -2,15 +2,12 @@
 
 namespace App\Livewire;
 
-use App\Events\SMSMessageSent;
+use App\Services\SimpleTextingAdapter;
 use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
 use Filament\Forms\Form;
 use Filament\Notifications\Notification;
 use Filament\Widgets\Widget;
-use Twilio\Exceptions\ConfigurationException;
-use Twilio\Exceptions\TwilioException;
-use Twilio\Rest\Client;
 use Ysfkaya\FilamentPhoneInput\Forms\PhoneInput;
 
 class SMSInput extends Widget implements HasForms
@@ -37,24 +34,14 @@ class SMSInput extends Widget implements HasForms
             ]);
     }
 
-    /**
-     * @throws ConfigurationException
-     * @throws TwilioException
-     */
     public function send(): void
     {
-        $twilio = new Client(config('twilio-notification-channel.account_sid'), config('twilio-notification-channel.auth_token'));
-        $message = $twilio->messages->create(
+        app(SimpleTextingAdapter::class)->sendMessage(
             $this->phoneNumber,
-            [
-                'from' => config('twilio-notification-channel.from'),
-                'body' => $this->message,
-            ]
+            $this->message
         );
 
-        $this->dispatch('sms-sent', messageId: $message->sid);
-
-        SMSMessageSent::dispatch($message);
+        $this->dispatch('sms-sent');
 
         Notification::make()
             ->title('SMS Message Sent Successfully')

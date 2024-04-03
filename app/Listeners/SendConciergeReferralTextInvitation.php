@@ -3,7 +3,9 @@
 namespace App\Listeners;
 
 use App\Events\ConciergeReferredViaText;
-use App\Notifications\ConciergeReferredText;
+use App\Services\SimpleTextingAdapter;
+use AshAllenDesign\ShortURL\Facades\ShortURL;
+use Illuminate\Support\Facades\URL;
 
 class SendConciergeReferralTextInvitation
 {
@@ -20,6 +22,18 @@ class SendConciergeReferralTextInvitation
      */
     public function handle(ConciergeReferredViaText $event): void
     {
-        $event->conciergeReferral->notify(new ConciergeReferredText($event->conciergeReferral));
+        $referrer = $event->conciergeReferral->concierge->user;
+
+        $url = URL::temporarySignedRoute('concierge.invitation', now()->addDays(), [
+            'conciergeReferral' => $event->conciergeReferral,
+        ]);
+
+        $shortURL = ShortURL::destinationUrl($url)->make()->default_short_url;
+
+        app(SimpleTextingAdapter::class)->sendMessage(
+            $event->conciergeReferral->phone,
+            "You've been invited to PRIMA by $referrer->name. Please click $shortURL to create your profile and start earning! Welcome aboard!"
+        );
+
     }
 }

@@ -41,4 +41,10 @@ return [
         'publishable_key' => env('STRIPE_PUBLISHABLE_KEY'),
     ],
 
+    'simple_texting' => [
+        'api_key' => env('SIMPLE_TEXTING_API_KEY'),
+        'base_uri' => env('SIMPLE_TEXTING_BASE_URI'),
+        'from_phone' => env('SIMPLE_TEXTING_FROM_PHONE'),
+    ],
+
 ];

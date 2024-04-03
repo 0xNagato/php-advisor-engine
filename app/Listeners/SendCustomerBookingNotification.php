@@ -3,10 +3,10 @@
 namespace App\Listeners;
 
 use App\Events\BookingPaid;
-use App\Notifications\CustomerBookingPaid;
+use App\Services\SimpleTextingAdapter;
+use Carbon\CarbonInterface;
 use Illuminate\Contracts\Queue\ShouldQueue;
-use Illuminate\Notifications\AnonymousNotifiable;
-use NotificationChannels\Twilio\TwilioChannel;
+use ShortURL;
 
 class SendCustomerBookingNotification implements ShouldQueue
 {
@@ -23,7 +23,31 @@ class SendCustomerBookingNotification implements ShouldQueue
      */
     public function handle(BookingPaid $event): void
     {
-        $notifiable = (new AnonymousNotifiable())->route(TwilioChannel::class, $event->booking->guest_phone);
-        $notifiable->notify(new CustomerBookingPaid($event->booking));
+        $bookingDate = $this->getFormattedDate($event->booking->booking_at);
+
+        $bookingTime = $event->booking->booking_at->format('g:ia');
+
+        $invoiceUrl = ShortURL::destinationUrl(route('customer.invoice', $event->booking->uuid))->make()->default_short_url;
+
+        app(SimpleTextingAdapter::class)->sendMessage(
+            $event->booking->guest_phone,
+            "PRIMA reservation at {$event->booking->restaurant->restaurant_name} $bookingDate at $bookingTime with {$event->booking->guest_count} guests. View your invoice at $invoiceUrl."
+        );
+    }
+
+    private function getFormattedDate(CarbonInterface $date): string
+    {
+        $today = now();
+        $tomorrow = now()->addDay();
+
+        if ($date->isSameDay($today)) {
+            return 'today';
+        }
+
+        if ($date->isSameDay($tomorrow)) {
+            return 'tomorrow';
+        }
+
+        return $date->format('l \\t\\h\\e jS');
     }
 }

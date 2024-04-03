@@ -150,6 +150,8 @@ class CreateRestaurant extends CreateRecord
             ]);
         }
 
+        \App\Events\RestaurantCreated::dispatch($restaurant);
+
         return $restaurant;
     }
 }
