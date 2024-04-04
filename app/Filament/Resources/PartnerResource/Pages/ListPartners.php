@@ -8,12 +8,22 @@ use Filament\Forms\Components\DatePicker;
 use Filament\Pages\Dashboard\Actions\FilterAction;
 use Filament\Pages\Dashboard\Concerns\HasFiltersAction;
 use Filament\Resources\Pages\ListRecords;
+use Illuminate\Contracts\Support\Htmlable;
 
 class ListPartners extends ListRecords
 {
     use HasFiltersAction;
 
     protected static string $resource = PartnerResource::class;
+
+    public function getHeading(): Htmlable|string
+    {
+        if (auth()->user()->hasRole('super_admin')) {
+            return 'Partners';
+        }
+
+        return 'My Earnings';
+    }
 
     public function mount(): void
     {
