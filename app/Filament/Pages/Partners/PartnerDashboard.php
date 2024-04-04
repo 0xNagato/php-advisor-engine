@@ -17,7 +17,6 @@ class PartnerDashboard extends Dashboard
 
     public static function canAccess(): bool
     {
-        ds(auth()->user()->partner);
         return auth()->user()?->hasRole('partner');
     }
 
