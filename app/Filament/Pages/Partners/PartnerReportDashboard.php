@@ -5,19 +5,32 @@ namespace App\Filament\Pages\Partners;
 use App\Livewire\Partner\PartnerLeaderboard;
 use App\Livewire\Partner\PartnerRecentBookings;
 use App\Livewire\Partner\PartnerStats;
+use Filament\Forms\Components\DatePicker;
 use Filament\Pages\Dashboard;
 
-class PartnerDashboard extends Dashboard
+class PartnerReportDashboard extends Dashboard
 {
-    protected static ?string $navigationIcon = 'heroicon-o-currency-dollar';
+    use Dashboard\Concerns\HasFiltersAction;
 
     protected static ?string $title = 'My Earnings';
-    protected static string $view = 'filament.pages.partners.partner-dashboard';
+
+    protected static string $routePath = 'partner/report';
+
+    protected static ?string $navigationIcon = 'heroicon-o-currency-dollar';
+
     protected ?string $heading = 'My Earnings';
 
     public static function canAccess(): bool
     {
         return auth()->user()?->hasRole('partner');
+    }
+
+    public function mount(): void
+    {
+        $this->filters = [
+            'startDate' => $this->filters['startDate'] ?? now()->subDays(30),
+            'endDate' => $this->filters['endDate'] ?? now(),
+        ];
     }
 
     public function getHeaderWidgets(): array
@@ -39,4 +52,17 @@ class PartnerDashboard extends Dashboard
         ];
     }
 
+    protected function getHeaderActions(): array
+    {
+        return [
+            Dashboard\Actions\FilterAction::make()
+                ->label('Date Range')
+                ->icon('heroicon-o-calendar')
+                ->iconButton()
+                ->form([
+                    DatePicker::make('startDate'),
+                    DatePicker::make('endDate'),
+                ]),
+        ];
+    }
 }
