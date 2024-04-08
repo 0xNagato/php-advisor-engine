@@ -59,6 +59,13 @@ class Schedule extends Model
             ->where('available_tables', '>', 0);
     }
 
+    public function scopeUnavailable(Builder $query): Builder
+    {
+        return $query
+            ->where('is_available', false)
+            ->orWhere('available_tables', '<=', 0);
+    }
+
     public function getFormattedStartTimeAttribute(): string
     {
         return date('g:i a', strtotime($this->attributes['start_time']));

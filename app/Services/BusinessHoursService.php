@@ -22,7 +22,7 @@ class BusinessHoursService
             $selectedDays[$day] = !$schedules->every(fn($schedule) => $schedule->is_available === false);
             if ($selectedDays[$day]) {
                 $startTimes[$day] = $schedules->first(fn($schedule) => $schedule->is_available)?->start_time;
-                $endTimes[$day] = $schedules->last(fn($schedule) => $schedule->is_available)?->end_time;
+                $endTimes[$day] = $schedules->last(fn($schedule) => $schedule->is_available)?->start_time;
             }
         }
 
@@ -35,7 +35,7 @@ class BusinessHoursService
             $schedules = $data->restaurant->schedules()->where('day_of_week', $day)->get();
 
             foreach ($schedules as $schedule) {
-                $schedule->update(['is_available' => $data->selectedDays[$day] && $schedule->start_time >= $data->startTimes[$day] && $schedule->start_time < $data->endTimes[$day]]);
+                $schedule->update(['is_available' => $data->selectedDays[$day] && $schedule->start_time >= $data->startTimes[$day] && $schedule->start_time <= $data->endTimes[$day]]);
             }
         }
     }
