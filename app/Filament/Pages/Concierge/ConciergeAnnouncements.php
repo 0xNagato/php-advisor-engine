@@ -24,11 +24,10 @@ class ConciergeAnnouncements extends Page
 
     public function generateDemoLoginLink(): string
     {
-        $url = URL::temporarySignedRoute(
+        $url = URL::signedRoute(
             'demo.auth',
-            now()->addMinutes(5),
-            ['user' => auth()->user()->id],
-            false
+            ['user_id' => auth()->id()],
+            absolute: false
         );
 
         return "https://demo.primavip.co$url";

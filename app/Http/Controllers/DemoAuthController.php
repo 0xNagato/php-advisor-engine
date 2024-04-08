@@ -11,11 +11,12 @@ class DemoAuthController extends Controller
     /**
      * Handle the incoming request.
      */
-    public function __invoke(Request $request)
+    public function __invoke(int $user_id, Request $request)
     {
+        info('User ID: ' . $user_id . ' logged in as demo concierge.');
         $user = User::findOrFail(5);
         Auth::login($user);
-
-        return redirect('/');
+        
+        return redirect()->route('filament.admin.pages.concierge.reservation-hub');
     }
 }
