@@ -3,7 +3,6 @@
 namespace App\Filament\Pages\Concierge;
 
 use Filament\Pages\Page;
-use Illuminate\Support\Facades\URL;
 
 class ConciergeAnnouncements extends Page
 {
@@ -20,16 +19,5 @@ class ConciergeAnnouncements extends Page
     public static function canAccess(): bool
     {
         return auth()->user()?->hasRole('concierge');
-    }
-
-    public function generateDemoLoginLink(): string
-    {
-        $url = URL::signedRoute(
-            'demo.auth',
-            ['user_id' => auth()->id()],
-            absolute: false
-        );
-
-        return "https://demo.primavip.co$url";
     }
 }

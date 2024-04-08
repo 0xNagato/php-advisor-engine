@@ -21,9 +21,11 @@
             <p>Welcome aboard!</p>
             <p>We look forward to working with you.</p>
 
-            <x-filament::button tag="a" :href="$this->generateDemoLoginLink()" target="_blank">
+            <x-filament::button tag="a" href="/demo/redirect" target="_blank">
                 Access Demo Account
             </x-filament::button>
+
+            <p></p>
         </div>
     </x-filament::section>
 </x-filament-panels::page>
