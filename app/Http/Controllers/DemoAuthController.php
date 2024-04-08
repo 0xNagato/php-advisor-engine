@@ -13,10 +13,14 @@ class DemoAuthController extends Controller
      */
     public function __invoke(int $user_id, Request $request)
     {
+        if (!$request->hasValidSignature()) {
+            abort(401);
+        }
+        
         info('User ID: ' . $user_id . ' logged in as demo concierge.');
         $user = User::findOrFail(5);
         Auth::login($user);
-        
+
         return redirect()->route('filament.admin.pages.concierge.reservation-hub');
     }
 }

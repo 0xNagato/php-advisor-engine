@@ -22,5 +22,4 @@ Route::get('/invitation/{conciergeReferral}', ConciergeInvitation::class)
     ->middleware('signed');
 
 Route::get('/demo/{user_id}', DemoAuthController::class)
-    ->name('demo.auth')
-    ->middleware('signed');
+    ->name('demo.auth');
