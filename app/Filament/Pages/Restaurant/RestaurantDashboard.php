@@ -13,11 +13,11 @@ class RestaurantDashboard extends Dashboard
 
     protected static ?string $navigationIcon = 'heroicon-o-currency-dollar';
 
-    protected static ?string $title = 'My Earnings';
+    protected static ?string $title = 'Earnings Snapshot';
 
     protected static string $routePath = 'restaurant';
 
-    protected ?string $heading = 'My Earnings';
+    protected ?string $heading = 'Earnings Snapshot';
 
     public static function canAccess(): bool
     {

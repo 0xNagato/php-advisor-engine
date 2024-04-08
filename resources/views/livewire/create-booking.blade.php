@@ -1,7 +1,7 @@
 @php use App\Enums\BookingStatus; @endphp
 <div class="flex flex-col justify-center min-h-screen p-4 antialiased wavy-background h-screen">
     <x-filament-panels::logo/>
-    <div class="flex flex-col items-center pt-20 flex-grow max-w-lg mx-auto">
+    <div class="flex flex-col items-center pt-10 flex-grow max-w-lg mx-auto">
         {{--    <div class="flex flex-col items-center pt-20 sm:pt-0 sm:justify-center flex-grow max-w-lg mx-auto">--}}
         @if($booking->status === BookingStatus::CONFIRMED)
             <div class="flex flex-col items-center gap-3" id="form">
@@ -108,6 +108,10 @@
                         <x-filament::button class="w-full" type="submit" color="indigo" size="xl">
                             Complete Reservation
                         </x-filament::button>
+
+                        <div class="font-semibold mt-1 text-sm text-center">
+                            Fees paid are for reservation only. Not applicable towards restaurant bill.
+                        </div>
                     </fieldset>
                 </form>
             </div>

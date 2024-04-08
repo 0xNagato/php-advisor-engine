@@ -27,9 +27,9 @@ class PaymentInformation extends Page
     public string $account_type;
 
     public array $payoutOptions = [
-        'ACH',
+        'Direct Deposit',
         'PayPal',
-        'Venmo',
+        'Check',
     ];
 
     public int $charity_percentage;

@@ -15,16 +15,16 @@
                 </x-filament::input.select>
             </x-filament::input.wrapper>
 
-            @if ($payout_type === 'PayPal' || $payout_type === 'Venmo')
+            @if ($payout_type === 'PayPal' || $payout_type === 'Check')
                 <x-filament::input.wrapper>
                     <x-filament::input
                         type="text"
                         required
                         wire:model="payout_name"
-                        placeholder="{{ $payout_type === 'PayPal' ? 'PayPal Email' : 'Venmo Username' }}"
+                        placeholder="{{ $payout_type === 'PayPal' ? 'PayPal Email' : 'Name or Company Name' }}"
                     />
                 </x-filament::input.wrapper>
-            @elseif($payout_type === 'ACH')
+            @elseif($payout_type === 'Direct Deposit')
                 <x-filament::input.wrapper>
                     <x-filament::input
                         type="text"

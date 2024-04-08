@@ -92,11 +92,11 @@
 
     @if ($booking && (BookingStatus::PENDING === $booking->status || BookingStatus::GUEST_ON_PAGE === $booking->status))
 
-        {{--        @env('local')--}}
-        {{--            <x-filament::button tag="a" :href="$bookingUrl">--}}
-        {{--                Customer Booking Link--}}
-        {{--            </x-filament::button>--}}
-        {{--        @endenv--}}
+        @env('local')
+            <x-filament::button tag="a" :href="$bookingUrl" target="_new">
+                Customer Booking Link
+            </x-filament::button>
+        @endenv
 
 
         <div x-data="{ tab: 'collectPayment' }" id="tabs">

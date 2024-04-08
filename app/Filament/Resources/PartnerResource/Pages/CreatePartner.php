@@ -55,7 +55,7 @@ class CreatePartner extends CreateRecord
                         TextInput::make('percentage')
                             ->label('Percentage')
                             ->placeholder('Percentage')
-                            ->default(10)
+                            ->default(20)
                             ->suffix('%')
                             ->numeric()
                             ->required(),
