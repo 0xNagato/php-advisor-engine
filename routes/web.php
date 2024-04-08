@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\DemoAuthController;
 use App\Http\Controllers\DownloadInvoiceController;
 use App\Livewire\Booking\CreateBooking;
 use App\Livewire\Booking\CustomerInvoice;
@@ -20,6 +21,6 @@ Route::get('/invitation/{conciergeReferral}', ConciergeInvitation::class)
     ->name('concierge.invitation')
     ->middleware('signed');
 
-Route::get('/debug-sentry', function () {
-    throw new RuntimeException('My first Sentry error!');
-});
+Route::get('/demo', DemoAuthController::class)
+    ->name('demo.auth')
+    ->middleware('signed');

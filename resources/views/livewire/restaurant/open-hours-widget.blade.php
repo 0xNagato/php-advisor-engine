@@ -1,5 +1,5 @@
 <div>
-    <form wire:submit.prevent="saveBusinessHours"
+    <form wire:submit.prevent="saveHours"
           class="relative w-full mx-auto overflow-hidden text-sm font-normal bg-white border border-gray-200 rounded-lg shadow p-4">
 
         @foreach ($daysOfWeek as $day)

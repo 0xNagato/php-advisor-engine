@@ -4,7 +4,7 @@ namespace App\Data\Restaurant;
 
 use Spatie\LaravelData\Data;
 
-class LoadBusinessHoursData extends Data
+class LoadReservationHoursData extends Data
 {
     public function __construct(
         public array $startTimes,

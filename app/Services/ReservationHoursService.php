@@ -2,15 +2,15 @@
 
 namespace App\Services;
 
-use App\Data\Restaurant\LoadBusinessHoursData;
-use App\Data\Restaurant\SaveBusinessHoursData;
+use App\Data\Restaurant\LoadReservationHoursData;
+use App\Data\Restaurant\SaveReservationHoursData;
 use App\Models\Restaurant;
 
-class BusinessHoursService
+class ReservationHoursService
 {
     protected array $daysOfWeek = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
 
-    public function loadBusinessHours(Restaurant $restaurant): LoadBusinessHoursData
+    public function loadHours(Restaurant $restaurant): LoadReservationHoursData
     {
         $startTimes = [];
         $endTimes = [];
@@ -26,10 +26,10 @@ class BusinessHoursService
             }
         }
 
-        return new LoadBusinessHoursData(startTimes: $startTimes, endTimes: $endTimes, selectedDays: $selectedDays);
+        return new LoadReservationHoursData(startTimes: $startTimes, endTimes: $endTimes, selectedDays: $selectedDays);
     }
 
-    public function saveBusinessHours(SaveBusinessHoursData $data): void
+    public function saveHours(SaveReservationHoursData $data): void
     {
         foreach ($this->daysOfWeek as $day) {
             $schedules = $data->restaurant->schedules()->where('day_of_week', $day)->get();

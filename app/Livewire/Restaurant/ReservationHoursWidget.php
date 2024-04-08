@@ -2,16 +2,16 @@
 
 namespace App\Livewire\Restaurant;
 
-use App\Data\Restaurant\SaveBusinessHoursData;
+use App\Data\Restaurant\SaveReservationHoursData;
 use App\Models\Restaurant;
-use App\Services\BusinessHoursService;
+use App\Services\ReservationHoursService;
 use Carbon\Carbon;
 use DanHarrin\LivewireRateLimiting\Exceptions\TooManyRequestsException;
 use DanHarrin\LivewireRateLimiting\WithRateLimiting;
 use Filament\Notifications\Notification;
 use Filament\Widgets\Widget;
 
-class BusinessHoursWidget extends Widget
+class ReservationHoursWidget extends Widget
 {
     use WithRateLimiting;
 
@@ -29,17 +29,17 @@ class BusinessHoursWidget extends Widget
 
 
     protected Restaurant $restaurant;
-    protected BusinessHoursService $businessHoursService;
+    protected ReservationHoursService $reservationHoursService;
 
-    public function boot(BusinessHoursService $businessHoursService): void
+    public function boot(ReservationHoursService $reservationHoursService): void
     {
         $this->restaurant = auth()->user()->restaurant;
-        $this->businessHoursService = $businessHoursService;
+        $this->reservationHoursService = $reservationHoursService;
     }
 
     public function mount(): void
     {
-        $data = $this->businessHoursService->loadBusinessHours($this->restaurant);
+        $data = $this->reservationHoursService->loadHours($this->restaurant);
 
         $this->startTimes = $data->startTimes;
         $this->endTimes = $data->endTimes;
@@ -64,7 +64,7 @@ class BusinessHoursWidget extends Widget
         $this->endTimes[$key] = Carbon::createFromFormat('H:i', substr($value, 0, 5))->format('H:i:s');
     }
 
-    public function saveBusinessHours(): void
+    public function saveHours(): void
     {
         try {
             $this->rateLimit(2);
@@ -92,17 +92,17 @@ class BusinessHoursWidget extends Widget
             }
         }
 
-        $this->businessHoursService->saveBusinessHours(new SaveBusinessHoursData(
+        $this->reservationHoursService->saveHours(new SaveReservationHoursData(
             restaurant: $this->restaurant,
             startTimes: $this->startTimes,
             endTimes: $this->endTimes,
             selectedDays: $this->selectedDays,
         ));
 
-        $this->dispatch('business-hours-updated');
+        $this->dispatch('reservation-hours-updated');
 
         Notification::make()
-            ->title('Business hours saved successfully.')
+            ->title('Reservation hours saved successfully.')
             ->success()
             ->send();
     }

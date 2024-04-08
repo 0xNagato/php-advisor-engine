@@ -17,7 +17,7 @@ class ScheduleWidget extends Widget
 
     public $schedules = [];
     protected Restaurant $restaurant;
-    protected $listeners = ['business-hours-updated' => '$refresh'];
+    protected $listeners = ['reservation-hours-updated' => '$refresh'];
 
     public function updateTableAvailability($date, $time, $tables): void
     {
@@ -72,7 +72,7 @@ class ScheduleWidget extends Widget
         }
     }
 
-    #[On('business-hours-updated')]
+    #[On('reservation-hours-updated')]
     public function update(): void
     {
         $this->mount();

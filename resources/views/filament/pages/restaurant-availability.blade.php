@@ -35,7 +35,7 @@
         </div>
         <div class="relative w-full mt-2 content">
             <div :id="$id(tabId + '-content')" x-show="tabContentActive($el)" class="relative">
-                <livewire:restaurant.business-hours-widget/>
+                <livewire:restaurant.reservation-hours-widget/>
             </div>
 
             <div :id="$id(tabId + '-content')" x-show="tabContentActive($el)" class="relative" x-cloak>
