@@ -19,8 +19,6 @@ class UserResource extends Resource
 
     protected static ?int $navigationSort = 1;
 
-    // protected static bool $shouldRegisterNavigation = false;
-
     public static function shouldRegisterNavigation(): bool
     {
         return false;
@@ -63,11 +61,12 @@ class UserResource extends Resource
                     ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('main_role')
                     ->label('Role')
-                    ->color(fn (string $state): string => match ($state) {
+                    ->color(fn(string $state): string => match ($state) {
                         'Super Admin' => 'danger',
                         'Concierge' => 'info',
                         'Restaurant' => 'success',
                         'Partner' => 'warning',
+                        default => '',
                     })
                     ->badge()
                     ->searchable(),
@@ -88,13 +87,6 @@ class UserResource extends Resource
                 // Tables\Actions\EditAction::make(),
                 Impersonate::make(),
             ]);
-    }
-
-    public static function getRelations(): array
-    {
-        return [
-
-        ];
     }
 
     public static function getPages(): array

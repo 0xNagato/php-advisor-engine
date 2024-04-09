@@ -23,7 +23,7 @@ class ConciergeReferralEarnings extends Page
 
     protected static ?int $navigationSort = 2;
 
-    protected static ?string $slug = 'partner/concierge-referral-earnings/{conciergeId?}';
+    protected static ?string $slug = 'partner/concierge/earnings/{conciergeId?}';
 
     public ?int $conciergeId;
 

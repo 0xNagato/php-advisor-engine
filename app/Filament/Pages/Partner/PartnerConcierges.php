@@ -4,7 +4,7 @@ namespace App\Filament\Pages\Partner;
 
 use App\Filament\Pages\Concierge\ConciergeReferral;
 
-class PartnerConciergeReferrals extends ConciergeReferral
+class PartnerConcierges extends ConciergeReferral
 {
     protected static ?string $navigationIcon = 'govicon-user-suit';
 
@@ -14,7 +14,7 @@ class PartnerConciergeReferrals extends ConciergeReferral
 
     protected static ?int $navigationSort = 1;
 
-    protected static ?string $slug = 'partner/concierge-referrals';
+    protected static ?string $slug = 'partner/concierges';
 
     public static function canAccess(): bool
     {

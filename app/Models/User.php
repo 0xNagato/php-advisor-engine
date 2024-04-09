@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\Casts\AsArrayObject;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Eloquent\Relations\HasOneThrough;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Str;
@@ -138,14 +139,19 @@ class User extends Authenticatable implements FilamentUser, HasAvatar
         return $this->hasOne(Partner::class);
     }
 
-    public function referrer(): HasOne
-    {
-        return $this->hasOne(Concierge::class, 'id', 'concierge_referral_id');
-    }
-
     public function referrals(): HasMany
     {
         return $this->hasMany(Referral::class, 'referrer_id');
+    }
+
+    public function referral(): HasOne
+    {
+        return $this->hasOne(Referral::class);
+    }
+
+    public function referrer(): HasOneThrough
+    {
+        return $this->hasOneThrough(__CLASS__, Referral::class, 'user_id', 'id', 'id', 'referrer_id');
     }
 
     public function getHasSecuredAttribute(): bool

@@ -2,9 +2,9 @@
 
 namespace App\Filament\Pages\Partner;
 
-use App\Livewire\Partner\ConciergeReferralBookingsTable;
-use App\Livewire\Partner\ConciergeReferralStats;
-use App\Models\Concierge;
+use App\Livewire\Partner\RestaurantReferralBookingsTable;
+use App\Livewire\Partner\RestaurantReferralStats;
+use App\Models\Restaurant;
 use Filament\Forms\Components\DatePicker;
 use Filament\Pages\Dashboard\Actions\FilterAction;
 use Filament\Pages\Dashboard\Concerns\HasFiltersAction;
@@ -23,9 +23,9 @@ class RestaurantReferralEarnings extends Page
 
     protected static ?int $navigationSort = 4;
 
-    protected static ?string $slug = 'partner/restaurant-referral-earnings/{conciergeId?}';
+    protected static ?string $slug = 'partner/restaurant/earnings/{restaurantId?}';
 
-    public ?int $conciergeId;
+    public ?int $restaurantId;
 
     public static function canAccess(): bool
     {
@@ -34,18 +34,18 @@ class RestaurantReferralEarnings extends Page
 
     public function getHeading(): string|Htmlable
     {
-        if ($this->conciergeId) {
-            $concierge = Concierge::find($this->conciergeId);
+        if ($this->restaurantId) {
+            $restaurant = Restaurant::find($this->restaurantId);
 
-            return "{$concierge->user->name} Bookings";
+            return "{$restaurant->restaurant_name} Bookings";
         }
 
         return 'My Restaurant Earnings';
     }
 
-    public function mount(?int $conciergeId = null): void
+    public function mount(?int $restaurantId = null): void
     {
-        $this->conciergeId = $conciergeId;
+        $this->restaurantId = $restaurantId;
 
         $this->filters = [
             'startDate' => $this->filters['startDate'] ?? now()->subDays(30),
@@ -55,18 +55,18 @@ class RestaurantReferralEarnings extends Page
 
     public function getHeaderWidgets(): array
     {
-        $concierge = new Concierge();
-        if ($this->conciergeId) {
-            $concierge = Concierge::find($this->conciergeId);
+        $restaurant = new Restaurant();
+        if ($this->restaurantId) {
+            $restaurant = Restaurant::find($this->restaurantId);
         }
 
         return [
-            ConciergeReferralStats::make([
-                'concierge' => $concierge,
+            RestaurantReferralStats::make([
+                'restaurant' => $restaurant,
                 'columnSpan' => 'full',
             ]),
-            ConciergeReferralBookingsTable::make([
-                'concierge' => $concierge,
+            RestaurantReferralBookingsTable::make([
+                'restaurant' => $restaurant,
                 'columnSpan' => 'full',
             ]),
         ];

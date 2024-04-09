@@ -2,10 +2,11 @@
 
 namespace App\Filament\Resources\RestaurantResource\Pages;
 
+use App\Events\RestaurantCreated;
 use App\Filament\Resources\RestaurantResource;
+use App\Models\Referral;
 use App\Models\Schedule;
 use App\Models\User;
-use App\Notifications\RestaurantCreated;
 use Carbon\Carbon;
 use Filament\Forms\Components\Checkbox;
 use Filament\Forms\Components\Repeater;
@@ -116,8 +117,20 @@ class CreateRestaurant extends CreateRecord
             'password' => Str::random(8),
         ]);
 
+        Referral::create([
+            'user_id' => $user->id,
+            'type' => 'restaurant',
+            'referrer_type' => auth()->user()->main_role,
+            'referrer_id' => auth()->id(),
+            'email' => $data['email'],
+            'phone' => $data['phone'],
+        ]);
+
         $user->assignRole('restaurant');
-        $user->notify(new RestaurantCreated($user));
+
+        // We are going to notify the restaurant once the partner
+        // has set up the restaurant account.
+        // $user->notify(new RestaurantCreated($user));
 
         $restaurant = $user->restaurant()->create([
             'restaurant_name' => $data['restaurant_name'],
@@ -137,8 +150,8 @@ class CreateRestaurant extends CreateRecord
             ],
         ]);
 
-        $startTime = Carbon::createFromTime(17, 0, 0); // 5pm
-        $endTime = Carbon::createFromTime(23, 30, 0); // 10:30pm
+        $startTime = Carbon::createFromTime(17); // 5pm
+        $endTime = Carbon::createFromTime(23, 30); // 10:30pm
 
         for ($time = $startTime; $time->lessThan($endTime); $time->addMinutes(30)) {
             Schedule::create([
@@ -150,8 +163,13 @@ class CreateRestaurant extends CreateRecord
             ]);
         }
 
-        \App\Events\RestaurantCreated::dispatch($restaurant);
+        RestaurantCreated::dispatch($restaurant);
 
         return $restaurant;
+    }
+
+    protected function getRedirectUrl(): string
+    {
+        return $this->previousUrl ?? self::getResource()::getUrl('index');
     }
 }

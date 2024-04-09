@@ -15,7 +15,7 @@ use Filament\Widgets\TableWidget as BaseWidget;
 
 class ConciergeReferralsTable extends BaseWidget
 {
-    public static ?string $heading = 'Referrals';
+    public static ?string $heading = 'Concierges';
 
     protected static bool $isLazy = true;
 
@@ -32,7 +32,10 @@ class ConciergeReferralsTable extends BaseWidget
     {
         return $table
             ->query(
-                auth()->user()->referrals()->orderBy('created_at', 'desc')->getQuery()
+                auth()->user()->referrals()
+                    ->orderBy('created_at', 'desc')
+                    ->where('type', 'concierge')
+                    ->getQuery()
             )
             ->recordUrl(function (Referral $record) {
                 if ($record->has_secured) {
@@ -41,6 +44,7 @@ class ConciergeReferralsTable extends BaseWidget
 
                 return null;
             })
+            ->emptyStateHeading('No concierges found.')
             ->columns([
                 TextColumn::make('label')
                     ->label('Referral'),
