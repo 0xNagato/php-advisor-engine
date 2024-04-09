@@ -1,9 +1,9 @@
 <?php
 
-namespace App\Livewire\Concierge;
+namespace App\Livewire\Partner;
 
 use App\Events\ConciergeReferredViaText;
-use App\Filament\Pages\Concierge\ConciergeReferralEarnings;
+use App\Filament\Pages\Partner\ConciergeReferralEarnings;
 use App\Models\Referral;
 use App\Notifications\ConciergeReferredEmail;
 use Filament\Notifications\Notification;
@@ -13,7 +13,7 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Filament\Widgets\TableWidget as BaseWidget;
 
-class ReferralsTable extends BaseWidget
+class ConciergeReferralsTable extends BaseWidget
 {
     public static ?string $heading = 'Referrals';
 

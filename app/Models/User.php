@@ -143,6 +143,11 @@ class User extends Authenticatable implements FilamentUser, HasAvatar
         return $this->hasOne(Concierge::class, 'id', 'concierge_referral_id');
     }
 
+    public function referrals(): HasMany
+    {
+        return $this->hasMany(Referral::class, 'referrer_id');
+    }
+
     public function getHasSecuredAttribute(): bool
     {
         return !blank($this->secured_at);

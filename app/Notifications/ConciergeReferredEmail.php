@@ -2,7 +2,7 @@
 
 namespace App\Notifications;
 
-use App\Models\ConciergeReferral;
+use App\Models\Referral;
 use App\Models\User;
 use AshAllenDesign\ShortURL\Exceptions\ShortURLException;
 use AshAllenDesign\ShortURL\Facades\ShortURL;
@@ -22,9 +22,9 @@ class ConciergeReferredEmail extends Notification
     /**
      * @throws ShortURLException
      */
-    public function __construct(public ConciergeReferral $conciergeReferral)
+    public function __construct(public Referral $conciergeReferral)
     {
-        $this->referrer = $this->conciergeReferral->concierge->user;
+        $this->referrer = $this->conciergeReferral->referrer;
 
         $url = URL::temporarySignedRoute('concierge.invitation', now()->addDays(), [
             'conciergeReferral' => $this->conciergeReferral,

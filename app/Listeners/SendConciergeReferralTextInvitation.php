@@ -22,7 +22,7 @@ class SendConciergeReferralTextInvitation
      */
     public function handle(ConciergeReferredViaText $event): void
     {
-        $referrer = $event->conciergeReferral->concierge->user;
+        $referrer = $event->conciergeReferral->referrer;
 
         $url = URL::temporarySignedRoute('concierge.invitation', now()->addDays(), [
             'conciergeReferral' => $event->conciergeReferral,

@@ -68,11 +68,6 @@ class Concierge extends Model
         return $this->hasMany(Booking::class, 'concierge_id');
     }
 
-    public function referrals(): HasMany
-    {
-        return $this->hasMany(ConciergeReferral::class);
-    }
-
     public function referringConcierge(): HasOneThrough
     {
         return $this->hasOneThrough(

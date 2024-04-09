@@ -2,7 +2,7 @@
 
 namespace App\Livewire\Partner;
 
-use App\Models\Booking;
+use App\Models\Earning;
 use App\Models\Partner;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
@@ -41,31 +41,29 @@ class PartnerRecentBookings extends BaseWidget
         $startDate = $this->filters['startDate'] ?? now()->subDays(30);
         $endDate = $this->filters['endDate'] ?? now();
 
-        $partnerWithBookings = Partner::withAllBookings()->find($this->partner->id);
-
-        $query = Booking::confirmed()->where(function ($query) use ($partnerWithBookings) {
-            $query->whereIn('id', $partnerWithBookings->conciergeBookings->pluck('id')->concat($partnerWithBookings->restaurantBookings->pluck('id')));
-        })->whereBetween('created_at', [$startDate, $endDate])->orderByDesc('created_at');
+        $query = Earning::where('user_id', $this->partner->user_id)
+            ->whereBetween('created_at', [$startDate, $endDate])
+            ->orderByDesc('created_at');
 
         return $table
-            ->recordUrl(fn (Booking $booking) => route('filament.admin.resources.bookings.view', $booking))
+            ->recordUrl(fn(Earning $earning) => route('filament.admin.resources.bookings.view', $earning->booking))
             ->query($query)
             ->searchable(false)
             ->columns([
-                TextColumn::make('id')
+                TextColumn::make('booking.id')
                     ->label('Booking ID')
                     ->toggleable(isToggledHiddenByDefault: true),
-                TextColumn::make('guest_name')
+                TextColumn::make('booking.guest_name')
                     ->label('Guest')
                     ->toggleable(isToggledHiddenByDefault: true)
                     ->searchable(),
-                TextColumn::make('schedule.restaurant.restaurant_name')
+                TextColumn::make('booking.schedule.restaurant.restaurant_name')
                     ->label('Restaurant')
                     ->searchable(),
-                TextColumn::make('booking_at')
+                TextColumn::make('booking.booking_at')
                     ->label('Date')
                     ->dateTime('D, M j'),
-                TextColumn::make('partner_earnings')
+                TextColumn::make('amount')
                     ->alignRight()
                     ->label('Earned')
                     ->currency('USD'),

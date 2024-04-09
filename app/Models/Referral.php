@@ -8,22 +8,24 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Notifications\Notifiable;
 use libphonenumber\PhoneNumberFormat;
 
-class ConciergeReferral extends Model
+class Referral extends Model
 {
     use HasUuids;
     use Notifiable;
 
     protected $fillable = [
-        'concierge_id',
+        'referrer_id',
         'email',
         'phone',
         'secured_at',
         'user_id',
+        'type',
+        'referrer_type',
     ];
 
-    public function concierge(): BelongsTo
+    public function referrer(): BelongsTo
     {
-        return $this->belongsTo(Concierge::class);
+        return $this->belongsTo(User::class);
     }
 
     public function user(): BelongsTo
@@ -38,7 +40,7 @@ class ConciergeReferral extends Model
 
     public function getHasSecuredAttribute(): bool
     {
-        return ! blank($this->secured_at);
+        return !blank($this->secured_at);
     }
 
     public function getLabelAttribute(): string

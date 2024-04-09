@@ -2,7 +2,7 @@
 
 namespace App\Livewire\Partner;
 
-use App\Models\Booking;
+use App\Models\Earning;
 use App\Models\Partner;
 use Filament\Tables;
 use Filament\Tables\Table;
@@ -30,14 +30,11 @@ class PartnerLeaderboard extends BaseWidget
         $startDate = $this->filters['startDate'] ?? now()->subDays(30);
         $endDate = $this->filters['endDate'] ?? now();
 
-        $query = Booking::select('partners.user_id', DB::raw('SUM(partner_concierge_fee) + SUM(partner_restaurant_fee) as total_earned'), DB::raw("CONCAT(users.first_name, ' ', users.last_name) as user_name"))
-            ->join('partners', function ($join) {
-                $join->on('partners.id', '=', 'bookings.partner_concierge_id')
-                    ->orOn('partners.id', '=', 'bookings.partner_restaurant_id');
-            })
-            ->join('users', 'users.id', '=', 'partners.user_id')
-            ->whereBetween('booking_at', [$startDate, $endDate])
-            ->groupBy('partners.user_id')
+        $query = Earning::select('earnings.user_id', 'partners.id as partner_id', DB::raw('SUM(amount) as total_earned'), DB::raw("CONCAT(users.first_name, ' ', users.last_name) as user_name"))
+            ->join('users', 'users.id', '=', 'earnings.user_id')
+            ->join('partners', 'partners.user_id', '=', 'earnings.user_id')
+            ->whereBetween('earnings.created_at', [$startDate, $endDate])
+            ->groupBy('earnings.user_id', 'partners.id')
             ->orderBy('total_earned', 'desc')
             ->limit(10);
 
@@ -56,7 +53,6 @@ class PartnerLeaderboard extends BaseWidget
                 Tables\Columns\TextColumn::make('user_name')
                     ->label('Partner Name')
                     ->formatStateUsing(function ($state, $record) {
-                        // current user is partner display their name if not display the name of the ******* else display names
                         if ($this->showFilters) {
                             if (auth()->user()->partner->user_id === $record->user_id) {
                                 return 'You';

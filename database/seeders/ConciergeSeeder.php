@@ -3,7 +3,7 @@
 namespace Database\Seeders;
 
 use App\Models\Concierge;
-use App\Models\ConciergeReferral;
+use App\Models\Referral;
 use App\Models\User;
 use Illuminate\Database\Seeder;
 use Random\RandomException;
@@ -42,14 +42,14 @@ class ConciergeSeeder extends Seeder
 
         $hotelNames->each(function ($hotelName) {
             $shouldAssignReferralId = random_int(0, 1) <= 0.5;
-            $conciergeId = $shouldAssignReferralId ? Concierge::pluck('id')->random() : null;
+            $concierge = $shouldAssignReferralId ? Concierge::with('user')->get()->random() : null;
 
-            $email = 'concierge@'.str_replace(' ', '', strtolower($hotelName)).'.com';
+            $email = 'concierge@' . str_replace(' ', '', strtolower($hotelName)) . '.com';
 
             $user = User::factory([
                 'first_name' => 'Concierge',
                 'email' => $email,
-                'concierge_referral_id' => $conciergeId,
+                'concierge_referral_id' => $concierge->id ?? null,
             ])
                 ->has(Concierge::factory([
                     'hotel_name' => $hotelName,
@@ -57,8 +57,8 @@ class ConciergeSeeder extends Seeder
                 ->create();
 
             if ($shouldAssignReferralId) {
-                ConciergeReferral::create([
-                    'concierge_id' => $conciergeId,
+                Referral::create([
+                    'referrer_id' => $concierge?->user->id,
                     'user_id' => $user->id,
                     'email' => $email,
                     'secured_at' => now(),

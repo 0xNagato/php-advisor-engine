@@ -2,7 +2,7 @@
 
 namespace App\Events;
 
-use App\Models\ConciergeReferral;
+use App\Models\Referral;
 use Illuminate\Broadcasting\Channel;
 use Illuminate\Broadcasting\InteractsWithSockets;
 use Illuminate\Broadcasting\PrivateChannel;
@@ -16,7 +16,7 @@ class ConciergeReferredViaEmail
     /**
      * Create a new event instance.
      */
-    public function __construct(public ConciergeReferral $conciergeReferral)
+    public function __construct(public Referral $conciergeReferral)
     {
         //
     }

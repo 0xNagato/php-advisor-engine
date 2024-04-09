@@ -2,7 +2,7 @@
 
 namespace App\Livewire\Concierge;
 
-use App\Models\ConciergeReferral;
+use App\Models\Referral;
 use App\Models\User;
 use DanHarrin\LivewireRateLimiting\Exceptions\TooManyRequestsException;
 use DanHarrin\LivewireRateLimiting\WithRateLimiting;
@@ -31,7 +31,7 @@ class ConciergeInvitation extends SimplePage
 
     protected static string $layout = 'components.layouts.app';
 
-    public ConciergeReferral $conciergeReferral;
+    public Referral $conciergeReferral;
 
     public ?array $data = [];
 
@@ -45,7 +45,7 @@ class ConciergeInvitation extends SimplePage
         return 'Secure Your Account';
     }
 
-    public function mount(ConciergeReferral $conciergeReferral): void
+    public function mount(Referral $conciergeReferral): void
     {
         $this->conciergeReferral = $conciergeReferral;
         $this->form->fill([
@@ -138,15 +138,25 @@ class ConciergeInvitation extends SimplePage
 
         $data = $this->form->getState();
 
-        $user = User::create([
+        $referrer = User::findOrFail($this->conciergeReferral->referrer_id);
+        $role = strtolower($referrer->main_role);
+
+        $userData = [
             'first_name' => $data['first_name'],
             'last_name' => $data['last_name'],
             'email' => $data['email'],
             'phone' => $data['phone'],
             'password' => bcrypt($data['password']),
-            'concierge_referral_id' => $this->conciergeReferral->concierge_id,
             'secured_at' => now(),
-        ]);
+        ];
+
+        if ($role === 'partner') {
+            $userData['partner_referral_id'] = $referrer->partner->id;
+        } else {
+            $userData['concierge_referral_id'] = $referrer->concierge->id;
+        }
+
+        $user = User::create($userData);
 
         $this->conciergeReferral->update([
             'user_id' => $user->id,

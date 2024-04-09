@@ -84,8 +84,7 @@ class DatabaseSeeder extends Seeder
             ConciergeSeeder::class,
             RestaurantSeeder::class,
             PartnerSeeder::class,
-            // ScheduleSeeder::class,
-            BookingSeeder::class,
+            // BookingSeeder::class,
             ShieldSeeder::class,
         ]);
 

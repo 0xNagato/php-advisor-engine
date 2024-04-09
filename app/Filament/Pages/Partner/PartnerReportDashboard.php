@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Filament\Pages\Partners;
+namespace App\Filament\Pages\Partner;
 
 use App\Livewire\Partner\PartnerLeaderboard;
 use App\Livewire\Partner\PartnerRecentBookings;
