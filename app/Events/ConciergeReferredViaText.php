@@ -16,7 +16,7 @@ class ConciergeReferredViaText
     /**
      * Create a new event instance.
      */
-    public function __construct(public Referral $conciergeReferral)
+    public function __construct(public Referral $referral)
     {
         //
     }

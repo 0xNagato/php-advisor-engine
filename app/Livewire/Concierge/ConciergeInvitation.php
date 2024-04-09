@@ -31,7 +31,7 @@ class ConciergeInvitation extends SimplePage
 
     protected static string $layout = 'components.layouts.app';
 
-    public Referral $conciergeReferral;
+    public Referral $referral;
 
     public ?array $data = [];
 
@@ -45,12 +45,12 @@ class ConciergeInvitation extends SimplePage
         return 'Secure Your Account';
     }
 
-    public function mount(Referral $conciergeReferral): void
+    public function mount(Referral $referral): void
     {
-        $this->conciergeReferral = $conciergeReferral;
+        $this->referral = $referral;
         $this->form->fill([
-            'email' => $conciergeReferral->email,
-            'phone' => $conciergeReferral->phone,
+            'email' => $referral->email,
+            'phone' => $referral->phone,
         ]);
     }
 
@@ -138,7 +138,7 @@ class ConciergeInvitation extends SimplePage
 
         $data = $this->form->getState();
 
-        $referrer = User::findOrFail($this->conciergeReferral->referrer_id);
+        $referrer = User::findOrFail($this->referral->referrer_id);
         $role = strtolower($referrer->main_role);
 
         $userData = [
@@ -158,7 +158,7 @@ class ConciergeInvitation extends SimplePage
 
         $user = User::create($userData);
 
-        $this->conciergeReferral->update([
+        $this->referral->update([
             'user_id' => $user->id,
             'secured_at' => now(),
         ]);

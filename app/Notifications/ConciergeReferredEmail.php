@@ -22,12 +22,12 @@ class ConciergeReferredEmail extends Notification
     /**
      * @throws ShortURLException
      */
-    public function __construct(public Referral $conciergeReferral)
+    public function __construct(public Referral $referral)
     {
-        $this->referrer = $this->conciergeReferral->referrer;
+        $this->referrer = $this->referral->referrer;
 
         $url = URL::temporarySignedRoute('concierge.invitation', now()->addDays(), [
-            'conciergeReferral' => $this->conciergeReferral,
+            'referral' => $this->referral,
         ]);
 
         $this->shortURL = ShortURL::destinationUrl($url)->make()->default_short_url;

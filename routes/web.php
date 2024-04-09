@@ -17,7 +17,7 @@ Route::get('/restaurants/confirm/{token}', RestaurantBookingConfirmation::class)
 
 Route::get('/bookings/create/{token}', CreateBooking::class)->name('bookings.create');
 
-Route::get('/invitation/{conciergeReferral}', ConciergeInvitation::class)
+Route::get('/invitation/{referral}', ConciergeInvitation::class)
     ->name('concierge.invitation')
     ->middleware('signed');
 
