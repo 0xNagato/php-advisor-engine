@@ -27,17 +27,17 @@
 
     @endif
 
-    @if(!isset($customerInvoice) && !$download)
-        <button class="absolute left-4 top-8 z-10 text-white font-bold prima-native:hidden sm:text-indigo-600"
-                onclick="window.history.back();">
-            &#x276E;&nbsp; Back
-        </button>
-    @endif
 
     <div
         class="bg-white rounded-xl shadow sm:max-w-3xl lg:mx-auto invoice-container flex flex-col @if($download) min-h-[10in] @endif"
     >
-        <div class="relative overflow-hidden text-center bg-indigo-800 min-h-32 rounded-t-xl">
+        <div class="relative overflow-hidden bg-indigo-800 min-h-32 rounded-t-xl">
+            @if(!isset($customerInvoice) && !$download)
+                <button class="text-white font-bold prima-native:hidden p-4"
+                        onclick="window.history.back();">
+                    &#x276E;&nbsp Back
+                </button>
+            @endif
             <!-- SVG Background Element -->
             <figure class="absolute inset-x-0 bottom-0 -mb-px ">
                 <svg preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg" x="0px" y="0px"

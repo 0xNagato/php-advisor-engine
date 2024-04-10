@@ -45,7 +45,7 @@ class Restaurant extends Model
 
     protected $casts = [
         'open_days' => 'array',
-        'contacts' => DataCollection::class.':'.RestaurantContactData::class,
+        'contacts' => DataCollection::class . ':' . RestaurantContactData::class,
         'non_prime_time' => 'array',
         'business_hours' => 'array',
     ];
@@ -80,7 +80,7 @@ class Restaurant extends Model
             $endTime = Carbon::createFromTime(23, 59); // End of the day
 
             while ($startTime->lessThanOrEqualTo($endTime)) {
-                $isAvailable = $startTime->hour >= 12 && $startTime->hour < 22; // Available from 12pm to 10pm
+                $isAvailable = $startTime->hour >= 12 && ($startTime->hour < 22 || ($startTime->hour === 22 && $startTime->minute < 30));
 
                 $this->schedules()->create([
                     'start_time' => $startTime->format('H:i:s'),
