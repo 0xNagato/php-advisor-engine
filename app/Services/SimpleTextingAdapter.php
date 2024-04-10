@@ -10,6 +10,7 @@ use JsonException;
 class SimpleTextingAdapter
 {
     protected Client $client;
+
     protected mixed $apiKey;
 
     public function __construct()
@@ -28,7 +29,7 @@ class SimpleTextingAdapter
     {
         $response = $this->client->request('GET', 'messages', [
             'headers' => [
-                'Authorization' => 'Bearer ' . $this->apiKey,
+                'Authorization' => 'Bearer '.$this->apiKey,
             ],
             'query' => [
                 'page' => $page,
@@ -36,7 +37,7 @@ class SimpleTextingAdapter
                 'accountPhone' => $accountPhone ?? config('services.simple_texting.from_phone'),
                 'since' => $since,
                 'contactPhone' => $contactPhone,
-            ]
+            ],
         ]);
 
         $body = $response->getBody();
@@ -52,7 +53,7 @@ class SimpleTextingAdapter
     {
         $response = $this->client->request('POST', 'messages', [
             'headers' => [
-                'Authorization' => 'Bearer ' . $this->apiKey,
+                'Authorization' => 'Bearer '.$this->apiKey,
             ],
             'json' => [
                 'contactPhone' => $contactPhone,
@@ -62,7 +63,7 @@ class SimpleTextingAdapter
                 'subject' => $subject,
                 'fallbackText' => $fallbackText,
                 'mediaItems' => $mediaItems,
-            ]
+            ],
         ]);
 
         SmsResponse::create([

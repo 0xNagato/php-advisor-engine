@@ -10,7 +10,7 @@ class SmsResponse extends Model
     protected $fillable = [
         'message',
         'phone_number',
-        'response'
+        'response',
     ];
 
     public function booking(): BelongsTo

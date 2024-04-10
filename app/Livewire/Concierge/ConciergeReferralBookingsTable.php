@@ -56,7 +56,7 @@ class ConciergeReferralBookingsTable extends BaseWidget
         return $table
             ->paginationPageOptions([10, 25, 50])
             ->query($bookingsQuery)
-            ->recordUrl(fn(Earning $record) => ViewBooking::getUrl([$record->booking]))
+            ->recordUrl(fn (Earning $record) => ViewBooking::getUrl([$record->booking]))
             ->emptyStateIcon('heroicon-o-currency-dollar')
             ->emptyStateHeading('Earnings will show here when bookings begin!')
             ->columns([

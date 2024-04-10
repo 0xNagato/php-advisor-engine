@@ -24,6 +24,7 @@ class SendRestaurantWelcomeSMS
 
     /**
      * Handle the event.
+     *
      * @throws ShortURLException
      */
     public function handle(RestaurantCreated $event): void

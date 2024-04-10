@@ -16,7 +16,9 @@ class ScheduleWidget extends Widget
     protected static bool $isLazy = false;
 
     public $schedules = [];
+
     protected Restaurant $restaurant;
+
     protected $listeners = ['reservation-hours-updated' => '$refresh'];
 
     public function updateTableAvailability($date, $time, $tables): void
@@ -40,7 +42,7 @@ class ScheduleWidget extends Widget
 
                 // Send a notification
                 Notification::make()
-                    ->title('Max tables (30) exceeded on ' . ucfirst($date) . ' at ' . $formattedTime)
+                    ->title('Max tables (30) exceeded on '.ucfirst($date).' at '.$formattedTime)
                     ->danger()
                     ->send();
 

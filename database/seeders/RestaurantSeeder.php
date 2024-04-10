@@ -41,12 +41,12 @@ class RestaurantSeeder extends Seeder
 
         $restaurantNames->each(function ($restaurantName) {
             $partner = Partner::inRandomOrder()->first();
-            $email = 'restaurant@' . Str::slug($restaurantName) . '.com';
+            $email = 'restaurant@'.Str::slug($restaurantName).'.com';
 
             $user = User::factory([
                 'first_name' => 'Restaurant',
                 'partner_referral_id' => $partner->id,
-                'email' => $email
+                'email' => $email,
             ])
                 ->has(Restaurant::factory([
                     'restaurant_name' => $restaurantName,

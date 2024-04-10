@@ -19,7 +19,7 @@ class DemoAuthController extends Controller
             abort(401);
         }
 
-        info('User ID: ' . $user_id . ' logged in as demo concierge.');
+        info('User ID: '.$user_id.' logged in as demo concierge.');
         $user = User::findOrFail(5);
         Auth::login($user);
 
@@ -31,7 +31,7 @@ class DemoAuthController extends Controller
         $url = config('app.url');
         $host = parse_url($url, PHP_URL_HOST);
         $parts = explode('.', $host);
-        $domain = '.' . implode('.', array_slice($parts, -2));
+        $domain = '.'.implode('.', array_slice($parts, -2));
 
         $cookie = Cookie::make('user_id', auth()->id(), 60, null, $domain);
 

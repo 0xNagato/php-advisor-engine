@@ -22,6 +22,7 @@ class SendConciergeReferralTextInvitation
 
     /**
      * Handle the event.
+     *
      * @throws ShortURLException
      * @throws GuzzleException
      * @throws JsonException
@@ -35,7 +36,6 @@ class SendConciergeReferralTextInvitation
         ]);
 
         $shortURL = ShortURL::destinationUrl($url)->make()->default_short_url;
-
 
         app(SimpleTextingAdapter::class)->sendMessage(
             $event->referral->phone,

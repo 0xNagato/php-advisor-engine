@@ -9,10 +9,9 @@ class SaveReservationHoursData extends Data
 {
     public function __construct(
         public Restaurant $restaurant,
-        public array      $startTimes,
-        public array      $endTimes,
-        public array      $selectedDays,
-    )
-    {
+        public array $startTimes,
+        public array $endTimes,
+        public array $selectedDays,
+    ) {
     }
 }

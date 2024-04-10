@@ -27,7 +27,7 @@ class PartnerRestaurants extends Page
     protected function getHeaderWidgets(): array
     {
         return [
-            RestaurantReferralsTable::make()
+            RestaurantReferralsTable::make(),
         ];
     }
 
@@ -37,7 +37,7 @@ class PartnerRestaurants extends Page
             Action::make('Create Restaurant')
                 ->label('Create Restaurant')
                 ->icon('heroicon-o-plus-circle')
-                ->url(CreateRestaurant::getUrl())
+                ->url(CreateRestaurant::getUrl()),
         ];
     }
 }

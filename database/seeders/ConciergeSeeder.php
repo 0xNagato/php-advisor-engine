@@ -46,7 +46,7 @@ class ConciergeSeeder extends Seeder
             $shouldAssignReferralId = random_int(0, 1) <= 0.5;
             $partner = $shouldAssignReferralId ? Concierge::with('user')->get()->random() : Partner::inRandomOrder()->first();
 
-            $email = 'concierge@' . Str::slug($hotelName) . '.com';
+            $email = 'concierge@'.Str::slug($hotelName).'.com';
 
             $user = User::factory([
                 'first_name' => 'Concierge',
@@ -58,7 +58,6 @@ class ConciergeSeeder extends Seeder
                     'hotel_name' => $hotelName,
                 ]))
                 ->create();
-
 
             Referral::create([
                 'referrer_id' => $partner->user->id,

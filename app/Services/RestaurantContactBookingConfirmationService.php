@@ -57,5 +57,4 @@ class RestaurantContactBookingConfirmationService
 
         return $date->format('l \\t\\h\\e jS');
     }
-
 }

@@ -45,7 +45,7 @@ class Restaurant extends Model
 
     protected $casts = [
         'open_days' => 'array',
-        'contacts' => DataCollection::class . ':' . RestaurantContactData::class,
+        'contacts' => DataCollection::class.':'.RestaurantContactData::class,
         'non_prime_time' => 'array',
         'business_hours' => 'array',
     ];

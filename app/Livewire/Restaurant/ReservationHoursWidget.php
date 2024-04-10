@@ -27,8 +27,8 @@ class ReservationHoursWidget extends Widget
 
     public array $daysOfWeek = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
 
-
     protected Restaurant $restaurant;
+
     protected ReservationHoursService $reservationHoursService;
 
     public function boot(ReservationHoursService $reservationHoursService): void
@@ -48,7 +48,7 @@ class ReservationHoursWidget extends Widget
 
     public function updatedSelectedDays($value, $key): void
     {
-        if ($value === true && !isset($this->startTimes[$key], $this->endTimes[$key])) {
+        if ($value === true && ! isset($this->startTimes[$key], $this->endTimes[$key])) {
             $this->startTimes[$key] = '12:00:00';
             $this->endTimes[$key] = '22:00:00';
         }
@@ -80,8 +80,8 @@ class ReservationHoursWidget extends Widget
         foreach ($this->daysOfWeek as $day) {
             if ($this->selectedDays[$day]) {
                 $this->validate([
-                    'startTimes.' . $day => ['required', 'date_format:H:i:s', 'before:endTimes.' . $day],
-                    'endTimes.' . $day => ['required', 'date_format:H:i:s', 'after:startTimes.' . $day],
+                    'startTimes.'.$day => ['required', 'date_format:H:i:s', 'before:endTimes.'.$day],
+                    'endTimes.'.$day => ['required', 'date_format:H:i:s', 'after:startTimes.'.$day],
                 ]);
 
                 $startTime = Carbon::createFromFormat('H:i', substr($this->startTimes[$day], 0, 5))->format('H:i:s');

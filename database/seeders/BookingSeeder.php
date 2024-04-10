@@ -62,7 +62,7 @@ class BookingSeeder extends Seeder
             strtotime($endDate)
         ));
 
-        $bookingAt = Carbon::parse($randomDate->toDateString() . ' ' . $schedule->start_time)->format('Y-m-d H:i:s');
+        $bookingAt = Carbon::parse($randomDate->toDateString().' '.$schedule->start_time)->format('Y-m-d H:i:s');
 
         // Half of the time, set the guest_count to 2. The other half, set it to a random number between 3 and 8.
         $guestCount = random_int(0, 1) === 0 ? 2 : random_int(3, 8);

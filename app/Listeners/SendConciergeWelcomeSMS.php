@@ -24,6 +24,7 @@ class SendConciergeWelcomeSMS
 
     /**
      * Handle the event.
+     *
      * @throws ShortURLException
      */
     public function handle(ConciergeCreated $event): void

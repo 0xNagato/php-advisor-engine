@@ -49,8 +49,8 @@ class RestaurantReferralsTable extends BaseWidget
                 IconColumn::make('has_secured')
                     ->label('Active')
                     ->alignCenter()
-                    ->icon(fn(string $state): string => empty($state) ? 'heroicon-o-x-circle' : 'heroicon-o-check-circle')
-                    ->color(fn(string $state): string => empty($state) ? 'danger' : 'success'),
+                    ->icon(fn (string $state): string => empty($state) ? 'heroicon-o-x-circle' : 'heroicon-o-check-circle')
+                    ->color(fn (string $state): string => empty($state) ? 'danger' : 'success'),
             ])
             ->actions([
                 Impersonate::make(),
@@ -60,7 +60,7 @@ class RestaurantReferralsTable extends BaseWidget
                     ->color('success')
                     ->requiresConfirmation()
                     ->modalHeading('Send Welcome Email')
-                    ->hidden(fn(User $record) => $record->has_secured)
+                    ->hidden(fn (User $record) => $record->has_secured)
                     ->action(function (User $record) {
 
                         $record->notify(new RestaurantCreated($record));

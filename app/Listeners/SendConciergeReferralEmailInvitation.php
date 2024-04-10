@@ -18,6 +18,7 @@ class SendConciergeReferralEmailInvitation
 
     /**
      * Handle the event.
+     *
      * @throws ShortURLException
      */
     public function handle(ConciergeReferredViaEmail $event): void

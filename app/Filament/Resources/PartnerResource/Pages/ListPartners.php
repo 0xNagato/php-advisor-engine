@@ -20,6 +20,7 @@ class ListPartners extends ListRecords
     use HasFiltersAction;
 
     protected static string $resource = PartnerResource::class;
+
     protected static string $view = 'filament.pages.partner.partner-list';
 
     public function getHeading(): Htmlable|string

@@ -109,7 +109,7 @@ class ConciergeReferral extends Page
             'referrer_id' => auth()->id(),
             'email' => $data['email'],
             'type' => 'concierge',
-            'referrer_type' => strtolower(auth()->user()->main_role)
+            'referrer_type' => strtolower(auth()->user()->main_role),
         ]);
 
         $this->emailForm->fill();
@@ -132,7 +132,7 @@ class ConciergeReferral extends Page
             'referrer_id' => auth()->id(),
             'phone' => $data['phone'],
             'type' => 'concierge',
-            'referrer_type' => strtolower(auth()->user()->main_role)
+            'referrer_type' => strtolower(auth()->user()->main_role),
         ]);
 
         $this->textForm->fill();
