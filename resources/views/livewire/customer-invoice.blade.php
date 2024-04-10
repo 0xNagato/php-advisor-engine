@@ -33,7 +33,7 @@
     >
         <div class="relative overflow-hidden bg-indigo-800 min-h-32 rounded-t-xl">
             @if(!isset($customerInvoice) && !$download)
-                <button class="text-white font-bold prima-native:hidden p-4"
+                <button class="text-white font-semibold prima-native:hidden p-4"
                         onclick="window.history.back();">
                     &#x276E;&nbsp Back
                 </button>

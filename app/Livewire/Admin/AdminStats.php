@@ -33,7 +33,6 @@ class AdminStats extends Widget
         $bookingsQuery = Booking::whereBetween('created_at', [$startDate, $endDate]);
 
         $platformEarnings = $bookingsQuery->sum('platform_earnings');
-        $charityEarnings = $bookingsQuery->sum('charity_earnings');
         $numberOfBookings = $bookingsQuery->count();
 
         // Calculate for the previous time frame
@@ -44,37 +43,29 @@ class AdminStats extends Widget
         $prevBookingsQuery = Booking::whereBetween('created_at', [$prevStartDate, $prevEndDate]);
 
         $prevPlatformEarnings = $prevBookingsQuery->sum('platform_earnings');
-        $prevCharityEarnings = $prevBookingsQuery->sum('charity_earnings');
         $prevNumberOfBookings = $prevBookingsQuery->count();
-
-        // Calculate the difference for each point and add a new property indicating if it was up or down from the previous time frame.
+        
         $this->stats = new AdminStatData([
             'current' => [
                 'platform_earnings' => $platformEarnings,
-                'charity_earnings' => $charityEarnings,
                 'number_of_bookings' => $numberOfBookings,
             ],
             'previous' => [
                 'platform_earnings' => $prevPlatformEarnings,
-                'charity_earnings' => $prevCharityEarnings,
                 'number_of_bookings' => $prevNumberOfBookings,
             ],
             'difference' => [
                 'platform_earnings' => $platformEarnings - $prevPlatformEarnings,
                 'platform_earnings_up' => $platformEarnings >= $prevPlatformEarnings,
-                'charity_earnings' => $charityEarnings - $prevCharityEarnings,
-                'charity_earnings_up' => $charityEarnings >= $prevCharityEarnings,
                 'number_of_bookings' => $numberOfBookings - $prevNumberOfBookings,
                 'number_of_bookings_up' => $numberOfBookings >= $prevNumberOfBookings,
             ],
             'formatted' => [
                 'platform_earnings' => $this->formatNumber($platformEarnings),
-                'charity_earnings' => $this->formatNumber($charityEarnings),
-                'number_of_bookings' => $numberOfBookings, // Assuming this is an integer count, no need to format
+                'number_of_bookings' => $numberOfBookings,
                 'difference' => [
                     'platform_earnings' => $this->formatNumber($platformEarnings - $prevPlatformEarnings),
-                    'charity_earnings' => $this->formatNumber($charityEarnings - $prevCharityEarnings),
-                    'number_of_bookings' => $numberOfBookings - $prevNumberOfBookings, // Assuming this is an integer count, no need to format
+                    'number_of_bookings' => $numberOfBookings - $prevNumberOfBookings,
                 ],
             ],
         ]);
@@ -82,11 +73,6 @@ class AdminStats extends Widget
 
     private function formatNumber($number): string
     {
-        $number = round($number / 100, 2); // Convert to dollars from cents and round to nearest two decimal places.
-        if ($number >= 1000) {
-            return '$'.number_format($number / 1000, 1).'k'; // Convert to k if number is greater than or equal to 1000 and keep one decimal place.
-        }
-
-        return money($number, 'USD', true);
+        return money($number, 'USD');
     }
 }

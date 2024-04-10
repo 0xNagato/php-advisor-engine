@@ -56,14 +56,12 @@ class RestaurantStats extends Widget
             'current' => [
                 'original_earnings' => $restaurantEarnings,
                 'restaurant_earnings' => $restaurantEarnings,
-                'charity_earnings' => 0, // Assuming charity earnings are not applicable here
                 'number_of_bookings' => $numberOfBookings,
                 'restaurant_contribution' => $restaurantEarnings,
             ],
             'previous' => [
                 'original_earnings' => $prevRestaurantEarnings,
                 'restaurant_earnings' => $prevRestaurantEarnings,
-                'charity_earnings' => 0, // Assuming charity earnings are not applicable here
                 'number_of_bookings' => $prevNumberOfBookings,
                 'restaurant_contribution' => $prevRestaurantEarnings,
             ],
@@ -72,8 +70,7 @@ class RestaurantStats extends Widget
                 'original_earnings_up' => $restaurantEarnings >= $prevRestaurantEarnings,
                 'restaurant_earnings' => $restaurantEarnings - $prevRestaurantEarnings,
                 'restaurant_earnings_up' => $restaurantEarnings >= $prevRestaurantEarnings,
-                'charity_earnings' => 0, // Assuming charity earnings are not applicable here
-                'charity_earnings_up' => true, // Assuming charity earnings are not applicable here
+
                 'number_of_bookings' => $numberOfBookings - $prevNumberOfBookings,
                 'number_of_bookings_up' => $numberOfBookings >= $prevNumberOfBookings,
                 'restaurant_contribution' => $restaurantEarnings - $prevRestaurantEarnings,
@@ -82,13 +79,11 @@ class RestaurantStats extends Widget
             'formatted' => [
                 'original_earnings' => $this->formatNumber($restaurantEarnings),
                 'restaurant_earnings' => $this->formatNumber($restaurantEarnings),
-                'charity_earnings' => $this->formatNumber(0), // Assuming charity earnings are not applicable here
                 'number_of_bookings' => $numberOfBookings, // Assuming this is an integer count, no need to format
                 'restaurant_contribution' => $this->formatNumber($restaurantEarnings),
                 'difference' => [
                     'original_earnings' => $this->formatNumber($restaurantEarnings - $prevRestaurantEarnings),
                     'restaurant_earnings' => $this->formatNumber($restaurantEarnings - $prevRestaurantEarnings),
-                    'charity_earnings' => $this->formatNumber(0), // Assuming charity earnings are not applicable here
                     'number_of_bookings' => $numberOfBookings - $prevNumberOfBookings, // Assuming this is an integer count, no need to format
                     'restaurant_contribution' => $this->formatNumber($restaurantEarnings - $prevRestaurantEarnings),
                 ],
@@ -98,11 +93,6 @@ class RestaurantStats extends Widget
 
     private function formatNumber($number): string
     {
-        $number = round($number / 100, 2);
-        if ($number >= 1000) {
-            return '$'.number_format($number / 1000, 1).'k';
-        }
-
-        return money($number, 'USD', true);
+        return money($number, 'USD');
     }
 }

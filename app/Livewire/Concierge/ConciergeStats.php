@@ -61,14 +61,12 @@ class ConciergeStats extends Widget
             'current' => [
                 'original_earnings' => $conciergeEarnings,
                 'concierge_earnings' => $conciergeEarnings,
-                'charity_earnings' => 0, // Assuming charity earnings are not applicable here
                 'number_of_bookings' => $numberOfBookings,
                 'concierge_contribution' => $conciergeEarnings,
             ],
             'previous' => [
                 'original_earnings' => $prevConciergeEarnings,
                 'concierge_earnings' => $prevConciergeEarnings,
-                'charity_earnings' => 0, // Assuming charity earnings are not applicable here
                 'number_of_bookings' => $prevNumberOfBookings,
                 'concierge_contribution' => $prevConciergeEarnings,
             ],
@@ -77,8 +75,6 @@ class ConciergeStats extends Widget
                 'original_earnings_up' => $conciergeEarnings >= $prevConciergeEarnings,
                 'concierge_earnings' => $conciergeEarnings - $prevConciergeEarnings,
                 'concierge_earnings_up' => $conciergeEarnings >= $prevConciergeEarnings,
-                'charity_earnings' => 0, // Assuming charity earnings are not applicable here
-                'charity_earnings_up' => false, // Assuming charity earnings are not applicable here
                 'number_of_bookings' => $numberOfBookings - $prevNumberOfBookings,
                 'number_of_bookings_up' => $numberOfBookings >= $prevNumberOfBookings,
                 'concierge_contribution' => $conciergeEarnings - $prevConciergeEarnings,
@@ -87,13 +83,11 @@ class ConciergeStats extends Widget
             'formatted' => [
                 'original_earnings' => $this->formatNumber($conciergeEarnings),
                 'concierge_earnings' => $this->formatNumber($conciergeEarnings),
-                'charity_earnings' => $this->formatNumber(0), // Assuming charity earnings are not applicable here
                 'number_of_bookings' => $numberOfBookings, // Assuming this is an integer count, no need to format
                 'concierge_contribution' => $this->formatNumber($conciergeEarnings),
                 'difference' => [
                     'original_earnings' => $this->formatNumber($conciergeEarnings - $prevConciergeEarnings),
                     'concierge_earnings' => $this->formatNumber($conciergeEarnings - $prevConciergeEarnings),
-                    'charity_earnings' => $this->formatNumber(0), // Assuming charity earnings are not applicable here
                     'number_of_bookings' => $numberOfBookings - $prevNumberOfBookings, // Assuming this is an integer count, no need to format
                     'concierge_contribution' => $this->formatNumber($conciergeEarnings - $prevConciergeEarnings),
                 ],
@@ -103,11 +97,6 @@ class ConciergeStats extends Widget
 
     private function formatNumber($number): string
     {
-        $number = round($number / 100, 2); // Convert to dollars from cents and round to nearest two decimal places.
-        if ($number >= 1000) {
-            return '$'.number_format($number / 1000, 1).'k'; // Convert to k if number is greater than or equal to 1000 and keep one decimal place.
-        }
-
-        return money($number, 'USD', true);
+        return money($number, 'USD');
     }
 }
