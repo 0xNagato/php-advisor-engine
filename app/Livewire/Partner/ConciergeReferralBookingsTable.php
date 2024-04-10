@@ -39,11 +39,13 @@ class ConciergeReferralBookingsTable extends BaseWidget
         $startDate = Carbon::parse($this->filters['startDate'] ?? now()->subDays(30));
         $endDate = Carbon::parse($this->filters['endDate'] ?? now());
 
-        $bookingsQuery = Earning::confirmed()
-            ->where('user_id', $userId)
-            ->whereIn('type', ['partner_concierge'])
-            ->whereBetween('created_at', [$startDate, $endDate])
-            ->orderBy('created_at', 'desc')
+        $bookingsQuery = Earning::query()
+            ->where('earnings.user_id', $userId)
+            ->whereIn('earnings.type', ['partner_concierge'])
+            ->whereBetween('earnings.created_at', [$startDate, $endDate])
+            ->whereNotNull('earnings.confirmed_at') // Explicitly specify the table name here
+            ->join('bookings', 'earnings.booking_id', '=', 'bookings.id')
+            ->orderBy('bookings.created_at', 'desc')
             ->with('booking.concierge.user');
 
         if ($this->concierge->exists) {
@@ -61,6 +63,9 @@ class ConciergeReferralBookingsTable extends BaseWidget
             ->columns([
                 TextColumn::make('booking.concierge.user.name')
                     ->label('Concierge'),
+                TextColumn::make('booking.created_at')
+                    ->label('Date')
+                    ->dateTime('D, M j'),
                 TextColumn::make('amount')
                     ->label('Earnings')
                     ->alignRight()

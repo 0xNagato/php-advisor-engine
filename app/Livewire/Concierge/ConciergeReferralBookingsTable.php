@@ -30,7 +30,7 @@ class ConciergeReferralBookingsTable extends BaseWidget
 
     public function getTableHeading(): string|Htmlable|null
     {
-        return 'Booking Referrals';
+        return '';
     }
 
     public function table(Table $table): Table
@@ -40,11 +40,13 @@ class ConciergeReferralBookingsTable extends BaseWidget
         $startDate = Carbon::parse($this->filters['startDate'] ?? now()->subDays(30));
         $endDate = Carbon::parse($this->filters['endDate'] ?? now());
 
-        $bookingsQuery = Earning::confirmed()
-            ->where('user_id', $userId)
-            ->whereIn('type', ['concierge_referral_1', 'concierge_referral_2'])
-            ->whereBetween('created_at', [$startDate, $endDate])
-            ->orderBy('created_at', 'desc')
+        $bookingsQuery = Earning::query()
+            ->where('earnings.user_id', $userId)
+            ->whereIn('earnings.type', ['concierge_referral_1', 'concierge_referral_2'])
+            ->whereBetween('earnings.created_at', [$startDate, $endDate])
+            ->whereNotNull('earnings.confirmed_at') // Explicitly specify the table name here
+            ->join('bookings', 'earnings.booking_id', '=', 'bookings.id')
+            ->orderBy('bookings.created_at', 'desc')
             ->with('booking.concierge.user');
 
         if ($this->concierge->exists) {
@@ -56,7 +58,7 @@ class ConciergeReferralBookingsTable extends BaseWidget
         return $table
             ->paginationPageOptions([10, 25, 50])
             ->query($bookingsQuery)
-            ->recordUrl(fn (Earning $record) => ViewBooking::getUrl([$record->booking]))
+            ->recordUrl(fn(Earning $record) => ViewBooking::getUrl([$record->booking]))
             ->emptyStateIcon('heroicon-o-currency-dollar')
             ->emptyStateHeading('Earnings will show here when bookings begin!')
             ->columns([
@@ -78,6 +80,9 @@ class ConciergeReferralBookingsTable extends BaseWidget
                     }),
                 TextColumn::make('booking.concierge.user.name')
                     ->label('Concierge'),
+                TextColumn::make('booking.created_at')
+                    ->label('Date')
+                    ->dateTime('M j'),
                 TextColumn::make('amount')
                     ->label('Earnings')
                     ->alignRight()
