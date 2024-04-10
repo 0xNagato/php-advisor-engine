@@ -3,8 +3,8 @@
 namespace App\Livewire\Concierge;
 
 use App\Data\ConciergeStatData;
-use App\Models\Booking;
 use App\Models\Concierge;
+use App\Models\Earning;
 use Filament\Widgets\Concerns\InteractsWithPageFilters;
 use Filament\Widgets\Widget;
 
@@ -32,58 +32,70 @@ class ConciergeStats extends Widget
         $startDate = $this->filters['startDate'] ?? now()->subDays(30);
         $endDate = $this->filters['endDate'] ?? now();
 
-        // Calculate for the current time frame
-        $bookingsQuery = Booking::where('concierge_id', $this->concierge->id)
-            ->whereBetween('created_at', [$startDate, $endDate]);
+        // Get all earnings related to the concierge
+        $conciergeEarningsQuery = Earning::where('user_id', $this->concierge->user_id)
+            ->whereIn('type', ['concierge', 'concierge_referral_1', 'concierge_referral_2'])
+            ->whereBetween('confirmed_at', [$startDate, $endDate]);
 
-        $conciergeEarnings = $bookingsQuery->sum('concierge_earnings');
-        $numberOfBookings = $bookingsQuery->count();
+        // Calculate concierge earnings as the sum of amount
+        $conciergeEarnings = $conciergeEarningsQuery->sum('amount');
+
+        $numberOfBookings = $conciergeEarningsQuery->count();
 
         // Calculate for the previous time frame
         $timeFrameLength = $startDate->diffInDays($endDate);
         $prevStartDate = $startDate->copy()->subDays($timeFrameLength);
         $prevEndDate = $endDate->copy()->subDays($timeFrameLength);
 
-        $prevBookingsQuery = Booking::where('concierge_id', $this->concierge->id)
-            ->whereBetween('created_at', [$prevStartDate, $prevEndDate]);
+        $prevConciergeEarningsQuery = Earning::where('user_id', $this->concierge->user_id)
+            ->whereIn('type', ['concierge'])
+            ->whereBetween('confirmed_at', [$prevStartDate, $prevEndDate]);
 
-        $prevConciergeEarnings = $prevBookingsQuery->sum('concierge_earnings');
-        $prevNumberOfBookings = $prevBookingsQuery->count();
+        // Calculate previous concierge earnings as the sum of amount
+        $prevConciergeEarnings = $prevConciergeEarningsQuery->sum('amount');
+
+        $prevNumberOfBookings = $prevConciergeEarningsQuery->count();
 
         // Calculate the difference for each point and add a new property indicating if it was up or down from the previous time frame.
         $this->stats = new ConciergeStatData([
             'current' => [
+                'original_earnings' => $conciergeEarnings,
                 'concierge_earnings' => $conciergeEarnings,
+                'charity_earnings' => 0, // Assuming charity earnings are not applicable here
                 'number_of_bookings' => $numberOfBookings,
-                'charity_earnings' => 0,
-                'concierge_contribution' => 0,
+                'concierge_contribution' => $conciergeEarnings,
             ],
             'previous' => [
+                'original_earnings' => $prevConciergeEarnings,
                 'concierge_earnings' => $prevConciergeEarnings,
+                'charity_earnings' => 0, // Assuming charity earnings are not applicable here
                 'number_of_bookings' => $prevNumberOfBookings,
-                'charity_earnings' => 0,
-                'concierge_contribution' => 0,
+                'concierge_contribution' => $prevConciergeEarnings,
             ],
             'difference' => [
+                'original_earnings' => $conciergeEarnings - $prevConciergeEarnings,
+                'original_earnings_up' => $conciergeEarnings >= $prevConciergeEarnings,
                 'concierge_earnings' => $conciergeEarnings - $prevConciergeEarnings,
                 'concierge_earnings_up' => $conciergeEarnings >= $prevConciergeEarnings,
+                'charity_earnings' => 0, // Assuming charity earnings are not applicable here
+                'charity_earnings_up' => false, // Assuming charity earnings are not applicable here
                 'number_of_bookings' => $numberOfBookings - $prevNumberOfBookings,
                 'number_of_bookings_up' => $numberOfBookings >= $prevNumberOfBookings,
-                'charity_earnings' => 0,
-                'charity_earnings_up' => false,
-                'concierge_contribution' => 0,
-                'concierge_contribution_up' => false,
+                'concierge_contribution' => $conciergeEarnings - $prevConciergeEarnings,
+                'concierge_contribution_up' => $conciergeEarnings >= $prevConciergeEarnings,
             ],
             'formatted' => [
+                'original_earnings' => $this->formatNumber($conciergeEarnings),
                 'concierge_earnings' => $this->formatNumber($conciergeEarnings),
+                'charity_earnings' => $this->formatNumber(0), // Assuming charity earnings are not applicable here
                 'number_of_bookings' => $numberOfBookings, // Assuming this is an integer count, no need to format
-                'charity_earnings' => '$0',
-                'concierge_contribution' => '$0',
+                'concierge_contribution' => $this->formatNumber($conciergeEarnings),
                 'difference' => [
+                    'original_earnings' => $this->formatNumber($conciergeEarnings - $prevConciergeEarnings),
                     'concierge_earnings' => $this->formatNumber($conciergeEarnings - $prevConciergeEarnings),
+                    'charity_earnings' => $this->formatNumber(0), // Assuming charity earnings are not applicable here
                     'number_of_bookings' => $numberOfBookings - $prevNumberOfBookings, // Assuming this is an integer count, no need to format
-                    'charity_earnings' => '$0',
-                    'concierge_contribution' => '$0',
+                    'concierge_contribution' => $this->formatNumber($conciergeEarnings - $prevConciergeEarnings),
                 ],
             ],
         ]);

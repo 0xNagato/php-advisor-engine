@@ -3,7 +3,7 @@
 namespace App\Livewire\Restaurant;
 
 use App\Data\RestaurantStatData;
-use App\Models\Booking;
+use App\Models\Earning;
 use App\Models\Restaurant;
 use Filament\Widgets\Widget;
 
@@ -27,78 +27,70 @@ class RestaurantStats extends Widget
         $startDate = $this->filters['startDate'] ?? now()->subDays(30);
         $endDate = $this->filters['endDate'] ?? now();
 
-        // Get all schedule IDs related to the restaurant
-        $scheduleIds = $this->restaurant->schedules->pluck('id');
+        // Get all earnings related to the restaurant
+        $restaurantEarningsQuery = Earning::where('user_id', $this->restaurant->user_id)
+            ->whereIn('type', ['restaurant'])
+            ->whereBetween('confirmed_at', [$startDate, $endDate]);
 
-        // Calculate for the current time frame
-        $bookingsQuery = Booking::whereIn('schedule_id', $scheduleIds)
-            ->whereBetween('created_at', [$startDate, $endDate]);
+        // Calculate restaurant earnings as the sum of amount
+        $restaurantEarnings = $restaurantEarningsQuery->sum('amount');
 
-        $restaurantEarnings = $bookingsQuery->sum('restaurant_earnings');
-        $charityEarnings = $bookingsQuery->sum('charity_earnings');
-        $numberOfBookings = $bookingsQuery->count();
-
-        // Calculate the restaurant's contribution to the charity
-        $charityPercentage = $this->restaurant->user->charity_percentage / 100;
-        $originalEarnings = $restaurantEarnings / (1 - $charityPercentage);
-        $restaurantContribution = $originalEarnings - $restaurantEarnings;
+        $numberOfBookings = $restaurantEarningsQuery->count();
 
         // Calculate for the previous time frame
         $timeFrameLength = $startDate->diffInDays($endDate);
         $prevStartDate = $startDate->copy()->subDays($timeFrameLength);
         $prevEndDate = $endDate->copy()->subDays($timeFrameLength);
 
-        $prevBookingsQuery = Booking::whereIn('schedule_id', $scheduleIds)
-            ->whereBetween('created_at', [$prevStartDate, $prevEndDate]);
+        $prevRestaurantEarningsQuery = Earning::where('user_id', $this->restaurant->user_id)
+            ->whereIn('type', ['restaurant'])
+            ->whereBetween('confirmed_at', [$prevStartDate, $prevEndDate]);
 
-        $prevRestaurantEarnings = $prevBookingsQuery->sum('restaurant_earnings');
-        $prevCharityEarnings = $prevBookingsQuery->sum('charity_earnings');
-        $prevNumberOfBookings = $prevBookingsQuery->count();
+        // Calculate previous restaurant earnings as the sum of amount
+        $prevRestaurantEarnings = $prevRestaurantEarningsQuery->sum('amount');
 
-        // Calculate the restaurant's contribution to the charity for the previous time frame.
-        $prevOriginalEarnings = $prevRestaurantEarnings / (1 - $charityPercentage);
-        $prevRestaurantContribution = $prevOriginalEarnings - $prevRestaurantEarnings;
+        $prevNumberOfBookings = $prevRestaurantEarningsQuery->count();
 
         // Calculate the difference for each point and add a new property indicating if it was up or down from the previous time frame.
         $this->stats = new RestaurantStatData([
             'current' => [
-                'original_earnings' => $originalEarnings,
+                'original_earnings' => $restaurantEarnings,
                 'restaurant_earnings' => $restaurantEarnings,
-                'charity_earnings' => $charityEarnings,
+                'charity_earnings' => 0, // Assuming charity earnings are not applicable here
                 'number_of_bookings' => $numberOfBookings,
-                'restaurant_contribution' => $restaurantContribution,
+                'restaurant_contribution' => $restaurantEarnings,
             ],
             'previous' => [
-                'original_earnings' => $prevOriginalEarnings,
+                'original_earnings' => $prevRestaurantEarnings,
                 'restaurant_earnings' => $prevRestaurantEarnings,
-                'charity_earnings' => $prevCharityEarnings,
+                'charity_earnings' => 0, // Assuming charity earnings are not applicable here
                 'number_of_bookings' => $prevNumberOfBookings,
-                'restaurant_contribution' => $prevRestaurantContribution,
+                'restaurant_contribution' => $prevRestaurantEarnings,
             ],
             'difference' => [
-                'original_earnings' => $originalEarnings - $prevOriginalEarnings,
-                'original_earnings_up' => $originalEarnings >= $prevOriginalEarnings,
+                'original_earnings' => $restaurantEarnings - $prevRestaurantEarnings,
+                'original_earnings_up' => $restaurantEarnings >= $prevRestaurantEarnings,
                 'restaurant_earnings' => $restaurantEarnings - $prevRestaurantEarnings,
                 'restaurant_earnings_up' => $restaurantEarnings >= $prevRestaurantEarnings,
-                'charity_earnings' => $charityEarnings - $prevCharityEarnings,
-                'charity_earnings_up' => $charityEarnings >= $prevCharityEarnings,
+                'charity_earnings' => 0, // Assuming charity earnings are not applicable here
+                'charity_earnings_up' => true, // Assuming charity earnings are not applicable here
                 'number_of_bookings' => $numberOfBookings - $prevNumberOfBookings,
                 'number_of_bookings_up' => $numberOfBookings >= $prevNumberOfBookings,
-                'restaurant_contribution' => $restaurantContribution - $prevRestaurantContribution,
-                'restaurant_contribution_up' => $restaurantContribution >= $prevRestaurantContribution,
+                'restaurant_contribution' => $restaurantEarnings - $prevRestaurantEarnings,
+                'restaurant_contribution_up' => $restaurantEarnings >= $prevRestaurantEarnings,
             ],
             'formatted' => [
-                'original_earnings' => $this->formatNumber($originalEarnings),
+                'original_earnings' => $this->formatNumber($restaurantEarnings),
                 'restaurant_earnings' => $this->formatNumber($restaurantEarnings),
-                'charity_earnings' => $this->formatNumber($charityEarnings),
+                'charity_earnings' => $this->formatNumber(0), // Assuming charity earnings are not applicable here
                 'number_of_bookings' => $numberOfBookings, // Assuming this is an integer count, no need to format
-                'restaurant_contribution' => $this->formatNumber($restaurantContribution),
+                'restaurant_contribution' => $this->formatNumber($restaurantEarnings),
                 'difference' => [
-                    'original_earnings' => $this->formatNumber($originalEarnings - $prevOriginalEarnings),
+                    'original_earnings' => $this->formatNumber($restaurantEarnings - $prevRestaurantEarnings),
                     'restaurant_earnings' => $this->formatNumber($restaurantEarnings - $prevRestaurantEarnings),
-                    'charity_earnings' => $this->formatNumber($charityEarnings - $prevCharityEarnings),
+                    'charity_earnings' => $this->formatNumber(0), // Assuming charity earnings are not applicable here
                     'number_of_bookings' => $numberOfBookings - $prevNumberOfBookings, // Assuming this is an integer count, no need to format
-                    'restaurant_contribution' => $this->formatNumber($restaurantContribution - $prevRestaurantContribution),
+                    'restaurant_contribution' => $this->formatNumber($restaurantEarnings - $prevRestaurantEarnings),
                 ],
             ],
         ]);
