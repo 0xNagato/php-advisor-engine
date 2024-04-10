@@ -3,7 +3,7 @@
 namespace App\Livewire\Partner;
 
 use App\Data\PartnerStatData;
-use App\Models\Booking;
+use App\Models\Earning;
 use App\Models\Partner;
 use Filament\Widgets\Widget;
 
@@ -27,63 +27,52 @@ class PartnerStats extends Widget
         $startDate = $this->filters['startDate'] ?? now()->subDays(30);
         $endDate = $this->filters['endDate'] ?? now();
 
-        // Get all bookings related to the partner
-        $partnerWithBookings = Partner::withAllBookings()->find($this->partner->id);
+        // Get all earnings related to the partner
+        $partnerEarningsQuery = Earning::where('user_id', $this->partner->user_id)
+            ->whereIn('type', ['partner_concierge', 'partner_restaurant'])
+            ->whereBetween('confirmed_at', [$startDate, $endDate]);
 
-        // Calculate for the current time frame
-        $conciergeBookingsQuery = Booking::whereIn('id', $partnerWithBookings->conciergeBookings->pluck('id'))
-            ->whereBetween('created_at', [$startDate, $endDate]);
+        // Calculate partner earnings as the sum of amount
+        $partnerEarnings = $partnerEarningsQuery->sum('amount');
 
-        $restaurantBookingsQuery = Booking::whereIn('id', $partnerWithBookings->restaurantBookings->pluck('id'))
-            ->whereBetween('created_at', [$startDate, $endDate]);
-
-        // Calculate partner earnings as the sum of partner_concierge_fee and partner_restaurant_fee
-        $partnerConciergeEarnings = $conciergeBookingsQuery->sum('partner_concierge_fee');
-        $partnerRestaurantEarnings = $restaurantBookingsQuery->sum('partner_restaurant_fee');
-
-        $numberOfConciergeBookings = $conciergeBookingsQuery->count();
-        $numberOfRestaurantBookings = $restaurantBookingsQuery->count();
+        $numberOfBookings = $partnerEarningsQuery->count();
 
         // Calculate for the previous time frame
         $timeFrameLength = $startDate->diffInDays($endDate);
         $prevStartDate = $startDate->copy()->subDays($timeFrameLength);
         $prevEndDate = $endDate->copy()->subDays($timeFrameLength);
 
-        $prevConciergeBookingsQuery = Booking::whereIn('id', $partnerWithBookings->conciergeBookings->pluck('id'))
-            ->whereBetween('created_at', [$prevStartDate, $prevEndDate]);
+        $prevPartnerEarningsQuery = Earning::where('user_id', $this->partner->user_id)
+            ->whereIn('type', ['partner_concierge', 'partner_restaurant'])
+            ->whereBetween('confirmed_at', [$prevStartDate, $prevEndDate]);
 
-        $prevRestaurantBookingsQuery = Booking::whereIn('id', $partnerWithBookings->restaurantBookings->pluck('id'))
-            ->whereBetween('created_at', [$prevStartDate, $prevEndDate]);
+        // Calculate previous partner earnings as the sum of amount
+        $prevPartnerEarnings = $prevPartnerEarningsQuery->sum('amount');
 
-        // Calculate previous partner earnings as the sum of partner_concierge_fee and partner_restaurant_fee
-        $prevPartnerConciergeEarnings = $prevConciergeBookingsQuery->sum('partner_concierge_fee');
-        $prevPartnerRestaurantEarnings = $prevRestaurantBookingsQuery->sum('partner_restaurant_fee');
-
-        $prevNumberOfConciergeBookings = $prevConciergeBookingsQuery->count();
-        $prevNumberOfRestaurantBookings = $prevRestaurantBookingsQuery->count();
+        $prevNumberOfBookings = $prevPartnerEarningsQuery->count();
 
         // Calculate the difference for each point and add a new property indicating if it was up or down from the previous time frame.
         $this->stats = new PartnerStatData([
             'current' => [
-                'partner_earnings' => $partnerConciergeEarnings + $partnerRestaurantEarnings,
-                'number_of_bookings' => $numberOfConciergeBookings + $numberOfRestaurantBookings,
+                'partner_earnings' => $partnerEarnings,
+                'number_of_bookings' => $numberOfBookings,
             ],
             'previous' => [
-                'partner_earnings' => $prevPartnerConciergeEarnings + $prevPartnerRestaurantEarnings,
-                'number_of_bookings' => $prevNumberOfConciergeBookings + $prevNumberOfRestaurantBookings,
+                'partner_earnings' => $prevPartnerEarnings,
+                'number_of_bookings' => $prevNumberOfBookings,
             ],
             'difference' => [
-                'partner_earnings' => ($partnerConciergeEarnings + $partnerRestaurantEarnings) - ($prevPartnerConciergeEarnings + $prevPartnerRestaurantEarnings),
-                'partner_earnings_up' => ($partnerConciergeEarnings + $partnerRestaurantEarnings) >= ($prevPartnerConciergeEarnings + $prevPartnerRestaurantEarnings),
-                'number_of_bookings' => ($numberOfConciergeBookings + $numberOfRestaurantBookings) - ($prevNumberOfConciergeBookings + $prevNumberOfRestaurantBookings),
-                'number_of_bookings_up' => ($numberOfConciergeBookings + $numberOfRestaurantBookings) >= ($prevNumberOfConciergeBookings + $prevNumberOfRestaurantBookings),
+                'partner_earnings' => $partnerEarnings - $prevPartnerEarnings,
+                'partner_earnings_up' => $partnerEarnings >= $prevPartnerEarnings,
+                'number_of_bookings' => $numberOfBookings - $prevNumberOfBookings,
+                'number_of_bookings_up' => $numberOfBookings >= $prevNumberOfBookings,
             ],
             'formatted' => [
-                'partner_earnings' => $this->formatNumber($partnerConciergeEarnings + $partnerRestaurantEarnings),
-                'number_of_bookings' => $numberOfConciergeBookings + $numberOfRestaurantBookings, // Assuming this is an integer count, no need to format
+                'partner_earnings' => $this->formatNumber($partnerEarnings),
+                'number_of_bookings' => $numberOfBookings, // Assuming this is an integer count, no need to format
                 'difference' => [
-                    'partner_earnings' => $this->formatNumber(($partnerConciergeEarnings + $partnerRestaurantEarnings) - ($prevPartnerConciergeEarnings + $prevPartnerRestaurantEarnings)),
-                    'number_of_bookings' => ($numberOfConciergeBookings + $numberOfRestaurantBookings) - ($prevNumberOfConciergeBookings + $prevNumberOfRestaurantBookings), // Assuming this is an integer count, no need to format
+                    'partner_earnings' => $this->formatNumber($partnerEarnings - $prevPartnerEarnings),
+                    'number_of_bookings' => $numberOfBookings - $prevNumberOfBookings, // Assuming this is an integer count, no need to format
                 ],
             ],
         ]);
