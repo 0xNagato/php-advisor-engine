@@ -100,7 +100,7 @@ class RestaurantStats extends Widget
     {
         $number = round($number / 100, 2);
         if ($number >= 1000) {
-            return '$'.number_format($number / 1000, 2).'k';
+            return '$'.number_format($number / 1000, 1).'k';
         }
 
         return money($number, 'USD', true);
