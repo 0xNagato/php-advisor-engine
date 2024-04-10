@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Models\SmsResponse;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\GuzzleException;
+use Illuminate\Support\Facades\RateLimiter;
 use JsonException;
 
 class SimpleTextingAdapter
@@ -18,7 +19,7 @@ class SimpleTextingAdapter
         $this->apiKey = config('services.simple_texting.api_key');
         $this->client = new Client([
             'base_uri' => config('services.simple_texting.base_uri'),
-            'timeout' => 2.0,
+            'timeout' => 5.0,
         ]);
     }
 
@@ -29,7 +30,7 @@ class SimpleTextingAdapter
     {
         $response = $this->client->request('GET', 'messages', [
             'headers' => [
-                'Authorization' => 'Bearer '.$this->apiKey,
+                'Authorization' => 'Bearer ' . $this->apiKey,
             ],
             'query' => [
                 'page' => $page,
@@ -49,11 +50,24 @@ class SimpleTextingAdapter
     /**
      * @throws GuzzleException|JsonException
      */
-    public function sendMessage($contactPhone, $text, $accountPhone = null, $mode = 'AUTO', $subject = null, $fallbackText = null, $mediaItems = [])
+    public function sendMessage(
+        $contactPhone,
+        $text,
+        $accountPhone = null,
+        $mode = 'AUTO',
+        $subject = null,
+        $fallbackText = null,
+        $mediaItems = [],
+    )
     {
+        if (!app()->environment('production') && RateLimiter::tooManyAttempts('sms', 5)) {
+            info('Rate limited: ' . $contactPhone . ' - ' . $text);
+            return null;
+        }
+
         $response = $this->client->request('POST', 'messages', [
             'headers' => [
-                'Authorization' => 'Bearer '.$this->apiKey,
+                'Authorization' => 'Bearer ' . $this->apiKey,
             ],
             'json' => [
                 'contactPhone' => $contactPhone,
@@ -71,6 +85,10 @@ class SimpleTextingAdapter
             'response' => $response->getBody()->getContents(),
             'message' => $text,
         ]);
+
+        if (!app()->environment('production')) {
+            RateLimiter::hit('sms');
+        }
 
         return json_decode($response->getBody(), false, 512, JSON_THROW_ON_ERROR);
     }

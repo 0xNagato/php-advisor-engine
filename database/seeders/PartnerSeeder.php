@@ -16,7 +16,7 @@ class PartnerSeeder extends Seeder
         $users = User::factory(10)->create(['first_name' => 'Partner']);
 
         $users->each(function ($user) {
-            Partner::factory()->create(['user_id' => $user->id]);
+            Partner::factory()->create(['user_id' => $user->id, 'percentage' => 20]);
             $user->assignRole('partner');
         });
 
