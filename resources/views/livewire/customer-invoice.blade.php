@@ -179,25 +179,32 @@
                 @endif
             </div>
 
+            @if(isset($showConcierges) && $showConcierges)
+                <div class="mt-4">
+                    <div class="capitalize font-semibold text-xs">EARNINGS</div>
+                    <div class="grid grid-cols-3 gap-2 mt-2 text-xs">
+                        @foreach($booking->earnings as $earning)
+
+                            <div class="truncate">{{ $earning->user->name }}</div>
+                            <div>{{ Str::title(str_replace('_', ' ', $earning->type)) }}</div>
+                            <div class="text-right">{{ money($earning->amount) }}</div>
+
+                        @endforeach
+
+                        @role('super_admin')
+                        <div class="font-semibold mt-2">Total Payout:</div>
+                        <div
+                            class="col-span-2 font-semibold mt-2 text-right">{{ money($booking->earnings->sum('amount')) }}</div>
+                        @endrole
+                    </div>
+                </div>
+            @endif
 
         </div>
         <!-- End Body -->
 
         <div class="text-xs text-gray-500 flex-grow flex items-end justify-center p-4">
-            @if(isset($showConcierges) && $showConcierges)
-                <div class="">
-                    <h2 class="font-semibold text-base">Earnings</h2>
-                    <div class="grid grid-cols-3 gap-2 mt-4 text-xs">
-                        @foreach($booking->earnings as $earning)
 
-                            <div>{{ $earning->user->name }}</div>
-                            <div>{{ $earning->type }}</div>
-                            <div class="text-right">{{ money($earning->amount) }}</div>
-
-                        @endforeach
-                    </div>
-                </div>
-            @endif
         </div>
     </div>
 </div>
