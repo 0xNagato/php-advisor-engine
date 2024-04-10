@@ -178,6 +178,21 @@
                     </div>
                 @endif
             </div>
+
+
+            <div class="mt-4">
+                <h2 class="font-semibold text-base">Earnings</h2>
+                <div class="grid grid-cols-3 gap-2 mt-4 text-xs">
+                    @foreach($booking->earnings as $earning)
+
+                        <div>{{ $earning->user->name }}</div>
+                        <div>{{ $earning->type }}</div>
+                        <div class="text-right">{{ money($earning->amount) }}</div>
+
+                    @endforeach
+                </div>
+            </div>
+
         </div>
         <!-- End Body -->
 
