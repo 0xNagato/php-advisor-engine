@@ -60,7 +60,7 @@ class SimpleTextingAdapter
         $mediaItems = [],
     )
     {
-        if (!app()->environment('production') && RateLimiter::tooManyAttempts('sms', 5)) {
+        if (RateLimiter::tooManyAttempts('sms', 5)) {
             info('Rate limited: ' . $contactPhone . ' - ' . $text);
             return null;
         }
@@ -85,10 +85,8 @@ class SimpleTextingAdapter
             'response' => $response->getBody()->getContents(),
             'message' => $text,
         ]);
-
-        if (!app()->environment('production')) {
-            RateLimiter::hit('sms');
-        }
+        
+        RateLimiter::hit('sms');
 
         return json_decode($response->getBody(), false, 512, JSON_THROW_ON_ERROR);
     }
