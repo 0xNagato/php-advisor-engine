@@ -13,7 +13,6 @@ class PartnerSeeder extends Seeder
      */
     public function run(): void
     {
-        // lets start by creating 10 partners with user accounts and creating partner accounts and setting the user role to partner
         $users = User::factory(10)->create(['first_name' => 'Partner']);
 
         $users->each(function ($user) {
@@ -22,12 +21,12 @@ class PartnerSeeder extends Seeder
         });
 
         // now each partner should randomly refer to 1-5 concierge or restaurant users
-        $partners = Partner::all();
-        $users = User::role(['restaurant', 'concierge'])->inRandomOrder()->take(20);
-        $users->each(function ($user) use ($partners) {
-            $partner = $partners->random();
-            $user->partner_referral_id = $partner->id;
-            $user->save();
-        });
+        // $partners = Partner::all();
+        // $users = User::role(['restaurant', 'concierge'])->inRandomOrder()->take(20);
+        // $users->each(function ($user) use ($partners) {
+        //     $partner = $partners->random();
+        //     $user->partner_referral_id = $partner->id;
+        //     $user->save();
+        // });
     }
 }

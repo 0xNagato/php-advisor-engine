@@ -15,7 +15,7 @@ class PartnerRestaurants extends Page
 
     protected static ?string $title = 'My Restaurants';
 
-    protected static ?string $slug = 'partner/restaurants';
+    protected static ?string $slug = 'partner/restaurant';
 
     protected static ?int $navigationSort = 3;
 

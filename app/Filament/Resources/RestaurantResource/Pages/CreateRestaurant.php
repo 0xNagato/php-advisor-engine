@@ -5,9 +5,7 @@ namespace App\Filament\Resources\RestaurantResource\Pages;
 use App\Events\RestaurantCreated;
 use App\Filament\Resources\RestaurantResource;
 use App\Models\Referral;
-use App\Models\Schedule;
 use App\Models\User;
-use Carbon\Carbon;
 use Filament\Forms\Components\Checkbox;
 use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Section;
@@ -74,6 +72,7 @@ class CreateRestaurant extends CreateRecord
 
                 Repeater::make('contacts')
                     ->label('Contacts')
+                    ->addActionLabel('Add Additional Contact')
                     ->schema([
                         TextInput::make('contact_name')
                             ->label('Contact Name')
@@ -109,12 +108,15 @@ class CreateRestaurant extends CreateRecord
 
     protected function handleRecordCreation(array $data): Model
     {
+        $partnerId = (auth()->user()->main_role === 'Partner') ? auth()->user()->partner->id : null;
+
         $user = User::create([
             'first_name' => $data['first_name'],
             'last_name' => $data['last_name'],
             'email' => $data['email'],
             'phone' => $data['phone'],
             'password' => Str::random(8),
+            'partner_referral_id' => $partnerId,
         ]);
 
         Referral::create([
@@ -128,16 +130,12 @@ class CreateRestaurant extends CreateRecord
 
         $user->assignRole('restaurant');
 
-        // We are going to notify the restaurant once the partner
-        // has set up the restaurant account.
-        // $user->notify(new RestaurantCreated($user));
-
         $restaurant = $user->restaurant()->create([
             'restaurant_name' => $data['restaurant_name'],
             'primary_contact_name' => $data['primary_contact_name'],
             'contact_phone' => $data['contact_phone'],
             'payout_restaurant' => $data['payout_restaurant'],
-            'booking_fee' => $data['booking_fee'] * 100,
+            'booking_fee' => $data['booking_fee'],
             'contacts' => $data['contacts'],
             'open_days' => [
                 'monday' => 'open',
@@ -149,19 +147,6 @@ class CreateRestaurant extends CreateRecord
                 'sunday' => 'open',
             ],
         ]);
-
-        $startTime = Carbon::createFromTime(17); // 5pm
-        $endTime = Carbon::createFromTime(23, 30); // 10:30pm
-
-        for ($time = $startTime; $time->lessThan($endTime); $time->addMinutes(30)) {
-            Schedule::create([
-                'start_time' => $time->format('H:i:s'),
-                'end_time' => $time->copy()->addMinutes(30)->format('H:i:s'),
-                'restaurant_id' => $restaurant->id,
-                'is_available' => true,
-                'available_tables' => 100,
-            ]);
-        }
 
         RestaurantCreated::dispatch($restaurant);
 

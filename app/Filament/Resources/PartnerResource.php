@@ -44,13 +44,11 @@ class PartnerResource extends Resource
                     ->numeric()
                     ->searchable(['first_name', 'last_name'])
                     ->sortable(),
-                Tables\Columns\TextColumn::make('percentage')
-                    ->toggleable(isToggledHiddenByDefault: true),
-                Tables\Columns\TextColumn::make('last_months_earnings')
+                Tables\Columns\TextColumn::make('total_earned')
                     ->label('Earned')
                     ->alignRight()
                     ->currency('USD'),
-                Tables\Columns\TextColumn::make('last_month_bookings')
+                Tables\Columns\TextColumn::make('bookings')
                     ->label('Bookings')
                     ->alignRight()
                     ->numeric(),
@@ -69,13 +67,6 @@ class PartnerResource extends Resource
             ->actions([
 
             ]);
-    }
-
-    public static function getRelations(): array
-    {
-        return [
-            //
-        ];
     }
 
     public static function getPages(): array

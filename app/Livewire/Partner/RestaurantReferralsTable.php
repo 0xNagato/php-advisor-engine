@@ -2,8 +2,9 @@
 
 namespace App\Livewire\Partner;
 
-use App\Filament\Pages\Partner\RestaurantReferralEarnings;
+use App\Filament\Pages\Partner\RestaurantEarnings;
 use App\Models\User;
+use App\Notifications\RestaurantCreated;
 use Filament\Notifications\Notification;
 use Filament\Tables\Actions\Action;
 use Filament\Tables\Columns\IconColumn;
@@ -30,12 +31,13 @@ class RestaurantReferralsTable extends BaseWidget
         return $table
             ->query(function () {
                 return User::whereHas('referral', function ($query) {
-                    $query->where('type', 'restaurant');
+                    $query->where('type', 'restaurant')
+                        ->where('referrer_id', auth()->id());
                 });
             })
             ->recordUrl(function (User $record) {
                 if ($record->has_secured) {
-                    return RestaurantReferralEarnings::getUrl([$record->restaurant->id]);
+                    return RestaurantEarnings::getUrl([$record->restaurant->id]);
                 }
 
                 return null;
@@ -57,13 +59,16 @@ class RestaurantReferralsTable extends BaseWidget
                     ->iconButton()
                     ->color('success')
                     ->requiresConfirmation()
+                    ->modalHeading('Send Welcome Email and SMS')
                     ->hidden(fn(User $record) => $record->has_secured)
                     ->action(function (User $record) {
-                        // if (!blank($record->phone)) {
-                        //     ConciergeReferredViaText::dispatch($record);
-                        // } elseif (!blank($record->email)) {
-                        //     $record->notify(new ConciergeReferredEmail($record));
-                        // }
+
+                        $record->notify(new RestaurantCreated($record));
+                        $record->secured_at = now();
+                        $record->save();
+
+                        $record->referral->secured_at = now();
+                        $record->referral->save();
 
                         Notification::make()
                             ->title('Welcome Email and SMS sent successfully.')

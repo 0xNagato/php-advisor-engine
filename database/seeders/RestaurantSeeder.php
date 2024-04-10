@@ -2,9 +2,12 @@
 
 namespace Database\Seeders;
 
+use App\Models\Partner;
+use App\Models\Referral;
 use App\Models\Restaurant;
 use App\Models\User;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Str;
 
 class RestaurantSeeder extends Seeder
 {
@@ -37,13 +40,29 @@ class RestaurantSeeder extends Seeder
         ]);
 
         $restaurantNames->each(function ($restaurantName) {
-            $user = User::factory(['first_name' => 'Restaurant'])
+            $partner = Partner::inRandomOrder()->first();
+            $email = 'restaurant@' . Str::slug($restaurantName) . '.com';
+
+            $user = User::factory([
+                'first_name' => 'Restaurant',
+                'partner_referral_id' => $partner->id,
+                'email' => $email
+            ])
                 ->has(Restaurant::factory([
                     'restaurant_name' => $restaurantName,
                 ]))
                 ->create();
 
             $user->assignRole('restaurant');
+
+            Referral::create([
+                'referrer_id' => $partner->user->id,
+                'user_id' => $user->id,
+                'email' => $email,
+                'secured_at' => now(),
+                'type' => 'restaurant',
+                'referrer_type' => 'partner',
+            ]);
         });
     }
 }

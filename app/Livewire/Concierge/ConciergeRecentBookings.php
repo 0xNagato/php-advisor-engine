@@ -46,9 +46,11 @@ class ConciergeRecentBookings extends BaseWidget
         $query = $query->whereBetween('created_at', [$startDate, $endDate])->orderByDesc('created_at');
 
         return $table
-            ->recordUrl(fn (Booking $booking) => route('filament.admin.resources.bookings.view', $booking))
+            ->recordUrl(fn(Booking $booking) => route('filament.admin.resources.bookings.view', $booking))
             ->query($query)
             ->searchable(false)
+            ->emptyStateIcon('heroicon-o-currency-dollar')
+            ->emptyStateHeading('Earnings will show here when bookings begin!')
             ->columns([
                 TextColumn::make('guest_name')
                     ->label('Guest')
@@ -64,7 +66,7 @@ class ConciergeRecentBookings extends BaseWidget
                     ->alignRight()
                     ->label('Earned')
                     ->currency('USD')
-                    ->hidden((bool) ! auth()->user()?->hasRole('concierge') && ! $this->hideConcierge),
+                    ->hidden((bool)!auth()->user()?->hasRole('concierge') && !$this->hideConcierge),
                 TextColumn::make('charity_earnings')
                     ->alignRight()
                     ->currency('USD')

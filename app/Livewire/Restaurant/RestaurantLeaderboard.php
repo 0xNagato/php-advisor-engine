@@ -2,7 +2,7 @@
 
 namespace App\Livewire\Restaurant;
 
-use App\Models\Booking;
+use App\Models\Earning;
 use App\Models\Restaurant;
 use Filament\Tables;
 use Filament\Tables\Table;
@@ -30,12 +30,11 @@ class RestaurantLeaderboard extends BaseWidget
         $startDate = $this->filters['startDate'] ?? now()->subDays(30);
         $endDate = $this->filters['endDate'] ?? now();
 
-        $query = Booking::select('restaurants.user_id', DB::raw('sum(restaurant_earnings) as total_earned'), 'restaurants.restaurant_name')
-            ->join('schedules', 'schedules.id', '=', 'bookings.schedule_id')
-            ->join('restaurants', 'restaurants.id', '=', 'schedules.restaurant_id')
-            ->join('users', 'users.id', '=', 'restaurants.user_id')
-            ->whereBetween('booking_at', [$startDate, $endDate])
-            ->groupBy('restaurants.user_id', 'restaurants.restaurant_name')
+        $query = Earning::select('earnings.user_id', 'restaurants.id as restaurant_id', DB::raw('SUM(amount) as total_earned'), 'restaurants.restaurant_name')
+            ->join('users', 'users.id', '=', 'earnings.user_id')
+            ->join('restaurants', 'restaurants.user_id', '=', 'earnings.user_id')
+            ->whereBetween('earnings.created_at', [$startDate, $endDate])
+            ->groupBy('earnings.user_id', 'restaurants.id')
             ->orderBy('total_earned', 'desc')
             ->limit(10);
 

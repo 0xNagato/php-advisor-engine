@@ -35,9 +35,11 @@ class AdminRecentBookings extends BaseWidget
         $query = $query->whereBetween('created_at', [$startDate, $endDate])->orderByDesc('created_at');
 
         return $table
-            ->recordUrl(fn (Booking $booking) => route('filament.admin.resources.bookings.view', $booking))
+            ->recordUrl(fn(Booking $booking) => route('filament.admin.resources.bookings.view', $booking))
             ->query($query)
             ->searchable(false)
+            ->emptyStateIcon('heroicon-o-currency-dollar')
+            ->emptyStateHeading('Earnings will show here when bookings begin!')
             ->columns([
                 TextColumn::make('guest_name')
                     ->label('Guest')

@@ -126,16 +126,27 @@ class Restaurant extends Model
 
     public function scopeOpenToday(Builder $query): Builder
     {
-        $currentDay = strtolower(now()->format('l')); // Get the current day of the week in lowercase
+        $currentDay = strtolower(now()->format('l'));
 
-        return $query->where("open_days->{$currentDay}", 'open'); // Check if the restaurant is open on that day
+        return $query->where("open_days->{$currentDay}", 'open');
+
+        // ->whereHas('user', function (Builder $query) {
+        //         $query->whereNotNull('secured_at');
+        //     })
+    }
+
+    public function scopeAvailable(Builder $query): Builder
+    {
+        return $query->whereHas('user', function (Builder $query) {
+            $query->whereNotNull('secured_at');
+        });
     }
 
     public function scopeOpenOnDate(Builder $query, string $date): Builder
     {
-        $dayOfWeek = strtolower(Carbon::parse($date)->format('l')); // Convert the date to a day of the week
+        $dayOfWeek = strtolower(Carbon::parse($date)->format('l'));
 
-        return $query->where("open_days->{$dayOfWeek}", 'open'); // Check if the restaurant is open on that day
+        return $query->where("open_days->{$dayOfWeek}", 'open');
     }
 
     public function getPriceForDate(string $date): float

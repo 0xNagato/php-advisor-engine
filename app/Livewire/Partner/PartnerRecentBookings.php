@@ -49,6 +49,8 @@ class PartnerRecentBookings extends BaseWidget
             ->recordUrl(fn(Earning $earning) => route('filament.admin.resources.bookings.view', $earning->booking))
             ->query($query)
             ->searchable(false)
+            ->emptyStateIcon('heroicon-o-currency-dollar')
+            ->emptyStateHeading('Earnings will show here when bookings begin!')
             ->columns([
                 TextColumn::make('booking.id')
                     ->label('Booking ID')

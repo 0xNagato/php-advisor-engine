@@ -81,10 +81,10 @@ class DatabaseSeeder extends Seeder
             ->assignRole('concierge');
 
         $this->call([
+            PartnerSeeder::class,
             ConciergeSeeder::class,
             RestaurantSeeder::class,
-            PartnerSeeder::class,
-            // BookingSeeder::class,
+            BookingSeeder::class,
             ShieldSeeder::class,
         ]);
 

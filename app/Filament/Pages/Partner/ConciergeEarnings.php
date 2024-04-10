@@ -2,30 +2,30 @@
 
 namespace App\Filament\Pages\Partner;
 
-use App\Livewire\Partner\RestaurantReferralBookingsTable;
-use App\Livewire\Partner\RestaurantReferralStats;
-use App\Models\Restaurant;
+use App\Livewire\Partner\ConciergeReferralBookingsTable;
+use App\Livewire\Partner\ConciergeReferralStats;
+use App\Models\Concierge;
 use Filament\Forms\Components\DatePicker;
 use Filament\Pages\Dashboard\Actions\FilterAction;
 use Filament\Pages\Dashboard\Concerns\HasFiltersAction;
 use Filament\Pages\Page;
 use Illuminate\Contracts\Support\Htmlable;
 
-class RestaurantReferralEarnings extends Page
+class ConciergeEarnings extends Page
 {
     use HasFiltersAction;
 
-    public static ?string $title = 'My Restaurant Earnings';
+    public static ?string $title = 'My Concierge Earnings';
 
     protected static ?string $navigationIcon = 'heroicon-s-currency-dollar';
 
     protected static string $view = 'filament.pages.concierge.concierge-referral-earnings';
 
-    protected static ?int $navigationSort = 4;
+    protected static ?int $navigationSort = 2;
 
-    protected static ?string $slug = 'partner/restaurant/earnings/{restaurantId?}';
+    protected static ?string $slug = 'partner/concierge/earnings/{conciergeId?}';
 
-    public ?int $restaurantId;
+    public ?int $conciergeId;
 
     public static function canAccess(): bool
     {
@@ -34,18 +34,18 @@ class RestaurantReferralEarnings extends Page
 
     public function getHeading(): string|Htmlable
     {
-        if ($this->restaurantId) {
-            $restaurant = Restaurant::find($this->restaurantId);
+        if ($this->conciergeId) {
+            $concierge = Concierge::find($this->conciergeId);
 
-            return "{$restaurant->restaurant_name} Bookings";
+            return "{$concierge->user->name} Bookings";
         }
 
-        return 'My Restaurant Earnings';
+        return 'My Concierge Earnings';
     }
 
-    public function mount(?int $restaurantId = null): void
+    public function mount(?int $conciergeId = null): void
     {
-        $this->restaurantId = $restaurantId;
+        $this->conciergeId = $conciergeId;
 
         $this->filters = [
             'startDate' => $this->filters['startDate'] ?? now()->subDays(30),
@@ -55,18 +55,18 @@ class RestaurantReferralEarnings extends Page
 
     public function getHeaderWidgets(): array
     {
-        $restaurant = new Restaurant();
-        if ($this->restaurantId) {
-            $restaurant = Restaurant::find($this->restaurantId);
+        $concierge = new Concierge();
+        if ($this->conciergeId) {
+            $concierge = Concierge::find($this->conciergeId);
         }
 
         return [
-            RestaurantReferralStats::make([
-                'restaurant' => $restaurant,
+            ConciergeReferralStats::make([
+                'concierge' => $concierge,
                 'columnSpan' => 'full',
             ]),
-            RestaurantReferralBookingsTable::make([
-                'restaurant' => $restaurant,
+            ConciergeReferralBookingsTable::make([
+                'concierge' => $concierge,
                 'columnSpan' => 'full',
             ]),
         ];

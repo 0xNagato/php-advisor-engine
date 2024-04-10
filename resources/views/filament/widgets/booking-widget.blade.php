@@ -279,7 +279,7 @@
 
         <x-filament::button wire:click="resetBooking" class="w-full bg-[#421fff] h-[48px]"
                             icon="gmdi-restaurant-menu">
-            Create New Booking
+            Back to Reservation Hub
         </x-filament::button>
 
         <div class="flex gap-4">

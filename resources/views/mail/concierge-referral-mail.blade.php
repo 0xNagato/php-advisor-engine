@@ -19,6 +19,8 @@ After you create your PRIMA account, you will have access to the PRIMA Reservati
 - 12% of the gross booking fees for reservations 20 through 50.
 - 15% of the gross booking fees for any reservations after the first 50.
 
+**All commissions are calculated on a monthly basis and reset at the end of the month.**
+
 **Example:**
 
 If you are booking your 15th monthly reservation, and the reservation is for 6 people, the total booking fee is $400 and you will earn 12% or $48 for the reservation.
@@ -35,9 +37,9 @@ You can also earn additional income by referring a concierge just like yourself 
 
 **Example:**
 
-If a concierge you referred is booking their 15th monthly reservation, and the reservation is for 6 people, the total booking fee is $400.  The restaurant will earn 60% or $240, the concierge will earn 12% or $48 for the reservation.  You will receive 10% of the balance, or ($400 less $240 less $48) * 10% = $11.20
+If a concierge you referred is booking their 15th monthly reservation, and the reservation is for 6 people, the total booking fee is $400. The restaurant will earn 60% or $240, the concierge will earn 10% or $40 for the reservation. You will receive 10% of the balance, or ($400 less $240 less $40) * 10% = $12.00
 
-If a concierge that was referred by a concierge that you referred is booking their 15th monthly reservation, and the reservation is for 6 people, the total booking fee is $400.  The restaurant will earn 60% or $240, the concierge will earn 12% or $48 for the reservation.  You will receive 5% of the balance, or ($400 less $240 less $48) * 5% = $5.60
+If a concierge that was referred by a concierge that you referred is booking their 15th monthly reservation, and the reservation is for 6 people, the total booking fee is $400. The restaurant will earn 60% or $240, the concierge will earn 10% or $40 for the reservation. You will receive 5% of the balance, or ($400 less $240 less $40) * 5% = $6.00
 
 All commissions earned are paid out on the 15th of every month, for commissions earned in the prior month.  One payment across all of our restaurant and experience partners.  No invoices are necessary.
 

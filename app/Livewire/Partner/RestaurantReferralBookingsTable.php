@@ -54,6 +54,8 @@ class RestaurantReferralBookingsTable extends BaseWidget
             ->paginationPageOptions([10, 25, 50])
             ->query($bookingsQuery)
             ->recordUrl(fn(Earning $record) => ViewBooking::getUrl([$record->booking]))
+            ->emptyStateIcon('heroicon-o-currency-dollar')
+            ->emptyStateHeading('Earnings will show here when bookings begin!')
             ->columns([
                 TextColumn::make('booking.restaurant.restaurant_name')
                     ->label('Restaurant'),

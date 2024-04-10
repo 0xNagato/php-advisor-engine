@@ -14,7 +14,7 @@ class PartnerConcierges extends ConciergeReferral
 
     protected static ?int $navigationSort = 1;
 
-    protected static ?string $slug = 'partner/concierges';
+    protected static ?string $slug = 'partner/concierge';
 
     public static function canAccess(): bool
     {

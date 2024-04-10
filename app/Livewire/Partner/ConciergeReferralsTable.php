@@ -3,7 +3,7 @@
 namespace App\Livewire\Partner;
 
 use App\Events\ConciergeReferredViaText;
-use App\Filament\Pages\Partner\ConciergeReferralEarnings;
+use App\Filament\Pages\Partner\ConciergeEarnings;
 use App\Models\Referral;
 use App\Notifications\ConciergeReferredEmail;
 use Filament\Notifications\Notification;
@@ -39,7 +39,7 @@ class ConciergeReferralsTable extends BaseWidget
             )
             ->recordUrl(function (Referral $record) {
                 if ($record->has_secured) {
-                    return ConciergeReferralEarnings::getUrl([$record->user->concierge->id]);
+                    return ConciergeEarnings::getUrl([$record->user->concierge->id]);
                 }
 
                 return null;

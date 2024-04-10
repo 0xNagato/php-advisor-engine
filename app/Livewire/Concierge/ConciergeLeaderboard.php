@@ -2,8 +2,8 @@
 
 namespace App\Livewire\Concierge;
 
-use App\Models\Booking;
 use App\Models\Concierge;
+use App\Models\Earning;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Filament\Widgets\TableWidget as BaseWidget;
@@ -12,8 +12,6 @@ use Illuminate\Support\Facades\DB;
 
 class ConciergeLeaderboard extends BaseWidget
 {
-    protected static bool $isLazy = true;
-
     public ?Concierge $concierge;
 
     public bool $showFilters = false;
@@ -30,11 +28,11 @@ class ConciergeLeaderboard extends BaseWidget
         $startDate = $this->filters['startDate'] ?? now()->subDays(30);
         $endDate = $this->filters['endDate'] ?? now();
 
-        $query = Booking::select('concierges.user_id', 'bookings.concierge_id', DB::raw('sum(concierge_earnings) as total_earned'), DB::raw("CONCAT(users.first_name, ' ', users.last_name) as user_name"))
-            ->join('concierges', 'concierges.id', '=', 'bookings.concierge_id')
-            ->join('users', 'users.id', '=', 'concierges.user_id')
-            ->whereBetween('booking_at', [$startDate, $endDate])
-            ->groupBy('concierges.user_id', 'bookings.concierge_id') // Add 'bookings.concierge_id' to the groupBy clause
+        $query = Earning::select('earnings.user_id', 'concierges.id as concierge_id', DB::raw('SUM(amount) as total_earned'), DB::raw("CONCAT(users.first_name, ' ', users.last_name) as user_name"))
+            ->join('users', 'users.id', '=', 'earnings.user_id')
+            ->join('concierges', 'concierges.user_id', '=', 'earnings.user_id')
+            ->whereBetween('earnings.created_at', [$startDate, $endDate])
+            ->groupBy('earnings.user_id', 'concierges.id')
             ->orderBy('total_earned', 'desc')
             ->limit(10);
 
@@ -43,7 +41,7 @@ class ConciergeLeaderboard extends BaseWidget
             ->recordUrl(function (Model $record) {
                 $record = Concierge::find($record->concierge_id);
 
-                if (! $record) {
+                if (!$record) {
                     return null;
                 }
 

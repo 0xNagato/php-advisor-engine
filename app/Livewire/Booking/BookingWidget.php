@@ -84,7 +84,7 @@ class BookingWidget extends Widget implements HasForms
 
     public function mount(): void
     {
-        $this->restaurants = Restaurant::openToday()->get();
+        $this->restaurants = Restaurant::openToday()->available()->get();
         $this->selectedDate = now()->format('Y-m-d');
     }
 
@@ -111,7 +111,7 @@ class BookingWidget extends Widget implements HasForms
         $this->selectedSchedule = null;
         $this->unavailableSchedules = null;
 
-        $this->restaurants = Restaurant::openOnDate($value)->get();
+        $this->restaurants = Restaurant::openOnDate($value)->available()->get();
     }
 
     public function updatedSelectedRestaurantId($value): void

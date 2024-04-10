@@ -3,9 +3,11 @@
 namespace Database\Seeders;
 
 use App\Models\Concierge;
+use App\Models\Partner;
 use App\Models\Referral;
 use App\Models\User;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Str;
 use Random\RandomException;
 
 class ConciergeSeeder extends Seeder
@@ -42,28 +44,30 @@ class ConciergeSeeder extends Seeder
 
         $hotelNames->each(function ($hotelName) {
             $shouldAssignReferralId = random_int(0, 1) <= 0.5;
-            $concierge = $shouldAssignReferralId ? Concierge::with('user')->get()->random() : null;
+            $partner = $shouldAssignReferralId ? Concierge::with('user')->get()->random() : Partner::inRandomOrder()->first();
 
-            $email = 'concierge@' . str_replace(' ', '', strtolower($hotelName)) . '.com';
+            $email = 'concierge@' . Str::slug($hotelName) . '.com';
 
             $user = User::factory([
                 'first_name' => 'Concierge',
                 'email' => $email,
-                'concierge_referral_id' => $concierge->id ?? null,
+                'concierge_referral_id' => $partner->user->hasRole('concierge') ? $partner->id : null,
+                'partner_referral_id' => $partner->user->hasRole('partner') ? $partner->id : null,
             ])
                 ->has(Concierge::factory([
                     'hotel_name' => $hotelName,
                 ]))
                 ->create();
 
-            if ($shouldAssignReferralId) {
-                Referral::create([
-                    'referrer_id' => $concierge?->user->id,
-                    'user_id' => $user->id,
-                    'email' => $email,
-                    'secured_at' => now(),
-                ]);
-            }
+
+            Referral::create([
+                'referrer_id' => $partner->user->id,
+                'user_id' => $user->id,
+                'email' => $email,
+                'secured_at' => now(),
+                'type' => 'concierge',
+                'referrer_type' => $partner->user->hasRole('concierge') ? 'concierge' : 'partner',
+            ]);
 
             $user->assignRole('concierge');
         });
