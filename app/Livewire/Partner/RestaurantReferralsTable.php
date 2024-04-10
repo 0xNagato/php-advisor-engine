@@ -59,7 +59,7 @@ class RestaurantReferralsTable extends BaseWidget
                     ->iconButton()
                     ->color('success')
                     ->requiresConfirmation()
-                    ->modalHeading('Send Welcome Email and SMS')
+                    ->modalHeading('Send Welcome Email')
                     ->hidden(fn(User $record) => $record->has_secured)
                     ->action(function (User $record) {
 
@@ -71,7 +71,7 @@ class RestaurantReferralsTable extends BaseWidget
                         $record->referral->save();
 
                         Notification::make()
-                            ->title('Welcome Email and SMS sent successfully.')
+                            ->title('Welcome Email sent successfully.')
                             ->success()
                             ->send();
                     }),

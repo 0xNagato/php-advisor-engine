@@ -16,7 +16,7 @@
         </div>
     </div>
     <div class="flex items-end justify-center text-sm text-center">
-        &copy; {{ date('Y') }} {{ config('app.name', 'Prima') }} VIP. All rights reserved.
+        &copy; {{ date('Y') }} {{ config('app.name', 'PRIMA VIP') }}. All rights reserved.
     </div>
 
 </div>
