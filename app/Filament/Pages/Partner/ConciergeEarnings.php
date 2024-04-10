@@ -15,7 +15,7 @@ class ConciergeEarnings extends Page
 {
     use HasFiltersAction;
 
-    public static ?string $title = 'My Concierge Earnings';
+    public static ?string $title = 'Concierge Earnings';
 
     protected static ?string $navigationIcon = 'heroicon-s-currency-dollar';
 

@@ -15,7 +15,7 @@ class RestaurantEarnings extends Page
 {
     use HasFiltersAction;
 
-    public static ?string $title = 'My Restaurant Earnings';
+    public static ?string $title = 'Restaurant Earnings';
 
     protected static ?string $navigationIcon = 'heroicon-s-currency-dollar';
 

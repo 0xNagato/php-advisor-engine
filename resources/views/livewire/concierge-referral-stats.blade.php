@@ -25,7 +25,7 @@
 
             <!-- Referrals -->
             <div class="px-4 py-5 sm:p-6">
-                <dt class="text-xs font-semibold text-slate-900">Referrals</dt>
+                <dt class="text-xs font-semibold text-slate-900">Bookings</dt>
                 <dd class="mt-1 flex items-baseline justify-between md:block lg:flex">
                     <div class="flex flex-col items-baseline text-xl sm:text-2xl font-semibold text-indigo-600">
                         {{ $stats['referrals'] }}
