@@ -16,6 +16,11 @@ class BookingResource extends Resource
 
     protected static ?string $navigationIcon = 'gmdi-restaurant-menu-o';
 
+    public static function shouldRegisterNavigation(): bool
+    {
+        return auth()->user()->hasRole(['concierge', 'super_admin', 'partner']);
+    }
+
     public static function form(Form $form): Form
     {
         return $form
