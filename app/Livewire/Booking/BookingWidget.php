@@ -84,7 +84,7 @@ class BookingWidget extends Widget implements HasForms
 
     public function mount(): void
     {
-        $this->restaurants = Restaurant::openToday()->available()->get();
+        $this->restaurants = Restaurant::available()->get();
         $this->selectedDate = now()->format('Y-m-d');
     }
 

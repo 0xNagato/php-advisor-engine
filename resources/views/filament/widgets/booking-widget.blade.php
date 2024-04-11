@@ -35,8 +35,7 @@
                 </label>
             </div>
 
-            <x-filament::input.wrapper x-show="showCalendar" @click="$refs.calendar.focus()"
-                                       suffix-icon="heroicon-m-calendar">
+            <x-filament::input.wrapper x-show="showCalendar" @click="$refs.calendar.focus()">
                 <x-filament::input type="date" x-ref="calendar" wire:model.live="selectedDate"/>
             </x-filament::input.wrapper>
 

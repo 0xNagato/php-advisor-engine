@@ -9,8 +9,12 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOneThrough;
+use Illuminate\Log\Logger;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
+use libphonenumber\NumberParseException;
+use libphonenumber\PhoneNumberFormat;
+use libphonenumber\PhoneNumberUtil;
 
 class Booking extends Model
 {
@@ -241,7 +245,7 @@ class Booking extends Model
 
     public function getGuestNameAttribute(): string
     {
-        return $this->guest_first_name.' '.$this->guest_last_name;
+        return $this->guest_first_name . ' ' . $this->guest_last_name;
     }
 
     public function getPartnerEarningsAttribute()
@@ -257,5 +261,34 @@ class Booking extends Model
         }
 
         return $earnings;
+    }
+
+    public function getGuestPhoneAttribute($value): string
+    {
+        $phoneUtil = PhoneNumberUtil::getInstance();
+
+        try {
+            $numberProto = $phoneUtil->parse($value, "US");
+
+            // Check if the number is valid
+            if ($phoneUtil->isValidNumber($numberProto)) {
+                // Format the number in the US/CA national format
+                return $phoneUtil->format($numberProto, PhoneNumberFormat::NATIONAL);
+            }
+
+            $repairedNumber = "+1" . $value;
+            $numberProto = $phoneUtil->parse($repairedNumber, "US");
+
+            if ($phoneUtil->isValidNumber($numberProto)) {
+                return $phoneUtil->format($numberProto, PhoneNumberFormat::NATIONAL);
+            }
+        } catch (NumberParseException $e) {
+            Logger::error("Error parsing phone number: " . $e->getMessage());
+            // If parsing fails, return the original number
+            return $value;
+        }
+
+        // Return the original input if all else fails
+        return $value;
     }
 }

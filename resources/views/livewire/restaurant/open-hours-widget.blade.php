@@ -17,9 +17,6 @@
                     <div class="w-full flex-grow">
                         <label for="start-time-{{ $day }}" class="sr-only">Start time:</label>
                         <div class="relative">
-                            <div class="absolute inset-y-0 end-0 top-0 flex items-center pe-2.5 pointer-events-none">
-                                <x-heroicon-o-clock class="h-5 w-5 text-indigo-600"/>
-                            </div>
                             <input type="time" id="start-time-{{ $day }}"
                                    {{$selectedDays[$day] ? 'required' : 'disabled' }}
                                    wire:model="startTimes.{{ $day }}"
@@ -33,9 +30,6 @@
                     <div class="w-full flex-grow">
                         <label for="end-time-{{ $day }}" class="sr-only">End time:</label>
                         <div class="relative">
-                            <div class="absolute inset-y-0 end-0 top-0 flex items-center pe-2.5 pointer-events-none">
-                                <x-heroicon-o-clock class="h-5 w-5 text-indigo-600"/>
-                            </div>
                             <input type="time" id="end-time-{{ $day }}"
                                    {{$selectedDays[$day] ? 'required' : 'disabled' }}
                                    wire:model="endTimes.{{ $day }}"
