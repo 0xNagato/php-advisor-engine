@@ -57,6 +57,10 @@ body::before {
     /*@apply -my-4 tracking-wide text-3xl !important;*/
 }
 
+.fi-ta-text-item, .fi-ta-text-item-label {
+    @apply w-full;
+}
+
 [x-persist="topbar.end"] {
     margin: 0 !important;
     @apply w-full flex items-center !important;

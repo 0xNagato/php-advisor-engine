@@ -7,21 +7,13 @@ export default {
         './app/Filament/**/*.php',
         './resources/views/**/*.blade.php',
         './vendor/filament/**/*.blade.php',
-        "./vendor/robsontenorio/mary/src/View/Components/**/*.php"
     ],
 
     plugins: [
-        require("daisyui"),
         plugin(function ({addVariant}) {
             return addVariant('prima-native', ['&.prima-native', '.prima-native &']);
         }),
     ],
-
-    daisyui: {
-        themes: false,
-        darkTheme: 'light'
-    },
-
     theme: {
         extend: {
             colors: {

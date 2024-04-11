@@ -4,8 +4,9 @@ namespace App\Filament\Resources\BookingResource\Pages;
 
 use App\Enums\BookingStatus;
 use App\Filament\Resources\BookingResource;
+use App\Models\Booking;
 use Filament\Resources\Pages\ListRecords;
-use Filament\Tables;
+use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 
@@ -32,55 +33,30 @@ class ListBookings extends ListRecords
                 return $query;
             })
             ->columns([
-                Tables\Columns\TextColumn::make('concierge.user.name')
-                    ->label('Concierge')
-                    ->numeric()
-                    ->sortable()
-                    ->hidden(function () {
-                        return auth()->user()->hasRole('concierge');
+                TextColumn::make('id')
+                    ->label('Booking')
+                    ->formatStateUsing(function (Booking $record) {
+                        return view('partials.booking-info-column', ['record' => $record]);
                     }),
-                Tables\Columns\TextColumn::make('schedule.restaurant.restaurant_name')
-                    ->label('Restaurant')
-                    ->searchable()
-                    ->sortable()
-                    ->hidden(function () {
-                        return auth()->user()->hasRole('restaurant');
-                    }),
-                Tables\Columns\TextColumn::make('booking_at')
-                    ->label('When')
-                    ->dateTime('D, M j')
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
-                Tables\Columns\TextColumn::make('guest_name')
-                    ->searchable()
-                    ->toggleable(isToggledHiddenByDefault: true),
-                Tables\Columns\TextColumn::make('guest_email')
-                    ->searchable()
-                    ->toggleable(isToggledHiddenByDefault: true),
-                Tables\Columns\TextColumn::make('guest_phone')
-                    ->searchable()
-                    ->toggleable(isToggledHiddenByDefault: true),
-                Tables\Columns\TextColumn::make('guest_count')
-                    ->numeric()
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
-                Tables\Columns\TextColumn::make('total_fee')
-                    ->currency('USD')
+
+                // TextColumn::make('concierge.user.name')
+                //     ->label('Concierge')
+                //     ->numeric()
+                //     ->sortable()
+                //     ->hidden(function () {
+                //         return auth()->user()->hasRole('concierge');
+                //     }),
+                // TextColumn::make('schedule.restaurant.restaurant_name')
+                //     ->label('Restaurant')
+                //     ->searchable()
+                //     ->sortable()
+                //     ->hidden(function () {
+                //         return auth()->user()->hasRole('restaurant');
+                //     }),
+                TextColumn::make('total_fee')
+                    ->money('USD', divideBy: 100)
+                    ->alignRight()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('currency')
-                    ->searchable()
-                    ->toggleable(isToggledHiddenByDefault: true),
-                Tables\Columns\TextColumn::make('status')
-                    ->searchable()
-                    ->toggleable(isToggledHiddenByDefault: true),
-                Tables\Columns\TextColumn::make('created_at')
-                    ->dateTime()
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
-                Tables\Columns\TextColumn::make('updated_at')
-                    ->dateTime()
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
             ]);
     }
 }
