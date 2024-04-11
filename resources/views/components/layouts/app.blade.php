@@ -30,6 +30,26 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet">
 
+    <style>
+        .dm-serif {
+            font-family: "DM Serif Display", serif;
+            font-weight: 400;
+            font-style: normal;
+        }
+
+        .dm-serif display-regular {
+            font-family: "DM Serif Display", serif;
+            font-weight: 400;
+            font-style: normal;
+        }
+
+        .dm-serif display-regular-italic {
+            font-family: "DM Serif Display", serif;
+            font-weight: 400;
+            font-style: italic;
+        }
+    </style>
+
     @filamentStyles
     @vite('resources/css/app.css')
 
