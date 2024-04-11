@@ -36,8 +36,9 @@ class RestaurantDailyBookings extends Page implements HasTable
      */
     public function getHeading(): string|Htmlable
     {
-        return 'Bookings - ' . date('D, M d, Y', strtotime($this->date));
+        return date('D, M d, Y', strtotime($this->date));
     }
+    
 
     public function mount(Restaurant $restaurant, string $date): void
     {
