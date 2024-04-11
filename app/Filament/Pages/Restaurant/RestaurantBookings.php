@@ -29,7 +29,7 @@ class RestaurantBookings extends Page implements HasTable
 
     public function table(Table $table): Table
     {
-        $query = Booking::query()
+        $query = Booking::confirmed()
             ->selectRaw('MIN(bookings.id) as id, DATE(booking_at) as booking_date, COUNT(*) as number_of_bookings')
             ->addSelect(DB::raw('SUM(earnings.amount) as earnings'))
             ->join('earnings', 'bookings.id', '=', 'earnings.booking_id')
