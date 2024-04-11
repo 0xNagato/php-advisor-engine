@@ -8,7 +8,7 @@
     <div class="w-full text-3xl font-black text-center pt-4">
         PRIMA
     </div>
-    <div class="sanomat-font text-2xl p-2 mb-4 text-center font-black">
+    <div class="dm-serif text-2xl p-2 mb-4 text-center font-black">
         Everybody Wins
         {{--<sup>&trade;</sup>--}}
     </div>

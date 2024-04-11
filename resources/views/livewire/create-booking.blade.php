@@ -5,7 +5,7 @@
         {{--    <div class="flex flex-col items-center pt-20 sm:pt-0 sm:justify-center flex-grow max-w-lg mx-auto">--}}
         @if($booking->status === BookingStatus::CONFIRMED)
             <div class="flex flex-col items-center gap-3" id="form">
-                <h1 class="text-3xl text-center sanomat-font">Thank you for your reservation!</h1>
+                <h1 class="text-3xl text-center dm-serif">Thank you for your reservation!</h1>
 
                 <h2 class="text-base text-center">
                     <p>Your reservation request has been received. Please check your phone for a text confirmation.</p>
@@ -15,7 +15,7 @@
             </div>
         @elseif(!$this->isValid())
             <div class="flex flex-col items-center gap-3" id="form">
-                <h1 class="text-3xl text-center sanomat-font">Sorry!</h1>
+                <h1 class="text-3xl text-center dm-serif">Sorry!</h1>
 
                 <h2 class="text-base text-left">
                     <p>
@@ -27,7 +27,7 @@
             </div>
         @elseif ($this->isValid())
             <div class="flex flex-col items-center gap-3">
-                <h1 class="text-3xl text-center sanomat-font font-semibold">Secure Your Reservation</h1>
+                <h1 class="text-3xl text-center dm-serif font-semibold">Secure Your Reservation</h1>
 
                 <h2 class="text-base text-center">
                     Enter your credit card information to confirm your reservation below.

@@ -1,7 +1,7 @@
 <x-filament-widgets::widget>
     <div class="flex items-center">
         <div class="flex-grow flex flex-col">
-            <div class="sanomat-font font-bold text-2xl">
+            <div class="dm-serif font-bold text-2xl">
                 {{ $concierge->user->name }}
             </div>
             <div>

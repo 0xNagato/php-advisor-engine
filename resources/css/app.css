@@ -33,17 +33,14 @@ body::before {
     font-style: normal;
 }
 
-.melete-font-bold {
-    font-family: "Melete Bold", sans-serif;
+.dm-serif display-regular {
+    font-family: "DM Serif Display", serif;
+    font-weight: 400;
     font-style: normal;
 }
 
-.melete-font {
-    font-family: "Melete", sans-serif;
-    font-style: normal;
-}
-
-.sanomat-font {
-    font-family: "Sanomat Web Regular Regular", serif;
-    font-style: normal;
+.dm-serif display-regular-italic {
+    font-family: "DM Serif Display", serif;
+    font-weight: 400;
+    font-style: italic;
 }
