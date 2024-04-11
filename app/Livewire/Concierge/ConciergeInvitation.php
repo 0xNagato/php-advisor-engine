@@ -4,6 +4,7 @@ namespace App\Livewire\Concierge;
 
 use App\Models\Referral;
 use App\Models\User;
+use App\Notifications\ConciergeRegisteredEmail;
 use DanHarrin\LivewireRateLimiting\Exceptions\TooManyRequestsException;
 use DanHarrin\LivewireRateLimiting\WithRateLimiting;
 use Filament\Actions\Action;
@@ -168,6 +169,8 @@ class ConciergeInvitation extends SimplePage
         $user->concierge()->create([
             'hotel_name' => $data['hotel_name'],
         ]);
+
+        $user->notify(new ConciergeRegisteredEmail());
 
         Auth::login($user);
 
