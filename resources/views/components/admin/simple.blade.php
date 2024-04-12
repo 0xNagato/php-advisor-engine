@@ -5,10 +5,10 @@
 ])
 
 <div class="pb-4">
-    <div class="w-full text-3xl font-black text-center pt-4">
+    <div class="w-full text-3xl font-bold text-center pt-4">
         PRIMA
     </div>
-    <div class="dm-serif text-2xl p-2 mb-4 text-center font-black">
+    <div class="dm-serif text-2xl p-2 mb-4 text-center font-bold tracking-tight text-gray-950">
         Everybody Wins
         {{--<sup>&trade;</sup>--}}
     </div>
