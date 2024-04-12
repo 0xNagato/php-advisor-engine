@@ -88,10 +88,10 @@ class DatabaseSeeder extends Seeder
             ->assignRole('concierge');
 
         $this->call([
+            ShieldSeeder::class,
             ConciergeSeeder::class,
             RestaurantSeeder::class,
             BookingSeeder::class,
-            ShieldSeeder::class,
         ]);
 
         Artisan::call('shield:generate --all');

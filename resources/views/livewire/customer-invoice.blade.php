@@ -81,7 +81,7 @@
                     <div class="block text-sm font-medium text-gray-800 dark:text-gray-200">
                         {{ $booking->guest_name }}
                         <br/>
-                        {{ phone($booking->guest_phone, ['US', 'CA'], PhoneNumberFormat::NATIONAL) }}
+                        {{ $booking->guest_phone }}
                         @if($booking->guest_email)
                             <br/>
                             {{ $booking->guest_email }}
