@@ -69,7 +69,7 @@ class AppServiceProvider extends ServiceProvider
             PanelsRenderHook::PAGE_END,
             static fn() => new HtmlString('
             <div class="text-xs text-center mb-4">
-                &copy; 2024 PRIMA VIP, All rights reserved.
+                &copy; 2024 PRIMA VIP. All rights reserved.
             </div>
             ')
         );
