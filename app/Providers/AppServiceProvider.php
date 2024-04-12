@@ -79,6 +79,20 @@ class AppServiceProvider extends ServiceProvider
             static fn(): string => '<meta name="viewport" content="width=device-width, initial-scale=1" />',
         );
 
+        Filament::registerRenderHook(PanelsRenderHook::HEAD_END, function () {
+            return new HtmlString("
+                <!-- Google tag (gtag.js) -->
+                <script async src='https://www.googletagmanager.com/gtag/js?id=G-Z8HQ7BTL4F'></script>
+                <script>
+                  window.dataLayer = window.dataLayer || [];
+                  function gtag(){dataLayer.push(arguments);}
+                  gtag('js', new Date());
+
+                  gtag('config', 'G-Z8HQ7BTL4F');
+                </script>
+            ");
+        });
+
         FilamentView::registerRenderHook(
             'panels::head.start',
             static fn(): string => '

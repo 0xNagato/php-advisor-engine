@@ -3,7 +3,7 @@
 namespace App\Filament\Resources\PartnerResource\Pages;
 
 use App\Filament\Resources\PartnerResource;
-use App\Models\Earning;
+use App\Models\Partner;
 use Filament\Actions;
 use Filament\Forms\Components\DatePicker;
 use Filament\Pages\Dashboard\Actions\FilterAction;
@@ -45,11 +45,14 @@ class ListPartners extends ListRecords
         $startDate = $this->filters['startDate'] ?? now()->subDays(30);
         $endDate = $this->filters['endDate'] ?? now();
 
-        $query = Earning::select('earnings.user_id', 'partners.id as id', DB::raw('SUM(amount) as total_earned'), DB::raw("CONCAT(users.first_name, ' ', users.last_name) as user_name"), DB::raw('COUNT(case when earnings.type in ("partner_concierge", "partner_restaurant") then 1 else null end) as bookings'))
-            ->join('users', 'users.id', '=', 'earnings.user_id')
-            ->join('partners', 'partners.user_id', '=', 'earnings.user_id')
-            ->whereBetween('earnings.created_at', [$startDate, $endDate])
-            ->groupBy('earnings.user_id', 'partners.id')
+        $query = Partner::query()
+            ->select('partners.id', 'users.id as user_id', DB::raw("CONCAT(users.first_name, ' ', users.last_name) as user_name"), DB::raw('COALESCE(SUM(amount), 0) as total_earned'), DB::raw('COALESCE(COUNT(case when earnings.type in ("partner_concierge", "partner_restaurant") then 1 else null end), 0) as bookings'))
+            ->join('users', 'users.id', '=', 'partners.user_id')
+            ->leftJoin('earnings', function ($join) use ($startDate, $endDate) {
+                $join->on('earnings.user_id', '=', 'users.id')
+                    ->whereBetween('earnings.created_at', [$startDate, $endDate]);
+            })
+            ->groupBy('partners.id', 'users.id')
             ->orderBy('total_earned', 'desc')
             ->limit(10);
 
@@ -77,7 +80,7 @@ class ListPartners extends ListRecords
 
     public function getTableRecordKey(Model $record): string
     {
-        return uniqid();
+        return (string)$record->getKey();
     }
 
     protected function getHeaderActions(): array
