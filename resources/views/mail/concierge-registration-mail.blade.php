@@ -1,6 +1,4 @@
 <x-mail::message>
-# Welcome to PRIMA!
-
 Hello from PRIMA!
 
 PRIMA was created for two very simple reasons:  To make it easier for consumers to access in-demand restaurants and experiences and to maximize the revenues of all those involved in the process, including you.

@@ -18,7 +18,7 @@
         </div>
     @endif
     <div>
-        {{ $booking->guest_phone }}
+        {{ $record->local_formatted_guest_phone }}
     </div>
 
     <div class="mt-1 flex gap-2">

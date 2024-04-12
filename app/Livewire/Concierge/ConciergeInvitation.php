@@ -174,7 +174,7 @@ class ConciergeInvitation extends SimplePage
 
         Auth::login($user);
 
-        $this->redirectRoute('filament.admin.pages.concierge.reservation-hub');
+        $this->redirectRoute('filament.admin.pages.concierge.announcements');
     }
 
     public function getFormActions(): array

@@ -2,18 +2,17 @@
 
 namespace App\Models;
 
+use App\Traits\FormatsPhoneNumber;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Notifications\Notifiable;
-use libphonenumber\NumberParseException;
-use libphonenumber\PhoneNumberFormat;
-use libphonenumber\PhoneNumberUtil;
 
 class Referral extends Model
 {
     use HasUuids;
     use Notifiable;
+    use FormatsPhoneNumber;
 
     protected $fillable = [
         'referrer_id',
@@ -23,6 +22,7 @@ class Referral extends Model
         'user_id',
         'type',
         'referrer_type',
+        'local_formatted_phone',
     ];
 
     public function referrer(): BelongsTo
@@ -45,37 +45,13 @@ class Referral extends Model
         return !blank($this->secured_at);
     }
 
-    public function getPhoneAttribute($value): string
-    {
-        $phoneUtil = PhoneNumberUtil::getInstance();
-
-        try {
-            $numberProto = $phoneUtil->parse($value, "US");
-
-            // Check if the number is valid
-            if ($phoneUtil->isValidNumber($numberProto)) {
-                // Format the number in the US/CA national format
-                return $phoneUtil->format($numberProto, PhoneNumberFormat::NATIONAL);
-            }
-
-            $repairedNumber = "+1" . $value;
-            $numberProto = $phoneUtil->parse($repairedNumber, "US");
-
-            if ($phoneUtil->isValidNumber($numberProto)) {
-                return $phoneUtil->format($numberProto, PhoneNumberFormat::NATIONAL);
-            }
-        } catch (NumberParseException $e) {
-            Logger::error("Error parsing phone number: " . $e->getMessage());
-            // If parsing fails, return the original number
-            return $value;
-        }
-
-        // Return the original input if all else fails
-        return $value;
-    }
-
     public function getLabelAttribute(): string
     {
-        return $this->has_secured ? $this->user->name : $this->email ?? $this->phone;
+        return $this->has_secured ? $this->user->name : $this->email ?? $this->local_formatted_phone;
+    }
+
+    public function getLocalFormattedPhoneAttribute(): string
+    {
+        return $this->getLocalFormattedPhoneNumber($this->phone);
     }
 }

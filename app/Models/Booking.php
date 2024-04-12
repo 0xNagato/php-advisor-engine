@@ -4,23 +4,21 @@ namespace App\Models;
 
 use App\Data\Stripe\StripeChargeData;
 use App\Enums\BookingStatus;
+use App\Traits\FormatsPhoneNumber;
 use AssertionError;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOneThrough;
-use Illuminate\Log\Logger;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
-use libphonenumber\NumberParseException;
-use libphonenumber\PhoneNumberFormat;
-use libphonenumber\PhoneNumberUtil;
 use Sentry;
 
 class Booking extends Model
 {
     use HasFactory;
+    use FormatsPhoneNumber;
 
     /**
      * The attributes that are mass assignable.
@@ -57,6 +55,7 @@ class Booking extends Model
 
     protected $appends = [
         'guest_name',
+        'local_formatted_guest_phone',
     ];
 
     protected $casts = [
@@ -304,32 +303,8 @@ class Booking extends Model
         return $earnings;
     }
 
-    public function getGuestPhoneAttribute($value): string
+    public function getLocalFormattedGuestPhoneAttribute(): string
     {
-        $phoneUtil = PhoneNumberUtil::getInstance();
-
-        try {
-            $numberProto = $phoneUtil->parse($value, "US");
-
-            // Check if the number is valid
-            if ($phoneUtil->isValidNumber($numberProto)) {
-                // Format the number in the US/CA national format
-                return $phoneUtil->format($numberProto, PhoneNumberFormat::NATIONAL);
-            }
-
-            $repairedNumber = "+1" . $value;
-            $numberProto = $phoneUtil->parse($repairedNumber, "US");
-
-            if ($phoneUtil->isValidNumber($numberProto)) {
-                return $phoneUtil->format($numberProto, PhoneNumberFormat::NATIONAL);
-            }
-        } catch (NumberParseException $e) {
-            Logger::error("Error parsing phone number: " . $e->getMessage());
-            // If parsing fails, return the original number
-            return $value;
-        }
-
-        // Return the original input if all else fails
-        return $value;
+        return $this->getLocalFormattedPhoneNumber($this->guest_phone);
     }
 }

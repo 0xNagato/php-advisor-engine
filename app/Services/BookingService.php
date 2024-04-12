@@ -5,9 +5,8 @@ namespace App\Services;
 use App\Enums\BookingStatus;
 use App\Events\BookingPaid;
 use App\Models\Booking;
+use App\Traits\FormatsPhoneNumber;
 use libphonenumber\NumberParseException;
-use libphonenumber\PhoneNumberFormat;
-use libphonenumber\PhoneNumberUtil;
 use Stripe\Charge;
 use Stripe\Customer;
 use Stripe\Exception\ApiErrorException;
@@ -15,6 +14,8 @@ use Stripe\Stripe;
 
 class BookingService
 {
+    use FormatsPhoneNumber;
+
     /**
      * @throws ApiErrorException
      * @throws NumberParseException
@@ -39,9 +40,7 @@ class BookingService
             'description' => 'Booking for ' . $booking->restaurant->restaurant_name,
         ]);
 
-        $phoneUtil = PhoneNumberUtil::getInstance();
-        $numberProto = $phoneUtil->parse($form['phone'], 'US');
-        $formattedPhone = $phoneUtil->format($numberProto, PhoneNumberFormat::E164);
+        $formattedPhone = $this->getInternationalFormattedPhoneNumber($form['phone']);
 
         $booking->update([
             'guest_first_name' => $form['first_name'],

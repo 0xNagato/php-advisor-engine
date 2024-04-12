@@ -21,10 +21,11 @@ body {
 }
 
 body {
-    background-image: url("https://dev.primavip.co/images/new-waves.png");
+    /* background-image: url("https://dev.primavip.co/images/new-waves.png");
     background-repeat: no-repeat;
     background-position: center;
-    background-size: cover;
+    background-size: cover; */
+    background-color: #b6aae5;
 }
 
 p,
@@ -112,7 +113,7 @@ img {
 }
 
 .header a {
-    color: #4736dd;
+    color: #000000;
     font-size: 19px;
     font-weight: bold;
     text-decoration: none;

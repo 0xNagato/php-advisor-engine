@@ -41,17 +41,20 @@ class PasswordSettings extends Widget implements HasForms
                     ->placeholder('Current Password')
                     ->required()
                     ->password()
+                    ->revealable()
                     ->rule('current_password'),
                 TextInput::make('new_password')
                     ->hiddenLabel()
                     ->placeholder('New Password')
                     ->password()
+                    ->revealable()
                     ->minLength(8)
                     ->required(),
                 TextInput::make('new_password_confirmation')
                     ->hiddenLabel()
                     ->placeholder('Confirm New Password')
                     ->password()
+                    ->revealable()
                     ->same('new_password')
                     ->required(),
             ])
@@ -67,15 +70,17 @@ class PasswordSettings extends Widget implements HasForms
             'password' => Hash::make($data['new_password']),
         ]);
 
-        session()->forget('password_hash_'.Filament::getCurrentPanel()->getAuthGuard());
+        $user = auth()->user();
 
-        Filament::auth()->login($this->user);
+        session()->forget('password_hash_' . Filament::getCurrentPanel()->getAuthGuard());
+
+        Filament::auth()->login($user);
 
         $this->reset(['data']);
 
         Notification::make()
             ->success()
-            ->title(__('filament-breezy::default.profile.password.notify'))
+            ->title('Password Updated Successfully.')
             ->send();
     }
 }
