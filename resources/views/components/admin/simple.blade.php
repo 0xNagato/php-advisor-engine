@@ -5,7 +5,7 @@
 ])
 
 <div class="pb-4">
-    <div class="w-full text-3xl font-bold text-center pt-4">
+    <div class="w-full text-3xl font-bold text-center pt-6 leading-5 tracking-tight text-gray-950">
         PRIMA
     </div>
     <div class="dm-serif text-2xl p-2 mb-4 text-center font-bold tracking-tight text-gray-950">
