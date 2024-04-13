@@ -146,7 +146,7 @@ class BookingWidget extends Widget implements HasForms
 
     public function updatedData($data, $key): void
     {
-        if ($key === 'restaurant' || ($key === 'reservation_time' && isset($this->data['restaurant']))) {
+        if ($key === 'restaurant' || ($key === 'reservation_time' && isset($this->data['restaurant'])) || ($key === 'date' && isset($this->data['restaurant']) && isset($this->data['reservation_time']))) {
             $reservationTime = $this->form->getState()['reservation_time'];
             $restaurantId = $this->form->getState()['restaurant'];
 
@@ -250,6 +250,8 @@ class BookingWidget extends Widget implements HasForms
         $this->bookingUrl = null;
 
         $this->form->fill();
+        $this->schedulesThisWeek = new Collection();
+        $this->schedulesToday = new Collection();
     }
 
     public function resetBooking(): void
@@ -261,6 +263,8 @@ class BookingWidget extends Widget implements HasForms
         $this->SMSSent = false;
 
         $this->form->fill();
+        $this->schedulesThisWeek = new Collection();
+        $this->schedulesToday = new Collection();
     }
 
     #[On('sms-sent')]
