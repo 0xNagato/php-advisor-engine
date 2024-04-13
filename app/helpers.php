@@ -1,5 +1,7 @@
 <?php
 
+use Carbon\Carbon;
+
 if (! function_exists('formatPhoneNumber')) {
     function formatPhoneNumber($phoneNumber): string
     {
@@ -30,5 +32,19 @@ if (! function_exists('isPrimaApp')) {
         $request = request();
 
         return $request->userAgent() === 'PrimaApp/1.0';
+    }
+}
+
+if (! function_exists('formatDateFromString')) {
+    function formatDateFromString($date)
+    {
+        $carbonDate = Carbon::createFromFormat('Y-m-d', $date);
+        if ($carbonDate->isToday()) {
+            return 'Today';
+        } elseif ($carbonDate->isTomorrow()) {
+            return 'Tomorrow';
+        } else {
+            return $carbonDate->format('D, M j');
+        }
     }
 }

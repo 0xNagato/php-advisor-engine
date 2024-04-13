@@ -10,7 +10,9 @@
         @if ($this->schedulesToday->count() || $this->schedulesThisWeek->count())
             <div class="flex flex-col gap-3 p-4 bg-white border rounded-lg shadow">
                 @if ($this->schedulesToday->count())
-                    <div class="text-sm font-semibold">Availability Today</div>
+                    <div class="text-sm font-semibold">
+                        Availability {{ formatDateFromString($this->data['date']) }}
+                    </div>
                     <div class="grid gap-1.5 grid-cols-4">
                         @foreach ($this->schedulesToday as $schedule)
                             <span
