@@ -68,7 +68,7 @@ class AppServiceProvider extends ServiceProvider
         FilamentView::registerRenderHook(
             PanelsRenderHook::PAGE_END,
             static fn () => new HtmlString('
-            <div class="text-xs text-center mb-4">
+            <div class="mb-4 text-xs text-center">
                 &copy; 2024 PRIMA VIP. All rights reserved.
             </div>
             ')
@@ -90,6 +90,10 @@ class AppServiceProvider extends ServiceProvider
 
                   gtag('config', 'G-Z8HQ7BTL4F');
                 </script>
+                <script
+                    src='https://js.sentry-cdn.com/13f74541d55ad7fbd95d3eefa72399c9.min.js'
+                    crossorigin='anonymous'
+                ></script>
             ");
         });
 
@@ -98,8 +102,7 @@ class AppServiceProvider extends ServiceProvider
             static fn (): string => '
             <link rel="preconnect" href="https://fonts.googleapis.com">
             <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-            <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet">
-            ',
+            <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet">',
         );
 
         Page::$reportValidationErrorUsing = static function (ValidationException $exception) {
