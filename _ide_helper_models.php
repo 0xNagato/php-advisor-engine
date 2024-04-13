@@ -343,6 +343,8 @@ namespace App\Models{
  * @property int $available_tables
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property int $prime_time
+ * @property int|null $prime_time_fee
  * @property mixed $0
  * @property mixed $1
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Booking> $bookings
@@ -364,6 +366,8 @@ namespace App\Models{
  * @method static \Illuminate\Database\Eloquent\Builder|Schedule whereEndTime($value)
  * @method static \Illuminate\Database\Eloquent\Builder|Schedule whereId($value)
  * @method static \Illuminate\Database\Eloquent\Builder|Schedule whereIsAvailable($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Schedule wherePrimeTime($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Schedule wherePrimeTimeFee($value)
  * @method static \Illuminate\Database\Eloquent\Builder|Schedule whereRestaurantId($value)
  * @method static \Illuminate\Database\Eloquent\Builder|Schedule whereStartTime($value)
  * @method static \Illuminate\Database\Eloquent\Builder|Schedule whereUpdatedAt($value)

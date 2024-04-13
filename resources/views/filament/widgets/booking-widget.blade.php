@@ -11,14 +11,24 @@
             <div class="flex flex-col bg-white border divide-y rounded-lg shadow">
                 @if ($this->schedulesToday->count())
                     <div class="p-4">
-                        <div class="text-sm font-semibold mb-2">
-                            Availability {{ formatDateFromString($this->data['date']) }}
+                        <div class="flex items-center">
+                            <div class="text-sm font-semibold mb-2 flex-grow">
+                                Availability {{ formatDateFromString($this->data['date']) }}
+                            </div>
+                            <div class="flex items-center gap-1">
+                                <x-heroicon-s-star @class(['h-4 w-4 text-yellow-300 -mt-0.5']) />
+                                <span class="font-semibold text-xs">PRIME</span>
+                            </div>
                         </div>
                         <div class="grid gap-1.5 grid-cols-3">
                             @foreach ($this->schedulesToday as $schedule)
                                 <div @if ($schedule->is_bookable) wire:click="createBooking({{ $schedule->id }})" @endif
                                     class="flex gap-1 items-center px-2 py-2 text-xs font-semibold leading-none rounded-full {{ $schedule->is_bookable ? 'bg-green-600 text-white cursor-pointer' : 'bg-gray-100 text-gray-400' }}">
-                                    <x-heroicon-s-currency-dollar class="h-4 w-4" />
+                                    @if (!$schedule->prime_time)
+                                        {{-- <x-heroicon-s-currency-dollar class="h-4 w-4" /> --}}
+                                    @else
+                                        <x-heroicon-s-star @class(['h-4 w-4', 'text-yellow-300' => $schedule->is_bookable]) />
+                                    @endif
                                     <span>{{ $schedule->formatted_start_time }}</span>
                                 </div>
                             @endforeach
@@ -38,7 +48,7 @@
                                 @endphp
                                 <div @if ($schedule->is_bookable) wire:click="createBooking({{ $schedule->id }}, '{{ $nextDayOfWeek->format('Y-m-d') }}')" @endif
                                     class="flex gap-1 items-center px-2 py-2 text-xs font-semibold leading-none rounded-full {{ $schedule->is_bookable ? 'bg-green-600 text-white cursor-pointer' : 'bg-gray-100 text-gray-400' }}">
-                                    <x-heroicon-s-currency-dollar class="h-4 w-4" />
+                                    {{-- <x-heroicon-s-currency-dollar class="h-4 w-4" /> --}}
                                     <span>
                                         {{-- {{ substr(ucfirst($schedule->day_of_week), 0, 3) }}, --}}
                                         {{ $nextDayOfWeek->format('M jS') }}

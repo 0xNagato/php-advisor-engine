@@ -19,6 +19,8 @@ class Schedule extends Model
         'is_available',
         'available_tables',
         'day_of_week',
+        'prime_time',
+        'prime_time_fee',
     ];
 
     protected $casts = [

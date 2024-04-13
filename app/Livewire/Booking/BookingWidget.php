@@ -179,10 +179,20 @@ class BookingWidget extends Widget implements HasForms
     public function updatedData($data, $key): void
     {
         if ($key === 'restaurant' || ($key === 'reservation_time' && isset($this->data['restaurant'])) || (isset($this->data['restaurant'], $this->data['reservation_time']) && $key === 'date') || (isset($this->data['restaurant'], $this->data['reservation_time'], $this->data['date']) && $key === 'guest_count')) {
-            $reservationTime = $this->form->getState()['reservation_time'];
+            $reservationTime = Carbon::createFromFormat('H:i:s', $this->form->getState()['reservation_time'], auth()->user()->timezone)->subHour();
+            $reservationTime = $reservationTime->max(Carbon::now(auth()->user()->timezone));
+            $minute = $reservationTime->minute;
+            $second = $reservationTime->second;
+
+            if ($second > 0 || $minute % 30 > 0) {
+                $reservationTime = $reservationTime->subMinutes($minute % 30)->second(0);
+            }
+
+            $reservationTime = $reservationTime->format('H:i:s');
+
             $restaurantId = $this->form->getState()['restaurant'];
 
-            $endTime = Carbon::createFromFormat('H:i:s', $reservationTime)->addHours(self::AVAILABILITY_HOURS);
+            $endTime = Carbon::createFromFormat('H:i:s', $reservationTime)->addHours(self::AVAILABILITY_HOURS)->subMinutes(30);
             $limitTime = Carbon::createFromTime(23, 59, 0);
 
             if ($endTime->gt($limitTime)) {
@@ -194,7 +204,7 @@ class BookingWidget extends Widget implements HasForms
             $this->schedulesToday = Schedule::where('restaurant_id', $restaurantId)
                 ->where('start_time', '>=', $reservationTime)
                 ->where('start_time', '<=', $endTimeForQuery)
-                ->where('day_of_week', Carbon::createFromFormat('Y-m-d', $this->form->getState()['date'])->format('l'))
+                ->where('day_of_week', strtolower(Carbon::createFromFormat('Y-m-d', $this->form->getState()['date'])->format('l')))
                 ->get();
 
             $daysOfWeek = collect(['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday']);
@@ -203,7 +213,7 @@ class BookingWidget extends Widget implements HasForms
             $sortedDaysOfWeek = $daysOfWeek->slice($currentDayIndex)->concat($daysOfWeek->slice(0, $currentDayIndex));
 
             $this->schedulesThisWeek = Schedule::where('restaurant_id', $restaurantId)
-                ->where('start_time', $reservationTime)
+                ->where('start_time', $this->form->getState()['reservation_time'])
                 ->whereIn('day_of_week', collect(range(1, self::AVAILABILITY_DAYS))->map(fn ($day) => strtolower(Carbon::now()->addDays($day)->format('l')))->toArray())
                 ->get()
                 ->sortBy(fn ($schedule) => $sortedDaysOfWeek->search($schedule->day_of_week));
