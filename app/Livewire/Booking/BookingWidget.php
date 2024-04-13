@@ -181,9 +181,11 @@ class BookingWidget extends Widget implements HasForms
     /**
      * @throws Exception
      */
-    public function createBooking($scheduleId): void
+    public function createBooking($scheduleId, ?string $date): void
     {
         $data = $this->form->getState();
+
+        $data['date'] = $date ?? $data['date'];
 
         $bookingAt = Carbon::createFromFormat(
             'Y-m-d H:i:s',

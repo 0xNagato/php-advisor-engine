@@ -28,8 +28,13 @@
                     <div class="text-sm font-semibold">Availability later this Week</div>
                     <div class="grid gap-1.5 grid-cols-2">
                         @foreach ($this->schedulesThisWeek as $schedule)
+                            @php
+                                $nextDayOfWeek = \Carbon\Carbon::parse($this->data['date'])
+                                    ->next($schedule->day_of_week)
+                                    ->format('Y-m-d');
+                            @endphp
                             <span
-                                @if ($schedule->is_bookable) wire:click="createBooking({{ $schedule->id }})" @endif
+                                @if ($schedule->is_bookable) wire:click="createBooking({{ $schedule->id }}, '{{ $nextDayOfWeek }}')" @endif
                                 class="text-nowrap inline-block px-2 py-1 text-xs font-semibold leading-none rounded-full {{ $schedule->is_bookable ? 'bg-green-600 text-white cursor-pointer' : 'bg-gray-100 text-gray-400' }}">
                                 {{ ucfirst($schedule->day_of_week) }} {{ $schedule->formatted_start_time }}
                             </span>
