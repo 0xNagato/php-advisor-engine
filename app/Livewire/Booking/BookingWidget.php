@@ -157,7 +157,7 @@ class BookingWidget extends Widget implements HasForms
 
             $this->schedulesToday = Schedule::where('restaurant_id', $restaurantId)
                 ->where('start_time', '>=', $reservationTime)
-                ->where('start_time', '<=', Carbon::createFromFormat('H:i:s', $reservationTime)->addHours(self::AVAILABILITY_HOURS)->format('H:i:s'))
+                ->where('start_time', '<=', Carbon::createFromFormat('H:i:s', $reservationTime)->addHours(self::AVAILABILITY_HOURS)->addMinutes(30)->format('H:i:s'))
                 ->where('day_of_week', Carbon::createFromFormat('Y-m-d', $this->form->getState()['date'])->format('l'))
                 ->get();
 
