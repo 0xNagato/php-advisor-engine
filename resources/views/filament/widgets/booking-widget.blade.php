@@ -31,14 +31,16 @@
                         <div class="grid gap-1.5 grid-cols-2">
                             @foreach ($this->schedulesThisWeek as $schedule)
                                 @php
-                                    $nextDayOfWeek = \Carbon\Carbon::parse($this->data['date'])
-                                        ->next($schedule->day_of_week)
-                                        ->format('Y-m-d');
+                                    $nextDayOfWeek = \Carbon\Carbon::parse($this->data['date'])->next(
+                                        $schedule->day_of_week,
+                                    );
                                 @endphp
-                                <div @if ($schedule->is_bookable) wire:click="createBooking({{ $schedule->id }}, '{{ $nextDayOfWeek }}')" @endif
+                                <div @if ($schedule->is_bookable) wire:click="createBooking({{ $schedule->id }}, '{{ $nextDayOfWeek->format('Y-m-d') }}')" @endif
                                     class="flex gap-2 items-center text-nowrap px-3 py-2 text-xs font-semibold leading-none rounded-full {{ $schedule->is_bookable ? 'bg-green-600 text-white cursor-pointer' : 'bg-gray-100 text-gray-400' }}">
-                                    <span>{{ ucfirst($schedule->day_of_week) }}
-                                        {{ $schedule->formatted_start_time }}</span>
+                                    <span>
+                                        {{ ucfirst($schedule->day_of_week) }} {{ $nextDayOfWeek->format('jS') }},
+                                        {{ $schedule->formatted_start_time }}
+                                    </span>
                                 </div>
                             @endforeach
                         </div>
