@@ -18,6 +18,11 @@ class ConciergeAnnouncements extends Page
 
     protected ?string $heading = 'Announcements';
 
+    public function getHeading(): string|\Illuminate\Contracts\Support\Htmlable
+    {
+        return 'Welcome, '.auth()->user()?->name;
+    }
+
     public static function canAccess(): bool
     {
         return auth()->user()?->hasRole('concierge');
