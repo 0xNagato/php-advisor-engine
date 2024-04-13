@@ -69,6 +69,8 @@ class BookingWidget extends Widget implements HasForms
      */
     public Collection $schedulesThisWeek;
 
+    protected int|string|array $columnSpan = 'full';
+
     public static function canView(): bool
     {
         return auth()->user()->hasRole('concierge');
@@ -101,6 +103,7 @@ class BookingWidget extends Widget implements HasForms
                     ->inline()
                     ->hiddenLabel()
                     ->live()
+                    ->columnSpanFull()
                     ->required(),
                 DatePicker::make('date_selected')
                     ->hiddenLabel()
@@ -111,13 +114,13 @@ class BookingWidget extends Widget implements HasForms
                     ->afterStateUpdated(fn ($state, $set) => $set('date', $state)),
                 Select::make('guest_count')
                     ->options([
-                        2 => '2 Guests ($200)',
-                        3 => '3 Guests ($250)',
-                        4 => '4 Guests ($300)',
-                        5 => '5 Guests ($350)',
-                        6 => '6 Guests ($400)',
-                        7 => '7 Guests ($450)',
-                        8 => '8 Guests ($500)',
+                        2 => '2 Guests',
+                        3 => '3 Guests',
+                        4 => '4 Guests',
+                        5 => '5 Guests',
+                        6 => '6 Guests',
+                        7 => '7 Guests',
+                        8 => '8 Guests',
                     ])
                     ->placeholder('Select number of guests')
                     ->live()
@@ -141,6 +144,9 @@ class BookingWidget extends Widget implements HasForms
                     ->hiddenLabel()
                     ->searchable()
                     ->selectablePlaceholder(false),
+            ])
+            ->columns([
+                'default' => 1,
             ])
             ->statePath('data');
     }
@@ -196,12 +202,13 @@ class BookingWidget extends Widget implements HasForms
     public function createBooking($scheduleId, ?string $date = null): void
     {
         $data = $this->form->getState();
+        $schedule = Schedule::find($scheduleId);
 
         $data['date'] = $date ?? $data['date'];
 
         $bookingAt = Carbon::createFromFormat(
             'Y-m-d H:i:s',
-            $data['date'].' '.$data['reservation_time']
+            $data['date'].' '.$schedule->start_time
         );
 
         $this->booking = Booking::create([
