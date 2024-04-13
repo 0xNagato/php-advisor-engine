@@ -108,6 +108,7 @@ class BookingWidget extends Widget implements HasForms
                 DatePicker::make('date_selected')
                     ->hiddenLabel()
                     ->live()
+                    ->columnSpanFull()
                     ->default(now()->addDays(2)->format('Y-m-d'))
                     ->minDate(now()->addDay()->format('Y-m-d'))
                     ->hidden(fn (Get $get) => Carbon::parse($get('date'))->lte(now()->addDay()))
