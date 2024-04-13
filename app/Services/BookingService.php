@@ -6,7 +6,6 @@ use App\Enums\BookingStatus;
 use App\Events\BookingPaid;
 use App\Models\Booking;
 use App\Traits\FormatsPhoneNumber;
-use libphonenumber\NumberParseException;
 use Stripe\Charge;
 use Stripe\Customer;
 use Stripe\Exception\ApiErrorException;
@@ -18,7 +17,6 @@ class BookingService
 
     /**
      * @throws ApiErrorException
-     * @throws NumberParseException
      *
      * @todo Add type hint for $form with DataTransferObject
      */
@@ -27,7 +25,7 @@ class BookingService
         Stripe::setApiKey(config('services.stripe.secret'));
 
         $stripeCustomer = Customer::create([
-            'name' => $form['first_name'] . ' ' . $form['last_name'],
+            'name' => $form['first_name'].' '.$form['last_name'],
             'phone' => $form['phone'],
             'email' => $form['email'],
             'source' => $form['token'],
@@ -37,7 +35,7 @@ class BookingService
             'amount' => $booking->total_with_tax_in_cents,
             'currency' => 'usd',
             'customer' => $stripeCustomer->id,
-            'description' => 'Booking for ' . $booking->restaurant->restaurant_name,
+            'description' => 'Booking for '.$booking->restaurant->restaurant_name,
         ]);
 
         $formattedPhone = $this->getInternationalFormattedPhoneNumber($form['phone']);
@@ -53,8 +51,6 @@ class BookingService
             'confirmed_at' => now(),
         ]);
 
-        if (!app()->runningInConsole()) {
-            BookingPaid::dispatch($booking);
-        }
+        BookingPaid::dispatch($booking);
     }
 }

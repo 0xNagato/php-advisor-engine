@@ -31,6 +31,7 @@ class Schedule extends Model
         'computed_available_tables',
         'formatted_start_time',
         'formatted_end_time',
+        'is_bookable',
     ];
 
     public function restaurant(): BelongsTo
@@ -74,5 +75,10 @@ class Schedule extends Model
     public function getFormattedEndTimeAttribute(): string
     {
         return date('g:i a', strtotime($this->attributes['end_time']));
+    }
+
+    public function getIsBookableAttribute(): bool
+    {
+        return $this->is_available && $this->available_tables > 0;
     }
 }

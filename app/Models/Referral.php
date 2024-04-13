@@ -10,9 +10,9 @@ use Illuminate\Notifications\Notifiable;
 
 class Referral extends Model
 {
+    use FormatsPhoneNumber;
     use HasUuids;
     use Notifiable;
-    use FormatsPhoneNumber;
 
     protected $fillable = [
         'referrer_id',
@@ -42,7 +42,7 @@ class Referral extends Model
 
     public function getHasSecuredAttribute(): bool
     {
-        return !blank($this->secured_at);
+        return ! blank($this->secured_at);
     }
 
     public function getLabelAttribute(): string

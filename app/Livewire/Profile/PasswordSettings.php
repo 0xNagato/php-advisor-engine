@@ -72,7 +72,7 @@ class PasswordSettings extends Widget implements HasForms
 
         $user = auth()->user();
 
-        session()->forget('password_hash_' . Filament::getCurrentPanel()->getAuthGuard());
+        session()->forget('password_hash_'.Filament::getCurrentPanel()->getAuthGuard());
 
         Filament::auth()->login($user);
 

@@ -19,13 +19,12 @@ class ReservationHoursService
         foreach ($this->daysOfWeek as $day) {
             $schedules = $restaurant->schedules()->where('day_of_week', $day)->orderBy('start_time')->get();
 
-            $selectedDays[$day] = !$schedules->every(fn($schedule) => $schedule->is_available === false);
+            $selectedDays[$day] = ! $schedules->every(fn ($schedule) => $schedule->is_available === false);
             if ($selectedDays[$day]) {
-                $startTimes[$day] = $schedules->first(fn($schedule) => $schedule->is_available)?->start_time;
-                $endTimes[$day] = $schedules->last(fn($schedule) => $schedule->is_available)?->start_time;
+                $startTimes[$day] = $schedules->first(fn ($schedule) => $schedule->is_available)?->start_time;
+                $endTimes[$day] = $schedules->last(fn ($schedule) => $schedule->is_available)?->start_time;
             }
         }
-
 
         return new LoadReservationHoursData(startTimes: $startTimes, endTimes: $endTimes, selectedDays: $selectedDays);
     }

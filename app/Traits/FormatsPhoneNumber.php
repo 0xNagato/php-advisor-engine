@@ -18,7 +18,7 @@ trait FormatsPhoneNumber
         $phoneUtil = PhoneNumberUtil::getInstance();
 
         try {
-            $numberProto = $phoneUtil->parse($value, "US");
+            $numberProto = $phoneUtil->parse($value, 'US');
 
             // Check if the number is valid
             if ($phoneUtil->isValidNumber($numberProto)) {
@@ -26,8 +26,8 @@ trait FormatsPhoneNumber
                 return $phoneUtil->format($numberProto, $format);
             }
 
-            $repairedNumber = "+1" . $value;
-            $numberProto = $phoneUtil->parse($repairedNumber, "US");
+            $repairedNumber = '+1'.$value;
+            $numberProto = $phoneUtil->parse($repairedNumber, 'US');
 
             if ($phoneUtil->isValidNumber($numberProto)) {
                 return $phoneUtil->format($numberProto, $format);

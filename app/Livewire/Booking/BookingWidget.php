@@ -13,10 +13,13 @@ use App\Services\SalesTaxService;
 use AshAllenDesign\ShortURL\Facades\ShortURL;
 use chillerlan\QRCode\QRCode;
 use Exception;
+use Filament\Forms\Components\DatePicker;
+use Filament\Forms\Components\Radio;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
 use Filament\Forms\Form;
+use Filament\Forms\Get;
 use Filament\Widgets\Widget;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Carbon;
@@ -31,34 +34,13 @@ class BookingWidget extends Widget implements HasForms
 {
     use InteractsWithForms;
 
+    public const AVAILABILITY_HOURS = 2;
+
+    public const AVAILABILITY_DAYS = 4;
+
     protected static string $view = 'filament.widgets.booking-widget';
 
     protected static bool $isLazy = false;
-
-    /**
-     * @var Collection<Restaurant>|null
-     */
-    public ?Collection $restaurants;
-
-    public ?Restaurant $selectedRestaurant;
-
-    public int|string|null $selectedRestaurantId;
-
-    /**
-     * @var Collection<Schedule>|null
-     */
-    public ?Collection $schedules;
-
-    /**
-     * @var Collection<Schedule>|null
-     */
-    public ?Collection $unavailableSchedules;
-
-    public ?Schedule $selectedSchedule;
-
-    public int|string|null $selectedScheduleId;
-
-    public ?int $guestCount;
 
     #[Session]
     public ?string $qrCode;
@@ -69,13 +51,23 @@ class BookingWidget extends Widget implements HasForms
     #[Session]
     public ?Booking $booking;
 
-    public string $selectedDate;
-
     public bool $isLoading = false;
 
     public bool $paymentSuccess = false;
 
     public bool $SMSSent = false;
+
+    public ?array $data = [];
+
+    /**
+     * @var Collection<Schedule>
+     */
+    public Collection $schedulesToday;
+
+    /**
+     * @var Collection<Schedule>
+     */
+    public Collection $schedulesThisWeek;
 
     public static function canView(): bool
     {
@@ -84,98 +76,129 @@ class BookingWidget extends Widget implements HasForms
 
     public function mount(): void
     {
-        $this->restaurants = Restaurant::available()->get();
-        $this->selectedDate = now()->format('Y-m-d');
+        $this->form->fill();
+        $this->schedulesToday = new Collection();
+        $this->schedulesThisWeek = new Collection();
     }
 
     public function form(Form $form): Form
     {
+        $reservationTimes = [];
+        $start = Carbon::createFromTime(12);
+        $end = Carbon::createFromTime(22);
+
+        for ($time = $start; $time->lte($end); $time->addMinutes(30)) {
+            $dbTime = $time->format('H:i:s');
+            $displayTime = $time->format('g:i A');
+            $reservationTimes[$dbTime] = $displayTime;
+        }
+
         return $form
             ->schema([
-                Select::make('selectedRestaurantId')
-                    ->options($this->restaurants->pluck('restaurant_name', 'id'))
+                Radio::make('date')
+                    ->options([
+                        now()->format('Y-m-d') => 'Today',
+                        now()->addDay()->format('Y-m-d') => 'Tomorrow',
+                        '' => 'Select Date',
+                    ])
+                    ->default(now()->format('Y-m-d'))
+                    ->inline()
+                    ->hiddenLabel()
+                    ->live()
+                    ->required(),
+                DatePicker::make('date_selected')
+                    ->hiddenLabel()
+                    ->default(now()->format('Y-m-d'))
+                    ->hidden(fn (Get $get) => ! empty($get('date'))),
+                Select::make('guest_count')
+                    ->options([
+                        2 => '2 Guests ($200)',
+                        3 => '3 Guests ($250)',
+                        4 => '4 Guests ($300)',
+                        5 => '5 Guests ($350)',
+                        6 => '6 Guests ($400)',
+                        7 => '7 Guests ($450)',
+                        8 => '8 Guests ($500)',
+                    ])
+                    ->placeholder('Select number of guests')
+                    ->live()
+                    ->hiddenLabel()
+                    ->required(),
+                Select::make('reservation_time')
+                    ->options($reservationTimes)
+                    ->placeholder('Select a time')
+                    ->hiddenLabel()
+                    ->required()
+                    ->live(),
+                Select::make('restaurant')
+                    ->options(
+                        Restaurant::available()->pluck('restaurant_name', 'id')
+                    )
                     ->placeholder('Select a restaurant')
+                    ->required()
                     ->live()
                     ->hiddenLabel()
                     ->searchable()
                     ->selectablePlaceholder(false),
             ])
-            ->columns(1);
+            ->statePath('data');
     }
 
-    public function updatedSelectedDate($value): void
+    public function updatedData($data, $key): void
     {
-        $this->selectedRestaurantId = null;
-        $this->selectedRestaurant = null;
-        $this->selectedScheduleId = null;
-        $this->selectedSchedule = null;
-        $this->unavailableSchedules = null;
+        if ($key === 'restaurant' || ($key === 'reservation_time' && isset($this->data['restaurant']))) {
+            $reservationTime = $this->form->getState()['reservation_time'];
+            $restaurantId = $this->form->getState()['restaurant'];
 
-        $this->restaurants = Restaurant::openOnDate($value)->available()->get();
-    }
-
-    public function updatedSelectedRestaurantId($value): void
-    {
-        $this->selectedRestaurant = Restaurant::find($value);
-
-        $userTimezone = auth()->user()->timezone;
-        $selectedDateInUserTimezone = Carbon::createFromFormat('Y-m-d', $this->selectedDate)->setTimezone($userTimezone)->format('Y-m-d');
-        $dayOfWeek = strtolower(Carbon::parse($selectedDateInUserTimezone)->format('l')); // Convert the date to a day of the week
-
-        $currentTime = Carbon::now($userTimezone)->addMinutes(30)->format('H:i:s'); // Add a 30-minute buffer to the current time
-        $noonTime = Carbon::createFromTime(12, 0, 0, $userTimezone)->format('H:i:s'); // Define noon time
-        $endTime = Carbon::createFromTime(22, 0, 0, $userTimezone)->format('H:i:s'); // Define end time
-
-        if ($selectedDateInUserTimezone === Carbon::now($userTimezone)->format('Y-m-d')) {
-            // If the selected date is the current day, apply the time restrictions
-            $this->schedules = $this->selectedRestaurant->schedules()
-                ->available() // Use the 'available' scope
-                ->where('day_of_week', $dayOfWeek)
-                ->where('end_time', '>', $currentTime)
+            $this->schedulesToday = Schedule::where('restaurant_id', $restaurantId)
+                ->where('start_time', '>=', $reservationTime)
+                ->where('start_time', '<=', Carbon::createFromFormat('H:i:s', $reservationTime)->addHours(self::AVAILABILITY_HOURS)->format('H:i:s'))
+                ->where('day_of_week', Carbon::createFromFormat('Y-m-d', $this->form->getState()['date'])->format('l'))
                 ->get();
 
-            $this->unavailableSchedules = $this->selectedRestaurant->schedules()
-                ->unavailable()
-                ->where('day_of_week', $dayOfWeek)
-                ->whereBetween('start_time', [$noonTime, $endTime])
-                ->get();
-        } else {
-            // If the selected date is in the future, show all available schedules for that day of the week
-            $this->schedules = $this->selectedRestaurant->schedules()
-                ->available() // Use the 'available' scope
-                ->where('day_of_week', $dayOfWeek)
-                ->get();
+            $daysOfWeek = collect(['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday']);
+            $currentDayIndex = $daysOfWeek->search(strtolower(Carbon::now()->format('l')));
 
-            $this->unavailableSchedules = $this->selectedRestaurant->schedules()
-                ->unavailable()
-                ->where('day_of_week', $dayOfWeek)
-                ->whereBetween('start_time', [$noonTime, $endTime])
-                ->get();
+            $sortedDaysOfWeek = $daysOfWeek->slice($currentDayIndex)->concat($daysOfWeek->slice(0, $currentDayIndex));
+
+            $this->schedulesThisWeek = Schedule::where('restaurant_id', $restaurantId)
+                ->where('start_time', $reservationTime)
+                ->whereIn('day_of_week', collect(range(1, self::AVAILABILITY_DAYS))->map(function ($day) {
+                    return strtolower(Carbon::now()->addDays($day)->format('l'));
+                })->toArray())
+                ->get()
+                ->sortBy(function ($schedule) use ($sortedDaysOfWeek) {
+                    return $sortedDaysOfWeek->search($schedule->day_of_week);
+                });
         }
-
-        $this->selectedScheduleId = null;
-    }
-
-    public function updatedSelectedScheduleId($value): void
-    {
-        $this->selectedSchedule = Schedule::find($value);
     }
 
     /**
      * @throws Exception
      */
-    public function createBooking(): void
+    public function createBooking($scheduleId): void
     {
+        $data = $this->form->getState();
+
+        $bookingAt = Carbon::createFromFormat(
+            'Y-m-d H:i:s',
+            $data['date'].' '.$data['reservation_time']
+        );
+
         $this->booking = Booking::create([
-            'schedule_id' => $this->selectedScheduleId,
-            'guest_count' => $this->guestCount,
+            'schedule_id' => $scheduleId,
+            'guest_count' => $data['guest_count'],
             'concierge_id' => auth()->user()->concierge->id,
             'status' => BookingStatus::PENDING,
-            'booking_at' => $this->selectedDate . ' ' . $this->selectedSchedule->start_time,
+            'booking_at' => $bookingAt,
         ]);
 
-        $taxData = app(SalesTaxService::class)->calculateTax('miami', $this->booking->total_fee);
-        $totalWithTaxInCents = $this->booking->total_fee + $taxData->amountInCents;
+        $taxData = app(SalesTaxService::class)->calculateTax(
+            'miami',
+            $this->booking->total_fee
+        );
+        $totalWithTaxInCents =
+            $this->booking->total_fee + $taxData->amountInCents;
 
         $this->booking->update([
             'tax' => $taxData->tax,
@@ -184,11 +207,19 @@ class BookingWidget extends Widget implements HasForms
             'total_with_tax_in_cents' => $totalWithTaxInCents,
         ]);
 
-        $shortUrlQr = ShortURL::destinationUrl(route('bookings.create', ['token' => $this->booking->uuid, 'r' => 'qr']))
-            ->make();
+        $shortUrlQr = ShortURL::destinationUrl(
+            route('bookings.create', [
+                'token' => $this->booking->uuid,
+                'r' => 'qr',
+            ])
+        )->make();
 
-        $shortUrl = ShortURL::destinationUrl(route('bookings.create', ['token' => $this->booking->uuid, 'r' => 'sms']))
-            ->make();
+        $shortUrl = ShortURL::destinationUrl(
+            route('bookings.create', [
+                'token' => $this->booking->uuid,
+                'r' => 'sms',
+            ])
+        )->make();
 
         $this->bookingUrl = $shortUrl->default_short_url;
 
@@ -218,12 +249,7 @@ class BookingWidget extends Widget implements HasForms
         $this->qrCode = null;
         $this->bookingUrl = null;
 
-        $this->selectedRestaurantId = null;
-        $this->selectedRestaurant = null;
-        $this->selectedScheduleId = null;
-        $this->selectedSchedule = null;
-        $this->guestCount = null;
-        $this->unavailableSchedules = null;
+        $this->form->fill();
     }
 
     public function resetBooking(): void
@@ -234,12 +260,7 @@ class BookingWidget extends Widget implements HasForms
         $this->paymentSuccess = false;
         $this->SMSSent = false;
 
-        $this->selectedRestaurantId = null;
-        $this->selectedRestaurant = null;
-        $this->selectedScheduleId = null;
-        $this->selectedSchedule = null;
-        $this->guestCount = null;
-        $this->unavailableSchedules = null;
+        $this->form->fill();
     }
 
     #[On('sms-sent')]

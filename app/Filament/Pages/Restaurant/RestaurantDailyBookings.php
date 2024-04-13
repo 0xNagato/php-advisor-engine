@@ -21,9 +21,11 @@ class RestaurantDailyBookings extends Page implements HasTable
     protected static string $view = 'filament.pages.restaurant-daily-bookings';
 
     protected static ?string $slug = 'restaurant/bookings/{restaurant?}/{date?}';
+
     protected static bool $shouldRegisterNavigation = false;
 
     public Restaurant $restaurant;
+
     public string $date;
 
     public static function canAccess(): bool
@@ -31,14 +33,10 @@ class RestaurantDailyBookings extends Page implements HasTable
         return auth()->user()->hasRole('restaurant');
     }
 
-    /**
-     * @return string|Htmlable
-     */
     public function getHeading(): string|Htmlable
     {
         return date('D, M d, Y', strtotime($this->date));
     }
-    
 
     public function mount(Restaurant $restaurant, string $date): void
     {
@@ -58,7 +56,7 @@ class RestaurantDailyBookings extends Page implements HasTable
 
         return $table
             ->query($query)
-            ->recordUrl(fn($record) => ViewBooking::getUrl(['record' => $record]))
+            ->recordUrl(fn ($record) => ViewBooking::getUrl(['record' => $record]))
             ->columns([
                 TextColumn::make('id')
                     ->label('Booking')
@@ -68,7 +66,7 @@ class RestaurantDailyBookings extends Page implements HasTable
                 TextColumn::make('earnings')
                     ->label('Earnings')
                     ->alignRight()
-                    ->money('USD', divideBy: 100)
+                    ->money('USD', divideBy: 100),
             ]);
     }
 }

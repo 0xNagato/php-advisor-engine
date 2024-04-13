@@ -17,8 +17,8 @@ use Sentry;
 
 class Booking extends Model
 {
-    use HasFactory;
     use FormatsPhoneNumber;
+    use HasFactory;
 
     /**
      * The attributes that are mass assignable.
@@ -53,10 +53,7 @@ class Booking extends Model
         'invoice_path',
     ];
 
-    protected $appends = [
-        'guest_name',
-        'local_formatted_guest_phone',
-    ];
+    protected $appends = ['guest_name', 'local_formatted_guest_phone'];
 
     protected $casts = [
         'booking_at' => 'datetime',
@@ -77,13 +74,19 @@ class Booking extends Model
         });
 
         static::updated(static function (Booking $booking) {
-            if ($booking->status === BookingStatus::CONFIRMED && $booking->wasChanged('status')) {
+            if (
+                $booking->status === BookingStatus::CONFIRMED &&
+                $booking->wasChanged('status')
+            ) {
                 DB::table('earnings')
                     ->where('booking_id', $booking->id)
                     ->update(['confirmed_at' => now()]);
             }
 
-            if ($booking->status === BookingStatus::CANCELLED && $booking->wasChanged('status')) {
+            if (
+                $booking->status === BookingStatus::CANCELLED &&
+                $booking->wasChanged('status')
+            ) {
                 $booking->earnings()->delete();
             }
         });
@@ -91,14 +94,20 @@ class Booking extends Model
         static::saving(static function (Booking $booking) {
             $booking->total_fee = $booking->totalFee();
 
-            $booking->restaurant_earnings = $booking->total_fee * ($booking->restaurant->payout_restaurant / 100);
-            $booking->concierge_earnings = $booking->total_fee * ($booking->concierge->payout_percentage / 100);
+            $booking->restaurant_earnings =
+                $booking->total_fee *
+                ($booking->restaurant->payout_restaurant / 100);
+            $booking->concierge_earnings =
+                $booking->total_fee *
+                ($booking->concierge->payout_percentage / 100);
         });
 
         static::created(static function (Booking $booking) {
             DB::transaction(function () use ($booking) {
-
-                $remainder = $booking->total_fee - $booking->restaurant_earnings - $booking->concierge_earnings;
+                $remainder =
+                    $booking->total_fee -
+                    $booking->restaurant_earnings -
+                    $booking->concierge_earnings;
                 $platform = $remainder;
 
                 $restaurant_earnings = $booking->restaurant_earnings;
@@ -128,7 +137,8 @@ class Booking extends Model
                 ]);
 
                 if ($booking->concierge->referringConcierge) {
-                    $user_id = $booking->concierge->referringConcierge->user->id;
+                    $user_id =
+                        $booking->concierge->referringConcierge->user->id;
                     $referralPercentage = 10;
                     $amount = $remainder * ($referralPercentage / 100);
                     $platform -= $amount;
@@ -144,8 +154,13 @@ class Booking extends Model
                     ]);
                 }
 
-                if ($booking->concierge->referringConcierge && $booking->concierge->referringConcierge->referringConcierge) {
-                    $user_id = $booking->concierge->referringConcierge->referringConcierge->user->id;
+                if (
+                    $booking->concierge->referringConcierge &&
+                    $booking->concierge->referringConcierge->referringConcierge
+                ) {
+                    $user_id =
+                        $booking->concierge->referringConcierge
+                            ->referringConcierge->user->id;
                     $referralPercentage = 5;
                     $amount = $remainder * ($referralPercentage / 100);
                     $platform -= $amount;
@@ -163,13 +178,19 @@ class Booking extends Model
 
                 // Calculate partner's fees based on initial platform earnings
                 if ($booking->concierge->user->partner_referral_id) {
-                    $booking->partner_concierge_id = $booking->concierge->user->partner_referral_id;
-                    $booking->partner_concierge_fee = $platform * ($booking->partnerConcierge->percentage / 100);
-                    $concierge_partner_earnings = $booking->partner_concierge_fee;
+                    $booking->partner_concierge_id =
+                        $booking->concierge->user->partner_referral_id;
+                    $booking->partner_concierge_fee =
+                        $platform *
+                        ($booking->partnerConcierge->percentage / 100);
+                    $concierge_partner_earnings =
+                        $booking->partner_concierge_fee;
 
                     Earning::create([
                         'booking_id' => $booking->id,
-                        'user_id' => Partner::find($booking->concierge->user->partner_referral_id)->user_id,
+                        'user_id' => Partner::find(
+                            $booking->concierge->user->partner_referral_id
+                        )->user_id,
                         'type' => 'partner_concierge',
                         'amount' => $booking->partner_concierge_fee,
                         'percentage' => $booking->partnerConcierge->percentage,
@@ -178,13 +199,19 @@ class Booking extends Model
                 }
 
                 if ($booking->restaurant->user->partner_referral_id) {
-                    $booking->partner_restaurant_id = $booking->restaurant->user->partner_referral_id;
-                    $booking->partner_restaurant_fee = $platform * ($booking->partnerRestaurant->percentage / 100);
-                    $restaurant_partner_earnings = $booking->partner_restaurant_fee;
+                    $booking->partner_restaurant_id =
+                        $booking->restaurant->user->partner_referral_id;
+                    $booking->partner_restaurant_fee =
+                        $platform *
+                        ($booking->partnerRestaurant->percentage / 100);
+                    $restaurant_partner_earnings =
+                        $booking->partner_restaurant_fee;
 
                     Earning::create([
                         'booking_id' => $booking->id,
-                        'user_id' => Partner::find($booking->restaurant->user->partner_referral_id)->user_id,
+                        'user_id' => Partner::find(
+                            $booking->restaurant->user->partner_referral_id
+                        )->user_id,
                         'type' => 'partner_restaurant',
                         'amount' => $booking->partner_restaurant_fee,
                         'percentage' => $booking->partnerRestaurant->percentage,
@@ -193,15 +220,24 @@ class Booking extends Model
                 }
 
                 // Deduct partner's fees from platform earnings
-                $platform -= $booking->partner_concierge_fee + $booking->partner_restaurant_fee;
+                $platform -=
+                    $booking->partner_concierge_fee +
+                    $booking->partner_restaurant_fee;
 
                 $platform_earnings = $platform;
 
-                $totalLocal = $restaurant_earnings + $concierge_earnings + $concierge_referral_level_1_earnings + $concierge_referral_level_2_earnings + $restaurant_partner_earnings + $concierge_partner_earnings + $platform_earnings;
+                $totalLocal =
+                    $restaurant_earnings +
+                    $concierge_earnings +
+                    $concierge_referral_level_1_earnings +
+                    $concierge_referral_level_2_earnings +
+                    $restaurant_partner_earnings +
+                    $concierge_partner_earnings +
+                    $platform_earnings;
 
                 try {
                     assert(
-                        (int)$totalLocal === (int)$booking->total_fee,
+                        (int) $totalLocal === (int) $booking->total_fee,
                         'The sum of all earnings does not equal the total fee.'
                     );
                     $booking->platform_earnings = $platform;
@@ -217,7 +253,14 @@ class Booking extends Model
                         'restaurant_partner_earnings' => $restaurant_partner_earnings,
                         'concierge_partner_earnings' => $concierge_partner_earnings,
                         'platform_earnings' => $platform_earnings,
-                        'total_local' => $restaurant_earnings + $concierge_earnings + $concierge_referral_level_1_earnings + $concierge_referral_level_2_earnings + $restaurant_partner_earnings + $concierge_partner_earnings + $platform_earnings,
+                        'total_local' =>
+                            $restaurant_earnings +
+                            $concierge_earnings +
+                            $concierge_referral_level_1_earnings +
+                            $concierge_referral_level_2_earnings +
+                            $restaurant_partner_earnings +
+                            $concierge_partner_earnings +
+                            $platform_earnings,
                         'total_fee' => $booking->total_fee,
                     ]);
 
@@ -236,10 +279,11 @@ class Booking extends Model
 
     public function totalFee(): int
     {
-        $bookingFee = $this->schedule->restaurant->specialPricing()
-            ->where('date', $this->booking_at->format('Y-m-d'))
-            ->first()
-            ->fee ?? $this->schedule->restaurant->booking_fee;
+        $bookingFee =
+            $this->schedule->restaurant
+                ->specialPricing()
+                ->where('date', $this->booking_at->format('Y-m-d'))
+                ->first()->fee ?? $this->schedule->restaurant->booking_fee;
 
         $extraGuestFee = max(0, $this->guest_count - 2) * 50;
 
@@ -292,11 +336,19 @@ class Booking extends Model
     {
         $earnings = 0;
 
-        if ($this->partnerConcierge && $this->concierge->user->partner_referral_id === $this->partnerConcierge->id) {
+        if (
+            $this->partnerConcierge &&
+            $this->concierge->user->partner_referral_id ===
+                $this->partnerConcierge->id
+        ) {
             $earnings += $this->partner_concierge_fee;
         }
 
-        if ($this->partnerRestaurant && $this->schedule->restaurant->user->partner_referral_id === $this->partnerRestaurant->id) {
+        if (
+            $this->partnerRestaurant &&
+            $this->schedule->restaurant->user->partner_referral_id ===
+                $this->partnerRestaurant->id
+        ) {
             $earnings += $this->partner_restaurant_fee;
         }
 

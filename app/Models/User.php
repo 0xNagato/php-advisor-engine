@@ -21,11 +21,11 @@ use Storage;
 
 class User extends Authenticatable implements FilamentUser, HasAvatar
 {
+    use FormatsPhoneNumber;
     use HasFactory;
     use HasPanelShield;
     use HasRoles;
     use Notifiable;
-    use FormatsPhoneNumber;
 
     /**
      * The attributes that are mass assignable.
@@ -105,7 +105,7 @@ class User extends Authenticatable implements FilamentUser, HasAvatar
 
     public function getFilamentAvatarUrl(): ?string
     {
-        return !blank($this->profile_photo_path) ? Storage::url($this->profile_photo_path) : null;
+        return ! blank($this->profile_photo_path) ? Storage::url($this->profile_photo_path) : null;
     }
 
     public function routeNotificationForTwilio(): string
@@ -158,7 +158,7 @@ class User extends Authenticatable implements FilamentUser, HasAvatar
 
     public function getHasSecuredAttribute(): bool
     {
-        return !blank($this->secured_at);
+        return ! blank($this->secured_at);
     }
 
     public function getLabelAttribute(): string

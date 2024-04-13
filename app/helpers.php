@@ -1,6 +1,6 @@
 <?php
 
-if (!function_exists('formatPhoneNumber')) {
+if (! function_exists('formatPhoneNumber')) {
     function formatPhoneNumber($phoneNumber): string
     {
         // Remove any non-digit character
@@ -17,14 +17,14 @@ if (!function_exists('formatPhoneNumber')) {
             $prefix = substr($phoneNumber, 3, 3);
             $lineNumber = substr($phoneNumber, 6, 4);
 
-            return '(' . $areaCode . ') ' . $prefix . '-' . $lineNumber;
+            return '('.$areaCode.') '.$prefix.'-'.$lineNumber;
         }
 
         // If the number doesn't have 10 digits, return it as is
         return $phoneNumber;
     }
 }
-if (!function_exists('isPrimaApp')) {
+if (! function_exists('isPrimaApp')) {
     function isPrimaApp(): bool
     {
         $request = request();

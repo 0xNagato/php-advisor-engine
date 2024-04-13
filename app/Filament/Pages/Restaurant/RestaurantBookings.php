@@ -39,7 +39,7 @@ class RestaurantBookings extends Page implements HasTable
 
         return $table
             ->query($query)
-            ->recordUrl(fn($record) => RestaurantDailyBookings::getUrl(['restaurant' => auth()->user()->restaurant, 'date' => $record->booking_date]))
+            ->recordUrl(fn ($record) => RestaurantDailyBookings::getUrl(['restaurant' => auth()->user()->restaurant, 'date' => $record->booking_date]))
             ->columns([
                 TextColumn::make('booking_date')
                     ->date('D, M d, Y')
@@ -51,7 +51,7 @@ class RestaurantBookings extends Page implements HasTable
                 TextColumn::make('earnings')
                     ->label('Earnings')
                     ->alignRight()
-                    ->money('USD', divideBy: 100)
+                    ->money('USD', divideBy: 100),
             ]);
     }
 }

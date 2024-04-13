@@ -44,7 +44,7 @@ class AdminStats extends Widget
 
         $prevPlatformEarnings = $prevBookingsQuery->sum('platform_earnings');
         $prevNumberOfBookings = $prevBookingsQuery->count();
-        
+
         $this->stats = new AdminStatData([
             'current' => [
                 'platform_earnings' => $platformEarnings,

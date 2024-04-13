@@ -80,7 +80,7 @@ class ListPartners extends ListRecords
 
     public function getTableRecordKey(Model $record): string
     {
-        return (string)$record->getKey();
+        return (string) $record->getKey();
     }
 
     protected function getHeaderActions(): array
