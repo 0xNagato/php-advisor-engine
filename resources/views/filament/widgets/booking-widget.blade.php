@@ -14,11 +14,11 @@
                         <div class="text-sm font-semibold mb-2">
                             Availability {{ formatDateFromString($this->data['date']) }}
                         </div>
-                        <div class="grid gap-1.5 grid-cols-3">
+                        <div class="grid gap-1 grid-cols-3">
                             @foreach ($this->schedulesToday as $schedule)
                                 <div @if ($schedule->is_bookable) wire:click="createBooking({{ $schedule->id }})" @endif
-                                    class="flex gap-2 items-center px-3 py-2 text-xs font-semibold leading-none rounded-full {{ $schedule->is_bookable ? 'bg-green-600 text-white cursor-pointer' : 'bg-gray-100 text-gray-400' }}">
-                                    <x-heroicon-s-currency-dollar class="h-5 w-5" />
+                                    class="flex gap-2 items-center px-2 py-2 text-xs font-semibold leading-none rounded-full {{ $schedule->is_bookable ? 'bg-green-600 text-white cursor-pointer' : 'bg-gray-100 text-gray-400' }}">
+                                    <x-heroicon-s-currency-dollar class="h-4 w-4" />
                                     <span>{{ $schedule->formatted_start_time }}</span>
                                 </div>
                             @endforeach
@@ -29,7 +29,7 @@
                 @if ($this->schedulesThisWeek->count())
                     <div class="p-4">
                         <div class="text-sm font-semibold mb-2">Availability later this week</div>
-                        <div class="grid gap-1.5 grid-cols-2">
+                        <div class="grid gap-1 grid-cols-2">
                             @foreach ($this->schedulesThisWeek as $schedule)
                                 @php
                                     $nextDayOfWeek = \Carbon\Carbon::parse($this->data['date'])->next(
@@ -37,11 +37,11 @@
                                     );
                                 @endphp
                                 <div @if ($schedule->is_bookable) wire:click="createBooking({{ $schedule->id }}, '{{ $nextDayOfWeek->format('Y-m-d') }}')" @endif
-                                    class="flex gap-2 items-center px-3 py-2 text-xs font-semibold leading-none rounded-full {{ $schedule->is_bookable ? 'bg-green-600 text-white cursor-pointer' : 'bg-gray-100 text-gray-400' }}">
-                                    <x-heroicon-s-currency-dollar class="h-5 w-5" />
+                                    class="flex gap-2 items-center px-2 py-2 text-xs font-semibold leading-none rounded-full {{ $schedule->is_bookable ? 'bg-green-600 text-white cursor-pointer' : 'bg-gray-100 text-gray-400' }}">
+                                    <x-heroicon-s-currency-dollar class="h-4 w-4" />
                                     <span>
                                         {{-- {{ substr(ucfirst($schedule->day_of_week), 0, 3) }}, --}}
-                                        {{ $nextDayOfWeek->format('M jS') }} &dash;
+                                        {{ $nextDayOfWeek->format('M jS') }}
                                         {{ $schedule->formatted_start_time }}
                                     </span>
                                 </div>
