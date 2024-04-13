@@ -7,7 +7,6 @@
 }" class="flex flex-col gap-4">
     @if (!$booking)
         {{ $this->form }}
-
         @if ($this->schedulesToday->count() || $this->schedulesThisWeek->count())
             <div class="flex flex-col gap-3 p-4 bg-white border rounded-lg shadow">
                 @if ($this->schedulesToday->count())

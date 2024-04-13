@@ -96,11 +96,13 @@ class BookingWidget extends Widget implements HasForms
         return $form
             ->schema([
                 Radio::make('date')
-                    ->options([
-                        now()->format('Y-m-d') => 'Today',
-                        now()->addDay()->format('Y-m-d') => 'Tomorrow',
-                        '' => 'Select Date',
-                    ])
+                    ->options(function ($get) {
+                        return [
+                            now()->format('Y-m-d') => 'Today',
+                            now()->addDay()->format('Y-m-d') => 'Tomorrow',
+                            $get('date_selected') => 'Select Date',
+                        ];
+                    })
                     ->default(now()->format('Y-m-d'))
                     ->inline()
                     ->hiddenLabel()
@@ -108,8 +110,11 @@ class BookingWidget extends Widget implements HasForms
                     ->required(),
                 DatePicker::make('date_selected')
                     ->hiddenLabel()
-                    ->default(now()->format('Y-m-d'))
-                    ->hidden(fn (Get $get) => ! empty($get('date'))),
+                    ->live()
+                    ->default(now()->addDays(2)->format('Y-m-d'))
+                    ->minDate(now()->addDay()->format('Y-m-d'))
+                    ->hidden(fn (Get $get) => Carbon::parse($get('date'))->lte(now()->addDay()))
+                    ->afterStateUpdated(fn ($state, $set) => $set('date', $state)),
                 Select::make('guest_count')
                     ->options([
                         2 => '2 Guests ($200)',
@@ -146,7 +151,7 @@ class BookingWidget extends Widget implements HasForms
 
     public function updatedData($data, $key): void
     {
-        if ($key === 'restaurant' || ($key === 'reservation_time' && isset($this->data['restaurant']))) {
+        if ($key === 'restaurant' || ($key === 'reservation_time' && isset($this->data['restaurant'])) || ($key === 'date' && isset($this->data['restaurant']) && isset($this->data['reservation_time']))) {
             $reservationTime = $this->form->getState()['reservation_time'];
             $restaurantId = $this->form->getState()['restaurant'];
 
@@ -250,6 +255,8 @@ class BookingWidget extends Widget implements HasForms
         $this->bookingUrl = null;
 
         $this->form->fill();
+        $this->schedulesThisWeek = new Collection();
+        $this->schedulesToday = new Collection();
     }
 
     public function resetBooking(): void
@@ -261,6 +268,8 @@ class BookingWidget extends Widget implements HasForms
         $this->SMSSent = false;
 
         $this->form->fill();
+        $this->schedulesThisWeek = new Collection();
+        $this->schedulesToday = new Collection();
     }
 
     #[On('sms-sent')]
