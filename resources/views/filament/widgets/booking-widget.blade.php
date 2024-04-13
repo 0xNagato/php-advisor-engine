@@ -38,7 +38,8 @@
                                 <div @if ($schedule->is_bookable) wire:click="createBooking({{ $schedule->id }}, '{{ $nextDayOfWeek->format('Y-m-d') }}')" @endif
                                     class="flex gap-2 items-center text-nowrap px-3 py-2 text-xs font-semibold leading-none rounded-full {{ $schedule->is_bookable ? 'bg-green-600 text-white cursor-pointer' : 'bg-gray-100 text-gray-400' }}">
                                     <span>
-                                        {{ ucfirst($schedule->day_of_week) }} {{ $nextDayOfWeek->format('jS') }},
+                                        {{ substr(ucfirst($schedule->day_of_week), 0, 3) }},
+                                        {{ $nextDayOfWeek->format('M jS') }} &dash;
                                         {{ $schedule->formatted_start_time }}
                                     </span>
                                 </div>
