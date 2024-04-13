@@ -34,9 +34,9 @@ class BookingWidget extends Widget implements HasForms
 {
     use InteractsWithForms;
 
-    public const AVAILABILITY_HOURS = 3;
+    public const int AVAILABILITY_HOURS = 3;
 
-    public const AVAILABILITY_DAYS = 4;
+    public const int AVAILABILITY_DAYS = 4;
 
     protected static string $view = 'filament.widgets.booking-widget';
 
@@ -77,22 +77,16 @@ class BookingWidget extends Widget implements HasForms
     public function mount(): void
     {
         $this->form->fill();
-        $this->schedulesToday = new Collection();
-        $this->schedulesThisWeek = new Collection();
+
+        /** @var Collection<Schedule> $emptyCollection */
+        $emptyCollection = new Collection();
+
+        $this->schedulesToday = $emptyCollection;
+        $this->schedulesThisWeek = $emptyCollection;
     }
 
     public function form(Form $form): Form
     {
-        $reservationTimes = [];
-        $start = Carbon::createFromTime(12);
-        $end = Carbon::createFromTime(22);
-
-        for ($time = $start; $time->lte($end); $time->addMinutes(30)) {
-            $dbTime = $time->format('H:i:s');
-            $displayTime = $time->format('g:i A');
-            $reservationTimes[$dbTime] = $displayTime;
-        }
-
         return $form
             ->schema([
                 Radio::make('date')
@@ -130,7 +124,9 @@ class BookingWidget extends Widget implements HasForms
                     ->hiddenLabel()
                     ->required(),
                 Select::make('reservation_time')
-                    ->options($reservationTimes)
+                    ->options(function (Get $get) {
+                        return $this->getReservationTimeOptions($get('date'));
+                    })
                     ->placeholder('Select a time')
                     ->hiddenLabel()
                     ->required()
@@ -149,9 +145,29 @@ class BookingWidget extends Widget implements HasForms
             ->statePath('data');
     }
 
+    public function getReservationTimeOptions(string $date): array
+    {
+        $userTimezone = auth()->user()->timezone;
+        $currentDate = (bool) ($date === Carbon::now($userTimezone)->format('Y-m-d'));
+        $currentTime = Carbon::now($userTimezone);
+        $startTime = Carbon::createFromTime(12, 0, 0, $userTimezone);
+        $endTime = Carbon::createFromTime(22, 0, 0, $userTimezone);
+
+        $reservationTimes = [];
+
+        for ($time = $startTime; $time->lte($endTime); $time->addMinutes(30)) {
+            if ($currentDate && $time->lt($currentTime)) {
+                continue;
+            }
+            $reservationTimes[$time->format('H:i:s')] = $time->format('g:i A');
+        }
+
+        return $reservationTimes;
+    }
+
     public function updatedData($data, $key): void
     {
-        if ($key === 'restaurant' || ($key === 'reservation_time' && isset($this->data['restaurant'])) || ($key === 'date' && isset($this->data['restaurant']) && isset($this->data['reservation_time']))) {
+        if ($key === 'restaurant' || ($key === 'reservation_time' && isset($this->data['restaurant'])) || (isset($this->data['restaurant'], $this->data['reservation_time']) && $key === 'date') || (isset($this->data['restaurant'], $this->data['reservation_time'], $this->data['date']) && $key === 'guest_count')) {
             $reservationTime = $this->form->getState()['reservation_time'];
             $restaurantId = $this->form->getState()['restaurant'];
 
@@ -168,13 +184,9 @@ class BookingWidget extends Widget implements HasForms
 
             $this->schedulesThisWeek = Schedule::where('restaurant_id', $restaurantId)
                 ->where('start_time', $reservationTime)
-                ->whereIn('day_of_week', collect(range(1, self::AVAILABILITY_DAYS))->map(function ($day) {
-                    return strtolower(Carbon::now()->addDays($day)->format('l'));
-                })->toArray())
+                ->whereIn('day_of_week', collect(range(1, self::AVAILABILITY_DAYS))->map(fn ($day) => strtolower(Carbon::now()->addDays($day)->format('l')))->toArray())
                 ->get()
-                ->sortBy(function ($schedule) use ($sortedDaysOfWeek) {
-                    return $sortedDaysOfWeek->search($schedule->day_of_week);
-                });
+                ->sortBy(fn ($schedule) => $sortedDaysOfWeek->search($schedule->day_of_week));
         }
     }
 
