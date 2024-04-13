@@ -181,7 +181,7 @@ class BookingWidget extends Widget implements HasForms
     /**
      * @throws Exception
      */
-    public function createBooking($scheduleId, ?string $date): void
+    public function createBooking($scheduleId, ?string $date = null): void
     {
         $data = $this->form->getState();
 
