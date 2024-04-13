@@ -34,7 +34,7 @@ class BookingWidget extends Widget implements HasForms
 {
     use InteractsWithForms;
 
-    public const AVAILABILITY_HOURS = 2;
+    public const AVAILABILITY_HOURS = 3;
 
     public const AVAILABILITY_DAYS = 4;
 

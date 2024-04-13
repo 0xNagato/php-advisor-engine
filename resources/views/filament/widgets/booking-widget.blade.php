@@ -15,11 +15,13 @@
                     </div>
                     <div class="grid gap-1.5 grid-cols-4">
                         @foreach ($this->schedulesToday as $schedule)
-                            <span
-                                @if ($schedule->is_bookable) wire:click="createBooking({{ $schedule->id }})" @endif
-                                class="text-nowrap inline-block px-2 py-1 text-xs font-semibold leading-none rounded-full {{ $schedule->is_bookable ? 'bg-green-600 text-white cursor-pointer' : 'bg-gray-100 text-gray-400' }}">
-                                {{ $schedule->formatted_start_time }}
-                            </span>
+                            <div @if ($schedule->is_bookable) wire:click="createBooking({{ $schedule->id }})" @endif
+                                class="flex gap-2 items-center text-nowrap px-3 py-2 text-xs font-semibold leading-none rounded-full {{ $schedule->is_bookable ? 'bg-green-600 text-white cursor-pointer' : 'bg-gray-100 text-gray-400' }}">
+                                @if ($schedule->is_bookable)
+                                    <x-heroicon-s-check-circle class="h-4 w-4" />
+                                @endif
+                                <span>{{ $schedule->formatted_start_time }}</span>
+                            </div>
                         @endforeach
                     </div>
                 @endif
@@ -33,11 +35,13 @@
                                     ->next($schedule->day_of_week)
                                     ->format('Y-m-d');
                             @endphp
-                            <span
-                                @if ($schedule->is_bookable) wire:click="createBooking({{ $schedule->id }}, '{{ $nextDayOfWeek }}')" @endif
-                                class="text-nowrap inline-block px-2 py-1 text-xs font-semibold leading-none rounded-full {{ $schedule->is_bookable ? 'bg-green-600 text-white cursor-pointer' : 'bg-gray-100 text-gray-400' }}">
-                                {{ ucfirst($schedule->day_of_week) }} {{ $schedule->formatted_start_time }}
-                            </span>
+                            <div @if ($schedule->is_bookable) wire:click="createBooking({{ $schedule->id }}, '{{ $nextDayOfWeek }}')" @endif
+                                class="flex gap-2 items-center text-nowrap px-3 py-2 text-xs font-semibold leading-none rounded-full {{ $schedule->is_bookable ? 'bg-green-600 text-white cursor-pointer' : 'bg-gray-100 text-gray-400' }}">
+                                @if ($schedule->is_bookable)
+                                    <x-heroicon-s-check-circle class="h-4 w-4" />
+                                @endif
+                                <span>{{ ucfirst($schedule->day_of_week) }} {{ $schedule->formatted_start_time }}</span>
+                            </div>
                         @endforeach
                     </div>
                 @endif
