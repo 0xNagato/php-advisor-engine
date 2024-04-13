@@ -122,9 +122,10 @@ class BookingWidget extends Widget implements HasForms
                         7 => '7 Guests',
                         8 => '8 Guests',
                     ])
-                    ->placeholder('Select number of guests')
+                    ->placeholder('Party Size')
                     ->live()
                     ->hiddenLabel()
+                    ->columnSpan(1)
                     ->required(),
                 Select::make('reservation_time')
                     ->options(function (Get $get) {
@@ -133,6 +134,7 @@ class BookingWidget extends Widget implements HasForms
                     ->placeholder('Select a time')
                     ->hiddenLabel()
                     ->required()
+                    ->columnSpan(1)
                     ->live(),
                 Select::make('restaurant')
                     ->options(
@@ -143,10 +145,12 @@ class BookingWidget extends Widget implements HasForms
                     ->live()
                     ->hiddenLabel()
                     ->searchable()
+                    ->columnSpanFull()
                     ->selectablePlaceholder(false),
             ])
+            ->extraAttributes(['class' => 'inline-form'])
             ->columns([
-                'default' => 1,
+                'default' => 2,
             ])
             ->statePath('data');
     }
