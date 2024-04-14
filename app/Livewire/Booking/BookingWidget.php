@@ -99,7 +99,7 @@ class BookingWidget extends Widget implements HasForms
                             $get('date_selected') => 'Select Date',
                         ];
                     })
-                    ->default(now()->format('Y-m-d'))
+                    ->default(now(auth()->user()->timezone)->format('Y-m-d'))
                     ->inline()
                     ->hiddenLabel()
                     ->live()
@@ -301,9 +301,9 @@ class BookingWidget extends Widget implements HasForms
         $this->qrCode = null;
         $this->bookingUrl = null;
 
-        $this->form->fill();
-        $this->schedulesThisWeek = new Collection();
-        $this->schedulesToday = new Collection();
+        // $this->form->fill();
+        // $this->schedulesThisWeek = new Collection();
+        // $this->schedulesToday = new Collection();
     }
 
     public function resetBooking(): void
