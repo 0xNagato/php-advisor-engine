@@ -18,17 +18,17 @@ class InvoiceSmall extends Widget
     public function dayDisplay(): string
     {
         $bookingDate = $this->booking->booking_at->startOfDay();
-        $today = now()->startOfDay();
-        $tomorrow = now()->addDay()->startOfDay();
+        $today = now(auth()->user()->timezone)->startOfDay();
+        $tomorrow = now(auth()->user()->timezone)->addDay()->startOfDay();
 
-        if ($bookingDate->equalTo($today)) {
+        if ($bookingDate->format('Y-m-d') === $today->format('Y-m-d')) {
             return 'Today';
         }
 
-        if ($bookingDate->equalTo($tomorrow)) {
+        if ($bookingDate->format('Y-m-d') === $tomorrow->format('Y-m-d')) {
             return 'Tomorrow';
         }
 
-        return $this->booking->booking_at->format('l');
+        return $this->booking->booking_at->format('D, M j');
     }
 }

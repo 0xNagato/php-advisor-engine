@@ -180,21 +180,30 @@ class BookingWidget extends Widget implements HasForms
     public function updatedData($data, $key): void
     {
         if ($key === 'restaurant' || ($key === 'reservation_time' && isset($this->data['restaurant'])) || (isset($this->data['restaurant'], $this->data['reservation_time']) && $key === 'date') || (isset($this->data['restaurant'], $this->data['reservation_time'], $this->data['date']) && $key === 'guest_count')) {
-            $reservationTime = Carbon::createFromFormat('H:i:s', $this->form->getState()['reservation_time'], auth()->user()->timezone)->subHour();
-            $reservationTime = $reservationTime->max(Carbon::now(auth()->user()->timezone));
-            $minute = $reservationTime->minute;
-            $second = $reservationTime->second;
+            $userTimezone = auth()->user()->timezone;
+            $currentDate = (bool) ($this->data['date'] === Carbon::now($userTimezone)->format('Y-m-d'));
 
-            if ($second > 0 || $minute % 30 > 0) {
-                $reservationTime = $reservationTime->subMinutes($minute % 30)->second(0);
+            if (! $currentDate) {
+                $reservationTime = $this->form->getState()['reservation_time'];
+            } else {
+                $reservationTime = Carbon::createFromFormat('H:i:s', $this->form->getState()['reservation_time'], $userTimezone);
+                if ($reservationTime->lt(Carbon::now($userTimezone))) {
+                    $reservationTime = Carbon::now($userTimezone)->addHour();
+                }
+                $minute = $reservationTime->minute;
+                $second = $reservationTime->second;
+
+                if ($second > 0 || $minute % 30 > 0) {
+                    $reservationTime = $reservationTime->subMinutes($minute % 30)->second(0);
+                }
+
+                $reservationTime = $reservationTime->format('H:i:s');
             }
-
-            $reservationTime = $reservationTime->format('H:i:s');
 
             $restaurantId = $this->form->getState()['restaurant'];
 
-            $endTime = Carbon::createFromFormat('H:i:s', $reservationTime)->addHours(self::AVAILABILITY_HOURS)->subMinutes(30);
-            $limitTime = Carbon::createFromTime(23, 59, 0);
+            $endTime = Carbon::createFromFormat('H:i:s', $reservationTime, $userTimezone)->addHours(self::AVAILABILITY_HOURS)->subMinutes(30);
+            $limitTime = Carbon::createFromTime(23, 59, 0, $userTimezone);
 
             if ($endTime->gt($limitTime)) {
                 $endTimeForQuery = '23:59:59';
@@ -205,17 +214,17 @@ class BookingWidget extends Widget implements HasForms
             $this->schedulesToday = Schedule::where('restaurant_id', $restaurantId)
                 ->where('start_time', '>=', $reservationTime)
                 ->where('start_time', '<=', $endTimeForQuery)
-                ->where('day_of_week', strtolower(Carbon::createFromFormat('Y-m-d', $this->form->getState()['date'])->format('l')))
+                ->where('day_of_week', strtolower(Carbon::createFromFormat('Y-m-d', $this->form->getState()['date'], $userTimezone)->format('l')))
                 ->get();
 
             $daysOfWeek = collect(['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday']);
-            $currentDayIndex = $daysOfWeek->search(strtolower(Carbon::now()->format('l')));
+            $currentDayIndex = $daysOfWeek->search(strtolower(Carbon::now($userTimezone)->format('l')));
 
             $sortedDaysOfWeek = $daysOfWeek->slice($currentDayIndex)->concat($daysOfWeek->slice(0, $currentDayIndex));
 
             $this->schedulesThisWeek = Schedule::where('restaurant_id', $restaurantId)
                 ->where('start_time', $this->form->getState()['reservation_time'])
-                ->whereIn('day_of_week', collect(range(1, self::AVAILABILITY_DAYS))->map(fn ($day) => strtolower(Carbon::now()->addDays($day)->format('l')))->toArray())
+                ->whereIn('day_of_week', collect(range(1, self::AVAILABILITY_DAYS))->map(fn ($day) => strtolower(Carbon::now($userTimezone)->addDays($day)->format('l')))->toArray())
                 ->get()
                 ->sortBy(fn ($schedule) => $sortedDaysOfWeek->search($schedule->day_of_week));
         }
@@ -233,7 +242,8 @@ class BookingWidget extends Widget implements HasForms
 
         $bookingAt = Carbon::createFromFormat(
             'Y-m-d H:i:s',
-            $data['date'].' '.$schedule->start_time
+            $data['date'].' '.$schedule->start_time,
+            auth()->user()->timezone
         );
 
         $this->booking = Booking::create([
