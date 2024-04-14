@@ -111,7 +111,7 @@ class BookingWidget extends Widget implements HasForms
                     ->columnSpanFull()
                     ->default(now(auth()->user()->timezone)->addDays(2)->format('Y-m-d'))
                     ->minDate(now(auth()->user()->timezone)->addDay()->format('Y-m-d'))
-                    ->hidden(fn (Get $get) => Carbon::parse($get('date'))->lte(now(auth()->user()->timezone)->addDay()))
+                    ->hidden(fn (Get $get) => Carbon::parse($get('date'))->lte(now(auth()->user()->timezone)))
                     ->afterStateUpdated(fn ($state, $set) => $set('date', $state)),
                 Select::make('guest_count')
                     ->options([
