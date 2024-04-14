@@ -7,6 +7,7 @@
 }" class="flex flex-col gap-4">
     @if (!$booking)
         {{ $this->form }}
+        @json($this->data)
         @if ($this->schedulesToday->count() || $this->schedulesThisWeek->count())
             <div class="flex flex-col bg-white border divide-y rounded-lg shadow">
                 @if ($this->schedulesToday->count())
