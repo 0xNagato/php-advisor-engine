@@ -94,8 +94,8 @@ class BookingWidget extends Widget implements HasForms
                 Radio::make('date')
                     ->options(function ($get) {
                         return [
-                            now()->format('Y-m-d') => 'Today',
-                            now()->addDay()->format('Y-m-d') => 'Tomorrow',
+                            now(auth()->user()->timezone)->format('Y-m-d') => 'Today',
+                            now(auth()->user()->timezone)->addDay()->format('Y-m-d') => 'Tomorrow',
                             $get('date_selected') => 'Select Date',
                         ];
                     })
@@ -109,9 +109,9 @@ class BookingWidget extends Widget implements HasForms
                     ->hiddenLabel()
                     ->live()
                     ->columnSpanFull()
-                    ->default(now()->addDays(2)->format('Y-m-d'))
-                    ->minDate(now()->addDay()->format('Y-m-d'))
-                    ->hidden(fn (Get $get) => Carbon::parse($get('date'))->lte(now()->addDay()))
+                    ->default(now(auth()->user()->timezone)->addDays(2)->format('Y-m-d'))
+                    ->minDate(now(auth()->user()->timezone)->addDay()->format('Y-m-d'))
+                    ->hidden(fn (Get $get) => Carbon::parse($get('date'))->lte(now(auth()->user()->timezone)->addDay()))
                     ->afterStateUpdated(fn ($state, $set) => $set('date', $state)),
                 Select::make('guest_count')
                     ->options([
@@ -160,6 +160,8 @@ class BookingWidget extends Widget implements HasForms
     {
         $userTimezone = auth()->user()->timezone;
         $currentDate = (bool) ($date === Carbon::now($userTimezone)->format('Y-m-d'));
+
+        ds($date);
         $currentTime = Carbon::now($userTimezone);
         $startTime = Carbon::createFromTime(12, 0, 0, $userTimezone);
         $endTime = Carbon::createFromTime(22, 0, 0, $userTimezone);

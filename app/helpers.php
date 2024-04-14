@@ -38,7 +38,14 @@ if (! function_exists('isPrimaApp')) {
 if (! function_exists('formatDateFromString')) {
     function formatDateFromString($date)
     {
-        $carbonDate = Carbon::createFromFormat('Y-m-d', $date);
+        if (auth()->check()) {
+            $user = auth()->user();
+            $timezone = $user->timezone;
+        } else {
+            $timezone = config('app.timezone');
+        }
+
+        $carbonDate = Carbon::createFromFormat('Y-m-d', $date, $timezone);
         if ($carbonDate->isToday()) {
             return 'Today';
         } elseif ($carbonDate->isTomorrow()) {

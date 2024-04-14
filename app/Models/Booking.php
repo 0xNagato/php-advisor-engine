@@ -253,8 +253,7 @@ class Booking extends Model
                         'restaurant_partner_earnings' => $restaurant_partner_earnings,
                         'concierge_partner_earnings' => $concierge_partner_earnings,
                         'platform_earnings' => $platform_earnings,
-                        'total_local' =>
-                            $restaurant_earnings +
+                        'total_local' => $restaurant_earnings +
                             $concierge_earnings +
                             $concierge_referral_level_1_earnings +
                             $concierge_referral_level_2_earnings +
@@ -329,7 +328,7 @@ class Booking extends Model
 
     public function getGuestNameAttribute(): string
     {
-        return $this->guest_first_name . ' ' . $this->guest_last_name;
+        return $this->guest_first_name.' '.$this->guest_last_name;
     }
 
     public function getPartnerEarningsAttribute()
