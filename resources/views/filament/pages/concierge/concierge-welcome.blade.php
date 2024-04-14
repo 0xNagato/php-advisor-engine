@@ -21,20 +21,19 @@
             <p>Welcome aboard!</p>
             <p>We look forward to working with you.</p>
 
-            <p class="text-sm font-semibold">Please use the following credentials to access our demo server.</p>
-            <p class="grid grid-cols-2 p-4 -mt-1 text-sm font-semibold border rounded-lg shadow bg-indigo-50">
-                <span>Email: </span>
-                <bold class="text-indigo-500">concierge@primavip.co</bold>
-                <span>Password: </span>
-                <bold class="text-indigo-500">demo2024</bold>
-            </p>
+            @unless(Request::getHost() === 'demo.primavip.co')
+                <p class="text-sm font-semibold">Please use the following credentials to access our demo server.</p>
+                <p class="grid grid-cols-2 p-4 -mt-1 text-sm font-semibold border rounded-lg shadow bg-indigo-50">
+                    <span>Email: </span>
+                    <bold class="text-indigo-500">concierge@primavip.co</bold>
+                    <span>Password: </span>
+                    <bold class="text-indigo-500">demo2024</bold>
+                </p>
 
-            <x-filament::button tag="a" href="https://demo.primavip.co/admin" target="_blank">
-                Access Demo Account
-            </x-filament::button>
-
-
-
+                <x-filament::button tag="a" href="https://demo.primavip.co/admin" target="_blank">
+                    Access Demo Account
+                </x-filament::button>
+            @endunless
 
 
             <p></p>
