@@ -161,7 +161,6 @@ class BookingWidget extends Widget implements HasForms
         $userTimezone = auth()->user()->timezone;
         $currentDate = (bool) ($date === Carbon::now($userTimezone)->format('Y-m-d'));
 
-        ds($date);
         $currentTime = Carbon::now($userTimezone);
         $startTime = Carbon::createFromTime(12, 0, 0, $userTimezone);
         $endTime = Carbon::createFromTime(22, 0, 0, $userTimezone);
