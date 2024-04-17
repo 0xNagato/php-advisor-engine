@@ -18,6 +18,7 @@ use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\HtmlString;
 use Illuminate\Validation\Rules\Password as PasswordRule;
+use libphonenumber\PhoneNumberType;
 use Ysfkaya\FilamentPhoneInput\Forms\PhoneInput;
 
 /**
@@ -76,6 +77,12 @@ class ConciergeInvitation extends SimplePage
                     ->required(),
                 PhoneInput::make('phone')
                     ->hiddenLabel()
+                    ->onlyCountries(config('app.countries'))
+                    ->validateFor(
+                        country: config('app.countries'),
+                        type: PhoneNumberType::MOBILE,
+                        lenient: true,
+                    )
                     ->columnSpan(2)
                     ->required(),
                 TextInput::make('hotel_name')

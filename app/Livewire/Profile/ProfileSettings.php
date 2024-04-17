@@ -2,13 +2,13 @@
 
 namespace App\Livewire\Profile;
 
-use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
 use Filament\Forms\Form;
 use Filament\Notifications\Notification;
 use Filament\Widgets\Widget;
+use libphonenumber\PhoneNumberType;
 use Tapp\FilamentTimezoneField\Forms\Components\TimezoneSelect;
 use Ysfkaya\FilamentPhoneInput\Forms\PhoneInput;
 
@@ -57,6 +57,12 @@ class ProfileSettings extends Widget implements HasForms
                 ->email(),
             PhoneInput::make('phone')
                 ->required()
+                ->onlyCountries(config('app.countries'))
+                ->validateFor(
+                    country: config('app.countries'),
+                    type: PhoneNumberType::MOBILE,
+                    lenient: true,
+                )
                 ->label('Phone'),
             TimezoneSelect::make('timezone')
                 ->searchable()

@@ -14,6 +14,7 @@ use Filament\Forms\Form;
 use Filament\Notifications\Notification;
 use Filament\Pages\Page;
 use Illuminate\Validation\ValidationException;
+use libphonenumber\PhoneNumberType;
 use Ysfkaya\FilamentPhoneInput\Forms\PhoneInput;
 
 /**
@@ -80,7 +81,12 @@ class ConciergeReferral extends Page
                             ->schema([
                                 PhoneInput::make('phone')
                                     ->placeholder('Phone Number')
-                                    ->validateFor(['US', 'CA'])
+                                    ->onlyCountries(config('app.countries'))
+                                    ->validateFor(
+                                        country: config('app.countries'),
+                                        type: PhoneNumberType::MOBILE,
+                                        lenient: true,
+                                    )
                                     ->columnSpan(2)
                                     ->required()
                                     ->hiddenLabel(),
@@ -172,7 +178,12 @@ class ConciergeReferral extends Page
             ->schema([
                 PhoneInput::make('phone')
                     ->placeholder('Phone Number')
-                    ->validateFor(['US', 'CA'])
+                    ->onlyCountries(config('app.countries'))
+                    ->validateFor(
+                        country: config('app.countries'),
+                        type: PhoneNumberType::MOBILE,
+                        lenient: true,
+                    )
                     ->columnSpan(2)
                     ->required()
                     ->hiddenLabel(),

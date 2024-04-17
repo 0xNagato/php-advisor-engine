@@ -13,6 +13,7 @@ use Filament\Forms\Components\TextInput;
 use Filament\Forms\Form;
 use Filament\Resources\Pages\CreateRecord;
 use Illuminate\Database\Eloquent\Model;
+use libphonenumber\PhoneNumberType;
 use Str;
 use Ysfkaya\FilamentPhoneInput\Forms\PhoneInput;
 
@@ -48,7 +49,12 @@ class CreateRestaurant extends CreateRecord
                             ->label('Phone Number')
                             ->placeholder('Phone Number')
                             ->hint('Used for SMS notifications')
-                            ->onlyCountries(['US', 'CA'])
+                            ->onlyCountries(config('app.countries'))
+                            ->validateFor(
+                                country: config('app.countries'),
+                                type: PhoneNumberType::MOBILE,
+                                lenient: true,
+                            )
                             ->initialCountry('US')
                             ->required(),
                     ]),
@@ -65,7 +71,12 @@ class CreateRestaurant extends CreateRecord
                         PhoneInput::make('contact_phone')
                             ->label('Primary Contact Phone')
                             ->required()
-                            ->onlyCountries(['US', 'CA'])
+                            ->onlyCountries(config('app.countries'))
+                            ->validateFor(
+                                country: config('app.countries'),
+                                type: PhoneNumberType::MOBILE,
+                                lenient: true,
+                            )
                             ->initialCountry('US'),
 
                     ]),
@@ -80,7 +91,12 @@ class CreateRestaurant extends CreateRecord
                         PhoneInput::make('contact_phone')
                             ->label('Contact Phone')
                             ->required()
-                            ->onlyCountries(['US', 'CA'])
+                            ->onlyCountries(config('app.countries'))
+                            ->validateFor(
+                                country: config('app.countries'),
+                                type: PhoneNumberType::MOBILE,
+                                lenient: true,
+                            )
                             ->initialCountry('US'),
                         Checkbox::make('use_for_reservations')
                             ->label('Use for Reservations')

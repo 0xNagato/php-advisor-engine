@@ -9,6 +9,7 @@ use Filament\Forms\Components\TextInput;
 use Filament\Forms\Form;
 use Filament\Notifications\Notification;
 use Filament\Pages\Page;
+use libphonenumber\PhoneNumberType;
 use Ysfkaya\FilamentPhoneInput\Forms\PhoneInput;
 
 class ManageContacts extends Page
@@ -48,7 +49,12 @@ class ManageContacts extends Page
                             PhoneInput::make('contact_phone')
                                 ->label('Contact Phone')
                                 ->required()
-                                ->onlyCountries(['US', 'CA'])
+                                ->onlyCountries(config('app.countries'))
+                                ->validateFor(
+                                    country: config('app.countries'),
+                                    type: PhoneNumberType::MOBILE,
+                                    lenient: true,
+                                )
                                 ->initialCountry('US'),
                             Checkbox::make('use_for_reservations')
                                 ->label('Use for Reservations')

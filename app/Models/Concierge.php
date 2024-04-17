@@ -35,12 +35,11 @@ class Concierge extends Model
 
     /**
      * Calculate the payout percentage based on the amount sales.
-     *
      * @return int The payout percentage.
      */
     public function getPayoutPercentageAttribute(): int
     {
-        $sales = $this->sales;
+        $sales = $this->sales_this_month;
 
         if ($sales >= 0 && $sales <= 20) {
             return 10;
@@ -66,6 +65,19 @@ class Concierge extends Model
     public function bookings(): HasMany
     {
         return $this->hasMany(Booking::class, 'concierge_id');
+    }
+
+    /**
+     * Get the amount confirmed bookings.
+     *
+     * @return int The amount confirmed bookings.
+     */
+    public function getSalesThisMonthAttribute(): int
+    {
+        return $this->bookings()
+            ->where('status', BookingStatus::CONFIRMED)
+            ->whereMonth('created_at', now()->month)
+            ->count();
     }
 
     public function referringConcierge(): HasOneThrough

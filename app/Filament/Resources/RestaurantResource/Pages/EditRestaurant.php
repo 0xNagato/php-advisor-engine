@@ -12,6 +12,7 @@ use Filament\Forms\Components\TextInput;
 use Filament\Forms\Form;
 use Filament\Resources\Pages\EditRecord;
 use Illuminate\Contracts\Support\Htmlable;
+use libphonenumber\PhoneNumberType;
 use Ysfkaya\FilamentPhoneInput\Forms\PhoneInput;
 
 class EditRestaurant extends EditRecord
@@ -56,6 +57,12 @@ class EditRestaurant extends EditRecord
                             ->required(),
                         PhoneInput::make('contact_phone')
                             ->label('Primary Contact Phone')
+                            ->onlyCountries(config('app.countries'))
+                            ->validateFor(
+                                country: config('app.countries'),
+                                type: PhoneNumberType::MOBILE,
+                                lenient: true,
+                            )
                             ->required()
                             ->onlyCountries(['US', 'CA'])
                             ->initialCountry('US'),
@@ -72,7 +79,12 @@ class EditRestaurant extends EditRecord
                         PhoneInput::make('contact_phone')
                             ->label('Contact Phone')
                             ->required()
-                            ->onlyCountries(['US', 'CA'])
+                            ->onlyCountries(config('app.countries'))
+                            ->validateFor(
+                                country: config('app.countries'),
+                                type: PhoneNumberType::MOBILE,
+                                lenient: true,
+                            )
                             ->initialCountry('US'),
                         Checkbox::make('use_for_reservations')
                             ->label('Use for Reservations')
@@ -137,7 +149,7 @@ class EditRestaurant extends EditRecord
     public function toggleSuspend(): void
     {
         $this->getRecord()->update([
-            'is_suspended' => ! $this->getRecord()->is_suspended,
+            'is_suspended' => !$this->getRecord()->is_suspended,
         ]);
     }
 

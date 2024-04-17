@@ -1,4 +1,4 @@
-@php use App\Enums\BookingStatus; @endphp
+@php use App\Enums\BookingStatus;use Carbon\Carbon; @endphp
     <!--suppress JSUnresolvedReference, BadExpressionStatementJS -->
 <x-filament-widgets::widget x-data="{}" x-init="() => {
     let script = document.createElement('script');
@@ -7,7 +7,7 @@
 }" class="flex flex-col gap-4">
     @if (!$booking)
         {{ $this->form }}
-        
+
         @if ($this->schedulesToday->count() || $this->schedulesThisWeek->count())
             <div class="flex flex-col bg-white border divide-y rounded-lg shadow">
                 @if ($this->schedulesToday->count())
@@ -43,7 +43,7 @@
                         <div class="grid gap-1.5 grid-cols-2">
                             @foreach ($this->schedulesThisWeek as $schedule)
                                 @php
-                                    $nextDayOfWeek = \Carbon\Carbon::parse(
+                                    $nextDayOfWeek = Carbon::parse(
                                         $this->data['date'],
                                         auth()->user()->timezone,
                                     )->next($schedule->day_of_week);

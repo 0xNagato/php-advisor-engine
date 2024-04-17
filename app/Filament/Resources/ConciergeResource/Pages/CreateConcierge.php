@@ -10,6 +10,7 @@ use Filament\Forms\Components\TextInput;
 use Filament\Forms\Form;
 use Filament\Resources\Pages\CreateRecord;
 use Illuminate\Database\Eloquent\Model;
+use libphonenumber\PhoneNumberType;
 use Str;
 use Ysfkaya\FilamentPhoneInput\Forms\PhoneInput;
 
@@ -45,7 +46,12 @@ class CreateConcierge extends CreateRecord
                             ->label('Phone Number')
                             ->placeholder('Phone Number')
                             ->hint('Used for SMS notifications')
-                            ->onlyCountries(['US', 'CA'])
+                            ->onlyCountries(config('app.countries'))
+                            ->validateFor(
+                                country: config('app.countries'),
+                                type: PhoneNumberType::MOBILE,
+                                lenient: true,
+                            )
                             ->initialCountry('US')
                             ->required(),
                     ]),

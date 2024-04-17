@@ -17,9 +17,19 @@ class InvoiceSmall extends Widget
     #[Computed]
     public function dayDisplay(): string
     {
+
+        $timezone = 'UTC';
+
+        if (auth()->check()) {
+            $timezone = auth()->user()->timezone;
+        } elseif (request()->hasCookie('timezone')) {
+            $timezone = request()->cookie('timezone');
+        }
+
+
         $bookingDate = $this->booking->booking_at->startOfDay();
-        $today = now(auth()->user()->timezone)->startOfDay();
-        $tomorrow = now(auth()->user()->timezone)->addDay()->startOfDay();
+        $today = now($timezone)->startOfDay();
+        $tomorrow = now($timezone)->addDay()->startOfDay();
 
         if ($bookingDate->format('Y-m-d') === $today->format('Y-m-d')) {
             return 'Today';

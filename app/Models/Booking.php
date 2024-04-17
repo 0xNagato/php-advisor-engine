@@ -237,7 +237,7 @@ class Booking extends Model
 
                 try {
                     assert(
-                        (int) $totalLocal === (int) $booking->total_fee,
+                        (int)$totalLocal === (int)$booking->total_fee,
                         'The sum of all earnings does not equal the total fee.'
                     );
                     $booking->platform_earnings = $platform;
@@ -328,7 +328,7 @@ class Booking extends Model
 
     public function getGuestNameAttribute(): string
     {
-        return $this->guest_first_name.' '.$this->guest_last_name;
+        return $this->guest_first_name . ' ' . $this->guest_last_name;
     }
 
     public function getPartnerEarningsAttribute()
@@ -338,7 +338,7 @@ class Booking extends Model
         if (
             $this->partnerConcierge &&
             $this->concierge->user->partner_referral_id ===
-                $this->partnerConcierge->id
+            $this->partnerConcierge->id
         ) {
             $earnings += $this->partner_concierge_fee;
         }
@@ -346,7 +346,7 @@ class Booking extends Model
         if (
             $this->partnerRestaurant &&
             $this->schedule->restaurant->user->partner_referral_id ===
-                $this->partnerRestaurant->id
+            $this->partnerRestaurant->id
         ) {
             $earnings += $this->partner_restaurant_fee;
         }

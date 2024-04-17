@@ -8,6 +8,7 @@ use Filament\Forms\Contracts\HasForms;
 use Filament\Forms\Form;
 use Filament\Notifications\Notification;
 use Filament\Widgets\Widget;
+use libphonenumber\PhoneNumberType;
 use Ysfkaya\FilamentPhoneInput\Forms\PhoneInput;
 
 class SMSInput extends Widget implements HasForms
@@ -30,6 +31,12 @@ class SMSInput extends Widget implements HasForms
             ->schema([
                 PhoneInput::make('phoneNumber')
                     ->hiddenLabel()
+                    ->onlyCountries(config('app.countries'))
+                    ->validateFor(
+                        country: config('app.countries'),
+                        type: PhoneNumberType::MOBILE,
+                        lenient: true,
+                    )
                     ->required(),
             ]);
     }
