@@ -60,15 +60,6 @@ class SimpleTextingAdapter
         $mediaItems = [],
     )
     {
-        ds([
-            'contactPhone' => $contactPhone,
-            'text' => $text,
-            'accountPhone' => $accountPhone ?? config('services.simple_texting.from_phone'),
-            'mode' => $mode,
-            'subject' => $subject,
-            'fallbackText' => $fallbackText,
-            'mediaItems' => $mediaItems,
-        ]);
         if (RateLimiter::tooManyAttempts('sms', 5)) {
             info('Rate limited: ' . $contactPhone . ' - ' . $text);
 

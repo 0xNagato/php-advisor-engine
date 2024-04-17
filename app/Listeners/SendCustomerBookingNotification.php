@@ -3,7 +3,7 @@
 namespace App\Listeners;
 
 use App\Events\BookingPaid;
-use App\Services\SimpleTextingAdapter;
+use App\Services\SmsService;
 use Carbon\CarbonInterface;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use ShortURL;
@@ -29,7 +29,7 @@ class SendCustomerBookingNotification implements ShouldQueue
 
         $invoiceUrl = ShortURL::destinationUrl(route('customer.invoice', $event->booking->uuid))->make()->default_short_url;
 
-        app(SimpleTextingAdapter::class)->sendMessage(
+        app(SmsService::class)->sendMessage(
             $event->booking->guest_phone,
             "PRIMA reservation at {$event->booking->restaurant->restaurant_name} $bookingDate at $bookingTime with {$event->booking->guest_count} guests. View your invoice at $invoiceUrl."
         );

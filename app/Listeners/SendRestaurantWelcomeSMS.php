@@ -3,7 +3,7 @@
 namespace App\Listeners;
 
 use App\Events\RestaurantCreated;
-use App\Services\SimpleTextingAdapter;
+use App\Services\SmsService;
 use AshAllenDesign\ShortURL\Exceptions\ShortURLException;
 use Filament\Facades\Filament;
 use GuzzleHttp\Exception\GuzzleException;
@@ -35,7 +35,7 @@ class SendRestaurantWelcomeSMS
         $secureUrl = ShortURL::destinationUrl($url)->make()->default_short_url;
 
         try {
-            app(SimpleTextingAdapter::class)->sendMessage(
+            app(SmsService::class)->sendMessage(
                 $event->restaurant->user->phone,
                 "Welcome to PRIMA! Your account has been created. Please click $secureUrl to login and update your payment info and begin making reservations. Thank you for joining us!"
             );

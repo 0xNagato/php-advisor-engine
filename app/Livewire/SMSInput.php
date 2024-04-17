@@ -2,7 +2,7 @@
 
 namespace App\Livewire;
 
-use App\Services\SimpleTextingAdapter;
+use App\Services\SmsService;
 use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
 use Filament\Forms\Form;
@@ -43,7 +43,7 @@ class SMSInput extends Widget implements HasForms
 
     public function send(): void
     {
-        app(SimpleTextingAdapter::class)->sendMessage(
+        app(SmsService::class)->sendMessage(
             $this->phoneNumber,
             $this->message
         );

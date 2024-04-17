@@ -35,7 +35,7 @@ class RestaurantContactBookingConfirmationService
 
         $bookingTime = $booking->booking_at->format('g:ia');
 
-        app(SimpleTextingAdapter::class)->sendMessage(
+        app(SmsService::class)->sendMessage(
             $contact->contact_phone,
             "PRIMA Reservation - $bookingDate at $bookingTime, $booking->guest_name, $booking->guest_count guests, $booking->guest_phone."
         );
