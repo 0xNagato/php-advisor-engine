@@ -30,7 +30,7 @@
                     <bold class="text-indigo-500">demo2024</bold>
                 </p>
 
-                <x-filament::button tag="a" href="https://demo.primavip.co/admin" target="_blank">
+                <x-filament::button tag="a" href="https://demo.primavip.co/admin?email=concierge@primavip.co&password=demo2024" target="_blank">
                     Access Demo Account
                 </x-filament::button>
             @endunless
