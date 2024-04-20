@@ -24,8 +24,9 @@
                                         at
                                         <span class="underline">{{ $schedule->formatted_start_time }}</span>
                                     </div>
-                                    <div class="rounded-full bg-green-500 p-1.5 -m-1.5">
-                                        {{ money($schedule->fee($this->data['guest_count'])) }}
+                                    <div
+                                        class="rounded-full {{ $schedule->is_bookable ? 'bg-green-500' : 'bg-gray-100'  }} p-1.5 -m-1.5">
+                                        {{ $schedule->is_bookable ? money($schedule->fee($this->data['guest_count'])) : money(0)}}
                                     </div>
                                 </div>
                             @endforeach
@@ -46,8 +47,9 @@
                                         at
                                         <span class="underline">{{ $schedule->formatted_start_time }}</span>
                                     </div>
-                                    <div class="rounded-full bg-green-500 p-1.5 -m-1.5">
-                                        {{ money($schedule->fee($this->data['guest_count'])) }}
+                                    <div
+                                        class="rounded-full {{ $schedule->is_bookable ? 'bg-green-500' : 'bg-gray-100'  }} p-1.5 -m-1.5">
+                                        {{ $schedule->is_bookable ? money($schedule->fee($this->data['guest_count'])) : money(0)}}
                                     </div>
                                 </div>
                             @endforeach

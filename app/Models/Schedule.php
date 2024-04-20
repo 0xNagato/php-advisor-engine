@@ -56,7 +56,7 @@ class Schedule extends Model
     {
         $datePart = $this->booking_date->toDateString();
 
-        return Carbon::parse($datePart . ' ' . $this->start_time)->toDateTimeString();
+        return Carbon::parse($datePart.' '.$this->start_time)->toDateTimeString();
     }
 
     public function fee(int $partySize): int

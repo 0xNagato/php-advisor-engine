@@ -21,7 +21,7 @@ class Restaurant extends Model
 
     public const int DEFAULT_TABLES = 10;
 
-    public const int DEFAULT_START_HOUR = 12; // 12:00 PM
+    public const int DEFAULT_START_HOUR = 16; // 4:00 PM
 
     public const int DEFAULT_END_HOUR = 22; // 10:00 PM
 

@@ -49,8 +49,8 @@ class ReservationHoursWidget extends Widget
     public function updatedSelectedDays($value, $key): void
     {
         if ($value === true && ! isset($this->startTimes[$key], $this->endTimes[$key])) {
-            $this->startTimes[$key] = '12:00:00';
-            $this->endTimes[$key] = '22:00:00';
+            $this->startTimes[$key] = Restaurant::DEFAULT_START_HOUR.':00:00';
+            $this->endTimes[$key] = Restaurant::DEFAULT_END_HOUR.':00:00';
         }
     }
 

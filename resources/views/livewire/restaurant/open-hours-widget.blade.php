@@ -44,7 +44,7 @@
         @endforeach
 
         <x-filament::button type="submit" class="w-full mt-2" wire:loading.attr="disabled">
-            Save Business Hours
+            Save Reservation Hours
         </x-filament::button>
 
     </form>

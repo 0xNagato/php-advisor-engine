@@ -17,7 +17,7 @@ class ReservationHoursService
         $selectedDays = [];
 
         foreach ($this->daysOfWeek as $day) {
-            $schedules = $restaurant->schedules()->where('day_of_week', $day)->orderBy('start_time')->get();
+            $schedules = $restaurant->scheduleTemplates()->where('day_of_week', $day)->orderBy('start_time')->get();
 
             $selectedDays[$day] = ! $schedules->every(fn ($schedule) => $schedule->is_available === false);
             if ($selectedDays[$day]) {
@@ -32,7 +32,7 @@ class ReservationHoursService
     public function saveHours(SaveReservationHoursData $data): void
     {
         foreach ($this->daysOfWeek as $day) {
-            $schedules = $data->restaurant->schedules()->where('day_of_week', $day)->get();
+            $schedules = $data->restaurant->scheduleTemplates()->where('day_of_week', $day)->get();
 
             $data->restaurant->open_days = [
                 'monday' => $data->selectedDays['monday'] ? 'open' : 'closed',
