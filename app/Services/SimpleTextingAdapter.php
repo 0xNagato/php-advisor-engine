@@ -30,7 +30,7 @@ class SimpleTextingAdapter
     {
         $response = $this->client->request('GET', 'messages', [
             'headers' => [
-                'Authorization' => 'Bearer ' . $this->apiKey,
+                'Authorization' => 'Bearer '.$this->apiKey,
             ],
             'query' => [
                 'page' => $page,
@@ -58,17 +58,16 @@ class SimpleTextingAdapter
         $subject = null,
         $fallbackText = null,
         $mediaItems = [],
-    )
-    {
+    ) {
         if (RateLimiter::tooManyAttempts('sms', 5)) {
-            info('Rate limited: ' . $contactPhone . ' - ' . $text);
+            info('Rate limited: '.$contactPhone.' - '.$text);
 
             return null;
         }
 
         $response = $this->client->request('POST', 'messages', [
             'headers' => [
-                'Authorization' => 'Bearer ' . $this->apiKey,
+                'Authorization' => 'Bearer '.$this->apiKey,
             ],
             'json' => [
                 'contactPhone' => $contactPhone,

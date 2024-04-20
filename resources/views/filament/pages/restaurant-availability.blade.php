@@ -39,7 +39,7 @@
             </div>
 
             <div :id="$id(tabId + '-content')" x-show="tabContentActive($el)" class="relative" x-cloak>
-                <livewire:restaurant.schedule-widget/>
+                <livewire:restaurant.table-availability/>
             </div>
 
         </div>

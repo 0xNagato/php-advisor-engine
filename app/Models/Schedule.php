@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -21,19 +22,24 @@ class Schedule extends Model
         'day_of_week',
         'prime_time',
         'prime_time_fee',
+        'party_size',
+        'booking_date',
     ];
 
     protected $casts = [
         'is_available' => 'boolean',
         'start_time',
         'end_time',
+        'prime_time' => 'boolean',
+        'booking_date' => 'date',
+        'booking_at' => 'datetime',
     ];
 
     protected $appends = [
-        'computed_available_tables',
         'formatted_start_time',
         'formatted_end_time',
         'is_bookable',
+        'booking_at',
     ];
 
     public function restaurant(): BelongsTo
@@ -41,18 +47,24 @@ class Schedule extends Model
         return $this->belongsTo(Restaurant::class);
     }
 
-    public function getComputedAvailableTablesAttribute(): int
-    {
-        $bookingsTodayCount = $this->bookings()
-            ->whereDate('created_at', now()->toDateString())
-            ->count();
-
-        return $this->attributes['available_tables'] - $bookingsTodayCount;
-    }
-
     public function bookings(): HasMany
     {
         return $this->hasMany(Booking::class);
+    }
+
+    public function getBookingAtAttribute(): string
+    {
+        $datePart = $this->booking_date->toDateString();
+
+        return Carbon::parse($datePart . ' ' . $this->start_time)->toDateTimeString();
+    }
+
+    public function fee(int $partySize): int
+    {
+        $extraPeople = max(0, $partySize - 2);
+        $extraFee = $extraPeople * 50;
+
+        return ($this->restaurant->booking_fee + $extraFee) * 100;
     }
 
     public function scopeAvailable(Builder $query): Builder

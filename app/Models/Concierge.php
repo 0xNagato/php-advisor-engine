@@ -35,6 +35,7 @@ class Concierge extends Model
 
     /**
      * Calculate the payout percentage based on the amount sales.
+     *
      * @return int The payout percentage.
      */
     public function getPayoutPercentageAttribute(): int

@@ -6,31 +6,27 @@
     document.head.appendChild(script);
 }" class="flex flex-col gap-4">
     @if (!$booking)
+        {{--        @env('local')--}}
+        {{--            <pre class="text-xs">{{ json_encode($data, JSON_PRETTY_PRINT) }}</pre>--}}
+        {{--        @endenv--}}
         {{ $this->form }}
 
         @if ($this->schedulesToday->count() || $this->schedulesThisWeek->count())
             <div class="flex flex-col bg-white border divide-y rounded-lg shadow">
                 @if ($this->schedulesToday->count())
                     <div class="p-4">
-                        <div class="flex items-center">
-                            <div class="text-sm font-semibold mb-2 flex-grow">
-                                Availability {{ formatDateFromString($this->data['date']) }}
-                            </div>
-                            <div class="flex items-center gap-1">
-                                <x-heroicon-s-star @class(['h-4 w-4 text-yellow-300 -mt-0.5']) />
-                                <span class="font-semibold text-xs">PRIME</span>
-                            </div>
-                        </div>
-                        <div class="grid gap-1.5 grid-cols-3">
+                        <div class="grid gap-2 grid-cols-1">
                             @foreach ($this->schedulesToday as $schedule)
                                 <div @if ($schedule->is_bookable) wire:click="createBooking({{ $schedule->id }})" @endif
-                                class="flex gap-1 items-center px-2 py-2 text-xs font-semibold leading-none rounded-full {{ $schedule->is_bookable ? 'bg-green-600 text-white cursor-pointer' : 'bg-gray-100 text-gray-400' }}">
-                                    @if (!$schedule->prime_time)
-                                        {{-- <x-heroicon-s-currency-dollar class="h-4 w-4" /> --}}
-                                    @else
-                                        <x-heroicon-s-star @class(['h-4 w-4', 'text-yellow-300' => $schedule->is_bookable]) />
-                                    @endif
-                                    <span>{{ $schedule->formatted_start_time }}</span>
+                                class="flex gap-2 items-center px-3 py-3 text-sm font-bold leading-none rounded-full {{ $schedule->is_bookable ? 'bg-green-600 text-white cursor-pointer hover:bg-green-500' : 'bg-gray-100 text-gray-400' }}">
+                                    <div class="flex-grow">
+                                        {{ formatDateFromString($this->data['date']) }}
+                                        at
+                                        <span class="underline">{{ $schedule->formatted_start_time }}</span>
+                                    </div>
+                                    <div class="rounded-full bg-green-500 p-1.5 -m-1.5">
+                                        {{ money($schedule->fee($this->data['guest_count'])) }}
+                                    </div>
                                 </div>
                             @endforeach
                         </div>
@@ -39,25 +35,20 @@
 
                 @if ($this->schedulesThisWeek->count())
                     <div class="p-4">
-                        <div class="text-sm font-semibold mb-2">Availability later this week</div>
-                        <div class="grid gap-1.5 grid-cols-2">
+                        <div class="grid gap-2 grid-cols-1">
                             @foreach ($this->schedulesThisWeek as $schedule)
-                                @php
-                                    $nextDayOfWeek = Carbon::parse(
-                                        $this->data['date'],
-                                        auth()->user()->timezone,
-                                    )->next($schedule->day_of_week);
-                                @endphp
                                 <div
-                                    @if ($schedule->is_bookable) wire:click="createBooking({{ $schedule->id }}, '{{ $nextDayOfWeek->format('Y-m-d') }}')"
+                                    @if ($schedule->is_bookable) wire:click="createBooking({{ $schedule->id }}, '{{ $schedule->booking_date->format('Y-m-d') }}')"
                                     @endif
-                                    class="flex gap-1 items-center px-2 py-2 text-xs font-semibold leading-none rounded-full {{ $schedule->is_bookable ? 'bg-green-600 text-white cursor-pointer' : 'bg-gray-100 text-gray-400' }}">
-                                    {{-- <x-heroicon-s-currency-dollar class="h-4 w-4" /> --}}
-                                    <span>
-                                        {{-- {{ substr(ucfirst($schedule->day_of_week), 0, 3) }}, --}}
-                                        {{ $nextDayOfWeek->format('M jS') }}
-                                        {{ $schedule->formatted_start_time }}
-                                    </span>
+                                    class="flex gap-2 items-center px-3 py-3 text-sm font-bold leading-none rounded-full {{ $schedule->is_bookable ? 'bg-green-600 text-white cursor-pointer hover:bg-green-500' : 'bg-gray-100 text-gray-400' }}">
+                                    <div class="flex-grow">
+                                        {{ $schedule->booking_date->format('D, M jS') }}
+                                        at
+                                        <span class="underline">{{ $schedule->formatted_start_time }}</span>
+                                    </div>
+                                    <div class="rounded-full bg-green-500 p-1.5 -m-1.5">
+                                        {{ money($schedule->fee($this->data['guest_count'])) }}
+                                    </div>
                                 </div>
                             @endforeach
                         </div>
@@ -65,11 +56,6 @@
                 @endif
             </div>
         @endif
-
-        {{-- <x-filament::button wire:click="createBooking" wire:loading.attr="disabled" class="w-full bg-[#421fff] h-[48px]"
-            icon="gmdi-restaurant-menu">
-            Hold Reservation
-        </x-filament::button> --}}
     @endif
 
 

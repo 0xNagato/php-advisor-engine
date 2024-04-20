@@ -26,7 +26,6 @@ class InvoiceSmall extends Widget
             $timezone = request()->cookie('timezone');
         }
 
-
         $bookingDate = $this->booking->booking_at->startOfDay();
         $today = now($timezone)->startOfDay();
         $tomorrow = now($timezone)->addDay()->startOfDay();

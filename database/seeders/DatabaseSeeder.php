@@ -61,7 +61,7 @@ class DatabaseSeeder extends Seeder
             PartnerSeeder::class,
         ]);
 
-        $restaurant = User::factory([
+        User::factory([
             'first_name' => 'Demo',
             'last_name' => 'Restaurant',
             'email' => 'restaurant@primavip.co',
@@ -74,7 +74,7 @@ class DatabaseSeeder extends Seeder
             ->create()
             ->assignRole('restaurant');
 
-        $concierge = User::factory([
+        User::factory([
             'first_name' => 'Demo',
             'last_name' => 'Concierge',
             'email' => 'concierge@primavip.co',
@@ -91,7 +91,7 @@ class DatabaseSeeder extends Seeder
             ShieldSeeder::class,
             ConciergeSeeder::class,
             RestaurantSeeder::class,
-            BookingSeeder::class,
+            // BookingSeeder::class,
         ]);
 
         Artisan::call('shield:generate --all');

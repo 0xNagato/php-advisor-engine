@@ -1,5 +1,7 @@
 <?php
 
+/** @noinspection StaticInvocationViaThisInspection */
+
 namespace App\Livewire\Admin;
 
 use App\Data\AdminStatData;
@@ -30,7 +32,7 @@ class AdminStats extends Widget
         $endDate = $this->filters['endDate'] ?? now();
 
         // Calculate for the current time frame
-        $bookingsQuery = Booking::whereBetween('created_at', [$startDate, $endDate]);
+        $bookingsQuery = Booking::confirmed()->whereBetween('created_at', [$startDate, $endDate]);
 
         $platformEarnings = $bookingsQuery->sum('platform_earnings');
         $numberOfBookings = $bookingsQuery->count();

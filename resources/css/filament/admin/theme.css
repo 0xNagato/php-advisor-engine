@@ -31,6 +31,10 @@ body::before {
     @apply dark:bg-white;
 }
 
+.fi-input-wrp-icon {
+    @apply h-4 w-4 !important;
+}
+
 .inline-form {
     @apply gap-4 !important;
 }

@@ -14,6 +14,7 @@ use Twilio\Rest\Client;
 class SmsService
 {
     protected SimpleTextingAdapter $simpleTextingAdapter;
+
     protected Client $twilioClient;
 
     public function __construct(SimpleTextingAdapter $simpleTextingAdapter)
@@ -29,8 +30,7 @@ class SmsService
         $subject = null,
         $fallbackText = null,
         $mediaItems = [],
-    )
-    {
+    ) {
         $phoneUtil = PhoneNumberUtil::getInstance();
         try {
             $phoneNumber = $phoneUtil->parse($contactPhone);

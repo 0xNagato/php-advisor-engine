@@ -12,7 +12,7 @@ class TimezoneMiddleware
 {
     public function handle(Request $request, Closure $next)
     {
-        if (Cookie::get('timezone') === null && !auth()->check()) {
+        if (Cookie::get('timezone') === null && ! auth()->check()) {
             $ip = $request->ip();
             $url = "http://ip-api.com/json/$ip";
 

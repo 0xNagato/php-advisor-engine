@@ -1,0 +1,31 @@
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+
+class ScheduleTemplate extends Model
+{
+    protected $fillable = [
+        'restaurant_id',
+        'day_of_week',
+        'start_time',
+        'end_time',
+        'is_available',
+        'available_tables',
+        'prime_time',
+        'prime_time_fee',
+        'party_size',
+    ];
+
+    protected $casts = [
+        'is_available' => 'boolean',
+        'prime_time' => 'boolean',
+    ];
+
+    public function restaurant(): BelongsTo
+    {
+        return $this->belongsTo(Restaurant::class);
+    }
+}

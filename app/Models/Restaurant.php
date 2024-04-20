@@ -19,6 +19,12 @@ class Restaurant extends Model
 {
     use HasFactory;
 
+    public const int DEFAULT_TABLES = 10;
+
+    public const int DEFAULT_START_HOUR = 12; // 12:00 PM
+
+    public const int DEFAULT_END_HOUR = 22; // 10:00 PM
+
     /**
      * The attributes that are mass assignable.
      *
@@ -41,6 +47,7 @@ class Restaurant extends Model
         'is_suspended',
         'non_prime_time',
         'business_hours',
+        'party_sizes',
     ];
 
     protected $casts = [
@@ -48,8 +55,10 @@ class Restaurant extends Model
         'contacts' => DataCollection::class.':'.RestaurantContactData::class,
         'non_prime_time' => 'array',
         'business_hours' => 'array',
+        'party_sizes' => 'array',
     ];
 
+    /** @noinspection PackedHashtableOptimizationInspection */
     protected static function boot(): void
     {
         parent::boot();
@@ -64,6 +73,13 @@ class Restaurant extends Model
                 'saturday' => 'open',
                 'sunday' => 'open',
             ];
+
+            $restaurant->party_sizes = [
+                '2' => 2,
+                '4' => 4,
+                '6' => 6,
+                '8' => 8,
+            ];
         });
 
         static::created(function (Restaurant $restaurant) {
@@ -73,24 +89,42 @@ class Restaurant extends Model
 
     public function createDefaultSchedules(): void
     {
+        $schedulesData = [];
         $daysOfWeek = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
 
-        foreach ($daysOfWeek as $day) {
-            $startTime = Carbon::createFromTime(0, 0); // Start of the day
-            $endTime = Carbon::createFromTime(23, 59); // End of the day
+        foreach ($daysOfWeek as $dayOfWeek) {
+            $startTime = Carbon::createFromTime();
+            $endTime = Carbon::createFromTime(23, 59);
 
             while ($startTime->lessThanOrEqualTo($endTime)) {
-                $isAvailable = $startTime->hour >= 12 && ($startTime->hour < 22 || ($startTime->hour === 22 && $startTime->minute < 30));
+                $isAvailable = $startTime->hour >= self::DEFAULT_START_HOUR && ($startTime->hour < self::DEFAULT_END_HOUR || ($startTime->hour === self::DEFAULT_END_HOUR && $startTime->minute < 30));
 
-                $this->schedules()->create([
-                    'start_time' => $startTime->format('H:i:s'),
-                    'end_time' => $startTime->addMinutes(30)->format('H:i:s'),
-                    'is_available' => $isAvailable,
-                    'available_tables' => $isAvailable ? 10 : 0, // Set available tables to 10 if available, 0 otherwise
-                    'day_of_week' => $day,
-                ]);
+                foreach ($this->party_sizes as $partySize) {
+                    $timeSlotStart = clone $startTime;
+
+                    $schedulesData[] = [
+                        'restaurant_id' => $this->id,
+                        'start_time' => $timeSlotStart->format('H:i:s'),
+                        'end_time' => $timeSlotStart->addMinutes(30)->format('H:i:s'),
+                        'is_available' => $isAvailable,
+                        'available_tables' => $isAvailable ? self::DEFAULT_TABLES : 0,
+                        'day_of_week' => $dayOfWeek,
+                        'party_size' => $partySize,
+                        'created_at' => now(),
+                        'updated_at' => now(),
+                    ];
+                }
+
+                $startTime->addMinutes(30);
             }
         }
+
+        $this->scheduleTemplates()->insert($schedulesData);
+    }
+
+    public function scheduleTemplates(): HasMany
+    {
+        return $this->hasMany(ScheduleTemplate::class);
     }
 
     /**
@@ -99,6 +133,34 @@ class Restaurant extends Model
     public function schedules(): HasMany
     {
         return $this->hasMany(Schedule::class);
+    }
+
+    public function generateScheduleForDate(Carbon $date): void
+    {
+        $dayOfWeek = strtolower($date->format('l'));
+        $scheduleTemplates = $this->scheduleTemplates()->where('day_of_week', $dayOfWeek)->get();
+        $schedulesData = [];
+
+        foreach ($scheduleTemplates as $scheduleTemplate) {
+            $schedulesData[] = [
+                'restaurant_id' => $this->id,
+                'start_time' => $scheduleTemplate->start_time,
+                'end_time' => $scheduleTemplate->end_time,
+                'is_available' => $scheduleTemplate->is_available,
+                'available_tables' => $scheduleTemplate->available_tables,
+                'day_of_week' => $dayOfWeek,
+                'party_size' => $scheduleTemplate->party_size,
+                'booking_date' => $date->format('Y-m-d'),
+                'prime_time' => $scheduleTemplate->prime_time,
+                'prime_time_fee' => $scheduleTemplate->prime_time_fee,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ];
+        }
+
+        if (! empty($schedulesData)) {
+            Schedule::insert($schedulesData);
+        }
     }
 
     /**
@@ -128,7 +190,7 @@ class Restaurant extends Model
     {
         $currentDay = strtolower(now()->format('l'));
 
-        return $query->where("open_days->{$currentDay}", 'open');
+        return $query->where("open_days->$currentDay", 'open');
 
         // ->whereHas('user', function (Builder $query) {
         //         $query->whereNotNull('secured_at');
@@ -146,7 +208,7 @@ class Restaurant extends Model
     {
         $dayOfWeek = strtolower(Carbon::parse($date)->format('l'));
 
-        return $query->where("open_days->{$dayOfWeek}", 'open');
+        return $query->where("open_days->$dayOfWeek", 'open');
     }
 
     public function getPriceForDate(string $date): float
@@ -154,7 +216,7 @@ class Restaurant extends Model
         // Parse the date
         $date = Carbon::parse($date)->format('Y-m-d');
 
-        // Check if there's a special price for the given date
+        // Check if there's a special price for the given date.
         $specialPrice = $this->specialPricing()->where('date', $date)->first();
 
         return $specialPrice->fee ?? $this->booking_fee;
