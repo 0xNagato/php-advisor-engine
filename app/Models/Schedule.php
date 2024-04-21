@@ -74,6 +74,16 @@ class Schedule extends Model
         return ($fee + $extraFee) * 100;
     }
 
+    public function getConfirmedBookingsCountAttribute(): int
+    {
+        return $this->bookings()->where('status', 'confirmed')->count();
+    }
+
+    public function getRemainingTablesAttribute(): int
+    {
+        return $this->available_tables - $this->confirmed_bookings_count;
+    }
+
     public function scopeAvailable(Builder $query): Builder
     {
         return $query
@@ -100,6 +110,6 @@ class Schedule extends Model
 
     public function getIsBookableAttribute(): bool
     {
-        return $this->is_available && $this->available_tables > 0;
+        return $this->is_available && $this->remaining_tables > 0;
     }
 }
