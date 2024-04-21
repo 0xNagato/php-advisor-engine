@@ -34,13 +34,6 @@
                                 <div>
                                     {{ $schedule->is_bookable ? money($schedule->fee) : money(0)}}
                                 </div>
-                                <div class="text-xs opacity-80">
-                                    @if($schedule->remaining_tables)
-                                        Available: {{ $schedule->remaining_tables }}
-                                    @else
-                                        Fully Booked
-                                    @endif
-                                </div>
                             </button>
                         @endforeach
                     </div>
