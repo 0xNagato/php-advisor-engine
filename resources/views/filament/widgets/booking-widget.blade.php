@@ -18,10 +18,10 @@
 
                     <div class="grid gap-2 grid-cols-3">
                         @foreach ($this->schedulesToday as $schedule)
-                            <div @if ($schedule->is_bookable) wire:click="createBooking({{ $schedule->id }})" @endif
+                            <button @if ($schedule->is_bookable) wire:click="createBooking({{ $schedule->id }})" @endif
                                 @class([
                                     'flex flex-col gap-1 items-center p-3 text-sm font-semibold leading-none rounded-xl',
-                                    'bg-green-700' => $schedule->start_time === $this->data['reservation_time'],
+                                    'outline outline-2 outline-offset-2 outline-green-600' => $schedule->start_time === $this->data['reservation_time'],
                                     'bg-green-600 text-white cursor-pointer hover:bg-green-500' => $schedule->is_bookable,
                                     'bg-gray-100 text-gray-400 border-none' => !$schedule->is_bookable,
                                 ])
@@ -32,7 +32,7 @@
                                 <div>
                                     {{ $schedule->is_bookable ? money($schedule->fee($this->data['guest_count'])) : money(0)}}
                                 </div>
-                            </div>
+                            </button>
                         @endforeach
                     </div>
 
