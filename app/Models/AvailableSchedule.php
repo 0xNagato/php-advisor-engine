@@ -29,8 +29,6 @@ class AvailableSchedule extends Schedule
 
     /**
      * Get the bookings for the available schedule.
-     *
-     * @return HasMany
      */
     public function bookings(): HasMany
     {

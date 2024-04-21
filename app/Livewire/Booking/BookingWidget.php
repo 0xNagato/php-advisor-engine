@@ -125,7 +125,7 @@ class BookingWidget extends Widget implements HasForms
                     ->hidden(function (Get $get) {
                         return $get('radio_date') !== 'select_date';
                     })
-                    ->afterStateUpdated(fn($state, $set) => $set('date', Carbon::parse($state)->format('Y-m-d')))
+                    ->afterStateUpdated(fn ($state, $set) => $set('date', Carbon::parse($state)->format('Y-m-d')))
                     ->prefixIcon('heroicon-m-calendar')
                     ->native(false)
                     ->closeOnDateSelection(),
@@ -217,26 +217,18 @@ class BookingWidget extends Widget implements HasForms
             $currentDate = Carbon::now($userTimezone);
 
             if (($key === 'radio_date' || $key === 'select_date') && $currentDate->isSameDay($requestedDate)) {
-                ds([
-                    'currentDate' => $currentDate->format('Y-m-d'),
-                    'requestedDate' => $requestedDate->format('Y-m-d'),
-                ]);
+
                 $reservationTime = Carbon::createFromFormat('H:i:s', $this->form->getState()['reservation_time'], $userTimezone);
                 $currentTime = Carbon::now($userTimezone);
-
-                ds([
-                    'reservationTime' => $reservationTime->format('Y-m-d H:i:s'),
-                    'currentTime' => $currentTime->format('Y-m-d H:i:s'),
-                ]);
 
                 // Check if the reservation time is before the current time
                 if ($reservationTime->lt($currentTime)) {
                     $this->schedulesToday = new Collection();
                     $this->schedulesThisWeek = new Collection();
+
                     return;
                 }
             }
-
 
             if ($currentDate->isSameDay($requestedDate)) {
                 $reservationTime = Carbon::createFromFormat('H:i:s', $this->form->getState()['reservation_time'], $userTimezone);
@@ -300,7 +292,7 @@ class BookingWidget extends Widget implements HasForms
             ->where('booking_date', $date->format('Y-m-d'))
             ->exists();
 
-        if (!$scheduleExists) {
+        if (! $scheduleExists) {
             $restaurant = Restaurant::find($restaurantId);
             $restaurant?->generateScheduleForDate($date);
         }
@@ -331,7 +323,7 @@ class BookingWidget extends Widget implements HasForms
 
         $bookingAt = Carbon::createFromFormat(
             'Y-m-d H:i:s',
-            $data['date'] . ' ' . $schedule->start_time,
+            $data['date'].' '.$schedule->start_time,
             auth()->user()->timezone
         );
 
