@@ -21,6 +21,7 @@ use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
 use Filament\Forms\Form;
 use Filament\Forms\Get;
+use Filament\Notifications\Notification;
 use Filament\Widgets\Widget;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Carbon;
@@ -124,7 +125,7 @@ class BookingWidget extends Widget implements HasForms
                     ->hidden(function (Get $get) {
                         return $get('radio_date') !== 'select_date';
                     })
-                    ->afterStateUpdated(fn ($state, $set) => $set('date', Carbon::parse($state)->format('Y-m-d')))
+                    ->afterStateUpdated(fn($state, $set) => $set('date', Carbon::parse($state)->format('Y-m-d')))
                     ->prefixIcon('heroicon-m-calendar')
                     ->native(false)
                     ->closeOnDateSelection(),
@@ -277,7 +278,7 @@ class BookingWidget extends Widget implements HasForms
             ->where('booking_date', $date->format('Y-m-d'))
             ->exists();
 
-        if (! $scheduleExists) {
+        if (!$scheduleExists) {
             $restaurant = Restaurant::find($restaurantId);
             $restaurant?->generateScheduleForDate($date);
         }
@@ -288,6 +289,19 @@ class BookingWidget extends Widget implements HasForms
      */
     public function createBooking($scheduleId, ?string $date = null): void
     {
+        $userTimezone = auth()->user()->timezone;
+        $bookingDate = Carbon::createFromFormat('Y-m-d', $this->data['date'], $userTimezone);
+        $currentDate = Carbon::now($userTimezone);
+
+        if ($bookingDate->gt($currentDate->copy()->addMonth())) {
+            Notification::make()
+                ->title('Booking cannot be created more than one month in advance.')
+                ->danger()
+                ->send();
+
+            return;
+        }
+
         $data = $this->form->getState();
         $schedule = Schedule::find($scheduleId);
 
@@ -295,7 +309,7 @@ class BookingWidget extends Widget implements HasForms
 
         $bookingAt = Carbon::createFromFormat(
             'Y-m-d H:i:s',
-            $data['date'].' '.$schedule->start_time,
+            $data['date'] . ' ' . $schedule->start_time,
             auth()->user()->timezone
         );
 

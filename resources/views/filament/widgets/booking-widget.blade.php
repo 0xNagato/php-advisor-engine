@@ -22,6 +22,8 @@
                                 @class([
                                     'flex flex-col gap-1 items-center p-3 text-sm font-semibold leading-none rounded-xl',
                                     'outline outline-2 outline-offset-2 outline-green-600' => $schedule->start_time === $this->data['reservation_time'],
+                                    'outline outline-2 outline-offset-2 outline-indigo-600' => $schedule->start_time === $this->data['reservation_time'] && $schedule->prime_time,
+                                    'bg-indigo-600' => $schedule->prime_time,
                                     'bg-green-600 text-white cursor-pointer hover:bg-green-500' => $schedule->is_bookable,
                                     'bg-gray-100 text-gray-400 border-none' => !$schedule->is_bookable,
                                 ])

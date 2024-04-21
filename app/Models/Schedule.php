@@ -56,15 +56,22 @@ class Schedule extends Model
     {
         $datePart = $this->booking_date->toDateString();
 
-        return Carbon::parse($datePart.' '.$this->start_time)->toDateTimeString();
+        return Carbon::parse($datePart . ' ' . $this->start_time)->toDateTimeString();
     }
 
     public function fee(int $partySize): int
     {
+        if ($this->prime_time) {
+            return 0;
+        }
+
         $extraPeople = max(0, $partySize - 2);
         $extraFee = $extraPeople * 50;
 
-        return ($this->restaurant->booking_fee + $extraFee) * 100;
+        $specialPrice = $this->restaurant->specialPricing()->where('date', $this->booking_date)->first();
+        $fee = $specialPrice->fee ?? $this->restaurant->booking_fee;
+
+        return ($fee + $extraFee) * 100;
     }
 
     public function scopeAvailable(Builder $query): Builder
