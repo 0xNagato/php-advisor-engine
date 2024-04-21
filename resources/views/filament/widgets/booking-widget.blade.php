@@ -11,53 +11,67 @@
         {{--        @endenv--}}
         {{ $this->form }}
 
-        @if ($this->schedulesToday->count() || $this->schedulesThisWeek->count())
-            <div class="flex flex-col bg-white border divide-y rounded-lg shadow">
+        <div class="flex flex-col gap-2">
+            @if ($this->schedulesToday->count() || $this->schedulesThisWeek->count())
+
                 @if ($this->schedulesToday->count())
-                    <div class="p-4">
-                        <div class="grid gap-2 grid-cols-1">
-                            @foreach ($this->schedulesToday as $schedule)
-                                <div @if ($schedule->is_bookable) wire:click="createBooking({{ $schedule->id }})" @endif
-                                class="flex gap-2 items-center px-3 py-3 text-sm font-bold leading-none rounded-full {{ $schedule->is_bookable ? 'bg-green-600 text-white cursor-pointer hover:bg-green-500' : 'bg-gray-100 text-gray-400' }}">
-                                    <div class="flex-grow">
-                                        {{ formatDateFromString($this->data['date']) }}
-                                        at
-                                        <span class="underline">{{ $schedule->formatted_start_time }}</span>
-                                    </div>
-                                    <div
-                                        class="rounded-full {{ $schedule->is_bookable ? 'bg-green-500' : 'bg-gray-100'  }} p-1.5 -m-1.5">
-                                        {{ $schedule->is_bookable ? money($schedule->fee($this->data['guest_count'])) : money(0)}}
-                                    </div>
+
+                    <div class="grid gap-2 grid-cols-3">
+                        @foreach ($this->schedulesToday as $schedule)
+                            <div @if ($schedule->is_bookable) wire:click="createBooking({{ $schedule->id }})" @endif
+                                @class([
+                                    'flex flex-col gap-1 items-center p-3 border-4 border-green-600 hover:border-green-500 text-sm font-semibold leading-none rounded-xl',
+                                    'border-yellow-300' => $schedule->start_time === $this->data['reservation_time'],
+                                    'bg-green-600 text-white cursor-pointer hover:bg-green-500' => $schedule->is_bookable,
+                                    'bg-gray-100 text-gray-400 border-none' => !$schedule->is_bookable,
+                                ])
+                            >
+                                <div class="text-center text-lg">
+                                    {{ $schedule->formatted_start_time }}
                                 </div>
-                            @endforeach
-                        </div>
+                                <div>
+                                    {{ $schedule->is_bookable ? money($schedule->fee($this->data['guest_count'])) : money(0)}}
+                                </div>
+                            </div>
+                        @endforeach
                     </div>
+
                 @endif
 
                 @if ($this->schedulesThisWeek->count())
-                    <div class="p-4">
-                        <div class="grid gap-2 grid-cols-1">
-                            @foreach ($this->schedulesThisWeek as $schedule)
-                                <div
-                                    @if ($schedule->is_bookable) wire:click="createBooking({{ $schedule->id }}, '{{ $schedule->booking_date->format('Y-m-d') }}')"
-                                    @endif
-                                    class="flex gap-2 items-center px-3 py-3 text-sm font-bold leading-none rounded-full {{ $schedule->is_bookable ? 'bg-green-600 text-white cursor-pointer hover:bg-green-500' : 'bg-gray-100 text-gray-400' }}">
-                                    <div class="flex-grow">
-                                        {{ $schedule->booking_date->format('D, M jS') }}
-                                        at
-                                        <span class="underline">{{ $schedule->formatted_start_time }}</span>
-                                    </div>
-                                    <div
-                                        class="rounded-full {{ $schedule->is_bookable ? 'bg-green-500' : 'bg-gray-100'  }} p-1.5 -m-1.5">
-                                        {{ $schedule->is_bookable ? money($schedule->fee($this->data['guest_count'])) : money(0)}}
-                                    </div>
-                                </div>
-                            @endforeach
-                        </div>
+                    <div class="font-bold text-sm text-center uppercase mt-2">
+                        Next {{ self::AVAILABILITY_DAYS }} Days Availability
                     </div>
+                    <div class="grid gap-2 grid-cols-3">
+                        @foreach ($this->schedulesThisWeek as $schedule)
+                            <div
+                                @if ($schedule->is_bookable)
+                                    wire:click="createBooking({{ $schedule->id }}, '{{ $schedule->booking_date->format('Y-m-d') }}')"
+                                @endif
+                                @class([
+                                    'flex flex-col gap-1 items-center px-3 py-3 text-sm font-semibold leading-none rounded-xl',
+                                    'bg-green-600 text-white cursor-pointer hover:bg-green-500' => $schedule->is_bookable,
+                                    'bg-gray-100 text-gray-400' => !$schedule->is_bookable,
+                                ])
+                            >
+                                <div class="text-xs text-center">
+                                    {{ $schedule->booking_date->format('D, M jS') }}
+                                </div>
+                                <div class="text-center text-lg">
+                                    {{ $schedule->formatted_start_time }}
+                                </div>
+                                <div>
+                                    {{ $schedule->is_bookable ? money($schedule->fee($this->data['guest_count'])) : money(0)}}
+                                </div>
+                            </div>
+                        @endforeach
+                    </div>
+
                 @endif
-            </div>
-        @endif
+
+            @endif
+        </div>
+
     @endif
 
 

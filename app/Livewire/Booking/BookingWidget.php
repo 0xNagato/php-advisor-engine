@@ -149,8 +149,10 @@ class BookingWidget extends Widget implements HasForms
                     ->options(function (Get $get) {
                         return $this->getReservationTimeOptions($get('date'));
                     })
-                    ->disableOptionWhen(function ($value) {
-                        return $value < now(auth()->user()->timezone)->format('H:i:s');
+                    ->disableOptionWhen(function (Get $get, $value) {
+                        $isCurrentDay = $get('date') === now(auth()->user()->timezone)->format('Y-m-d');
+
+                        return $isCurrentDay && $value < now(auth()->user()->timezone)->format('H:i:s');
                     })
                     ->placeholder('Select Time')
                     ->hiddenLabel()
@@ -277,9 +279,7 @@ class BookingWidget extends Widget implements HasForms
 
         if (! $scheduleExists) {
             $restaurant = Restaurant::find($restaurantId);
-            if ($restaurant) {
-                $restaurant->generateScheduleForDate($date);
-            }
+            $restaurant?->generateScheduleForDate($date);
         }
     }
 
