@@ -28,7 +28,7 @@ class ConciergeLeaderboard extends BaseWidget
         $startDate = $this->filters['startDate'] ?? now()->subDays(30);
         $endDate = $this->filters['endDate'] ?? now();
 
-        $query = Earning::select('earnings.user_id', 'concierges.id as concierge_id', DB::raw('SUM(amount) as total_earned'), DB::raw("CONCAT(users.first_name, ' ', users.last_name) as user_name"))
+        $query = Earning::confirmed()->select('earnings.user_id', 'concierges.id as concierge_id', DB::raw('SUM(amount) as total_earned'), DB::raw("CONCAT(users.first_name, ' ', users.last_name) as user_name"))
             ->join('users', 'users.id', '=', 'earnings.user_id')
             ->join('concierges', 'concierges.user_id', '=', 'earnings.user_id')
             ->whereBetween('earnings.created_at', [$startDate, $endDate])
@@ -41,7 +41,7 @@ class ConciergeLeaderboard extends BaseWidget
             ->recordUrl(function (Model $record) {
                 $record = Concierge::find($record->concierge_id);
 
-                if (! $record) {
+                if (!$record) {
                     return null;
                 }
 

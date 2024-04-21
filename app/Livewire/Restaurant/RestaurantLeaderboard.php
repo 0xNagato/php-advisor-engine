@@ -30,7 +30,7 @@ class RestaurantLeaderboard extends BaseWidget
         $startDate = $this->filters['startDate'] ?? now()->subDays(30);
         $endDate = $this->filters['endDate'] ?? now();
 
-        $query = Earning::select('earnings.user_id', 'restaurants.id as restaurant_id', DB::raw('SUM(amount) as total_earned'), 'restaurants.restaurant_name')
+        $query = Earning::confirmed()->select('earnings.user_id', 'restaurants.id as restaurant_id', DB::raw('SUM(amount) as total_earned'), 'restaurants.restaurant_name')
             ->join('users', 'users.id', '=', 'earnings.user_id')
             ->join('restaurants', 'restaurants.user_id', '=', 'earnings.user_id')
             ->whereBetween('earnings.created_at', [$startDate, $endDate])
