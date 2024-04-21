@@ -125,7 +125,7 @@ class BookingWidget extends Widget implements HasForms
                     ->hidden(function (Get $get) {
                         return $get('radio_date') !== 'select_date';
                     })
-                    ->afterStateUpdated(fn($state, $set) => $set('date', Carbon::parse($state)->format('Y-m-d')))
+                    ->afterStateUpdated(fn ($state, $set) => $set('date', Carbon::parse($state)->format('Y-m-d')))
                     ->prefixIcon('heroicon-m-calendar')
                     ->native(false)
                     ->closeOnDateSelection(),
@@ -278,7 +278,7 @@ class BookingWidget extends Widget implements HasForms
             ->where('booking_date', $date->format('Y-m-d'))
             ->exists();
 
-        if (!$scheduleExists) {
+        if (! $scheduleExists) {
             $restaurant = Restaurant::find($restaurantId);
             $restaurant?->generateScheduleForDate($date);
         }
@@ -309,7 +309,7 @@ class BookingWidget extends Widget implements HasForms
 
         $bookingAt = Carbon::createFromFormat(
             'Y-m-d H:i:s',
-            $data['date'] . ' ' . $schedule->start_time,
+            $data['date'].' '.$schedule->start_time,
             auth()->user()->timezone
         );
 

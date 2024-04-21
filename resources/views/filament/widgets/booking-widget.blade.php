@@ -32,7 +32,7 @@
                                     {{ $schedule->formatted_start_time }}
                                 </div>
                                 <div>
-                                    {{ $schedule->is_bookable ? money($schedule->fee($this->data['guest_count'])) : money(0)}}
+                                    {{ $schedule->is_bookable ? money($schedule->fee) : money(0)}}
                                 </div>
                                 <div class="text-xs opacity-80">
                                     @if($schedule->remaining_tables)
@@ -70,7 +70,7 @@
                                     {{ $schedule->formatted_start_time }}
                                 </div>
                                 <div>
-                                    {{ $schedule->is_bookable ? money($schedule->fee($this->data['guest_count'])) : money(0)}}
+                                    {{ $schedule->is_bookable ? money($schedule->fee) : money(0)}}
                                 </div>
                             </div>
                         @endforeach

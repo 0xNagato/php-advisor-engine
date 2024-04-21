@@ -26,8 +26,6 @@ class CreateBookings extends Command
 
     /**
      * Execute the console command.
-     *
-     * @return int
      */
     public function handle(): int
     {
@@ -36,8 +34,9 @@ class CreateBookings extends Command
 
         $schedule = Schedule::find($scheduleId);
 
-        if (!$schedule) {
+        if (! $schedule) {
             $this->error("Schedule with id $scheduleId not found.");
+
             return 1;
         }
 

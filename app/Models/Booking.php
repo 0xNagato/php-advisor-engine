@@ -278,15 +278,7 @@ class Booking extends Model
 
     public function totalFee(): int
     {
-        $bookingFee =
-            $this->schedule->restaurant
-                ->specialPricing()
-                ->where('date', $this->booking_at->format('Y-m-d'))
-                ->first()->fee ?? $this->schedule->restaurant->booking_fee;
-
-        $extraGuestFee = max(0, $this->guest_count - 2) * 50;
-
-        return ($bookingFee + $extraGuestFee) * 100;
+        return $this->schedule->fee;
     }
 
     public function scopeConfirmed($query)
