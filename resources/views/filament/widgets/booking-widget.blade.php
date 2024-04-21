@@ -20,8 +20,8 @@
                         @foreach ($this->schedulesToday as $schedule)
                             <div @if ($schedule->is_bookable) wire:click="createBooking({{ $schedule->id }})" @endif
                                 @class([
-                                    'flex flex-col gap-1 items-center p-3 border-4 border-green-600 hover:border-green-500 text-sm font-semibold leading-none rounded-xl',
-                                    'border-yellow-300' => $schedule->start_time === $this->data['reservation_time'],
+                                    'flex flex-col gap-1 items-center p-3 text-sm font-semibold leading-none rounded-xl',
+                                    'bg-green-700' => $schedule->start_time === $this->data['reservation_time'],
                                     'bg-green-600 text-white cursor-pointer hover:bg-green-500' => $schedule->is_bookable,
                                     'bg-gray-100 text-gray-400 border-none' => !$schedule->is_bookable,
                                 ])
