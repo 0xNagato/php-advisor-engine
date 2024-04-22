@@ -19,7 +19,6 @@ use Filament\Pages\Page;
  */
 class AvailabilityCalendar extends Page
 {
-
     public const int AVAILABILITY_DAYS = 3;
 
     public const int MINUTES_PAST = 30;
@@ -79,7 +78,7 @@ class AvailabilityCalendar extends Page
                 ->hidden(function (Get $get) {
                     return $get('radio_date') !== 'select_date';
                 })
-                ->afterStateUpdated(fn($state, $set) => $set('date', Carbon::parse($state)->format('Y-m-d')))
+                ->afterStateUpdated(fn ($state, $set) => $set('date', Carbon::parse($state)->format('Y-m-d')))
                 ->prefixIcon('heroicon-m-calendar')
                 ->native(false)
                 ->closeOnDateSelection(),
@@ -166,6 +165,7 @@ class AvailabilityCalendar extends Page
                 // Check if the reservation time is before the current time
                 if ($reservationTime->lt($currentTime)) {
                     $this->schedules = null;
+
                     return;
                 }
             }
@@ -220,7 +220,7 @@ class AvailabilityCalendar extends Page
             ->where('booking_date', $date->format('Y-m-d'))
             ->exists();
 
-        if (!$scheduleExists) {
+        if (! $scheduleExists) {
             $restaurant = Restaurant::find($restaurantId);
             $restaurant?->generateScheduleForDate($date);
         }

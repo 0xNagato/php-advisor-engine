@@ -36,7 +36,7 @@
                                 {{ $schedule->is_bookable ? money($schedule->fee) : 'Sold Out' }}
                             </div>
                             <div class="text-center opacity-80" style="font-size: 12px">
-                                @if($schedule->remaining_tables > 0)
+                                @if($schedule->is_bookable && $schedule->remaining_tables > 0)
                                     Avail: {{ $schedule->remaining_tables }}
                                 @endif
                             </div>

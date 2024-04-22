@@ -18,6 +18,10 @@ trait FormatsPhoneNumber
         $phoneUtil = PhoneNumberUtil::getInstance();
 
         try {
+
+            if ($value === null) {
+                return '';
+            }
             $numberProto = $phoneUtil->parse($value, 'US');
 
             // Check if the number is valid
