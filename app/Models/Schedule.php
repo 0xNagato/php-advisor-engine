@@ -56,7 +56,7 @@ class Schedule extends Model
     {
         $datePart = $this->booking_date->toDateString();
 
-        return Carbon::parse($datePart.' '.$this->start_time)->toDateTimeString();
+        return Carbon::parse($datePart . ' ' . $this->start_time)->toDateTimeString();
     }
 
     public function getFeeAttribute(): int
@@ -100,12 +100,12 @@ class Schedule extends Model
 
     public function getFormattedStartTimeAttribute(): string
     {
-        return date('g:i a', strtotime($this->attributes['start_time']));
+        return date('g:ia', strtotime($this->attributes['start_time']));
     }
 
     public function getFormattedEndTimeAttribute(): string
     {
-        return date('g:i a', strtotime($this->attributes['end_time']));
+        return date('g:ia', strtotime($this->attributes['end_time']));
     }
 
     public function getIsBookableAttribute(): bool

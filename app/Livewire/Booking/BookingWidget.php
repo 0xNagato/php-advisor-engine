@@ -27,6 +27,7 @@ use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Carbon;
 use Livewire\Attributes\On;
 use Livewire\Attributes\Session;
+use Livewire\Attributes\Url;
 use Stripe\Exception\ApiErrorException;
 
 /**
@@ -75,6 +76,9 @@ class BookingWidget extends Widget implements HasForms
 
     protected int|string|array $columnSpan = 'full';
 
+    #[Url]
+    public ?string $scheduleId = null;
+
     public static function canView(): bool
     {
         return auth()->user()->hasRole('concierge');
@@ -89,6 +93,19 @@ class BookingWidget extends Widget implements HasForms
 
         $this->schedulesToday = $emptyCollection;
         $this->schedulesThisWeek = $emptyCollection;
+
+        if ($this->scheduleId) {
+            $schedule = Schedule::find($this->scheduleId);
+            $this->form->fill([
+                'date' => $schedule->booking_date->format('Y-m-d'),
+                'guest_count' => $schedule->party_size,
+                'reservation_time' => $schedule->start_time,
+                'restaurant' => $schedule->restaurant_id,
+                'select_date' => 'select_date',
+                'radio_date' => 'select_date',
+            ]);
+            $this->createBooking($this->scheduleId, $schedule->booking_date->format('Y-m-d'));
+        }
     }
 
     public function form(Form $form): Form
@@ -125,7 +142,7 @@ class BookingWidget extends Widget implements HasForms
                     ->hidden(function (Get $get) {
                         return $get('radio_date') !== 'select_date';
                     })
-                    ->afterStateUpdated(fn ($state, $set) => $set('date', Carbon::parse($state)->format('Y-m-d')))
+                    ->afterStateUpdated(fn($state, $set) => $set('date', Carbon::parse($state)->format('Y-m-d')))
                     ->prefixIcon('heroicon-m-calendar')
                     ->native(false)
                     ->closeOnDateSelection(),
@@ -292,7 +309,7 @@ class BookingWidget extends Widget implements HasForms
             ->where('booking_date', $date->format('Y-m-d'))
             ->exists();
 
-        if (! $scheduleExists) {
+        if (!$scheduleExists) {
             $restaurant = Restaurant::find($restaurantId);
             $restaurant?->generateScheduleForDate($date);
         }
@@ -323,7 +340,7 @@ class BookingWidget extends Widget implements HasForms
 
         $bookingAt = Carbon::createFromFormat(
             'Y-m-d H:i:s',
-            $data['date'].' '.$schedule->start_time,
+            $data['date'] . ' ' . $schedule->start_time,
             auth()->user()->timezone
         );
 
