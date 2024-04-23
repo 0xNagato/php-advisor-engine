@@ -17,26 +17,16 @@ class RestaurantSeeder extends Seeder
     public function run(): void
     {
         $restaurantNames = collect([
-            'The Golden Fork',
-            'Mystic Pizza',
-            'The Secret Ingredient',
-            'Harbor Delights',
-            // 'Saffron & Sage',
-            // 'Twilight Tacos',
-            // 'Basil & Barley',
-            // 'The Urban Garden',
-            // 'Velvet Vineyard',
-            // 'Moonlit Meals',
-            // 'Sizzle & Steam',
-            // 'Aqua Essence',
-            // 'The Spice Symphony',
-            // 'Flavors of Fire',
-            // 'Garnish & Glow',
-            // 'Pinnacle Plates',
-            // 'Whispering Bamboo',
-            // 'Epic Eats',
-            // 'Bounty Bistro',
-            // 'Cherry Blossom Cafe',
+            'GEKKO',
+            'Casa Donna',
+            'Papi Steak',
+            'Swan',
+            'KOMODO',
+            'Call Me Gaby',
+            'Sexy Fish',
+            'Standard Hotel Front Line',
+            'RAOs',
+            'Kissaki',
         ]);
 
         $restaurantNames->each(function ($restaurantName) {
@@ -45,7 +35,7 @@ class RestaurantSeeder extends Seeder
 
             $user = User::factory([
                 'first_name' => 'Restaurant',
-                'partner_referral_id' => $partner->id,
+                'partner_referral_id' => $partner?->id,
                 'email' => $email,
             ])
                 ->has(Restaurant::factory([
@@ -56,7 +46,7 @@ class RestaurantSeeder extends Seeder
             $user->assignRole('restaurant');
 
             Referral::create([
-                'referrer_id' => $partner->user->id,
+                'referrer_id' => $partner?->user->id,
                 'user_id' => $user->id,
                 'email' => $email,
                 'secured_at' => now(),
@@ -64,5 +54,7 @@ class RestaurantSeeder extends Seeder
                 'referrer_type' => 'partner',
             ]);
         });
+
+        Restaurant::all()->each(fn (Restaurant $restaurant) => $restaurant->generatePreviousMonthSchedules());
     }
 }

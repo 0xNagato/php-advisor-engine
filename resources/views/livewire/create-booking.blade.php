@@ -36,9 +36,8 @@
                 <div class="flex items-center gap-1 text-xl font-semibold">
                     <div>Time Remaining:</div>
 
-                    <span class="countdown font-mono text-xl">
-                        <span id="minutes" style="--value:5;"></span>:
-                        <span id="seconds" style="--value:00;"></span>
+                    <span id="countdown" class="font-mono text-xl">
+
                     </span>
                 </div>
 
@@ -85,11 +84,13 @@
                                    placeholder="Email Address (optional)">
                         </label>
 
-                        <div id="card-element"
-                             wire:ignore
-                             class="w-full rounded-lg border border-indigo-600 text-sm bg-white px-2 py-3 h-[40px]">
-                            <!-- A Stripe Element will be inserted here. -->
-                        </div>
+                        @if ($booking->prime_time)
+                            <div id="card-element"
+                                 wire:ignore
+                                 class="w-full rounded-lg border border-indigo-600 text-sm bg-white px-2 py-3 h-[40px]">
+                                <!-- A Stripe Element will be inserted here. -->
+                            </div>
+                        @endif
 
                         <div class="flex items-center gap-2">
                             <label class="text-[11px] flex items-center gap-1">
@@ -97,13 +98,6 @@
                                 <span>I agree to receive my reservation confirmation via text message.</span>
                             </label>
                         </div>
-
-                        {{--                        <div class="flex items-center gap-2">--}}
-                        {{--                            <input type="checkbox" wire:model="agreeTerms" class="checkbox checkbox-primary"/>--}}
-                        {{--                            <div class="label-text underline font-semibold" @click="$wire.showModal = true">--}}
-                        {{--                                Accept Terms & Conditions--}}
-                        {{--                            </div>--}}
-                        {{--                        </div>--}}
 
                         <x-filament::button class="w-full" type="submit" color="indigo" size="xl">
                             Complete Reservation
@@ -127,13 +121,6 @@
     <div class="flex items-end justify-center text-sm text-center">
         &copy; {{ date('Y') }} {{ config('app.name', 'PRIMA VIP') }}. All rights reserved.
     </div>
-
-    {{--    <x-mary-modal wire:model="showModal" title="Terms & Conditions" class="backdrop-blur">--}}
-    {{--        @markdown(file_get_contents(resource_path('markdown/terms-and-conditions.md')))--}}
-    {{--        <x-slot:actions>--}}
-    {{--            <x-mary-button label="Close" @click="$wire.showModal = false"/>--}}
-    {{--        </x-slot:actions>--}}
-    {{--    </x-mary-modal>--}}
 </div>
 
 
@@ -143,15 +130,32 @@
 
 @script
 <script>
-    const stripe = Stripe('{{ config('services.stripe.key') }}');
+    let countdownDiv = document.getElementById('countdown');
+    let count = 300; // 5 minutes in seconds
 
-    const elements = stripe.elements();
-    const card = elements.create('card', {
-        disableLink: true,
-        hidePostalCode: true,
-    });
+    setInterval(() => {
+        count--;
+        let minutes = Math.floor(count / 60);
+        let seconds = count % 60;
+        countdownDiv.innerHTML = `${ minutes }:${ seconds.toString().padStart(2, '0') }`;
+        if (count === 0) {
+            clearInterval();
+        }
+    }, 1000);
 
-    card.mount('#card-element');
+    const isPrimeTime = @JS($booking->prime_time);
+
+    if (isPrimeTime) {
+        const stripe = Stripe('{{ config('services.stripe.key') }}');
+
+        const elements = stripe.elements();
+        const card = elements.create('card', {
+            disableLink: true,
+            hidePostalCode: true,
+        });
+
+        card.mount('#card-element');
+    }
 
     const form = document.getElementById('form');
 
@@ -163,18 +167,20 @@
             return;
         }
         e.preventDefault();
-        card.update({disabled: true});
+
         $wire.$set('isLoading', true);
 
-        const {
-            token,
-            error
-        } = await stripe.createToken(card)
+        if (isPrimeTime) {
+            const {
+                token,
+                error
+            } = await stripe.createToken(card)
 
-        if (error) {
-            $wire.$set('isLoading', false);
-            card.update({disabled: false});
-            return alert(error.message);
+            if (error) {
+                $wire.$set('isLoading', false);
+                card.update({disabled: false});
+                return alert(error.message);
+            }
         }
 
         const formData = {
@@ -182,38 +188,10 @@
             last_name: document.querySelector('input[name="last_name"]').value,
             phone: document.querySelector('input[name="phone"]').value,
             email: document.querySelector('input[name="email"]').value,
-            token: token.id
+            token: isPrimeTime ? token.id : null
         }
 
         $wire.$call('completeBooking', formData);
     });
-
-    const minuteElement = document.querySelector('#minutes');
-    const secondElement = document.querySelector('#seconds');
-
-    // Set the initial countdown time (2 minutes = 120 seconds)
-    let countdownTime = 300;
-
-    // Function to update the countdown
-    function updateCountdown() {
-        // Calculate minutes and seconds
-        const minutes = Math.floor(countdownTime / 60);
-        const seconds = countdownTime % 60;
-
-        // Update the --value CSS variable of the minute and second elements
-        minuteElement.style.setProperty('--value', minutes);
-        secondElement.style.setProperty('--value', seconds < 10 ? '0' + seconds : seconds);
-
-        // Decrease the countdown time
-        countdownTime--;
-
-        // If the countdown reaches zero, stop the countdown
-        if (countdownTime < 0) {
-            clearInterval(countdownInterval);
-        }
-    }
-
-    // Start the countdown
-    const countdownInterval = setInterval(updateCountdown, 1000);
 </script>
 @endscript

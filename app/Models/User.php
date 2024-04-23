@@ -2,7 +2,7 @@
 
 namespace App\Models;
 
-use App\Traits\FormatsPhoneNumber;
+use App\Providers\Traits\FormatsPhoneNumber;
 use BezhanSalleh\FilamentShield\Traits\HasPanelShield;
 use Filament\Models\Contracts\FilamentUser;
 use Filament\Models\Contracts\HasAvatar;

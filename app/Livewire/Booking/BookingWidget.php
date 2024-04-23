@@ -419,6 +419,9 @@ class BookingWidget extends Widget implements HasForms
 
     public function resetBooking(): void
     {
+        $this->schedulesThisWeek = new Collection();
+        $this->schedulesToday = new Collection();
+
         $this->booking = null;
         $this->qrCode = null;
         $this->bookingUrl = null;
@@ -426,8 +429,7 @@ class BookingWidget extends Widget implements HasForms
         $this->SMSSent = false;
 
         $this->form->fill();
-        $this->schedulesThisWeek = new Collection([new Schedule()]);
-        $this->schedulesToday = new Collection([new Schedule()]);
+
     }
 
     #[On('sms-sent')]

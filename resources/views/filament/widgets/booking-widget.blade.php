@@ -20,7 +20,7 @@
                         @foreach ($this->schedulesToday as $schedule)
                             <button @if ($schedule->is_bookable) wire:click="createBooking({{ $schedule->id }})" @endif
                                 @class([
-                                    'flex flex-col gap-1 items-center p-3 text-sm font-semibold leading-none rounded-xl',
+                                    'flex flex-col gap-1 items-center p-3 text-sm font-semibold leading-none rounded-xl justify-center',
                                     'outline outline-2 outline-offset-2 outline-green-600' => $schedule->start_time === $this->data['reservation_time'],
                                     'outline outline-2 outline-offset-2 outline-gray-100' => $schedule->start_time === $this->data['reservation_time'] && !$schedule->is_bookable,
                                     'outline outline-2 outline-offset-2 outline-indigo-600' => $schedule->start_time === $this->data['reservation_time'] && $schedule->prime_time,
@@ -32,8 +32,16 @@
                                     {{ $schedule->formatted_start_time }}
                                 </div>
                                 <div>
-                                    {{ $schedule->is_bookable ? money($schedule->fee) : money(0)}}
+                                    {{ $schedule->is_bookable ? money($schedule->fee($data['guest_count'])) : money(0)}}
                                 </div>
+                                @if($schedule->is_bookable && $schedule->remaining_tables <= 5)
+
+                                    <div
+                                        class="bg-red-500 px-1 py-1 shadow-xl text-white top-0 right-4 text-[10px] text-nowrap rounded">
+                                        Last Tables
+                                    </div>
+
+                                @endif
                             </button>
                         @endforeach
                     </div>
@@ -116,8 +124,12 @@
 
             <div x-show="tab === 'collectPayment'" class="mt-6">
                 <!-- @todo Refactor this to a separate component -->
+
                 <div wire:ignore class="flex flex-col items-center gap-3" x-data="{}"
                      x-init="() => {
+                         const isPrimeTime = @JS($booking->prime_time);
+
+
                         function initializeStripe() {
                             if (window.Stripe) {
                                 setupStripe();
@@ -127,31 +139,29 @@
                         }
 
                         function setupStripe() {
-                            const stripe = Stripe('{{ config('services.stripe.key') }}');
-                            const elements = stripe.elements();
-                            const card = elements.create('card', {
-                                disableLink: true,
-                                hidePostalCode: true
-                            });
-                            card.mount('#card-element');
+                            if (isPrimeTime) {
+                                const stripe = Stripe('{{ config('services.stripe.key') }}');
+                                const elements = stripe.elements();
+                                const card = elements.create('card', {
+                                    disableLink: true,
+                                    hidePostalCode: true
+                                });
+                                card.mount('#card-element');
+                            }
 
                             const form = document.getElementById('form');
 
                             form.addEventListener('submit', async (e) => {
-                                //const agreeCheckbox = document.querySelector('input[name=agree]');
-                                //if (!agreeCheckbox.checked) {
-                                //   alert('You must agree to receive your reservation confirmation via text message.');
-                                //  e.preventDefault();
-                                // return;
-                                //}
                                 e.preventDefault();
                                 $wire.$set('isLoading', true);
 
-                                const { token, error } = await stripe.createToken(card);
+                                if (isPrimeTime) {
+                                    const { token, error } = await stripe.createToken(card);
 
-                                if (error) {
-                                    $wire.$set('isLoading', false);
-                                    return;
+                                    if (error) {
+                                        $wire.$set('isLoading', false);
+                                        return;
+                                    }
                                 }
 
                                 const formData = {
@@ -159,7 +169,7 @@
                                     last_name: document.querySelector('input[name=last_name]').value,
                                     phone: document.querySelector('input[name=phone]').value,
                                     email: document.querySelector('input[name=email]').value,
-                                    token: token.id
+                                    token: isPrimeTime ? token.id : ''
                                 }
 
                                 $wire.$call('completeBooking', formData);
@@ -199,17 +209,12 @@
                                        placeholder="Email Address (optional)">
                             </label>
 
-                            <div id="card-element"
-                                 class="w-full rounded-lg border border-gray-400 text-sm bg-white px-2 py-3 h-[40px]">
-                                <!-- A Stripe Element will be inserted here. -->
-                            </div>
-
-                            {{--                            <div class="flex items-center gap-2"> --}}
-                            {{--                                <label class="text-[11px] flex items-center gap-1"> --}}
-                            {{--                                    <x-filament::input.checkbox checked name="agree"/> --}}
-                            {{--                                    <span>I agree to receive my reservation confirmation via text message.</span> --}}
-                            {{--                                </label> --}}
-                            {{--                            </div> --}}
+                            @if($booking->prime_time)
+                                <div id="card-element"
+                                     class="w-full rounded-lg border border-gray-400 text-sm bg-white px-2 py-3 h-[40px]">
+                                    <!-- A Stripe Element will be inserted here. -->
+                                </div>
+                            @endif
 
                             <x-filament::button class="w-full" type="submit" size="xl">
                                 Complete Reservation

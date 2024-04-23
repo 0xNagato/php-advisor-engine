@@ -2,7 +2,6 @@
 
 namespace App\Filament\Resources\RestaurantResource\Pages;
 
-use App\Events\RestaurantCreated;
 use App\Filament\Resources\RestaurantResource;
 use App\Models\Referral;
 use App\Models\User;
@@ -164,7 +163,7 @@ class CreateRestaurant extends CreateRecord
             ],
         ]);
 
-        RestaurantCreated::dispatch($restaurant);
+        // RestaurantCreated::dispatch($restaurant);
 
         return $restaurant;
     }

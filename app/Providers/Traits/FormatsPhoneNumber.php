@@ -1,16 +1,17 @@
 <?php
 
-namespace App\Traits;
+namespace App\Providers\Traits;
 
 use libphonenumber\NumberParseException;
 use libphonenumber\PhoneNumberFormat;
 use libphonenumber\PhoneNumberUtil;
+use Sentry;
 
 trait FormatsPhoneNumber
 {
     public function getLocalFormattedPhoneNumber($value): string
     {
-        return $this->getFormattedPhoneNumber($value, PhoneNumberFormat::NATIONAL);
+        return $this->getFormattedPhoneNumber($value);
     }
 
     public function getFormattedPhoneNumber($value, $format = PhoneNumberFormat::NATIONAL): string
@@ -37,6 +38,8 @@ trait FormatsPhoneNumber
                 return $phoneUtil->format($numberProto, $format);
             }
         } catch (NumberParseException $e) {
+            Sentry::captureException($e);
+
             return $value;
         }
 

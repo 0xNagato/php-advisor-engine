@@ -5,7 +5,7 @@ namespace App\Services;
 use App\Enums\BookingStatus;
 use App\Events\BookingPaid;
 use App\Models\Booking;
-use App\Traits\FormatsPhoneNumber;
+use App\Providers\Traits\FormatsPhoneNumber;
 use Stripe\Charge;
 use Stripe\Customer;
 use Stripe\Exception\ApiErrorException;
@@ -22,21 +22,22 @@ class BookingService
      */
     public function processBooking(Booking $booking, $form): void
     {
-        Stripe::setApiKey(config('services.stripe.secret'));
+        if ($booking->prime_time) {
+            Stripe::setApiKey(config('services.stripe.secret'));
+            $stripeCustomer = Customer::create([
+                'name' => $form['first_name'].' '.$form['last_name'],
+                'phone' => $form['phone'],
+                'email' => $form['email'],
+                'source' => $form['token'],
+            ]);
 
-        $stripeCustomer = Customer::create([
-            'name' => $form['first_name'].' '.$form['last_name'],
-            'phone' => $form['phone'],
-            'email' => $form['email'],
-            'source' => $form['token'],
-        ]);
-
-        $stripeCharge = Charge::create([
-            'amount' => $booking->total_with_tax_in_cents,
-            'currency' => 'usd',
-            'customer' => $stripeCustomer->id,
-            'description' => 'Booking for '.$booking->restaurant->restaurant_name,
-        ]);
+            $stripeCharge = Charge::create([
+                'amount' => $booking->total_with_tax_in_cents,
+                'currency' => 'usd',
+                'customer' => $stripeCustomer->id,
+                'description' => 'Booking for '.$booking->restaurant->restaurant_name,
+            ]);
+        }
 
         $formattedPhone = $this->getInternationalFormattedPhoneNumber($form['phone']);
 
@@ -46,8 +47,8 @@ class BookingService
             'guest_phone' => $formattedPhone,
             'guest_email' => $form['email'],
             'status' => BookingStatus::CONFIRMED,
-            'stripe_charge' => $stripeCharge->toArray(),
-            'stripe_charge_id' => $stripeCharge->id,
+            'stripe_charge' => $booking->prime_time ? $stripeCharge->toArray() : null,
+            'stripe_charge_id' => $booking->prime_time ? $stripeCharge->id : null,
             'confirmed_at' => now(),
         ]);
 

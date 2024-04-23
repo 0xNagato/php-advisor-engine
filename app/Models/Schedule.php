@@ -62,16 +62,31 @@ class Schedule extends Model
     public function getFeeAttribute(): int
     {
         if ($this->prime_time) {
-            return 0;
+            $extraPeople = max(0, $this->party_size - 2);
+            $extraFee = $extraPeople * 50;
+
+            $specialPrice = $this->restaurant->specialPricing()->where('date', $this->booking_date)->first();
+            $fee = $specialPrice->fee ?? $this->restaurant->booking_fee;
+
+            return ($fee + $extraFee) * 100;
         }
 
-        $extraPeople = max(0, $this->party_size - 2);
-        $extraFee = $extraPeople * 50;
+        return 0;
+    }
 
-        $specialPrice = $this->restaurant->specialPricing()->where('date', $this->booking_date)->first();
-        $fee = $specialPrice->fee ?? $this->restaurant->booking_fee;
+    public function fee(int $partySize): int
+    {
+        if ($this->prime_time) {
+            $extraPeople = max(0, $partySize - 2);
+            $extraFee = $extraPeople * 50;
 
-        return ($fee + $extraFee) * 100;
+            $specialPrice = $this->restaurant->specialPricing()->where('date', $this->booking_date)->first();
+            $fee = $specialPrice->fee ?? $this->restaurant->booking_fee;
+
+            return ($fee + $extraFee) * 100;
+        }
+
+        return 0;
     }
 
     public function getConfirmedBookingsCountAttribute(): int
@@ -100,12 +115,12 @@ class Schedule extends Model
 
     public function getFormattedStartTimeAttribute(): string
     {
-        return date('g:ia', strtotime($this->attributes['start_time']));
+        return date('g:ia', strtotime($this->start_time));
     }
 
     public function getFormattedEndTimeAttribute(): string
     {
-        return date('g:ia', strtotime($this->attributes['end_time']));
+        return date('g:ia', strtotime($this->end_time));
     }
 
     public function getIsBookableAttribute(): bool

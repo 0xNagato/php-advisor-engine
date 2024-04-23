@@ -4,7 +4,7 @@ namespace App\Models;
 
 use App\Data\Stripe\StripeChargeData;
 use App\Enums\BookingStatus;
-use App\Traits\FormatsPhoneNumber;
+use App\Providers\Traits\FormatsPhoneNumber;
 use AssertionError;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -278,7 +278,7 @@ class Booking extends Model
 
     public function totalFee(): int
     {
-        return $this->schedule->fee;
+        return $this->schedule->fee($this->guest_count);
     }
 
     public function scopeConfirmed($query)
@@ -321,6 +321,11 @@ class Booking extends Model
     public function getGuestNameAttribute(): string
     {
         return $this->guest_first_name.' '.$this->guest_last_name;
+    }
+
+    public function getPrimeTimeAttribute(): bool
+    {
+        return $this->schedule->prime_time;
     }
 
     public function getPartnerEarningsAttribute()

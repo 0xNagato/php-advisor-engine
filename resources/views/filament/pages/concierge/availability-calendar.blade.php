@@ -18,12 +18,12 @@
                 @endif
                 <div class="col-span-1 text-xs font-semibold">{{ $restaurant['restaurant']->restaurant_name }}</div>
 
-                <div class="col-span-2 grid grid-cols-3 gap-4 mb-2">
+                <div class="col-span-2 grid grid-cols-3 gap-4 mb-3">
 
                     @foreach($restaurant['schedules'] as $schedule)
                         <button @if ($schedule->is_bookable) wire:click="createBooking({{ $schedule->id }})" @endif
                             @class([
-                                'flex flex-col gap-1 items-center p-3 text-sm font-semibold leading-none rounded-xl',
+                                'flex flex-col gap-1 items-center p-3 text-sm font-semibold leading-none rounded-xl justify-center',
                                 'outline outline-2 outline-offset-2 outline-green-600' => $schedule->start_time === $this->data['reservation_time'],
                                 'outline outline-2 outline-offset-2 outline-gray-100' => $schedule->start_time === $this->data['reservation_time'] && !$schedule->is_bookable,
                                 'outline outline-2 outline-offset-2 outline-indigo-600' => $schedule->start_time === $this->data['reservation_time'] && $schedule->prime_time,
@@ -31,15 +31,19 @@
                                 'bg-gray-100 text-gray-400 border-none' => !$schedule->is_bookable,
                             ])
                         >
-
                             <div class="text-sm">
-                                {{ $schedule->is_bookable ? money($schedule->fee) : 'Sold Out' }}
+                                {{ $schedule->is_bookable ? money($schedule->fee($data['guest_count'])) : 'Sold Out' }}
                             </div>
-                            <div class="text-center opacity-80" style="font-size: 12px">
-                                @if($schedule->is_bookable && $schedule->remaining_tables > 0)
-                                    Avail: {{ $schedule->remaining_tables }}
-                                @endif
-                            </div>
+
+                            @if($schedule->is_bookable && $schedule->remaining_tables <= 5)
+
+                                <div
+                                    class="bg-red-500 px-1 py-1 shadow-xl text-white top-0 right-4 text-[10px] text-nowrap rounded">
+                                    Last Tables
+                                </div>
+
+                            @endif
+
                         </button>
                     @endforeach
                 </div>

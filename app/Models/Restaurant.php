@@ -21,7 +21,7 @@ class Restaurant extends Model
 
     public const int DEFAULT_TABLES = 10;
 
-    public const int DEFAULT_START_HOUR = 16; // 4:00 PM
+    public const int DEFAULT_START_HOUR = 11; // 11:00 AM
 
     public const int DEFAULT_END_HOUR = 22; // 10:00 PM
 
@@ -107,6 +107,7 @@ class Restaurant extends Model
                         'start_time' => $timeSlotStart->format('H:i:s'),
                         'end_time' => $timeSlotStart->addMinutes(30)->format('H:i:s'),
                         'is_available' => $isAvailable,
+                        'prime_time' => (bool) $isAvailable,
                         'available_tables' => $isAvailable ? self::DEFAULT_TABLES : 0,
                         'day_of_week' => $dayOfWeek,
                         'party_size' => $partySize,
@@ -120,6 +121,36 @@ class Restaurant extends Model
         }
 
         $this->scheduleTemplates()->insert($schedulesData);
+    }
+
+    public function generatePreviousMonthSchedules(): void
+    {
+        // Get the start and end dates of the previous month
+        $start = now()->subMonth()->startOfMonth();
+        $end = now()->subMonth()->endOfMonth();
+
+        // Loop through each day of the previous month
+        for ($date = $start; $date->lte($end); $date->addDay()) {
+            // Get the schedule templates for that day of the week
+            $dayOfWeek = strtolower($date->format('l'));
+            $scheduleTemplates = $this->scheduleTemplates()->where('day_of_week', $dayOfWeek)->get();
+
+            // For each schedule template, create a new schedule
+            foreach ($scheduleTemplates as $scheduleTemplate) {
+                Schedule::create([
+                    'restaurant_id' => $this->id,
+                    'start_time' => $scheduleTemplate->start_time,
+                    'end_time' => $scheduleTemplate->end_time,
+                    'is_available' => $scheduleTemplate->is_available,
+                    'available_tables' => $scheduleTemplate->available_tables,
+                    'day_of_week' => $dayOfWeek,
+                    'party_size' => $scheduleTemplate->party_size,
+                    'booking_date' => $date->format('Y-m-d'),
+                    'prime_time' => $scheduleTemplate->prime_time,
+                    'prime_time_fee' => $scheduleTemplate->prime_time_fee,
+                ]);
+            }
+        }
     }
 
     public function scheduleTemplates(): HasMany
