@@ -2,7 +2,7 @@
 
 namespace App\Models;
 
-use App\Providers\Traits\FormatsPhoneNumber;
+use App\Traits\FormatsPhoneNumber;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -42,7 +42,7 @@ class Referral extends Model
 
     public function getHasSecuredAttribute(): bool
     {
-        return ! blank($this->secured_at);
+        return !blank($this->secured_at);
     }
 
     public function getLabelAttribute(): string

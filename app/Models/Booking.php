@@ -4,7 +4,7 @@ namespace App\Models;
 
 use App\Data\Stripe\StripeChargeData;
 use App\Enums\BookingStatus;
-use App\Providers\Traits\FormatsPhoneNumber;
+use App\Traits\FormatsPhoneNumber;
 use AssertionError;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -26,7 +26,7 @@ class Booking extends Model
      * @var array<int, string>
      */
     protected $fillable = [
-        'schedule_id',
+        'schedule_template_id',
         'concierge_id',
         'guest_first_name',
         'guest_last_name',
@@ -116,7 +116,6 @@ class Booking extends Model
                 $concierge_referral_level_2_earnings = 0;
                 $restaurant_partner_earnings = 0;
                 $concierge_partner_earnings = 0;
-                $platform_earnings = 0;
 
                 Earning::create([
                     'booking_id' => $booking->id,
@@ -237,7 +236,7 @@ class Booking extends Model
 
                 try {
                     assert(
-                        (int) $totalLocal === (int) $booking->total_fee,
+                        (int)$totalLocal === (int)$booking->total_fee,
                         'The sum of all earnings does not equal the total fee.'
                     );
                     $booking->platform_earnings = $platform;
@@ -288,17 +287,18 @@ class Booking extends Model
 
     public function schedule(): BelongsTo
     {
-        return $this->belongsTo(Schedule::class);
+        return $this->belongsTo(ScheduleWithBooking::class, 'schedule_template_id', 'schedule_template_id')
+            ->whereColumn('booking_at', 'schedule_with_bookings.booking_at');
     }
 
     public function restaurant(): HasOneThrough
     {
         return $this->hasOneThrough(
             Restaurant::class,
-            Schedule::class,
+            ScheduleTemplate::class,
             'id',
             'id',
-            'schedule_id',
+            'schedule_template_id',
             'restaurant_id'
         );
     }
@@ -320,7 +320,7 @@ class Booking extends Model
 
     public function getGuestNameAttribute(): string
     {
-        return $this->guest_first_name.' '.$this->guest_last_name;
+        return $this->guest_first_name . ' ' . $this->guest_last_name;
     }
 
     public function getPrimeTimeAttribute(): bool

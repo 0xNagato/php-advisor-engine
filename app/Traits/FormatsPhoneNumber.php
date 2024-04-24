@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Providers\Traits;
+namespace App\Traits;
 
 use libphonenumber\NumberParseException;
 use libphonenumber\PhoneNumberFormat;
@@ -31,7 +31,7 @@ trait FormatsPhoneNumber
                 return $phoneUtil->format($numberProto, $format);
             }
 
-            $repairedNumber = '+1'.$value;
+            $repairedNumber = '+1' . $value;
             $numberProto = $phoneUtil->parse($repairedNumber, 'US');
 
             if ($phoneUtil->isValidNumber($numberProto)) {

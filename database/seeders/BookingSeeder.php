@@ -8,7 +8,7 @@ use App\Enums\BookingStatus;
 use App\Models\Booking;
 use App\Models\Concierge;
 use App\Models\Restaurant;
-use App\Models\Schedule;
+use App\Models\ScheduleWithBooking;
 use App\Services\SalesTaxService;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Collection;
@@ -23,7 +23,7 @@ class BookingSeeder extends Seeder
 
         foreach ($restaurants as $restaurant) {
             for ($i = 0; $i < $bookingsCount; $i++) {
-                $schedule = Schedule::available()
+                $schedule = ScheduleWithBooking::query()
                     ->where('restaurant_id', $restaurant->id)
                     ->inRandomOrder()
                     ->first();
@@ -33,13 +33,13 @@ class BookingSeeder extends Seeder
         }
     }
 
-    private function createBooking(Schedule $schedule, Collection $concierges): void
+    private function createBooking(ScheduleWithBooking $schedule, Collection $concierges): void
     {
         /**
          * @var Booking $booking
          */
         $booking = Booking::factory()->create([
-            'schedule_id' => $schedule->id,
+            'schedule_template_id' => $schedule->schedule_template_id,
             'concierge_id' => $concierges->random()->id,
             'status' => BookingStatus::CONFIRMED,
             'booking_at' => $schedule->booking_at,

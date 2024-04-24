@@ -13,17 +13,16 @@
 
         <div class="flex flex-col gap-2">
             @if ($this->schedulesToday->count() || $this->schedulesThisWeek->count())
-
                 @if ($this->schedulesToday->count())
 
                     <div class="grid gap-2 grid-cols-3">
                         @foreach ($this->schedulesToday as $schedule)
-                            <button @if ($schedule->is_bookable) wire:click="createBooking({{ $schedule->id }})" @endif
+                            <button
+                                @if ($schedule->is_bookable) wire:click="createBooking({{ $schedule->schedule_template_id }})" @endif
                                 @class([
                                     'flex flex-col gap-1 items-center p-3 text-sm font-semibold leading-none rounded-xl justify-center',
                                     'outline outline-2 outline-offset-2 outline-green-600' => $schedule->start_time === $this->data['reservation_time'],
                                     'outline outline-2 outline-offset-2 outline-gray-100' => $schedule->start_time === $this->data['reservation_time'] && !$schedule->is_bookable,
-                                    'outline outline-2 outline-offset-2 outline-indigo-600' => $schedule->start_time === $this->data['reservation_time'] && $schedule->prime_time,
                                     'bg-green-600 text-white cursor-pointer hover:bg-green-500' => $schedule->is_bookable,
                                     'bg-gray-100 text-gray-400 border-none' => !$schedule->is_bookable,
                                 ])
@@ -32,15 +31,17 @@
                                     {{ $schedule->formatted_start_time }}
                                 </div>
                                 <div>
-                                    {{ $schedule->is_bookable ? money($schedule->fee($data['guest_count'])) : money(0)}}
+                                    @if($schedule->is_bookable && $schedule->prime_time)
+                                        {{ money($schedule->fee($data['guest_count'])) }}
+                                    @elseif($schedule->is_bookable && !$schedule->prime_time)
+                                        No Fee
+                                    @endif
                                 </div>
                                 @if($schedule->is_bookable && $schedule->remaining_tables <= 5)
-
                                     <div
-                                        class="bg-red-500 px-1 py-1 shadow-xl text-white top-0 right-4 text-[10px] text-nowrap rounded">
-                                        Last Tables
+                                        class="bg-red-500 [text-shadow:_0_1px_0_rgb(0_0_0_/_40%)] mt-1 px-2 py-1 border border-red-900 text-white text-[12px] text-nowrap rounded">
+                                        Last Tables ({{ $schedule->remaining_tables }})
                                     </div>
-
                                 @endif
                             </button>
                         @endforeach
@@ -56,7 +57,7 @@
                         @foreach ($this->schedulesThisWeek as $schedule)
                             <div
                                 @if ($schedule->is_bookable)
-                                    wire:click="createBooking({{ $schedule->id }}, '{{ $schedule->booking_date->format('Y-m-d') }}')"
+                                    wire:click="createBooking({{ $schedule->schedule_template_id }}, '{{ $schedule->booking_date->format('Y-m-d') }}')"
                                 @endif
                                 @class([
                                     'flex flex-col gap-1 items-center px-3 py-3 text-sm font-semibold leading-none rounded-xl',
@@ -71,8 +72,18 @@
                                     {{ $schedule->formatted_start_time }}
                                 </div>
                                 <div>
-                                    {{ $schedule->is_bookable ? money($schedule->fee) : money(0)}}
+                                    @if($schedule->is_bookable && $schedule->prime_time)
+                                        {{ money($schedule->fee($data['guest_count'])) }}
+                                    @elseif($schedule->is_bookable && !$schedule->prime_time)
+                                        No Fee
+                                    @endif
                                 </div>
+                                @if($schedule->is_bookable && $schedule->remaining_tables <= 5)
+                                    <div
+                                        class="bg-red-500 [text-shadow:_0_1px_0_rgb(0_0_0_/_40%)] mt-1 px-2 py-1 border border-red-900 text-white text-[12px] text-nowrap rounded">
+                                        Last Tables ({{ $schedule->remaining_tables }})
+                                    </div>
+                                @endif
                             </div>
                         @endforeach
                     </div>
@@ -103,7 +114,7 @@
                         @click="tab = 'collectPayment'"
                         class="flex items-center gap-1 px-4 py-2 text-xs font-semibold bg-gray-100 rounded-lg shadow-lg shadow-gray-400">
                         <x-gmdi-credit-card class="w-6 h-6 font-semibold text-center"/>
-                        <div>Credit Card</div>
+                        <div>Guest Info</div>
                     </button>
                     <button
                         :class="{ 'bg-indigo-600 text-white': tab === 'smsPayment', 'bg-gray-100': tab !== 'smsPayment' }"
@@ -127,9 +138,6 @@
 
                 <div wire:ignore class="flex flex-col items-center gap-3" x-data="{}"
                      x-init="() => {
-                         const isPrimeTime = @JS($booking->prime_time);
-
-
                         function initializeStripe() {
                             if (window.Stripe) {
                                 setupStripe();
@@ -139,15 +147,13 @@
                         }
 
                         function setupStripe() {
-                            if (isPrimeTime) {
-                                const stripe = Stripe('{{ config('services.stripe.key') }}');
-                                const elements = stripe.elements();
-                                const card = elements.create('card', {
-                                    disableLink: true,
-                                    hidePostalCode: true
-                                });
-                                card.mount('#card-element');
-                            }
+                            const stripe = Stripe('{{ config('services.stripe.key') }}');
+                            const elements = stripe.elements();
+                            const card = elements.create('card', {
+                                disableLink: true,
+                                hidePostalCode: true
+                            });
+                            card.mount('#card-element');
 
                             const form = document.getElementById('form');
 
@@ -155,25 +161,28 @@
                                 e.preventDefault();
                                 $wire.$set('isLoading', true);
 
-                                if (isPrimeTime) {
-                                    const { token, error } = await stripe.createToken(card);
 
-                                    if (error) {
-                                        $wire.$set('isLoading', false);
-                                        return;
-                                    }
+                                @if($booking->prime_time)
+                                const { token, error } = await stripe.createToken(card);
+
+                                if (error) {
+                                    $wire.$set('isLoading', false);
+                                    return;
                                 }
+                                @else
+                                var token = {id: '' };
+                                @endif
 
                                 const formData = {
                                     first_name: document.querySelector('input[name=first_name]').value,
                                     last_name: document.querySelector('input[name=last_name]').value,
                                     phone: document.querySelector('input[name=phone]').value,
                                     email: document.querySelector('input[name=email]').value,
-                                    token: isPrimeTime ? token.id : ''
+                                    token: token?.id ?? ''
                                 }
 
                                 $wire.$call('completeBooking', formData);
-                            });
+                            })
 
                         }
 
@@ -209,12 +218,12 @@
                                        placeholder="Email Address (optional)">
                             </label>
 
-                            @if($booking->prime_time)
-                                <div id="card-element"
-                                     class="w-full rounded-lg border border-gray-400 text-sm bg-white px-2 py-3 h-[40px]">
-                                    <!-- A Stripe Element will be inserted here. -->
-                                </div>
-                            @endif
+
+                            <div id="card-element"
+                                 class="w-full rounded-lg border border-gray-400 text-sm bg-white px-2 py-3 h-[40px] {{ !$booking->prime_time ? 'hidden' : ''  }}">
+                                <!-- A Stripe Element will be inserted here. -->
+                            </div>
+
 
                             <x-filament::button class="w-full" type="submit" size="xl">
                                 Complete Reservation
@@ -261,7 +270,7 @@
     @elseif($booking && $booking->status === BookingStatus::CONFIRMED)
         <div class="flex flex-col items-center gap-3" id="form">
             <div class="text-xl font-semibold text-black divider divider-neutral">Reservation Confirmed</div>
-            <p>Thank you for the booking! We are notifying the restaurant now.</p>
+            <p class="text-center">Thank you for the booking!<br>We are notifying the restaurant now.</p>
         </div>
 
         <x-filament::button wire:click="resetBooking" class="w-full bg-[#421fff] h-[48px]" icon="gmdi-restaurant-menu">

@@ -7,9 +7,11 @@ use App\Events\BookingCancelled;
 use App\Events\BookingCreated;
 use App\Models\Booking;
 use App\Models\Restaurant;
-use App\Models\Schedule;
+use App\Models\ScheduleTemplate;
+use App\Models\ScheduleWithBooking;
 use App\Services\BookingService;
 use App\Services\SalesTaxService;
+use App\Traits\HasReservation;
 use AshAllenDesign\ShortURL\Facades\ShortURL;
 use chillerlan\QRCode\QRCode;
 use Exception;
@@ -28,6 +30,7 @@ use Illuminate\Support\Carbon;
 use Livewire\Attributes\On;
 use Livewire\Attributes\Session;
 use Livewire\Attributes\Url;
+use Sentry;
 use Stripe\Exception\ApiErrorException;
 
 /**
@@ -36,6 +39,7 @@ use Stripe\Exception\ApiErrorException;
 class BookingWidget extends Widget implements HasForms
 {
     use InteractsWithForms;
+    use HasReservation;
 
     public const int AVAILABILITY_DAYS = 3;
 
@@ -65,19 +69,22 @@ class BookingWidget extends Widget implements HasForms
     public ?array $data = [];
 
     /**
-     * @var Collection<Schedule>|Collection
+     * @var Collection
      */
     public Collection $schedulesToday;
 
     /**
-     * @var Collection<Schedule>|Collection
+     * @var Collection
      */
     public Collection $schedulesThisWeek;
 
     protected int|string|array $columnSpan = 'full';
 
     #[Url]
-    public ?string $scheduleId = null;
+    public null|string|int $scheduleTemplateId = null;
+
+    #[Url]
+    public null|string $date = null;
 
     public static function canView(): bool
     {
@@ -86,25 +93,28 @@ class BookingWidget extends Widget implements HasForms
 
     public function mount(): void
     {
+        // if ($this->booking) {
+        //     $this->booking = $this->booking->refresh();
+        // }
+
         $this->form->fill();
 
-        /** @var Collection<Schedule> $emptyCollection */
-        $emptyCollection = new Collection();
+        $this->schedulesToday = new Collection();
+        $this->schedulesThisWeek = new Collection();
 
-        $this->schedulesToday = $emptyCollection;
-        $this->schedulesThisWeek = $emptyCollection;
+        if ($this->scheduleTemplateId && $this->date) {
+            $schedule = ScheduleTemplate::find($this->scheduleTemplateId);
 
-        if ($this->scheduleId) {
-            $schedule = Schedule::find($this->scheduleId);
             $this->form->fill([
-                'date' => $schedule->booking_date->format('Y-m-d'),
+                'date' => $this->date,
                 'guest_count' => $schedule->party_size,
                 'reservation_time' => $schedule->start_time,
                 'restaurant' => $schedule->restaurant_id,
-                'select_date' => 'select_date',
-                'radio_date' => 'select_date',
+                'select_date' => now(auth()->user()->timezone)->format('Y-m-d'),
+                'radio_date' => now(auth()->user()->timezone)->format('Y-m-d'),
             ]);
-            $this->createBooking($this->scheduleId, $schedule->booking_date->format('Y-m-d'));
+
+            $this->createBooking($this->scheduleTemplateId, $this->date);
         }
     }
 
@@ -142,7 +152,7 @@ class BookingWidget extends Widget implements HasForms
                     ->hidden(function (Get $get) {
                         return $get('radio_date') !== 'select_date';
                     })
-                    ->afterStateUpdated(fn ($state, $set) => $set('date', Carbon::parse($state)->format('Y-m-d')))
+                    ->afterStateUpdated(fn($state, $set) => $set('date', Carbon::parse($state)->format('Y-m-d')))
                     ->prefixIcon('heroicon-m-calendar')
                     ->native(false)
                     ->closeOnDateSelection(),
@@ -195,27 +205,6 @@ class BookingWidget extends Widget implements HasForms
                 'default' => 2,
             ])
             ->statePath('data');
-    }
-
-    public function getReservationTimeOptions(string $date, $onlyShowFuture = false): array
-    {
-        $userTimezone = auth()->user()->timezone;
-        $currentDate = ($date === Carbon::now($userTimezone)->format('Y-m-d'));
-
-        $currentTime = Carbon::now($userTimezone);
-        $startTime = Carbon::createFromTime(Restaurant::DEFAULT_START_HOUR, 0, 0, $userTimezone);
-        $endTime = Carbon::createFromTime(Restaurant::DEFAULT_END_HOUR, 0, 0, $userTimezone);
-
-        $reservationTimes = [];
-
-        for ($time = $startTime; $time->lte($endTime); $time->addMinutes(30)) {
-            if ($onlyShowFuture && $currentDate && $time->lt($currentTime)) {
-                continue;
-            }
-            $reservationTimes[$time->format('H:i:s')] = $time->format('g:i A');
-        }
-
-        return $reservationTimes;
     }
 
     public function updatedData($data, $key): void
@@ -277,9 +266,7 @@ class BookingWidget extends Widget implements HasForms
                 $guestCount++;
             }
 
-            $this->ensureOrGenerateSchedules($restaurantId, $requestedDate);
-
-            $this->schedulesToday = Schedule::where('restaurant_id', $restaurantId)
+            $this->schedulesToday = ScheduleWithBooking::where('restaurant_id', $restaurantId)
                 ->where('booking_date', $this->form->getState()['date'])
                 ->where('party_size', $guestCount)
                 ->where('start_time', '>=', $reservationTime)
@@ -287,11 +274,7 @@ class BookingWidget extends Widget implements HasForms
                 ->get();
 
             if ($requestedDate->isSameDay($currentDate)) {
-                for ($i = 1; $i <= self::AVAILABILITY_DAYS; $i++) {
-                    $newDate = $requestedDate->copy()->addDays($i);
-                    $this->ensureOrGenerateSchedules($restaurantId, $newDate);
-                }
-                $this->schedulesThisWeek = Schedule::where('restaurant_id', $restaurantId)
+                $this->schedulesThisWeek = ScheduleWithBooking::where('restaurant_id', $restaurantId)
                     ->where('start_time', $this->form->getState()['reservation_time'])
                     ->where('party_size', $guestCount)
                     ->whereDate('booking_date', '>', $currentDate)
@@ -303,22 +286,7 @@ class BookingWidget extends Widget implements HasForms
         }
     }
 
-    public function ensureOrGenerateSchedules(int $restaurantId, Carbon $date): void
-    {
-        $scheduleExists = Schedule::where('restaurant_id', $restaurantId)
-            ->where('booking_date', $date->format('Y-m-d'))
-            ->exists();
-
-        if (! $scheduleExists) {
-            $restaurant = Restaurant::find($restaurantId);
-            $restaurant?->generateScheduleForDate($date);
-        }
-    }
-
-    /**
-     * @throws Exception
-     */
-    public function createBooking($scheduleId, ?string $date = null): void
+    public function createBooking($scheduleTemplateId, ?string $date = null): void
     {
         $userTimezone = auth()->user()->timezone;
         $bookingDate = Carbon::createFromFormat('Y-m-d', $this->data['date'], $userTimezone);
@@ -333,23 +301,20 @@ class BookingWidget extends Widget implements HasForms
             return;
         }
 
-        try {
-            $data = $this->form->getState();
-        } catch (Exception $e) {
+        $data = $this->form->getState();
 
-        }
-        $schedule = Schedule::find($scheduleId);
+        $scheduleTemplate = ScheduleTemplate::find($scheduleTemplateId);
 
         $data['date'] = $date ?? $data['date'];
 
         $bookingAt = Carbon::createFromFormat(
             'Y-m-d H:i:s',
-            $data['date'].' '.$schedule->start_time,
+            $data['date'] . ' ' . $scheduleTemplate->start_time,
             auth()->user()->timezone
         );
 
         $this->booking = Booking::create([
-            'schedule_id' => $scheduleId,
+            'schedule_template_id' => $scheduleTemplateId,
             'guest_count' => $data['guest_count'],
             'concierge_id' => auth()->user()->concierge->id,
             'status' => BookingStatus::PENDING,
@@ -360,6 +325,7 @@ class BookingWidget extends Widget implements HasForms
             'miami',
             $this->booking->total_fee
         );
+
         $totalWithTaxInCents =
             $this->booking->total_fee + $taxData->amountInCents;
 
@@ -370,22 +336,33 @@ class BookingWidget extends Widget implements HasForms
             'total_with_tax_in_cents' => $totalWithTaxInCents,
         ]);
 
-        $shortUrlQr = ShortURL::destinationUrl(
-            route('bookings.create', [
-                'token' => $this->booking->uuid,
-                'r' => 'qr',
-            ])
-        )->make();
+        try {
+            $shortUrlQr = ShortURL::destinationUrl(
+                route('bookings.create', [
+                    'token' => $this->booking->uuid,
+                    'r' => 'qr',
+                ])
+            )->make();
 
-        $shortUrl = ShortURL::destinationUrl(
-            route('bookings.create', [
-                'token' => $this->booking->uuid,
-                'r' => 'sms',
-            ])
-        )->make();
+            $shortUrl = ShortURL::destinationUrl(
+                route('bookings.create', [
+                    'token' => $this->booking->uuid,
+                    'r' => 'sms',
+                ])
+            )->make();
+        } catch (Exception $e) {
+            Sentry::captureException($e);
+
+            $this->booking->delete();
+            Notification::make()
+                ->title('An error occurred while creating the booking.')
+                ->danger()
+                ->send();
+
+            return;
+        }
 
         $this->bookingUrl = $shortUrl->default_short_url;
-
         $this->qrCode = (new QRCode())->render($shortUrlQr->default_short_url);
 
         BookingCreated::dispatch($this->booking);
@@ -411,10 +388,6 @@ class BookingWidget extends Widget implements HasForms
         $this->booking = null;
         $this->qrCode = null;
         $this->bookingUrl = null;
-
-        // $this->form->fill();
-        // $this->schedulesThisWeek = new Collection();
-        // $this->schedulesToday = new Collection();
     }
 
     public function resetBooking(): void

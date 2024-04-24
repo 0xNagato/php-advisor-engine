@@ -3,7 +3,7 @@
 namespace App\Filament\Pages\Concierge;
 
 use App\Models\Restaurant;
-use App\Models\Schedule;
+use App\Traits\HasReservation;
 use Carbon\Carbon;
 use Exception;
 use Filament\Forms\Components\DatePicker;
@@ -19,6 +19,8 @@ use Filament\Pages\Page;
  */
 class AvailabilityCalendar extends Page
 {
+    use HasReservation;
+
     public const int AVAILABILITY_DAYS = 3;
 
     public const int MINUTES_PAST = 30;
@@ -33,7 +35,7 @@ class AvailabilityCalendar extends Page
 
     public ?array $data;
 
-    public ?array $resraurants;
+    public ?array $restaurants;
 
     public function mount(): void
     {
@@ -78,7 +80,7 @@ class AvailabilityCalendar extends Page
                 ->hidden(function (Get $get) {
                     return $get('radio_date') !== 'select_date';
                 })
-                ->afterStateUpdated(fn ($state, $set) => $set('date', Carbon::parse($state)->format('Y-m-d')))
+                ->afterStateUpdated(fn($state, $set) => $set('date', Carbon::parse($state)->format('Y-m-d')))
                 ->prefixIcon('heroicon-m-calendar')
                 ->native(false)
                 ->closeOnDateSelection(),
@@ -121,27 +123,6 @@ class AvailabilityCalendar extends Page
             ->statePath('data');
     }
 
-    public function getReservationTimeOptions(string $date, $onlyShowFuture = false): array
-    {
-        $userTimezone = auth()->user()->timezone;
-        $currentDate = ($date === Carbon::now($userTimezone)->format('Y-m-d'));
-
-        $currentTime = Carbon::now($userTimezone);
-        $startTime = Carbon::createFromTime(Restaurant::DEFAULT_START_HOUR, 0, 0, $userTimezone);
-        $endTime = Carbon::createFromTime(Restaurant::DEFAULT_END_HOUR, 0, 0, $userTimezone);
-
-        $reservationTimes = [];
-
-        for ($time = $startTime; $time->lte($endTime); $time->addMinutes(30)) {
-            if ($onlyShowFuture && $currentDate && $time->lt($currentTime)) {
-                continue;
-            }
-            $reservationTimes[$time->format('H:i:s')] = $time->format('g:i A');
-        }
-
-        return $reservationTimes;
-    }
-
     public function updatedData($data, $key): void
     {
         if ($key === 'radio_date' && $data === 'select_date') {
@@ -156,19 +137,6 @@ class AvailabilityCalendar extends Page
             $userTimezone = auth()->user()->timezone;
             $requestedDate = Carbon::createFromFormat('Y-m-d', $this->data['date'], $userTimezone);
             $currentDate = Carbon::now($userTimezone);
-
-            if (($key === 'radio_date' || $key === 'select_date') && $currentDate->isSameDay($requestedDate)) {
-
-                $reservationTime = Carbon::createFromFormat('H:i:s', $this->form->getState()['reservation_time'], $userTimezone);
-                $currentTime = Carbon::now($userTimezone);
-
-                // Check if the reservation time is before the current time
-                if ($reservationTime->lt($currentTime)) {
-                    $this->schedules = null;
-
-                    return;
-                }
-            }
 
             if ($currentDate->isSameDay($requestedDate)) {
                 $reservationTime = Carbon::createFromFormat('H:i:s', $this->form->getState()['reservation_time'], $userTimezone);
@@ -198,41 +166,28 @@ class AvailabilityCalendar extends Page
                 $guestCount++;
             }
 
-            $restaurants = Restaurant::all();
+            $restaurants = Restaurant::with(['schedules' => function ($query) use ($guestCount, $reservationTime, $endTimeForQuery) {
+                $query->where('booking_date', $this->form->getState()['date'])
+                    ->where('party_size', $guestCount)
+                    ->where('start_time', '>=', $reservationTime)
+                    ->where('start_time', '<=', $endTimeForQuery);
+            }])->get();
 
             foreach ($restaurants as $restaurant) {
-                $this->ensureOrGenerateSchedules($restaurant->id, $requestedDate);
-                $this->resraurants[$restaurant->id]['restaurant'] = $restaurant;
-                $this->resraurants[$restaurant->id]['schedules'] =
-                    Schedule::where('restaurant_id', $restaurant->id)
-                        ->where('booking_date', $this->form->getState()['date'])
-                        ->where('party_size', $guestCount)
-                        ->where('start_time', '>=', $reservationTime)
-                        ->where('start_time', '<=', $endTimeForQuery)
-                        ->get();
+                $this->restaurants[$restaurant->id]['restaurant'] = $restaurant;
+                $this->restaurants[$restaurant->id]['schedules'] = $restaurant->schedules;
             }
-        }
-    }
-
-    public function ensureOrGenerateSchedules(int $restaurantId, Carbon $date): void
-    {
-        $scheduleExists = Schedule::where('restaurant_id', $restaurantId)
-            ->where('booking_date', $date->format('Y-m-d'))
-            ->exists();
-
-        if (! $scheduleExists) {
-            $restaurant = Restaurant::find($restaurantId);
-            $restaurant?->generateScheduleForDate($date);
         }
     }
 
     /**
      * @throws Exception
      */
-    public function createBooking($scheduleId): void
+    public function createBooking($scheduleTemplateId, $date): void
     {
         $this->redirectRoute('filament.admin.pages.concierge.reservation-hub', [
-            'scheduleId' => $scheduleId,
+            'scheduleTemplateId' => $scheduleTemplateId,
+            'date' => $date,
         ]);
     }
 }

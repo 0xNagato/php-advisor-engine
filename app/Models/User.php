@@ -2,7 +2,7 @@
 
 namespace App\Models;
 
-use App\Providers\Traits\FormatsPhoneNumber;
+use App\Traits\FormatsPhoneNumber;
 use BezhanSalleh\FilamentShield\Traits\HasPanelShield;
 use Filament\Models\Contracts\FilamentUser;
 use Filament\Models\Contracts\HasAvatar;
@@ -105,7 +105,7 @@ class User extends Authenticatable implements FilamentUser, HasAvatar
 
     public function getFilamentAvatarUrl(): ?string
     {
-        return ! blank($this->profile_photo_path) ? Storage::url($this->profile_photo_path) : null;
+        return !blank($this->profile_photo_path) ? Storage::url($this->profile_photo_path) : null;
     }
 
     public function routeNotificationForTwilio(): string
@@ -158,7 +158,7 @@ class User extends Authenticatable implements FilamentUser, HasAvatar
 
     public function getHasSecuredAttribute(): bool
     {
-        return ! blank($this->secured_at);
+        return !blank($this->secured_at);
     }
 
     public function getLabelAttribute(): string

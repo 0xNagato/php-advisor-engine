@@ -84,13 +84,12 @@
                                    placeholder="Email Address (optional)">
                         </label>
 
-                        @if ($booking->prime_time)
-                            <div id="card-element"
-                                 wire:ignore
-                                 class="w-full rounded-lg border border-indigo-600 text-sm bg-white px-2 py-3 h-[40px]">
-                                <!-- A Stripe Element will be inserted here. -->
-                            </div>
-                        @endif
+
+                        <div id="card-element"
+                             wire:ignore
+                             class="w-full rounded-lg border border-indigo-600 text-sm bg-white px-2 py-3 h-[40px] {{ !$booking->prime_time ? 'hidden' : ''  }}">
+                            <!-- A Stripe Element will be inserted here. -->
+                        </div>
 
                         <div class="flex items-center gap-2">
                             <label class="text-[11px] flex items-center gap-1">
@@ -143,19 +142,17 @@
         }
     }, 1000);
 
-    const isPrimeTime = @JS($booking->prime_time);
 
-    if (isPrimeTime) {
-        const stripe = Stripe('{{ config('services.stripe.key') }}');
+    const stripe = Stripe('{{ config('services.stripe.key') }}');
 
-        const elements = stripe.elements();
-        const card = elements.create('card', {
-            disableLink: true,
-            hidePostalCode: true,
-        });
+    const elements = stripe.elements();
+    const card = elements.create('card', {
+        disableLink: true,
+        hidePostalCode: true,
+    });
 
-        card.mount('#card-element');
-    }
+    card.mount('#card-element');
+
 
     const form = document.getElementById('form');
 
@@ -170,25 +167,25 @@
 
         $wire.$set('isLoading', true);
 
-        if (isPrimeTime) {
-            const {
-                token,
-                error
-            } = await stripe.createToken(card)
+        @if($booking->prime_time)
+        console.log('prime');
+        const {token, error} = await stripe.createToken(card);
 
-            if (error) {
-                $wire.$set('isLoading', false);
-                card.update({disabled: false});
-                return alert(error.message);
-            }
+        if (error) {
+            $wire.$set('isLoading', false);
+            return;
         }
+        @else
+        console.log('non prime');
+        var token = {id: ''};
+        @endif
 
         const formData = {
             first_name: document.querySelector('input[name="first_name"]').value,
             last_name: document.querySelector('input[name="last_name"]').value,
             phone: document.querySelector('input[name="phone"]').value,
             email: document.querySelector('input[name="email"]').value,
-            token: isPrimeTime ? token.id : null
+            token: token?.id ?? ''
         }
 
         $wire.$call('completeBooking', formData);

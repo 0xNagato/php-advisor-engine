@@ -24,14 +24,14 @@ class RestaurantSeeder extends Seeder
             'KOMODO',
             'Call Me Gaby',
             'Sexy Fish',
-            'Standard Hotel Front Line',
+            'Standard Hotel',
             'RAOs',
             'Kissaki',
         ]);
 
         $restaurantNames->each(function ($restaurantName) {
             $partner = Partner::inRandomOrder()->first();
-            $email = 'restaurant@'.Str::slug($restaurantName).'.com';
+            $email = 'restaurant@' . Str::slug($restaurantName) . '.com';
 
             $user = User::factory([
                 'first_name' => 'Restaurant',
@@ -54,7 +54,5 @@ class RestaurantSeeder extends Seeder
                 'referrer_type' => 'partner',
             ]);
         });
-
-        Restaurant::all()->each(fn (Restaurant $restaurant) => $restaurant->generatePreviousMonthSchedules());
     }
 }
