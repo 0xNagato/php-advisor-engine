@@ -93,16 +93,14 @@ class BookingWidget extends Widget implements HasForms
 
     public function mount(): void
     {
-        // if ($this->booking) {
-        //     $this->booking = $this->booking->refresh();
-        // }
+        $this->booking = $this->booking?->refresh();
 
         $this->form->fill();
 
         $this->schedulesToday = new Collection();
         $this->schedulesThisWeek = new Collection();
 
-        if ($this->scheduleTemplateId && $this->date) {
+        if (!$this->booking && ($this->scheduleTemplateId && $this->date)) {
             $schedule = ScheduleTemplate::find($this->scheduleTemplateId);
 
             $this->form->fill([

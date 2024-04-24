@@ -106,7 +106,6 @@
 
 
         <div x-data="{ tab: 'collectPayment' }" id="tabs">
-
             <div class="flex space-x-4">
                 <div class="flex w-full space-x-4 text-xs">
                     <button
