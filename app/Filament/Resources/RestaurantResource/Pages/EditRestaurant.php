@@ -95,6 +95,10 @@ class EditRestaurant extends EditRecord
                             ->numeric()
                             ->suffix('%')
                             ->required(),
+                        TextInput::make('minimum_spend')
+                            ->label('Minimum Spend')
+                            ->prefix('$')
+                            ->numeric()
                     ]),
                 Section::make('Special Pricing')
                     ->icon('heroicon-m-currency-dollar')
@@ -125,11 +129,11 @@ class EditRestaurant extends EditRecord
             Action::make($this->getRecord()->is_suspended ? 'Restore' : 'Suspend')
                 ->action(function () {
                     $this->getRecord()->update([
-                        'is_suspended' => ! $this->getRecord()->is_suspended,
+                        'is_suspended' => !$this->getRecord()->is_suspended,
                     ]);
                 })
                 ->requiresConfirmation()
-                ->color(fn () => $this->getRecord()->is_suspended ? 'success' : 'danger'),
+                ->color(fn() => $this->getRecord()->is_suspended ? 'success' : 'danger'),
         ];
     }
 }

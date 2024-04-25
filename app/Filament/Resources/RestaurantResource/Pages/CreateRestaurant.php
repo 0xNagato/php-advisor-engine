@@ -117,6 +117,10 @@ class CreateRestaurant extends CreateRecord
                             ->numeric()
                             ->suffix('%')
                             ->required(),
+                        TextInput::make('minimum_spend')
+                            ->label('Minimum Spend')
+                            ->prefix('$')
+                            ->numeric()
                     ]),
             ]);
     }
