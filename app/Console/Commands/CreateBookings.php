@@ -34,7 +34,7 @@ class CreateBookings extends Command
 
         $schedule = ScheduleTemplate::find($scheduleId);
 
-        if (!$schedule) {
+        if (! $schedule) {
             $this->error("Schedule with id $scheduleId not found.");
 
             return 1;

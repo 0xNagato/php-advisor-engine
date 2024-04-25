@@ -33,17 +33,16 @@ class SmsService
         $subject = null,
         $fallbackText = null,
         $mediaItems = [],
-    )
-    {
+    ) {
         $contactPhone = $this->getInternationalFormattedPhoneNumber($contactPhone);
         $phoneUtil = PhoneNumberUtil::getInstance();
-        app(Logger::class)->info('Parsing phone number ' . $contactPhone);
+        app(Logger::class)->info('Parsing phone number '.$contactPhone);
         try {
             $phoneNumber = $phoneUtil->parse($contactPhone);
             $countryCode = $phoneUtil->getRegionCodeForNumber($phoneNumber);
-            
+
             if ($countryCode === 'US' || $countryCode === 'CA') {
-                app(Logger::class)->info('Sending SMS to ' . $contactPhone, [
+                app(Logger::class)->info('Sending SMS to '.$contactPhone, [
                     'countryCode' => $countryCode,
                     'text' => $text,
                     'provider' => 'SIMPLE_TEXTING',
@@ -65,7 +64,7 @@ class SmsService
                 config('twilio-notification-channel.token')
             );
 
-            app(Logger::class)->info('Sending SMS to ' . $contactPhone, [
+            app(Logger::class)->info('Sending SMS to '.$contactPhone, [
                 'countryCode' => $countryCode,
                 'text' => $text,
                 'provider' => 'TWILIO',

@@ -41,7 +41,7 @@ class AppServiceProvider extends ServiceProvider
 
         Filament::registerRenderHook(
             'panels::body.end',
-            static fn(): string => <<<'HTML'
+            static fn (): string => <<<'HTML'
                 <div x-data="" x-init="
                     if (!localStorage.getItem('sidebar_initialized')) {
                         localStorage.setItem('sidebar_initialized', true);
@@ -56,7 +56,7 @@ class AppServiceProvider extends ServiceProvider
          */
         FilamentView::registerRenderHook(
             PanelsRenderHook::HEAD_START,
-            static fn() => new HtmlString("
+            static fn () => new HtmlString("
                 <script>
                 const { userAgent } = window.navigator;
                 if (/PrimaApp/.test(userAgent)) {
@@ -68,12 +68,12 @@ class AppServiceProvider extends ServiceProvider
 
         FilamentView::registerRenderHook(
             PanelsRenderHook::USER_MENU_BEFORE,
-            static fn() => view('filament.admin.logo')
+            static fn () => view('filament.admin.logo')
         );
 
         FilamentView::registerRenderHook(
             PanelsRenderHook::PAGE_END,
-            static fn() => new HtmlString('
+            static fn () => new HtmlString('
             <div class="mb-4 text-xs text-center">
                 &copy; 2024 PRIMA VIP. All rights reserved.
             </div>
@@ -82,7 +82,7 @@ class AppServiceProvider extends ServiceProvider
 
         Filament::registerRenderHook(
             'panels::head.start',
-            static fn(): string => '<meta name="viewport" content="width=device-width, initial-scale=1" />',
+            static fn (): string => '<meta name="viewport" content="width=device-width, initial-scale=1" />',
         );
 
         Filament::registerRenderHook(PanelsRenderHook::HEAD_START, function () {
@@ -105,7 +105,7 @@ class AppServiceProvider extends ServiceProvider
 
         FilamentView::registerRenderHook(
             'panels::head.start',
-            static fn(): string => '
+            static fn (): string => '
             <link rel="preconnect" href="https://fonts.googleapis.com">
             <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
             <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet">',

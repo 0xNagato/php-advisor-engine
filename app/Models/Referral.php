@@ -44,12 +44,12 @@ class Referral extends Model
 
     public function getNameAttribute(): string
     {
-        return $this->first_name . ' ' . $this->last_name;
+        return $this->first_name.' '.$this->last_name;
     }
 
     public function getHasSecuredAttribute(): bool
     {
-        return !blank($this->secured_at);
+        return ! blank($this->secured_at);
     }
 
     public function getLabelAttribute(): string

@@ -17,7 +17,7 @@ use Ysfkaya\FilamentPhoneInput\Forms\PhoneInput;
 
 /**
  * Class EditRestaurant
- * @package App\Filament\Resources\RestaurantResource\Pages
+ *
  * @method Restaurant getRecord()
  */
 class EditRestaurant extends EditRecord
@@ -125,11 +125,11 @@ class EditRestaurant extends EditRecord
             Action::make($this->getRecord()->is_suspended ? 'Restore' : 'Suspend')
                 ->action(function () {
                     $this->getRecord()->update([
-                        'is_suspended' => !$this->getRecord()->is_suspended,
+                        'is_suspended' => ! $this->getRecord()->is_suspended,
                     ]);
                 })
                 ->requiresConfirmation()
-                ->color(fn() => $this->getRecord()->is_suspended ? 'success' : 'danger'),
+                ->color(fn () => $this->getRecord()->is_suspended ? 'success' : 'danger'),
         ];
     }
 }

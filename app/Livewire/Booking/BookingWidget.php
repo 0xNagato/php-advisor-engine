@@ -39,8 +39,8 @@ use Stripe\Exception\ApiErrorException;
  */
 class BookingWidget extends Widget implements HasForms
 {
-    use InteractsWithForms;
     use HasReservation;
+    use InteractsWithForms;
 
     public const int AVAILABILITY_DAYS = 3;
 
@@ -69,14 +69,8 @@ class BookingWidget extends Widget implements HasForms
 
     public ?array $data = [];
 
-    /**
-     * @var Collection
-     */
     public Collection $schedulesToday;
 
-    /**
-     * @var Collection
-     */
     public Collection $schedulesThisWeek;
 
     protected int|string|array $columnSpan = 'full';
@@ -85,13 +79,12 @@ class BookingWidget extends Widget implements HasForms
     public null|string|int $scheduleTemplateId = null;
 
     #[Url]
-    public null|string $date = null;
+    public ?string $date = null;
 
     public static function canView(): bool
     {
         return auth()->user()->hasRole('concierge');
     }
-
 
     public function mount(): void
     {
@@ -102,7 +95,7 @@ class BookingWidget extends Widget implements HasForms
         $this->schedulesToday = new Collection();
         $this->schedulesThisWeek = new Collection();
 
-        if (!$this->booking && $this->scheduleTemplateId && $this->date) {
+        if (! $this->booking && $this->scheduleTemplateId && $this->date) {
             $schedule = ScheduleTemplate::find($this->scheduleTemplateId);
 
             $this->form->fill([
@@ -152,7 +145,7 @@ class BookingWidget extends Widget implements HasForms
                     ->hidden(function (Get $get) {
                         return $get('radio_date') !== 'select_date';
                     })
-                    ->afterStateUpdated(fn($state, $set) => $set('date', Carbon::parse($state)->format('Y-m-d')))
+                    ->afterStateUpdated(fn ($state, $set) => $set('date', Carbon::parse($state)->format('Y-m-d')))
                     ->prefixIcon('heroicon-m-calendar')
                     ->native(false)
                     ->closeOnDateSelection(),
@@ -309,7 +302,7 @@ class BookingWidget extends Widget implements HasForms
 
         $bookingAt = Carbon::createFromFormat(
             'Y-m-d H:i:s',
-            $data['date'] . ' ' . $scheduleTemplate->start_time,
+            $data['date'].' '.$scheduleTemplate->start_time,
             auth()->user()->timezone
         );
 

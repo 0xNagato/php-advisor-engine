@@ -34,9 +34,6 @@ trait HasReservation
     // }
 
     /**
-     * @param Carbon $currentDate
-     * @param false|Carbon $requestedDate
-     * @param mixed $userTimezone
      * @return mixed|string
      */
     public function getReservationTime(Carbon $currentDate, false|Carbon $requestedDate, mixed $userTimezone): mixed
@@ -53,6 +50,7 @@ trait HasReservation
         } else {
             $reservationTime = $this->form->getState()['reservation_time'];
         }
+
         return $reservationTime;
     }
 }

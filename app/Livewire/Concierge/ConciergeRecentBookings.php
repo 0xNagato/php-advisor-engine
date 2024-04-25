@@ -44,7 +44,7 @@ class ConciergeRecentBookings extends BaseWidget
             ->where('concierge_id', $this->concierge->id);
 
         return $table
-            ->recordUrl(fn(Booking $booking) => route('filament.admin.resources.bookings.view', $booking))
+            ->recordUrl(fn (Booking $booking) => route('filament.admin.resources.bookings.view', $booking))
             ->query($query)
             ->searchable(false)
             ->emptyStateIcon('heroicon-o-currency-dollar')
@@ -64,7 +64,7 @@ class ConciergeRecentBookings extends BaseWidget
                     ->alignRight()
                     ->label('Earned')
                     ->money('USD', divideBy: 100)
-                    ->hidden(!auth()->user()?->hasRole('concierge') && !$this->hideConcierge),
+                    ->hidden(! auth()->user()?->hasRole('concierge') && ! $this->hideConcierge),
                 TextColumn::make('charity_earnings')
                     ->alignRight()
                     ->money('USD', divideBy: 100)

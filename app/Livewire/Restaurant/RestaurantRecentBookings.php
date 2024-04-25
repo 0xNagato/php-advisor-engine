@@ -45,9 +45,8 @@ class RestaurantRecentBookings extends BaseWidget
                 $query->where('restaurant_id', $this->restaurant->id);
             });
 
-
         return $table
-            ->recordUrl(fn(Booking $booking) => route('filament.admin.resources.bookings.view', $booking))
+            ->recordUrl(fn (Booking $booking) => route('filament.admin.resources.bookings.view', $booking))
             ->query($query)
             ->searchable(false)
             ->emptyStateIcon('heroicon-o-currency-dollar')

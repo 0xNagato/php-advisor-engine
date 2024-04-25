@@ -158,7 +158,7 @@ class User extends Authenticatable implements FilamentUser, HasAvatar
 
     public function getHasSecuredAttribute(): bool
     {
-        return !blank($this->secured_at);
+        return ! blank($this->secured_at);
     }
 
     public function getLabelAttribute(): string

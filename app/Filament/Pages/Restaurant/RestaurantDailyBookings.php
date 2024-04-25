@@ -56,7 +56,7 @@ class RestaurantDailyBookings extends Page implements HasTable
 
         return $table
             ->query($query)
-            ->recordUrl(fn($record) => ViewBooking::getUrl(['record' => $record]))
+            ->recordUrl(fn ($record) => ViewBooking::getUrl(['record' => $record]))
             ->columns([
                 TextColumn::make('id')
                     ->label('Booking')

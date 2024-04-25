@@ -31,7 +31,7 @@ trait FormatsPhoneNumber
                 return $phoneUtil->format($numberProto, $format);
             }
 
-            $repairedNumber = '+1' . $value;
+            $repairedNumber = '+1'.$value;
             $numberProto = $phoneUtil->parse($repairedNumber, 'US');
 
             if ($phoneUtil->isValidNumber($numberProto)) {
