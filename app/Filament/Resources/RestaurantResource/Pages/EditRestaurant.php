@@ -7,7 +7,6 @@ use Filament\Actions\Action;
 use Filament\Forms\Components\Checkbox;
 use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Section;
-use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Form;
 use Filament\Resources\Pages\EditRecord;
@@ -26,23 +25,6 @@ class EditRestaurant extends EditRecord
 
     public function form(Form $form): Form
     {
-
-        $halfHourSteps = range(720, 1380, 30); // Minutes from 12:00 to 23:30
-        $timeOptions = array_combine(
-            $halfHourSteps,
-            array_map(
-                function ($minutes) {
-                    $hour = floor($minutes / 60);
-                    $minutes = ($minutes % 60);
-                    $suffix = $hour >= 12 ? 'pm' : 'am';
-                    $hour = $hour > 12 ? $hour - 12 : $hour;
-
-                    return sprintf('%d:%02d%s', $hour, $minutes, $suffix);
-                },
-                $halfHourSteps
-            )
-        );
-
         return $form
             ->schema([
                 Section::make('Restaurant Information')
@@ -70,6 +52,7 @@ class EditRestaurant extends EditRecord
                     ]),
 
                 Repeater::make('contacts')
+                    ->columnSpanFull()
                     ->addActionLabel('Add Contact')
                     ->label('Contacts')
                     ->schema([
@@ -127,39 +110,20 @@ class EditRestaurant extends EditRecord
                                     ->required(),
                             ]),
                     ]),
-
-                Section::make('Non Prime Time')
-                    ->icon('heroicon-m-clock')
-                    ->schema([
-                        Repeater::make('non_prime_time')
-                            ->addActionLabel('Add Time Block')
-                            ->label('Non Prime Time')
-                            ->hiddenLabel()
-                            ->schema([
-                                Select::make('time')
-                                    ->label('Time')
-                                    ->placeholder('Select Time')
-                                    ->options($timeOptions)
-                                    ->required(),
-                            ]),
-                    ]),
             ]);
-    }
-
-    public function toggleSuspend(): void
-    {
-        $this->getRecord()->update([
-            'is_suspended' => ! $this->getRecord()->is_suspended,
-        ]);
     }
 
     protected function getHeaderActions(): array
     {
         return [
             Action::make($this->getRecord()->is_suspended ? 'Restore' : 'Suspend')
-                ->action('toggleSuspend')
+                ->action(function () {
+                    $this->getRecord()->update([
+                        'is_suspended' => !$this->getRecord()->is_suspended,
+                    ]);
+                })
                 ->requiresConfirmation()
-                ->color($this->getRecord()->is_suspended ? 'success' : 'danger'),
+                ->color(fn() => $this->getRecord()->is_suspended ? 'success' : 'danger'),
         ];
     }
 }
