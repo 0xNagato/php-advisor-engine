@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\RestaurantResource\Pages;
 
 use App\Filament\Resources\RestaurantResource;
+use App\Models\Restaurant;
 use Filament\Actions\Action;
 use Filament\Forms\Components\Checkbox;
 use Filament\Forms\Components\Repeater;
@@ -14,6 +15,11 @@ use Illuminate\Contracts\Support\Htmlable;
 use libphonenumber\PhoneNumberType;
 use Ysfkaya\FilamentPhoneInput\Forms\PhoneInput;
 
+/**
+ * Class EditRestaurant
+ * @package App\Filament\Resources\RestaurantResource\Pages
+ * @method Restaurant getRecord()
+ */
 class EditRestaurant extends EditRecord
 {
     protected static string $resource = RestaurantResource::class;

@@ -147,7 +147,7 @@ class Restaurant extends Model
     {
         return $query->whereHas('user', function (Builder $query) {
             $query->whereNotNull('secured_at');
-        });
+        })->where('is_suspended', false);
     }
 
     public function specialPricing(): HasMany
