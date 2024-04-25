@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Traits\FormatsPhoneNumber;
 use GuzzleHttp\Exception\GuzzleException;
 use Illuminate\Log\Logger;
 use JsonException;
@@ -13,6 +14,8 @@ use Twilio\Rest\Client;
 
 class SmsService
 {
+    use FormatsPhoneNumber;
+
     protected SimpleTextingAdapter $simpleTextingAdapter;
 
     protected Client $twilioClient;
@@ -30,13 +33,24 @@ class SmsService
         $subject = null,
         $fallbackText = null,
         $mediaItems = [],
-    ) {
+    )
+    {
+        $contactPhone = $this->getInternationalFormattedPhoneNumber($contactPhone);
         $phoneUtil = PhoneNumberUtil::getInstance();
+        app(Logger::class)->info('Parsing phone number ' . $contactPhone);
         try {
             $phoneNumber = $phoneUtil->parse($contactPhone);
+            app(Logger::class)->info('Parsing phone number ' . $contactPhone);
             $countryCode = $phoneUtil->getRegionCodeForNumber($phoneNumber);
 
+
             if ($countryCode === 'US' || $countryCode === 'CA') {
+                app(Logger::class)->info('Sending SMS to ' . $contactPhone, [
+                    'countryCode' => $countryCode,
+                    'text' => $text,
+                    'provider' => 'SIMPLE_TEXTING',
+                ]);
+
                 return $this->simpleTextingAdapter->sendMessage(
                     $contactPhone,
                     $text,
@@ -52,6 +66,12 @@ class SmsService
                 config('twilio-notification-channel.sid'),
                 config('twilio-notification-channel.token')
             );
+
+            app(Logger::class)->info('Sending SMS to ' . $contactPhone, [
+                'countryCode' => $countryCode,
+                'text' => $text,
+                'provider' => 'TWILIO',
+            ]);
 
             return $twilioClient->messages->create(
                 $contactPhone,

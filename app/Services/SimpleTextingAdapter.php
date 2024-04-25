@@ -19,7 +19,7 @@ class SimpleTextingAdapter
         $this->apiKey = config('services.simple_texting.api_key');
         $this->client = new Client([
             'base_uri' => config('services.simple_texting.base_uri'),
-            'timeout' => 5.0,
+            'timeout' => 10.0,
         ]);
     }
 
@@ -30,7 +30,7 @@ class SimpleTextingAdapter
     {
         $response = $this->client->request('GET', 'messages', [
             'headers' => [
-                'Authorization' => 'Bearer '.$this->apiKey,
+                'Authorization' => 'Bearer ' . $this->apiKey,
             ],
             'query' => [
                 'page' => $page,
@@ -58,16 +58,17 @@ class SimpleTextingAdapter
         $subject = null,
         $fallbackText = null,
         $mediaItems = [],
-    ) {
+    )
+    {
         if (RateLimiter::tooManyAttempts('sms', 5)) {
-            info('Rate limited: '.$contactPhone.' - '.$text);
+            info('Rate limited: ' . $contactPhone . ' - ' . $text);
 
             return null;
         }
 
         $response = $this->client->request('POST', 'messages', [
             'headers' => [
-                'Authorization' => 'Bearer '.$this->apiKey,
+                'Authorization' => 'Bearer ' . $this->apiKey,
             ],
             'json' => [
                 'contactPhone' => $contactPhone,
