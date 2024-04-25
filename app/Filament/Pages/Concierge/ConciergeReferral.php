@@ -11,6 +11,7 @@ use Filament\Forms\Components\Actions\Action;
 use Filament\Forms\Components\Tabs;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Form;
+use Filament\Forms\Get;
 use Filament\Notifications\Notification;
 use Filament\Pages\Page;
 use Illuminate\Validation\ValidationException;
@@ -18,8 +19,7 @@ use libphonenumber\PhoneNumberType;
 use Ysfkaya\FilamentPhoneInput\Forms\PhoneInput;
 
 /**
- * @property Form $textForm
- * @property Form $emailForm
+ * @property Form $tabbedForm
  */
 class ConciergeReferral extends Page
 {
@@ -42,8 +42,7 @@ class ConciergeReferral extends Page
 
     public function mount(): void
     {
-        $this->emailForm->fill();
-        $this->textForm->fill();
+        $this->tabbedForm->fill();
     }
 
     public function tabbedForm(Form $form): Form
@@ -53,33 +52,22 @@ class ConciergeReferral extends Page
                 Tabs::make('tabs')
                     ->extraAttributes(['class' => 'single-col-tabs'])
                     ->tabs([
-                        Tabs\Tab::make('Send Email')
-                            ->icon('gmdi-email-o')
-                            ->schema([
-                                TextInput::make('email')
-                                    ->placeholder('Email Address')
-                                    ->unique(User::class, 'email')
-                                    ->type('email')
-                                    ->columnSpan(2)
-                                    ->required()
-                                    ->hiddenLabel(),
-                                Actions::make([
-                                    Action::make('sendEmail')
-                                        ->label('Send Email')
-                                        ->action(function () {
-                                            $this->sendInviteViaEmail();
-                                        }),
-                                ])
-                                    ->fullWidth(),
-                            ])
-                            ->statePath('emailData')
-                            ->columns([
-                                'default' => '1',
-                            ]),
                         Tabs\Tab::make('Send SMS')
                             ->icon('gmdi-phone-android-o')
                             ->schema([
+                                TextInput::make('first_name')
+                                    ->hiddenLabel()
+                                    ->live()
+                                    ->columnSpan(1)
+                                    ->extraAttributes(['class' => 'mr-2'])
+                                    ->placeholder('First Name'),
+                                TextInput::make('last_name')
+                                    ->hiddenLabel()
+                                    ->live()
+                                    ->columnSpan(1)
+                                    ->placeholder('Last Name'),
                                 PhoneInput::make('phone')
+                                    ->live()
                                     ->placeholder('Phone Number')
                                     ->onlyCountries(config('app.countries'))
                                     ->validateFor(
@@ -87,21 +75,64 @@ class ConciergeReferral extends Page
                                         type: PhoneNumberType::MOBILE,
                                         lenient: true,
                                     )
+                                    ->validationMessages([
+                                        'validation.phone' => 'The phone number is invalid.',
+                                    ])
                                     ->columnSpan(2)
-                                    ->required()
                                     ->hiddenLabel(),
                                 Actions::make([
                                     Action::make('sendText')
                                         ->label('Send SMS')
+                                        ->disabled(function (Get $get) {
+                                            return empty($get('phone')) || $get('first_name') === '' || $get('last_name') === '';
+                                        })
                                         ->action(function () {
                                             $this->sendInviteViaText();
                                         }),
-                                ])
+                                ])->columnSpanFull()
                                     ->fullWidth(),
                             ])
                             ->statePath('phoneData')
                             ->columns([
-                                'default' => '1',
+                                'default' => '2',
+                            ]),
+                        Tabs\Tab::make('Send Email')
+                            ->icon('gmdi-email-o')
+                            ->schema([
+                                TextInput::make('first_name')
+                                    ->live()
+                                    ->hiddenLabel()
+                                    ->columnSpan(1)
+                                    ->extraAttributes(['class' => 'mr-2'])
+                                    ->placeholder('First Name'),
+                                TextInput::make('last_name')
+                                    ->live()
+                                    ->hiddenLabel()
+                                    ->columnSpan(1)
+                                    ->placeholder('Last Name'),
+                                TextInput::make('email')
+                                    ->live()
+                                    ->placeholder('Email Address')
+                                    ->unique(User::class, 'email')
+                                    ->type('email')
+                                    ->columnSpan(2)
+                                    ->hiddenLabel(),
+                                Actions::make([
+                                    Action::make('sendEmail')
+                                        ->label('Send Email')
+                                        ->disabled(function (Get $get) {
+                                            return empty($get('email')) || $get('first_name') === '' || $get('last_name') === '';
+                                        })
+                                        ->action(function () {
+                                            $this->sendInviteViaEmail();
+                                        }),
+                                ])
+                                    ->columnSpanFull()
+                                    ->fullWidth(),
+                            ])
+                            ->statePath('emailData')
+                            ->columns([
+                                'default' => '2',
                             ]),
                     ]),
             ]);
@@ -109,16 +140,18 @@ class ConciergeReferral extends Page
 
     public function sendInviteViaEmail(): void
     {
-        $data = $this->emailForm->getState();
+        $data = $this->tabbedForm->getState()['emailData'];
 
         $referral = Referral::create([
             'referrer_id' => auth()->id(),
             'email' => $data['email'],
+            'first_name' => $data['first_name'],
+            'last_name' => $data['last_name'],
             'type' => 'concierge',
             'referrer_type' => strtolower(auth()->user()->main_role),
         ]);
 
-        $this->emailForm->fill();
+        $this->tabbedForm->fill();
 
         ConciergeReferredViaEmail::dispatch($referral);
 
@@ -132,16 +165,19 @@ class ConciergeReferral extends Page
 
     public function sendInviteViaText(): void
     {
-        $data = $this->textForm->getState();
+        ds($this->tabbedForm->getState());
+        $data = $this->tabbedForm->getState()['phoneData'];
 
         $referral = Referral::create([
             'referrer_id' => auth()->id(),
             'phone' => $data['phone'],
+            'first_name' => $data['first_name'],
+            'last_name' => $data['last_name'],
             'type' => 'concierge',
             'referrer_type' => strtolower(auth()->user()->main_role),
         ]);
 
-        $this->textForm->fill();
+        $this->tabbedForm->fill();
 
         ConciergeReferredViaText::dispatch($referral);
 
@@ -153,53 +189,9 @@ class ConciergeReferral extends Page
             ->send();
     }
 
-    public function emailForm(Form $form): Form
-    {
-        return $form
-            ->schema([
-                TextInput::make('email')
-                    ->placeholder('Email Address')
-                    ->unique(User::class, 'email')
-                    ->type('email')
-                    ->columnSpan(2)
-                    ->required()
-                    ->hiddenLabel(),
-            ])
-            ->extraAttributes(['class' => 'inline-form'])
-            ->columns([
-                'default' => 2,
-            ])
-            ->statePath('emailData');
-    }
-
-    public function textForm(Form $form): Form
-    {
-        return $form
-            ->schema([
-                PhoneInput::make('phone')
-                    ->placeholder('Phone Number')
-                    ->onlyCountries(config('app.countries'))
-                    ->validateFor(
-                        country: config('app.countries'),
-                        type: PhoneNumberType::MOBILE,
-                        lenient: true,
-                    )
-                    ->columnSpan(2)
-                    ->required()
-                    ->hiddenLabel(),
-            ])
-            ->extraAttributes(['class' => 'inline-form'])
-            ->columns([
-                'default' => 2,
-            ])
-            ->statePath('phoneData');
-    }
-
     protected function getForms(): array
     {
         return [
-            'emailForm',
-            'textForm',
             'tabbedForm',
         ];
     }

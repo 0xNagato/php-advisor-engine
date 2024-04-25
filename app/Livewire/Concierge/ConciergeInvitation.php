@@ -88,7 +88,7 @@ class ConciergeInvitation extends SimplePage
                 TextInput::make('hotel_name')
                     ->label('Affiliation')
                     ->hiddenLabel()
-                    ->placeholder('Hotel Name or Company Name')
+                    ->placeholder('Hotel Name, Company Name or Your Name')
                     ->columnSpan(2)
                     ->required(),
                 TextInput::make('password')

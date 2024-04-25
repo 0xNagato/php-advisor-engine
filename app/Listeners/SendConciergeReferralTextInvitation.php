@@ -35,7 +35,7 @@ class SendConciergeReferralTextInvitation
 
         app(SmsService::class)->sendMessage(
             $event->referral->phone,
-            "You've been invited to PRIMA by $referrer->name. Please click $shortURL to create your profile and start earning! Welcome aboard!"
+            "Hi {$event->referral->first_name}! You've been invited to join PRIMA VIP by $referrer->name. Please click $shortURL to set up your account now and welcome to the team!  We look forward to working with you!"
         );
     }
 }

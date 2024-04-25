@@ -23,6 +23,8 @@ class Referral extends Model
         'type',
         'referrer_type',
         'local_formatted_phone',
+        'first_name',
+        'last_name',
     ];
 
     public function referrer(): BelongsTo
@@ -38,6 +40,11 @@ class Referral extends Model
     public function routeNotificationForTwilio(): string
     {
         return $this->phone ?? '';
+    }
+
+    public function getNameAttribute(): string
+    {
+        return $this->first_name . ' ' . $this->last_name;
     }
 
     public function getHasSecuredAttribute(): bool
