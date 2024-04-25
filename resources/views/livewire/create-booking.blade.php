@@ -1,7 +1,7 @@
 @php use App\Enums\BookingStatus; @endphp
 <div class="flex flex-col justify-center min-h-screen p-4 antialiased wavy-background h-screen">
     <x-filament-panels::logo/>
-    <div class="flex flex-col items-center pt-2 flex-grow max-w-lg mx-auto">
+    <div class="flex flex-col items-center pt-4 flex-grow max-w-lg mx-auto">
         {{--    <div class="flex flex-col items-center pt-20 sm:pt-0 sm:justify-center flex-grow max-w-lg mx-auto">--}}
         @if($booking->status === BookingStatus::CONFIRMED)
             <div class="flex flex-col items-center gap-3" id="form">
