@@ -4,7 +4,6 @@ namespace App\Listeners;
 
 use App\Events\BookingPaid;
 use Illuminate\Contracts\Queue\ShouldQueue;
-
 use function Spatie\LaravelPdf\Support\pdf;
 
 class GenerateCustomerInvoice implements ShouldQueue
@@ -21,7 +20,7 @@ class GenerateCustomerInvoice implements ShouldQueue
     {
         info('Generating invoice for booking', ['booking_id' => $event->booking->id]);
 
-        $path = config('app.env').'/invoices/prima-invoice-'.$event->booking->id.'.pdf';
+        $path = config('app.env') . '/invoices/prima-invoice-' . $event->booking->id . '.pdf';
 
         pdf()
             ->view('livewire.customer-invoice-download', [
@@ -35,6 +34,6 @@ class GenerateCustomerInvoice implements ShouldQueue
             'invoice_path' => $path,
         ]);
 
-        info('Invoice generated', ['booking_id' => $event->booking->id]);
+        info('Invoice generated', ['booking_id' => $event->booking->id, 'invoice_path' => $path]);
     }
 }
