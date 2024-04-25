@@ -48,7 +48,7 @@ class RestaurantDailyBookings extends Page implements HasTable
     {
         $query = Booking::confirmed()
             ->select('bookings.*', 'earnings.amount as earnings')
-            ->join('schedules', 'bookings.schedule_id', '=', 'schedules.id')
+            ->join('schedules', 'bookings.schedule_template_id', '=', 'schedules.id')
             ->join('earnings', 'bookings.id', '=', 'earnings.booking_id')
             ->where('schedules.restaurant_id', $this->restaurant->id)
             ->whereDate('bookings.booking_at', $this->date)
@@ -56,7 +56,7 @@ class RestaurantDailyBookings extends Page implements HasTable
 
         return $table
             ->query($query)
-            ->recordUrl(fn ($record) => ViewBooking::getUrl(['record' => $record]))
+            ->recordUrl(fn($record) => ViewBooking::getUrl(['record' => $record]))
             ->columns([
                 TextColumn::make('id')
                     ->label('Booking')
