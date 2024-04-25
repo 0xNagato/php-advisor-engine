@@ -14,8 +14,6 @@ class ConciergeRecentBookings extends BaseWidget
 {
     use InteractsWithPageFilters;
 
-    protected static bool $isLazy = true;
-
     protected static ?string $pollingInterval = null;
 
     protected static ?int $sort = 3;
@@ -38,15 +36,15 @@ class ConciergeRecentBookings extends BaseWidget
 
     public function table(Table $table): Table
     {
-        $query = Booking::confirmed()->where('concierge_id', $this->concierge->id);
-
         $startDate = $this->filters['startDate'] ?? now()->subDays(30);
         $endDate = $this->filters['endDate'] ?? now();
 
-        $query = $query->whereBetween('created_at', [$startDate, $endDate])->orderByDesc('created_at');
+        $query = Booking::confirmed()
+            ->whereBetween('created_at', [$startDate, $endDate])->orderByDesc('created_at')
+            ->where('concierge_id', $this->concierge->id);
 
         return $table
-            ->recordUrl(fn (Booking $booking) => route('filament.admin.resources.bookings.view', $booking))
+            ->recordUrl(fn(Booking $booking) => route('filament.admin.resources.bookings.view', $booking))
             ->query($query)
             ->searchable(false)
             ->emptyStateIcon('heroicon-o-currency-dollar')
@@ -65,11 +63,11 @@ class ConciergeRecentBookings extends BaseWidget
                 TextColumn::make('concierge_earnings')
                     ->alignRight()
                     ->label('Earned')
-                    ->currency('USD')
-                    ->hidden((bool) ! auth()->user()?->hasRole('concierge') && ! $this->hideConcierge),
+                    ->money('USD', divideBy: 100)
+                    ->hidden(!auth()->user()?->hasRole('concierge') && !$this->hideConcierge),
                 TextColumn::make('charity_earnings')
                     ->alignRight()
-                    ->currency('USD')
+                    ->money('USD', divideBy: 100)
                     ->toggleable(isToggledHiddenByDefault: true),
             ]);
     }

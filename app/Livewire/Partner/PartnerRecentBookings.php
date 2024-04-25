@@ -14,8 +14,6 @@ class PartnerRecentBookings extends BaseWidget
 {
     use InteractsWithPageFilters;
 
-    protected static bool $isLazy = true;
-
     protected static ?string $pollingInterval = null;
 
     protected static ?int $sort = 3;
@@ -72,7 +70,7 @@ class PartnerRecentBookings extends BaseWidget
                 TextColumn::make('partner_earnings')
                     ->alignRight()
                     ->label('Earned')
-                    ->currency('USD'),
+                    ->money('USD', divideBy: 100),
             ]);
     }
 }

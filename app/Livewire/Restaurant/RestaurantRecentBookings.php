@@ -14,8 +14,6 @@ class RestaurantRecentBookings extends BaseWidget
 {
     use InteractsWithPageFilters;
 
-    protected static bool $isLazy = true;
-
     protected static ?string $pollingInterval = null;
 
     protected static ?int $sort = 3;
@@ -38,17 +36,18 @@ class RestaurantRecentBookings extends BaseWidget
 
     public function table(Table $table): Table
     {
-        $query = Booking::confirmed()->whereHas('schedule', function ($query) {
-            $query->where('restaurant_id', $this->restaurant->id);
-        });
-
         $startDate = $this->filters['startDate'] ?? now()->subDays(30);
         $endDate = $this->filters['endDate'] ?? now();
 
-        $query = $query->whereBetween('created_at', [$startDate, $endDate])->orderByDesc('created_at');
+        $query = Booking::confirmed()
+            ->whereBetween('created_at', [$startDate, $endDate])->orderByDesc('created_at')
+            ->whereHas('schedule', function ($query) {
+                $query->where('restaurant_id', $this->restaurant->id);
+            });
+
 
         return $table
-            ->recordUrl(fn (Booking $booking) => route('filament.admin.resources.bookings.view', $booking))
+            ->recordUrl(fn(Booking $booking) => route('filament.admin.resources.bookings.view', $booking))
             ->query($query)
             ->searchable(false)
             ->emptyStateIcon('heroicon-o-currency-dollar')
@@ -63,11 +62,7 @@ class RestaurantRecentBookings extends BaseWidget
                 TextColumn::make('restaurant_earnings')
                     ->alignRight()
                     ->label('Earned')
-                    ->currency('USD'),
-                TextColumn::make('charity_earnings')
-                    ->alignRight()
-                    ->currency('USD')
-                    ->toggleable(isToggledHiddenByDefault: true),
+                    ->money('USD', divideBy: 100),
             ]);
     }
 }
