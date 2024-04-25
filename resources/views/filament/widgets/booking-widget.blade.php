@@ -1,4 +1,4 @@
-@php use App\Enums\BookingStatus;use Carbon\Carbon; @endphp
+@php use App\Enums\BookingStatus;use App\Livewire\Booking\BookingWidget;use Carbon\Carbon; @endphp
     <!--suppress JSUnresolvedReference, BadExpressionStatementJS -->
 <x-filament-widgets::widget x-data="{}" x-init="() => {
     let script = document.createElement('script');
@@ -262,7 +262,7 @@
                 <livewire:booking.booking-status-widget :booking="$booking"/>
             </div>
         </div>
-
+        
         <x-filament::button wire:click="cancelBooking" class="w-full opacity-50" color="gray">
             Abandon Reservation
         </x-filament::button>

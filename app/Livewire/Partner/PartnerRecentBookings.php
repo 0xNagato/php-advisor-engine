@@ -41,7 +41,7 @@ class PartnerRecentBookings extends BaseWidget
         $startDate = $this->filters['startDate'] ?? now()->subDays(30);
         $endDate = $this->filters['endDate'] ?? now();
 
-        $query = Booking::query()
+        $query = Booking::confirmed()
             ->where(function ($query) {
                 $query->where('partner_concierge_id', $this->partner->id)
                     ->orWhere('partner_restaurant_id', $this->partner->id);
@@ -50,7 +50,7 @@ class PartnerRecentBookings extends BaseWidget
             ->orderByDesc('created_at');
 
         return $table
-            ->recordUrl(fn (Booking $booking) => route('filament.admin.resources.bookings.view', $booking))
+            ->recordUrl(fn(Booking $booking) => route('filament.admin.resources.bookings.view', $booking))
             ->query($query)
             ->searchable(false)
             ->emptyStateIcon('heroicon-o-currency-dollar')

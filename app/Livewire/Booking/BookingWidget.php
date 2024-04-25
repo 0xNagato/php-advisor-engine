@@ -5,6 +5,7 @@ namespace App\Livewire\Booking;
 use App\Enums\BookingStatus;
 use App\Events\BookingCancelled;
 use App\Events\BookingCreated;
+use App\Filament\Pages\Concierge\AvailabilityCalendar;
 use App\Models\Booking;
 use App\Models\Restaurant;
 use App\Models\ScheduleTemplate;
@@ -58,7 +59,7 @@ class BookingWidget extends Widget implements HasForms
     public ?string $bookingUrl;
 
     #[Session]
-    public ?Booking $booking;
+    public ?Booking $booking = null;
 
     public bool $isLoading = false;
 
@@ -91,6 +92,7 @@ class BookingWidget extends Widget implements HasForms
         return auth()->user()->hasRole('concierge');
     }
 
+
     public function mount(): void
     {
         $this->booking = $this->booking?->refresh();
@@ -100,7 +102,7 @@ class BookingWidget extends Widget implements HasForms
         $this->schedulesToday = new Collection();
         $this->schedulesThisWeek = new Collection();
 
-        if (!$this->booking && ($this->scheduleTemplateId && $this->date)) {
+        if (!$this->booking && $this->scheduleTemplateId && $this->date) {
             $schedule = ScheduleTemplate::find($this->scheduleTemplateId);
 
             $this->form->fill([
@@ -386,6 +388,10 @@ class BookingWidget extends Widget implements HasForms
         $this->booking = null;
         $this->qrCode = null;
         $this->bookingUrl = null;
+
+        if ($this->scheduleTemplateId && $this->date) {
+            $this->redirect(AvailabilityCalendar::getUrl());
+        }
     }
 
     public function resetBooking(): void
