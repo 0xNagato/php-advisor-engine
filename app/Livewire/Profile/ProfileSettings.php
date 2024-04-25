@@ -2,12 +2,14 @@
 
 namespace App\Livewire\Profile;
 
+use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
 use Filament\Forms\Form;
 use Filament\Notifications\Notification;
 use Filament\Widgets\Widget;
+use Illuminate\Support\Facades\Storage;
 use libphonenumber\PhoneNumberType;
 use Tapp\FilamentTimezoneField\Forms\Components\TimezoneSelect;
 use Ysfkaya\FilamentPhoneInput\Forms\PhoneInput;
@@ -38,12 +40,14 @@ class ProfileSettings extends Widget implements HasForms
     public function form(Form $form): Form
     {
         return $form->schema([
-            // FileUpload::make('profile_photo_path')
-            //     ->label('Profile Photo')
-            //     ->disk('do')
-            //     ->hidden(function () {
-            //         return ! auth()->user()->hasRole('concierge');
-            //     }),
+            FileUpload::make('profile_photo_path')
+                ->disk('do')
+                ->visibility('public')
+                ->directory('profile-photos')
+                ->moveFiles()
+                ->hidden(function () {
+                    return auth()->user()->hasRole('restaurant');
+                }),
             TextInput::make('first_name')
                 ->required()
                 ->label('First Name'),
@@ -74,9 +78,18 @@ class ProfileSettings extends Widget implements HasForms
 
     public function save(): void
     {
-        $this->validate();
+        $data = $this->form->getState();
 
-        auth()->user()->update($this->data);
+        // Assuming the profile photo is stored as a file
+        $profilePhotoPath = $data['profile_photo_path'];
+
+        // Make the profile photo file public
+        Storage::disk('do')->setVisibility($profilePhotoPath, 'public');
+
+        // Update the user's profile photo file path
+        $data['profile_photo_path'] = $profilePhotoPath;
+
+        auth()->user()->update($data);
 
         Notification::make()
             ->title('Profile updated successfully.')

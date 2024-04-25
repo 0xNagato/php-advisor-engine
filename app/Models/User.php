@@ -14,10 +14,10 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\HasOneThrough;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Spatie\Permission\Models\Role;
 use Spatie\Permission\Traits\HasRoles;
-use Storage;
 
 class User extends Authenticatable implements FilamentUser, HasAvatar
 {
@@ -105,7 +105,7 @@ class User extends Authenticatable implements FilamentUser, HasAvatar
 
     public function getFilamentAvatarUrl(): ?string
     {
-        return !blank($this->profile_photo_path) ? Storage::url($this->profile_photo_path) : null;
+        return $this->profile_photo_path ? Storage::url($this->profile_photo_path) : null;
     }
 
     public function routeNotificationForTwilio(): string
