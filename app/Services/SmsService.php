@@ -40,10 +40,8 @@ class SmsService
         app(Logger::class)->info('Parsing phone number ' . $contactPhone);
         try {
             $phoneNumber = $phoneUtil->parse($contactPhone);
-            app(Logger::class)->info('Parsing phone number ' . $contactPhone);
             $countryCode = $phoneUtil->getRegionCodeForNumber($phoneNumber);
-
-
+            
             if ($countryCode === 'US' || $countryCode === 'CA') {
                 app(Logger::class)->info('Sending SMS to ' . $contactPhone, [
                     'countryCode' => $countryCode,
