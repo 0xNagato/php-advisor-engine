@@ -166,7 +166,7 @@ class AvailabilityCalendar extends Page
                 $guestCount++;
             }
 
-            $restaurants = Restaurant::with(['schedules' => function ($query) use ($guestCount, $reservationTime, $endTimeForQuery) {
+            $restaurants = Restaurant::available()->with(['schedules' => function ($query) use ($guestCount, $reservationTime, $endTimeForQuery) {
                 $query->where('booking_date', $this->form->getState()['date'])
                     ->where('party_size', $guestCount)
                     ->where('start_time', '>=', $reservationTime)

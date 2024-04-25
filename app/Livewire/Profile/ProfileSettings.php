@@ -42,6 +42,7 @@ class ProfileSettings extends Widget implements HasForms
         return $form->schema([
             FileUpload::make('profile_photo_path')
                 ->disk('do')
+                ->avatar()
                 ->visibility('public')
                 ->directory('profile-photos')
                 ->moveFiles()
