@@ -165,7 +165,6 @@ class ConciergeReferral extends Page
 
     public function sendInviteViaText(): void
     {
-        ds($this->tabbedForm->getState());
         $data = $this->tabbedForm->getState()['phoneData'];
 
         $referral = Referral::create([
