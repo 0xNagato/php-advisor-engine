@@ -27,24 +27,25 @@ class AdminRecentBookings extends BaseWidget
 
     public function table(Table $table): Table
     {
-        $query = Booking::confirmed();
-
         $startDate = $this->filters['startDate'] ?? now()->subDays(30);
         $endDate = $this->filters['endDate'] ?? now();
 
-        $query = $query->whereBetween('created_at', [$startDate, $endDate])->orderByDesc('created_at');
+        $query = Booking::confirmed()
+            ->whereBetween('created_at', [$startDate, $endDate])->orderByDesc('created_at')
+            ->limit(10);
 
         return $table
-            ->recordUrl(fn (Booking $booking) => route('filament.admin.resources.bookings.view', $booking))
+            ->recordUrl(fn(Booking $booking) => route('filament.admin.resources.bookings.view', $booking))
             ->query($query)
+            ->paginated(false)
             ->searchable(false)
             ->emptyStateIcon('heroicon-o-currency-dollar')
             ->emptyStateHeading('Earnings will show here when bookings begin!')
             ->columns([
-                TextColumn::make('guest_name')
-                    ->label('Guest')
-                    ->toggleable(isToggledHiddenByDefault: true)
-                    ->searchable(),
+                // TextColumn::make('guest_name')
+                //     ->label('Guest')
+                //     ->toggleable(isToggledHiddenByDefault: true)
+                //     ->searchable(),
                 TextColumn::make('schedule.restaurant.restaurant_name')
                     ->label('Restaurant')
                     ->searchable(),
@@ -54,15 +55,7 @@ class AdminRecentBookings extends BaseWidget
                 TextColumn::make('platform_earnings')
                     ->alignRight()
                     ->label('Earned')
-                    ->currency('USD'),
-                TextColumn::make('total_fee')
-                    ->alignRight()
-                    ->currency('USD')
-                    ->toggleable(isToggledHiddenByDefault: true),
-                TextColumn::make('charity_earnings')
-                    ->alignRight()
-                    ->currency('USD')
-                    ->toggleable(isToggledHiddenByDefault: true),
+                    ->money('USD', divideBy: 100),
 
             ]);
     }
