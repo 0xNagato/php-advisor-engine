@@ -13,7 +13,7 @@ return new class extends Migration
         DB::statement("
             CREATE OR REPLACE VIEW schedule_with_bookings AS
             WITH RECURSIVE date_range AS (
-                SELECT CURDATE() AS date
+            SELECT CURDATE() - INTERVAL 1 DAY AS date
                 UNION ALL
                 SELECT DATE_ADD(date, INTERVAL 1 DAY)
                 FROM date_range

@@ -25,6 +25,7 @@ class BookingSeeder extends Seeder
             for ($i = 0; $i < $bookingsCount; $i++) {
                 $schedule = ScheduleWithBooking::query()
                     ->where('restaurant_id', $restaurant->id)
+                    ->where('booking_date', now()->subDay()->format('Y-m-d'))
                     ->inRandomOrder()
                     ->first();
 

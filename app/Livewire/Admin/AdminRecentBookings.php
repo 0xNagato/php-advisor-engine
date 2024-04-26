@@ -12,8 +12,6 @@ class AdminRecentBookings extends BaseWidget
 {
     use InteractsWithPageFilters;
 
-    protected static bool $isLazy = true;
-
     protected static ?string $pollingInterval = null;
 
     protected static ?int $sort = 3;
@@ -35,7 +33,7 @@ class AdminRecentBookings extends BaseWidget
             ->limit(10);
 
         return $table
-            ->recordUrl(fn(Booking $booking) => route('filament.admin.resources.bookings.view', $booking))
+            ->recordUrl(fn (Booking $booking) => route('filament.admin.resources.bookings.view', $booking))
             ->query($query)
             ->paginated(false)
             ->searchable(false)

@@ -237,7 +237,7 @@ class Booking extends Model
 
                 try {
                     assert(
-                        (int)$totalLocal === (int)$booking->total_fee,
+                        (int) $totalLocal === (int) $booking->total_fee,
                         'The sum of all earnings does not equal the total fee.'
                     );
                     $booking->platform_earnings = $platform;
@@ -321,7 +321,7 @@ class Booking extends Model
 
     public function getGuestNameAttribute(): string
     {
-        return $this->guest_first_name . ' ' . $this->guest_last_name;
+        return $this->guest_first_name.' '.$this->guest_last_name;
     }
 
     public function getPrimeTimeAttribute(): bool
