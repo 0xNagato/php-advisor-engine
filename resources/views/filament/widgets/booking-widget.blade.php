@@ -95,46 +95,36 @@
 
     @if ($booking && (BookingStatus::PENDING === $booking->status || BookingStatus::GUEST_ON_PAGE === $booking->status))
 
-        @env('local')
-            <x-filament::button tag="a" :href="$bookingUrl" target="_new">
-                Customer Booking Link
-            </x-filament::button>
-        @endenv
-
-
         <div x-data="{ tab: '{{ $booking->prime_time ? 'smsPayment' : 'collectPayment' }}' }" id="tabs">
-            <div class="flex space-x-4">
-                <div class="flex w-full space-x-4 text-xs">
-                    @if($booking->prime_time)
+            @if($booking->prime_time)
+                <div class="flex space-x-4">
+                    <div class="flex w-full space-x-4 text-xs">
                         <button
                             :class="{ 'bg-indigo-600 text-white': tab === 'smsPayment', 'bg-gray-100': tab !== 'smsPayment' }"
                             @click="tab = 'smsPayment'"
-                            class="flex items-center gap-1 px-4 py-2 font-semibold bg-gray-100 rounded-lg shadow-lg shadow-gray-400">
+                            class="flex items-center gap-1 px-4 py-2 text-xs font-semibold bg-gray-100 rounded-lg shadow-lg shadow-gray-400">
                             <x-gmdi-phone-android-r class="w-6 h-6 font-semibold"/>
                             <div>SMS</div>
                         </button>
                         <button
                             :class="{ 'bg-indigo-600 text-white': tab === 'qrCode', 'bg-gray-100': tab !== 'qrCode' }"
                             @click="tab = 'qrCode'"
-                            class="flex items-center gap-1 px-4 py-2 font-semibold bg-gray-100 rounded-lg shadow-lg shadow-gray-400">
+                            class="flex items-center gap-1 px-4 py-2 text-xs font-semibold bg-gray-100 rounded-lg shadow-lg shadow-gray-400">
                             <x-gmdi-qr-code class="w-6 h-6 font-semibold"/>
                             <div>QR Code</div>
                         </button>
-                    @endunless
-                    <button
-                        :class="{ 'bg-indigo-600 text-white': tab === 'collectPayment', 'bg-gray-100': tab !== 'collectPayment' }"
-                        @click="tab = 'collectPayment'"
-                        class="flex items-center gap-1 px-4 py-2 font-semibold bg-gray-100 rounded-lg shadow-lg shadow-gray-400">
-                        @if($booking->prime_time)
+                        <button
+                            :class="{ 'bg-indigo-600 text-white': tab === 'collectPayment', 'bg-gray-100': tab !== 'collectPayment' }"
+                            @click="tab = 'collectPayment'"
+                            class="flex items-center gap-1 px-4 py-2 text-xs font-semibold bg-gray-100 rounded-lg shadow-lg shadow-gray-400">
                             <x-gmdi-credit-card class="w-6 h-6 font-semibold text-center"/>
                             <div>Collect CC</div>
-                        @else
-                            <x-gmdi-person class="w-6 h-6 font-semibold"/>
-                            <div>Enter Guest Details</div>
-                        @endif
-                    </button>
+                        </button>
+                    </div>
                 </div>
-            </div>
+            @else
+                <div class="-mt-6"></div>
+            @endif
 
             <div x-show="tab === 'collectPayment'" class="mt-6">
                 <!-- @todo Refactor this to a separate component -->
