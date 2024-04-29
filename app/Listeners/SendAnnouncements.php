@@ -6,7 +6,6 @@ use App\Events\AnnouncementCreated;
 use App\Models\Message;
 use App\Models\User;
 use Illuminate\Contracts\Queue\ShouldQueue;
-use Illuminate\Queue\InteractsWithQueue;
 
 class SendAnnouncements implements ShouldQueue
 {

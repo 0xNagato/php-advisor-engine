@@ -16,7 +16,7 @@ class AnnouncementSeeder extends Seeder
         $admin_user = User::role('super_admin')->get()->random();
         Announcement::factory()->create([
             'title' => 'Test Announcement!',
-            'sender_id' => $admin_user->id
+            'sender_id' => $admin_user->id,
         ]);
     }
 }

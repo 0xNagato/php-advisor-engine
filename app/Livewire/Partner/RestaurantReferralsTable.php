@@ -2,9 +2,9 @@
 
 namespace App\Livewire\Partner;
 
+use App\Events\RestaurantInvited;
 use App\Filament\Pages\Partner\RestaurantEarnings;
 use App\Models\User;
-use App\Notifications\RestaurantCreated;
 use Filament\Notifications\Notification;
 use Filament\Tables\Actions\Action;
 use Filament\Tables\Columns\IconColumn;
@@ -62,16 +62,19 @@ class RestaurantReferralsTable extends BaseWidget
                     ->modalHeading('Send Welcome Email')
                     ->hidden(fn (User $record) => $record->has_secured)
                     ->action(function (User $record) {
+                        RestaurantInvited::dispatch($record->restaurant);
 
-                        $record->notify(new RestaurantCreated($record));
                         $record->secured_at = now();
                         $record->save();
 
                         $record->referral->secured_at = now();
                         $record->referral->save();
 
+                        $record->restaurant->is_suspended = true;
+                        $record->restaurant->save();
+
                         Notification::make()
-                            ->title('Welcome Email sent successfully.')
+                            ->title('Welcome SMS sent successfully.')
                             ->success()
                             ->send();
                     }),

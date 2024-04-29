@@ -17,7 +17,7 @@ class MessageSeeder extends Seeder
     {
         $admin_user = User::role('super_admin')->first();
         $announcement = Announcement::factory()->create([
-            'sender_id' => $admin_user->id
+            'sender_id' => $admin_user->id,
         ]);
 
         foreach (Concierge::all() as $concierge) {

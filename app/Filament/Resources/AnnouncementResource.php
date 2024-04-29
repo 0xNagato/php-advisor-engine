@@ -35,7 +35,7 @@ class AnnouncementResource extends Resource
 
         $recipients = User::role($roles)
             ->get()
-            ->mapWithKeys(fn(User $user, int $key) => [$user['id'] => $user['first_name'] . ' ' . $user['last_name']]);
+            ->mapWithKeys(fn (User $user, int $key) => [$user['id'] => $user['first_name'].' '.$user['last_name']]);
 
         return $form
             ->schema([
@@ -55,7 +55,7 @@ class AnnouncementResource extends Resource
                             ->options($recipients)
                             ->multiple()
                             ->searchable(),
-                    ])
+                    ]),
             ]);
     }
 
@@ -69,7 +69,7 @@ class AnnouncementResource extends Resource
                 Action::make('Publish')
                     ->icon('fas-paper-plane')
                     ->requiresConfirmation()
-                    ->hidden(fn(Announcement $announcement) => $announcement->published_at !== null)
+                    ->hidden(fn (Announcement $announcement) => $announcement->published_at !== null)
                     ->action(function (Announcement $announcement) {
                         $announcement->update(['published_at' => now()]);
                         AnnouncementCreated::dispatch($announcement);

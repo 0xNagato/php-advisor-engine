@@ -12,6 +12,7 @@ class CreateAnnouncement extends CreateRecord
     protected function mutateFormDataBeforeCreate(array $data): array
     {
         $data['sender_id'] = auth()->id();
+
         return $data;
     }
 
