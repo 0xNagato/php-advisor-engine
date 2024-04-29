@@ -39,6 +39,10 @@ body::before {
     @apply gap-4 gap-x-2 !important;
 }
 
+.submit-btn {
+    @apply text-base !important;
+}
+
 .single-col-tabs .fi-fo-component-ctn {
     @apply gap-x-0 gap-y-4;
 }

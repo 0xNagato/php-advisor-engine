@@ -9,7 +9,7 @@
     <form wire:submit="handleSubmit" class="py-2">
         {{ $this->form }}
 
-        <x-filament::button type="submit" class="mt-4 w-full">
+        <x-filament::button type="submit" class="mt-4 w-full text-lg submit-btn">
             SMS Booking Link
         </x-filament::button>
     </form>
