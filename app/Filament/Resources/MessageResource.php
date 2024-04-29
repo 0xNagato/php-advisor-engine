@@ -20,7 +20,7 @@ class MessageResource extends Resource
 
     public static function canAccess(): bool
     {
-        return auth()->user()?->hasRole(['concierge', 'partner', 'restaurant']);
+        return auth()->user()?->hasRole(['concierge']);
     }
 
     public static function getPages(): array
