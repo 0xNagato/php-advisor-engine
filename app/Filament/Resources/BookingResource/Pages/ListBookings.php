@@ -5,7 +5,9 @@ namespace App\Filament\Resources\BookingResource\Pages;
 use App\Enums\BookingStatus;
 use App\Filament\Resources\BookingResource;
 use App\Models\Booking;
+use App\Services\RestaurantContactBookingConfirmationService;
 use Filament\Resources\Pages\ListRecords;
+use Filament\Tables\Actions\Action;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
@@ -38,25 +40,22 @@ class ListBookings extends ListRecords
                     ->formatStateUsing(function (Booking $record) {
                         return view('partials.booking-info-column', ['record' => $record]);
                     }),
-
-                // TextColumn::make('concierge.user.name')
-                //     ->label('Concierge')
-                //     ->numeric()
-                //     ->sortable()
-                //     ->hidden(function () {
-                //         return auth()->user()->hasRole('concierge');
-                //     }),
-                // TextColumn::make('schedule.restaurant.restaurant_name')
-                //     ->label('Restaurant')
-                //     ->searchable()
-                //     ->sortable()
-                //     ->hidden(function () {
-                //         return auth()->user()->hasRole('restaurant');
-                //     }),
                 TextColumn::make('total_fee')
                     ->money('USD', divideBy: 100)
-                    ->alignRight()
-                    ->sortable(),
+                    ->alignRight(),
+            ])->actions([
+                Action::make('resendNotification')
+                    ->hidden(fn (Booking $record) => ! auth()->user()->hasRole('super_admin'))
+                    ->label('Resend Notification')
+                    ->requiresConfirmation()
+                    ->icon(fn (Booking $record) => is_null($record->restaurant_confirmed_at) ? 'ri-refresh-line' : 'heroicon-o-check-circle')
+                    ->iconButton()
+                    ->color(fn (Booking $record) => is_null($record->restaurant_confirmed_at) ? 'indigo' : 'success')
+                    ->requiresConfirmation()
+                    ->action(function (Booking $record) {
+                        app(RestaurantContactBookingConfirmationService::class)->sendConfirmation($record);
+                        $record->update(['resent_restaurant_confirmation_at' => now()]);
+                    }),
             ]);
     }
 }

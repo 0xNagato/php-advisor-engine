@@ -1,6 +1,17 @@
 <?php
 
+use App\Traits\FormatsPhoneNumber;
 use Carbon\Carbon;
+
+if (! function_exists('formatInternationalPhoneNumber')) {
+    function formatInternationalPhoneNumber($phoneNumber): string
+    {
+        return (new class
+        {
+            use FormatsPhoneNumber;
+        })->getInternationalFormattedPhoneNumber($phoneNumber);
+    }
+}
 
 if (! function_exists('formatPhoneNumber')) {
     function formatPhoneNumber($phoneNumber): string
@@ -48,10 +59,12 @@ if (! function_exists('formatDateFromString')) {
         $carbonDate = Carbon::createFromFormat('Y-m-d', $date, $timezone);
         if ($carbonDate->isToday()) {
             return 'Today';
-        } elseif ($carbonDate->isTomorrow()) {
-            return 'Tomorrow';
-        } else {
-            return $carbonDate->format('D, M j');
         }
+
+        if ($carbonDate->isTomorrow()) {
+            return 'Tomorrow';
+        }
+
+        return $carbonDate->format('D, M j');
     }
 }

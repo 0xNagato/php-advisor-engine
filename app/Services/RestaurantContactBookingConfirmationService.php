@@ -37,7 +37,7 @@ class RestaurantContactBookingConfirmationService
 
         app(SmsService::class)->sendMessage(
             $contact->contact_phone,
-            "PRIMA Reservation - $bookingDate at $bookingTime, $booking->guest_name, $booking->guest_count guests, $booking->guest_phone."
+            "PRIMA Reservation - $bookingDate at $bookingTime, $booking->guest_name, $booking->guest_count guests, $booking->guest_phone. Confirm the reservation by clicking here $confirmationUrl."
         );
 
     }
