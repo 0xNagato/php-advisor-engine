@@ -41,7 +41,7 @@ class SmsService
             $phoneNumber = $phoneUtil->parse($contactPhone);
             $countryCode = $phoneUtil->getRegionCodeForNumber($phoneNumber);
 
-            if ($countryCode === 'US' || $countryCode === 'CA') {
+            if ($countryCode === 'US') {
                 app(Logger::class)->info('Sending SMS to '.$contactPhone, [
                     'countryCode' => $countryCode,
                     'text' => $text,
@@ -60,8 +60,8 @@ class SmsService
             }
 
             $twilioClient = new Client(
-                config('twilio-notification-channel.sid'),
-                config('twilio-notification-channel.token')
+                config('services.twilio.sid'),
+                config('services.twilio.token')
             );
 
             app(Logger::class)->info('Sending SMS to '.$contactPhone, [
@@ -73,7 +73,7 @@ class SmsService
             return $twilioClient->messages->create(
                 $contactPhone,
                 [
-                    'from' => $accountPhone ?? config('twilio-notification-channel.from'),
+                    'from' => $accountPhone ?? config('services.twilio.from'),
                     'body' => $text,
                 ]
             );

@@ -47,4 +47,9 @@ return [
         'from_phone' => env('SIMPLE_TEXTING_FROM_PHONE'),
     ],
 
+    'twilio' => [
+        'sid' => env('TWILIO_SID'),
+        'token' => env('TWILIO_TOKEN'),
+        'from' => env('TWILIO_FROM'),
+    ],
 ];
