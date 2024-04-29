@@ -105,7 +105,7 @@ class User extends Authenticatable implements FilamentUser, HasAvatar
 
     public function getFilamentAvatarUrl(): ?string
     {
-        return $this->profile_photo_path ? Storage::url($this->profile_photo_path) : null;
+        return $this->profile_photo_path ? Storage::url($this->profile_photo_path) : "https://ui-avatars.com/api/?background=312596&color=fff&name=$this->name";
     }
 
     public function routeNotificationForTwilio(): string
@@ -163,7 +163,7 @@ class User extends Authenticatable implements FilamentUser, HasAvatar
 
     public function getHasSecuredAttribute(): bool
     {
-        return ! blank($this->secured_at);
+        return !blank($this->secured_at);
     }
 
     public function getLabelAttribute(): string
@@ -174,5 +174,15 @@ class User extends Authenticatable implements FilamentUser, HasAvatar
     public function earnings(): HasMany
     {
         return $this->hasMany(Earning::class);
+    }
+
+    public function sentAnnoucements(): HasMany
+    {
+        return $this->hasMany(Announcement::class, 'sender_id');
+    }
+
+    public function messages(): HasMany
+    {
+        return $this->hasMany(Message::class);
     }
 }
