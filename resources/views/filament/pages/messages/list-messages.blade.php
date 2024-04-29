@@ -36,7 +36,7 @@
             </div>
         </div>
     </x-filament::section>
-    @if($messages !== null)
+    @if($messages->isNotEmpty())
         <div class="flex flex-col gap-0 divide-y bg-white shadow-lg rounded-lg -mt-4">
 
             @foreach ($this->messages as $message)
