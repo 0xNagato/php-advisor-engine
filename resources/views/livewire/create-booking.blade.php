@@ -89,10 +89,17 @@
                             >
                         </label>
 
+                        <label class="w-full">
+                                    <textarea name="notes"
+                                              {{ $booking->notes && "value='$booking->notes'" }}
+                                              class="w-full rounded-lg border border-indigo-600 text-sm"
+                                              placeholder="Notes/Special Requests (optional)"></textarea>
+                        </label>
+
 
                         <div id="card-element"
                              wire:ignore
-                             class="w-full rounded-lg border border-indigo-600 text-sm bg-white px-2 py-3 h-[40px] {{ !$booking->prime_time ? 'hidden' : ''  }}">
+                             class="-mt-1.5 w-full rounded-lg border border-indigo-600 text-sm bg-white px-2 py-3 h-[40px] {{ !$booking->prime_time ? 'hidden' : ''  }}">
                             <!-- A Stripe Element will be inserted here. -->
                         </div>
 

@@ -1,11 +1,10 @@
 <?php
 
-namespace App\Livewire\Booking;
+namespace App\Filament\Pages\Concierge;
 
 use App\Enums\BookingStatus;
 use App\Events\BookingCancelled;
 use App\Events\BookingCreated;
-use App\Filament\Pages\Concierge\AvailabilityCalendar;
 use App\Models\Booking;
 use App\Models\Restaurant;
 use App\Models\ScheduleTemplate;
@@ -20,12 +19,10 @@ use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Hidden;
 use Filament\Forms\Components\Radio;
 use Filament\Forms\Components\Select;
-use Filament\Forms\Concerns\InteractsWithForms;
-use Filament\Forms\Contracts\HasForms;
 use Filament\Forms\Form;
 use Filament\Forms\Get;
 use Filament\Notifications\Notification;
-use Filament\Widgets\Widget;
+use Filament\Pages\Page;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Carbon;
 use Livewire\Attributes\On;
@@ -37,10 +34,9 @@ use Stripe\Exception\ApiErrorException;
 /**
  * @property Form $form
  */
-class BookingWidget extends Widget implements HasForms
+class ReservationHub extends Page
 {
     use HasReservation;
-    use InteractsWithForms;
 
     public const int AVAILABILITY_DAYS = 3;
 
@@ -48,9 +44,22 @@ class BookingWidget extends Widget implements HasForms
 
     public const int MINUTES_FUTURE = 60;
 
-    protected static string $view = 'filament.widgets.booking-widget';
+    protected static ?string $navigationIcon = 'heroicon-o-building-storefront';
 
-    protected static bool $isLazy = false;
+    protected static ?string $title = 'Reservation Hub';
+
+    protected static ?int $navigationSort = -4;
+
+    protected static ?string $slug = 'concierge/reservation-hub';
+
+    protected ?string $heading = 'Reservation Request';
+
+    protected static string $view = 'filament.widgets.reservation-hub';
+
+    public static function canAccess(): bool
+    {
+        return auth()->user()?->hasRole('concierge');
+    }
 
     #[Session]
     public ?string $qrCode;

@@ -1,9 +1,12 @@
-<?php /** @noinspection ALL */
+<?php
+
+/** @noinspection ALL */
 
 namespace App\Livewire\Booking;
 
 use App\Models\Booking;
 use App\Services\SmsService;
+use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
@@ -23,8 +26,11 @@ class SMSBookingForm extends Widget implements HasForms
     protected static string $view = 'livewire.bookings.s-m-s-booking-form';
 
     public ?array $data = [];
+
     public bool $SMSSent = false;
+
     public Booking $booking;
+
     public string $bookingUrl;
 
     public function mount(): void
@@ -59,6 +65,10 @@ class SMSBookingForm extends Widget implements HasForms
                 ->placeholder('Email Address (optional)')
                 ->autocomplete(false)
                 ->columnSpan(2),
+            Textarea::make('notes')
+                ->hiddenLabel()
+                ->placeholder('Notes/Special Requests (optional)')
+                ->columnSpan(2),
         ])
             ->extraAttributes(['class' => 'inline-form'])
             ->columns([
@@ -77,6 +87,7 @@ class SMSBookingForm extends Widget implements HasForms
             'guest_last_name' => $data['last_name'],
             'guest_email' => $data['email'],
             'guest_phone' => $data['phone'],
+            'notes' => $data['notes'],
         ]);
 
         app(SmsService::class)->sendMessage($data['phone'], $message);
