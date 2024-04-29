@@ -29,7 +29,7 @@
     @if(!$record->restaurant_confirmed_at && auth()->user()->hasRole('super_admin'))
         <div class="mt-2 font-semibold">Restaurant Contacts:</div>
         @foreach($record->restaurant->contacts->where('use_for_reservations', true) as $contact)
-            <div class="flex gap-1 ml-1">
+            <div class="flex gap-1">
                 <div class="font-semibold">{{ $contact->contact_name }}:</div>
                 <div>{{ formatInternationalPhoneNumber($contact->contact_phone) }}</div>
             </div>
