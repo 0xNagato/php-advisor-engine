@@ -36,7 +36,7 @@ body::before {
 }
 
 .inline-form {
-    @apply gap-4 !important;
+    @apply gap-4 gap-x-2 !important;
 }
 
 .single-col-tabs .fi-fo-component-ctn {

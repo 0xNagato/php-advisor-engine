@@ -6,23 +6,20 @@
     document.head.appendChild(script);
 }" class="flex flex-col gap-4">
     @if (!$booking)
-        {{--        @env('local')--}}
-        {{--            <pre class="text-xs">{{ json_encode($data, JSON_PRETTY_PRINT) }}</pre>--}}
-        {{--        @endenv--}}
         {{ $this->form }}
 
         <div class="flex flex-col gap-2">
-            @if ($this->schedulesToday->count() || $this->schedulesThisWeek->count())
-                @if ($this->schedulesToday->count())
+            @if ($schedulesToday->count() || $schedulesThisWeek->count())
+                @if ($schedulesToday->count())
 
                     <div class="grid gap-2 grid-cols-3">
-                        @foreach ($this->schedulesToday as $schedule)
+                        @foreach ($schedulesToday as $schedule)
                             <button
                                 @if ($schedule->is_bookable) wire:click="createBooking({{ $schedule->schedule_template_id }})" @endif
                                 @class([
                                     'flex flex-col gap-1 items-center p-3 text-sm font-semibold leading-none rounded-xl justify-center',
-                                    'outline outline-2 outline-offset-2 outline-green-600' => $schedule->start_time === $this->data['reservation_time'],
-                                    'outline outline-2 outline-offset-2 outline-gray-100' => $schedule->start_time === $this->data['reservation_time'] && !$schedule->is_bookable,
+                                    'outline outline-2 outline-offset-2 outline-green-600' => $schedule->start_time === $data['reservation_time'],
+                                    'outline outline-2 outline-offset-2 outline-gray-100' => $schedule->start_time === $data['reservation_time'] && !$schedule->is_bookable,
                                     'bg-green-600 text-white cursor-pointer hover:bg-green-500' => $schedule->is_bookable,
                                     'bg-gray-100 text-gray-400 border-none' => !$schedule->is_bookable,
                                 ])
@@ -49,12 +46,12 @@
 
                 @endif
 
-                @if ($this->schedulesThisWeek->count())
+                @if ($schedulesThisWeek->count())
                     <div class="font-bold text-sm text-center uppercase mt-2">
                         Next {{ self::AVAILABILITY_DAYS }} Days Availability
                     </div>
                     <div class="grid gap-2 grid-cols-3">
-                        @foreach ($this->schedulesThisWeek as $schedule)
+                        @foreach ($schedulesThisWeek as $schedule)
                             <div
                                 @if ($schedule->is_bookable)
                                     wire:click="createBooking({{ $schedule->schedule_template_id }}, '{{ $schedule->booking_date->format('Y-m-d') }}')"
@@ -105,22 +102,22 @@
         @endenv
 
 
-        <div x-data="{ tab: 'collectPayment' }" id="tabs">
+        <div x-data="{ tab: 'smsPayment' }" id="tabs">
             <div class="flex space-x-4">
                 <div class="flex w-full space-x-4 text-xs">
-                    <button
-                        :class="{ 'bg-indigo-600 text-white': tab === 'collectPayment', 'bg-gray-100': tab !== 'collectPayment' }"
-                        @click="tab = 'collectPayment'"
-                        class="flex items-center gap-1 px-4 py-2 text-xs font-semibold bg-gray-100 rounded-lg shadow-lg shadow-gray-400">
-                        <x-gmdi-credit-card class="w-6 h-6 font-semibold text-center"/>
-                        <div>Guest Info</div>
-                    </button>
                     <button
                         :class="{ 'bg-indigo-600 text-white': tab === 'smsPayment', 'bg-gray-100': tab !== 'smsPayment' }"
                         @click="tab = 'smsPayment'"
                         class="flex items-center gap-1 px-4 py-2 text-xs font-semibold bg-gray-100 rounded-lg shadow-lg shadow-gray-400">
                         <x-gmdi-phone-android-r class="w-6 h-6 font-semibold"/>
                         <div>SMS</div>
+                    </button>
+                    <button
+                        :class="{ 'bg-indigo-600 text-white': tab === 'collectPayment', 'bg-gray-100': tab !== 'collectPayment' }"
+                        @click="tab = 'collectPayment'"
+                        class="flex items-center gap-1 px-4 py-2 text-xs font-semibold bg-gray-100 rounded-lg shadow-lg shadow-gray-400">
+                        <x-gmdi-credit-card class="w-6 h-6 font-semibold text-center"/>
+                        <div>Guest Info</div>
                     </button>
                     <button
                         :class="{ 'bg-indigo-600 text-white': tab === 'qrCode', 'bg-gray-100': tab !== 'qrCode' }"
@@ -229,26 +226,12 @@
                             </x-filament::button>
                         </fieldset>
                     </form>
-
-                    <div class="w-full">
-                        <livewire:booking.invoice-small :booking="$booking"/>
-                    </div>
-
                 </div>
             </div>
 
             <div x-show="tab === 'smsPayment'" class="flex flex-col gap-4 mt-4">
                 <!-- SMS Payment Link Tab Content -->
-                @if ($SMSSent)
-                    <div class="flex flex-col gap-2 p-4 bg-white rounded shadow">
-                        <p>Advise customer to check their phone for reservation payment link.</p>
-                        <p>Sending message to customer now.</p>
-                    </div>
-                @endif
-                @php
-                    $message = "Your reservation at {$booking->restaurant->restaurant_name} is pending. Please click $bookingUrl to secure your booking within the next 5 minutes.";
-                @endphp
-                <livewire:s-m-s-input :message="$message"/>
+                <livewire:booking.s-m-s-booking-form :booking="$booking" :booking-url="$bookingUrl"/>
             </div>
 
             <div x-show="tab === 'qrCode'" class="flex flex-col gap-4 mt-4">
@@ -262,7 +245,11 @@
                 <livewire:booking.booking-status-widget :booking="$booking"/>
             </div>
         </div>
-        
+
+        <div class="w-full">
+            <livewire:booking.invoice-small :booking="$booking"/>
+        </div>
+
         <x-filament::button wire:click="cancelBooking" class="w-full opacity-50" color="gray">
             Abandon Reservation
         </x-filament::button>
