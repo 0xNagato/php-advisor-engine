@@ -9,6 +9,7 @@ use App\Services\RestaurantContactBookingConfirmationService;
 use Filament\Resources\Pages\ListRecords;
 use Filament\Tables\Actions\Action;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\Filter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 
@@ -43,14 +44,20 @@ class ListBookings extends ListRecords
                 TextColumn::make('total_fee')
                     ->money('USD', divideBy: 100)
                     ->alignRight(),
-            ])->actions([
+
+            ])
+            ->filters([
+                Filter::make('unconfirmed')
+                    ->query(fn(Builder $query) => $query->whereNull('restaurant_confirmed_at'))
+            ])
+            ->actions([
                 Action::make('resendNotification')
-                    ->hidden(fn (Booking $record) => ! auth()->user()->hasRole('super_admin'))
+                    ->hidden(fn(Booking $record) => !auth()->user()->hasRole('super_admin'))
                     ->label('Resend Notification')
                     ->requiresConfirmation()
-                    ->icon(fn (Booking $record) => is_null($record->restaurant_confirmed_at) ? 'ri-refresh-line' : 'heroicon-o-check-circle')
+                    ->icon(fn(Booking $record) => is_null($record->restaurant_confirmed_at) ? 'ri-refresh-line' : 'heroicon-o-check-circle')
                     ->iconButton()
-                    ->color(fn (Booking $record) => is_null($record->restaurant_confirmed_at) ? 'indigo' : 'success')
+                    ->color(fn(Booking $record) => is_null($record->restaurant_confirmed_at) ? 'indigo' : 'success')
                     ->requiresConfirmation()
                     ->action(function (Booking $record) {
                         app(RestaurantContactBookingConfirmationService::class)->sendConfirmation($record);
