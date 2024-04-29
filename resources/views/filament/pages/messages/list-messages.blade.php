@@ -36,42 +36,43 @@
             </div>
         </div>
     </x-filament::section>
-    <div class="flex flex-col gap-0 divide-y bg-white shadow-lg rounded-lg -mt-4">
+    @if($messages !== null)
+        <div class="flex flex-col gap-0 divide-y bg-white shadow-lg rounded-lg -mt-4">
 
-        @foreach ($this->messages as $message)
+            @foreach ($this->messages as $message)
 
-            <div class="p-4">
-                <a href="{{ route('filament.admin.resources.messages.view', ['record' => $message->id]) }}">
-                    <div class="flex flex-row items-center">
-                        <div class="w-2/12 sm:w-1/12 mr-2">
-                            <x-filament::avatar
-                                src="{{ $message->announcement->sender->getFilamentAvatarUrl() }}"
-                                alt="User Avatar"
-                                size="w-12 h-12"
-                            />
-                        </div>
+                <div class="p-4">
+                    <a href="{{ route('filament.admin.resources.messages.view', ['record' => $message->id]) }}">
+                        <div class="flex flex-row items-center">
+                            <div class="w-2/12 sm:w-1/12 mr-2">
+                                <x-filament::avatar
+                                    src="{{ $message->announcement->sender->getFilamentAvatarUrl() }}"
+                                    alt="User Avatar"
+                                    size="w-12 h-12"
+                                />
+                            </div>
 
-                        <div class="w-10/12">
-                            <div class="flex flex-row items-center">
+                            <div class="w-10/12">
+                                <div class="flex flex-row items-center">
                         <span class="font-semibold mr-1">
                             {{ $message->announcement->sender->name }}
                         </span>
-                                @if (is_null($message->read_at))
-                                    <x-heroicon-s-information-circle class="h-4 w-4 -mt-0.5 text-xs text-green-600"/>
-                                @endif
-                                <span class="grow self-start text-xs text-right">
+                                    @if (is_null($message->read_at))
+                                        <x-heroicon-s-information-circle
+                                            class="h-4 w-4 -mt-0.5 text-xs text-green-600"/>
+                                    @endif
+                                    <span class="grow self-start text-xs text-right">
                             {{ $message->created_at->format('M j h:i A') }}
                         </span>
+                                </div>
+                                <p class="text-xs truncate">
+                                    {{ $message->announcement->message }}
+                                </p>
                             </div>
-                            <p class="text-xs truncate">
-                                {{ $message->announcement->message }}
-                            </p>
                         </div>
-                    </div>
-                </a>
-            </div>
-
-        @endforeach
-
-    </div>
+                    </a>
+                </div>
+            @endforeach
+        </div>
+    @endif
 </x-filament-panels::page>
