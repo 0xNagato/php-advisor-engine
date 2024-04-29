@@ -138,6 +138,11 @@
 
 
             <div class="mt-5 sm:mt-10">
+                @if($booking->notes)
+                    <h4 class="text-xs font-semibold text-gray-800 uppercase dark:text-gray-200">Notes</h4>
+                    <p class="mb-3 text-sm text-gray-800 dark:text-gray-200">{{ $booking->notes }}</p>
+                @endif
+
                 <h4 class="text-xs font-semibold text-gray-800 uppercase dark:text-gray-200">Summary</h4>
 
                 <ul class="flex flex-col mt-3">
