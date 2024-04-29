@@ -52,16 +52,18 @@
                                     type="text"
                                     class="w-full rounded-lg border border-indigo-600 text-sm h-[40px]"
                                     placeholder="First Name"
+                                    value="{{ $booking->guest_first_name }}"
                                     required
                                 >
                             </label>
 
-                            <label class="w-full">
+                            <label class=" w-full">
                                 <input
                                     name="last_name"
                                     type="text"
                                     class="w-full rounded-lg border border-indigo-600 text-sm h-[40px]"
                                     placeholder="Last Name"
+                                    value="{{ $booking->guest_last_name }}"
                                     required
                                 >
                             </label>
@@ -74,6 +76,7 @@
                                 type="text"
                                 class="w-full rounded-lg border border-indigo-600 text-sm h-[40px]"
                                 placeholder="Cell Phone Number"
+                                value="{{ $booking->guest_phone }}"
                                 required
                             >
                         </label>
@@ -81,7 +84,9 @@
                         <label class="w-full">
                             <input name="email" type="email"
                                    class="w-full rounded-lg border border-indigo-600 text-sm h-[40px]"
-                                   placeholder="Email Address (optional)">
+                                   placeholder="Email Address (optional)"
+                                   value="{{ $booking->guest_email }}"
+                            >
                         </label>
 
 

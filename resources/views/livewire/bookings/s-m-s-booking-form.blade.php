@@ -1,6 +1,6 @@
 <x-filament-widgets::widget>
     @if ($SMSSent)
-        <div class="flex flex-col gap-2 p-4 bg-white rounded shadow">
+        <div class="flex flex-col gap-4 p-4 mb-4 bg-white rounded shadow text-sm">
             <p>Advise customer to check their phone for reservation payment link.</p>
             <p>Sending message to customer now.</p>
         </div>

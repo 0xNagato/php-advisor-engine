@@ -113,18 +113,18 @@
                         <div>SMS</div>
                     </button>
                     <button
-                        :class="{ 'bg-indigo-600 text-white': tab === 'collectPayment', 'bg-gray-100': tab !== 'collectPayment' }"
-                        @click="tab = 'collectPayment'"
-                        class="flex items-center gap-1 px-4 py-2 text-xs font-semibold bg-gray-100 rounded-lg shadow-lg shadow-gray-400">
-                        <x-gmdi-credit-card class="w-6 h-6 font-semibold text-center"/>
-                        <div>Guest Info</div>
-                    </button>
-                    <button
                         :class="{ 'bg-indigo-600 text-white': tab === 'qrCode', 'bg-gray-100': tab !== 'qrCode' }"
                         @click="tab = 'qrCode'"
                         class="flex items-center gap-1 px-4 py-2 text-xs font-semibold bg-gray-100 rounded-lg shadow-lg shadow-gray-400">
                         <x-gmdi-qr-code class="w-6 h-6 font-semibold"/>
                         <div>QR Code</div>
+                    </button>
+                    <button
+                        :class="{ 'bg-indigo-600 text-white': tab === 'collectPayment', 'bg-gray-100': tab !== 'collectPayment' }"
+                        @click="tab = 'collectPayment'"
+                        class="flex items-center gap-1 px-4 py-2 text-xs font-semibold bg-gray-100 rounded-lg shadow-lg shadow-gray-400">
+                        <x-gmdi-credit-card class="w-6 h-6 font-semibold text-center"/>
+                        <div>Guest Info</div>
                     </button>
                 </div>
             </div>

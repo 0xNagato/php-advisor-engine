@@ -81,6 +81,7 @@ class SMSBookingForm extends Widget implements HasForms
 
         app(SmsService::class)->sendMessage($data['phone'], $message);
 
+        $this->SMSSent = true;
         $this->dispatch('sms-sent');
 
         Notification::make()
