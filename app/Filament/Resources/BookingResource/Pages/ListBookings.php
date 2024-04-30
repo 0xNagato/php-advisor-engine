@@ -48,16 +48,16 @@ class ListBookings extends ListRecords
             ])
             ->filters([
                 Filter::make('unconfirmed')
-                    ->query(fn(Builder $query) => $query->whereNull('restaurant_confirmed_at'))
+                    ->query(fn (Builder $query) => $query->whereNull('restaurant_confirmed_at')),
             ])
             ->actions([
                 Action::make('resendNotification')
-                    ->hidden(fn(Booking $record) => !auth()->user()->hasRole('super_admin'))
+                    ->hidden(fn (Booking $record) => ! auth()->user()->hasRole('super_admin'))
                     ->label('Resend Notification')
                     ->requiresConfirmation()
-                    ->icon(fn(Booking $record) => is_null($record->restaurant_confirmed_at) ? 'ri-refresh-line' : 'heroicon-o-check-circle')
+                    ->icon(fn (Booking $record) => is_null($record->restaurant_confirmed_at) ? 'ri-refresh-line' : 'heroicon-o-check-circle')
                     ->iconButton()
-                    ->color(fn(Booking $record) => is_null($record->restaurant_confirmed_at) ? 'indigo' : 'success')
+                    ->color(fn (Booking $record) => is_null($record->restaurant_confirmed_at) ? 'indigo' : 'success')
                     ->requiresConfirmation()
                     ->action(function (Booking $record) {
                         app(RestaurantContactBookingConfirmationService::class)->sendConfirmation($record);
