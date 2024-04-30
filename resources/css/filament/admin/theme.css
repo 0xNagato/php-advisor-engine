@@ -31,6 +31,18 @@ body::before {
     @apply dark:bg-white;
 }
 
+.fi-sidebar-item-icon {
+    @apply text-black !important;
+}
+
+.fi-sidebar-item-label {
+    @apply text-black text-lg font-bold !important;
+}
+
+.fi-sidebar-nav-groups {
+    @apply gap-y-4 !important;
+}
+
 .fi-input-wrp-icon {
     @apply h-4 w-4 !important;
 }
