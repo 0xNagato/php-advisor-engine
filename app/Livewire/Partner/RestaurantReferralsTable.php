@@ -4,6 +4,7 @@ namespace App\Livewire\Partner;
 
 use App\Events\RestaurantInvited;
 use App\Filament\Pages\Partner\RestaurantEarnings;
+use App\Models\Referral;
 use App\Models\User;
 use Filament\Notifications\Notification;
 use Filament\Tables\Actions\Action;
@@ -45,7 +46,10 @@ class RestaurantReferralsTable extends BaseWidget
             ->emptyStateHeading('No restaurants found.')
             ->columns([
                 TextColumn::make('restaurant.restaurant_name')
-                    ->label('Referral'),
+                    ->label('Referral')
+                    ->formatStateUsing(function (Referral $record) {
+                        return view('partials.referral-info-column', ['record' => $record]);
+                    }),
                 IconColumn::make('has_secured')
                     ->label('Active')
                     ->alignCenter()
