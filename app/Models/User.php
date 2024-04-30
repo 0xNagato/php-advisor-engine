@@ -176,7 +176,7 @@ class User extends Authenticatable implements FilamentUser, HasAvatar
         return $this->hasMany(Earning::class);
     }
 
-    public function sentAnnoucements(): HasMany
+    public function sentAnnouncements(): HasMany
     {
         return $this->hasMany(Announcement::class, 'sender_id');
     }
@@ -184,5 +184,15 @@ class User extends Authenticatable implements FilamentUser, HasAvatar
     public function messages(): HasMany
     {
         return $this->hasMany(Message::class);
+    }
+
+    public function getLocalFormattedPhoneAttribute(): string
+    {
+        return $this->getLocalFormattedPhoneNumber($this->phone);
+    }
+
+    public function getInternationalFormattedPhoneNumberAttribute(): string
+    {
+        return $this->getInternationalFormattedPhoneNumber($this->phone);
     }
 }
