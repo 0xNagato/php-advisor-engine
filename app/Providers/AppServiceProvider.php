@@ -1,5 +1,7 @@
 <?php
 
+/** @noinspection JSUnresolvedReference, JSUnresolvedLibraryURL */
+
 namespace App\Providers;
 
 use Filament\Facades\Filament;
@@ -82,7 +84,7 @@ class AppServiceProvider extends ServiceProvider
 
         Filament::registerRenderHook(
             'panels::head.start',
-            static fn (): string => '<meta name="viewport" content="width=device-width, initial-scale=1" />',
+            static fn (): string => '<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />',
         );
 
         Filament::registerRenderHook(PanelsRenderHook::HEAD_START, function () {
@@ -110,6 +112,8 @@ class AppServiceProvider extends ServiceProvider
             <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
             <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet">',
         );
+
+        Filament::registerRenderHook(PanelsRenderHook::USER_MENU_PROFILE_AFTER, fn () => view('partials.concierge-user-menu'));
 
         Page::$reportValidationErrorUsing = static function (ValidationException $exception) {
             Notification::make()

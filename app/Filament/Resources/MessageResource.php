@@ -20,6 +20,10 @@ class MessageResource extends Resource
 
     public static function canAccess(): bool
     {
+        if (session()->exists('simpleMode')) {
+            return ! session('simpleMode');
+        }
+
         return auth()->user()?->hasRole(['concierge']);
     }
 

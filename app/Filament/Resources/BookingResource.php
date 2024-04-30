@@ -18,6 +18,10 @@ class BookingResource extends Resource
 
     public static function shouldRegisterNavigation(): bool
     {
+        if (session()->exists('simpleMode')) {
+            return ! session('simpleMode');
+        }
+
         return auth()->user()->hasRole(['concierge', 'super_admin', 'partner']);
     }
 

@@ -71,7 +71,6 @@ class AdminPanelProvider extends PanelProvider
                     ->label('Change Password')
                     ->icon('heroicon-o-lock-closed')
                     ->url('/change-password'),
-
             ])
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\\Filament\\Resources')
             ->discoverPages(in: app_path('Filament/Pages'), for: 'App\\Filament\\Pages')

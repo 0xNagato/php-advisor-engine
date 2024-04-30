@@ -6,6 +6,7 @@ use App\Filament\Resources\RestaurantResource;
 use App\Models\Restaurant;
 use Filament\Actions\Action;
 use Filament\Forms\Components\Checkbox;
+use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Section;
 use Filament\Forms\Components\TextInput;
@@ -36,6 +37,11 @@ class EditRestaurant extends EditRecord
                 Section::make('Restaurant Information')
                     ->icon('heroicon-m-building-storefront')
                     ->schema([
+                        FileUpload::make('restaurant_logo_path')
+                            ->label('Restaurant Logo')
+                            ->disk('do')
+                            ->directory('restaurants')
+                            ->visibility('public'),
                         TextInput::make('restaurant_name')
                             ->label('Restaurant Name')
                             ->required()

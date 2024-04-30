@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Facades\Storage;
 use Spatie\LaravelData\DataCollection;
 
 /**
@@ -23,6 +24,21 @@ class Restaurant extends Model
     public const int DEFAULT_START_HOUR = 11; // 11:00 AM
 
     public const int DEFAULT_END_HOUR = 22; // 10:00 PM
+
+    /**
+     * @var array<string, string>
+     */
+    public const array REGIONS = [
+        'miami' => 'Miami',
+        'ibiza' => 'Ibiza',
+        'mykonos' => 'Mykonos',
+        'paris' => 'Paris',
+        'london' => 'London',
+        'st_tropez' => 'St. Tropez',
+        'new_york' => 'New York',
+        'los_angeles' => 'Los Angeles',
+        'las_vegas' => 'Las Vegas',
+    ];
 
     /**
      * The attributes that are mass assignable.
@@ -48,6 +64,8 @@ class Restaurant extends Model
         'business_hours',
         'party_sizes',
         'minimum_spend',
+        'restaurant_logo_path',
+        'region',
     ];
 
     protected $casts = [
@@ -126,6 +144,11 @@ class Restaurant extends Model
     public function scheduleTemplates(): HasMany
     {
         return $this->hasMany(ScheduleTemplate::class);
+    }
+
+    public function getLogoAttribute(): ?string
+    {
+        return $this->restaurant_logo_path ? Storage::url($this->restaurant_logo_path) : null;
     }
 
     /**

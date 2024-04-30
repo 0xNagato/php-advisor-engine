@@ -15,7 +15,15 @@
                         @endforeach
                     </div>
                 @endif
-                <div class="col-span-1 text-base font-semibold">{{ $restaurant['restaurant']->restaurant_name }}</div>
+                <div class="col-span-1 text-base font-semibold">
+                    @if($restaurant['restaurant']->logo)
+                        <img src="{{ $restaurant['restaurant']->logo }}"
+                             alt="{{ $restaurant['restaurant']->restaurant_name }}"
+                             class="w-12 h-12 object-cover">
+                    @else
+                        {{ $restaurant['restaurant']->restaurant_name }}
+                    @endif
+                </div>
 
                 <div class="col-span-2 grid grid-cols-3 gap-4 mb-3">
 

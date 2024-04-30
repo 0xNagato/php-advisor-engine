@@ -34,11 +34,9 @@ class SendAnnouncements implements ShouldQueue
 
         collect($recipients)
             ->unique()
-            ->each(function (int $recipient_id) use ($event) {
-                Message::create([
-                    'user_id' => $recipient_id,
-                    'announcement_id' => $event->announcement->id,
-                ]);
-            });
+            ->each(fn (int $recipient_id) => Message::create([
+                'user_id' => $recipient_id,
+                'announcement_id' => $event->announcement->id,
+            ]));
     }
 }

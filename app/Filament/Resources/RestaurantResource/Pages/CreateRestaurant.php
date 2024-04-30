@@ -4,10 +4,13 @@ namespace App\Filament\Resources\RestaurantResource\Pages;
 
 use App\Filament\Resources\RestaurantResource;
 use App\Models\Referral;
+use App\Models\Restaurant;
 use App\Models\User;
 use Filament\Forms\Components\Checkbox;
+use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Section;
+use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Form;
 use Filament\Resources\Pages\CreateRecord;
@@ -60,10 +63,20 @@ class CreateRestaurant extends CreateRecord
                 Section::make('Restaurant Information')
                     ->icon('heroicon-m-building-storefront')
                     ->schema([
+                        FileUpload::make('restaurant_logo_path')
+                            ->label('Restaurant Logo')
+                            ->disk('do')
+                            ->imageEditor()
+                            ->visibility('public')
+                            ->directory('restaurants')
+                            ->moveFiles(),
                         TextInput::make('restaurant_name')
                             ->label('Restaurant Name')
                             ->required()
                             ->maxLength(255),
+                        Select::make('region')
+                            ->placeholder('Select Region')
+                            ->options(Restaurant::REGIONS),
                         TextInput::make('primary_contact_name')
                             ->label('Primary Contact Name')
                             ->required(),
@@ -156,6 +169,8 @@ class CreateRestaurant extends CreateRecord
             'payout_restaurant' => $data['payout_restaurant'],
             'booking_fee' => $data['booking_fee'],
             'contacts' => $data['contacts'],
+            'region' => $data['region'],
+            'restaurant_logo_path' => $data['restaurant_logo_path'],
             'open_days' => [
                 'monday' => 'open',
                 'tuesday' => 'open',
