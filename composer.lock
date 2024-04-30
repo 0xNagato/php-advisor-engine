@@ -1269,16 +1269,16 @@
         },
         {
             "name": "aws/aws-sdk-php",
-            "version": "3.305.5",
+            "version": "3.305.6",
             "source": {
                 "type": "git",
                 "url": "https://github.com/aws/aws-sdk-php.git",
-                "reference": "aff7806278b7ce7777ced1afd7534c72329e9240"
+                "reference": "3ce65364cc318ae36fc2c61c87a7aa5c83ee626f"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/aws/aws-sdk-php/zipball/aff7806278b7ce7777ced1afd7534c72329e9240",
-                "reference": "aff7806278b7ce7777ced1afd7534c72329e9240",
+                "url": "https://api.github.com/repos/aws/aws-sdk-php/zipball/3ce65364cc318ae36fc2c61c87a7aa5c83ee626f",
+                "reference": "3ce65364cc318ae36fc2c61c87a7aa5c83ee626f",
                 "shasum": ""
             },
             "require": {
@@ -1358,9 +1358,9 @@
             "support": {
                 "forum": "https://forums.aws.amazon.com/forum.jspa?forumID=80",
                 "issues": "https://github.com/aws/aws-sdk-php/issues",
-                "source": "https://github.com/aws/aws-sdk-php/tree/3.305.5"
+                "source": "https://github.com/aws/aws-sdk-php/tree/3.305.6"
             },
-            "time": "2024-04-29T18:07:32+00:00"
+            "time": "2024-04-30T18:08:11+00:00"
         },
         {
             "name": "bezhansalleh/filament-shield",
@@ -5665,16 +5665,16 @@
         },
         {
             "name": "laravel/framework",
-            "version": "v10.48.9",
+            "version": "v10.48.10",
             "source": {
                 "type": "git",
                 "url": "https://github.com/laravel/framework.git",
-                "reference": "ad758500b47964d022addf119600a1b1b0230733"
+                "reference": "91e2b9e218afa4e5c377510faa11957042831ba3"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/laravel/framework/zipball/ad758500b47964d022addf119600a1b1b0230733",
-                "reference": "ad758500b47964d022addf119600a1b1b0230733",
+                "url": "https://api.github.com/repos/laravel/framework/zipball/91e2b9e218afa4e5c377510faa11957042831ba3",
+                "reference": "91e2b9e218afa4e5c377510faa11957042831ba3",
                 "shasum": ""
             },
             "require": {
@@ -5868,7 +5868,7 @@
                 "issues": "https://github.com/laravel/framework/issues",
                 "source": "https://github.com/laravel/framework"
             },
-            "time": "2024-04-23T15:01:33+00:00"
+            "time": "2024-04-30T12:52:59+00:00"
         },
         {
             "name": "laravel/horizon",
@@ -6029,16 +6029,16 @@
         },
         {
             "name": "laravel/prompts",
-            "version": "v0.1.20",
+            "version": "v0.1.21",
             "source": {
                 "type": "git",
                 "url": "https://github.com/laravel/prompts.git",
-                "reference": "bf9a360c484976692de0f3792f30066f4f4b34a2"
+                "reference": "23ea808e8a145653e0ab29e30d4385e49f40a920"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/laravel/prompts/zipball/bf9a360c484976692de0f3792f30066f4f4b34a2",
-                "reference": "bf9a360c484976692de0f3792f30066f4f4b34a2",
+                "url": "https://api.github.com/repos/laravel/prompts/zipball/23ea808e8a145653e0ab29e30d4385e49f40a920",
+                "reference": "23ea808e8a145653e0ab29e30d4385e49f40a920",
                 "shasum": ""
             },
             "require": {
@@ -6078,24 +6078,25 @@
             "license": [
                 "MIT"
             ],
+            "description": "Add beautiful and user-friendly forms to your command-line applications.",
             "support": {
                 "issues": "https://github.com/laravel/prompts/issues",
-                "source": "https://github.com/laravel/prompts/tree/v0.1.20"
+                "source": "https://github.com/laravel/prompts/tree/v0.1.21"
             },
-            "time": "2024-04-18T00:45:25+00:00"
+            "time": "2024-04-30T12:46:16+00:00"
         },
         {
             "name": "laravel/pulse",
-            "version": "v1.0.0-beta16",
+            "version": "v1.0.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/laravel/pulse.git",
-                "reference": "bd05ae7bfb9a6671c91f7eb25e742ee2497df0df"
+                "reference": "37fc7512d01de7e59b0ae9634c638849d98c3fca"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/laravel/pulse/zipball/bd05ae7bfb9a6671c91f7eb25e742ee2497df0df",
-                "reference": "bd05ae7bfb9a6671c91f7eb25e742ee2497df0df",
+                "url": "https://api.github.com/repos/laravel/pulse/zipball/37fc7512d01de7e59b0ae9634c638849d98c3fca",
+                "reference": "37fc7512d01de7e59b0ae9634c638849d98c3fca",
                 "shasum": ""
             },
             "require": {
@@ -6114,7 +6115,7 @@
                 "illuminate/routing": "^10.48.4|^11.0.8",
                 "illuminate/support": "^10.48.4|^11.0.8",
                 "illuminate/view": "^10.48.4|^11.0.8",
-                "livewire/livewire": "^3.2",
+                "livewire/livewire": "^3.4.9",
                 "nesbot/carbon": "^2.67|^3.0",
                 "php": "^8.1",
                 "symfony/console": "^6.0|^7.0"
@@ -6169,7 +6170,7 @@
                 "issues": "https://github.com/laravel/pulse/issues",
                 "source": "https://github.com/laravel/pulse"
             },
-            "time": "2024-03-24T15:02:27+00:00"
+            "time": "2024-04-30T14:43:29+00:00"
         },
         {
             "name": "laravel/serializable-closure",
@@ -16576,16 +16577,16 @@
         },
         {
             "name": "laravel/pint",
-            "version": "v1.15.2",
+            "version": "v1.15.3",
             "source": {
                 "type": "git",
                 "url": "https://github.com/laravel/pint.git",
-                "reference": "2c9f8004899815f3f0ee3cb28ef7281e2b589134"
+                "reference": "3600b5d17aff52f6100ea4921849deacbbeb8656"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/laravel/pint/zipball/2c9f8004899815f3f0ee3cb28ef7281e2b589134",
-                "reference": "2c9f8004899815f3f0ee3cb28ef7281e2b589134",
+                "url": "https://api.github.com/repos/laravel/pint/zipball/3600b5d17aff52f6100ea4921849deacbbeb8656",
+                "reference": "3600b5d17aff52f6100ea4921849deacbbeb8656",
                 "shasum": ""
             },
             "require": {
@@ -16638,7 +16639,7 @@
                 "issues": "https://github.com/laravel/pint/issues",
                 "source": "https://github.com/laravel/pint"
             },
-            "time": "2024-04-23T15:42:34+00:00"
+            "time": "2024-04-30T15:02:26+00:00"
         },
         {
             "name": "laravel/sail",
@@ -20450,16 +20451,16 @@
         },
         {
             "name": "spatie/laravel-ignition",
-            "version": "2.6.1",
+            "version": "2.6.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/spatie/laravel-ignition.git",
-                "reference": "866eadf05386f79b9e5c44213ada3c3899240f23"
+                "reference": "42d986f4ab9d667020264a7481190a4606ebbeb0"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/spatie/laravel-ignition/zipball/866eadf05386f79b9e5c44213ada3c3899240f23",
-                "reference": "866eadf05386f79b9e5c44213ada3c3899240f23",
+                "url": "https://api.github.com/repos/spatie/laravel-ignition/zipball/42d986f4ab9d667020264a7481190a4606ebbeb0",
+                "reference": "42d986f4ab9d667020264a7481190a4606ebbeb0",
                 "shasum": ""
             },
             "require": {
@@ -20538,7 +20539,7 @@
                     "type": "github"
                 }
             ],
-            "time": "2024-04-30T08:47:46+00:00"
+            "time": "2024-04-30T13:56:21+00:00"
         },
         {
             "name": "squizlabs/php_codesniffer",
