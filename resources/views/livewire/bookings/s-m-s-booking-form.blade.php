@@ -10,7 +10,7 @@
         {{ $this->form }}
 
         <x-filament::button type="submit" class="mt-4 w-full text-lg submit-btn">
-            SMS Booking Link
+            Send Payment Link to Client
         </x-filament::button>
     </form>
 </x-filament-widgets::widget>
