@@ -7,7 +7,6 @@ use App\Livewire\Admin\AdminStats;
 use App\Livewire\Concierge\ConciergeLeaderboard;
 use App\Livewire\Partner\PartnerLeaderboard;
 use App\Livewire\Restaurant\RestaurantLeaderboard;
-use Filament\Actions\Action;
 use Filament\Forms\Components\DatePicker;
 use Filament\Pages\Dashboard;
 
@@ -64,24 +63,6 @@ class AdminDashboard extends Dashboard
                     DatePicker::make('startDate'),
                     DatePicker::make('endDate'),
                 ]),
-            Action::Make('addConcierge')
-                ->label('Concierge')
-                ->link()
-                ->icon('govicon-user-suit')
-                ->iconButton()
-                ->url(fn (): string => route('filament.admin.resources.concierges.create')),
-            Action::Make('addRestaurant')
-                ->label('Restaurant')
-                ->link()
-                ->iconButton()
-                ->icon('heroicon-o-building-storefront')
-                ->url(fn (): string => route('filament.admin.resources.restaurants.create')),
-            Action::Make('addPartner')
-                ->label('Partner')
-                ->link()
-                ->iconButton()
-                ->icon('gmdi-business-center-o')
-                ->url(fn (): string => route('filament.admin.resources.partners.create')),
         ];
     }
 }
