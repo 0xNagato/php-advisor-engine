@@ -48,8 +48,10 @@ class AppServiceProvider extends ServiceProvider
                     if (!localStorage.getItem('sidebar_initialized')) {
                         localStorage.setItem('sidebar_initialized', true);
                         $store.sidebar.isOpen = false;
-                    }
-                "></div>
+                    }"
+                    x-on:region-changed.window="$store.sidebar.isOpen = false"
+                >
+                </div>
             HTML
         );
 

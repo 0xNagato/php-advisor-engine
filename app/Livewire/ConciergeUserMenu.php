@@ -39,7 +39,7 @@ class ConciergeUserMenu extends Widget implements HasForms
                 ->default(fn () => session('simpleMode', false))
                 ->afterStateUpdated(function (Get $get) {
                     session(['simpleMode' => $get('simpleMode')]);
-                    $this->dispatch('simpleModeToggled', $get('simpleMode'));
+                    $this->dispatch('simple-mode-toggled', $get('simpleMode'));
                     if ($get('simpleMode')) {
                         $this->redirect(ReservationHub::getUrl());
                     } else {
@@ -54,7 +54,7 @@ class ConciergeUserMenu extends Widget implements HasForms
                 ->extraAttributes(['class' => 'text-sm'])
                 ->afterStateUpdated(function (Get $get) {
                     session(['region' => $get('region')]);
-                    $this->dispatch('regionChanged', $get('region'));
+                    $this->dispatch('region-changed', $get('region'));
                 })
                 ->default(session('region', ''))
                 ->selectablePlaceholder(false)

@@ -31,6 +31,10 @@ body::before {
     @apply dark:bg-white;
 }
 
+.fi-section-header {
+    @apply px-4 py-3 !important;
+}
+
 .fi-sidebar-item-active .fi-sidebar-item-icon, .fi-sidebar-item-active .fi-sidebar-item-label {
     @apply text-indigo-600 !important;
 }

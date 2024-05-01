@@ -5,7 +5,7 @@
         </x-slot>
 
         <x-slot name="headerEnd">
-            <div class="text-sm text-gray-500">
+            <div class="text-xs text-gray-500">
                 {{ auth()->user()->created_at->format('M j h:ia') }}
             </div>
         </x-slot>
