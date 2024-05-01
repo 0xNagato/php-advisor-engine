@@ -17,7 +17,7 @@
             </div>
 
             <div
-                class="grid grid-cols-[100px_repeat(3,_1fr)] auto-rows-fr p-2 pt-0 items-center bg-white rounded-b shadow-sm"
+                class="grid grid-cols-[100px_repeat(3,_1fr)] auto-rows-fr p-2 divide-y pt-0 items-center bg-white rounded-b shadow-sm"
             >
                 @foreach($restaurants as $restaurant)
                     <div class="flex h-12 items-center truncate text-base font-semibold text-wrap">
@@ -35,7 +35,7 @@
                             <button
                                 @if ($schedule->is_bookable) wire:click="createBooking({{ $schedule->id }}, '{{ $schedule->booking_date->format('Y-m-d') }}')" @endif
                                 @class([
-                                    'text-sm font-semibold rounded-xl p-1',
+                                    'text-sm font-semibold rounded-xl p-2 w-full mx-1',
                                     'bg-green-600 text-white cursor-pointer hover:bg-green-500' => $schedule->is_bookable,
                                     'bg-gray-100 text-gray-400 border-none' => !$schedule->is_bookable,
                                 ])
