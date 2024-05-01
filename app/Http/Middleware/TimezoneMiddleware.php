@@ -12,7 +12,11 @@ class TimezoneMiddleware
 {
     public function handle(Request $request, Closure $next)
     {
-        if (Cookie::get('timezone') === null && !auth()->check()) {
+        if (in_array($request->ip(), ['127.0.0.1', '0.0.0.0'])) {
+            return $next($request);
+        }
+
+        if (Cookie::get('timezone') === null && ! auth()->check()) {
             $ip = $request->ip();
             $url = "http://ip-api.com/json/$ip";
 
@@ -22,6 +26,7 @@ class TimezoneMiddleware
                 Cookie::queue('timezone', $timezone, 60 * 24 * 30);
             } catch (JsonException $e) {
                 Sentry::captureException($e);
+
                 return $next($request);
             }
         }

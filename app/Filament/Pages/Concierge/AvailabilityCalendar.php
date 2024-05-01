@@ -13,6 +13,7 @@ use Filament\Forms\Components\Select;
 use Filament\Forms\Form;
 use Filament\Forms\Get;
 use Filament\Pages\Page;
+use Illuminate\Database\Eloquent\Collection;
 
 /**
  * @property Form $form
@@ -35,7 +36,10 @@ class AvailabilityCalendar extends Page
 
     public ?array $data;
 
-    public ?array $restaurants;
+    /**
+     * @var Collection<Restaurant>|null
+     */
+    public ?Collection $restaurants;
 
     public function mount(): void
     {
@@ -166,17 +170,12 @@ class AvailabilityCalendar extends Page
                 $guestCount++;
             }
 
-            $restaurants = Restaurant::available()->with(['schedules' => function ($query) use ($guestCount, $reservationTime, $endTimeForQuery) {
+            $this->restaurants = Restaurant::available()->with(['schedules' => function ($query) use ($guestCount, $reservationTime, $endTimeForQuery) {
                 $query->where('booking_date', $this->form->getState()['date'])
                     ->where('party_size', $guestCount)
                     ->where('start_time', '>=', $reservationTime)
                     ->where('start_time', '<=', $endTimeForQuery);
             }])->get();
-
-            foreach ($restaurants as $restaurant) {
-                $this->restaurants[$restaurant->id]['restaurant'] = $restaurant;
-                $this->restaurants[$restaurant->id]['schedules'] = $restaurant->schedules;
-            }
         }
     }
 
