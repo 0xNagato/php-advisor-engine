@@ -43,8 +43,24 @@ class AvailabilityCalendar extends Page
 
     public function mount(): void
     {
-        $this->form->fill();
+        // $this->form->fill();
+
+        $this->form->fill([
+            'date' => now(auth()->user()->timezone)->format('Y-m-d'),
+            'radio_date' => now(auth()->user()->timezone)->format('Y-m-d'),
+            'select_date' => now(auth()->user()->timezone)->format('Y-m-d'),
+            'guest_count' => 2,
+            'reservation_time' => now(auth()->user()->timezone)->format('H:i:s'),
+        ]);
+
+        $this->restaurants = Restaurant::available()->with(['schedules' => function ($query) {
+            $query->where('booking_date', now(auth()->user()->timezone)->format('Y-m-d'))
+                ->where('party_size', 2)
+                ->where('start_time', '>=', now(auth()->user()->timezone)->format('H:i:s'))
+                ->where('start_time', '<=', now(auth()->user()->timezone)->addMinutes(90)->format('H:i:s'));
+        }])->get();
     }
+
 
     public static function canAccess(): bool
     {
@@ -84,7 +100,7 @@ class AvailabilityCalendar extends Page
                 ->hidden(function (Get $get) {
                     return $get('radio_date') !== 'select_date';
                 })
-                ->afterStateUpdated(fn ($state, $set) => $set('date', Carbon::parse($state)->format('Y-m-d')))
+                ->afterStateUpdated(fn($state, $set) => $set('date', Carbon::parse($state)->format('Y-m-d')))
                 ->prefixIcon('heroicon-m-calendar')
                 ->native(false)
                 ->closeOnDateSelection(),
