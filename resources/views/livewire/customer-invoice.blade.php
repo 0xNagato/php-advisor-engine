@@ -92,7 +92,7 @@
                 <div>
                     <span class="block text-xs text-gray-500 uppercase">Amount Paid:</span>
                     <span class="block text-sm font-medium text-gray-800 dark:text-gray-200">
-                    {{ money($booking->total_with_tax_in_cents) }}
+                    {{ money($booking->total_with_tax_in_cents, $booking->currency) }}
                 </span>
                 </div>
                 <!-- End Col -->
@@ -153,7 +153,7 @@
                             {{ $booking->restaurant->restaurant_name }} ({{ $booking->guest_count }} guests)
                         </span>
                             <span>
-                            {{ money($booking->total_fee) }}
+                            {{ money($booking->total_fee, $booking->currency) }}
                         </span>
                         </div>
                     </li>
@@ -162,7 +162,7 @@
                         <div class="flex items-center justify-between w-full">
                             <span>Tax ({{ $booking->tax * 100 }}%)</span>
                             <span>
-                            {{ money($booking->tax_amount_in_cents) }}
+                            {{ money($booking->tax_amount_in_cents, $booking->currency) }}
                         </span>
                         </div>
                     </li>
@@ -171,7 +171,7 @@
                         <div class="flex items-center justify-between w-full">
                             <span>Amount Paid</span>
                             <span>
-                            {{ money($booking->total_with_tax_in_cents) }}
+                            {{ money($booking->total_with_tax_in_cents, $booking->currency) }}
                         </span>
                         </div>
                     </li>
@@ -192,14 +192,14 @@
 
                             <div class="truncate">{{ $earning->user->name }}</div>
                             <div>{{ Str::title(str_replace('_', ' ', $earning->type)) }}</div>
-                            <div class="text-right">{{ money($earning->amount) }}</div>
+                            <div class="text-right">{{ money($earning->amount, $booking->currency) }}</div>
 
                         @endforeach
 
                         @role('super_admin')
                         <div class="font-semibold mt-2">Total Payout:</div>
                         <div
-                            class="col-span-2 font-semibold mt-2 text-right">{{ money($booking->earnings->sum('amount')) }}</div>
+                            class="col-span-2 font-semibold mt-2 text-right">{{ money($booking->earnings->sum('amount'), $booking->currency) }}</div>
                         @endrole
                     </div>
                 </div>

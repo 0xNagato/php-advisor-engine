@@ -4,7 +4,7 @@ namespace App\Livewire;
 
 use App\Filament\Pages\Concierge\ReservationHub;
 use App\Filament\Resources\MessageResource\Pages\ListMessages;
-use App\Models\Restaurant;
+use App\Models\Region;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Toggle;
 use Filament\Forms\Concerns\InteractsWithForms;
@@ -34,7 +34,7 @@ class ConciergeUserMenu extends Widget implements HasForms
     {
         return $form->schema([
             Toggle::make('simpleMode')
-                ->label(fn () => new HtmlString('<span class="text-sm">Simple Mode</span>'))
+                ->label(fn () => new HtmlString('<span class="text-sm">Booking Mode</span>'))
                 ->live()
                 ->default(fn () => session('simpleMode', false))
                 ->afterStateUpdated(function (Get $get) {
@@ -50,7 +50,7 @@ class ConciergeUserMenu extends Widget implements HasForms
                 ->hiddenLabel()
                 ->live()
                 ->placeholder('Select a region')
-                ->options(Restaurant::REGIONS)
+                ->options(Region::all()->sortBy('id')->pluck('name', 'id'))
                 ->extraAttributes(['class' => 'text-sm'])
                 ->afterStateUpdated(function (Get $get) {
                     session(['region' => $get('region')]);

@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Enums\BookingStatus;
 use App\Events\BookingPaid;
 use App\Models\Booking;
+use App\Models\Region;
 use App\Traits\FormatsPhoneNumber;
 use Stripe\Charge;
 use Stripe\Customer;
@@ -22,23 +23,41 @@ class BookingService
      */
     public function processBooking(Booking $booking, $form): void
     {
-        if ($booking->prime_time) {
-            Stripe::setApiKey(config('services.stripe.secret'));
-            $stripeCustomer = Customer::create([
-                'name' => $form['first_name'].' '.$form['last_name'],
-                'phone' => $form['phone'],
-                'email' => $form['email'],
-                'source' => $form['token'],
-            ]);
+        $stripeCharge = $this->handleStripeCharge($booking, $form);
+        $this->updateBooking($booking, $form, $stripeCharge);
+        BookingPaid::dispatch($booking);
+    }
 
-            $stripeCharge = Charge::create([
-                'amount' => $booking->total_with_tax_in_cents,
-                'currency' => 'usd',
-                'customer' => $stripeCustomer->id,
-                'description' => 'Booking for '.$booking->restaurant->restaurant_name,
-            ]);
+    /**
+     * @throws ApiErrorException
+     */
+    private function handleStripeCharge(Booking $booking, $form)
+    {
+        if (! $booking->prime_time) {
+            return null;
         }
 
+        Stripe::setApiKey(config('services.stripe.secret'));
+
+        $stripeCustomer = Customer::create([
+            'name' => $form['first_name'].' '.$form['last_name'],
+            'phone' => $form['phone'],
+            'email' => $form['email'],
+            'source' => $form['token'],
+        ]);
+
+        $region = Region::find($booking->restaurant->region);
+
+        return Charge::create([
+            'amount' => $booking->total_with_tax_in_cents,
+            'currency' => $region->currency,
+            'customer' => $stripeCustomer->id,
+            'description' => 'Booking for '.$booking->restaurant->restaurant_name,
+        ]);
+    }
+
+    private function updateBooking(Booking $booking, $form, $stripeCharge): void
+    {
         $formattedPhone = $this->getInternationalFormattedPhoneNumber($form['phone']);
 
         $booking->update([
@@ -51,7 +70,5 @@ class BookingService
             'stripe_charge_id' => $booking->prime_time ? $stripeCharge->id : null,
             'confirmed_at' => now(),
         ]);
-
-        BookingPaid::dispatch($booking);
     }
 }

@@ -4,7 +4,7 @@ namespace App\Filament\Resources\RestaurantResource\Pages;
 
 use App\Filament\Resources\RestaurantResource;
 use App\Models\Referral;
-use App\Models\Restaurant;
+use App\Models\Region;
 use App\Models\User;
 use Filament\Forms\Components\Checkbox;
 use Filament\Forms\Components\FileUpload;
@@ -76,7 +76,7 @@ class CreateRestaurant extends CreateRecord
                             ->maxLength(255),
                         Select::make('region')
                             ->placeholder('Select Region')
-                            ->options(Restaurant::REGIONS),
+                            ->options(Region::all()->sortBy('id')->pluck('name', 'id')),
                         TextInput::make('primary_contact_name')
                             ->label('Primary Contact Name')
                             ->required(),

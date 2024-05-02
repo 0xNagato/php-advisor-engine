@@ -191,4 +191,7 @@ return [
         // 'Example' => App\Facades\Example::class,
     ])->toArray(),
 
+    'default_timezone' => env('LOCAL_ENV_TIMEZONE', 'America/New_York'),
+    'default_region' => env('LOCAL_ENV_REGION', 'miami'),
+
 ];

@@ -6,21 +6,18 @@ use App\Enums\BookingStatus;
 use App\Events\BookingCancelled;
 use App\Events\BookingCreated;
 use App\Models\Booking;
+use App\Models\Region;
 use App\Models\Restaurant;
 use App\Models\ScheduleTemplate;
 use App\Models\ScheduleWithBooking;
 use App\Services\BookingService;
 use App\Services\SalesTaxService;
-use App\Traits\HasReservation;
+use App\Traits\ManagesBookingForms;
 use AshAllenDesign\ShortURL\Facades\ShortURL;
 use chillerlan\QRCode\QRCode;
 use Exception;
-use Filament\Forms\Components\DatePicker;
-use Filament\Forms\Components\Hidden;
-use Filament\Forms\Components\Radio;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Form;
-use Filament\Forms\Get;
 use Filament\Notifications\Notification;
 use Filament\Pages\Page;
 use Illuminate\Database\Eloquent\Collection;
@@ -36,13 +33,7 @@ use Stripe\Exception\ApiErrorException;
  */
 class ReservationHub extends Page
 {
-    use HasReservation;
-
-    public const int AVAILABILITY_DAYS = 3;
-
-    public const int MINUTES_PAST = 30;
-
-    public const int MINUTES_FUTURE = 60;
+    use ManagesBookingForms;
 
     protected static ?string $navigationIcon = 'heroicon-o-building-storefront';
 
@@ -56,11 +47,6 @@ class ReservationHub extends Page
 
     protected static string $view = 'filament.widgets.reservation-hub';
 
-    public static function canAccess(): bool
-    {
-        return auth()->user()?->hasRole('concierge');
-    }
-
     #[Session]
     public ?string $qrCode;
 
@@ -73,6 +59,8 @@ class ReservationHub extends Page
     public bool $isLoading = false;
 
     public bool $paymentSuccess = false;
+
+    public string $currency;
 
     public bool $SMSSent = false;
 
@@ -90,13 +78,14 @@ class ReservationHub extends Page
     #[Url]
     public ?string $date = null;
 
-    public static function canView(): bool
+    public static function canAccess(): bool
     {
-        return auth()->user()->hasRole('concierge');
+        return auth()->user()?->hasRole('concierge');
     }
 
     public function mount(): void
     {
+        $this->currency = Region::find(session('region'))->currency;
         $this->booking = $this->booking?->refresh();
 
         $this->form->fill();
@@ -124,75 +113,13 @@ class ReservationHub extends Page
     {
         return $form
             ->schema([
-                Hidden::make('date')
-                    ->default(now(auth()->user()->timezone)->format('Y-m-d')),
-                Radio::make('radio_date')
-                    ->options([
-                        now(auth()->user()->timezone)->format('Y-m-d') => 'Today',
-                        now(auth()->user()->timezone)->addDay()->format('Y-m-d') => 'Tomorrow',
-                        'select_date' => 'Select Date',
-                    ])
-                    ->afterStateUpdated(function ($state, $set) {
-                        if ($state !== 'select_date') {
-                            $set('date', $state);
-                        }
-                    })
-                    ->default(now(auth()->user()->timezone)->format('Y-m-d'))
-                    ->inline()
-                    ->hiddenLabel()
-                    ->live()
-                    ->columnSpanFull()
-                    ->required(),
-                DatePicker::make('select_date')
-                    ->hiddenLabel()
-                    ->live()
-                    ->columnSpanFull()
-                    ->weekStartsOnSunday()
-                    ->default(now(auth()->user()->timezone)->format('Y-m-d'))
-                    ->minDate(now(auth()->user()->timezone)->format('Y-m-d'))
-                    ->maxDate(now(auth()->user()->timezone)->addMonth()->format('Y-m-d'))
-                    ->hidden(function (Get $get) {
-                        return $get('radio_date') !== 'select_date';
-                    })
-                    ->afterStateUpdated(fn ($state, $set) => $set('date', Carbon::parse($state)->format('Y-m-d')))
-                    ->prefixIcon('heroicon-m-calendar')
-                    ->native(false)
-                    ->closeOnDateSelection(),
-                Select::make('guest_count')
-                    ->prefixIcon('heroicon-m-users')
-                    ->options([
-                        2 => '2 Guests',
-                        3 => '3 Guests',
-                        4 => '4 Guests',
-                        5 => '5 Guests',
-                        6 => '6 Guests',
-                        7 => '7 Guests',
-                        8 => '8 Guests',
-                    ])
-                    ->placeholder('Party Size')
-                    ->live()
-                    ->hiddenLabel()
-                    ->columnSpan(1)
-                    ->required(),
-                Select::make('reservation_time')
-                    ->prefixIcon('heroicon-m-clock')
-                    ->options(function (Get $get) {
-                        return $this->getReservationTimeOptions($get('date'));
-                    })
-                    ->disableOptionWhen(function (Get $get, $value) {
-                        $isCurrentDay = $get('date') === now(auth()->user()->timezone)->format('Y-m-d');
-
-                        return $isCurrentDay && $value < now(auth()->user()->timezone)->format('H:i:s');
-                    })
-                    ->placeholder('Select Time')
-                    ->hiddenLabel()
-                    ->required()
-                    ->columnSpan(1)
-                    ->live(),
+                ...$this->commonFormComponents(),
                 Select::make('restaurant')
                     ->prefixIcon('heroicon-m-building-storefront')
                     ->options(
-                        Restaurant::available()->pluck('restaurant_name', 'id')
+                        Restaurant::available()
+                            ->where('region', session('region'))
+                            ->pluck('restaurant_name', 'id')
                     )
                     ->placeholder('Select Restaurant')
                     ->required()
@@ -321,11 +248,13 @@ class ReservationHub extends Page
             'concierge_id' => auth()->user()->concierge->id,
             'status' => BookingStatus::PENDING,
             'booking_at' => $bookingAt,
+            'currency' => $this->currency,
         ]);
 
         $taxData = app(SalesTaxService::class)->calculateTax(
-            'miami',
-            $this->booking->total_fee
+            $this->booking->restaurant->region,
+            $this->booking->total_fee,
+            noTax: true,
         );
 
         $totalWithTaxInCents =
@@ -334,7 +263,7 @@ class ReservationHub extends Page
         $this->booking->update([
             'tax' => $taxData->tax,
             'tax_amount_in_cents' => $taxData->amountInCents,
-            'city' => $taxData->city,
+            'city' => $taxData->region,
             'total_with_tax_in_cents' => $totalWithTaxInCents,
         ]);
 

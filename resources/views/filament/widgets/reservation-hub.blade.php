@@ -30,7 +30,7 @@
                                     </div>
                                     <div>
                                         @if($schedule->is_bookable && $schedule->prime_time)
-                                            {{ money($schedule->fee($data['guest_count'])) }}
+                                            @money($schedule->fee($data['guest_count']), $currency)
                                         @elseif($schedule->is_bookable && !$schedule->prime_time)
                                             No Fee
                                         @endif
@@ -71,7 +71,7 @@
                                     </div>
                                     <div>
                                         @if($schedule->is_bookable && $schedule->prime_time)
-                                            {{ money($schedule->fee($data['guest_count'])) }}
+                                            @money($schedule->fee($data['guest_count']), $currency)
                                         @elseif($schedule->is_bookable && !$schedule->prime_time)
                                             No Fee
                                         @endif

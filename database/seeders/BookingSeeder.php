@@ -55,7 +55,7 @@ class BookingSeeder extends Seeder
         $booking->update([
             'tax' => $taxData->tax,
             'tax_amount_in_cents' => $taxData->amountInCents,
-            'city' => $taxData->city,
+            'city' => $taxData->region,
             'total_with_tax_in_cents' => $totalWithTaxInCents,
             'confirmed_at' => $schedule->booking_at,
         ]);

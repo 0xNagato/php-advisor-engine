@@ -2,31 +2,22 @@
 
 namespace App\Filament\Pages\Concierge;
 
+use App\Models\Region;
 use App\Models\Restaurant;
-use App\Traits\HasReservation;
+use App\Traits\ManagesBookingForms;
 use Carbon\Carbon;
 use Exception;
-use Filament\Forms\Components\DatePicker;
-use Filament\Forms\Components\Hidden;
-use Filament\Forms\Components\Radio;
-use Filament\Forms\Components\Select;
 use Filament\Forms\Form;
-use Filament\Forms\Get;
 use Filament\Pages\Page;
 use Illuminate\Database\Eloquent\Collection;
+use Livewire\Attributes\On;
 
 /**
  * @property Form $form
  */
 class AvailabilityCalendar extends Page
 {
-    use HasReservation;
-
-    public const int AVAILABILITY_DAYS = 3;
-
-    public const int MINUTES_PAST = 30;
-
-    public const int MINUTES_FUTURE = 60;
+    use ManagesBookingForms;
 
     protected static ?string $navigationIcon = 'heroicon-o-calendar';
 
@@ -36,6 +27,10 @@ class AvailabilityCalendar extends Page
 
     public ?array $data;
 
+    public string $currency;
+
+    public ?string $endTimeForQuery;
+
     /**
      * @var Collection<Restaurant>|null
      */
@@ -43,6 +38,7 @@ class AvailabilityCalendar extends Page
 
     public function mount(): void
     {
+        $this->currency = Region::find(session('region'))->currency;
         $this->form->fill();
 
         // This is used for testing the design so you don't need to fill out the form every time
@@ -70,71 +66,7 @@ class AvailabilityCalendar extends Page
     public function form(Form $form): Form
     {
         return $form->schema([
-            Hidden::make('date')
-                ->default(now(auth()->user()->timezone)->format('Y-m-d')),
-            Radio::make('radio_date')
-                ->options([
-                    now(auth()->user()->timezone)->format('Y-m-d') => 'Today',
-                    now(auth()->user()->timezone)->addDay()->format('Y-m-d') => 'Tomorrow',
-                    'select_date' => 'Select Date',
-                ])
-                ->afterStateUpdated(function ($state, $set) {
-                    if ($state !== 'select_date') {
-                        $set('date', $state);
-                    }
-                })
-                ->default(now(auth()->user()->timezone)->format('Y-m-d'))
-                ->inline()
-                ->hiddenLabel()
-                ->live()
-                ->columnSpanFull()
-                ->required(),
-            DatePicker::make('select_date')
-                ->hiddenLabel()
-                ->live()
-                ->columnSpanFull()
-                ->weekStartsOnSunday()
-                ->default(now(auth()->user()->timezone)->format('Y-m-d'))
-                ->minDate(now(auth()->user()->timezone)->format('Y-m-d'))
-                ->maxDate(now(auth()->user()->timezone)->addMonth()->format('Y-m-d'))
-                ->hidden(function (Get $get) {
-                    return $get('radio_date') !== 'select_date';
-                })
-                ->afterStateUpdated(fn ($state, $set) => $set('date', Carbon::parse($state)->format('Y-m-d')))
-                ->prefixIcon('heroicon-m-calendar')
-                ->native(false)
-                ->closeOnDateSelection(),
-            Select::make('guest_count')
-                ->prefixIcon('heroicon-m-users')
-                ->options([
-                    2 => '2 Guests',
-                    3 => '3 Guests',
-                    4 => '4 Guests',
-                    5 => '5 Guests',
-                    6 => '6 Guests',
-                    7 => '7 Guests',
-                    8 => '8 Guests',
-                ])
-                ->placeholder('Party Size')
-                ->live()
-                ->hiddenLabel()
-                ->columnSpan(1)
-                ->required(),
-            Select::make('reservation_time')
-                ->prefixIcon('heroicon-m-clock')
-                ->options(function (Get $get) {
-                    return $this->getReservationTimeOptions($get('date'));
-                })
-                ->disableOptionWhen(function (Get $get, $value) {
-                    $isCurrentDay = $get('date') === now(auth()->user()->timezone)->format('Y-m-d');
-
-                    return $isCurrentDay && $value < now(auth()->user()->timezone)->format('H:i:s');
-                })
-                ->placeholder('Select Time')
-                ->hiddenLabel()
-                ->required()
-                ->columnSpan(1)
-                ->live(),
+            ...$this->commonFormComponents(),
         ])
             ->extraAttributes(['class' => 'inline-form'])
             ->columns([
@@ -145,10 +77,6 @@ class AvailabilityCalendar extends Page
 
     public function updatedData($data, $key): void
     {
-        if ($key === 'radio_date' && $data === 'select_date') {
-            return;
-        }
-
         if ($key === 'guest_count' && empty($data)) {
             $this->data['guest_count'] = 2;
         }
@@ -158,45 +86,76 @@ class AvailabilityCalendar extends Page
             $requestedDate = Carbon::createFromFormat('Y-m-d', $this->data['date'], $userTimezone);
             $currentDate = Carbon::now($userTimezone);
 
+            $reservationTime = $this->form->getState()['reservation_time'];
             if ($currentDate->isSameDay($requestedDate)) {
-                $reservationTime = Carbon::createFromFormat('H:i:s', $this->form->getState()['reservation_time'], $userTimezone);
-                $currentTime = Carbon::now($userTimezone);
-
-                if ($reservationTime->copy()->subMinutes(self::MINUTES_PAST)->gt($currentTime)) {
-                    $reservationTime = $reservationTime->subMinutes(self::MINUTES_PAST)->format('H:i:s');
-                } else {
-                    $reservationTime = $this->form->getState()['reservation_time'];
-                }
-            } else {
-                $reservationTime = $this->form->getState()['reservation_time'];
+                $reservationTime = $this->adjustReservationTime($reservationTime, $userTimezone);
             }
 
-            $endTime = Carbon::createFromFormat('H:i:s', $reservationTime, $userTimezone)->addMinutes(self::MINUTES_FUTURE);
-            $limitTime = Carbon::createFromTime(23, 59, 0, $userTimezone);
+            $endTime = $this->calculateEndTime($reservationTime, $userTimezone);
+            $guestCount = $this->calculateGuestCount();
 
-            if ($endTime->gt($limitTime)) {
-                $endTimeForQuery = '23:59:59';
-            } else {
-                $endTimeForQuery = $endTime->format('H:i:s');
-            }
+            $this->restaurants = $this->getAvailableRestaurants($guestCount, $reservationTime, $endTime);
+        }
+    }
 
-            $guestCount = $this->form->getState()['guest_count'];
-            $guestCount = ceil($guestCount);
-            if ($guestCount % 2 !== 0) {
-                $guestCount++;
-            }
+    private function adjustReservationTime($reservationTime, $userTimezone): string
+    {
+        $reservationTime = Carbon::createFromFormat('H:i:s', $reservationTime, $userTimezone);
+        $currentTime = Carbon::now($userTimezone);
 
-            $this->restaurants = Restaurant::available()->with(['schedules' => function ($query) use ($guestCount, $reservationTime, $endTimeForQuery) {
+        if ($reservationTime->copy()->subMinutes(self::MINUTES_PAST)->gt($currentTime)) {
+            return $reservationTime->subMinutes(self::MINUTES_PAST)->format('H:i:s');
+        }
+
+        return $reservationTime;
+    }
+
+    private function calculateEndTime($reservationTime, $userTimezone): string
+    {
+        $endTime = Carbon::createFromFormat('H:i:s', $reservationTime, $userTimezone)->addMinutes(self::MINUTES_FUTURE);
+        $limitTime = Carbon::createFromTime(23, 59, 0, $userTimezone);
+
+        return $endTime->gt($limitTime) ? '23:59:59' : $endTime->format('H:i:s');
+    }
+
+    private function calculateGuestCount(): int
+    {
+        $guestCount = ceil($this->form->getState()['guest_count']);
+
+        return (int) ($guestCount % 2 !== 0 ? $guestCount + 1 : $guestCount);
+    }
+
+    /**
+     * @return Collection<Restaurant>
+     */
+    private function getAvailableRestaurants($guestCount, $reservationTime, $endTime): Collection
+    {
+        return Restaurant::available()
+            ->where('region', session('region'))
+            ->with(['schedules' => function ($query) use ($guestCount, $reservationTime, $endTime) {
                 $query->where('booking_date', $this->form->getState()['date'])
                     ->where('party_size', $guestCount)
                     ->where('start_time', '>=', $reservationTime)
-                    ->where('start_time', '<=', $endTimeForQuery);
+                    ->where('start_time', '<=', $endTime);
             }])->get();
+    }
+
+    #[On('region-changed')]
+    public function regionChanged(): void
+    {
+        $this->currency = Region::find(session('region'))->currency;
+
+        if (isset($this->data['reservation_time'], $this->data['date'], $this->data['guest_count'])) {
+            $userTimezone = auth()->user()->timezone;
+            $endTime = $this->calculateEndTime($this->data['reservation_time'], $userTimezone);
+            $this->restaurants = $this->getAvailableRestaurants($this->calculateGuestCount(), $this->data['reservation_time'], $endTime);
         }
     }
 
     /**
      * @throws Exception
+     *
+     * @todo: Extract the create booking from ReservationHub to a service class and reuse here
      */
     public function createBooking($scheduleTemplateId, $date): void
     {

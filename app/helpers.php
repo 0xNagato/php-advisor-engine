@@ -70,9 +70,9 @@ if (! function_exists('formatDateFromString')) {
 }
 
 if (! function_exists('moneyWithoutCents')) {
-    function moneyWithoutCents($amount): string
+    function moneyWithoutCents($amount, $currency): string
     {
-        $formatted = money($amount);
+        $formatted = money($amount, $currency);
 
         // Remove any cents value from the end of the string
         return preg_replace('/\.\d{2}$/', '', $formatted);

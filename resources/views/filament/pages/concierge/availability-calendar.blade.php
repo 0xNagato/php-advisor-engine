@@ -43,7 +43,7 @@
                             >
                                 <div>
                                     @if($schedule->is_bookable && $schedule->prime_time)
-                                        {{ moneyWithoutCents($schedule->fee($data['guest_count'])) }}
+                                        {{ moneyWithoutCents($schedule->fee($data['guest_count']), $currency) }}
                                     @elseif($schedule->is_bookable && !$schedule->prime_time)
                                         <span class="text-xs text-nowrap">No Fee</span>
                                     @else
