@@ -51,7 +51,7 @@ class PaymentInformation extends Page
     public static function canAccess(): bool
     {
         if (session()->exists('simpleMode')) {
-            return ! session('simpleMode');
+            return !session('simpleMode');
         }
 
         return auth()->user()->hasRole('concierge') || auth()->user()->hasRole('restaurant');
@@ -59,6 +59,13 @@ class PaymentInformation extends Page
 
     public function mount(): void
     {
+        if (auth()->user()->hasRole('concierge')) {
+            $this->payoutOptions = [
+                'Direct Deposit',
+                'PayPal',
+            ];
+        }
+
         $this->user = User::find(auth()->id());
 
         $this->payout_type = $this->user->payout?->payout_type ?? '';
