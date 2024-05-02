@@ -61,7 +61,6 @@ class ReservationHub extends Page
     public bool $paymentSuccess = false;
 
     public string $currency;
-    public string $timezone;
 
     public bool $SMSSent = false;
 
@@ -257,7 +256,7 @@ class ReservationHub extends Page
         $taxData = app(SalesTaxService::class)->calculateTax(
             $this->booking->restaurant->region,
             $this->booking->total_fee,
-            noTax: true,
+            noTax: config('app.no_tax'),
         );
 
         $totalWithTaxInCents =

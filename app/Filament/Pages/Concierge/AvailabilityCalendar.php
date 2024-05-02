@@ -28,7 +28,6 @@ class AvailabilityCalendar extends Page
     public ?array $data;
 
     public string $currency;
-    public string $timezone;
 
     public ?string $endTimeForQuery;
 
@@ -109,11 +108,15 @@ class AvailabilityCalendar extends Page
             return $reservationTime->subMinutes(self::MINUTES_PAST)->format('H:i:s');
         }
 
-        return $reservationTime;
+        return $reservationTime->format('H:i:s');
     }
 
     private function calculateEndTime($reservationTime): string
     {
+        ds([
+            'reservationTime' => $reservationTime,
+            'timezone' => $this->timezone,
+        ]);
         $endTime = Carbon::createFromFormat('H:i:s', $reservationTime, $this->timezone)->addMinutes(self::MINUTES_FUTURE);
         $limitTime = Carbon::createFromTime(23, 59, 0, $this->timezone);
 
