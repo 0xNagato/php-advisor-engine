@@ -113,10 +113,6 @@ class AvailabilityCalendar extends Page
 
     private function calculateEndTime($reservationTime): string
     {
-        ds([
-            'reservationTime' => $reservationTime,
-            'timezone' => $this->timezone,
-        ]);
         $endTime = Carbon::createFromFormat('H:i:s', $reservationTime, $this->timezone)->addMinutes(self::MINUTES_FUTURE);
         $limitTime = Carbon::createFromTime(23, 59, 0, $this->timezone);
 
