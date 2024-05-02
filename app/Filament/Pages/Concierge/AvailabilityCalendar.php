@@ -123,7 +123,7 @@ class AvailabilityCalendar extends Page
     {
         $guestCount = ceil($this->form->getState()['guest_count']);
 
-        return (int) ($guestCount % 2 !== 0 ? $guestCount + 1 : $guestCount);
+        return (int)($guestCount % 2 !== 0 ? $guestCount + 1 : $guestCount);
     }
 
     /**
@@ -145,13 +145,12 @@ class AvailabilityCalendar extends Page
     public function regionChanged(): void
     {
         $region = Region::find(session('region'));
+
         $this->timezone = $region->timezone;
         $this->currency = $region->currency;
 
-        if (isset($this->data['reservation_time'], $this->data['date'], $this->data['guest_count'])) {
-            $endTime = $this->calculateEndTime($this->data['reservation_time']);
-            $this->restaurants = $this->getAvailableRestaurants($this->calculateGuestCount(), $this->data['reservation_time'], $endTime);
-        }
+        $this->restaurants = null;
+        $this->form->fill();
     }
 
     /**
