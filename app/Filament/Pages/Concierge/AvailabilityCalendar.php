@@ -28,6 +28,7 @@ class AvailabilityCalendar extends Page
     public ?array $data;
 
     public string $currency;
+    public string $timezone;
 
     public ?string $endTimeForQuery;
 
@@ -38,7 +39,9 @@ class AvailabilityCalendar extends Page
 
     public function mount(): void
     {
-        $this->currency = Region::find(session('region'))->currency;
+        $region = Region::find(session('region'));
+        $this->timezone = $region->timezone;
+        $this->currency = $region->currency;
         $this->form->fill();
 
         // This is used for testing the design so you don't need to fill out the form every time
@@ -82,26 +85,25 @@ class AvailabilityCalendar extends Page
         }
 
         if (isset($this->data['reservation_time'], $this->data['date'], $this->data['guest_count'])) {
-            $userTimezone = auth()->user()->timezone;
-            $requestedDate = Carbon::createFromFormat('Y-m-d', $this->data['date'], $userTimezone);
-            $currentDate = Carbon::now($userTimezone);
+            $requestedDate = Carbon::createFromFormat('Y-m-d', $this->data['date'], $this->timezone);
+            $currentDate = Carbon::now($this->timezone);
 
             $reservationTime = $this->form->getState()['reservation_time'];
             if ($currentDate->isSameDay($requestedDate)) {
-                $reservationTime = $this->adjustReservationTime($reservationTime, $userTimezone);
+                $reservationTime = $this->adjustReservationTime($reservationTime);
             }
 
-            $endTime = $this->calculateEndTime($reservationTime, $userTimezone);
+            $endTime = $this->calculateEndTime($reservationTime);
             $guestCount = $this->calculateGuestCount();
 
             $this->restaurants = $this->getAvailableRestaurants($guestCount, $reservationTime, $endTime);
         }
     }
 
-    private function adjustReservationTime($reservationTime, $userTimezone): string
+    private function adjustReservationTime($reservationTime): string
     {
-        $reservationTime = Carbon::createFromFormat('H:i:s', $reservationTime, $userTimezone);
-        $currentTime = Carbon::now($userTimezone);
+        $reservationTime = Carbon::createFromFormat('H:i:s', $reservationTime, $this->timezone);
+        $currentTime = Carbon::now($this->timezone);
 
         if ($reservationTime->copy()->subMinutes(self::MINUTES_PAST)->gt($currentTime)) {
             return $reservationTime->subMinutes(self::MINUTES_PAST)->format('H:i:s');
@@ -110,10 +112,10 @@ class AvailabilityCalendar extends Page
         return $reservationTime;
     }
 
-    private function calculateEndTime($reservationTime, $userTimezone): string
+    private function calculateEndTime($reservationTime): string
     {
-        $endTime = Carbon::createFromFormat('H:i:s', $reservationTime, $userTimezone)->addMinutes(self::MINUTES_FUTURE);
-        $limitTime = Carbon::createFromTime(23, 59, 0, $userTimezone);
+        $endTime = Carbon::createFromFormat('H:i:s', $reservationTime, $this->timezone)->addMinutes(self::MINUTES_FUTURE);
+        $limitTime = Carbon::createFromTime(23, 59, 0, $this->timezone);
 
         return $endTime->gt($limitTime) ? '23:59:59' : $endTime->format('H:i:s');
     }
@@ -122,7 +124,7 @@ class AvailabilityCalendar extends Page
     {
         $guestCount = ceil($this->form->getState()['guest_count']);
 
-        return (int) ($guestCount % 2 !== 0 ? $guestCount + 1 : $guestCount);
+        return (int)($guestCount % 2 !== 0 ? $guestCount + 1 : $guestCount);
     }
 
     /**
@@ -143,11 +145,12 @@ class AvailabilityCalendar extends Page
     #[On('region-changed')]
     public function regionChanged(): void
     {
-        $this->currency = Region::find(session('region'))->currency;
+        $region = Region::find(session('region'));
+        $this->timezone = $region->timezone;
+        $this->currency = $region->currency;
 
         if (isset($this->data['reservation_time'], $this->data['date'], $this->data['guest_count'])) {
-            $userTimezone = auth()->user()->timezone;
-            $endTime = $this->calculateEndTime($this->data['reservation_time'], $userTimezone);
+            $endTime = $this->calculateEndTime($this->data['reservation_time']);
             $this->restaurants = $this->getAvailableRestaurants($this->calculateGuestCount(), $this->data['reservation_time'], $endTime);
         }
     }

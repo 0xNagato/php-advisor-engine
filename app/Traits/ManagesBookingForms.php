@@ -18,15 +18,17 @@ trait ManagesBookingForms
 
     public const int MINUTES_FUTURE = 60;
 
+    public string $timezone;
+
     protected function commonFormComponents(): array
     {
         return [
             Hidden::make('date')
-                ->default(now(auth()->user()->timezone)->format('Y-m-d')),
+                ->default(now($this->timezone)->format('Y-m-d')),
             Radio::make('radio_date')
                 ->options([
-                    now(auth()->user()->timezone)->format('Y-m-d') => 'Today',
-                    now(auth()->user()->timezone)->addDay()->format('Y-m-d') => 'Tomorrow',
+                    now($this->timezone)->format('Y-m-d') => 'Today',
+                    now($this->timezone)->addDay()->format('Y-m-d') => 'Tomorrow',
                     'select_date' => 'Select Date',
                 ])
                 ->afterStateUpdated(function ($state, $set) {
@@ -34,7 +36,7 @@ trait ManagesBookingForms
                         $set('date', $state);
                     }
                 })
-                ->default(now(auth()->user()->timezone)->format('Y-m-d'))
+                ->default(now($this->timezone)->format('Y-m-d'))
                 ->inline()
                 ->hiddenLabel()
                 ->live()
@@ -45,13 +47,13 @@ trait ManagesBookingForms
                 ->live()
                 ->columnSpanFull()
                 ->weekStartsOnSunday()
-                ->default(now(auth()->user()->timezone)->format('Y-m-d'))
-                ->minDate(now(auth()->user()->timezone)->format('Y-m-d'))
-                ->maxDate(now(auth()->user()->timezone)->addMonth()->format('Y-m-d'))
+                ->default(now($this->timezone)->format('Y-m-d'))
+                ->minDate(now($this->timezone)->format('Y-m-d'))
+                ->maxDate(now($this->timezone)->addMonth()->format('Y-m-d'))
                 ->hidden(function (Get $get) {
                     return $get('radio_date') !== 'select_date';
                 })
-                ->afterStateUpdated(fn ($state, $set) => $set('date', Carbon::parse($state)->format('Y-m-d')))
+                ->afterStateUpdated(fn($state, $set) => $set('date', Carbon::parse($state)->format('Y-m-d')))
                 ->prefixIcon('heroicon-m-calendar')
                 ->native(false)
                 ->closeOnDateSelection(),
@@ -77,9 +79,9 @@ trait ManagesBookingForms
                     return $this->getReservationTimeOptions($get('date'));
                 })
                 ->disableOptionWhen(function (Get $get, $value) {
-                    $isCurrentDay = $get('date') === now(auth()->user()->timezone)->format('Y-m-d');
+                    $isCurrentDay = $get('date') === now($this->timezone)->format('Y-m-d');
 
-                    return $isCurrentDay && $value < now(auth()->user()->timezone)->format('H:i:s');
+                    return $isCurrentDay && $value < now($this->timezone)->format('H:i:s');
                 })
                 ->placeholder('Select Time')
                 ->hiddenLabel()
@@ -91,12 +93,11 @@ trait ManagesBookingForms
 
     protected function getReservationTimeOptions(string $date, $onlyShowFuture = false): array
     {
-        $userTimezone = auth()->user()->timezone;
-        $currentDate = ($date === Carbon::now($userTimezone)->format('Y-m-d'));
+        $currentDate = ($date === Carbon::now($this->timezone)->format('Y-m-d'));
 
-        $currentTime = Carbon::now($userTimezone);
-        $startTime = Carbon::createFromTime(Restaurant::DEFAULT_START_HOUR, 0, 0, $userTimezone);
-        $endTime = Carbon::createFromTime(Restaurant::DEFAULT_END_HOUR, 0, 0, $userTimezone);
+        $currentTime = Carbon::now($this->timezone);
+        $startTime = Carbon::createFromTime(Restaurant::DEFAULT_START_HOUR, 0, 0, $this->timezone);
+        $endTime = Carbon::createFromTime(Restaurant::DEFAULT_END_HOUR, 0, 0, $this->timezone);
 
         $reservationTimes = [];
 

@@ -61,6 +61,7 @@ class ReservationHub extends Page
     public bool $paymentSuccess = false;
 
     public string $currency;
+    public string $timezone;
 
     public bool $SMSSent = false;
 
@@ -85,7 +86,9 @@ class ReservationHub extends Page
 
     public function mount(): void
     {
-        $this->currency = Region::find(session('region'))->currency;
+        $region = Region::find(session('region'));
+        $this->timezone = $region->timezone;
+        $this->currency = $region->currency;
         $this->booking = $this->booking?->refresh();
 
         $this->form->fill();
@@ -93,7 +96,7 @@ class ReservationHub extends Page
         $this->schedulesToday = new Collection();
         $this->schedulesThisWeek = new Collection();
 
-        if (! $this->booking && $this->scheduleTemplateId && $this->date) {
+        if (!$this->booking && $this->scheduleTemplateId && $this->date) {
             $schedule = ScheduleTemplate::find($this->scheduleTemplateId);
 
             $this->form->fill([
@@ -101,8 +104,8 @@ class ReservationHub extends Page
                 'guest_count' => $schedule->party_size,
                 'reservation_time' => $schedule->start_time,
                 'restaurant' => $schedule->restaurant_id,
-                'select_date' => now(auth()->user()->timezone)->format('Y-m-d'),
-                'radio_date' => now(auth()->user()->timezone)->format('Y-m-d'),
+                'select_date' => now($this->timezone)->format('Y-m-d'),
+                'radio_date' => now($this->timezone)->format('Y-m-d'),
             ]);
 
             $this->createBooking($this->scheduleTemplateId, $this->date);
@@ -147,7 +150,7 @@ class ReservationHub extends Page
         }
 
         if (isset($this->data['restaurant'], $this->data['reservation_time'], $this->data['date'], $this->data['guest_count'])) {
-            $userTimezone = auth()->user()->timezone;
+            $userTimezone = $this->timezone;
             $requestedDate = Carbon::createFromFormat('Y-m-d', $this->data['date'], $userTimezone);
             $currentDate = Carbon::now($userTimezone);
 
@@ -217,7 +220,7 @@ class ReservationHub extends Page
 
     public function createBooking($scheduleTemplateId, ?string $date = null): void
     {
-        $userTimezone = auth()->user()->timezone;
+        $userTimezone = $this->timezone;
         $bookingDate = Carbon::createFromFormat('Y-m-d', $this->data['date'], $userTimezone);
         $currentDate = Carbon::now($userTimezone);
 
@@ -238,8 +241,8 @@ class ReservationHub extends Page
 
         $bookingAt = Carbon::createFromFormat(
             'Y-m-d H:i:s',
-            $data['date'].' '.$scheduleTemplate->start_time,
-            auth()->user()->timezone
+            $data['date'] . ' ' . $scheduleTemplate->start_time,
+            $this->timezone
         );
 
         $this->booking = Booking::create([
