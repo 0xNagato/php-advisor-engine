@@ -26,7 +26,7 @@ class ConciergeReferredEmail extends Notification
     {
         $this->referrer = $this->referral->referrer;
 
-        $url = URL::temporarySignedRoute('concierge.invitation', now()->addDays(), [
+        $url = URL::temporarySignedRoute('concierge.invitation', now()->addDays(15), [
             'referral' => $this->referral,
         ]);
 

@@ -134,7 +134,7 @@ class ConciergeInvitation extends SimplePage
     public function secureAccount(): void
     {
         try {
-            $this->rateLimit(2);
+            $this->rateLimit(5);
         } catch (TooManyRequestsException $exception) {
             Notification::make()
                 ->title("Too many requests! Please wait another $exception->secondsUntilAvailable seconds to secure your account.")

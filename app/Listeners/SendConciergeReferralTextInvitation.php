@@ -27,7 +27,7 @@ class SendConciergeReferralTextInvitation
     {
         $referrer = $event->referral->referrer;
 
-        $url = URL::temporarySignedRoute('concierge.invitation', now()->addDays(), [
+        $url = URL::temporarySignedRoute('concierge.invitation', now()->addDays(15), [
             'referral' => $event->referral,
         ]);
 

@@ -48,9 +48,11 @@ class RestaurantDailyBookings extends Page implements HasTable
     {
         $query = Booking::confirmed()
             ->select('bookings.*', 'earnings.amount as earnings')
-            ->join('schedules', 'bookings.schedule_template_id', '=', 'schedules.id')
-            ->join('earnings', 'bookings.id', '=', 'earnings.booking_id')
-            ->where('schedules.restaurant_id', $this->restaurant->id)
+            ->join('earnings', function ($join) {
+                $join->on('earnings.booking_id', '=', 'bookings.id')
+                    ->where('earnings.type', '=', 'restaurant')
+                    ->where('earnings.user_id', '=', $this->restaurant->user_id);
+            })
             ->whereDate('bookings.booking_at', $this->date)
             ->where('earnings.type', 'restaurant');
 
