@@ -95,7 +95,7 @@ class ReservationHub extends Page
         $this->schedulesToday = new Collection();
         $this->schedulesThisWeek = new Collection();
 
-        if (!$this->booking && $this->scheduleTemplateId && $this->date) {
+        if (! $this->booking && $this->scheduleTemplateId && $this->date) {
             $schedule = ScheduleTemplate::find($this->scheduleTemplateId);
 
             $this->form->fill([
@@ -240,7 +240,7 @@ class ReservationHub extends Page
 
         $bookingAt = Carbon::createFromFormat(
             'Y-m-d H:i:s',
-            $data['date'] . ' ' . $scheduleTemplate->start_time,
+            $data['date'].' '.$scheduleTemplate->start_time,
             $this->timezone
         );
 
