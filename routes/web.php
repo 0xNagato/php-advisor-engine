@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\DemoAuthController;
 use App\Http\Controllers\DownloadInvoiceController;
+use App\Http\Controllers\ExceptionFormController;
 use App\Livewire\Booking\CreateBooking;
 use App\Livewire\Booking\CustomerInvoice;
 use App\Livewire\Concierge\ConciergeInvitation;
@@ -23,3 +24,5 @@ Route::get('/invitation/{referral}', ConciergeInvitation::class)
 
 Route::get('/demo/auth/{user_id}', [DemoAuthController::class, 'auth'])->name('demo.auth');
 Route::get('/demo/redirect', [DemoAuthController::class, 'redirect'])->name('demo.redirect');
+
+Route::post('/exception-form', ExceptionFormController::class)->name('exception.form');
