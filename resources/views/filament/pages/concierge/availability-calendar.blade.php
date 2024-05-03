@@ -5,7 +5,7 @@
     <div>
         @if (!empty($restaurants))
             <div
-                class="grid grid-cols-[100px_repeat(3,_1fr)] items-center bg-white sticky top-28 shadow border-t sm:border-none sm:mt-0 -mt-4 sm:mx-0 -mx-4">
+                class="grid grid-cols-[100px_repeat(3,_1fr)] items-center bg-white sticky {{ app('impersonate')->isImpersonating() ? 'top-28' : 'top-16' }} shadow border-t sm:border-none sm:mt-0 -mt-4 sm:mx-0 -mx-4">
                 <div></div>
                 <div class="col-span-3 grid grid-cols-3">
                     @foreach($restaurants[0]->schedules as $schedule)
