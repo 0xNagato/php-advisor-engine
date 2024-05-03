@@ -34,6 +34,7 @@ class RestaurantBookings extends Page implements HasTable
             ->addSelect(DB::raw('SUM(earnings.amount) as earnings'))
             ->join('earnings', 'bookings.id', '=', 'earnings.booking_id')
             ->where('earnings.type', 'restaurant')
+            ->where('earnings.user_id', auth()->user()->id)
             ->groupBy(DB::raw('DATE(booking_at)'))
             ->orderByRaw('DATE(booking_at) DESC');
 

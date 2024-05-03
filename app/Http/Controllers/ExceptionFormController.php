@@ -26,7 +26,7 @@ class ExceptionFormController extends Controller
 
         $emailContent = '';
         foreach ($data as $key => $value) {
-            $emailContent .= $key . ': ' . $value . "\n";
+            $emailContent .= $key.': '.$value."\n";
         }
 
         Mail::raw($emailContent, static function ($message) {
