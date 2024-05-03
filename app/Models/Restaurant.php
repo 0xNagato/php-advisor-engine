@@ -167,6 +167,11 @@ class Restaurant extends Model
         return $this->belongsTo(User::class);
     }
 
+    public function inRegion(): BelongsTo
+    {
+        return $this->belongsTo(Region::class, 'region', 'id');
+    }
+
     public function scopeAvailable(Builder $query): Builder
     {
         return $query->whereHas('user', function (Builder $query) {

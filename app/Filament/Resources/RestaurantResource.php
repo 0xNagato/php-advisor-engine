@@ -6,7 +6,9 @@ use App\Filament\Resources\RestaurantResource\Pages\CreateRestaurant;
 use App\Filament\Resources\RestaurantResource\Pages\EditRestaurant;
 use App\Filament\Resources\RestaurantResource\Pages\ListRestaurants;
 use App\Filament\Resources\RestaurantResource\Pages\ViewRestaurant;
+use App\Models\Region;
 use App\Models\Restaurant;
+use Exception;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
@@ -24,6 +26,9 @@ class RestaurantResource extends Resource
         return auth()->user()?->hasRole('super_admin');
     }
 
+    /**
+     * @throws Exception
+     */
     public static function table(Table $table): Table
     {
         return $table
@@ -38,21 +43,12 @@ class RestaurantResource extends Resource
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
-                Tables\Columns\TextColumn::make('updated_at')
-                    ->dateTime()
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
-
+                Tables\Filters\SelectFilter::make('region')
+                    ->multiple()
+                    ->options(Region::pluck('name', 'id')),
             ]);
-    }
-
-    public static function getRelations(): array
-    {
-        return [
-
-        ];
     }
 
     public static function getPages(): array
