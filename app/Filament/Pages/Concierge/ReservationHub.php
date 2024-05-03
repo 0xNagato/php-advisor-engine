@@ -85,7 +85,7 @@ class ReservationHub extends Page
 
     public function mount(): void
     {
-        $region = Region::find(session('region'));
+        $region = Region::find(session('region', 'miami'));
         $this->timezone = $region->timezone;
         $this->currency = $region->currency;
         $this->booking = $this->booking?->refresh();
@@ -120,7 +120,7 @@ class ReservationHub extends Page
                     ->prefixIcon('heroicon-m-building-storefront')
                     ->options(
                         Restaurant::available()
-                            ->where('region', session('region'))
+                            ->where('region', session('region', 'miami'))
                             ->pluck('restaurant_name', 'id')
                     )
                     ->placeholder('Select Restaurant')
@@ -344,7 +344,7 @@ class ReservationHub extends Page
     #[On('region-changed')]
     public function regionChanged(): void
     {
-        $region = Region::find(session('region'));
+        $region = Region::find(session('region', 'miami'));
 
         $this->timezone = $region->timezone;
         $this->currency = $region->currency;

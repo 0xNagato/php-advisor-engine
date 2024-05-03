@@ -38,7 +38,7 @@ class AvailabilityCalendar extends Page
 
     public function mount(): void
     {
-        $region = Region::find(session('region'));
+        $region = Region::find(session('region', 'miami'));
         $this->timezone = $region->timezone;
         $this->currency = $region->currency;
         $this->form->fill();
@@ -132,7 +132,7 @@ class AvailabilityCalendar extends Page
     private function getAvailableRestaurants($guestCount, $reservationTime, $endTime): Collection
     {
         return Restaurant::available()
-            ->where('region', session('region'))
+            ->where('region', session('region', 'miami'))
             ->with(['schedules' => function ($query) use ($guestCount, $reservationTime, $endTime) {
                 $query->where('booking_date', $this->form->getState()['date'])
                     ->where('party_size', $guestCount)
@@ -144,7 +144,7 @@ class AvailabilityCalendar extends Page
     #[On('region-changed')]
     public function regionChanged(): void
     {
-        $region = Region::find(session('region'));
+        $region = Region::find(session('region', 'miami'));
 
         $this->timezone = $region->timezone;
         $this->currency = $region->currency;
