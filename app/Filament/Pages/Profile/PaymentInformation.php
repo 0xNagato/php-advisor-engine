@@ -51,7 +51,7 @@ class PaymentInformation extends Page
     public static function canAccess(): bool
     {
         if (session()->exists('simpleMode')) {
-            return !session('simpleMode');
+            return ! session('simpleMode');
         }
 
         return auth()->user()->hasRole('concierge') || auth()->user()->hasRole('restaurant');

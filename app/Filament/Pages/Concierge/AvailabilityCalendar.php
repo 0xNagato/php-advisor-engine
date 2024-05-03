@@ -123,7 +123,7 @@ class AvailabilityCalendar extends Page
     {
         $guestCount = ceil($this->form->getState()['guest_count']);
 
-        return (int)($guestCount % 2 !== 0 ? $guestCount + 1 : $guestCount);
+        return (int) ($guestCount % 2 !== 0 ? $guestCount + 1 : $guestCount);
     }
 
     /**

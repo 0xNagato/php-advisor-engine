@@ -24,6 +24,7 @@ class BookingSeeder extends Seeder
         foreach ($restaurants as $restaurant) {
             for ($i = 0; $i < $bookingsCount; $i++) {
                 $schedule = ScheduleWithBooking::query()
+                    ->where('is_available', true)
                     ->where('restaurant_id', $restaurant->id)
                     ->where('booking_date', now()->subDay()->format('Y-m-d'))
                     ->inRandomOrder()
@@ -49,7 +50,7 @@ class BookingSeeder extends Seeder
             'updated_at' => $schedule->booking_at,
         ]);
 
-        $taxData = app(SalesTaxService::class)->calculateTax('miami', $booking->total_fee);
+        $taxData = app(SalesTaxService::class)->calculateTax($booking->restaurant->region, $booking->total_fee, noTax: config('app.no_tax'));
         $totalWithTaxInCents = $booking->total_fee + $taxData->amountInCents;
 
         $booking->update([
