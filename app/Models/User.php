@@ -186,6 +186,11 @@ class User extends Authenticatable implements FilamentUser, HasAvatar
         return $this->hasMany(Message::class);
     }
 
+    public function getUnreadMessageCountAttribute(): int
+    {
+        return $this->messages()->whereNull('read_at')->count();
+    }
+
     public function getLocalFormattedPhoneAttribute(): string
     {
         return $this->getLocalFormattedPhoneNumber($this->phone);

@@ -18,6 +18,16 @@ class MessageResource extends Resource
 
     protected static ?string $title = 'Announcements';
 
+    public static function getNavigationBadge(): ?string
+    {
+        return auth()->user()->unread_message_count > 0 ? (string) auth()->user()->unread_message_count : null;
+    }
+
+    public static function getNavigationBadgeColor(): string|array|null
+    {
+        return 'success';
+    }
+
     public static function canAccess(): bool
     {
         if (session()->exists('simpleMode')) {
