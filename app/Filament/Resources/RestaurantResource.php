@@ -46,7 +46,6 @@ class RestaurantResource extends Resource
             ])
             ->filters([
                 Tables\Filters\SelectFilter::make('region')
-                    ->multiple()
                     ->options(Region::pluck('name', 'id')),
             ]);
     }
