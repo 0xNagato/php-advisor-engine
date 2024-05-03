@@ -3,11 +3,9 @@
 <div class='flex flex-col gap-1 text-xs w-full'>
 
     <div class="font-semibold flex items-center gap-1">
-        @unless(auth()->user()->hasRole('restaurant'))
-            <div>
-                {{ $record->restaurant->restaurant_name }}
-            </div>
-        @endunless
+        <div>
+            {{ $record->restaurant->restaurant_name }}
+        </div>
 
         @if($record->restaurant_confirmed_at)
             <x-heroicon-s-check-circle class="h-4 w-4 -mt-0.5 text-green-600"/>
