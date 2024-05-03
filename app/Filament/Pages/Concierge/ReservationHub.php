@@ -95,6 +95,8 @@ class ReservationHub extends Page
         $this->schedulesToday = new Collection();
         $this->schedulesThisWeek = new Collection();
 
+        // This is used by the availability calendar to pre-fill the form
+        // this should eventually be refactored into its own service.
         if (! $this->booking && $this->scheduleTemplateId && $this->date) {
             $schedule = ScheduleTemplate::find($this->scheduleTemplateId);
 
@@ -119,7 +121,7 @@ class ReservationHub extends Page
                 Select::make('restaurant')
                     ->prefixIcon('heroicon-m-building-storefront')
                     ->options(
-                        Restaurant::available()
+                        fn () => Restaurant::available()
                             ->where('region', session('region', 'miami'))
                             ->pluck('restaurant_name', 'id')
                     )
