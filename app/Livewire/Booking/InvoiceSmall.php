@@ -3,6 +3,7 @@
 namespace App\Livewire\Booking;
 
 use App\Models\Booking;
+use App\Models\Region;
 use Filament\Widgets\Widget;
 use Livewire\Attributes\Computed;
 
@@ -13,6 +14,14 @@ class InvoiceSmall extends Widget
     protected static bool $isLazy = false;
 
     public Booking $booking;
+
+    public Region $region;
+
+    public function mount(Booking $booking): void
+    {
+        $this->booking = $booking;
+        $this->region = Region::find($booking->city);
+    }
 
     #[Computed]
     public function dayDisplay(): string

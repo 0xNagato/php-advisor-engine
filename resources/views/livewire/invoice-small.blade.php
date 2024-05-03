@@ -19,7 +19,8 @@
                 </div>
                 @if($booking->tax > 0)
                     <div class="flex justify-between gap-x-2">
-                        <span>Tax:</span> <span>@money($booking->tax_amount_in_cents, $booking->currency)</span>
+                        <span>{{ $region->tax_rate_term }}:</span>
+                        <span>@money($booking->tax_amount_in_cents, $booking->currency)</span>
                     </div>
                 @endif
             </div>

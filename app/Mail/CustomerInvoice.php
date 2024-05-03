@@ -3,6 +3,7 @@
 namespace App\Mail;
 
 use App\Models\Booking;
+use App\Models\Region;
 use Illuminate\Bus\Queueable;
 use Illuminate\Mail\Mailable;
 use Illuminate\Mail\Mailables\Attachment;
@@ -14,12 +15,14 @@ class CustomerInvoice extends Mailable
 {
     use Queueable, SerializesModels;
 
+    public Region $region;
+
     /**
      * Create a new message instance.
      */
     public function __construct(public Booking $booking)
     {
-        //
+        $this->region = Region::find($this->booking->city);
     }
 
     /**

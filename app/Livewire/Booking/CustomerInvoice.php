@@ -3,6 +3,7 @@
 namespace App\Livewire\Booking;
 
 use App\Models\Booking;
+use App\Models\Region;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
@@ -20,6 +21,8 @@ class CustomerInvoice extends Component implements HasForms
 
     public Booking $booking;
 
+    public Region $region;
+
     public $download = false;
 
     public $customerInvoice = true;
@@ -33,6 +36,7 @@ class CustomerInvoice extends Component implements HasForms
     public function mount(string $token): void
     {
         $this->booking = Booking::where('uuid', $token)->firstOrFail();
+        $this->region = Region::find($this->booking->city);
     }
 
     public function render(): \Illuminate\Contracts\View\View|\Illuminate\Foundation\Application|Factory|View|Application

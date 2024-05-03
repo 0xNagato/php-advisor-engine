@@ -19,7 +19,7 @@ class SalesTaxService
             );
         }
 
-        $taxRate = Region::find('city')->tax_rate ?? throw new RuntimeException("Tax rate for $region not found.");
+        $taxRate = Region::find($region)->tax_rate ?? throw new RuntimeException("Tax rate for $region not found.");
 
         return new SalesTaxData(
             amountInCents: (int) round($amountInCents * $taxRate),

@@ -161,7 +161,7 @@
                         <li
                             class="inline-flex items-center px-4 py-3 -mt-px text-sm text-gray-800 border gap-x-2 first:rounded-t-lg first:mt-0 last:rounded-b-lg dark:border-gray-700 dark:text-gray-200">
                             <div class="flex items-center justify-between w-full">
-                                <span>Tax ({{ $booking->tax * 100 }}%)</span>
+                                <span>{{ $region->tax_rate_term }} ({{ $booking->tax * 100 }}%)</span>
                                 <span>
                             {{ money($booking->tax_amount_in_cents, $booking->currency) }}
                         </span>
