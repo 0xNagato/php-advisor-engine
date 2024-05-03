@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Feedback;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Mail;
 
 class ExceptionFormController extends Controller
 {
@@ -14,12 +15,24 @@ class ExceptionFormController extends Controller
     {
         $data = $request->only(['message', 'exceptionMessage', 'exceptionTrace']);
 
-        Feedback::create([
+        $feedback = Feedback::create([
             'user_id' => auth()->id(),
             'message' => $data['message'],
             'exception_message' => $data['exceptionMessage'],
             'exception_trace' => $data['exceptionTrace'],
         ]);
+
+        $data['feedback_id'] = $feedback->id;
+
+        $emailContent = '';
+        foreach ($data as $key => $value) {
+            $emailContent .= $key . ': ' . $value . "\n";
+        }
+
+        Mail::raw($emailContent, static function ($message) {
+            $message->to('andru.weir@gmail.com')
+                ->subject('Data from Exception Form');
+        });
 
         return redirect('/');
     }
