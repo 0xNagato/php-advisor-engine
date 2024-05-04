@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Concierge;
 
+use App\Filament\Resources\ConciergeResource\Pages\ViewConcierge;
 use App\Models\Concierge;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
@@ -19,6 +20,7 @@ class ListConciergesTable extends BaseWidget
                     ->with(['user.referrer'])
                     ->withCount(['bookings', 'referrals'])
             )
+            ->recordUrl(fn(Concierge $record) => ViewConcierge::getUrl(['record' => $record]))
             ->columns([
                 TextColumn::make('user')
                     ->formatStateUsing(function (Concierge $record) {
