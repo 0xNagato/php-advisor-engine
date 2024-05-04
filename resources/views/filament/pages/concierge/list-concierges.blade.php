@@ -17,7 +17,7 @@
         }
     }"
 
-        x-init="tabRepositionMarker($refs.tabButtons.firstElementChild);" class="relative w-full max-w-sm">
+        x-init="tabRepositionMarker($refs.tabButtons.firstElementChild);" class="relative w-full">
 
         <div x-ref="tabButtons"
              class="relative inline-grid items-center justify-center w-full h-10 grid-cols-2 p-1 text-gray-500 bg-gray-100 rounded-lg select-none">
