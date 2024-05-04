@@ -41,8 +41,7 @@ class ListConciergesTable extends BaseWidget
                     ->alignCenter()
                     ->numeric(),
                 TextColumn::make('user.authentications.login_at')
-                    ->label('Last Login')
-                    ->dateTime('D, M j, Y g:ia'),
+                    ->label('Last Login'),
             ]);
     }
 }
