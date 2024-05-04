@@ -25,6 +25,7 @@ class Referral extends Model
         'local_formatted_phone',
         'first_name',
         'last_name',
+        'notified_at',
     ];
 
     public function referrer(): BelongsTo

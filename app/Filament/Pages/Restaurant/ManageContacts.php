@@ -12,6 +12,9 @@ use Filament\Pages\Page;
 use libphonenumber\PhoneNumberType;
 use Ysfkaya\FilamentPhoneInput\Forms\PhoneInput;
 
+/**
+ * @property Form $form
+ */
 class ManageContacts extends Page
 {
     protected static ?string $navigationIcon = 'gmdi-people-o';

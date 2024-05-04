@@ -10,6 +10,8 @@ class ListConcierges extends ListRecords
 {
     protected static string $resource = ConciergeResource::class;
 
+    protected static string $view = 'filament.pages.concierge.list-concierges';
+
     protected function getHeaderActions(): array
     {
         return [

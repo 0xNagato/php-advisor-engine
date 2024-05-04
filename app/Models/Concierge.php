@@ -101,4 +101,16 @@ class Concierge extends Model
             'concierge_referral_id',
         );
     }
+
+    public function referrals(): HasManyThrough
+    {
+        return $this->hasManyThrough(
+            Referral::class,
+            User::class,
+            'id', // Foreign key on the users table...
+            'referrer_id', // Foreign key on the referrals table...
+            'user_id', // Local key on the concierges table...
+            'id' // Local key on the users table...
+        );
+    }
 }

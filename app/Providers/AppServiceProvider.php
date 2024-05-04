@@ -11,6 +11,7 @@ use Filament\Support\Colors\Color;
 use Filament\Support\Facades\FilamentColor;
 use Filament\Support\Facades\FilamentView;
 use Filament\View\PanelsRenderHook;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\HtmlString;
 use Illuminate\Support\ServiceProvider;
@@ -127,6 +128,8 @@ class AppServiceProvider extends ServiceProvider
                 ->danger()
                 ->send();
         };
+
+        Model::preventLazyLoading(! $this->app->isProduction());
     }
 
     /**
