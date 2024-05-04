@@ -65,7 +65,8 @@ class Concierge extends Model
 
     public function bookings(): HasMany
     {
-        return $this->hasMany(Booking::class, 'concierge_id');
+        return $this->hasMany(Booking::class, 'concierge_id')
+            ->where('status', BookingStatus::CONFIRMED);
     }
 
     /**
