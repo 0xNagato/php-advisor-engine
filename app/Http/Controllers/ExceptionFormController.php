@@ -26,12 +26,13 @@ class ExceptionFormController extends Controller
 
         $emailContent = '';
         foreach ($data as $key => $value) {
-            $emailContent .= $key.': '.$value."\n";
+            $emailContent .= $key . ': ' . $value . "\n";
         }
 
-        Mail::raw($emailContent, static function ($message) {
+        Mail::raw($emailContent, static function ($message) use ($data) {
             $message->to('andru.weir@gmail.com')
-                ->subject('Data from Exception Form');
+                ->from('info@primavip.co')
+                ->subject('Data from Exception Form: ' . $data['exceptionMessage']);
         });
 
         return redirect('/');
