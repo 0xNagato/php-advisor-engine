@@ -40,7 +40,9 @@ class RestaurantRecentBookings extends BaseWidget
         $endDate = $this->filters['endDate'] ?? now();
 
         $query = Booking::confirmed()
-            ->with('earnings')
+            ->with('earnings', function ($query) {
+                $query->where('user_id', $this->restaurant->user_id);
+            })
             ->whereBetween('created_at', [$startDate, $endDate])->orderByDesc('created_at')
             ->whereHas('schedule', function ($query) {
                 $query->where('restaurant_id', $this->restaurant->id);

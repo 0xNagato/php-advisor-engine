@@ -40,7 +40,9 @@ class ConciergeRecentBookings extends BaseWidget
         $endDate = $this->filters['endDate'] ?? now();
 
         $query = Booking::confirmed()
-            ->with('earnings')
+            ->with('earnings', function ($query) {
+                $query->where('user_id', $this->concierge->user_id);
+            })
             ->whereBetween('created_at', [$startDate, $endDate])->orderByDesc('created_at')
             ->where('concierge_id', $this->concierge->id);
 
