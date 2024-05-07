@@ -75,6 +75,21 @@ class PartnerRecentBookings extends BaseWidget
 
                         return money($total, $booking->currency);
                     }),
+                TextColumn::make('partner_type')
+                    ->label('Partner Type')
+                    ->getStateUsing(function (Booking $booking) {
+                        $types = [];
+
+                        if ($booking->partner_concierge_id && $booking->partner_concierge_id == $this->partner->id) {
+                            $types[] = 'Concierge';
+                        }
+
+                        if ($booking->partner_restaurant_id && $booking->partner_restaurant_id == $this->partner->id) {
+                            $types[] = 'Restaurant';
+                        }
+
+                        return implode(' & ', $types) ?: 'Unknown'; // Join types with '&' if both exist, default to 'Unknown'
+                    }),
             ]);
     }
 }

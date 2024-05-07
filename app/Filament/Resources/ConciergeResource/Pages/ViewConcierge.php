@@ -6,32 +6,23 @@ use App\Filament\Resources\ConciergeResource;
 use App\Livewire\Concierge\ConciergeLeaderboard;
 use App\Livewire\Concierge\ConciergeRecentBookings;
 use App\Livewire\Concierge\ConciergeStats;
+use App\Models\Concierge;
 use Filament\Actions\EditAction;
 use Filament\Resources\Pages\ViewRecord;
 use Illuminate\Contracts\Support\Htmlable;
 use STS\FilamentImpersonate\Pages\Actions\Impersonate;
 
+/**
+ * @method Concierge getRecord()
+ */
 class ViewConcierge extends ViewRecord
 {
     protected static string $resource = ConciergeResource::class;
-
-    // protected ?string $heading = '';
 
     public function getHeading(): string|Htmlable
     {
         return $this->getRecord()->user->name;
     }
-
-    //
-    // public function getHeading(): string
-    // {
-    //     return $this->getRecord()->user->name;
-    // }
-
-    // public function getSubheading(): string|Htmlable|null
-    // {
-    //     return $this->getRecord()->hotel_name;
-    // }
 
     protected function getHeaderActions(): array
     {

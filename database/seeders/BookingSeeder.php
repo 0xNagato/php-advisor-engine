@@ -1,7 +1,5 @@
 <?php
 
-/** @noinspection NullPointerExceptionInspection */
-
 namespace Database\Seeders;
 
 use App\Enums\BookingStatus;
@@ -15,27 +13,29 @@ use Illuminate\Support\Collection;
 
 class BookingSeeder extends Seeder
 {
+    public const int BOOKINGS_COUNT = 20;
+
     public function run(): void
     {
         $concierges = Concierge::all();
-        $restaurants = Restaurant::all();
-        $bookingsCount = 300;
+        $salesTaxService = app(SalesTaxService::class);
+
+        $restaurants = Restaurant::with(['schedules' => function ($query) {
+            $query->where('is_available', true)
+                ->where('booking_date', now()->subDay()->format('Y-m-d'))
+                ->with('restaurant');
+        }, 'inRegion'])->get();
 
         foreach ($restaurants as $restaurant) {
-            for ($i = 0; $i < $bookingsCount; $i++) {
-                $schedule = ScheduleWithBooking::query()
-                    ->where('is_available', true)
-                    ->where('restaurant_id', $restaurant->id)
-                    ->where('booking_date', now()->subDay()->format('Y-m-d'))
-                    ->inRandomOrder()
-                    ->first();
+            $availableSchedules = $restaurant->schedules->shuffle()->take(self::BOOKINGS_COUNT);
 
-                $this->createBooking($schedule, $concierges);
+            foreach ($availableSchedules as $schedule) {
+                $this->createBooking($restaurant, $schedule, $concierges, $salesTaxService);
             }
         }
     }
 
-    private function createBooking(ScheduleWithBooking $schedule, Collection $concierges): void
+    private function createBooking(Restaurant $restaurant, ScheduleWithBooking $schedule, Collection $concierges, SalesTaxService $salesTaxService): void
     {
         /**
          * @var Booking $booking
@@ -48,9 +48,10 @@ class BookingSeeder extends Seeder
             'guest_count' => $schedule->party_size,
             'created_at' => $schedule->booking_at,
             'updated_at' => $schedule->booking_at,
+            'currency' => $restaurant->inRegion->currency,
         ]);
 
-        $taxData = app(SalesTaxService::class)->calculateTax($booking->restaurant->region, $booking->total_fee, noTax: config('app.no_tax'));
+        $taxData = $salesTaxService->calculateTax($restaurant->region, $booking->total_fee, noTax: config('app.no_tax'));
         $totalWithTaxInCents = $booking->total_fee + $taxData->amountInCents;
 
         $booking->update([

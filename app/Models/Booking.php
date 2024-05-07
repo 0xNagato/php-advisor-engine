@@ -11,6 +11,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOneThrough;
+use Illuminate\Log\Logger;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Sentry;
@@ -190,7 +191,7 @@ class Booking extends Model
                     $concierge_partner_earnings =
                         $booking->partner_concierge_fee;
 
-                    Earning::create([
+                    $earning = Earning::create([
                         'booking_id' => $booking->id,
                         'user_id' => Partner::find(
                             $booking->concierge->user->partner_referral_id
@@ -200,6 +201,13 @@ class Booking extends Model
                         'currency' => $booking->currency,
                         'percentage' => $booking->partnerConcierge->percentage,
                         'percentage_of' => 'remainder',
+                    ]);
+
+                    app(Logger::class)->info('partner_concierge Earning created', [
+                        'partner_concierge_id' => $booking->partner_concierge_id,
+                        'partner_id' => $earning->user_id,
+                        'earning' => $earning,
+                        'booking' => $booking,
                     ]);
                 }
 
