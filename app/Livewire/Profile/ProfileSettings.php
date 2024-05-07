@@ -14,6 +14,9 @@ use libphonenumber\PhoneNumberType;
 use Tapp\FilamentTimezoneField\Forms\Components\TimezoneSelect;
 use Ysfkaya\FilamentPhoneInput\Forms\PhoneInput;
 
+/**
+ * @property Form $form
+ */
 class ProfileSettings extends Widget implements HasForms
 {
     use InteractsWithForms;
@@ -47,6 +50,7 @@ class ProfileSettings extends Widget implements HasForms
                 ->circleCropper()
                 ->visibility('public')
                 ->directory('profile-photos')
+                ->optimize('webp')
                 ->moveFiles()
                 ->hidden(function () {
                     return auth()->user()->hasRole('restaurant');
@@ -83,14 +87,8 @@ class ProfileSettings extends Widget implements HasForms
     {
         $data = $this->form->getState();
 
-        // Assuming the profile photo is stored as a file
         $profilePhotoPath = $data['profile_photo_path'];
-
-        // Make the profile photo file public
         Storage::disk('do')->setVisibility($profilePhotoPath, 'public');
-
-        // Update the user's profile photo file path
-        $data['profile_photo_path'] = $profilePhotoPath;
 
         auth()->user()->update($data);
 

@@ -23,6 +23,7 @@
         "hirethunk/verbs": "^0.3.0",
         "itsgoingd/clockwork": "^5.1",
         "jenssegers/agent": "^2.6",
+        "joshembling/image-optimizer": "^1.4",
         "larabug/larabug": "^3.0",
         "laravel-notification-channels/twilio": "^3.3",
         "laravel/framework": "^10.10",
