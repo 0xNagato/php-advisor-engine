@@ -22,7 +22,6 @@ use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\Session\Middleware\AuthenticateSession;
 use Illuminate\Session\Middleware\StartSession;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
-use Tapp\FilamentAuthenticationLog\FilamentAuthenticationLogPlugin;
 
 class AdminPanelProvider extends PanelProvider
 {
@@ -90,7 +89,6 @@ class AdminPanelProvider extends PanelProvider
             ])
             ->plugins([
                 FilamentShieldPlugin::make(),
-                FilamentAuthenticationLogPlugin::make(),
             ])
             ->favicon('/favicon.ico')
             ->darkMode(false)
