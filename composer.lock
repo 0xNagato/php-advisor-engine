@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "1caaed16281a4cea6e1d46b29806fe96",
+    "content-hash": "f073c5cf88ef929522be7c51a75b2aa6",
     "packages": [
         {
             "name": "akaunting/laravel-money",
@@ -1269,16 +1269,16 @@
         },
         {
             "name": "aws/aws-sdk-php",
-            "version": "3.306.0",
+            "version": "3.306.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/aws/aws-sdk-php.git",
-                "reference": "dc228b55a4224fe3160a0a2ca430b80c5348d943"
+                "reference": "99e13a3647edffba9110948acc85052e3169e46a"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/aws/aws-sdk-php/zipball/dc228b55a4224fe3160a0a2ca430b80c5348d943",
-                "reference": "dc228b55a4224fe3160a0a2ca430b80c5348d943",
+                "url": "https://api.github.com/repos/aws/aws-sdk-php/zipball/99e13a3647edffba9110948acc85052e3169e46a",
+                "reference": "99e13a3647edffba9110948acc85052e3169e46a",
                 "shasum": ""
             },
             "require": {
@@ -1358,9 +1358,9 @@
             "support": {
                 "forum": "https://forums.aws.amazon.com/forum.jspa?forumID=80",
                 "issues": "https://github.com/aws/aws-sdk-php/issues",
-                "source": "https://github.com/aws/aws-sdk-php/tree/3.306.0"
+                "source": "https://github.com/aws/aws-sdk-php/tree/3.306.1"
             },
-            "time": "2024-05-06T18:11:49+00:00"
+            "time": "2024-05-07T18:11:42+00:00"
         },
         {
             "name": "bezhansalleh/filament-shield",
@@ -6305,20 +6305,20 @@
         },
         {
             "name": "laravel/pulse",
-            "version": "v1.0.0",
+            "version": "v1.1.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/laravel/pulse.git",
-                "reference": "37fc7512d01de7e59b0ae9634c638849d98c3fca"
+                "reference": "16746346a6cb2cd12d9e93db206aaf2b9d792b21"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/laravel/pulse/zipball/37fc7512d01de7e59b0ae9634c638849d98c3fca",
-                "reference": "37fc7512d01de7e59b0ae9634c638849d98c3fca",
+                "url": "https://api.github.com/repos/laravel/pulse/zipball/16746346a6cb2cd12d9e93db206aaf2b9d792b21",
+                "reference": "16746346a6cb2cd12d9e93db206aaf2b9d792b21",
                 "shasum": ""
             },
             "require": {
-                "doctrine/sql-formatter": "^1.1",
+                "doctrine/sql-formatter": "^1.2",
                 "guzzlehttp/promises": "^1.0|^2.0",
                 "illuminate/auth": "^10.48.4|^11.0.8",
                 "illuminate/cache": "^10.48.4|^11.0.8",
@@ -6388,7 +6388,7 @@
                 "issues": "https://github.com/laravel/pulse/issues",
                 "source": "https://github.com/laravel/pulse"
             },
-            "time": "2024-04-30T14:43:29+00:00"
+            "time": "2024-05-06T17:11:35+00:00"
         },
         {
             "name": "laravel/serializable-closure",
@@ -14940,74 +14940,6 @@
             "time": "2024-04-18T09:22:46+00:00"
         },
         {
-            "name": "tapp/filament-authentication-log",
-            "version": "v3.1.0",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/TappNetwork/filament-authentication-log.git",
-                "reference": "ba306cb9cb8fee8e574c6a648e85c1e74983617d"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/TappNetwork/filament-authentication-log/zipball/ba306cb9cb8fee8e574c6a648e85c1e74983617d",
-                "reference": "ba306cb9cb8fee8e574c6a648e85c1e74983617d",
-                "shasum": ""
-            },
-            "require": {
-                "filament/filament": "^3.0-stable",
-                "php": "^8.1",
-                "rappasoft/laravel-authentication-log": "^4.0",
-                "spatie/laravel-package-tools": "^1.9"
-            },
-            "require-dev": {
-                "laravel/pint": "^1.11"
-            },
-            "type": "library",
-            "extra": {
-                "laravel": {
-                    "providers": [
-                        "Tapp\\FilamentAuthenticationLog\\FilamentAuthenticationLogServiceProvider"
-                    ]
-                }
-            },
-            "autoload": {
-                "psr-4": {
-                    "Tapp\\FilamentAuthenticationLog\\": "src"
-                }
-            },
-            "notification-url": "https://packagist.org/downloads/",
-            "license": [
-                "MIT"
-            ],
-            "authors": [
-                {
-                    "name": "Tapp Network",
-                    "email": "steve@tappnetwork.com",
-                    "role": "Developer"
-                },
-                {
-                    "name": "Tapp Network",
-                    "email": "andreia.bohner@tappnetwork.com",
-                    "role": "Developer"
-                }
-            ],
-            "description": "Filament authentication log plugin.",
-            "homepage": "https://github.com/TappNetwork/filament-authentication-log",
-            "keywords": [
-                "Authentication",
-                "filament",
-                "log",
-                "relation manager",
-                "resource",
-                "tapp network"
-            ],
-            "support": {
-                "issues": "https://github.com/TappNetwork/filament-authentication-log/issues",
-                "source": "https://github.com/TappNetwork/filament-authentication-log"
-            },
-            "time": "2024-04-08T16:53:14+00:00"
-        },
-        {
             "name": "tapp/filament-timezone-field",
             "version": "v3.0.4",
             "source": {
@@ -16555,16 +16487,16 @@
         },
         {
             "name": "friendsofphp/php-cs-fixer",
-            "version": "v3.55.0",
+            "version": "v3.56.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/PHP-CS-Fixer/PHP-CS-Fixer.git",
-                "reference": "c9eeacb559bfa0bcc7f778cfb7b42715c83d2c7e"
+                "reference": "4429303e62a4ce583ddfe64ff5c34c76bcf74931"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/PHP-CS-Fixer/PHP-CS-Fixer/zipball/c9eeacb559bfa0bcc7f778cfb7b42715c83d2c7e",
-                "reference": "c9eeacb559bfa0bcc7f778cfb7b42715c83d2c7e",
+                "url": "https://api.github.com/repos/PHP-CS-Fixer/PHP-CS-Fixer/zipball/4429303e62a4ce583ddfe64ff5c34c76bcf74931",
+                "reference": "4429303e62a4ce583ddfe64ff5c34c76bcf74931",
                 "shasum": ""
             },
             "require": {
@@ -16636,7 +16568,7 @@
             ],
             "support": {
                 "issues": "https://github.com/PHP-CS-Fixer/PHP-CS-Fixer/issues",
-                "source": "https://github.com/PHP-CS-Fixer/PHP-CS-Fixer/tree/v3.55.0"
+                "source": "https://github.com/PHP-CS-Fixer/PHP-CS-Fixer/tree/v3.56.0"
             },
             "funding": [
                 {
@@ -16644,7 +16576,7 @@
                     "type": "github"
                 }
             ],
-            "time": "2024-05-06T00:10:15+00:00"
+            "time": "2024-05-07T15:50:05+00:00"
         },
         {
             "name": "hamcrest/hamcrest-php",

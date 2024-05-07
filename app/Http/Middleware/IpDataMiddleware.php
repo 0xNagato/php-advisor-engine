@@ -33,6 +33,10 @@ class IpDataMiddleware
 
             $request->session()->put('timezone', $region->timezone);
             $request->session()->put('region', $region->id);
+
+            if (auth()->check()) {
+                auth()->user()->update(['region' => $region]);
+            }
         }
 
         return $next($request);
