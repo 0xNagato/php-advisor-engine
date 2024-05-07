@@ -12,5 +12,5 @@ parameters:
     ignoreErrors:
         - '#Call to an undefined method Livewire\\Features\\SupportTesting\\Testable::test\(\)#'
 
-    excludes_analyse:
+    excludePaths:
         - vendor/**/*
