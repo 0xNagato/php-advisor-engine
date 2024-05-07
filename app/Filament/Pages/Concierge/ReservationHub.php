@@ -47,7 +47,7 @@ class ReservationHub extends Page
 
     protected static string $view = 'filament.widgets.reservation-hub';
 
-    protected $listeners = ['booking-completed' => '$refresh'];
+    protected $listeners = ['booking-confirmed' => '$refresh'];
 
     #[Session]
     public ?string $qrCode;
@@ -102,7 +102,7 @@ class ReservationHub extends Page
 
         // This is used by the availability calendar to pre-fill the form
         // this should eventually be refactored into its own service.
-        if (! $this->booking && $this->scheduleTemplateId && $this->date) {
+        if (!$this->booking && $this->scheduleTemplateId && $this->date) {
             $schedule = ScheduleTemplate::find($this->scheduleTemplateId);
 
             $this->form->fill([
@@ -126,7 +126,7 @@ class ReservationHub extends Page
                 Select::make('restaurant')
                     ->prefixIcon('heroicon-m-building-storefront')
                     ->options(
-                        fn () => Restaurant::available()
+                        fn() => Restaurant::available()
                             ->where('region', session('region', 'miami'))
                             ->pluck('restaurant_name', 'id')
                     )
@@ -249,7 +249,7 @@ class ReservationHub extends Page
 
         $bookingAt = Carbon::createFromFormat(
             'Y-m-d H:i:s',
-            $data['date'].' '.$scheduleTemplate->start_time,
+            $data['date'] . ' ' . $scheduleTemplate->start_time,
             $this->timezone
         );
 

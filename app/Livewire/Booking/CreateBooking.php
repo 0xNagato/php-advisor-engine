@@ -65,6 +65,6 @@ class CreateBooking extends Component
 
         $this->isLoading = false;
         $this->paymentSuccess = true;
-        $this->dispatch('booking-completed', $this->booking->id);
+        $this->dispatch('booking-confirmed', $this->booking->id);
     }
 }
