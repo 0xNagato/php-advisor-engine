@@ -90,7 +90,10 @@ class ReservationHub extends Page
         $region = Region::find(session('region', 'miami'));
         $this->timezone = $region->timezone;
         $this->currency = $region->currency;
-        $this->booking = $this->booking?->refresh();
+
+        if ($this->booking !== null) {
+            $this->booking = Booking::with('schedule.restaurant')->find($this->booking->id);
+        }
 
         $this->form->fill();
 
@@ -201,7 +204,8 @@ class ReservationHub extends Page
                 $guestCount++;
             }
 
-            $this->schedulesToday = ScheduleWithBooking::where('restaurant_id', $restaurantId)
+            $this->schedulesToday = ScheduleWithBooking::with('restaurant')
+                ->where('restaurant_id', $restaurantId)
                 ->where('booking_date', $this->form->getState()['date'])
                 ->where('party_size', $guestCount)
                 ->where('start_time', '>=', $reservationTime)
@@ -209,7 +213,8 @@ class ReservationHub extends Page
                 ->get();
 
             if ($requestedDate->isSameDay($currentDate)) {
-                $this->schedulesThisWeek = ScheduleWithBooking::where('restaurant_id', $restaurantId)
+                $this->schedulesThisWeek = ScheduleWithBooking::with('restaurant')
+                    ->where('restaurant_id', $restaurantId)
                     ->where('start_time', $this->form->getState()['reservation_time'])
                     ->where('party_size', $guestCount)
                     ->whereDate('booking_date', '>', $currentDate)
@@ -320,6 +325,12 @@ class ReservationHub extends Page
 
     public function cancelBooking(): void
     {
+        $this->booking = $this->booking->fresh();
+
+        if ($this->booking->status === BookingStatus::CONFIRMED) {
+            return;
+        }
+
         $this->booking->update(['status' => 'cancelled']);
         BookingCancelled::dispatch($this->booking);
         $this->booking = null;
