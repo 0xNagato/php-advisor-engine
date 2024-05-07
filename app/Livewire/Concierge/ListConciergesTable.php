@@ -4,6 +4,7 @@ namespace App\Livewire\Concierge;
 
 use App\Filament\Resources\ConciergeResource\Pages\ViewConcierge;
 use App\Models\Concierge;
+use Carbon\Carbon;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Filament\Widgets\TableWidget as BaseWidget;
@@ -41,6 +42,10 @@ class ListConciergesTable extends BaseWidget
                     ->alignCenter()
                     ->numeric(),
                 TextColumn::make('user.authentications.login_at')
+                    ->formatStateUsing(function (Concierge $record) {
+                        return Carbon::parse($record->user->authentications->last()->login_at, auth()->user()->timezone)
+                            ->diffForHumans();
+                    })
                     ->label('Last Login'),
             ]);
     }
