@@ -24,6 +24,6 @@ class CheckIfConfirmed extends Component
 
     public function render(): string
     {
-        return '<span></span>';
+        return '<span class="hidden" wire:poll.keep-alive.5s></span>';
     }
 }

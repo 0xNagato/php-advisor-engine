@@ -95,7 +95,7 @@
 
 
         @if ($booking && (BookingStatus::PENDING === $booking->status || BookingStatus::GUEST_ON_PAGE === $booking->status))
-            <livewire:booking.check-if-confirmed :booking="$booking" wire:poll.keep-alive.5s/>
+            <livewire:booking.check-if-confirmed :booking="$booking"/>
 
             <div x-data="{ tab: '{{ $booking->prime_time ? 'smsPayment' : 'collectPayment' }}' }" id="tabs">
                 @if($booking->prime_time)
