@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Feedback;
 use Illuminate\Http\Request;
+use Illuminate\Mail\Message;
 use Illuminate\Support\Facades\Mail;
 
 class ExceptionFormController extends Controller
@@ -26,13 +27,14 @@ class ExceptionFormController extends Controller
 
         $emailContent = '';
         foreach ($data as $key => $value) {
-            $emailContent .= $key.': '.$value."\n";
+            $emailContent .= $key . ': ' . $value . "\n";
         }
 
-        Mail::raw($emailContent, static function ($message) use ($data) {
+        Mail::raw($emailContent, static function (Message $message) use ($data) {
             $message->to('andru.weir@gmail.com')
-                ->from('info@primavip.co')
-                ->subject('Data from Exception Form: '.$data['exceptionMessage']);
+                ->from('info@primavip.co', 'PrimaVIP')
+                ->sender('info@primavip.co', 'PrimaVIP')
+                ->subject('Data from Exception Form: ' . $data['exceptionMessage']);
         });
 
         return redirect('/');
