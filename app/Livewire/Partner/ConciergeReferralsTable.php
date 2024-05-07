@@ -33,6 +33,7 @@ class ConciergeReferralsTable extends BaseWidget
         return $table
             ->query(
                 auth()->user()->referrals()
+                    ->with('user.concierge')
                     ->orderBy('created_at', 'desc')
                     ->where('type', 'concierge')
                     ->getQuery()
@@ -49,7 +50,7 @@ class ConciergeReferralsTable extends BaseWidget
                 TextColumn::make('label')
                     ->label('Referral')
                     ->formatStateUsing(function (Referral $record) {
-                        return view('partials.referral-info-column', ['record' => $record]);
+                        return view('partials.concierge-referral-info-column', ['record' => $record]);
                     }),
                 IconColumn::make('has_secured')
                     ->label('Active')
