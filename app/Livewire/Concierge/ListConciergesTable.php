@@ -43,7 +43,7 @@ class ListConciergesTable extends BaseWidget
                     ->numeric(),
                 TextColumn::make('user.authentications.login_at')
                     ->formatStateUsing(function (Concierge $record) {
-                        return Carbon::parse($record->user->authentications->last()->login_at, auth()->user()->timezone)
+                        return Carbon::parse($record->user->authentications()->orderByDesc('login_at')->first()->login_at, auth()->user()->timezone)
                             ->diffForHumans();
                     })
                     ->label('Last Login'),
