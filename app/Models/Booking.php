@@ -123,6 +123,7 @@ class Booking extends Model
                     'user_id' => $booking->restaurant->user->id,
                     'type' => 'restaurant',
                     'amount' => $booking->restaurant_earnings,
+                    'currency' => $booking->currency,
                     'percentage' => $booking->restaurant->payout_restaurant,
                     'percentage_of' => 'total_fee',
                 ]);
@@ -132,6 +133,7 @@ class Booking extends Model
                     'user_id' => $booking->concierge->user->id,
                     'type' => 'concierge',
                     'amount' => $booking->concierge_earnings,
+                    'currency' => $booking->currency,
                     'percentage' => $booking->concierge->payout_percentage,
                     'percentage_of' => 'total_fee',
                 ]);
@@ -149,6 +151,7 @@ class Booking extends Model
                         'user_id' => $user_id,
                         'type' => 'concierge_referral_1',
                         'amount' => $amount,
+                        'currency' => $booking->currency,
                         'percentage' => $referralPercentage,
                         'percentage_of' => 'platform',
                     ]);
@@ -171,6 +174,7 @@ class Booking extends Model
                         'user_id' => $user_id,
                         'type' => 'concierge_referral_2',
                         'amount' => $amount,
+                        'currency' => $booking->currency,
                         'percentage' => $referralPercentage,
                         'percentage_of' => 'platform',
                     ]);
@@ -193,6 +197,7 @@ class Booking extends Model
                         )->user_id,
                         'type' => 'partner_concierge',
                         'amount' => $booking->partner_concierge_fee,
+                        'currency' => $booking->currency,
                         'percentage' => $booking->partnerConcierge->percentage,
                         'percentage_of' => 'remainder',
                     ]);
@@ -214,6 +219,7 @@ class Booking extends Model
                         )->user_id,
                         'type' => 'partner_restaurant',
                         'amount' => $booking->partner_restaurant_fee,
+                        'currency' => $booking->currency,
                         'percentage' => $booking->partnerRestaurant->percentage,
                         'percentage_of' => 'remainder',
                     ]);
