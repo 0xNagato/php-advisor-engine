@@ -67,7 +67,7 @@ class RestaurantReferralBookingsTable extends BaseWidget
                 TextColumn::make('amount')
                     ->label('Earnings')
                     ->alignRight()
-                    ->currency('USD'),
+                    ->currency(fn (Earning $record) => $record->booking->currency),
             ]);
     }
 }
