@@ -40,6 +40,7 @@ class RestaurantRecentBookings extends BaseWidget
         $endDate = $this->filters['endDate'] ?? now();
 
         $query = Booking::confirmed()
+            ->with('earnings')
             ->whereBetween('created_at', [$startDate, $endDate])->orderByDesc('created_at')
             ->whereHas('schedule', function ($query) {
                 $query->where('restaurant_id', $this->restaurant->id);
@@ -61,7 +62,11 @@ class RestaurantRecentBookings extends BaseWidget
                 TextColumn::make('restaurant_earnings')
                     ->alignRight()
                     ->label('Earned')
-                    ->money('USD', divideBy: 100),
+                    ->formatStateUsing(function (Booking $booking) {
+                        $total = $booking->earnings->sum('amount');
+
+                        return money($total, $booking->currency);
+                    }),
             ]);
     }
 }

@@ -29,6 +29,7 @@ class AdminRecentBookings extends BaseWidget
         $endDate = $this->filters['endDate'] ?? now();
 
         $query = Booking::confirmed()
+            ->with('earnings')
             ->whereBetween('created_at', [$startDate, $endDate])->orderByDesc('created_at')
             ->limit(10);
 
@@ -40,10 +41,6 @@ class AdminRecentBookings extends BaseWidget
             ->emptyStateIcon('heroicon-o-currency-dollar')
             ->emptyStateHeading('Earnings will show here when bookings begin!')
             ->columns([
-                // TextColumn::make('guest_name')
-                //     ->label('Guest')
-                //     ->toggleable(isToggledHiddenByDefault: true)
-                //     ->searchable(),
                 TextColumn::make('schedule.restaurant.restaurant_name')
                     ->label('Restaurant')
                     ->searchable(),
@@ -53,7 +50,11 @@ class AdminRecentBookings extends BaseWidget
                 TextColumn::make('platform_earnings')
                     ->alignRight()
                     ->label('Earned')
-                    ->money('USD', divideBy: 100),
+                    ->formatStateUsing(function (Booking $booking) {
+                        $total = $booking->earnings->sum('amount');
+
+                        return money($total, $booking->currency);
+                    }),
 
             ]);
     }

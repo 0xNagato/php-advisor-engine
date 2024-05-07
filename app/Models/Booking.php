@@ -329,29 +329,6 @@ class Booking extends Model
         return $this->schedule->prime_time;
     }
 
-    public function getPartnerEarningsAttribute()
-    {
-        $earnings = 0;
-
-        if (
-            $this->partnerConcierge &&
-            $this->concierge->user->partner_referral_id ===
-            $this->partnerConcierge->id
-        ) {
-            $earnings += $this->partner_concierge_fee;
-        }
-
-        if (
-            $this->partnerRestaurant &&
-            $this->schedule->restaurant->user->partner_referral_id ===
-            $this->partnerRestaurant->id
-        ) {
-            $earnings += $this->partner_restaurant_fee;
-        }
-
-        return $earnings;
-    }
-
     public function getLocalFormattedGuestPhoneAttribute(): string
     {
         return $this->getLocalFormattedPhoneNumber($this->guest_phone);

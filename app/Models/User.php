@@ -135,7 +135,10 @@ class User extends Authenticatable implements FilamentUser, HasAvatar
         /**
          * @var Role $role
          */
-        $role = $this->roles->firstWhere('name', '!=', 'panel_user');
+        $role = self::with('roles')
+            ->find($this->id)
+            ->roles
+            ->firstWhere('name', '!=', 'panel_user');
 
         return Str::of($role->name)
             ->snake()

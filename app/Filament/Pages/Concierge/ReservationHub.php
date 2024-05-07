@@ -47,6 +47,8 @@ class ReservationHub extends Page
 
     protected static string $view = 'filament.widgets.reservation-hub';
 
+    protected $listeners = ['booking-completed' => '$refresh'];
+
     #[Session]
     public ?string $qrCode;
 

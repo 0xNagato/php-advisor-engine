@@ -20,7 +20,7 @@ class ListConciergesTable extends BaseWidget
                     ->with(['user.referrer'])
                     ->withCount(['bookings', 'referrals'])
             )
-            ->recordUrl(fn(Concierge $record) => ViewConcierge::getUrl(['record' => $record]))
+            ->recordUrl(fn (Concierge $record) => ViewConcierge::getUrl(['record' => $record]))
             ->columns([
                 TextColumn::make('user')
                     ->formatStateUsing(function (Concierge $record) {

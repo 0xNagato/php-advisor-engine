@@ -40,6 +40,7 @@ class ConciergeRecentBookings extends BaseWidget
         $endDate = $this->filters['endDate'] ?? now();
 
         $query = Booking::confirmed()
+            ->with('earnings')
             ->whereBetween('created_at', [$startDate, $endDate])->orderByDesc('created_at')
             ->where('concierge_id', $this->concierge->id);
 
@@ -50,25 +51,20 @@ class ConciergeRecentBookings extends BaseWidget
             ->emptyStateIcon('heroicon-o-currency-dollar')
             ->emptyStateHeading('Earnings will show here when bookings begin!')
             ->columns([
-                TextColumn::make('guest_name')
-                    ->label('Guest')
-                    ->toggleable(isToggledHiddenByDefault: true)
-                    ->searchable(),
                 TextColumn::make('schedule.restaurant.restaurant_name')
                     ->label('Restaurant')
                     ->searchable(),
                 TextColumn::make('booking_at')
                     ->label('Date')
                     ->dateTime('D, M j'),
-                TextColumn::make('concierge_earnings')
+                TextColumn::make('earnings.amount')
                     ->alignRight()
                     ->label('Earned')
-                    ->money('USD', divideBy: 100)
-                    ->hidden(! auth()->user()?->hasRole('concierge') && ! $this->hideConcierge),
-                TextColumn::make('charity_earnings')
-                    ->alignRight()
-                    ->money('USD', divideBy: 100)
-                    ->toggleable(isToggledHiddenByDefault: true),
+                    ->formatStateUsing(function (Booking $booking) {
+                        $total = $booking->earnings->sum('amount');
+
+                        return money($total, $booking->currency);
+                    }),
             ]);
     }
 }
