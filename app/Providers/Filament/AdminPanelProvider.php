@@ -22,7 +22,7 @@ use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\Session\Middleware\AuthenticateSession;
 use Illuminate\Session\Middleware\StartSession;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
-use Jenssegers\Agent\Agent;
+use Tapp\FilamentAuthenticationLog\FilamentAuthenticationLogPlugin;
 
 class AdminPanelProvider extends PanelProvider
 {
@@ -31,8 +31,6 @@ class AdminPanelProvider extends PanelProvider
      */
     public function panel(Panel $panel): Panel
     {
-        $agent = new Agent();
-
         $panel
             ->default()
             ->id('admin')
@@ -51,17 +49,17 @@ class AdminPanelProvider extends PanelProvider
                     ->url('/horizon')
                     ->icon('heroicon-o-sun')
                     ->sort(1000)
-                    ->visible(fn () => auth()->user()->email === 'andru.weir@gmail.com'),
+                    ->visible(fn() => auth()->user()->email === 'andru.weir@gmail.com'),
                 NavigationItem::make('Pulse')
                     ->url('/pulse')
                     ->icon('ri-pulse-line')
                     ->sort(999)
-                    ->visible(fn () => auth()->user()->email === 'andru.weir@gmail.com'),
+                    ->visible(fn() => auth()->user()->email === 'andru.weir@gmail.com'),
                 NavigationItem::make('Logs')
                     ->url('/log-viewer')
                     ->icon('gmdi-list-o')
                     ->sort(999)
-                    ->visible(fn () => auth()->user()->email === 'andru.weir@gmail.com'),
+                    ->visible(fn() => auth()->user()->email === 'andru.weir@gmail.com'),
 
             ])
             ->userMenuItems([
@@ -92,6 +90,7 @@ class AdminPanelProvider extends PanelProvider
             ])
             ->plugins([
                 FilamentShieldPlugin::make(),
+                FilamentAuthenticationLogPlugin::make(),
             ])
             ->favicon('/favicon.ico')
             ->darkMode(false)
