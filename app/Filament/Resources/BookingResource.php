@@ -89,7 +89,7 @@ class BookingResource extends Resource
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('total_fee')
-                    ->currency('USD')
+                    ->money(fn ($record) => $record->currency, divideBy: 100)
                     ->sortable(),
                 Tables\Columns\TextColumn::make('currency')
                     ->searchable()

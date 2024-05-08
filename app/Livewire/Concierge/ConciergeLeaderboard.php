@@ -68,7 +68,7 @@ class ConciergeLeaderboard extends BaseWidget
                     }),
                 Tables\Columns\TextColumn::make('total_earned')
                     ->label('Earned')
-                    ->currency('USD'),
+                    ->money('USD', divideBy: 100),
             ]);
     }
 

@@ -69,7 +69,7 @@ class RestaurantDailyBookings extends Page implements HasTable
                 TextColumn::make('earnings')
                     ->label('Earnings')
                     ->alignRight()
-                    ->money('USD', divideBy: 100),
+                    ->money(fn ($record) => $record->currency, divideBy: 100),
             ]);
     }
 }

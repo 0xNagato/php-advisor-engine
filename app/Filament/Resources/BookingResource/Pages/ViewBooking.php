@@ -80,7 +80,7 @@ class ViewBooking extends ViewRecord
                             ->inlineLabel(),
                         TextEntry::make('total_fee')
                             ->label('Reservation Fee:')
-                            ->money('USD', divideBy: 100)
+                            ->money(fn ($record) => $record->currency, divideBy: 100)
                             ->inlineLabel(),
                     ]),
             ]);

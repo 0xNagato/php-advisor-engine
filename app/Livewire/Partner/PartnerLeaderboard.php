@@ -12,8 +12,6 @@ use Illuminate\Support\Facades\DB;
 
 class PartnerLeaderboard extends BaseWidget
 {
-    protected static bool $isLazy = true;
-
     public ?Partner $partner;
 
     public bool $showFilters = false;
@@ -40,8 +38,8 @@ class PartnerLeaderboard extends BaseWidget
 
         return $table
             ->query($query)
-            ->recordUrl(function (Model $record) {
-                $record = Partner::where(['user_id' => $record->user_id])->first();
+            ->recordUrl(function (Earning $record) {
+                $record = Partner::firstWhere(['user_id' => $record->user_id]);
 
                 return route('filament.admin.resources.partners.view', ['record' => $record]);
             })
@@ -65,7 +63,7 @@ class PartnerLeaderboard extends BaseWidget
                     }),
                 Tables\Columns\TextColumn::make('total_earned')
                     ->label('Earned')
-                    ->currency('USD'),
+                    ->money('USD', divideBy: 100),
             ]);
     }
 

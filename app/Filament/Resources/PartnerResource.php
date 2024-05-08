@@ -47,7 +47,7 @@ class PartnerResource extends Resource
                 Tables\Columns\TextColumn::make('total_earned')
                     ->label('Earned')
                     ->alignRight()
-                    ->currency('USD'),
+                    ->money('USD', divideBy: 100),
                 Tables\Columns\TextColumn::make('bookings')
                     ->label('Bookings')
                     ->alignRight()

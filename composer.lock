@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "261a281fb68fa7329ecdc2ed7f09a1e8",
+    "content-hash": "2065e9ee663242633c975422a4969a26",
     "packages": [
         {
             "name": "akaunting/laravel-money",
@@ -1057,86 +1057,6 @@
                 "source": "https://github.com/AnourValar/eloquent-serialize/tree/1.2.22"
             },
             "time": "2024-03-22T12:56:46+00:00"
-        },
-        {
-            "name": "ariaieboy/filament-currency",
-            "version": "1.4.0",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/ariaieboy/filament-currency.git",
-                "reference": "191163f894291c8f8033466294029934c0bc7392"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/ariaieboy/filament-currency/zipball/191163f894291c8f8033466294029934c0bc7392",
-                "reference": "191163f894291c8f8033466294029934c0bc7392",
-                "shasum": ""
-            },
-            "require": {
-                "akaunting/laravel-money": "^1.2|^2.0|^3.0|^4.0|^5.2",
-                "filament/tables": "^3.0",
-                "illuminate/contracts": "^10.0|^11",
-                "php": "~8.1|~8.2|~8.3",
-                "spatie/laravel-package-tools": "^1.15.0"
-            },
-            "require-dev": {
-                "larastan/larastan": "^2.7.0",
-                "laravel/pint": "^1.0",
-                "nunomaduro/collision": "^7.9",
-                "orchestra/testbench": "^8.0",
-                "pestphp/pest": "^2.0",
-                "pestphp/pest-plugin-arch": "^2.0",
-                "pestphp/pest-plugin-laravel": "^2.0",
-                "phpstan/extension-installer": "^1.1",
-                "phpstan/phpstan-deprecation-rules": "^1.0",
-                "phpstan/phpstan-phpunit": "^1.0"
-            },
-            "type": "library",
-            "extra": {
-                "laravel": {
-                    "providers": [
-                        "Ariaieboy\\FilamentCurrency\\FilamentCurrencyServiceProvider"
-                    ],
-                    "aliases": {
-                        "FilamentCurrency": "Ariaieboy\\FilamentCurrency\\Facades\\FilamentCurrency"
-                    }
-                }
-            },
-            "autoload": {
-                "psr-4": {
-                    "Ariaieboy\\FilamentCurrency\\": "src/",
-                    "Ariaieboy\\FilamentCurrency\\Database\\Factories\\": "database/factories/"
-                }
-            },
-            "notification-url": "https://packagist.org/downloads/",
-            "license": [
-                "MIT"
-            ],
-            "authors": [
-                {
-                    "name": "AriaieBOY",
-                    "email": "ariaieboy.ir@gmail.com",
-                    "role": "Developer"
-                }
-            ],
-            "description": "Bring back laravel-money formatter for Filament Text Column",
-            "homepage": "https://github.com/ariaieboy/filament-currency",
-            "keywords": [
-                "ariaieboy",
-                "filament-currency",
-                "laravel"
-            ],
-            "support": {
-                "issues": "https://github.com/ariaieboy/filament-currency/issues",
-                "source": "https://github.com/ariaieboy/filament-currency"
-            },
-            "funding": [
-                {
-                    "url": "https://github.com/ariaieboy",
-                    "type": "github"
-                }
-            ],
-            "time": "2024-04-01T08:33:47+00:00"
         },
         {
             "name": "ashallendesign/laravel-config-validator",
@@ -17214,12 +17134,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/Roave/SecurityAdvisories.git",
-                "reference": "7e41e89915991a80d38f5cecb3ab3def0f4749b7"
+                "reference": "99ba3993d1441627081b78b6a844776fc9ef264f"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/Roave/SecurityAdvisories/zipball/7e41e89915991a80d38f5cecb3ab3def0f4749b7",
-                "reference": "7e41e89915991a80d38f5cecb3ab3def0f4749b7",
+                "url": "https://api.github.com/repos/Roave/SecurityAdvisories/zipball/99ba3993d1441627081b78b6a844776fc9ef264f",
+                "reference": "99ba3993d1441627081b78b6a844776fc9ef264f",
                 "shasum": ""
             },
             "conflict": {
@@ -17666,7 +17586,7 @@
                 "pimcore/demo": "<10.3",
                 "pimcore/ecommerce-framework-bundle": "<1.0.10",
                 "pimcore/perspective-editor": "<1.5.1",
-                "pimcore/pimcore": "<11.2.3",
+                "pimcore/pimcore": "<11.1.6.5-dev|>=11.2,<11.2.3",
                 "pixelfed/pixelfed": "<0.11.11",
                 "plotly/plotly.js": "<2.25.2",
                 "pocketmine/bedrock-protocol": "<8.0.2",
@@ -17998,7 +17918,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2024-05-07T20:04:15+00:00"
+            "time": "2024-05-08T14:04:15+00:00"
         },
         {
             "name": "sebastian/cli-parser",
