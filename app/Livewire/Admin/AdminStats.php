@@ -29,11 +29,11 @@ class AdminStats extends Widget
         $endDate = $this->filters['endDate'] ?? now();
 
         $bookingsQuery = Booking::confirmed()->whereBetween('created_at', [$startDate, $endDate]);
+        $numberOfBookings = $bookingsQuery->count();
+
         $currentEarningsByCurrency = $bookingsQuery->selectRaw('currency, SUM(platform_earnings) as total_earnings')
             ->groupBy('currency')
             ->get();
-
-        $numberOfBookings = $bookingsQuery->count();
 
         $this->stats = compact('currentEarningsByCurrency', 'numberOfBookings');
     }

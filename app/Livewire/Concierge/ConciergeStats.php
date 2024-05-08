@@ -35,13 +35,12 @@ class ConciergeStats extends Widget
             ->whereIn('type', ['concierge', 'concierge_referral_1', 'concierge_referral_2'])
             ->whereBetween('confirmed_at', [$startDate, $endDate]);
 
+        $numberOfBookings = $conciergeEarningsQuery->count();
+
         $conciergeEarnings = $conciergeEarningsQuery->selectRaw('currency, SUM(amount) as total_earnings')
             ->groupBy('currency')
             ->get();
 
-        $numberOfBookings = $conciergeEarningsQuery->count();
-
-        // Update the stats object
         $this->stats = [
             'currentEarningsByCurrency' => $conciergeEarnings,
             'numberOfBookings' => $numberOfBookings,

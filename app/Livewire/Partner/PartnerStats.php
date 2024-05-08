@@ -30,11 +30,11 @@ class PartnerStats extends Widget
             ->whereIn('type', ['partner_concierge', 'partner_restaurant'])
             ->whereBetween('confirmed_at', [$startDate, $endDate]);
 
+        $numberOfBookings = $partnerEarningsQuery->count();
+
         $partnerEarnings = $partnerEarningsQuery->selectRaw('currency, SUM(amount) as total_earnings')
             ->groupBy('currency')
             ->get();
-
-        $numberOfBookings = $partnerEarningsQuery->count();
 
         // Update the stats object
         $this->stats = [
