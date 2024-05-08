@@ -29,7 +29,6 @@ class AdminRecentBookings extends BaseWidget
         $endDate = $this->filters['endDate'] ?? now();
 
         $query = Booking::confirmed()
-            ->with('earnings')
             ->whereBetween('created_at', [$startDate, $endDate])->orderByDesc('created_at')
             ->limit(10);
 
@@ -47,14 +46,9 @@ class AdminRecentBookings extends BaseWidget
                 TextColumn::make('booking_at')
                     ->label('Date')
                     ->dateTime('D, M j'),
-                TextColumn::make('platform_earnings')
-                    ->alignRight()
-                    ->label('Earned')
-                    ->formatStateUsing(function (Booking $booking) {
-                        $total = $booking->earnings->sum('amount');
-
-                        return money($total, $booking->currency);
-                    }),
+                TextColumn::make('total_fee')
+                    ->label('Fee')
+                    ->money('USD', divideBy: 100),
 
             ]);
     }
