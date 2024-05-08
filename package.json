@@ -2,7 +2,7 @@
     "private": true,
     "type": "module",
     "scripts": {
-        "format":  "prettier --write 'resources/**/*.blade.php'",
+        "format": "prettier --write 'resources/**/*.blade.php'",
         "dev": "vite",
         "build": "vite build"
     },
@@ -14,16 +14,15 @@
         "@types/stripe-v3": "^3.1.33",
         "autoprefixer": "^10.4.18",
         "chokidar": "^3.6.0",
-        "daisyui": "^4.7.3",
         "laravel-vite-plugin": "^1.0.2",
         "postcss": "^8.4.36",
         "postcss-nesting": "^12.1.0",
         "prettier": "^3.2.5",
         "tailwindcss": "^3.4.1",
-        "vite": "^5.1.6"
+        "vite": "^5.1.6",
+        "prettier-plugin-blade": "^2.1.11"
     },
     "dependencies": {
-        "prettier-plugin-blade": "^2.1.11",
         "puppeteer": "^22.6.0"
     }
 }
