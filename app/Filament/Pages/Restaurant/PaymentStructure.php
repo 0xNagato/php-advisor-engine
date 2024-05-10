@@ -137,6 +137,7 @@ class PaymentStructure extends Page
                 ->mask(RawJs::make('$money($input)'))
                 ->stripCharacters(',')
                 ->numeric()
+                ->minValue(5)
                 ->prefix(fn () => $this->region->currency_symbol)
                 ->hidden(fn (Get $get) => $get('non_prime_type') === 'free')
                 ->required(),
@@ -150,7 +151,7 @@ class PaymentStructure extends Page
         $data = $this->nonPrimeFeesForm->getState();
         $this->restaurant->update([
             'non_prime_type' => $data['non_prime_type'],
-            'non_prime_fee_per_head' => $data['non_prime_fee_per_head'],
+            'non_prime_fee_per_head' => $data['non_prime_fee_per_head'] ?? $this->restaurant->non_prime_fee_per_head,
         ]);
 
         Notification::make()
