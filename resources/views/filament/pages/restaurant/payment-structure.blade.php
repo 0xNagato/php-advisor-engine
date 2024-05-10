@@ -4,7 +4,7 @@
             Prime Booking Fees
         </x-slot:heading>
 
-        <form wire:submit.prevent="saveBookingFeeForm">
+        <form wire:submit.prevent="saveBookingFeesForm">
             {{ $this->bookingFeesForm }}
 
             <x-filament::button type="submit" class="w-full mt-4">
