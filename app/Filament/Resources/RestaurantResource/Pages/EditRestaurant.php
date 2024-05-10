@@ -58,7 +58,6 @@ class EditRestaurant extends EditRecord
                                 lenient: true,
                             )
                             ->required()
-                            ->onlyCountries(['US', 'CA'])
                             ->initialCountry('US'),
 
                     ]),
