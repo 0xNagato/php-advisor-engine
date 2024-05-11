@@ -219,12 +219,8 @@ class User extends Authenticatable implements FilamentUser, HasAvatar
         $code = rand(100000, 999999);
 
         Twofacode::updateOrCreate(
-            [
-                'user_id' => $this->id,
-            ],
-            [
-                'code' => $code,
-            ]
+            ['user_id' => $this->id], // field to find
+            ['code' => $code,] // field to update
         );
 
 //        app(SmsService::class)->sendMessage(
@@ -232,7 +228,6 @@ class User extends Authenticatable implements FilamentUser, HasAvatar
 //            "Do not share this code with anyone. Your 2FA login code for Prima is " . $code
 //        );
     }
-
 
     public function verify2FACode($code): bool
     {
@@ -242,6 +237,7 @@ class User extends Authenticatable implements FilamentUser, HasAvatar
     public function markDeviceAsVerified()
     {
         $deviceKey = $this->deviceKey();
+
         $this->devices()
             ->where('key', $deviceKey)
             ->update(['verified' => true]);
