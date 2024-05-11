@@ -166,7 +166,7 @@ class User extends Authenticatable implements FilamentUser, HasAvatar
 
     public function getHasSecuredAttribute(): bool
     {
-        return !blank($this->secured_at);
+        return ! blank($this->secured_at);
     }
 
     public function getLabelAttribute(): string
@@ -220,13 +220,13 @@ class User extends Authenticatable implements FilamentUser, HasAvatar
 
         Twofacode::updateOrCreate(
             ['user_id' => $this->id], // field to find
-            ['code' => $code,] // field to update
+            ['code' => $code] // field to update
         );
 
-//        app(SmsService::class)->sendMessage(
-//            auth()->user()->phone,
-//            "Do not share this code with anyone. Your 2FA login code for Prima is " . $code
-//        );
+        //        app(SmsService::class)->sendMessage(
+        //            auth()->user()->phone,
+        //            "Do not share this code with anyone. Your 2FA login code for Prima is " . $code
+        //        );
     }
 
     public function verify2FACode($code): bool
@@ -242,7 +242,7 @@ class User extends Authenticatable implements FilamentUser, HasAvatar
             ->where('key', $deviceKey)
             ->update(['verified' => true]);
 
-        session()->put('twofacode' . $this->id, true);
+        session()->put('twofacode'.$this->id, true);
     }
 
     public function registerDevice()
@@ -257,6 +257,6 @@ class User extends Authenticatable implements FilamentUser, HasAvatar
 
     public function deviceKey()
     {
-        return md5(request()->userAgent() . request()->ip());
+        return md5(request()->userAgent().request()->ip());
     }
 }
