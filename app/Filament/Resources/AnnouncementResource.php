@@ -5,6 +5,7 @@ namespace App\Filament\Resources;
 use App\Events\AnnouncementCreated;
 use App\Filament\Resources\AnnouncementResource\Pages;
 use App\Models\Announcement;
+use App\Models\Region;
 use App\Models\User;
 use Filament\Forms;
 use Filament\Forms\Components\Section;
@@ -46,6 +47,9 @@ class AnnouncementResource extends Resource
                         Forms\Components\MarkdownEditor::make('message'),
                         Forms\Components\TextInput::make('call_to_action_title'),
                         Forms\Components\TextInput::make('call_to_action_url'),
+                        Forms\Components\Select::make('region')
+                            ->label('Region')
+                            ->options(Region::all()->pluck('name', 'id')),
                         Forms\Components\Select::make('recipient_roles')
                             ->label('Recipient Roles')
                             ->options($roles)

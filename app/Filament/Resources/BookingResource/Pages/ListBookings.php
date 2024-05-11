@@ -21,7 +21,9 @@ class ListBookings extends ListRecords
     {
         return $table
             ->modifyQueryUsing(function ($query) {
-                $query = $query->orderByDesc('created_at')->where('status', BookingStatus::CONFIRMED);
+                $query = $query
+                    ->with('restaurant')
+                    ->orderByDesc('created_at')->where('status', BookingStatus::CONFIRMED);
 
                 if (auth()->user()->hasRole('concierge')) {
                     return $query->where('concierge_id', auth()->user()->concierge->id);
@@ -42,7 +44,7 @@ class ListBookings extends ListRecords
                         return view('partials.booking-info-column', ['record' => $record]);
                     }),
                 TextColumn::make('total_fee')
-                    ->money('USD', divideBy: 100)
+                    ->money(fn ($record) => $record->currency, divideBy: 100)
                     ->alignRight(),
 
             ])

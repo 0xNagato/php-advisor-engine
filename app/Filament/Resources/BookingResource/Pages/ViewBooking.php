@@ -5,6 +5,7 @@ namespace App\Filament\Resources\BookingResource\Pages;
 use App\Enums\BookingStatus;
 use App\Filament\Resources\BookingResource;
 use App\Models\Booking;
+use App\Models\Region;
 use Filament\Infolists\Components\Section;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Infolists\Infolist;
@@ -26,9 +27,12 @@ class ViewBooking extends ViewRecord
 
     public bool $showConcierges = false;
 
+    public Region $region;
+
     public function mount(string|int $record): void
     {
-        $this->record = $this->resolveRecord($record);
+        $this->record = Booking::with('earnings.user')
+            ->firstWhere('id', $record);
 
         abort_if($this->record->status !== BookingStatus::CONFIRMED, 404);
 
@@ -39,6 +43,7 @@ class ViewBooking extends ViewRecord
         $this->authorizeAccess();
 
         $this->booking = $this->record;
+        $this->region = Region::find($this->booking->city);
     }
 
     public function infolist(Infolist $infolist): Infolist
@@ -75,7 +80,7 @@ class ViewBooking extends ViewRecord
                             ->inlineLabel(),
                         TextEntry::make('total_fee')
                             ->label('Reservation Fee:')
-                            ->money('USD', divideBy: 100)
+                            ->money(fn ($record) => $record->currency, divideBy: 100)
                             ->inlineLabel(),
                     ]),
             ]);

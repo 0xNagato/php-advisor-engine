@@ -86,7 +86,7 @@ class ConciergeReferralBookingsTable extends BaseWidget
                 TextColumn::make('amount')
                     ->label('Earnings')
                     ->alignRight()
-                    ->currency('USD'),
+                    ->money(fn (Earning $record) => $record->booking->currency, divideBy: 100),
             ]);
     }
 }

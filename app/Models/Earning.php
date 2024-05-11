@@ -13,6 +13,7 @@ class Earning extends Model
         'booking_id',
         'type',
         'amount',
+        'currency',
         'percentage',
         'percentage_of',
         'confirmed_at',

@@ -192,7 +192,7 @@
                     <div class="grid grid-cols-3 gap-2 mt-2 text-xs">
                         @foreach($booking->earnings as $earning)
 
-                            <div class="truncate">{{ $earning->user->name }}</div>
+                            <div class="truncate">{{ $earning->user->name }} ({{ $earning->user_id }})</div>
                             <div>{{ Str::title(str_replace('_', ' ', $earning->type)) }}</div>
                             <div class="text-right">{{ money($earning->amount, $booking->currency) }}</div>
 

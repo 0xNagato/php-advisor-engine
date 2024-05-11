@@ -108,7 +108,10 @@ class User extends Authenticatable implements FilamentUser, HasAvatar
 
     public function getFilamentAvatarUrl(): ?string
     {
-        return $this->profile_photo_path ? Storage::url($this->profile_photo_path) : "https://ui-avatars.com/api/?background=312596&color=fff&name=$this->name";
+        return $this->profile_photo_path
+            ? Storage::disk('do')
+                ->url($this->profile_photo_path)
+            : "https://ui-avatars.com/api/?background=312596&color=fff&name=$this->name";
     }
 
     public function routeNotificationForTwilio(): string
@@ -136,7 +139,10 @@ class User extends Authenticatable implements FilamentUser, HasAvatar
         /**
          * @var Role $role
          */
-        $role = $this->roles->firstWhere('name', '!=', 'panel_user');
+        $role = self::with('roles')
+            ->find($this->id)
+            ->roles
+            ->firstWhere('name', '!=', 'panel_user');
 
         return Str::of($role->name)
             ->snake()

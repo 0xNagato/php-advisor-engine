@@ -43,8 +43,9 @@ class ConciergeSeeder extends Seeder
         ]);
 
         $hotelNames->each(function ($hotelName) {
-            $shouldAssignReferralId = random_int(0, 1) <= 0.5;
-            $partner = $shouldAssignReferralId ? Concierge::with('user')->get()->random() : Partner::inRandomOrder()->first();
+            $partner = random_int(0, 1)
+                ? Concierge::with('user')->inRandomOrder()->first()
+                : Partner::with('user')->inRandomOrder()->first();
 
             $email = 'concierge@'.Str::slug($hotelName).'.com';
 

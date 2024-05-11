@@ -40,19 +40,14 @@ class AdminRecentBookings extends BaseWidget
             ->emptyStateIcon('heroicon-o-currency-dollar')
             ->emptyStateHeading('Earnings will show here when bookings begin!')
             ->columns([
-                // TextColumn::make('guest_name')
-                //     ->label('Guest')
-                //     ->toggleable(isToggledHiddenByDefault: true)
-                //     ->searchable(),
                 TextColumn::make('schedule.restaurant.restaurant_name')
                     ->label('Restaurant')
                     ->searchable(),
                 TextColumn::make('booking_at')
                     ->label('Date')
                     ->dateTime('D, M j'),
-                TextColumn::make('platform_earnings')
-                    ->alignRight()
-                    ->label('Earned')
+                TextColumn::make('total_fee')
+                    ->label('Fee')
                     ->money('USD', divideBy: 100),
 
             ]);

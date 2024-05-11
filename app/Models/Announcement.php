@@ -19,6 +19,7 @@ class Announcement extends Model
     protected $fillable = [
         'title',
         'message',
+        'region',
         'recipient_roles',
         'recipient_user_ids',
         'call_to_action_title',

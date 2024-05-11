@@ -15,7 +15,7 @@ class IPLocationService
         return IPData::from(json_decode($data, true));
     }
 
-    public function getClosestRegion(float $userLat, float $userLon)
+    public function getClosestRegion(float $userLat, float $userLon): Region
     {
         $closestRegion = null;
         $minDistance = PHP_INT_MAX;

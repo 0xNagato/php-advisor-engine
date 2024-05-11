@@ -55,7 +55,7 @@ class RestaurantReferralBookingsTable extends BaseWidget
         return $table
             ->paginationPageOptions([10, 25, 50])
             ->query($bookingsQuery)
-            ->recordUrl(fn (Earning $record) => ViewBooking::getUrl([$record->booking]))
+            ->recordUrl(fn (Earning $record) => ViewBooking::getUrl(['record' => $record->booking]))
             ->emptyStateIcon('heroicon-o-currency-dollar')
             ->emptyStateHeading('Earnings will show here when bookings begin!')
             ->columns([
@@ -67,7 +67,7 @@ class RestaurantReferralBookingsTable extends BaseWidget
                 TextColumn::make('amount')
                     ->label('Earnings')
                     ->alignRight()
-                    ->currency('USD'),
+                    ->money(fn (Earning $record) => $record->booking->currency, divideBy: 100),
             ]);
     }
 }

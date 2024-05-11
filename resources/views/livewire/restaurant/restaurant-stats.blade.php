@@ -31,7 +31,7 @@
                         </div>
                         <div
                             @class(['flex items-center', 'text-[11px]', 'text-green-600' => $stats->difference['restaurant_earnings_up'], 'text-red-600' => !$stats->difference['restaurant_earnings_up']])>
-                            <div>{{ money($stats->difference['restaurant_earnings']) }}</div>
+                            <div>{{ money($stats->difference['restaurant_earnings'], $currency) }}</div>
 
                             @if ($stats->difference['restaurant_earnings_up'])
                                 <x-filament::icon icon="heroicon-o-arrow-up-right" class="w-4 h-4"/>

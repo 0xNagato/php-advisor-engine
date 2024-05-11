@@ -4,6 +4,7 @@ namespace App\Livewire\Restaurant;
 
 use App\Data\RestaurantStatData;
 use App\Models\Earning;
+use App\Models\Region;
 use App\Models\Restaurant;
 use Filament\Widgets\Widget;
 
@@ -17,6 +18,8 @@ class RestaurantStats extends Widget
 
     public RestaurantStatData $stats;
 
+    public string $currency;
+
     public function getColumnSpan(): int|string|array
     {
         return 'full';
@@ -24,6 +27,8 @@ class RestaurantStats extends Widget
 
     public function mount(): void
     {
+        $this->currency = Region::find($this->restaurant->region)->currency;
+
         $startDate = $this->filters['startDate'] ?? now()->subDays(30);
         $endDate = $this->filters['endDate'] ?? now();
 
@@ -93,6 +98,6 @@ class RestaurantStats extends Widget
 
     private function formatNumber($number): string
     {
-        return money($number, 'USD');
+        return money($number, $this->currency);
     }
 }
