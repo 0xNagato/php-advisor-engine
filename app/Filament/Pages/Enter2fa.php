@@ -2,16 +2,16 @@
 
 namespace App\Filament\Pages;
 
-use Filament\Facades\Filament;
-use Filament\Pages\Page;
-use Filament\Forms\Components\TextInput;
-use Filament\Forms\Form;
 use Filament\Actions\Concerns\InteractsWithActions;
 use Filament\Actions\Contracts\HasActions;
+use Filament\Facades\Filament;
+use Filament\Forms\Components\TextInput;
 use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
+use Filament\Forms\Form;
+use Filament\Pages\Page;
 
-class Enter2fa extends Page implements HasForms, HasActions
+class Enter2fa extends Page implements HasActions, HasForms
 {
     use InteractsWithActions;
     use InteractsWithForms;
@@ -25,6 +25,7 @@ class Enter2fa extends Page implements HasForms, HasActions
     protected static bool $shouldRegisterNavigation = false;
 
     public ?array $data = [];
+
     public int $tries = 0;
 
     public function form(Form $form): Form
@@ -41,7 +42,7 @@ class Enter2fa extends Page implements HasForms, HasActions
     public function mount()
     {
         // if this device is verified, redirect to the dashboard
-        if (session()->has('twofacode' . auth()->user()->id)) {
+        if (session()->has('twofacode'.auth()->user()->id)) {
             return redirect()->route('filament.admin.pages.admin-dashboard');
         }
 
@@ -57,7 +58,7 @@ class Enter2fa extends Page implements HasForms, HasActions
     {
         $code = $this->form->getState()['code'];
 
-        if (!auth()->user()->verify2FACode($code)) {
+        if (! auth()->user()->verify2FACode($code)) {
             $this->tries++;
 
             if ($this->tries >= 3) {
@@ -73,6 +74,7 @@ class Enter2fa extends Page implements HasForms, HasActions
 
         } else {
             auth()->user()->markDeviceAsVerified();
+
             return redirect()->route('filament.admin.pages.admin-dashboard');
         }
     }
