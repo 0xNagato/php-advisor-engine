@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Services\SmsService;
 use App\Traits\FormatsPhoneNumber;
 use BezhanSalleh\FilamentShield\Traits\HasPanelShield;
 use Filament\Models\Contracts\FilamentUser;
@@ -165,7 +166,7 @@ class User extends Authenticatable implements FilamentUser, HasAvatar
 
     public function getHasSecuredAttribute(): bool
     {
-        return ! blank($this->secured_at);
+        return !blank($this->secured_at);
     }
 
     public function getLabelAttribute(): string
@@ -201,5 +202,65 @@ class User extends Authenticatable implements FilamentUser, HasAvatar
     public function getInternationalFormattedPhoneNumberAttribute(): string
     {
         return $this->getInternationalFormattedPhoneNumber($this->phone);
+    }
+
+    public function devices(): HasMany
+    {
+        return $this->hasMany(Device::class);
+    }
+
+    public function twofacode(): HasOne
+    {
+        return $this->hasOne(Twofacode::class);
+    }
+
+    public function generateCode()
+    {
+        $code = rand(100000, 999999);
+
+        Twofacode::updateOrCreate(
+            [
+                'user_id' => $this->id,
+            ],
+            [
+                'code' => $code,
+            ]
+        );
+
+//        app(SmsService::class)->sendMessage(
+//            auth()->user()->phone,
+//            "Do not share this code with anyone. Your 2FA login code for Prima is " . $code
+//        );
+    }
+
+
+    public function verify2FACode($code): bool
+    {
+        return $this->twofacode->code === $code;
+    }
+
+    public function markDeviceAsVerified()
+    {
+        $deviceKey = $this->deviceKey();
+        $this->devices()
+            ->where('key', $deviceKey)
+            ->update(['verified' => true]);
+
+        session()->put('twofacode' . $this->id, true);
+    }
+
+    public function registerDevice()
+    {
+        $deviceKey = $this->deviceKey();
+
+        return $this->devices()->firstOrCreate(
+            ['key' => $deviceKey],
+            ['verified' => false]
+        );
+    }
+
+    public function deviceKey()
+    {
+        return md5(request()->userAgent() . request()->ip());
     }
 }
