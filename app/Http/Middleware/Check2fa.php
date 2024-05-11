@@ -13,7 +13,7 @@ class Check2fa
         if (auth()->check()) {
 
             $user = auth()->user();
-            $sessionKey = 'twofacode' . $user->id;
+            $sessionKey = 'twofacode'.$user->id;
 
             // Check if the device is already verified in the session
             if (session()->has($sessionKey) && session($sessionKey) === true) {
