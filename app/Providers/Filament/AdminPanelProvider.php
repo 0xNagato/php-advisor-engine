@@ -5,6 +5,7 @@ namespace App\Providers\Filament;
 use App\Filament\Auth\Login;
 use App\Filament\Auth\RequestPasswordReset;
 use App\Filament\Auth\ResetPassword;
+use App\Http\Middleware\Check2FA;
 use BezhanSalleh\FilamentShield\FilamentShieldPlugin;
 use Exception;
 use Filament\Http\Middleware\Authenticate;
@@ -86,6 +87,7 @@ class AdminPanelProvider extends PanelProvider
                 SubstituteBindings::class,
                 DisableBladeIconComponents::class,
                 DispatchServingFilamentEvent::class,
+                Check2FA::class,
             ])
             ->authMiddleware([
                 Authenticate::class,
