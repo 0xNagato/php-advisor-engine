@@ -45,7 +45,7 @@ class PaymentStructure extends Page
 
     public function mount(): void
     {
-        $this->restaurant = auth()->user()->restaurant;
+        $this->restaurant = auth()->user()->restaurant ?? abort(403);
         $this->region = $this->restaurant->inRegion;
 
         $this->bookingFeesForm->fill([
