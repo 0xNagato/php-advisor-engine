@@ -15,25 +15,6 @@
 
     <x-filament::section>
         <x-slot:heading>
-            Non-Prime Booking Fees
-        </x-slot:heading>
-
-        <x-slot name="description">
-            Define fees for non-peak hour reservations, enabling you to encourage concierges to drive bookings during
-            slower periods and optimize venue utilization.
-        </x-slot>
-
-        <form wire:submit.prevent="saveNonPrimeFeesForm">
-            {{ $this->nonPrimeFeesForm }}
-
-            <x-filament::button type="submit" class="w-full mt-4">
-                Update Non-Prime Booking Fees
-            </x-filament::button>
-        </form>
-    </x-filament::section>
-
-    <x-filament::section>
-        <x-slot:heading>
             Daily Custom Pricing Override
         </x-slot:heading>
 
