@@ -10,11 +10,11 @@ class TwoFactorAuthentication
 {
     public function handle(Request $request, Closure $next): Response
     {
-        if (!auth()->check()) {
+        if (! auth()->check()) {
             return $next($request);
         }
 
-        $sessionKey = 'twofacode' . auth()->id();
+        $sessionKey = 'twofacode'.auth()->id();
 
         if ($this->deviceIsVerified($sessionKey)) {
             return $next($request);
@@ -23,7 +23,7 @@ class TwoFactorAuthentication
         $device = auth()->user()->registerDevice();
         $this->storeDeviceVerificationStatus($sessionKey, $device->verified);
 
-        if (!$device->verified && $this->shouldRedirectTo2fa($request)) {
+        if (! $device->verified && $this->shouldRedirectTo2fa($request)) {
             return redirect()->route('filament.admin.pages.enter2fa');
         }
 
@@ -42,7 +42,7 @@ class TwoFactorAuthentication
 
     protected function shouldRedirectTo2fa(Request $request): bool
     {
-        return !$request->routeIs('filament.admin.pages.enter2fa') &&
-            !$request->routeIs('filament.admin.auth.logout');
+        return ! $request->routeIs('filament.admin.pages.enter2fa') &&
+            ! $request->routeIs('filament.admin.auth.logout');
     }
 }
