@@ -10,6 +10,7 @@ use Filament\Forms\Contracts\HasForms;
 use Filament\Forms\Form;
 use Filament\Pages\Page;
 use HasanAhani\FilamentOtpInput\Components\OtpInput;
+use Illuminate\Contracts\View\View;
 
 class TwoFactorCode extends Page implements HasActions, HasForms
 {
@@ -21,6 +22,7 @@ class TwoFactorCode extends Page implements HasActions, HasForms
     protected static string $view = 'filament.pages.twofactorcode';
 
     protected static ?string $title = 'Two Factor Authentication';
+    protected ?string $heading = 'Two Factor Authentication';
 
     protected static bool $shouldRegisterNavigation = false;
 
@@ -98,5 +100,10 @@ class TwoFactorCode extends Page implements HasActions, HasForms
         auth()->user()->generateCode();
         $this->reset('data');
         $this->tries = 0;
+    }
+
+    public function getHeader(): ?View
+    {
+        return view('filament.pages.twofactorcode-header');
     }
 }

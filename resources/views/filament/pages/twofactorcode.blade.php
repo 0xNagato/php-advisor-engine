@@ -1,4 +1,9 @@
 <x-filament-panels::page>
+   <div>
+        <h1>
+            {{ $this->heading }}
+        </h1>
+    </div>
     <div>
             <p>
                 A code has been sent to your mobile phone. Please enter the code below.
