@@ -22,3 +22,4 @@ yarn-error.log
 /storage/pail
 /prima.test.pem
 /prima.test-key.pem
+.php-cs-fixer.cache

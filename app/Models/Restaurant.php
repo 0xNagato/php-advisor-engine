@@ -66,6 +66,9 @@ class Restaurant extends Model
         'minimum_spend',
         'restaurant_logo_path',
         'region',
+        'increment_fee',
+        'non_prime_fee_per_head',
+        'non_prime_type',
     ];
 
     protected $casts = [

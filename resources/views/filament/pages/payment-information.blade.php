@@ -24,6 +24,15 @@
                         placeholder="{{ $payout_type === 'PayPal' ? 'PayPal Email' : 'Name or Company Name' }}"
                     />
                 </x-filament::input.wrapper>
+            @elseif($payout_type === 'IBAN')
+                <x-filament::input.wrapper>
+                    <x-filament::input
+                        type="text"
+                        required
+                        wire:model="payout_name"
+                        placeholder="IBAN"
+                    />
+                </x-filament::input.wrapper>
             @elseif($payout_type === 'Direct Deposit')
                 <x-filament::input.wrapper>
                     <x-filament::input
