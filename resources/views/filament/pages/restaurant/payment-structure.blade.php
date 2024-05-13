@@ -15,19 +15,18 @@
 
     <x-filament::section>
         <x-slot:heading>
-            Daily Custom Pricing Override
+            Special Days
         </x-slot:heading>
 
-        <x-slot name="description">
-            Define exceptional pricing rules for specific dates, allowing you to temporarily supersede the standard
-            booking fees and offer tailored pricing for select events or promotions.
-        </x-slot>
-
-        <form wire:submit.prevent="saveSpecialPricingForm">
+        <form wire:submit.prevent="saveSpecialPricingForm" class="space-y-4">
+            <p class="text-sm -mt-2">
+                If you’d like to increase or decrease the base price of a reservation on a special occasion, please do
+                so here.
+            </p>
             {{ $this->specialPricingForm }}
 
-            <x-filament::button type="submit" class="w-full mt-4">
-                Update Custom Pricing Override
+            <x-filament::button type="submit" class="w-full">
+                Save Special Day
             </x-filament::button>
         </form>
     </x-filament::section>

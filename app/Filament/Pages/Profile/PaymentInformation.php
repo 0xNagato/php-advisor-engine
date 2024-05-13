@@ -14,7 +14,7 @@ class PaymentInformation extends Page
 
     protected static string $view = 'filament.pages.payment-information';
 
-    protected static ?int $navigationSort = 20;
+    protected static ?int $navigationSort = 100;
 
     public string $payout_type;
 
@@ -30,6 +30,7 @@ class PaymentInformation extends Page
         'Direct Deposit',
         'PayPal',
         'Check',
+        'IBAN',
     ];
 
     public int $charity_percentage;

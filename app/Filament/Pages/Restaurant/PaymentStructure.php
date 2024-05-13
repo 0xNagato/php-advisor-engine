@@ -23,6 +23,8 @@ class PaymentStructure extends Page
 
     protected static string $view = 'filament.pages.restaurant.payment-structure';
 
+    protected static ?string $title = 'Booking Fees';
+
     protected static ?int $navigationSort = 29;
 
     public Restaurant $restaurant;
@@ -67,26 +69,19 @@ class PaymentStructure extends Page
         return $form->schema([
             TextInput::make('booking_fee')
                 ->label('Booking Fee')
-                ->helperText('This is the minimum cost for a reservation for for a prime-time reservation.')
+                ->helperText('This is the amount charged for a prime-time reservation for 2 diners.')
                 ->mask(RawJs::make('$money($input)'))
                 ->stripCharacters(',')
                 ->numeric()
                 ->prefix(fn () => $this->region->currency_symbol)
                 ->required(),
             TextInput::make('increment_fee')
-                ->label('Increment Fee (per customer)')
+                ->label('Additional Fee (per customer)')
                 ->helperText('The base reservation is for 2 people. For each additional diner, this fee will apply.')
                 ->mask(RawJs::make('$money($input)'))
                 ->stripCharacters(',')
                 ->numeric()
                 ->prefix(fn () => $this->region->currency_symbol),
-            // TextInput::make('minimum_spend')
-            //     ->label('Minimum Spend (per customer)')
-            //     ->helperText('Define the minimum spend per person required for a booking. The concierge will communicate this amount to the customer, and their agreement will be obtained before confirming the booking.')
-            //     ->mask(RawJs::make('$money($input)'))
-            //     ->stripCharacters(',')
-            //     ->numeric()
-            //     ->prefix(fn () => $this->region->currency_symbol),
         ])
             ->statePath('bookingFeesFormData')
             ->model($this->restaurant);
@@ -98,7 +93,6 @@ class PaymentStructure extends Page
         $this->restaurant->update([
             'booking_fee' => $data['booking_fee'],
             'increment_fee' => $data['increment_fee'],
-            // 'minimum_spend' => $data['minimum_spend'],
         ]);
 
         Notification::make()

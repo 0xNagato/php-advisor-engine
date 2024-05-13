@@ -1,6 +1,6 @@
 <x-filament-panels::page>
     <x-filament::section>
-        <form wire:submit.prevent="saveBookingFeesForm" class="space-y-4">
+        <form wire:submit.prevent="saveForm" class="space-y-4">
             <p>
                 The PRIMA Concierge Network can help you fill your dining rooms when they aren’t full by recommending
                 your restaurant to diners.
@@ -13,12 +13,14 @@
             <p>
                 Please enter the amount you’d like to pay concierges per diner
             </p>
-            
+
             {{ $this->form }}
 
-            <p>
-                PRIMA will bill your account the incentive amount plus 7%.
-            </p>
+            @if($this->data['non_prime_type'] === 'paid')
+                <p>
+                    PRIMA will bill your account the incentive amount plus 7%.
+                </p>
+            @endif
 
             <x-filament::button type="submit" class="w-full mt-4">
                 Update Non-Prime Booking Fees

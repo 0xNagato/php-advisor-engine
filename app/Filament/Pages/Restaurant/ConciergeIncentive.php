@@ -29,7 +29,7 @@ class ConciergeIncentive extends Page
 
     public ?array $data = [];
 
-    public static function canAccess(array $parameters = []): bool
+    public static function canAccess(): bool
     {
         return auth()->user()->hasRole('restaurant');
     }
@@ -43,17 +43,16 @@ class ConciergeIncentive extends Page
             'non_prime_type' => $this->restaurant->non_prime_type,
             'non_prime_fee_per_head' => $this->restaurant->non_prime_fee_per_head,
         ]);
-
     }
 
     public function form(Form $form): Form
     {
         return $form->schema([
             Radio::make('non_prime_type')
-                ->label('Non-Prime Type')
+                ->label('Would you like to offer an incentive to the PRIMA Concierge Network to book non-prime reservations?')
                 ->options([
-                    'paid' => 'Paid',
-                    'free' => 'Free',
+                    'paid' => 'Yes',
+                    'free' => 'No',
                 ])
                 ->inline()
                 ->default('paid')

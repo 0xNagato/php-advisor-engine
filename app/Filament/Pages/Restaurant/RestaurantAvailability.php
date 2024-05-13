@@ -2,6 +2,7 @@
 
 namespace App\Filament\Pages\Restaurant;
 
+use App\Models\Restaurant;
 use Filament\Pages\Page;
 
 class RestaurantAvailability extends Page
@@ -12,8 +13,17 @@ class RestaurantAvailability extends Page
 
     protected static string $view = 'filament.pages.restaurant-availability';
 
+    protected static ?string $title = 'Restaurant Settings';
+
+    public Restaurant $restaurant;
+
     public static function canAccess(): bool
     {
         return auth()->user()->hasRole('restaurant');
+    }
+
+    public function mount(): void
+    {
+        $this->restaurant = auth()->user()->restaurant;
     }
 }
