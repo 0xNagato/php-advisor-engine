@@ -10,29 +10,39 @@ class TwoFactorAuthentication
 {
     public function handle(Request $request, Closure $next): Response
     {
-        if (auth()->check()) {
+        if (!auth()->check()) {
+            return $next($request);
+        }
 
-            $user = auth()->user();
-            $sessionKey = 'twofacode'.$user->id;
+        $sessionKey = 'twofacode' . auth()->id();
 
-            // Check if the device is already verified in the session
-            if (session()->has($sessionKey) && session($sessionKey) === true) {
-                return $next($request);
-            }
+        if ($this->deviceIsVerified($sessionKey)) {
+            return $next($request);
+        }
 
-            $device = $user->registerDevice();
+        $device = auth()->user()->registerDevice();
+        $this->storeDeviceVerificationStatus($sessionKey, $device->verified);
 
-            if (! $device->verified &&
-                ! $request->routeIs('filament.admin.pages.enter2fa') &&
-                ! $request->routeIs('filament.admin.auth.logout')) {
-                return redirect()->route('filament.admin.pages.enter2fa');
-            }
-
-            // Store the verification status in the session
-            session()->put($sessionKey, $device->verified);
-
+        if (!$device->verified && $this->shouldRedirectTo2fa($request)) {
+            return redirect()->route('filament.admin.pages.enter2fa');
         }
 
         return $next($request);
+    }
+
+    protected function deviceIsVerified($sessionKey): bool
+    {
+        return session()->has($sessionKey) && session($sessionKey) === true;
+    }
+
+    protected function storeDeviceVerificationStatus($sessionKey, $verified): void
+    {
+        session()->put($sessionKey, $verified);
+    }
+
+    protected function shouldRedirectTo2fa(Request $request): bool
+    {
+        return !$request->routeIs('filament.admin.pages.enter2fa') &&
+            !$request->routeIs('filament.admin.auth.logout');
     }
 }
