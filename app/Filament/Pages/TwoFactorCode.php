@@ -4,8 +4,8 @@ namespace App\Filament\Pages;
 
 use Filament\Actions\Concerns\InteractsWithActions;
 use Filament\Actions\Contracts\HasActions;
+use HasanAhani\FilamentOtpInput\Components\OtpInput;
 use Filament\Facades\Filament;
-use Filament\Forms\Components\TextInput;
 use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
 use Filament\Forms\Form;
@@ -27,15 +27,16 @@ class TwoFactorCode extends Page implements HasActions, HasForms
     public ?array $data = [];
 
     public int $tries = 0;
+    public int $regenerate = 0;
 
     public function form(Form $form): Form
     {
         return $form
             ->schema([
-                TextInput::make('code')
-                    ->numeric()
-                    ->length(6)
-                    ->required(),
+                OtpInput::make('code')
+                    ->numberInput(6)
+                    ->required()
+                    ->label('Code'),
             ])->statePath('data');
     }
 
@@ -83,8 +84,18 @@ class TwoFactorCode extends Page implements HasActions, HasForms
 
     public function regenerateCode()
     {
+        $this->regenerate++;
+
+        if ($this->regenerate >= 3) {
+            Filament::auth()->logout();
+            session()->invalidate();
+            session()->regenerateToken();
+
+            return redirect()->route('filament.admin.auth.login');
+        }
+
         auth()->user()->generateCode();
-        $this->tries = 0;
         $this->reset('data');
+        $this->tries = 0;
     }
 }

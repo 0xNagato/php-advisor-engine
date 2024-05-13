@@ -1,5 +1,10 @@
 <x-filament-panels::page>
     <div>
+            <p>
+                A code has been sent to your mobile phone. Please enter the code below.
+            </p>
+    </div>
+    <div>
         <x-filament::button type="button" size="sm" outlined wire:click="regenerateCode">
             Resend Code
         </x-filament::button>
