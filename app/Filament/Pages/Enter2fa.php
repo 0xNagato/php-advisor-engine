@@ -41,7 +41,7 @@ class Enter2fa extends Page implements HasActions, HasForms
 
     public function mount()
     {
-        $sessionKey = 'twofacode'.auth()->id();
+        $sessionKey = 'usercode.'.auth()->id();
 
         // if this device is verified, redirect to the dashboard
         if (session()->has($sessionKey) && session($sessionKey) === true) {

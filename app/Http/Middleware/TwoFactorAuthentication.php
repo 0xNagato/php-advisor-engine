@@ -14,7 +14,7 @@ class TwoFactorAuthentication
             return $next($request);
         }
 
-        $sessionKey = 'twofacode'.auth()->id();
+        $sessionKey = 'usercode.'.auth()->id();
 
         if ($this->deviceIsVerified($sessionKey)) {
             return $next($request);

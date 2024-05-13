@@ -215,16 +215,16 @@ class User extends Authenticatable implements FilamentUser, HasAvatar
         return $this->hasMany(Device::class);
     }
 
-    public function twofacode(): HasOne
+    public function userCode(): HasOne
     {
-        return $this->hasOne(Twofacode::class);
+        return $this->hasOne(UserCode::class);
     }
 
     public function generateCode()
     {
         $code = rand(100000, 999999);
 
-        Twofacode::updateOrCreate(
+        UserCode::updateOrCreate(
             ['user_id' => $this->id], // field to find
             ['code' => $code] // field to update
         );
@@ -237,7 +237,7 @@ class User extends Authenticatable implements FilamentUser, HasAvatar
 
     public function verify2FACode($code): bool
     {
-        return $this->twofacode->code === $code;
+        return $this->userCode->code === $code;
     }
 
     public function markDeviceAsVerified()
@@ -248,7 +248,7 @@ class User extends Authenticatable implements FilamentUser, HasAvatar
             ->where('key', $deviceKey)
             ->update(['verified' => true]);
 
-        session()->put('twofacode'.$this->id, true);
+        session()->put('usercode.'.$this->id, true);
     }
 
     public function registerDevice()
