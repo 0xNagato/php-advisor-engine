@@ -24,7 +24,7 @@ class TwoFactorAuthentication
         $this->storeDeviceVerificationStatus($sessionKey, $device->verified);
 
         if (! $device->verified && $this->shouldRedirectTo2fa($request)) {
-            return redirect()->route('filament.admin.pages.enter2fa');
+            return redirect()->route('filament.admin.pages.two-factor-code');
         }
 
         return $next($request);
@@ -42,7 +42,7 @@ class TwoFactorAuthentication
 
     protected function shouldRedirectTo2fa(Request $request): bool
     {
-        return ! $request->routeIs('filament.admin.pages.enter2fa') &&
+        return ! $request->routeIs('filament.admin.pages.two-factor-code') &&
             ! $request->routeIs('filament.admin.auth.logout');
     }
 }

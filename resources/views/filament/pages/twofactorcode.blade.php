@@ -14,6 +14,5 @@
                 Submit
             </x-filament::button>
         </div>
-        <div>{{ $this->tries }}</div>
     </x-filament-panels::form>
 </x-filament-panels::page>

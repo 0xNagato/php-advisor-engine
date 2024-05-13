@@ -11,14 +11,14 @@ use Filament\Forms\Contracts\HasForms;
 use Filament\Forms\Form;
 use Filament\Pages\Page;
 
-class Enter2fa extends Page implements HasActions, HasForms
+class TwoFactorCode extends Page implements HasActions, HasForms
 {
     use InteractsWithActions;
     use InteractsWithForms;
 
     protected static ?string $navigationIcon = 'heroicon-o-document-text';
 
-    protected static string $view = 'filament.pages.enter2fa';
+    protected static string $view = 'filament.pages.twofactorcode';
 
     protected static ?string $title = 'Two Factor Authentication';
 
