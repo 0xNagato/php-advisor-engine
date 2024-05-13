@@ -22,6 +22,7 @@ class TwoFactorCode extends Page implements HasActions, HasForms
     protected static string $view = 'filament.pages.twofactorcode';
 
     protected static ?string $title = 'Two Factor Authentication';
+
     protected ?string $heading = 'Two Factor Authentication';
 
     protected static bool $shouldRegisterNavigation = false;
