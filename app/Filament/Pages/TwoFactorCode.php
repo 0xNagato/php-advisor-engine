@@ -4,12 +4,12 @@ namespace App\Filament\Pages;
 
 use Filament\Actions\Concerns\InteractsWithActions;
 use Filament\Actions\Contracts\HasActions;
-use HasanAhani\FilamentOtpInput\Components\OtpInput;
 use Filament\Facades\Filament;
 use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
 use Filament\Forms\Form;
 use Filament\Pages\Page;
+use HasanAhani\FilamentOtpInput\Components\OtpInput;
 
 class TwoFactorCode extends Page implements HasActions, HasForms
 {
@@ -27,6 +27,7 @@ class TwoFactorCode extends Page implements HasActions, HasForms
     public ?array $data = [];
 
     public int $tries = 0;
+
     public int $regenerate = 0;
 
     public function form(Form $form): Form
