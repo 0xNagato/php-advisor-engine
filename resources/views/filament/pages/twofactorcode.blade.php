@@ -7,7 +7,7 @@
         </div>
         <div class="mb-4">
             <p>
-                Enter the 6-digit number that we sent to your phone number ending in {{ $this->phoneNumber }}.
+                Enter the 6-digit number that we sent to your phone number ending in *{{ $this->phoneNumber }}.
             </p>
         </div>
 
