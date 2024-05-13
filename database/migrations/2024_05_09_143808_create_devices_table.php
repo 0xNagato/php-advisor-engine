@@ -17,6 +17,8 @@ return new class extends Migration
             $table->string('key')->unique();
             $table->boolean('verified')->default(false);
             $table->timestamps();
+
+            $table->index('user_id');
         });
     }
 
