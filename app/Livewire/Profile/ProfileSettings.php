@@ -65,7 +65,7 @@ class ProfileSettings extends Widget implements HasForms
                 ->unique('users', ignorable: auth()->user())
                 ->live(onBlur: true)
                 ->afterStateUpdated(function (Component $livewire) {
-                    $livewire->dispatch('open-modal','check2FACode');
+                    $livewire->dispatch('open-modal', 'check2FACode');
                 })
                 ->email(),
             PhoneInput::make('phone')
