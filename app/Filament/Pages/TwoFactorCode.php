@@ -33,6 +33,8 @@ class TwoFactorCode extends Page implements HasActions, HasForms
 
     public int $regenerate = 0;
 
+    public string $phoneNumber;
+
     public function form(Form $form): Form
     {
         return $form
@@ -59,6 +61,8 @@ class TwoFactorCode extends Page implements HasActions, HasForms
 
         // send the code to the user
         auth()->user()->generateCode();
+
+        $this->phoneNumber = substr(auth()->user()->phone, -4);
     }
 
     public function save()
