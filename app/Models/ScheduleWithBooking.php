@@ -42,6 +42,11 @@ class ScheduleWithBooking extends Model
     {
         if ($this->prime_time) {
             $extraPeople = max(0, $partySize - 2);
+
+            if (! $this->relationLoaded('restaurant')) {
+                $this->load('restaurant');
+            }
+
             $extraFee = $extraPeople * $this->restaurant->increment_fee;
 
             return ($this->effective_fee + $extraFee) * 100;

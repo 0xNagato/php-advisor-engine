@@ -2,8 +2,11 @@
 
 namespace App\Livewire\Restaurant;
 
+use App\Filament\Actions\Restaurant\MarkAsNoShowAction;
+use App\Filament\Actions\Restaurant\ReverseMarkAsNoShowAction;
 use App\Models\Booking;
 use App\Models\Restaurant;
+use Filament\Tables\Actions\ActionGroup;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Filament\Widgets\Concerns\InteractsWithPageFilters;
@@ -39,7 +42,7 @@ class RestaurantRecentBookings extends BaseWidget
         $startDate = $this->filters['startDate'] ?? now()->subDays(30);
         $endDate = $this->filters['endDate'] ?? now();
 
-        $query = Booking::confirmed()
+        $query = Booking::confirmedOrNoShow()
             ->with('earnings', function ($query) {
                 $query->where('user_id', $this->restaurant->user_id);
             })
@@ -69,6 +72,14 @@ class RestaurantRecentBookings extends BaseWidget
 
                         return money($total, $booking->currency);
                     }),
+            ])
+            ->actions([
+                ActionGroup::make([
+                    MarkAsNoShowAction::make('mark no show'),
+                    ReverseMarkAsNoShowAction::make('reverse no show'),
+                ])
+                    ->tooltip('Actions')
+                    ->hidden(fn () => ! auth()->user()?->hasRole('restaurant')),
             ]);
     }
 }
