@@ -2,7 +2,6 @@
 
 namespace App\Livewire\Profile;
 
-use Filament\Actions\Action;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Concerns\InteractsWithForms;
