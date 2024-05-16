@@ -80,9 +80,8 @@ class TwoFactorCode extends Page implements HasActions, HasForms
                 return redirect()->route('filament.admin.auth.login');
             }
 
-            $this->addError('code', 'The provided 2FA code is incorrect.');
+            $this->addError('data.code', 'The provided 2FA code is incorrect.');
             $this->reset('data');
-
         } else {
             auth()->user()->markDeviceAsVerified();
 
