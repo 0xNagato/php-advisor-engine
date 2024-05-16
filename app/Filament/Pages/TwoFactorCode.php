@@ -8,6 +8,7 @@ use Filament\Facades\Filament;
 use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
 use Filament\Forms\Form;
+use Filament\Notifications\Notification;
 use Filament\Pages\Page;
 use HasanAhani\FilamentOtpInput\Components\OtpInput;
 use Illuminate\Contracts\View\View;
@@ -34,6 +35,8 @@ class TwoFactorCode extends Page implements HasActions, HasForms
     public int $regenerate = 0;
 
     public string $phoneNumber;
+
+    public string $redirectRoute;
 
     public function form(Form $form): Form
     {
@@ -63,6 +66,8 @@ class TwoFactorCode extends Page implements HasActions, HasForms
         auth()->user()->generateCode();
 
         $this->phoneNumber = substr(auth()->user()->phone, -4);
+
+        $this->redirectRoute = request()->query('redirect');
     }
 
     public function save()
@@ -89,11 +94,18 @@ class TwoFactorCode extends Page implements HasActions, HasForms
             $sessionKey = 'pending-data.' . auth()->id();
             $pendingData = session()->get($sessionKey);
 
+            Notification::make()
+                ->title('Changes updated successfully.')
+                ->success()
+                ->send();
+
             // Check if there is pending data to update
             if ($pendingData) {
                 auth()->user()->update($pendingData);
 
                 session()->forget($sessionKey);
+
+                return redirect()->route($this->redirectRoute);
             }
 
             return redirect()->route('filament.admin.pages.admin-dashboard');

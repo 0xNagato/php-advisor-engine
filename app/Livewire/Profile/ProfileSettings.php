@@ -98,7 +98,7 @@ class ProfileSettings extends Widget implements HasForms
     {
         session()->put('pending-data.' . $user->id, $data);
 
-        return redirect()->route('filament.admin.pages.two-factor-code');
+        return redirect()->route('filament.admin.pages.two-factor-code', ['redirect' => 'filament.admin.pages.my-settings']);
     }
 
     protected function updateProfileWithoutTwoFactor(array $data, $user)

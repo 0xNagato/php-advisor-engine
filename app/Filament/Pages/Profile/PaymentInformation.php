@@ -152,7 +152,7 @@ class PaymentInformation extends Page
 
             session()->put('pending-data.' . $this->user->id, $pendingData);
 
-            return redirect()->route('filament.pages.two-factor-code');
+            return redirect()->route('filament.admin.pages.two-factor-code', ['redirect' => 'filament.admin.pages.payment-information']);
         } else {
             $this->user->update($pendingData);
 
