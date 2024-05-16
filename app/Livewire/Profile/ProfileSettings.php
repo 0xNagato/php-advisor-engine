@@ -87,7 +87,7 @@ class ProfileSettings extends Widget implements HasForms
 
         $user = auth()->user();
 
-        if (!$this->requiresTwoFactorAuthentication($user, $data)) {
+        if (! $this->requiresTwoFactorAuthentication($user, $data)) {
             $this->updateProfileWithoutTwoFactor($data, $user);
         } else {
             $this->updateProfileWithTwoFactor($data, $user);
@@ -96,7 +96,7 @@ class ProfileSettings extends Widget implements HasForms
 
     protected function updateProfileWithTwoFactor(array $data, $user)
     {
-        session()->put('pending-data.' . $user->id, $data);
+        session()->put('pending-data.'.$user->id, $data);
 
         return redirect()->route('filament.admin.pages.two-factor-code');
     }
@@ -117,9 +117,9 @@ class ProfileSettings extends Widget implements HasForms
     // if user has not verified the device and the user details have changed
     protected function requiresTwoFactorAuthentication($user, array $data): bool
     {
-        $sessionKey = 'usercode.' . $user->id;
+        $sessionKey = 'usercode.'.$user->id;
 
-        return !$this->deviceIsVerified($sessionKey) && $this->userDetailsChanged($user, $data);
+        return ! $this->deviceIsVerified($sessionKey) && $this->userDetailsChanged($user, $data);
     }
 
     protected function deviceIsVerified($sessionKey): bool
