@@ -263,6 +263,6 @@ class User extends Authenticatable implements FilamentUser, HasAvatar
 
     public function deviceKey()
     {
-        return md5(request()->userAgent().request()->ip());
+        return md5(request()->userAgent().request()->ip().$this->id);
     }
 }

@@ -67,7 +67,7 @@ class TwoFactorCode extends Page implements HasActions, HasForms
 
         $this->phoneNumber = substr(auth()->user()->phone, -4);
 
-        $this->redirectRoute = request()->query('redirect');
+        $this->redirectRoute = request()->query('redirect') ?? 'filament.admin.resources.messages.index';
     }
 
     public function save()
@@ -104,11 +104,9 @@ class TwoFactorCode extends Page implements HasActions, HasForms
                 auth()->user()->update($pendingData);
 
                 session()->forget($sessionKey);
-
-                return redirect()->route($this->redirectRoute);
             }
 
-            return redirect()->route('filament.admin.pages.admin-dashboard');
+            return redirect()->route($this->redirectRoute);
         }
     }
 
