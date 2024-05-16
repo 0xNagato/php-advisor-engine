@@ -166,7 +166,7 @@ class ReservationHub extends Page
                 $currentTime = Carbon::now($userTimezone);
 
                 // Check if the reservation time is before the current time
-                if ($reservationTime->lt($currentTime)) {
+                if ($reservationTime?->lt($currentTime)) {
                     $this->schedulesToday = new Collection();
                     $this->schedulesThisWeek = new Collection();
 
@@ -178,7 +178,7 @@ class ReservationHub extends Page
                 $reservationTime = Carbon::createFromFormat('H:i:s', $this->form->getState()['reservation_time'], $userTimezone);
                 $currentTime = Carbon::now($userTimezone);
 
-                if ($reservationTime->copy()->subMinutes(self::MINUTES_PAST)->gt($currentTime)) {
+                if ($reservationTime?->copy()->subMinutes(self::MINUTES_PAST)->gt($currentTime)) {
                     $reservationTime = $reservationTime->subMinutes(self::MINUTES_PAST)->format('H:i:s');
                 } else {
                     $reservationTime = $this->form->getState()['reservation_time'];
@@ -189,7 +189,7 @@ class ReservationHub extends Page
 
             $restaurantId = $this->form->getState()['restaurant'];
 
-            $endTime = Carbon::createFromFormat('H:i:s', $reservationTime, $userTimezone)->addMinutes(self::MINUTES_FUTURE);
+            $endTime = Carbon::createFromFormat('H:i:s', $reservationTime, $userTimezone)?->addMinutes(self::MINUTES_FUTURE);
             $limitTime = Carbon::createFromTime(23, 59, 0, $userTimezone);
 
             if ($endTime->gt($limitTime)) {
@@ -212,7 +212,7 @@ class ReservationHub extends Page
                 ->where('start_time', '<=', $endTimeForQuery)
                 ->get();
 
-            if ($requestedDate->isSameDay($currentDate)) {
+            if ($requestedDate?->isSameDay($currentDate)) {
                 $this->schedulesThisWeek = ScheduleWithBooking::with('restaurant')
                     ->where('restaurant_id', $restaurantId)
                     ->where('start_time', $this->form->getState()['reservation_time'])
@@ -232,7 +232,7 @@ class ReservationHub extends Page
         $bookingDate = Carbon::createFromFormat('Y-m-d', $this->data['date'], $userTimezone);
         $currentDate = Carbon::now($userTimezone);
 
-        if ($bookingDate->gt($currentDate->copy()->addMonth())) {
+        if ($bookingDate?->gt($currentDate->copy()->addMonth())) {
             Notification::make()
                 ->title('Booking cannot be created more than one month in advance.')
                 ->danger()
@@ -260,6 +260,7 @@ class ReservationHub extends Page
             'status' => BookingStatus::PENDING,
             'booking_at' => $bookingAt,
             'currency' => $this->currency,
+            'is_prime' => $scheduleTemplate->prime_time,
         ]);
 
         $taxData = app(SalesTaxService::class)->calculateTax(

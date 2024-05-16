@@ -35,6 +35,7 @@ class BookingStatusWidget extends Component
             BookingStatus::GUEST_ON_PAGE => 'The guest is currently on the page. Assist them with their booking.',
             BookingStatus::COMPLETED => 'The booking has been completed successfully.',
             BookingStatus::CANCELLED => 'The booking has been cancelled. Check if there was a mistake.',
+            BookingStatus::NO_SHOW => 'The guest did not show up for the booking.',
         };
     }
 }

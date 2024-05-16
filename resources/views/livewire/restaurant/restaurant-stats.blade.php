@@ -1,6 +1,6 @@
 <x-filament-widgets::widget>
     <div class="sm:mt-0">
-        <dl class="grid divide-gray-200 overflow-hidden rounded-lg bg-white shadow grid-cols-2 divide-x divide-y-0">
+        <dl class="grid divide-gray-200 overflow-hidden rounded-lg bg-white shadow grid-cols-3 divide-x divide-y-0">
             <!-- Bookings -->
             <div class="px-4 py-5 sm:p-6">
                 <dt class="text-xs font-semibold text-slate-900">Bookings</dt>
@@ -37,6 +37,28 @@
                                 <x-filament::icon icon="heroicon-o-arrow-up-right" class="w-4 h-4"/>
                             @else
                                 <x-filament::icon icon="heroicon-o-arrow-down-right" class="w-4 h-4"/>
+                            @endif
+                        </div>
+                    </div>
+                </dd>
+            </div>
+
+            <!-- Bounty -->
+            <div class="px-4 py-5 sm:p-6">
+                <dt class="text-xs font-semibold text-slate-900">Bounty</dt>
+                <dd class="mt-1 flex items-baseline justify-between md:block lg:flex">
+                    <div class="flex flex-col items-baseline text-2xl font-semibold text-indigo-600">
+                        <div>
+                            {{ $stats->formatted['restaurant_bounty'] }}
+                        </div>
+                        <div
+                            @class(['flex items-center', 'text-[11px]', 'text-red-600' => $stats->difference['restaurant_bounty_up'], 'text-green-600' => !$stats->difference['restaurant_bounty_up']])>
+                            <div>{{ money($stats->difference['restaurant_bounty'], $currency) }}</div>
+
+                            @if ($stats->difference['restaurant_bounty_up'])
+                                <x-filament::icon icon="heroicon-o-arrow-down-right" class="w-4 h-4"/>
+                            @else
+                                <x-filament::icon icon="heroicon-o-arrow-up-right" class="w-4 h-4"/>
                             @endif
                         </div>
                     </div>

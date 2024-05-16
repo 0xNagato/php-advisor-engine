@@ -2,10 +2,13 @@
 
 namespace App\Filament\Pages\Restaurant;
 
+use App\Filament\Actions\Restaurant\MarkAsNoShowAction;
+use App\Filament\Actions\Restaurant\ReverseMarkAsNoShowAction;
 use App\Filament\Resources\BookingResource\Pages\ViewBooking;
 use App\Models\Booking;
 use App\Models\Restaurant;
 use Filament\Pages\Page;
+use Filament\Tables\Actions\ActionGroup;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Concerns\InteractsWithTable;
 use Filament\Tables\Contracts\HasTable;
@@ -46,7 +49,7 @@ class RestaurantDailyBookings extends Page implements HasTable
 
     public function table(Table $table): Table
     {
-        $query = Booking::confirmed()
+        $query = Booking::confirmedOrNoShow()
             ->with('restaurant')
             ->select('bookings.*', 'earnings.amount as earnings')
             ->join('earnings', function ($join) {
@@ -70,6 +73,14 @@ class RestaurantDailyBookings extends Page implements HasTable
                     ->label('Earnings')
                     ->alignRight()
                     ->money(fn ($record) => $record->currency, divideBy: 100),
+            ])
+            ->actions([
+                ActionGroup::make([
+                    MarkAsNoShowAction::make('mark no show'),
+                    ReverseMarkAsNoShowAction::make('reverse no show'),
+                ])
+                    ->tooltip('Actions')
+                    ->hidden(fn () => ! auth()->user()?->hasRole('restaurant')),
             ]);
     }
 }

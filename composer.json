@@ -36,6 +36,7 @@
         "opcodesio/log-viewer": "^3.8",
         "owenvoke/blade-fontawesome": "^2.6",
         "pelmered/filament-money-field": "^1.0",
+        "postare/blade-mdi": "^1.0",
         "propaganistas/laravel-phone": "^5.2",
         "rappasoft/laravel-authentication-log": "^4.0",
         "ryangjchandler/blade-tabler-icons": "^2.3",

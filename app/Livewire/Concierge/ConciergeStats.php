@@ -32,7 +32,7 @@ class ConciergeStats extends Widget
         $endDate = $this->filters['endDate'] ?? now();
 
         $conciergeEarningsQuery = Earning::where('user_id', $this->concierge->user_id)
-            ->whereIn('type', ['concierge', 'concierge_referral_1', 'concierge_referral_2'])
+            ->whereIn('type', ['concierge', 'concierge_referral_1', 'concierge_referral_2', 'concierge_bounty'])
             ->whereBetween('confirmed_at', [$startDate, $endDate]);
 
         $numberOfBookings = $conciergeEarningsQuery->count();

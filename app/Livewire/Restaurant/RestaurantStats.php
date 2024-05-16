@@ -37,8 +37,13 @@ class RestaurantStats extends Widget
             ->whereIn('type', ['restaurant'])
             ->whereBetween('confirmed_at', [$startDate, $endDate]);
 
+        $restaurantBountyQuery = Earning::where('user_id', $this->restaurant->user_id)
+            ->whereIn('type', ['restaurant_paid'])
+            ->whereBetween('confirmed_at', [$startDate, $endDate]);
+
         // Calculate restaurant earnings as the sum of amount
         $restaurantEarnings = $restaurantEarningsQuery->sum('amount');
+        $restaurantBounty = $restaurantBountyQuery->sum('amount');
 
         $numberOfBookings = $restaurantEarningsQuery->count();
 
@@ -51,8 +56,13 @@ class RestaurantStats extends Widget
             ->whereIn('type', ['restaurant'])
             ->whereBetween('confirmed_at', [$prevStartDate, $prevEndDate]);
 
+        $prevRestaurantBountyQuery = Earning::where('user_id', $this->restaurant->user_id)
+            ->whereIn('type', ['restaurant_paid'])
+            ->whereBetween('confirmed_at', [$prevStartDate, $prevEndDate]);
+
         // Calculate previous restaurant earnings as the sum of amount
         $prevRestaurantEarnings = $prevRestaurantEarningsQuery->sum('amount');
+        $prevRestaurantBounty = $prevRestaurantBountyQuery->sum('amount');
 
         $prevNumberOfBookings = $prevRestaurantEarningsQuery->count();
 
@@ -75,7 +85,8 @@ class RestaurantStats extends Widget
                 'original_earnings_up' => $restaurantEarnings >= $prevRestaurantEarnings,
                 'restaurant_earnings' => $restaurantEarnings - $prevRestaurantEarnings,
                 'restaurant_earnings_up' => $restaurantEarnings >= $prevRestaurantEarnings,
-
+                'restaurant_bounty' => $restaurantBounty - $prevRestaurantBounty,
+                'restaurant_bounty_up' => $restaurantBounty >= $prevRestaurantBounty,
                 'number_of_bookings' => $numberOfBookings - $prevNumberOfBookings,
                 'number_of_bookings_up' => $numberOfBookings >= $prevNumberOfBookings,
                 'restaurant_contribution' => $restaurantEarnings - $prevRestaurantEarnings,
@@ -86,9 +97,11 @@ class RestaurantStats extends Widget
                 'restaurant_earnings' => $this->formatNumber($restaurantEarnings),
                 'number_of_bookings' => $numberOfBookings, // Assuming this is an integer count, no need to format
                 'restaurant_contribution' => $this->formatNumber($restaurantEarnings),
+                'restaurant_bounty' => $this->formatNumber($restaurantBounty),
                 'difference' => [
                     'original_earnings' => $this->formatNumber($restaurantEarnings - $prevRestaurantEarnings),
                     'restaurant_earnings' => $this->formatNumber($restaurantEarnings - $prevRestaurantEarnings),
+                    'restaurant_bounty' => $this->formatNumber($restaurantBounty - $prevRestaurantBounty),
                     'number_of_bookings' => $numberOfBookings - $prevNumberOfBookings, // Assuming this is an integer count, no need to format
                     'restaurant_contribution' => $this->formatNumber($restaurantEarnings - $prevRestaurantEarnings),
                 ],

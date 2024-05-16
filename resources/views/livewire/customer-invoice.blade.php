@@ -194,14 +194,25 @@
 
                             <div class="truncate">{{ $earning->user->name }} ({{ $earning->user_id }})</div>
                             <div>{{ Str::title(str_replace('_', ' ', $earning->type)) }}</div>
-                            <div class="text-right">{{ money($earning->amount, $booking->currency) }}</div>
+                            <div class="text-right">
+                                {{ money($earning->amount, $booking->currency) }}
+                            </div>
 
                         @endforeach
 
                         @role('super_admin')
-                        <div class="font-semibold mt-2">Total Payout:</div>
+                        <div class="mt-2">Platform:</div>
                         <div
-                            class="col-span-2 font-semibold mt-2 text-right">{{ money($booking->earnings->sum('amount'), $booking->currency) }}</div>
+                            class="col-span-2 mt-2 text-right">
+                            {{ money($booking->platform_earnings, $booking->currency) }}
+                        </div>
+                        @if($booking->is_prime)
+                            <div class="font-semibold mt-2">Total Payout:</div>
+                            <div
+                                class="col-span-2 font-semibold mt-2 text-right">
+                                {{ money($booking->earnings->sum('amount'), $booking->currency) }}
+                            </div>
+                        @endif
                         @endrole
                     </div>
                 </div>

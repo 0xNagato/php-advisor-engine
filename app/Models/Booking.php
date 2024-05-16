@@ -27,32 +27,37 @@ class Booking extends Model
      * @var array<int, string>
      */
     protected $fillable = [
-        'schedule_template_id',
+        'booking_at',
+        'city',
+        'clicked_at',
+        'concierge_earnings',
         'concierge_id',
+        'concierge_referral_type',
+        'confirmed_at',
+        'currency',
+        'guest_count',
+        'guest_email',
         'guest_first_name',
         'guest_last_name',
-        'guest_email',
         'guest_phone',
-        'guest_count',
-        'currency',
-        'total_fee',
-        'booking_at',
-        'stripe_charge',
-        'stripe_charge_id',
-        'status',
+        'invoice_path',
+        'is_prime',
+        'no_show',
+        'notes',
         'partner_concierge_id',
         'partner_restaurant_id',
-        'confirmed_at',
-        'clicked_at',
-        'concierge_referral_type',
-        'restaurant_confirmed_at',
+        'platform_earnings',
         'resent_restaurant_confirmation_at',
+        'restaurant_confirmed_at',
+        'restaurant_earnings',
+        'schedule_template_id',
+        'status',
+        'stripe_charge',
+        'stripe_charge_id',
         'tax',
         'tax_amount_in_cents',
-        'city',
+        'total_fee',
         'total_with_tax_in_cents',
-        'invoice_path',
-        'notes',
     ];
 
     protected $appends = ['guest_name', 'local_formatted_guest_phone'];
@@ -96,15 +101,23 @@ class Booking extends Model
         static::saving(static function (Booking $booking) {
             $booking->total_fee = $booking->totalFee();
 
-            $booking->restaurant_earnings =
-                $booking->total_fee *
-                ($booking->restaurant->payout_restaurant / 100);
-            $booking->concierge_earnings =
-                $booking->total_fee *
-                ($booking->concierge->payout_percentage / 100);
+            if ($booking->is_prime) {
+                $booking->restaurant_earnings =
+                    $booking->total_fee *
+                    ($booking->restaurant->payout_restaurant / 100);
+                $booking->concierge_earnings =
+                    $booking->total_fee *
+                    ($booking->concierge->payout_percentage / 100);
+            }
         });
 
         static::created(static function (Booking $booking) {
+            if (! $booking->is_prime && $booking->restaurant->non_prime_type === 'paid') {
+                static::calculateNonPrimeEarnings($booking);
+
+                return;
+            }
+
             DB::transaction(static function () use ($booking) {
                 $remainder =
                     $booking->total_fee -
@@ -300,6 +313,16 @@ class Booking extends Model
         return $query->where('status', BookingStatus::CONFIRMED);
     }
 
+    public function scopeNoShow($query)
+    {
+        return $query->where('status', BookingStatus::NO_SHOW);
+    }
+
+    public function scopeConfirmedOrNoShow($query)
+    {
+        return $query->whereIn('status', [BookingStatus::CONFIRMED, BookingStatus::NO_SHOW]);
+    }
+
     public function schedule(): BelongsTo
     {
         return $this->belongsTo(ScheduleWithBooking::class, 'schedule_template_id', 'schedule_template_id')
@@ -346,5 +369,61 @@ class Booking extends Model
     public function getLocalFormattedGuestPhoneAttribute(): string
     {
         return $this->getLocalFormattedPhoneNumber($this->guest_phone);
+    }
+
+    public static function calculateNonPrimeEarnings(Booking $booking, $reconfirm = false): void
+    {
+        $fee = $booking->restaurant->non_prime_fee_per_head * $booking->guest_count;
+        $concierge_earnings = $fee * 0.90;
+        $platform_concierge = $fee * 0.10;
+        $platform_restaurant = $fee * 0.07;
+        $platform_earnings = $platform_concierge + $platform_restaurant;
+        $restaurant_earnings = ($concierge_earnings + $platform_earnings) * -1;
+
+        Earning::create([
+            'booking_id' => $booking->id,
+            'user_id' => $booking->restaurant->user->id,
+            'type' => 'restaurant_paid',
+            'amount' => $restaurant_earnings * 100,
+            'currency' => $booking->currency,
+            'percentage' => -100,
+            'percentage_of' => 'concierge_bounty',
+        ]);
+
+        Earning::create([
+            'booking_id' => $booking->id,
+            'user_id' => $booking->concierge->user->id,
+            'type' => 'concierge_bounty',
+            'amount' => $concierge_earnings * 100,
+            'currency' => $booking->currency,
+            'percentage' => 90,
+            'percentage_of' => 'concierge_bounty',
+        ]);
+
+        if ($reconfirm) {
+            $booking->update([
+                'no_show' => false,
+                'status' => BookingStatus::CONFIRMED,
+            ]);
+        }
+
+        $booking->update([
+            'concierge_earnings' => $concierge_earnings * 100,
+            'restaurant_earnings' => $restaurant_earnings * 100,
+            'platform_earnings' => $platform_earnings * 100,
+        ]);
+    }
+
+    public static function reverseNonPrimeEarnings(Booking $booking): void
+    {
+        $booking->earnings()->delete();
+
+        $booking->update([
+            'concierge_earnings' => 0,
+            'restaurant_earnings' => 0,
+            'platform_earnings' => 0,
+            'no_show' => true,
+            'status' => BookingStatus::NO_SHOW,
+        ]);
     }
 }
