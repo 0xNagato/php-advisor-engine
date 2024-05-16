@@ -81,23 +81,54 @@ class ProfileSettings extends Widget implements HasForms
             ->statePath('data');
     }
 
-    public function save(): void
+    public function save()
     {
         $data = $this->form->getState();
 
-        if ($data['email'] !== auth()->user()->email) {
-            $this->livewire->mountFormComponentAction('check2FACode');
-            dd('2FA code is required');
+        $user = auth()->user();
+
+        if (!$this->requiresTwoFactorAuthentication($user, $data)) {
+            $this->updateProfileWithoutTwoFactor($data, $user);
+        } else {
+            $this->updateProfileWithTwoFactor($data, $user);
         }
+    }
 
+    protected function updateProfileWithTwoFactor(array $data, $user)
+    {
+        session()->put('profile-settings.'.$user->id, $data);
+
+        return redirect()->route('filament.admin.pages.two-factor-code');
+    }
+
+    protected function updateProfileWithoutTwoFactor(array $data, $user)
+    {
         $profilePhotoPath = $data['profile_photo_path'];
-        Storage::disk('do')->setVisibility($profilePhotoPath, 'public');
+//        Storage::disk('do')->setVisibility($profilePhotoPath, 'public');
 
-        auth()->user()->update($data);
+        $user->update($data);
 
         Notification::make()
             ->title('Profile updated successfully.')
             ->success()
             ->send();
+    }
+
+    // if user has not verified the device and the user details have changed
+    protected function requiresTwoFactorAuthentication($user, array $data): bool
+    {
+        $sessionKey = 'usercode.' . $user->id;
+
+        return !$this->deviceIsVerified($sessionKey) && $this->userDetailsChanged($user, $data);
+    }
+
+    protected function deviceIsVerified($sessionKey): bool
+    {
+        return session()->has($sessionKey) && session($sessionKey) === true;
+    }
+
+    protected function userDetailsChanged($user, array $data): bool
+    {
+        return $data['email'] !== $user->email || $data['phone'] !== $user->phone;
     }
 }
