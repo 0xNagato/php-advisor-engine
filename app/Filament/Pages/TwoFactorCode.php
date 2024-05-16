@@ -85,6 +85,17 @@ class TwoFactorCode extends Page implements HasActions, HasForms
         } else {
             auth()->user()->markDeviceAsVerified();
 
+            // Update the user with the pending data
+            $sessionKey = 'profile-settings.' . auth()->id();
+            $pendingData = session()->get($sessionKey);
+
+            // Check if there is pending data to update
+            if ($pendingData) {
+                auth()->user()->update($pendingData);
+
+                session()->forget($sessionKey);
+            }
+
             return redirect()->route('filament.admin.pages.admin-dashboard');
         }
     }
