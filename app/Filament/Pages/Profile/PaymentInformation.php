@@ -52,7 +52,7 @@ class PaymentInformation extends Page
     public static function canAccess(): bool
     {
         if (session()->exists('simpleMode')) {
-            return !session('simpleMode');
+            return ! session('simpleMode');
         }
 
         return auth()->user()->hasRole('concierge') || auth()->user()->hasRole('restaurant');
@@ -150,7 +150,7 @@ class PaymentInformation extends Page
 
         if ($this->requiresTwoFactorAuthentication($this->user, $pendingData)) {
 
-            session()->put('pending-data.' . $this->user->id, $pendingData);
+            session()->put('pending-data.'.$this->user->id, $pendingData);
 
             return redirect()->route('filament.admin.pages.two-factor-code', ['redirect' => 'filament.admin.pages.payment-information']);
         } else {
@@ -165,9 +165,9 @@ class PaymentInformation extends Page
 
     protected function requiresTwoFactorAuthentication($user, $pendingData): bool
     {
-        $sessionKey = 'usercode.' . $user->id;
+        $sessionKey = 'usercode.'.$user->id;
 
-        return !$this->deviceIsVerified($sessionKey);
+        return ! $this->deviceIsVerified($sessionKey);
     }
 
     protected function deviceIsVerified($sessionKey): bool

@@ -91,7 +91,7 @@ class TwoFactorCode extends Page implements HasActions, HasForms
             auth()->user()->markDeviceAsVerified();
 
             // Update the user with the pending data
-            $sessionKey = 'pending-data.' . auth()->id();
+            $sessionKey = 'pending-data.'.auth()->id();
             $pendingData = session()->get($sessionKey);
 
             Notification::make()
