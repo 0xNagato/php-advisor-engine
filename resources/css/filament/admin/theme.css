@@ -37,6 +37,10 @@ body::before {
     @apply dark:bg-white;
 }
 
+.fi-btn-group {
+    @apply w-full !important;
+}
+
 .fi-section-header {
     @apply px-4 py-3 !important;
 }

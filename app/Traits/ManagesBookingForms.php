@@ -32,6 +32,7 @@ trait ManagesBookingForms
                     'select_date' => 'Select Date',
                 ])
                 ->grouped()
+                ->columnSpanFull()
                 ->afterStateUpdated(function ($state, $set) {
                     if ($state !== 'select_date') {
                         $set('date', $state);

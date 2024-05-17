@@ -4,13 +4,13 @@
 
     <div>
         @if (!empty($restaurants))
-            <div class="relative bg-white -mx-4">
+            <div class="relative bg-white -mx-4 -mt-4 sm:mx-0 sm:mt-0 border-t">
                 <table class="w-full table-auto">
                     <thead class="text-xs uppercase">
-                    <tr>
+                    <tr class="border-b shadow sticky {{ app('impersonate')->isImpersonating() ? 'top-28' : 'top-16' }} bg-white">
                         <th></th>
                         @foreach($restaurants[0]->schedules as $index => $schedule)
-                            <th class="p-2 text-center text-sm font-semibold {{ $loop->first ? 'hidden sm:table-cell' : '' }} {{ $loop->last ? 'hidden sm:table-cell' : '' }}">
+                            <th class="p-2 pl-4 text-center text-sm font-semibold {{ $loop->first ? 'hidden sm:table-cell' : '' }} {{ $loop->last ? 'hidden sm:table-cell' : '' }}">
                                 {{ Carbon::createFromFormat('H:i:s', $schedule->start_time)->format('g:i A') }}
                             </th>
                         @endforeach
@@ -19,8 +19,8 @@
                     </thead>
                     <tbody>
                     @foreach($restaurants as $restaurant)
-                        <tr class="border-b">
-                            <td class="pl-2">
+                        <tr class="odd:bg-gray-100">
+                            <td class="pl-2 w-28 text-center">
                                 @if($restaurant->logo)
                                     <img
                                         src="{{ \Illuminate\Support\Facades\Storage::disk('do')->url($restaurant->restaurant_logo_path) }}"
@@ -34,7 +34,7 @@
                             </td>
 
                             @foreach($restaurant->schedules as $index => $schedule)
-                                <td class="p-1 {{ $loop->first ? 'hidden sm:table-cell' : '' }} {{ $loop->last ? 'hidden sm:table-cell' : '' }}">
+                                <td class="p-1 [&:nth-child(3n+2)]:pr-2 sm:[&:nth-child(3+n2)]:pr-0 {{ $loop->first ? 'hidden sm:table-cell' : '' }} {{ $loop->last ? 'hidden sm:table-cell' : '' }}">
                                     <button
                                         @if ($schedule->is_bookable) wire:click="createBooking({{ $schedule->id }}, '{{ $schedule->booking_date->format('Y-m-d') }}')" @endif
                                         @class([
