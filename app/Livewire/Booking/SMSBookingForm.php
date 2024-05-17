@@ -15,6 +15,7 @@ use Filament\Notifications\Notification;
 use Filament\Widgets\Widget;
 use libphonenumber\PhoneNumberType;
 use Ysfkaya\FilamentPhoneInput\Forms\PhoneInput;
+use Ysfkaya\FilamentPhoneInput\PhoneInputNumberType;
 
 /**
  * @property Form $form
