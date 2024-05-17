@@ -10,6 +10,7 @@ use Filament\Models\Contracts\HasAvatar;
 use Filament\Panel;
 use Illuminate\Database\Eloquent\Casts\AsArrayObject;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\HasOneThrough;
@@ -17,6 +18,7 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use Random\RandomException;
 use Rappasoft\LaravelAuthenticationLog\Traits\AuthenticationLoggable;
 use Spatie\Permission\Models\Role;
 use Spatie\Permission\Traits\HasRoles;
@@ -134,6 +136,7 @@ class User extends Authenticatable implements FilamentUser, HasAvatar
         return "$this->first_name $this->last_name";
     }
 
+    /** @noinspection PhpPossiblePolymorphicInvocationInspection */
     public function getMainRoleAttribute(): string
     {
         /**
@@ -220,19 +223,22 @@ class User extends Authenticatable implements FilamentUser, HasAvatar
         return $this->hasOne(UserCode::class);
     }
 
-    public function generateCode()
+    /**
+     * @throws RandomException
+     */
+    public function generateCode(): void
     {
-        $code = rand(100000, 999999);
+        $code = random_int(100000, 999999);
 
         UserCode::updateOrCreate(
             ['user_id' => $this->id], // field to find
             ['code' => $code] // field to update
         );
 
-        //        app(SmsService::class)->sendMessage(
-        //            auth()->user()->phone,
-        //            "Do not share this code with anyone. Your 2FA login code for Prima is " . $code
-        //        );
+        app(SmsService::class)->sendMessage(
+            auth()->user()->phone,
+            'Do not share this code with anyone. Your 2FA login code for PRIMA is '.$code
+        );
     }
 
     public function verify2FACode($code): bool
@@ -240,7 +246,7 @@ class User extends Authenticatable implements FilamentUser, HasAvatar
         return $this->userCode->code === $code;
     }
 
-    public function markDeviceAsVerified()
+    public function markDeviceAsVerified(): void
     {
         $deviceKey = $this->deviceKey();
 
@@ -251,7 +257,7 @@ class User extends Authenticatable implements FilamentUser, HasAvatar
         session()->put('usercode.'.$this->id, true);
     }
 
-    public function registerDevice()
+    public function registerDevice(): Model
     {
         $deviceKey = $this->deviceKey();
 
@@ -261,7 +267,8 @@ class User extends Authenticatable implements FilamentUser, HasAvatar
         );
     }
 
-    public function deviceKey()
+    /** @noinspection NullPointerExceptionInspection */
+    public function deviceKey(): string
     {
         return md5(request()->userAgent().request()->ip().$this->id);
     }
