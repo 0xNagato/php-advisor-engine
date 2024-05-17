@@ -151,3 +151,12 @@ body::before {
 
     }
 }
+
+@media only screen and (max-width: 768px) {
+    .fi-otp-input{
+        padding: 6px;
+    }
+    .fi-otp-input-container{
+        gap: 12px;
+    }
+}

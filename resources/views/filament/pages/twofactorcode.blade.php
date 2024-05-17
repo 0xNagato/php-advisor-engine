@@ -5,7 +5,7 @@
                 {{ $this->heading }}
             </div>
         </div>
-        <div class="mb-4">
+    <div class="mb-4">
             <p>
                 Enter the 6-digit number that we sent to your phone number ending in *{{ $this->phoneNumber }}.
             </p>
@@ -20,7 +20,7 @@
                 </a>
             </div>
             <div>
-                <x-filament::button type="submit">
+                <x-filament::button type="submit" class="w-full">
                     Submit
                 </x-filament::button>
             </div>
