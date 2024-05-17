@@ -13,6 +13,7 @@ use Filament\Notifications\Notification;
 use Filament\Widgets\Widget;
 use libphonenumber\PhoneNumberType;
 use Ysfkaya\FilamentPhoneInput\Forms\PhoneInput;
+use Ysfkaya\FilamentPhoneInput\PhoneInputNumberType;
 
 /**
  * @property Form $form
@@ -49,6 +50,7 @@ class ManageContacts extends Widget implements HasForms
                         ->label('Contact Phone')
                         ->required()
                         ->onlyCountries(config('app.countries'))
+                        ->displayNumberFormat(PhoneInputNumberType::E164)
                         ->validateFor(
                             country: config('app.countries'),
                             type: PhoneNumberType::MOBILE,

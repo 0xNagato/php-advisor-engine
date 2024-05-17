@@ -20,6 +20,7 @@ use Illuminate\Support\HtmlString;
 use Illuminate\Validation\Rules\Password as PasswordRule;
 use libphonenumber\PhoneNumberType;
 use Ysfkaya\FilamentPhoneInput\Forms\PhoneInput;
+use Ysfkaya\FilamentPhoneInput\PhoneInputNumberType;
 
 /**
  * @property Form $form
@@ -78,6 +79,7 @@ class ConciergeInvitation extends SimplePage
                 PhoneInput::make('phone')
                     ->hiddenLabel()
                     ->onlyCountries(config('app.countries'))
+                    ->displayNumberFormat(PhoneInputNumberType::E164)
                     ->validateFor(
                         country: config('app.countries'),
                         type: PhoneNumberType::MOBILE,

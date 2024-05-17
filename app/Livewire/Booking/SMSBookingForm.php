@@ -52,6 +52,7 @@ class SMSBookingForm extends Widget implements HasForms
             PhoneInput::make('phone')
                 ->hiddenLabel()
                 ->onlyCountries(config('app.countries'))
+                ->displayNumberFormat(PhoneInputNumberType::E164)
                 ->validateFor(
                     country: config('app.countries'),
                     type: PhoneNumberType::MOBILE,

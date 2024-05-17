@@ -17,6 +17,7 @@ use Filament\Pages\Page;
 use Illuminate\Validation\ValidationException;
 use libphonenumber\PhoneNumberType;
 use Ysfkaya\FilamentPhoneInput\Forms\PhoneInput;
+use Ysfkaya\FilamentPhoneInput\PhoneInputNumberType;
 
 /**
  * @property Form $tabbedForm
@@ -72,6 +73,7 @@ class ConciergeReferral extends Page
                                     ->placeholder('Last Name'),
                                 PhoneInput::make('phone')
                                     ->live()
+                                    ->displayNumberFormat(PhoneInputNumberType::E164)
                                     ->placeholder('Phone Number')
                                     ->onlyCountries(config('app.countries'))
                                     ->validateFor(
