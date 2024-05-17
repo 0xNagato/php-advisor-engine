@@ -386,7 +386,7 @@ class Booking extends Model
             'type' => 'restaurant_paid',
             'amount' => $restaurant_earnings * 100,
             'currency' => $booking->currency,
-            'percentage' => -100,
+            'percentage' => -107,
             'percentage_of' => 'concierge_bounty',
         ]);
 

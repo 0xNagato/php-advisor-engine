@@ -5,8 +5,8 @@ namespace App\Traits;
 use App\Models\Restaurant;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Hidden;
-use Filament\Forms\Components\Radio;
 use Filament\Forms\Components\Select;
+use Filament\Forms\Components\ToggleButtons;
 use Filament\Forms\Get;
 use Illuminate\Support\Carbon;
 
@@ -14,9 +14,9 @@ trait ManagesBookingForms
 {
     public const int AVAILABILITY_DAYS = 3;
 
-    public const int MINUTES_PAST = 30;
+    public const int MINUTES_PAST = 60;
 
-    public const int MINUTES_FUTURE = 60;
+    public const int MINUTES_FUTURE = 120;
 
     public string $timezone;
 
@@ -25,12 +25,13 @@ trait ManagesBookingForms
         return [
             Hidden::make('date')
                 ->default(now($this->timezone)->format('Y-m-d')),
-            Radio::make('radio_date')
+            ToggleButtons::make('radio_date')
                 ->options([
                     now($this->timezone)->format('Y-m-d') => 'Today',
                     now($this->timezone)->addDay()->format('Y-m-d') => 'Tomorrow',
                     'select_date' => 'Select Date',
                 ])
+                ->grouped()
                 ->afterStateUpdated(function ($state, $set) {
                     if ($state !== 'select_date') {
                         $set('date', $state);

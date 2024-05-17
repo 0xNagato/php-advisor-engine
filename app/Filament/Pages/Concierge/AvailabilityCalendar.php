@@ -56,7 +56,7 @@ class AvailabilityCalendar extends Page
         //     $query->where('booking_date', now(auth()->user()->timezone)->format('Y-m-d'))
         //         ->where('party_size', 2)
         //         ->where('start_time', '>=', now(auth()->user()->timezone)->format('H:i:s'))
-        //         ->where('start_time', '<=', now(auth()->user()->timezone)->addMinutes(90)->format('H:i:s'));
+        //         ->where('start_time', '<=', now(auth()->user()->timezone)->addMinutes(150)->format('H:i:s'));
         // }])->get();
     }
 
@@ -75,6 +75,11 @@ class AvailabilityCalendar extends Page
                 'default' => 2,
             ])
             ->statePath('data');
+    }
+
+    public function conciergePayout(Restaurant $restaurant): int
+    {
+        return ($restaurant->non_prime_fee_per_head * $this->data['guest_count']) * 90;
     }
 
     public function updatedData($data, $key): void
@@ -113,7 +118,7 @@ class AvailabilityCalendar extends Page
 
     private function calculateEndTime($reservationTime): string
     {
-        $endTime = Carbon::createFromFormat('H:i:s', $reservationTime, $this->timezone)->addMinutes(self::MINUTES_FUTURE);
+        $endTime = Carbon::createFromFormat('H:i:s', $reservationTime, $this->timezone)?->addMinutes(self::MINUTES_FUTURE);
         $limitTime = Carbon::createFromTime(23, 59, 0, $this->timezone);
 
         return $endTime->gt($limitTime) ? '23:59:59' : $endTime->format('H:i:s');
