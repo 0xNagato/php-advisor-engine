@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 use Spatie\LaravelData\DataCollection;
 
 /**
@@ -48,6 +49,7 @@ class Restaurant extends Model
     protected $fillable = [
         'user_id',
         'restaurant_name',
+        'slug',
         'contact_phone',
         'payout_restaurant',
         'payout_charity',
@@ -84,7 +86,9 @@ class Restaurant extends Model
     {
         parent::boot();
 
-        static::creating(function (Restaurant $restaurant) {
+        static::creating(static function (Restaurant $restaurant) {
+            $restaurant->slug = Str::slug("{$restaurant->region}-{$restaurant->restaurant_name}");
+
             $restaurant->open_days = [
                 'monday' => 'open',
                 'tuesday' => 'open',
@@ -103,7 +107,7 @@ class Restaurant extends Model
             ];
         });
 
-        static::created(function (Restaurant $restaurant) {
+        static::created(static function (Restaurant $restaurant) {
             $restaurant->createDefaultSchedules();
         });
     }

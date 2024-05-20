@@ -15,6 +15,7 @@ use Filament\Resources\Pages\EditRecord;
 use Illuminate\Contracts\Support\Htmlable;
 use libphonenumber\PhoneNumberType;
 use Ysfkaya\FilamentPhoneInput\Forms\PhoneInput;
+use Ysfkaya\FilamentPhoneInput\PhoneInputNumberType;
 
 /**
  * Class EditRestaurant
@@ -52,6 +53,7 @@ class EditRestaurant extends EditRecord
                         PhoneInput::make('contact_phone')
                             ->label('Primary Contact Phone')
                             ->onlyCountries(config('app.countries'))
+                            ->displayNumberFormat(PhoneInputNumberType::E164)
                             ->validateFor(
                                 country: config('app.countries'),
                                 type: PhoneNumberType::MOBILE,
@@ -74,6 +76,7 @@ class EditRestaurant extends EditRecord
                             ->label('Contact Phone')
                             ->required()
                             ->onlyCountries(config('app.countries'))
+                            ->displayNumberFormat(PhoneInputNumberType::E164)
                             ->validateFor(
                                 country: config('app.countries'),
                                 type: PhoneNumberType::MOBILE,

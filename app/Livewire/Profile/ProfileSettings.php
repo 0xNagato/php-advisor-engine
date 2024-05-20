@@ -13,6 +13,7 @@ use Illuminate\Support\Facades\Storage;
 use libphonenumber\PhoneNumberType;
 use Tapp\FilamentTimezoneField\Forms\Components\TimezoneSelect;
 use Ysfkaya\FilamentPhoneInput\Forms\PhoneInput;
+use Ysfkaya\FilamentPhoneInput\PhoneInputNumberType;
 
 class ProfileSettings extends Widget implements HasForms
 {
@@ -66,6 +67,7 @@ class ProfileSettings extends Widget implements HasForms
             PhoneInput::make('phone')
                 ->required()
                 ->onlyCountries(config('app.countries'))
+                ->displayNumberFormat(PhoneInputNumberType::E164)
                 ->validateFor(
                     country: config('app.countries'),
                     type: PhoneNumberType::MOBILE,

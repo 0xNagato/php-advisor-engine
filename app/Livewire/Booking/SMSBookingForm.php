@@ -15,6 +15,7 @@ use Filament\Notifications\Notification;
 use Filament\Widgets\Widget;
 use libphonenumber\PhoneNumberType;
 use Ysfkaya\FilamentPhoneInput\Forms\PhoneInput;
+use Ysfkaya\FilamentPhoneInput\PhoneInputNumberType;
 
 /**
  * @property Form $form
@@ -52,6 +53,7 @@ class SMSBookingForm extends Widget implements HasForms
             PhoneInput::make('phone')
                 ->hiddenLabel()
                 ->onlyCountries(config('app.countries'))
+                ->displayNumberFormat(PhoneInputNumberType::E164)
                 ->validateFor(
                     country: config('app.countries'),
                     type: PhoneNumberType::MOBILE,

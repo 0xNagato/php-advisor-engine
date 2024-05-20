@@ -37,6 +37,14 @@ body::before {
     @apply dark:bg-white;
 }
 
+.fi-tabs-item {
+    @apply flex-1 items-center justify-center !important;
+}
+
+.fi-btn-group {
+    @apply w-full !important;
+}
+
 .fi-section-header {
     @apply px-4 py-3 !important;
 }

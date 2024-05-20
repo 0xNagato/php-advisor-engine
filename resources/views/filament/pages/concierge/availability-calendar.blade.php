@@ -4,57 +4,81 @@
 
     <div>
         @if (!empty($restaurants))
-            <div
-                class="grid grid-cols-[100px_repeat(3,_1fr)] items-center bg-white sticky {{ app('impersonate')->isImpersonating() ? 'top-28' : 'top-16' }} shadow border-t sm:border-none sm:mt-0 -mt-4 sm:mx-0 -mx-4">
-                <div></div>
-                <div class="col-span-3 grid grid-cols-3">
-                    @foreach($restaurants[0]->schedules as $schedule)
-                        <div class="text-center text-sm font-semibold p-2">
-                            {{ Carbon::createFromFormat('H:i:s', $schedule->start_time)->format('g:i A') }}
-                        </div>
+            <div class="relative bg-white -mx-4 -mt-4 sm:mx-0 sm:mt-0 border-t">
+                <table class="w-full table-auto">
+                    <thead class="text-xs uppercase">
+                    <tr class="border-b shadow sticky {{ app('impersonate')->isImpersonating() ? 'top-28' : 'top-16' }} bg-white">
+                        <th></th>
+                        @foreach($restaurants[0]->schedules as $index => $schedule)
+                            <th class="p-2 pl-4 text-center text-sm font-semibold {{ $loop->first ? 'hidden sm:table-cell' : '' }} {{ $loop->last ? 'hidden sm:table-cell' : '' }}">
+                                {{ Carbon::createFromFormat('H:i:s', $schedule->start_time)->format('g:i A') }}
+                            </th>
+                        @endforeach
+
+                    </tr>
+                    </thead>
+                    <tbody>
+                    @foreach($restaurants as $restaurant)
+                        <tr class="odd:bg-gray-100">
+                            <td class="pl-2 w-28 text-center">
+                                @if($restaurant->logo)
+                                    <img
+                                        src="{{ \Illuminate\Support\Facades\Storage::disk('do')->url($restaurant->restaurant_logo_path) }}"
+                                        alt="{{ $restaurant->restaurant_name }}"
+                                        class="object-cover max-h-[48px]">
+                                @else
+                                    <span class="text-sm line-clamp-2">
+                                        {{ $restaurant->restaurant_name }}
+                                    </span>
+                                @endif
+                            </td>
+
+                            @foreach($restaurant->schedules as $index => $schedule)
+                                <td class="p-1 [&:nth-child(3n+2)]:pr-2 sm:[&:nth-child(3+n2)]:pr-0 {{ $loop->first ? 'hidden sm:table-cell' : '' }} {{ $loop->last ? 'hidden sm:table-cell' : '' }}">
+                                    <button
+                                        @if ($schedule->is_bookable) wire:click="createBooking({{ $schedule->id }}, '{{ $schedule->booking_date->format('Y-m-d') }}')" @endif
+                                        @class([
+                                            'text-sm font-semibold rounded p-1 w-full mx-1 flex flex-col gap-y-[1px] justify-center items-center h-12',
+                                            'bg-green-600 text-white cursor-pointer hover:bg-green-500' => $schedule->prime_time && $schedule->is_bookable,
+                                            'bg-info-400 text-white cursor-pointer hover:bg-info-500' => ! $schedule->prime_time && $schedule->is_bookable,
+                                            'bg-[#E29B46] text-white cursor-pointer hover:bg-orange-500' => $schedule->has_low_inventory,
+                                            'bg-gray-200 text-gray-500 border-none' => !$schedule->is_bookable,
+                                        ])
+                                    >
+                                        @if($schedule->is_bookable && $schedule->prime_time)
+                                            <p class="text-base font-bold">
+                                                {{ moneyWithoutCents($schedule->fee($data['guest_count']), $currency) }}
+                                            </p>
+                                            @if($schedule->has_low_inventory)
+                                                <p class="-mt-1 text-xs font-light">
+                                                    Last Tables
+                                                </p>
+                                            @endif
+
+                                        @elseif($schedule->is_bookable && !$schedule->prime_time)
+                                            @if(session('simpleMode'))
+                                                <p class="text-xs uppercase text-nowrap sm:text-base">Non Prime</p>
+                                            @else
+                                                <p class="text-base font-bold uppercase text-nowrap">
+                                                    +{{ moneyWithoutCents($this->conciergePayout($restaurant), $currency) }}
+                                                </p>
+                                            @endif
+                                            @if($schedule->has_low_inventory)
+                                                <p class="-mt-1 text-xs font-light">
+                                                    Last Tables
+                                                </p>
+                                            @endif
+                                        @else
+                                            <p class="text-base text-nowrap">Sold Out</p>
+                                        @endif
+                                    </button>
+                                </td>
+                            @endforeach
+
+                        </tr>
                     @endforeach
-                </div>
-            </div>
-
-            <div
-                class="grid grid-cols-[100px_repeat(3,_1fr)] auto-rows-fr p-2 divide-y pt-0 items-center bg-white rounded-b shadow-sm sm:mx-0 -mx-4"
-            >
-                @foreach($restaurants as $restaurant)
-                    <div
-                        class="flex h-12 items-center truncate text-base font-semibold text-wrap ">
-                        @if($restaurant->logo)
-                            <img src="{{ $restaurant->logo }}"
-                                 alt="{{ $restaurant->restaurant_name }}"
-                                 class="h-12 w-12 object-cover">
-                        @else
-                            {{ $restaurant->restaurant_name }}
-                        @endif
-                    </div>
-
-                    @foreach($restaurant->schedules as $schedule)
-                        <div class="flex h-12 items-center justify-around border-l">
-                            <button
-                                @if ($schedule->is_bookable) wire:click="createBooking({{ $schedule->id }}, '{{ $schedule->booking_date->format('Y-m-d') }}')" @endif
-                                @class([
-                                    'text-sm font-semibold rounded p-2 w-full mx-1',
-                                    'bg-green-600 text-white cursor-pointer hover:bg-green-500' => $schedule->is_bookable,
-                                    'bg-gray-200 text-gray-400 border-none' => !$schedule->is_bookable,
-                                ])
-                            >
-                                <div>
-                                    @if($schedule->is_bookable && $schedule->prime_time)
-                                        {{ moneyWithoutCents($schedule->fee($data['guest_count']), $currency) }}
-                                    @elseif($schedule->is_bookable && !$schedule->prime_time)
-                                        <span class="text-xs text-nowrap">No Fee</span>
-                                    @else
-                                        <span class="text-xs text-nowrap">Sold Out</span>
-                                    @endif
-                                </div>
-
-                            </button>
-                        </div>
-                    @endforeach
-                @endforeach
+                    </tbody>
+                </table>
             </div>
         @endif
     </div>

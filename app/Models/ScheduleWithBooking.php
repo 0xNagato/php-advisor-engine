@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 /**
  * @property int $schedule_id
@@ -55,6 +56,11 @@ class ScheduleWithBooking extends Model
         return 0;
     }
 
+    public function bookings(): HasMany
+    {
+        return $this->hasMany(Booking::class);
+    }
+
     public function getBookingAtAttribute(): string
     {
         return $this->schedule_start;
@@ -73,5 +79,10 @@ class ScheduleWithBooking extends Model
     public function getIsBookableAttribute(): bool
     {
         return $this->is_available && $this->remaining_tables > 0;
+    }
+
+    public function getHasLowInventoryAttribute(): bool
+    {
+        return $this->is_bookable && $this->remaining_tables <= 5;
     }
 }

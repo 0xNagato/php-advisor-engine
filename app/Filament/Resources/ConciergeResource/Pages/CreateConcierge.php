@@ -13,6 +13,7 @@ use Illuminate\Database\Eloquent\Model;
 use libphonenumber\PhoneNumberType;
 use Str;
 use Ysfkaya\FilamentPhoneInput\Forms\PhoneInput;
+use Ysfkaya\FilamentPhoneInput\PhoneInputNumberType;
 
 class CreateConcierge extends CreateRecord
 {
@@ -47,6 +48,7 @@ class CreateConcierge extends CreateRecord
                             ->placeholder('Phone Number')
                             ->hint('Used for SMS notifications')
                             ->onlyCountries(config('app.countries'))
+                            ->displayNumberFormat(PhoneInputNumberType::E164)
                             ->validateFor(
                                 country: config('app.countries'),
                                 type: PhoneNumberType::MOBILE,
