@@ -49,6 +49,7 @@ class CreatePartner extends CreateRecord
                             ->hint('Used for SMS notifications')
                             ->onlyCountries(config('app.countries'))
                             ->displayNumberFormat(PhoneInputNumberType::E164)
+                            ->disallowDropdown()
                             ->validateFor(
                                 country: config('app.countries'),
                                 type: PhoneNumberType::MOBILE,

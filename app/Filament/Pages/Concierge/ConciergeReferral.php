@@ -74,6 +74,7 @@ class ConciergeReferral extends Page
                                 PhoneInput::make('phone')
                                     ->live()
                                     ->displayNumberFormat(PhoneInputNumberType::E164)
+                                    ->disallowDropdown()
                                     ->placeholder('Phone Number')
                                     ->onlyCountries(config('app.countries'))
                                     ->validateFor(
