@@ -80,6 +80,7 @@ class PrimeCalendar extends Page
                     'is_checked' => ! $override || $override->prime_time,
                     'override_id' => $override?->id,
                     'schedule_template_id' => $scheduleTemplate?->id,
+                    'is_available' => $scheduleTemplate->is_available,
                 ];
 
                 $currentTime->addMinutes(30);
