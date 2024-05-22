@@ -80,6 +80,7 @@ class ConciergeInvitation extends SimplePage
                     ->hiddenLabel()
                     ->onlyCountries(config('app.countries'))
                     ->displayNumberFormat(PhoneInputNumberType::E164)
+                    ->disallowDropdown()
                     ->validateFor(
                         country: config('app.countries'),
                         type: PhoneNumberType::MOBILE,

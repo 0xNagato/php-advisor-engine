@@ -5,7 +5,7 @@ namespace App\Filament\Pages\Restaurant;
 use App\Models\Restaurant;
 use Filament\Pages\Page;
 
-class RestaurantAvailability extends Page
+class RestaurantSettings extends Page
 {
     protected static ?string $navigationIcon = 'heroicon-o-building-storefront';
 
