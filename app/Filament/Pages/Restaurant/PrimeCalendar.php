@@ -137,7 +137,6 @@ class PrimeCalendar extends Page
                             $inserts[] = [
                                 'schedule_template_id' => $scheduleTemplate->id,
                                 'booking_date' => $date,
-                                'start_time' => $slot['start'],
                                 'prime_time' => $isChecked,
                             ];
                         }
