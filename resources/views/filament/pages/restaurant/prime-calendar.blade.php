@@ -24,15 +24,11 @@
                         </td>
                         @foreach ($upcomingDates as $date)
                             <td class="whitespace-nowrap border border-gray-300 px-2 py-1 text-center group-hover:bg-gray-100">
-                                @isset($slot['is_available'])
-                                    <input type="checkbox"
-                                           wire:model="selectedTimeSlots.{{ $date->format('Y-m-d') }}.{{ $index }}"
-                                           class="h-4 w-4 rounded border-gray-300 bg-gray-100 text-indigo-600 focus:ring-2 focus:ring-indigo-500 dark:border-gray-600 dark:bg-gray-700 dark:ring-offset-gray-800 dark:focus:ring-indigo-600"
-                                           @if(!$slot['is_checked']) checked @endif
-                                    />
-                                @else
-                                    N/A
-                                @endisset
+                                <input type="checkbox"
+                                       wire:model="selectedTimeSlots.{{ $date->format('Y-m-d') }}.{{ $index }}"
+                                       class="h-4 w-4 rounded border-gray-300 bg-gray-100 text-indigo-600 focus:ring-2 focus:ring-indigo-500 dark:border-gray-600 dark:bg-gray-700 dark:ring-offset-gray-800 dark:focus:ring-indigo-600"
+                                       @if(!$slot['is_checked']) checked @endif
+                                />
                             </td>
                         @endforeach
                     </tr>

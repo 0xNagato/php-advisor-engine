@@ -12,7 +12,7 @@ use Illuminate\Support\Collection;
 
 class PrimeCalendar extends Page
 {
-    public const int DAYS_TO_DISPLAY = 30;
+    public const DAYS_TO_DISPLAY = 30;
 
     protected static ?string $navigationIcon = 'polaris-calendar-time-icon';
 
@@ -80,7 +80,6 @@ class PrimeCalendar extends Page
                     'is_checked' => ! $override || $override->prime_time,
                     'override_id' => $override?->id,
                     'schedule_template_id' => $scheduleTemplate?->id,
-                    'is_available' => $scheduleTemplate->is_available,
                 ];
 
                 $currentTime->addMinutes(30);
@@ -106,16 +105,26 @@ class PrimeCalendar extends Page
             foreach ($slots as $index => $isChecked) {
                 $slot = $this->timeSlots[$date][$index];
 
-                if ($slot['override_id']) {
-                    $timeSlot = RestaurantTimeSlot::find($slot['override_id']);
-                    $timeSlot->update(['prime_time' => $isChecked]);
-                } elseif (! $isChecked) {
-                    RestaurantTimeSlot::create([
-                        'schedule_template_id' => $slot['schedule_template_id'],
-                        'booking_date' => $date,
-                        'start_time' => $slot['start'],
-                        'prime_time' => $isChecked,
-                    ]);
+                $scheduleTemplates = ScheduleTemplate::where('restaurant_id', $this->restaurant->id)
+                    ->where('day_of_week', strtolower(Carbon::parse($date)->format('l')))
+                    ->where('start_time', $slot['start'])
+                    ->get();
+
+                foreach ($scheduleTemplates as $scheduleTemplate) {
+                    $override = RestaurantTimeSlot::where('schedule_template_id', $scheduleTemplate->id)
+                        ->where('booking_date', $date)
+                        ->first();
+
+                    if ($override) {
+                        $override->update(['prime_time' => $isChecked]);
+                    } elseif (! $isChecked) {
+                        RestaurantTimeSlot::create([
+                            'schedule_template_id' => $scheduleTemplate->id,
+                            'booking_date' => $date,
+                            'start_time' => $slot['start'],
+                            'prime_time' => $isChecked,
+                        ]);
+                    }
                 }
             }
         }
