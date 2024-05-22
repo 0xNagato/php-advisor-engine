@@ -130,9 +130,9 @@ class PaymentInformation extends Page
         // $this->account_type = '';
     }
 
-    public function save(): void
+    public function save()
     {
-        $this->user->update([
+        $pendingData = [
             'payout' => [
                 'payout_type' => $this->payout_type,
                 'payout_name' => $this->payout_name,
@@ -146,11 +146,32 @@ class PaymentInformation extends Page
             'state' => $this->state,
             'zip' => $this->zip,
             'country' => $this->country,
-        ]);
+        ];
 
-        Notification::make()
-            ->title('Payout information updated successfully.')
-            ->success()
-            ->send();
+        if ($this->requiresTwoFactorAuthentication($this->user, $pendingData)) {
+
+            session()->put('pending-data.'.$this->user->id, $pendingData);
+
+            return redirect()->route('filament.admin.pages.two-factor-code', ['redirect' => 'filament.admin.pages.payment-information']);
+        } else {
+            $this->user->update($pendingData);
+
+            Notification::make()
+                ->title('Payout information updated successfully.')
+                ->success()
+                ->send();
+        }
+    }
+
+    protected function requiresTwoFactorAuthentication($user, $pendingData): bool
+    {
+        $sessionKey = 'usercode.'.$user->id;
+
+        return ! $this->deviceIsVerified($sessionKey);
+    }
+
+    protected function deviceIsVerified($sessionKey): bool
+    {
+        return session()->has($sessionKey) && session($sessionKey) === true;
     }
 }

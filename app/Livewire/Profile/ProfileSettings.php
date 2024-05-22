@@ -15,9 +15,6 @@ use Tapp\FilamentTimezoneField\Forms\Components\TimezoneSelect;
 use Ysfkaya\FilamentPhoneInput\Forms\PhoneInput;
 use Ysfkaya\FilamentPhoneInput\PhoneInputNumberType;
 
-/**
- * @property Form $form
- */
 class ProfileSettings extends Widget implements HasForms
 {
     use InteractsWithForms;
@@ -83,21 +80,58 @@ class ProfileSettings extends Widget implements HasForms
                 ->selectablePlaceholder(false)
                 ->required(),
 
-        ])->statePath('data');
+        ])
+            ->statePath('data');
     }
 
-    public function save(): void
+    public function save()
     {
         $data = $this->form->getState();
 
+        $user = auth()->user();
+
+        if (! $this->requiresTwoFactorAuthentication($user, $data)) {
+            $this->updateProfileWithoutTwoFactor($data, $user);
+        } else {
+            $this->updateProfileWithTwoFactor($data, $user);
+        }
+    }
+
+    protected function updateProfileWithTwoFactor(array $data, $user)
+    {
+        session()->put('pending-data.'.$user->id, $data);
+
+        return redirect()->route('filament.admin.pages.two-factor-code', ['redirect' => 'filament.admin.pages.my-settings']);
+    }
+
+    protected function updateProfileWithoutTwoFactor(array $data, $user)
+    {
         $profilePhotoPath = $data['profile_photo_path'];
         Storage::disk('do')->setVisibility($profilePhotoPath, 'public');
 
-        auth()->user()->update($data);
+        $user->update($data);
 
         Notification::make()
             ->title('Profile updated successfully.')
             ->success()
             ->send();
+    }
+
+    // if user has not verified the device and the user details have changed
+    protected function requiresTwoFactorAuthentication($user, array $data): bool
+    {
+        $sessionKey = 'usercode.'.$user->id;
+
+        return ! $this->deviceIsVerified($sessionKey) && $this->userDetailsChanged($user, $data);
+    }
+
+    protected function deviceIsVerified($sessionKey): bool
+    {
+        return session()->has($sessionKey) && session($sessionKey) === true;
+    }
+
+    protected function userDetailsChanged($user, array $data): bool
+    {
+        return $data['email'] !== $user->email || $data['phone'] !== $user->phone;
     }
 }
