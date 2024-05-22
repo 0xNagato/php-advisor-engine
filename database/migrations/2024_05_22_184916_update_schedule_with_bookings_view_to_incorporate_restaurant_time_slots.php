@@ -1,29 +1,27 @@
 <?php
 
 use Illuminate\Database\Migrations\Migration;
-use Illuminate\Support\Facades\DB;
 
-class UpdateScheduleWithBookingsViewToIncorporateRestaurantTimeSlots extends Migration
+return new class extends Migration
 {
     /**
      * Run the migrations.
-     *
-     * @return void
      */
-    public function up()
+    public function up(): void
     {
-        // Drop the existing view if it exists
         DB::statement('DROP VIEW IF EXISTS schedule_with_bookings');
-
-        // Create the new view with the updated definition
         DB::statement("
-            CREATE VIEW schedule_with_bookings AS
+            CREATE OR REPLACE VIEW schedule_with_bookings AS
             WITH RECURSIVE `date_range` AS (
-                SELECT (CURDATE() - INTERVAL 1 DAY) AS `date`
+                SELECT
+                    (CURDATE() - INTERVAL 1 DAY) AS `date`
                 UNION ALL
-                SELECT (`date_range`.`date` + INTERVAL 1 DAY)
-                FROM `date_range`
-                WHERE (`date_range`.`date` < (CURDATE() + INTERVAL 30 DAY))
+                SELECT
+                    (`date_range`.`date` + INTERVAL 1 DAY)
+                FROM
+                    `date_range`
+                WHERE
+                    (`date_range`.`date` < (CURDATE() + INTERVAL 30 DAY))
             )
             SELECT
                 `st`.`id` AS `id`,
@@ -65,11 +63,9 @@ class UpdateScheduleWithBookingsViewToIncorporateRestaurantTimeSlots extends Mig
 
     /**
      * Reverse the migrations.
-     *
-     * @return void
      */
-    public function down()
+    public function down(): void
     {
         DB::statement('DROP VIEW IF EXISTS schedule_with_bookings');
     }
-}
+};
