@@ -18,6 +18,8 @@ trait ManagesBookingForms
 
     public const int MINUTES_FUTURE = 120;
 
+    public const int MAX_DAYS_IN_ADVANCE = 7;
+
     public string $timezone;
 
     protected function commonFormComponents(): array
@@ -51,7 +53,7 @@ trait ManagesBookingForms
                 ->weekStartsOnSunday()
                 ->default(now($this->timezone)->format('Y-m-d'))
                 ->minDate(now($this->timezone)->format('Y-m-d'))
-                ->maxDate(now($this->timezone)->addMonth()->format('Y-m-d'))
+                ->maxDate(now($this->timezone)->addDays(self::MAX_DAYS_IN_ADVANCE)->format('Y-m-d'))
                 ->hidden(function (Get $get) {
                     return $get('radio_date') !== 'select_date';
                 })
