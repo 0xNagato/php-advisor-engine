@@ -101,32 +101,59 @@ class PrimeCalendar extends Page
 
     public function save(): void
     {
+        // Collect all necessary data in advance to minimize queries
+        $scheduleTemplates = ScheduleTemplate::where('restaurant_id', $this->restaurant->id)
+            ->get()
+            ->groupBy(['day_of_week', 'start_time']);
+
+        $existingOverrides = RestaurantTimeSlot::whereIn('booking_date', array_keys($this->selectedTimeSlots))
+            ->whereIn('schedule_template_id', $scheduleTemplates->flatten()->pluck('id'))
+            ->get()
+            ->keyBy(function ($item) {
+                return $item->schedule_template_id.'|'.$item->booking_date;
+            });
+
+        $updates = [];
+        $inserts = [];
+
         foreach ($this->selectedTimeSlots as $date => $slots) {
+            $dayOfWeek = strtolower(Carbon::parse($date)->format('l'));
+
             foreach ($slots as $index => $isChecked) {
                 $slot = $this->timeSlots[$date][$index];
+                $timeKey = $slot['start'];
 
-                $scheduleTemplates = ScheduleTemplate::where('restaurant_id', $this->restaurant->id)
-                    ->where('day_of_week', strtolower(Carbon::parse($date)->format('l')))
-                    ->where('start_time', $slot['start'])
-                    ->get();
+                if (isset($scheduleTemplates[$dayOfWeek][$timeKey])) {
+                    foreach ($scheduleTemplates[$dayOfWeek][$timeKey] as $scheduleTemplate) {
+                        $overrideKey = $scheduleTemplate->id.'|'.$date;
+                        $override = $existingOverrides[$overrideKey] ?? null;
 
-                foreach ($scheduleTemplates as $scheduleTemplate) {
-                    $override = RestaurantTimeSlot::where('schedule_template_id', $scheduleTemplate->id)
-                        ->where('booking_date', $date)
-                        ->first();
-
-                    if ($override) {
-                        $override->update(['prime_time' => $isChecked]);
-                    } elseif (! $isChecked) {
-                        RestaurantTimeSlot::create([
-                            'schedule_template_id' => $scheduleTemplate->id,
-                            'booking_date' => $date,
-                            'start_time' => $slot['start'],
-                            'prime_time' => $isChecked,
-                        ]);
+                        if ($override) {
+                            $updates[] = [
+                                'id' => $override->id,
+                                'prime_time' => $isChecked,
+                            ];
+                        } elseif (! $isChecked) {
+                            $inserts[] = [
+                                'schedule_template_id' => $scheduleTemplate->id,
+                                'booking_date' => $date,
+                                'start_time' => $slot['start'],
+                                'prime_time' => $isChecked,
+                            ];
+                        }
                     }
                 }
             }
+        }
+
+        // Batch update existing records
+        foreach ($updates as $update) {
+            RestaurantTimeSlot::where('id', $update['id'])->update(['prime_time' => $update['prime_time']]);
+        }
+
+        // Batch insert new records
+        if (! empty($inserts)) {
+            RestaurantTimeSlot::insert($inserts);
         }
 
         Notification::make()
