@@ -9,7 +9,7 @@
             this.activeAccordion = (this.activeAccordion === id) ? '' : id
         }
     }"
-     class="relative w-full mx-auto overflow-hidden text-sm font-normal bg-white border border-gray-200 divide-y divide-gray-200 rounded-lg shadow">
+     class="max-w-sm relative w-full mx-auto overflow-hidden text-sm font-normal bg-white border border-gray-200 divide-y divide-gray-200 rounded-lg shadow">
     @forelse ($schedules as $date => $times)
         @php $formattedDate = Carbon::parse($date)->format('l'); @endphp
         <div x-data="{ id: '{{ $date }}' }" class=" group">
@@ -55,7 +55,7 @@
                                 <td class="font-semibold pl-4">{{ Carbon::createFromFormat('H:i:s', $time)->format('g:ia') }}</td>
                                 <td class="text-center">
                                     <x-filament::input.checkbox
-                                        wire:model="schedules.{{ $date }}.{{ $time }}.prime_time"/>
+                                        wire:model="schedules.{{ $date }}.{{ $time }}.prime_time" />
                                 </td>
                                 @foreach ($partySizes as $partySize => $availableTables)
                                     @if($partySize === 'prime_time')

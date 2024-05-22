@@ -11,9 +11,7 @@ class RestaurantSettings extends Page
 
     protected static ?int $navigationSort = 20;
 
-    protected static string $view = 'filament.pages.restaurant-availability';
-
-    protected static ?string $title = 'Restaurant Settings';
+    protected static string $view = 'filament.pages.restaurant.restaurant-settings';
 
     public Restaurant $restaurant;
 

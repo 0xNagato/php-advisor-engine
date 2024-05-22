@@ -17,7 +17,7 @@
         }
     }"
 
-        x-init="tabRepositionMarker($refs.tabButtons.firstElementChild);" class="relative w-full max-w-sm">
+        x-init="tabRepositionMarker($refs.tabButtons.firstElementChild);" class="relative w-full">
 
         <div x-ref="tabButtons"
              class="relative inline-grid items-center justify-center w-full h-10 grid-cols-3 p-1 text-gray-500 bg-gray-100 rounded-lg select-none">
@@ -39,15 +39,15 @@
         </div>
         <div class="relative w-full mt-2 content">
             <div :id="$id(tabId + '-content')" x-show="tabContentActive($el)" class="relative">
-                <livewire:restaurant.reservation-hours-widget/>
+                <livewire:restaurant.reservation-hours-widget />
             </div>
 
             <div :id="$id(tabId + '-content')" x-show="tabContentActive($el)" class="relative" x-cloak>
-                <livewire:restaurant.table-availability/>
+                <livewire:restaurant.table-availability />
             </div>
 
             <div :id="$id(tabId + '-content')" x-show="tabContentActive($el)" class="relative" x-cloak>
-                <livewire:restaurant.manage-contacts :restaurant="$restaurant"/>
+                <livewire:restaurant.manage-contacts :restaurant="$restaurant" />
             </div>
         </div>
     </div>
