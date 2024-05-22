@@ -13,8 +13,8 @@
                 @if ($schedulesToday->count() || $schedulesThisWeek->count())
                     @if ($schedulesToday->count())
 
-                        <div class="grid gap-2 grid-cols-3">
-                            @foreach ($schedulesToday as $schedule)
+                        <div id="time-slots" class="grid gap-2 grid-cols-3 sm:grid-cols-5">
+                            @foreach ($schedulesToday as $index => $schedule)
                                 <button
                                     @if ($schedule->is_bookable) wire:click="createBooking({{ $schedule->schedule_template_id }})" @endif
                                     @class([
@@ -23,6 +23,7 @@
                                         'outline outline-2 outline-offset-2 outline-gray-100' => $schedule->start_time === $data['reservation_time'] && !$schedule->is_bookable,
                                         'bg-green-600 text-white cursor-pointer hover:bg-green-500' => $schedule->is_bookable,
                                         'bg-gray-100 text-gray-400 border-none' => !$schedule->is_bookable,
+                                        'hidden md:block' => $index === 0 || $index === $schedulesToday->count() - 1,
                                     ])
                                 >
                                     <div class="text-center text-lg">
@@ -95,7 +96,7 @@
 
 
         @if ($booking && (BookingStatus::PENDING === $booking->status || BookingStatus::GUEST_ON_PAGE === $booking->status))
-            <livewire:booking.check-if-confirmed :booking="$booking"/>
+            <livewire:booking.check-if-confirmed :booking="$booking" />
 
             <div x-data="{ tab: '{{ $booking->prime_time ? 'smsPayment' : 'collectPayment' }}' }" id="tabs">
                 @if($booking->prime_time)
@@ -105,21 +106,21 @@
                                 :class="{ 'bg-indigo-600 text-white': tab === 'smsPayment', 'bg-gray-100': tab !== 'smsPayment' }"
                                 @click="tab = 'smsPayment'"
                                 class="flex items-center gap-1 px-4 py-2 text-xs font-semibold bg-gray-100 rounded-lg shadow-lg shadow-gray-400">
-                                <x-gmdi-phone-android-r class="w-6 h-6 font-semibold"/>
+                                <x-gmdi-phone-android-r class="w-6 h-6 font-semibold" />
                                 <div>SMS</div>
                             </button>
                             <button
                                 :class="{ 'bg-indigo-600 text-white': tab === 'qrCode', 'bg-gray-100': tab !== 'qrCode' }"
                                 @click="tab = 'qrCode'"
                                 class="flex items-center gap-1 px-4 py-2 text-xs font-semibold bg-gray-100 rounded-lg shadow-lg shadow-gray-400">
-                                <x-gmdi-qr-code class="w-6 h-6 font-semibold"/>
+                                <x-gmdi-qr-code class="w-6 h-6 font-semibold" />
                                 <div>QR Code</div>
                             </button>
                             <button
                                 :class="{ 'bg-indigo-600 text-white': tab === 'collectPayment', 'bg-gray-100': tab !== 'collectPayment' }"
                                 @click="tab = 'collectPayment'"
                                 class="flex items-center gap-1 px-4 py-2 text-xs font-semibold bg-gray-100 rounded-lg shadow-lg shadow-gray-400">
-                                <x-gmdi-credit-card class="w-6 h-6 font-semibold text-center"/>
+                                <x-gmdi-credit-card class="w-6 h-6 font-semibold text-center" />
                                 <div>Collect CC</div>
                             </button>
                         </div>
@@ -236,7 +237,7 @@
 
                 <div x-show="tab === 'smsPayment'" class="flex flex-col gap-4 mt-4">
                     <!-- SMS Payment Link Tab Content -->
-                    <livewire:booking.s-m-s-booking-form :booking="$booking" :booking-url="$bookingUrl"/>
+                    <livewire:booking.s-m-s-booking-form :booking="$booking" :booking-url="$bookingUrl" />
                 </div>
 
                 <div x-show="tab === 'qrCode'" class="flex flex-col gap-4 mt-4">
@@ -247,12 +248,12 @@
 
                     <img src="{{ $qrCode }}" alt="QR Code" class="w-1/2 mx-auto shadow-lg">
 
-                    <livewire:booking.booking-status-widget :booking="$booking"/>
+                    <livewire:booking.booking-status-widget :booking="$booking" />
                 </div>
             </div>
 
             <div class="w-full">
-                <livewire:booking.invoice-small :booking="$booking"/>
+                <livewire:booking.invoice-small :booking="$booking" />
             </div>
 
             <x-filament::button wire:click="cancelBooking" class="w-full opacity-50" color="gray">
