@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "9b012b12bda1d3e63bff2ba07838c654",
+    "content-hash": "a30afb5a75eeeab9eafa3d1bd075f5e6",
     "packages": [
         {
             "name": "akaunting/laravel-money",
@@ -2933,6 +2933,68 @@
                 }
             ],
             "time": "2023-08-10T19:36:49+00:00"
+        },
+        {
+            "name": "eduard9969/blade-polaris-icons",
+            "version": "2.6.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/Eduard9969/blade-polaris-icons.git",
+                "reference": "11e3dfd1cac18d8ce3e4154645b2c60df2fd65ee"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/Eduard9969/blade-polaris-icons/zipball/11e3dfd1cac18d8ce3e4154645b2c60df2fd65ee",
+                "reference": "11e3dfd1cac18d8ce3e4154645b2c60df2fd65ee",
+                "shasum": ""
+            },
+            "require": {
+                "blade-ui-kit/blade-icons": "^1.1",
+                "illuminate/support": "^8.0|^9.0|^10.0|^11.0",
+                "php": "^7.4|^8.0|^8.1|^8.2|^8.3"
+            },
+            "require-dev": {
+                "codeat3/blade-icon-generation-helpers": "^0.8",
+                "codeat3/phpcs-styles": "^1.0",
+                "orchestra/testbench": "^6.0|^7.0|^8.0|^9.0",
+                "phpunit/phpunit": "^9.0|^10.0"
+            },
+            "type": "library",
+            "extra": {
+                "laravel": {
+                    "providers": [
+                        "Eduard9969\\BladePolarisIcons\\BladePolarisIconsServiceProvider"
+                    ]
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "Eduard9969\\BladePolarisIcons\\": "src"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Eduard Samoilenko",
+                    "homepage": "https://readytest.tk/"
+                }
+            ],
+            "description": "A package to easily make use of Polaris Icons in your Laravel Blade views.",
+            "homepage": "https://github.com/Eduard9969/blade-polaris-icons",
+            "keywords": [
+                "blade",
+                "laravel",
+                "polaris",
+                "shopify"
+            ],
+            "support": {
+                "issues": "https://github.com/Eduard9969/blade-polaris-icons/issues",
+                "source": "https://github.com/Eduard9969/blade-polaris-icons/tree/2.6.0"
+            },
+            "time": "2024-04-08T14:57:53+00:00"
         },
         {
             "name": "egulias/email-validator",
@@ -10153,6 +10215,71 @@
                 }
             ],
             "time": "2023-12-25T11:46:58+00:00"
+        },
+        {
+            "name": "staudenmeir/belongs-to-through",
+            "version": "v2.16",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/staudenmeir/belongs-to-through.git",
+                "reference": "79667db6660fa0065b24415bab29a5f85a0128c7"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/staudenmeir/belongs-to-through/zipball/79667db6660fa0065b24415bab29a5f85a0128c7",
+                "reference": "79667db6660fa0065b24415bab29a5f85a0128c7",
+                "shasum": ""
+            },
+            "require": {
+                "illuminate/database": "^11.0",
+                "php": "^8.2"
+            },
+            "require-dev": {
+                "barryvdh/laravel-ide-helper": "^3.0",
+                "orchestra/testbench": "^9.0",
+                "phpstan/phpstan": "^1.10",
+                "phpunit/phpunit": "^10.5"
+            },
+            "type": "library",
+            "extra": {
+                "laravel": {
+                    "providers": [
+                        "Staudenmeir\\BelongsToThrough\\IdeHelperServiceProvider"
+                    ]
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "Znck\\Eloquent\\": "src/",
+                    "Staudenmeir\\BelongsToThrough\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Rahul Kadyan",
+                    "email": "hi@znck.me"
+                },
+                {
+                    "name": "Jonas Staudenmeir",
+                    "email": "mail@jonas-staudenmeir.de"
+                }
+            ],
+            "description": "Laravel Eloquent BelongsToThrough relationships",
+            "support": {
+                "issues": "https://github.com/staudenmeir/belongs-to-through/issues",
+                "source": "https://github.com/staudenmeir/belongs-to-through/tree/v2.16"
+            },
+            "funding": [
+                {
+                    "url": "https://paypal.me/JonasStaudenmeir",
+                    "type": "custom"
+                }
+            ],
+            "time": "2024-03-09T09:53:11+00:00"
         },
         {
             "name": "stechstudio/filament-impersonate",
