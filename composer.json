@@ -19,6 +19,7 @@
         "codeat3/blade-govicons": "^1.4",
         "filament/filament": "^3.1",
         "guzzlehttp/guzzle": "^7.2",
+        "hasan-ahani/filament-otp-input": "^1.0",
         "itsgoingd/clockwork": "^5.1",
         "joshembling/image-optimizer": "^1.4",
         "laravel-notification-channels/twilio": "^3.3",
