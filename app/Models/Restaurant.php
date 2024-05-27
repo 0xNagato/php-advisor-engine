@@ -85,6 +85,7 @@ class Restaurant extends Model
             ];
 
             $restaurant->party_sizes = [
+                'Special Request' => 0,
                 '2' => 2,
                 '4' => 4,
                 '6' => 6,

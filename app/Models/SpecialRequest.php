@@ -18,6 +18,8 @@ class SpecialRequest extends Model
     protected $fillable = [
         'restaurant_id',
         'concierge_id',
+        'booking_id',
+        'schedule_template_id',
         'booking_date',
         'booking_time',
         'party_size',
@@ -29,12 +31,17 @@ class SpecialRequest extends Model
         'customer_phone',
         'customer_email',
         'status',
+        'restaurant_message',
+        'conversations',
+        'meta',
     ];
 
     protected function casts(): array
     {
         return [
             'status' => SpecialRequestStatus::class,
+            'conversations' => 'array',
+            'meta' => 'array',
         ];
     }
 
@@ -55,6 +62,16 @@ class SpecialRequest extends Model
     public function concierge(): BelongsTo
     {
         return $this->belongsTo(Concierge::class);
+    }
+
+    public function booking(): BelongsTo
+    {
+        return $this->belongsTo(Booking::class);
+    }
+
+    public function scheduleTemplate(): BelongsTo
+    {
+        return $this->belongsTo(ScheduleTemplate::class);
     }
 
     public function getCustomerNameAttribute(): string

@@ -36,6 +36,11 @@ class TableAvailability extends Widget
         $schedules = auth()->user()->restaurant->scheduleTemplates()->where('day_of_week', $day)->where('is_available', true)->get();
 
         foreach ($schedules as $schedule) {
+            // 0 is used for Special Requests, so we can skip it here
+            if ($schedule->party_size === 0) {
+                continue;
+            }
+
             if (! isset($times[$schedule->start_time])) {
                 $times[$schedule->start_time] = [];
                 $times[$schedule->start_time]['prime_time'] = $schedule->prime_time;

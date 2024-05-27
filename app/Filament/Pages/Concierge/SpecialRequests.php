@@ -6,8 +6,11 @@ use App\Enums\SpecialRequestStatus;
 use App\Events\SpecialRequestCreated;
 use App\Models\Region;
 use App\Models\Restaurant;
+use App\Models\ScheduleTemplate;
 use App\Models\SpecialRequest;
 use App\Traits\ManagesBookingForms;
+use Carbon\Carbon;
+use Exception;
 use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
@@ -17,6 +20,7 @@ use Filament\Notifications\Notification;
 use Filament\Pages\Page;
 use Filament\Support\RawJs;
 use libphonenumber\PhoneNumberType;
+use Sentry;
 use Ysfkaya\FilamentPhoneInput\Forms\PhoneInput;
 use Ysfkaya\FilamentPhoneInput\PhoneInputNumberType;
 
@@ -168,7 +172,26 @@ class SpecialRequests extends Page
     {
         $data = $this->form->getState();
 
+        try {
+            $scheduleTemplate = ScheduleTemplate::query()
+                ->where('restaurant_id', $data['restaurant'])
+                ->where('day_of_week', Carbon::parse($data['date'])->format('l'))
+                ->where('start_time', $data['reservation_time'])
+                ->where('party_size', 0)
+                ->firstOrFail();
+        } catch (Exception $e) {
+            Sentry::captureException($e);
+
+            Notification::make()
+                ->title('Restaurant is not available at the selected time')
+                ->warning()
+                ->send();
+
+            return;
+        }
+
         $specialRequest = SpecialRequest::create([
+            'schedule_template_id' => $scheduleTemplate->id,
             'restaurant_id' => $data['restaurant'],
             'concierge_id' => auth()->id(),
             'booking_date' => $data['date'],

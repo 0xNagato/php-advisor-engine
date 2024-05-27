@@ -2,6 +2,7 @@
 
 namespace App\Filament\Pages\Concierge;
 
+use App\Actions\Booking\CreateBooking;
 use App\Enums\BookingStatus;
 use App\Events\BookingCancelled;
 use App\Events\BookingCreated;
@@ -11,7 +12,6 @@ use App\Models\Restaurant;
 use App\Models\ScheduleTemplate;
 use App\Models\ScheduleWithBooking;
 use App\Services\BookingService;
-use App\Services\SalesTaxService;
 use App\Traits\ManagesBookingForms;
 use AshAllenDesign\ShortURL\Facades\ShortURL;
 use chillerlan\QRCode\QRCode;
@@ -222,15 +222,15 @@ class ReservationHub extends Page
         }
     }
 
-    public function createBooking($scheduleTemplateId, ?string $date = null): void
+    public function createBooking(int $scheduleTemplateId, ?string $date = null): void
     {
         $userTimezone = $this->timezone;
         $bookingDate = Carbon::createFromFormat('Y-m-d', $this->data['date'], $userTimezone);
         $currentDate = Carbon::now($userTimezone);
 
-        if ($bookingDate?->gt($currentDate->copy()->addMonth())) {
+        if ($bookingDate?->gt($currentDate->copy()->addDays(self::MAX_DAYS_IN_ADVANCE))) {
             Notification::make()
-                ->title('Booking cannot be created more than one month in advance.')
+                ->title('Booking cannot be created more than '.self::MAX_DAYS_IN_ADVANCE.' days in advance.')
                 ->danger()
                 ->send();
 
@@ -238,42 +238,9 @@ class ReservationHub extends Page
         }
 
         $data = $this->form->getState();
-
-        $scheduleTemplate = ScheduleTemplate::find($scheduleTemplateId);
-
         $data['date'] = $date ?? $data['date'];
 
-        $bookingAt = Carbon::createFromFormat(
-            'Y-m-d H:i:s',
-            $data['date'].' '.$scheduleTemplate->start_time,
-            $this->timezone
-        );
-
-        $this->booking = Booking::create([
-            'schedule_template_id' => $scheduleTemplateId,
-            'guest_count' => $data['guest_count'],
-            'concierge_id' => auth()->user()->concierge->id,
-            'status' => BookingStatus::PENDING,
-            'booking_at' => $bookingAt,
-            'currency' => $this->currency,
-            'is_prime' => $scheduleTemplate->prime_time,
-        ]);
-
-        $taxData = app(SalesTaxService::class)->calculateTax(
-            $this->booking->restaurant->region,
-            $this->booking->total_fee,
-            noTax: config('app.no_tax'),
-        );
-
-        $totalWithTaxInCents =
-            $this->booking->total_fee + $taxData->amountInCents;
-
-        $this->booking->update([
-            'tax' => $taxData->tax,
-            'tax_amount_in_cents' => $taxData->amountInCents,
-            'city' => $taxData->region,
-            'total_with_tax_in_cents' => $totalWithTaxInCents,
-        ]);
+        $this->booking = CreateBooking::run($scheduleTemplateId, $data, $userTimezone, $this->currency);
 
         try {
             $shortUrlQr = ShortURL::destinationUrl(

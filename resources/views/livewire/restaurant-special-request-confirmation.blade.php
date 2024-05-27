@@ -1,45 +1,26 @@
 @php use Carbon\Carbon; @endphp
 
 <div class="flex min-h-screen flex-col justify-center p-6 antialiased wavy-background">
-    <div class="w-full text-center text-3xl font-bold leading-5 tracking-tight text-gray-950">
+    <div class="w-full text-center text-xl font-bold leading-5 tracking-tight text-gray-950">
         PRIMA
     </div>
-    <div class="p-2 text-center text-2xl font-bold tracking-tight dm-serif text-gray-950">
-        Everybody Wins
-    </div>
-    <div class="mx-auto mt-4 flex w-full max-w-lg flex-grow flex-col items-center">
+    <div class="mx-auto mt-6 flex w-full max-w-lg flex-grow flex-col items-center">
         <div class="mx-4 flex w-full flex-col gap-4 rounded-lg bg-white p-4 shadow-sm ring-1 ring-gray-950/5">
             <h1 class="text-center text-2xl font-bold tracking-tight text-gray-950 dm-serif">
                 Confirm Special Request
             </h1>
 
             <div class="w-full text-sm space-y-3">
-                <div>
-                    <p class="font-medium text-gray-700">
-                        <span class="font-semibold">Customer Name:</span>
-                        <span class="text-black">
-                            {{ $specialRequest->customer_first_name }} {{ $specialRequest->customer_last_name }}
-                        </span>
-                    </p>
-                </div>
-                <div>
-                    <p class="font-medium text-gray-700">
-                        <span class="font-semibold">Customer Phone:</span>
-                        <span class="text-black">
-                            {{ $specialRequest->customer_phone }}
-                        </span>
-                    </p>
-                </div>
-                @if($specialRequest->customer_email)
-                    <div>
-                        <p class="font-medium text-gray-700">
-                            <span class="font-semibold">Customer Email:</span>
-                            <span class="text-black">
-                            {{ $specialRequest->customer_email }}
-                        </span>
-                        </p>
+
+                <div class="relative">
+                    <div class="absolute inset-0 flex items-center" aria-hidden="true">
+                        <div class="w-full border-t border-gray-300"></div>
                     </div>
-                @endif
+                    <div class="relative flex justify-center">
+                        <span class="bg-white px-3 text-base font-semibold leading-6 text-gray-900">Request Info</span>
+                    </div>
+                </div>
+
                 <div>
                     <p class="font-medium text-gray-700">
                         <span class="font-semibold">Booking Date:</span>
@@ -80,6 +61,44 @@
                         </span>
                     </p>
                 </div>
+
+                <div class="relative">
+                    <div class="absolute inset-0 flex items-center" aria-hidden="true">
+                        <div class="w-full border-t border-gray-300"></div>
+                    </div>
+                    <div class="relative flex justify-center">
+                        <span
+                            class="bg-white px-3 text-base font-semibold leading-6 text-gray-900">Customer Details</span>
+                    </div>
+                </div>
+
+                <div>
+                    <p class="font-medium text-gray-700">
+                        <span class="font-semibold">Name:</span>
+                        <span class="text-black">
+                            {{ $specialRequest->customer_first_name }} {{ $specialRequest->customer_last_name }}
+                        </span>
+                    </p>
+                </div>
+                <div>
+                    <p class="font-medium text-gray-700">
+                        <span class="font-semibold">Phone:</span>
+                        <span class="text-black">
+                            {{ $specialRequest->customer_phone }}
+                        </span>
+                    </p>
+                </div>
+                @if($specialRequest->customer_email)
+                    <div>
+                        <p class="font-medium text-gray-700">
+                            <span class="font-semibold">Email:</span>
+                            <span class="text-black">
+                            {{ $specialRequest->customer_email }}
+                        </span>
+                        </p>
+                    </div>
+                @endif
+
                 @if($specialRequest->special_request)
                     <div>
                         <p class="font-medium text-gray-700">
