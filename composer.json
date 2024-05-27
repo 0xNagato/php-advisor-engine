@@ -31,6 +31,7 @@
         "laravel/tinker": "^2.8",
         "league/flysystem-aws-s3-v3": "^3.0",
         "leandrocfe/filament-apex-charts": "^3.0",
+        "leventcz/laravel-top": "^1.0",
         "livewire/livewire": "^3.4",
         "livewire/volt": "^1.6",
         "lorisleiva/laravel-actions": "^2.7",

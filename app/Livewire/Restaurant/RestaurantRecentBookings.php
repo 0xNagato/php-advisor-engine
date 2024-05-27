@@ -60,18 +60,23 @@ class RestaurantRecentBookings extends BaseWidget
             ->columns([
                 TextColumn::make('guest_name')
                     ->label('Guest')
+                    ->formatStateUsing(function (Booking $booking) {
+                        return "$booking->guest_name ($booking->guest_count)";
+                    })
                     ->searchable(),
                 TextColumn::make('booking_at')
                     ->label('Date')
-                    ->dateTime('D, M j'),
-                TextColumn::make('restaurant_earnings')
-                    ->alignRight()
-                    ->label('Earned')
-                    ->formatStateUsing(function (Booking $booking) {
-                        $total = $booking->earnings->sum('amount');
-
-                        return money($total, $booking->currency);
-                    }),
+                    ->dateTime('D, M j g:ia'),
+                TextColumn::make('concierge.user.name')
+                    ->label('Booked By'),
+                // TextColumn::make('restaurant_earnings')
+                //     ->alignRight()
+                //     ->label('Earned')
+                //     ->formatStateUsing(function (Booking $booking) {
+                //         $total = $booking->earnings->sum('amount');
+                //
+                //         return money($total, $booking->currency);
+                //     }),
             ])
             ->actions([
                 ActionGroup::make([

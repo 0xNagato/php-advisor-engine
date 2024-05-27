@@ -12,7 +12,7 @@ use Illuminate\Support\Collection;
 
 class PrimeCalendar extends Page
 {
-    public const DAYS_TO_DISPLAY = 30;
+    public const int DAYS_TO_DISPLAY = 30;
 
     protected static ?string $navigationIcon = 'polaris-calendar-time-icon';
 
@@ -109,9 +109,7 @@ class PrimeCalendar extends Page
         $existingOverrides = RestaurantTimeSlot::whereIn('booking_date', array_keys($this->selectedTimeSlots))
             ->whereIn('schedule_template_id', $scheduleTemplates->flatten()->pluck('id'))
             ->get()
-            ->keyBy(function ($item) {
-                return $item->schedule_template_id.'|'.$item->booking_date;
-            });
+            ->keyBy(fn ($item) => $item->schedule_template_id.'|'.$item->booking_date);
 
         $updates = [];
         $inserts = [];

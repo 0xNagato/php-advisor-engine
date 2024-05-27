@@ -12,9 +12,9 @@
                             <div>{{ $stats->difference['number_of_bookings'] }}</div>
 
                             @if ($stats->difference['number_of_bookings_up'])
-                                <x-filament::icon icon="heroicon-o-arrow-up-right" class="w-4 h-4"/>
+                                <x-filament::icon icon="heroicon-o-arrow-up-right" class="w-4 h-4" />
                             @else
-                                <x-filament::icon icon="heroicon-o-arrow-down-right" class="w-4 h-4"/>
+                                <x-filament::icon icon="heroicon-o-arrow-down-right" class="w-4 h-4" />
                             @endif
                         </div>
                     </div>
@@ -23,7 +23,7 @@
 
             <!-- Earnings -->
             <div class="px-4 py-5 sm:p-6">
-                <dt class="text-xs font-semibold text-slate-900">Earnings</dt>
+                <dt class="text-xs font-semibold text-slate-900">PRIME Earnings</dt>
                 <dd class="mt-1 flex items-baseline justify-between md:block lg:flex">
                     <div class="flex flex-col items-baseline text-2xl font-semibold text-indigo-600">
                         <div>
@@ -34,9 +34,9 @@
                             <div>{{ money($stats->difference['restaurant_earnings'], $currency) }}</div>
 
                             @if ($stats->difference['restaurant_earnings_up'])
-                                <x-filament::icon icon="heroicon-o-arrow-up-right" class="w-4 h-4"/>
+                                <x-filament::icon icon="heroicon-o-arrow-up-right" class="w-4 h-4" />
                             @else
-                                <x-filament::icon icon="heroicon-o-arrow-down-right" class="w-4 h-4"/>
+                                <x-filament::icon icon="heroicon-o-arrow-down-right" class="w-4 h-4" />
                             @endif
                         </div>
                     </div>
@@ -45,20 +45,20 @@
 
             <!-- Bounty -->
             <div class="px-4 py-5 sm:p-6">
-                <dt class="text-xs font-semibold text-slate-900">Bounty</dt>
+                <dt class="text-xs font-semibold text-slate-900">Marketing Investment</dt>
                 <dd class="mt-1 flex items-baseline justify-between md:block lg:flex">
                     <div class="flex flex-col items-baseline text-2xl font-semibold text-indigo-600">
                         <div>
                             {{ $stats->formatted['restaurant_bounty'] }}
                         </div>
                         <div
-                            @class(['flex items-center', 'text-[11px]', 'text-red-600' => $stats->difference['restaurant_bounty_up'], 'text-green-600' => !$stats->difference['restaurant_bounty_up']])>
+                            @class(['flex items-center', 'text-[11px]', 'text-green-600' => $stats->difference['restaurant_bounty_up'], 'text-red-600' => !$stats->difference['restaurant_bounty_up']])>
                             <div>{{ money($stats->difference['restaurant_bounty'], $currency) }}</div>
 
                             @if ($stats->difference['restaurant_bounty_up'])
-                                <x-filament::icon icon="heroicon-o-arrow-down-right" class="w-4 h-4"/>
+                                <x-filament::icon icon="heroicon-o-arrow-down-right" class="w-4 h-4" />
                             @else
-                                <x-filament::icon icon="heroicon-o-arrow-up-right" class="w-4 h-4"/>
+                                <x-filament::icon icon="heroicon-o-arrow-up-right" class="w-4 h-4" />
                             @endif
                         </div>
                     </div>

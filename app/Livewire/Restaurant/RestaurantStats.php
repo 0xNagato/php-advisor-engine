@@ -43,7 +43,7 @@ class RestaurantStats extends Widget
 
         // Calculate restaurant earnings as the sum of amount
         $restaurantEarnings = $restaurantEarningsQuery->sum('amount');
-        $restaurantBounty = $restaurantBountyQuery->sum('amount');
+        $restaurantBounty = abs($restaurantBountyQuery->sum('amount'));
 
         $numberOfBookings = $restaurantEarningsQuery->count();
 
@@ -62,7 +62,7 @@ class RestaurantStats extends Widget
 
         // Calculate previous restaurant earnings as the sum of amount
         $prevRestaurantEarnings = $prevRestaurantEarningsQuery->sum('amount');
-        $prevRestaurantBounty = $prevRestaurantBountyQuery->sum('amount');
+        $prevRestaurantBounty = abs($prevRestaurantBountyQuery->sum('amount'));
 
         $prevNumberOfBookings = $prevRestaurantEarningsQuery->count();
 

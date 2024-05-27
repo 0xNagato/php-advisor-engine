@@ -1,0 +1,64 @@
+<?php
+
+namespace App\Models;
+
+use App\Enums\SpecialRequestStatus;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Str;
+
+/**
+ * @property string $uuid
+ */
+class SpecialRequest extends Model
+{
+    use HasFactory;
+
+    protected $fillable = [
+        'restaurant_id',
+        'concierge_id',
+        'booking_date',
+        'booking_time',
+        'party_size',
+        'commission_requested_percentage',
+        'minimum_spend',
+        'special_request',
+        'customer_first_name',
+        'customer_last_name',
+        'customer_phone',
+        'customer_email',
+        'status',
+    ];
+
+    protected function casts(): array
+    {
+        return [
+            'status' => SpecialRequestStatus::class,
+        ];
+    }
+
+    protected static function boot(): void
+    {
+        parent::boot();
+
+        static::creating(static function (SpecialRequest $specialRequest) {
+            $specialRequest->uuid = Str::uuid();
+        });
+    }
+
+    public function restaurant(): BelongsTo
+    {
+        return $this->belongsTo(Restaurant::class);
+    }
+
+    public function concierge(): BelongsTo
+    {
+        return $this->belongsTo(Concierge::class);
+    }
+
+    public function getCustomerNameAttribute(): string
+    {
+        return $this->customer_first_name.' '.$this->customer_last_name;
+    }
+}

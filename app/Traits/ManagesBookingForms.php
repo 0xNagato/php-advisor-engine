@@ -61,22 +61,7 @@ trait ManagesBookingForms
                 ->prefixIcon('heroicon-m-calendar')
                 ->native(false)
                 ->closeOnDateSelection(),
-            Select::make('guest_count')
-                ->prefixIcon('heroicon-m-users')
-                ->options([
-                    2 => '2 Guests',
-                    3 => '3 Guests',
-                    4 => '4 Guests',
-                    5 => '5 Guests',
-                    6 => '6 Guests',
-                    7 => '7 Guests',
-                    8 => '8 Guests',
-                ])
-                ->placeholder('Party Size')
-                ->live()
-                ->hiddenLabel()
-                ->columnSpan(1)
-                ->required(),
+            $this->getGuestCountInput(),
             Select::make('reservation_time')
                 ->prefixIcon('heroicon-m-clock')
                 ->options(function (Get $get) {
@@ -93,6 +78,26 @@ trait ManagesBookingForms
                 ->columnSpan(1)
                 ->live(),
         ];
+    }
+
+    protected function getGuestCountInput(): Select
+    {
+        return Select::make('guest_count')
+            ->prefixIcon('heroicon-m-users')
+            ->options([
+                2 => '2 Guests',
+                3 => '3 Guests',
+                4 => '4 Guests',
+                5 => '5 Guests',
+                6 => '6 Guests',
+                7 => '7 Guests',
+                8 => '8 Guests',
+            ])
+            ->placeholder('Party Size')
+            ->live()
+            ->hiddenLabel()
+            ->columnSpan(1)
+            ->required();
     }
 
     protected function getReservationTimeOptions(string $date, $onlyShowFuture = false): array

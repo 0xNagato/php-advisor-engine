@@ -20,6 +20,8 @@ class ConciergeReportDashboard extends Dashboard
 
     protected ?string $heading = 'My Earnings';
 
+    protected static ?int $navigationSort = -1;
+
     public static function canAccess(): bool
     {
         if (session()->exists('simpleMode')) {

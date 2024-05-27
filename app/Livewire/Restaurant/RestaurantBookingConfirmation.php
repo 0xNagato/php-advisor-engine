@@ -3,6 +3,9 @@
 namespace App\Livewire\Restaurant;
 
 use App\Models\Booking;
+use Illuminate\Contracts\Foundation\Application;
+use Illuminate\Contracts\View\Factory;
+use Illuminate\View\View;
 use Livewire\Component;
 
 class RestaurantBookingConfirmation extends Component
@@ -18,7 +21,7 @@ class RestaurantBookingConfirmation extends Component
         }
     }
 
-    public function render()
+    public function render(): \Illuminate\Contracts\View\View|\Illuminate\Foundation\Application|Factory|View|Application
     {
         return view('livewire.restaurant-booking-confirmation');
     }
