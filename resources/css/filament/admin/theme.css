@@ -73,6 +73,14 @@ body::before {
     @apply gap-4 gap-x-2 !important;
 }
 
+.inline-form .fi-section-content {
+    @apply p-4 !important;
+}
+
+.inline-form .fi-section-content .fi-fo-component-ctn {
+    @apply gap-4 gap-x-2 !important;
+}
+
 .submit-btn {
     @apply text-base !important;
 }
@@ -161,10 +169,11 @@ body::before {
 }
 
 @media only screen and (max-width: 768px) {
-    .fi-otp-input{
+    .fi-otp-input {
         padding: 6px;
     }
-    .fi-otp-input-container{
+
+    .fi-otp-input-container {
         gap: 12px;
     }
 }

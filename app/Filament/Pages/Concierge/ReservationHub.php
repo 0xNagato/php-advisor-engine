@@ -174,15 +174,11 @@ class ReservationHub extends Page
                 }
             }
 
-            if ($currentDate->isSameDay($requestedDate)) {
-                $reservationTime = Carbon::createFromFormat('H:i:s', $this->form->getState()['reservation_time'], $userTimezone);
-                $currentTime = Carbon::now($userTimezone);
+            $reservationTime = Carbon::createFromFormat('H:i:s', $this->form->getState()['reservation_time'], $userTimezone);
+            $currentTime = Carbon::now($userTimezone);
 
-                if ($reservationTime?->copy()->subMinutes(self::MINUTES_PAST)->gt($currentTime)) {
-                    $reservationTime = $reservationTime->subMinutes(self::MINUTES_PAST)->format('H:i:s');
-                } else {
-                    $reservationTime = $this->form->getState()['reservation_time'];
-                }
+            if ($reservationTime?->copy()->subMinutes(self::MINUTES_PAST)->gt($currentTime)) {
+                $reservationTime = $reservationTime->subMinutes(self::MINUTES_PAST)->format('H:i:s');
             } else {
                 $reservationTime = $this->form->getState()['reservation_time'];
             }

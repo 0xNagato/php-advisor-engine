@@ -8,6 +8,7 @@ use App\Models\Region;
 use App\Models\Restaurant;
 use App\Models\SpecialRequest;
 use App\Traits\ManagesBookingForms;
+use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
@@ -71,53 +72,67 @@ class SpecialRequests extends Page
                     ->searchable()
                     ->columnSpanFull()
                     ->selectablePlaceholder(false),
-                TextInput::make('commission_requested_percentage')
-                    ->label('Commission Requested')
-                    ->placeholder('Commission Requested')
-                    ->numeric()
-                    ->suffix('%')
-                    ->default(10)
-                    ->maxValue(15)
-                    ->required(),
-                TextInput::make('minimum_spend')
-                    ->label('Minimum Spend')
-                    ->placeholder('00.00')
-                    ->numeric()
-                    ->mask(RawJs::make('$money($input)'))
-                    ->prefix(Region::find(session('region', 'miami'))->currency_symbol)
-                    ->stripCharacters(',')
-                    ->required(),
-                TextInput::make('customer_first_name')
-                    ->hiddenLabel()
-                    ->placeholder('First Name')
-                    ->required(),
-                TextInput::make('customer_last_name')
-                    ->hiddenLabel()
-                    ->placeholder('Last Name')
-                    ->required(),
-                PhoneInput::make('customer_phone')
-                    ->hiddenLabel()
-                    ->onlyCountries(config('app.countries'))
-                    ->displayNumberFormat(PhoneInputNumberType::E164)
-                    ->disallowDropdown()
-                    ->validateFor(
-                        country: config('app.countries'),
-                        type: PhoneNumberType::MOBILE,
-                        lenient: true,
-                    )
-                    ->columnSpan(2)
-                    ->required(),
-                TextInput::make('customer_email')
-                    ->hiddenLabel()
-                    ->email()
-                    ->placeholder('Email Address (optional)')
-                    ->autocomplete(false)
-                    ->columnSpan(2),
-                Textarea::make('special_request')
-                    ->hiddenLabel()
-                    ->placeholder('Notes/Special Request')
-                    ->helperText('Please provide any special requests or additional information that you would like the restaurant to know.')
-                    ->columnSpan(2),
+                Section::make('Commission/Spend')
+                    ->schema([
+                        TextInput::make('commission_requested_percentage')
+                            ->label('Commission')
+                            ->placeholder('Commission')
+                            ->numeric()
+                            ->suffix('%')
+                            ->default(10)
+                            ->maxValue(15)
+                            ->required(),
+                        TextInput::make('minimum_spend')
+                            ->label('Minimum Spend')
+                            ->placeholder('00.00')
+                            ->numeric()
+                            ->mask(RawJs::make('$money($input)'))
+                            ->prefix(Region::find(session('region', 'miami'))->currency_symbol)
+                            ->stripCharacters(',')
+                            ->required(),
+                    ])
+                    ->extraAttributes(['class' => 'inline-form'])
+                    ->columns([
+                        'default' => 2,
+                    ]),
+                Section::make('Customer Details')
+                    ->schema([
+                        TextInput::make('customer_first_name')
+                            ->hiddenLabel()
+                            ->placeholder('First Name')
+                            ->required(),
+                        TextInput::make('customer_last_name')
+                            ->hiddenLabel()
+                            ->placeholder('Last Name')
+                            ->required(),
+                        PhoneInput::make('customer_phone')
+                            ->hiddenLabel()
+                            ->onlyCountries(config('app.countries'))
+                            ->displayNumberFormat(PhoneInputNumberType::E164)
+                            ->disallowDropdown()
+                            ->validateFor(
+                                country: config('app.countries'),
+                                type: PhoneNumberType::MOBILE,
+                                lenient: true,
+                            )
+                            ->columnSpan(2)
+                            ->required(),
+                        TextInput::make('customer_email')
+                            ->hiddenLabel()
+                            ->email()
+                            ->placeholder('Email Address (optional)')
+                            ->autocomplete(false)
+                            ->columnSpan(2),
+                        Textarea::make('special_request')
+                            ->hiddenLabel()
+                            ->placeholder('Notes/Special Request')
+                            ->helperText('Please provide any special requests or additional information that you would like the restaurant to know.')
+                            ->columnSpan(2),
+                    ])
+                    ->extraAttributes(['class' => 'inline-form'])
+                    ->columns([
+                        'default' => 2,
+                    ]),
             ])
             ->extraAttributes(['class' => 'inline-form'])
             ->columns([

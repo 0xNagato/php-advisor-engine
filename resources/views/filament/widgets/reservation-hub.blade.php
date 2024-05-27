@@ -13,7 +13,7 @@
                 @if ($schedulesToday->count() || $schedulesThisWeek->count())
                     @if ($schedulesToday->count())
 
-                        <div id="time-slots" class="grid gap-2 grid-cols-3 sm:grid-cols-5">
+                        <div id="time-slots" class="grid gap-2 grid-cols-3 md:grid-cols-5">
                             @foreach ($schedulesToday as $index => $schedule)
                                 <button
                                     @if ($schedule->is_bookable) wire:click="createBooking({{ $schedule->schedule_template_id }})" @endif
