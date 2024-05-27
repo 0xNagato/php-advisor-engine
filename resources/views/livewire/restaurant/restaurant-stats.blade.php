@@ -1,7 +1,7 @@
 <x-filament-widgets::widget>
     <div class="sm:mt-0">
         <dl class="grid divide-x divide-gray-200 overflow-hidden rounded-lg bg-white shadow"
-            style="grid-template-columns: 28% 36% 36%;">
+            style="grid-template-columns: 24% 38% 38%;">
             <!-- Bookings -->
             <div class="px-4 py-5 sm:p-6">
                 <dt class="text-xs font-semibold text-slate-900">Bookings</dt>
