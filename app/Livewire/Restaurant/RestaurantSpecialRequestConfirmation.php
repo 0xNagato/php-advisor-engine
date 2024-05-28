@@ -6,8 +6,8 @@ use App\Enums\SpecialRequestStatus;
 use App\Events\SpecialRequestAccepted;
 use App\Events\SpecialRequestRejected;
 use App\Models\SpecialRequest;
-use Filament\Actions\Action;
 use Filament\Forms\Components\Actions;
+use Filament\Forms\Components\Grid;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Form;
@@ -58,35 +58,45 @@ class RestaurantSpecialRequestConfirmation extends Page
         ];
     }
 
-    public function showRequestChangesFormAction(): Action
-    {
-        return Action::make('showRequestChangesForm')
-            ->label('Request Changes')
-            ->extraAttributes(['class' => 'w-full'])
-            ->action(fn () => $this->showRequestChangesForm = true)
-            ->visible(fn () => $this->showRequestChangesForm === false)
-            ->button();
-    }
-
     public function approvalForm(Form $form): Form
     {
         return $form->schema([
             Textarea::make('restaurant_message')
                 ->hiddenLabel()
                 ->placeholder('Message to the Concierge (optional)'),
-            Actions::make([
-                Actions\Action::make('confirmRequest')
-                    ->label('Accept Request')
-                    ->color('success')
-                    ->requiresConfirmation('Are you sure you want to accept this request?')
-                    ->button(),
-                Actions\Action::make('denyRequest')
-                    ->label('Deny Request')
-                    ->requiresConfirmation('Are you sure you want to deny this request?')
-                    ->color(Color::Gray)
-                    ->button(),
-            ])
-                ->fullWidth(),
+
+            Grid::make()
+                ->columns(1)
+                ->extraAttributes(['class' => 'grid-buttons'])
+                ->schema([
+                    Actions::make([
+                        Actions\Action::make('showRequestChangesForm')
+                            ->label('Make Changes')
+                            ->action(fn () => $this->showRequestChangesForm = true)
+                            ->visible(fn () => $this->showRequestChangesForm === false)
+                            ->size('xs')
+                            ->button(),
+                    ])
+                        ->fullWidth(),
+                    Actions::make([
+                        Actions\Action::make('confirmRequest')
+                            ->label('Accept Request')
+                            ->color('success')
+                            ->requiresConfirmation('Are you sure you want to accept this request?')
+                            ->size('xs')
+                            ->button(),
+                    ])
+                        ->fullWidth(),
+                    Actions::make([
+                        Actions\Action::make('denyRequest')
+                            ->label('Deny Request')
+                            ->requiresConfirmation('Are you sure you want to deny this request?')
+                            ->color(Color::Gray)
+                            ->size('xs')
+                            ->button(),
+                    ])
+                        ->fullWidth(),
+                ]),
         ])
             ->extraAttributes(['class' => 'inline-form'])
             ->statePath('approvalFormData');
@@ -119,7 +129,7 @@ class RestaurantSpecialRequestConfirmation extends Page
                 ->placeholder('Message to the Concierge (optional)'),
             Actions::make([
                 Actions\Action::make('requestChanges')
-                    ->label('Request Changes')
+                    ->label('Submit Changes')
                     ->requiresConfirmation('Are you sure you want to request changes?')
                     ->button(),
                 Actions\Action::make('cancel')

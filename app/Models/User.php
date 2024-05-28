@@ -136,7 +136,6 @@ class User extends Authenticatable implements FilamentUser, HasAvatar
         return "$this->first_name $this->last_name";
     }
 
-    /** @noinspection PhpPossiblePolymorphicInvocationInspection */
     public function getMainRoleAttribute(): string
     {
         /**
@@ -267,7 +266,6 @@ class User extends Authenticatable implements FilamentUser, HasAvatar
         );
     }
 
-    /** @noinspection NullPointerExceptionInspection */
     public function deviceKey(): string
     {
         return md5(request()->userAgent().request()->ip().$this->id);

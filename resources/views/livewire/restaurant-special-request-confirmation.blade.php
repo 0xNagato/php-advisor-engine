@@ -58,25 +58,6 @@
                 </p>
             </div>
 
-
-            @if($showRequestChangesForm)
-                <div class="relative">
-                    <div class="absolute inset-0 flex items-center" aria-hidden="true">
-                        <div class="w-full border-t border-gray-300"></div>
-                    </div>
-                    <div class="relative flex justify-center">
-                        <span class="bg-white px-3 text-base font-semibold leading-6 text-gray-900">
-                            Request Changes
-                        </span>
-                    </div>
-                </div>
-
-                {{ $this->requestChangesForm }}
-            @else
-                {{ $this->showRequestChangesFormAction }}
-            @endif
-
-
             <div class="relative">
                 <div class="absolute inset-0 flex items-center" aria-hidden="true">
                     <div class="w-full border-t border-gray-300"></div>
@@ -125,7 +106,27 @@
                     </p>
                 </div>
             @endif
-            
+
+            @if($showRequestChangesForm)
+                <div class="relative">
+                    <div class="absolute inset-0 flex items-center" aria-hidden="true">
+                        <div class="w-full border-t border-gray-300"></div>
+                    </div>
+                    <div class="relative flex justify-center">
+                        <span class="bg-white px-3 text-base font-semibold leading-6 text-gray-900">
+                            Request Changes
+                        </span>
+                    </div>
+                </div>
+
+                <p>
+                    Any changes you submit will be sent back to the concierge. If the concierge and client accept the
+                    changes, you will be notified.
+                </p>
+
+                {{ $this->requestChangesForm }}
+            @endif
+
             @if(!$showRequestChangesForm)
                 <div class="relative">
                     <div class="absolute inset-0 flex items-center" aria-hidden="true">
