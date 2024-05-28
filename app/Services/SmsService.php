@@ -2,86 +2,28 @@
 
 namespace App\Services;
 
-use App\Traits\FormatsPhoneNumber;
-use GuzzleHttp\Exception\GuzzleException;
-use Illuminate\Log\Logger;
-use JsonException;
-use libphonenumber\NumberParseException;
-use libphonenumber\PhoneNumberUtil;
-use Sentry;
-use Twilio\Exceptions\TwilioException;
-use Twilio\Rest\Client;
+use App\Http\Integrations\SimpleTexting\SimpleTexting;
+use App\Http\Integrations\Twilio\Twilio;
+use Saloon\Http\Response;
 
 class SmsService
 {
-    use FormatsPhoneNumber;
-
-    protected SimpleTextingAdapter $simpleTextingAdapter;
-
-    protected Client $twilioClient;
-
-    public function __construct(SimpleTextingAdapter $simpleTextingAdapter)
-    {
-        $this->simpleTextingAdapter = $simpleTextingAdapter;
-    }
-
     public function sendMessage(
         $contactPhone,
         $text,
-        $accountPhone = null,
-        $mode = 'AUTO',
-        $subject = null,
-        $fallbackText = null,
-        $mediaItems = [],
-    ) {
-        $contactPhone = $this->getInternationalFormattedPhoneNumber($contactPhone);
-        $phoneUtil = PhoneNumberUtil::getInstance();
-        app(Logger::class)->info('Parsing phone number '.$contactPhone);
-        try {
-            $phoneNumber = $phoneUtil->parse($contactPhone);
-            $countryCode = $phoneUtil->getRegionCodeForNumber($phoneNumber);
+    ): Response {
+        $phoneNumber = PhoneNumberParser::make($contactPhone)->parse();
 
-            if ($countryCode === 'US') {
-                app(Logger::class)->info('Sending SMS to '.$contactPhone, [
-                    'countryCode' => $countryCode,
-                    'text' => $text,
-                    'provider' => 'SIMPLE_TEXTING',
-                ]);
-
-                return $this->simpleTextingAdapter->sendMessage(
-                    $contactPhone,
-                    $text,
-                    $accountPhone,
-                    $mode,
-                    $subject,
-                    $fallbackText,
-                    $mediaItems
-                );
-            }
-
-            $twilioClient = new Client(
-                config('services.twilio.sid'),
-                config('services.twilio.token')
+        if ($phoneNumber->country === 'US') {
+            return (new SimpleTexting())->sms(
+                phone: $phoneNumber->phone,
+                text: $text,
             );
-
-            app(Logger::class)->info('Sending SMS to '.$contactPhone, [
-                'countryCode' => $countryCode,
-                'text' => $text,
-                'provider' => 'TWILIO',
-            ]);
-
-            return $twilioClient->messages->create(
-                $contactPhone,
-                [
-                    'from' => $accountPhone ?? config('services.twilio.from'),
-                    'body' => $text,
-                ]
-            );
-        } catch (NumberParseException|GuzzleException|JsonException|TwilioException $exception) {
-            app(Logger::class)->error($exception->getMessage());
-            Sentry::captureException($exception);
         }
 
-        return false;
+        return (new Twilio())->sms(
+            phone: $phoneNumber->phone,
+            text: $text
+        );
     }
 }
