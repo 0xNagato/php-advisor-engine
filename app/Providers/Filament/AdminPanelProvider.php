@@ -95,7 +95,8 @@ class AdminPanelProvider extends PanelProvider
             ->favicon('/favicon.ico')
             ->darkMode(false)
             ->brandName('PRIMA')
-            ->viteTheme('resources/css/filament/admin/theme.css');
+            ->viteTheme('resources/css/filament/admin/theme.css')
+            ->databaseNotifications();
 
         return $panel;
     }

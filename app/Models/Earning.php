@@ -11,6 +11,7 @@ class Earning extends Model
     protected $fillable = [
         'user_id',
         'booking_id',
+        'payment_id',
         'type',
         'amount',
         'currency',
@@ -27,6 +28,11 @@ class Earning extends Model
     public function booking(): BelongsTo
     {
         return $this->belongsTo(Booking::class);
+    }
+
+    public function payment(): BelongsTo
+    {
+        return $this->belongsTo(Payment::class);
     }
 
     public function scopeConfirmed(Builder $query): Builder
