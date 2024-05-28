@@ -20,6 +20,11 @@ class MyPayments extends Page implements HasTable
 
     protected static ?string $title = 'My Payments';
 
+    public static function canAccess(): bool
+    {
+        return auth()->user()?->hasRole('concierge') || auth()->user()?->hasRole('restaurant') || auth()->user()?->hasRole('partner');
+    }
+
     public function table(Table $table): Table
     {
         $query = PaymentItem::query()
@@ -34,9 +39,9 @@ class MyPayments extends Page implements HasTable
                     ->badge(),
                 Tables\Columns\TextColumn::make('created_at')
                     ->label('Date')
-                    ->formatStateUsing(fn (string $state): string => Carbon::parse($state)->format('F j, Y')),
+                    ->formatStateUsing(fn(string $state): string => Carbon::parse($state)->format('F j, Y')),
                 Tables\Columns\TextColumn::make('amount')
-                    ->money(fn (PaymentItem $record) => $record->currency, divideBy: 100)
+                    ->money(fn(PaymentItem $record) => $record->currency, divideBy: 100)
                     ->label('Total'),
             ]);
     }
