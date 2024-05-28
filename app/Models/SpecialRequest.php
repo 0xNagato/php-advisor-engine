@@ -3,6 +3,8 @@
 namespace App\Models;
 
 use App\Enums\SpecialRequestStatus;
+use Illuminate\Database\Eloquent\Casts\AsArrayObject;
+use Illuminate\Database\Eloquent\Casts\AsCollection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -40,8 +42,8 @@ class SpecialRequest extends Model
     {
         return [
             'status' => SpecialRequestStatus::class,
-            'conversations' => 'array',
-            'meta' => 'array',
+            'conversations' => AsCollection::class,
+            'meta' => AsArrayObject::class,
         ];
     }
 

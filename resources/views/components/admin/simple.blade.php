@@ -10,7 +10,6 @@
     </div>
     <div class="dm-serif text-2xl p-2 mb-4 text-center font-bold tracking-tight text-gray-950">
         Everybody Wins
-        {{--<sup>&trade;</sup>--}}
     </div>
 
     <div class="bg-white px-6 pt-8 pb-8 shadow-sm ring-1 ring-gray-950/5 rounded-lg mx-4 max-w-md sm:mx-auto">
@@ -22,7 +21,7 @@
     </div>
 
     @if (! $this instanceof HasTable)
-        <x-filament-actions::modals/>
+        <x-filament-actions::modals />
     @endif
 
     <div class="flex items-end justify-center text-sm text-center mt-4">

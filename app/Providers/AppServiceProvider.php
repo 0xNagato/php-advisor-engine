@@ -32,6 +32,7 @@ class AppServiceProvider extends ServiceProvider
         });
 
         FilamentColor::register([
+            'primary' => Color::Indigo,
             'indigo' => Color::Indigo,
             'brand' => '#4736dd',
             'gold' => '#DAA520',
