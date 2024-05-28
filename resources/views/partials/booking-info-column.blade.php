@@ -1,7 +1,6 @@
 @php use App\Enums\BookingStatus; @endphp
 @php use libphonenumber\PhoneNumberFormat; @endphp
-<div class='flex flex-col gap-1 text-xs w-full'>
-
+<div class='flex flex-col gap-1 text-xs w-full' data-cy="booking-card">
     <div class="font-semibold flex items-center gap-1">
         <div>
             {{ $record->restaurant->restaurant_name }}
