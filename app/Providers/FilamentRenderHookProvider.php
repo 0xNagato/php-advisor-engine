@@ -71,8 +71,9 @@ class FilamentRenderHookProvider extends ServiceProvider
             static fn (): string => '<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />',
         );
 
-        Filament::registerRenderHook(PanelsRenderHook::HEAD_START, static function () {
-            return new HtmlString("
+        if (app()->environment('production')) {
+            Filament::registerRenderHook(PanelsRenderHook::HEAD_START, static function () {
+                return new HtmlString("
                 <!-- Google tag (gtag.js) -->
                 <script async src='https://www.googletagmanager.com/gtag/js?id=G-Z8HQ7BTL4F'></script>
                 <script>
@@ -87,7 +88,8 @@ class FilamentRenderHookProvider extends ServiceProvider
                     crossorigin='anonymous'
                 ></script>
             ");
-        });
+            });
+        }
 
         FilamentView::registerRenderHook(
             'panels::head.start',
