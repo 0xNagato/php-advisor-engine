@@ -16,6 +16,9 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Sentry;
 
+/**
+ * @mixin IdeHelperBooking
+ */
 class Booking extends Model
 {
     use FormatsPhoneNumber;

@@ -6,10 +6,10 @@ use App\Data\RestaurantContactData;
 use App\Events\SpecialRequestCreated;
 use App\Services\SmsService;
 use AshAllenDesign\ShortURL\Exceptions\ShortURLException;
+use AshAllenDesign\ShortURL\Facades\ShortURL;
 use Carbon\Carbon;
 use Carbon\CarbonInterface;
 use Illuminate\Support\Facades\URL;
-use ShortURL;
 use Spatie\LaravelData\DataCollection;
 
 class SendRestaurantSpecialRequestConfirmation

@@ -16,6 +16,8 @@ use Sushi\Sushi;
  * @property string $tax_rate_term
  * @property string $country
  * @property string $timezone
+ *
+ * @mixin IdeHelperRegion
  */
 class Region extends Model
 {

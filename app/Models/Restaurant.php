@@ -16,6 +16,8 @@ use Spatie\LaravelData\DataCollection;
 
 /**
  * Class Restaurant
+ *
+ * @mixin IdeHelperRestaurant
  */
 class Restaurant extends Model
 {

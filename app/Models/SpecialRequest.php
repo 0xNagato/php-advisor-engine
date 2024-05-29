@@ -12,6 +12,8 @@ use Str;
 
 /**
  * @property string $uuid
+ *
+ * @mixin IdeHelperSpecialRequest
  */
 class SpecialRequest extends Model
 {

@@ -39,9 +39,9 @@ class MyPayments extends Page implements HasTable
                     ->badge(),
                 Tables\Columns\TextColumn::make('created_at')
                     ->label('Date')
-                    ->formatStateUsing(fn(string $state): string => Carbon::parse($state)->format('F j, Y')),
+                    ->formatStateUsing(fn (string $state): string => Carbon::parse($state)->format('F j, Y')),
                 Tables\Columns\TextColumn::make('amount')
-                    ->money(fn(PaymentItem $record) => $record->currency, divideBy: 100)
+                    ->money(fn (PaymentItem $record) => $record->currency, divideBy: 100)
                     ->label('Total'),
             ]);
     }

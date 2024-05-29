@@ -5,6 +5,14 @@
     "plugins": ["@prettier/plugin-php", "@shufo/prettier-plugin-blade"],
     "overrides": [
         {
+            "files": ["*.php"],
+            "options": {
+                "phpVersion": "8.3",
+                "trailingCommaPHP": true,
+                "printWidth": 120
+            }
+        },
+        {
             "files": ["*.blade.php"],
             "options": {
                 "parser": "blade",
