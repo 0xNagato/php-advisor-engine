@@ -8,8 +8,12 @@
                 <dd class="mt-1 flex items-baseline justify-between md:block lg:flex">
                     <div class="flex flex-col items-baseline text-xl font-semibold text-indigo-600">
                         {{ $stats->formatted['number_of_bookings'] }}
-                        <div
-                            @class(['flex items-center', 'text-[11px]', 'text-green-600' => $stats->difference['number_of_bookings_up'], 'text-red-600' => !$stats->difference['number_of_bookings_up']])>
+                        <div @class([
+                            'flex items-center',
+                            'text-[11px]',
+                            'text-green-600' => $stats->difference['number_of_bookings_up'],
+                            'text-red-600' => !$stats->difference['number_of_bookings_up'],
+                        ])>
                             <div>{{ $stats->difference['number_of_bookings'] }}</div>
 
                             @if ($stats->difference['number_of_bookings_up'])
@@ -30,8 +34,12 @@
                         <div>
                             {{ $stats->formatted['restaurant_earnings'] }}
                         </div>
-                        <div
-                            @class(['flex items-center', 'text-[11px]', 'text-green-600' => $stats->difference['restaurant_earnings_up'], 'text-red-600' => !$stats->difference['restaurant_earnings_up']])>
+                        <div @class([
+                            'flex items-center',
+                            'text-[11px]',
+                            'text-green-600' => $stats->difference['restaurant_earnings_up'],
+                            'text-red-600' => !$stats->difference['restaurant_earnings_up'],
+                        ])>
                             <div>{{ money($stats->difference['restaurant_earnings'], $currency) }}</div>
 
                             @if ($stats->difference['restaurant_earnings_up'])
@@ -52,8 +60,12 @@
                         <div>
                             {{ $stats->formatted['restaurant_bounty'] }}
                         </div>
-                        <div
-                            @class(['flex items-center', 'text-[11px]', 'text-green-600' => $stats->difference['restaurant_bounty_up'], 'text-red-600' => !$stats->difference['restaurant_bounty_up']])>
+                        <div @class([
+                            'flex items-center',
+                            'text-[11px]',
+                            'text-green-600' => $stats->difference['restaurant_bounty_up'],
+                            'text-red-600' => !$stats->difference['restaurant_bounty_up'],
+                        ])>
                             <div>{{ money($stats->difference['restaurant_bounty'], $currency) }}</div>
 
                             @if ($stats->difference['restaurant_bounty_up'])

@@ -45,7 +45,7 @@
                 <p class="font-medium text-gray-700">
                     <span class="font-semibold">Minimum Spend:</span>
                     <span class="text-black">
-                        {{ money($specialRequest->minimum_spend * 100, $specialRequest->restaurant->inRegion->currency) }}
+                        {{ money($this->minimumSpend * 100, $specialRequest->restaurant->inRegion->currency) }}
                     </span>
                 </p>
             </div>
@@ -53,9 +53,21 @@
                 <p class="font-medium text-gray-700">
                     <span class="font-semibold">Commission Requested:</span>
                     <span class="text-black">
-                        {{ $specialRequest->commission_requested_percentage }}%
+                        {{ $this->commissionRequestedPercentage }}%
                     </span>
                 </p>
+            </div>
+
+            <div>
+                <div class="font-medium text-gray-700">
+                    <span class="font-semibold">Example Total Fee:</span>
+                    <span class="text-black">
+                        {{ money($this->restaurantTotalFee * 100, $specialRequest->restaurant->inRegion->currency) }}
+                    </span>
+                    <div class="text-xs mt-1">
+                        ({{ $this->commissionRequestedPercentage }}% Commission + 7% PRIMA Platform Fee)
+                    </div>
+                </div>
             </div>
 
             <div class="relative">
@@ -63,9 +75,9 @@
                     <div class="w-full border-t border-gray-300"></div>
                 </div>
                 <div class="relative flex justify-center">
-                        <span class="bg-white px-3 text-base font-semibold leading-6 text-gray-900">
-                            Customer Details
-                        </span>
+                    <span class="bg-white px-3 text-base font-semibold leading-6 text-gray-900">
+                        Customer Details
+                    </span>
                 </div>
             </div>
 
@@ -85,7 +97,7 @@
                     </span>
                 </p>
             </div>
-            @if($specialRequest->customer_email)
+            @if ($specialRequest->customer_email)
                 <div>
                     <p class="font-medium text-gray-700">
                         <span class="font-semibold">Email:</span>
@@ -96,7 +108,7 @@
                 </div>
             @endif
 
-            @if($specialRequest->special_request)
+            @if ($specialRequest->special_request)
                 <div>
                     <p class="font-medium text-gray-700">
                         <span class="font-semibold">Special Request:</span>
@@ -107,7 +119,7 @@
                 </div>
             @endif
 
-            @if($showRequestChangesForm)
+            @if ($showRequestChangesForm)
                 <div class="relative">
                     <div class="absolute inset-0 flex items-center" aria-hidden="true">
                         <div class="w-full border-t border-gray-300"></div>
@@ -127,7 +139,7 @@
                 {{ $this->requestChangesForm }}
             @endif
 
-            @if(!$showRequestChangesForm)
+            @if (!$showRequestChangesForm)
                 <div class="relative">
                     <div class="absolute inset-0 flex items-center" aria-hidden="true">
                         <div class="w-full border-t border-gray-300"></div>

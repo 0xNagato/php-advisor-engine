@@ -80,4 +80,12 @@ class SpecialRequest extends Model
     {
         return $this->customer_first_name.' '.$this->customer_last_name;
     }
+
+    public function getRestaurantTotalFeeAttribute(): float
+    {
+        $commissionValue = ($this->commission_requested_percentage / 100) * $this->minimum_spend;
+        $additionalFee = 0.07 * $commissionValue;
+
+        return $commissionValue + $additionalFee;
+    }
 }

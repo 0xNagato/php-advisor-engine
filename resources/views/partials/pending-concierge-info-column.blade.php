@@ -1,5 +1,5 @@
 <dl>
-    {{ $record->first_name.' '.$record->last_name }}
+    {{ $record->first_name . ' ' . $record->last_name }}
     @if (is_null($record->email))
         <dt class="text-xs font-semibold">Phone:</dt>
         <dd>{{ $record->phone }}</dd>

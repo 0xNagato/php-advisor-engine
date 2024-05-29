@@ -9,8 +9,8 @@ use Saloon\Http\Response;
 class SmsService
 {
     public function sendMessage(
-        $contactPhone,
-        $text,
+        string $contactPhone,
+        string $text,
     ): Response {
         $phoneNumber = PhoneNumberParser::make($contactPhone)->parse();
 

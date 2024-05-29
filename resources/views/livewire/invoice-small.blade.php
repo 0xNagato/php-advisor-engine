@@ -1,8 +1,7 @@
 <x-filament-widgets::widget>
     <div class="flex items-center w-full gap-4 p-3 bg-white shadow bg-opacity-90 rounded-xl">
-        @if($booking->schedule->restaurant->logo)
-            <img
-                src="{{ \Illuminate\Support\Facades\Storage::disk('do')->url($booking->schedule->restaurant->restaurant_logo_path) }}"
+        @if ($booking->schedule->restaurant->logo)
+            <img src="{{ \Illuminate\Support\Facades\Storage::disk('do')->url($booking->schedule->restaurant->restaurant_logo_path) }}"
                 alt="{{ $booking->schedule->restaurant->restaurant_name }}"
                 class="object-cover max-h-[48px] max-w-[64px]">
         @else
@@ -26,7 +25,7 @@
                 <div class="flex justify-between gap-x-2">
                     <span>Subtotal:</span> <span>@money($booking->total_fee, $booking->currency)</span>
                 </div>
-                @if($booking->tax > 0)
+                @if ($booking->tax > 0)
                     <div class="flex justify-between gap-x-2">
                         <span>{{ $region->tax_rate_term }}:</span>
                         <span>@money($booking->tax_amount_in_cents, $booking->currency)</span>

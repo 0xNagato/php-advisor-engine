@@ -15,6 +15,7 @@ use Filament\Notifications\Notification;
 use Filament\Pages\Page;
 use Filament\Support\Colors\Color;
 use Filament\Support\RawJs;
+use Livewire\Attributes\Computed;
 
 /**
  * @property Form $approvalForm
@@ -113,6 +114,7 @@ class RestaurantSpecialRequestConfirmation extends Page
                 ->suffix('%')
                 ->default(10)
                 ->maxValue(15)
+                ->live()
                 ->required(),
             TextInput::make('minimum_spend')
                 ->label('Minimum Spend')
@@ -122,6 +124,7 @@ class RestaurantSpecialRequestConfirmation extends Page
                 ->mask(RawJs::make('$money($input)'))
                 ->prefix($this->specialRequest->restaurant->inRegion->currency_symbol)
                 ->stripCharacters(',')
+                ->live()
                 ->required(),
             Textarea::make('restaurant_message')
                 ->hiddenLabel()
@@ -175,5 +178,27 @@ class RestaurantSpecialRequestConfirmation extends Page
             ->title('Special Request Rejected')
             ->success()
             ->send();
+    }
+
+    #[Computed]
+    public function restaurantTotalFee(): float
+    {
+        $commissionValue = ($this->commissionRequestedPercentage() / 100) * $this->minimumSpend();
+        $platformFee = 0.07 * $commissionValue;
+
+        return $commissionValue + $platformFee;
+
+    }
+
+    #[Computed]
+    public function minimumSpend(): int
+    {
+        return (int) str_replace(',', '', $this->requestChangesFormData['minimum_spend']);
+    }
+
+    #[Computed]
+    public function commissionRequestedPercentage(): float
+    {
+        return $this->requestChangesFormData['commission_requested_percentage'];
     }
 }

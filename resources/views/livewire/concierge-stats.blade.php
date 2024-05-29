@@ -19,7 +19,6 @@
                         $400
                     </div>
 
-
                 </dd>
             </div>
 
@@ -30,12 +29,10 @@
                         22
                     </div>
 
-
                 </dd>
             </div>
 
         </dl>
     </div>
-
 
 </x-filament-widgets::widget>

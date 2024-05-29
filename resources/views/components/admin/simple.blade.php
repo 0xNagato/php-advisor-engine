@@ -20,7 +20,7 @@
         {{ $slot }}
     </div>
 
-    @if (! $this instanceof HasTable)
+    @if (!$this instanceof HasTable)
         <x-filament-actions::modals />
     @endif
 

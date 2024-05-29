@@ -15,7 +15,7 @@
                 <h2 class="text-center text-2xl font-semibold">Something Went Wrong!</h2>
 
                 <div class="space-y-4 text-base">
-                    <img src="/images/chef.png" alt="Chef" class="w-1/3 float-end ml-4"/>
+                    <img src="/images/chef.png" alt="Chef" class="w-1/3 float-end ml-4" />
                     <p class="text-left text-gray-600">
                         Oops! It looks like something broke. We're actively working to make PRIMA the best platform
                         for you.
@@ -31,15 +31,15 @@
                 </div>
 
                 <form class="space-y-2" method="post" action="{{ route('exception.form') }}">
-                    <input type="hidden" name="_token" value="{{ csrf_token() }}"/>
-                    <input type="hidden" name="exceptionMessage" value="{{ $exception->getMessage() }}"/>
-                    <input type="hidden" name="exceptionTrace" value="{{ $exception->getTraceAsString() }}"/>
+                    <input type="hidden" name="_token" value="{{ csrf_token() }}" />
+                    <input type="hidden" name="exceptionMessage" value="{{ $exception->getMessage() }}" />
+                    <input type="hidden" name="exceptionTrace" value="{{ $exception->getTraceAsString() }}" />
 
                     <textarea required name="message" class="w-full h-32 p-2 border border-gray-300 rounded-lg"
-                              placeholder="What happened? (Optional)"></textarea>
+                        placeholder="What happened? (Optional)"></textarea>
 
                     <button type="submit"
-                            class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold p-2 rounded-lg">
+                        class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold p-2 rounded-lg">
                         Send Report and Return to Dashboard
                     </button>
                 </form>

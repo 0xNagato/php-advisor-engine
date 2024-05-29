@@ -10,7 +10,7 @@
         &copy; {{ date('Y') }} {{ config('app.name', 'PRIMA VIP') }}. All rights reserved.
     </div>
 
-    @if (! $this instanceof HasTable)
+    @if (!$this instanceof HasTable)
         <x-filament-actions::modals />
     @endif
 </div>

@@ -16,7 +16,7 @@
 
             {{ $this->form }}
 
-            @if($this->data['non_prime_type'] === 'paid')
+            @if ($this->data['non_prime_type'] === 'paid')
                 <p>
                     PRIMA will bill your account the incentive amount plus 7%.
                 </p>

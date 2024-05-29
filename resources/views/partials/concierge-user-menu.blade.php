@@ -1,3 +1,3 @@
 @hasrole('concierge')
-<livewire:concierge-user-menu/>
+    <livewire:concierge-user-menu />
 @endhasrole

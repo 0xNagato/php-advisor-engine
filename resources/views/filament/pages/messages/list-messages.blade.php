@@ -18,14 +18,13 @@
                 So that you may fully experience the potential of PRIMA, we have created a demo concierge account
                 for you to explore.
             </p>
-            @unless(Request::getHost() === 'demo.primavip.co')
+            @unless (Request::getHost() === 'demo.primavip.co')
                 <p>
                     Please click the link below and you will be taken to our demo site where you can
                     try out the Reservation Hub as well as other features of PRIMA.
                 </p>
                 <x-filament::button tag="a"
-                                    href="https://demo.primavip.co/login?email=concierge@primavip.co&password=demo2024"
-                                    target="_blank">
+                    href="https://demo.primavip.co/login?email=concierge@primavip.co&password=demo2024" target="_blank">
                     Access Demo Account
                 </x-filament::button>
             @endunless
@@ -36,34 +35,30 @@
             </div>
         </div>
     </x-filament::section>
-    @if($messages->isNotEmpty())
+    @if ($messages->isNotEmpty())
         <div class="flex flex-col gap-0 divide-y bg-white shadow-lg rounded-lg -mt-4">
 
             @foreach ($this->messages as $message)
-
                 <div class="p-4">
                     <a href="{{ route('filament.admin.resources.messages.view', ['record' => $message->id]) }}">
                         <div class="flex flex-row items-center">
                             <div class="w-2/12 sm:w-1/12 mr-2">
-                                <x-filament::avatar
-                                    src="{{ $message->announcement->sender->getFilamentAvatarUrl() }}"
-                                    alt="User Avatar"
-                                    size="w-12 h-12"
-                                />
+                                <x-filament::avatar src="{{ $message->announcement->sender->getFilamentAvatarUrl() }}"
+                                    alt="User Avatar" size="w-12 h-12" />
                             </div>
 
                             <div class="w-10/12">
                                 <div class="flex flex-row items-center">
-                        <span class="font-semibold mr-1">
-                            {{ $message->announcement->sender->name }}
-                        </span>
+                                    <span class="font-semibold mr-1">
+                                        {{ $message->announcement->sender->name }}
+                                    </span>
                                     @if (is_null($message->read_at))
                                         <x-heroicon-s-information-circle
-                                            class="h-4 w-4 -mt-0.5 text-xs text-green-600"/>
+                                            class="h-4 w-4 -mt-0.5 text-xs text-green-600" />
                                     @endif
                                     <span class="grow self-start text-xs text-right">
-                            {{ $message->created_at->format('M j h:i A') }}
-                        </span>
+                                        {{ $message->created_at->format('M j h:i A') }}
+                                    </span>
                                 </div>
                                 <p class="text-xs truncate">
                                     {{ $message->announcement->message }}
