@@ -37,6 +37,7 @@ class Payment extends Model
             'status' => PaymentStatus::PAID,
         ]);
     }
+
     protected function casts(): array
     {
         return [

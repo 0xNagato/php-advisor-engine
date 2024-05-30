@@ -26,6 +26,7 @@ class ScheduleTemplate extends Model
     {
         return $this->belongsTo(Restaurant::class);
     }
+
     protected function casts(): array
     {
         return [

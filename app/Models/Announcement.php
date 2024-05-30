@@ -40,6 +40,7 @@ class Announcement extends Model
     {
         return $this->hasMany(Message::class);
     }
+
     /**
      * The attributes that should be cast.
      *

@@ -64,12 +64,12 @@ class ConciergeReferralBookingsTable extends BaseWidget
             ->columns([
                 IconColumn::make('type')
                     ->label('Level')
-                    ->color(fn(string $state) => match ($state) {
+                    ->color(fn (string $state) => match ($state) {
                         'concierge_referral_1' => 'gold',
                         'concierge_referral_2' => 'silver',
                         default => null,
                     })
-                    ->icon(fn(string $state) => match ($state) {
+                    ->icon(fn (string $state) => match ($state) {
                         'concierge_referral_1' => 'tabler-square-rounded-number-1-filled',
                         'concierge_referral_2' => 'tabler-square-rounded-number-2-filled',
                         default => null,

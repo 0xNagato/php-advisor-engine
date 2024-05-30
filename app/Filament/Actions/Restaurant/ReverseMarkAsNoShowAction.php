@@ -14,7 +14,7 @@ class ReverseMarkAsNoShowAction extends Action
     {
         $this->requiresConfirmation()
             ->modalHeading('Reverse Mark as No-Show')
-            ->modalDescription(fn() => new HtmlString(<<<'HTML'
+            ->modalDescription(fn () => new HtmlString(<<<'HTML'
                                 <div class="space-y-4 text-left">
                                     <p>Made a mistake?  If the customer attended the reservation, you can un-mark it as a NO SHOW.  The concierge which booked this reservation will be compensated per your non-prime concierge incentive plan.</p>
                                     <p class="text-center font-semibold">Are you sure this is correct?</p>

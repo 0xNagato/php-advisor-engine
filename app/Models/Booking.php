@@ -419,6 +419,7 @@ class Booking extends Model
             'status' => BookingStatus::NO_SHOW,
         ]);
     }
+
     protected function casts(): array
     {
         return [

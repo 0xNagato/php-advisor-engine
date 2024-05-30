@@ -22,6 +22,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property string $booking_at
  * @property string $start_time
  * @property string $end_time
+ *
  * @mixin IdeHelperScheduleWithBooking
  */
 class ScheduleWithBooking extends Model
@@ -81,6 +82,7 @@ class ScheduleWithBooking extends Model
     {
         return $this->is_bookable && $this->remaining_tables <= 5;
     }
+
     protected function casts(): array
     {
         return [

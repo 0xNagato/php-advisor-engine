@@ -46,7 +46,7 @@ class ReferralsTable extends BaseWidget
             ->columns([
                 TextColumn::make('label')
                     ->label('Referral')
-                    ->formatStateUsing(fn(Referral $record) => view('partials.concierge-referral-info-column', ['record' => $record])),
+                    ->formatStateUsing(fn (Referral $record) => view('partials.concierge-referral-info-column', ['record' => $record])),
                 IconColumn::make('has_secured')
                     ->label('Active')
                     ->alignCenter()

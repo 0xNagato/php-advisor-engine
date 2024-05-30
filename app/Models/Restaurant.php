@@ -194,6 +194,7 @@ class Restaurant extends Model
             'latest_end_time' => $latestEndTime,
         ];
     }
+
     protected function casts(): array
     {
         return [

@@ -60,7 +60,7 @@ class RestaurantRecentBookings extends BaseWidget
             ->columns([
                 TextColumn::make('guest_name')
                     ->label('Guest')
-                    ->formatStateUsing(fn(Booking $booking) => "$booking->guest_name ($booking->guest_count)")
+                    ->formatStateUsing(fn (Booking $booking) => "$booking->guest_name ($booking->guest_count)")
                     ->searchable(),
                 TextColumn::make('booking_at')
                     ->label('Date')

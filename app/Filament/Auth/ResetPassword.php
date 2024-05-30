@@ -111,7 +111,7 @@ class ResetPassword extends \Filament\Pages\Auth\PasswordReset\ResetPassword
         return Placeholder::make('termsAndConditions')
             ->content($label)
             ->hiddenLabel()
-            ->hidden(fn() => ! (empty($this->user->secured_at) && in_array($lowercaseRole, ['concierge', 'restaurant'])));
+            ->hidden(fn () => ! (empty($this->user->secured_at) && in_array($lowercaseRole, ['concierge', 'restaurant'])));
     }
 
     public function resetPassword(): ?PasswordResetResponse

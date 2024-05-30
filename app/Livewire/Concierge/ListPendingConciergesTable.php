@@ -25,7 +25,7 @@ class ListPendingConciergesTable extends BaseWidget
             ->columns([
                 TextColumn::make('id')
                     ->label('User')
-                    ->formatStateUsing(fn(Referral $record) => view('partials.pending-concierge-info-column', ['record' => $record])),
+                    ->formatStateUsing(fn (Referral $record) => view('partials.pending-concierge-info-column', ['record' => $record])),
                 TextColumn::make('created_at')
                     ->label('Invited')
                     ->dateTime('D, M j, Y g:ia', auth()->user()->timezone),

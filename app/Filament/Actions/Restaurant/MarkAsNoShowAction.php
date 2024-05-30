@@ -14,7 +14,7 @@ class MarkAsNoShowAction extends Action
     {
         $this->requiresConfirmation()
             ->modalHeading('Mark as No-Show')
-            ->modalDescription(fn() => new HtmlString(<<<'HTML'
+            ->modalDescription(fn () => new HtmlString(<<<'HTML'
                                 <div class="space-y-4 text-left">
                                     <p>By marking this reservation as a no-show, the concierge responsible for booking this reservation will have their booking bounty reversed and deducted from their account.</p>
                                     <p class="text-center font-semibold">Are you sure this is correct?</p>

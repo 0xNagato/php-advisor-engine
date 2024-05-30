@@ -26,7 +26,7 @@ class AppServiceProvider extends ServiceProvider
             URL::forceScheme('https');
         }
 
-        LogViewer::auth(static fn($request) => $request->user()
+        LogViewer::auth(static fn ($request) => $request->user()
             && $request->user()->hasRole('super_admin'));
 
         FilamentColor::register([

@@ -47,7 +47,7 @@ class EarningExporter extends Exporter
             ExportColumn::make('user.payout.routing_number')
                 ->label('Routing Number'),
             ExportColumn::make('amount')
-                ->state(fn(PaymentItem $item) => money($item->amount, $item->currency)),
+                ->state(fn (PaymentItem $item) => money($item->amount, $item->currency)),
         ];
     }
 

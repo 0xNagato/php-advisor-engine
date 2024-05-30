@@ -72,7 +72,7 @@ class FilamentRenderHookProvider extends ServiceProvider
         );
 
         if (app()->environment('production')) {
-            Filament::registerRenderHook(PanelsRenderHook::HEAD_START, static fn() => new HtmlString("
+            Filament::registerRenderHook(PanelsRenderHook::HEAD_START, static fn () => new HtmlString("
                 <!-- Google tag (gtag.js) -->
                 <script async src='https://www.googletagmanager.com/gtag/js?id=G-Z8HQ7BTL4F'></script>
                 <script>

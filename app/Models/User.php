@@ -262,6 +262,7 @@ class User extends Authenticatable implements FilamentUser, HasAvatar
     {
         return md5(request()->userAgent().request()->ip().$this->id);
     }
+
     /**
      * The attributes that should be cast.
      *
