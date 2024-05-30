@@ -14,6 +14,12 @@ class RestaurantContactData extends Data
         public bool $use_for_reservations,
         public ?NotificationPreferencesData $preferences = null,
     ) {
+        $this->preferences = NotificationPreferencesData::from([
+            'mail' => false,
+            'sms' => true,
+            'whatsapp' => false,
+            'database' => false,
+        ]);
     }
 
     public function toNotifiable(): AnonymousNotifiable
