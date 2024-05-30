@@ -2,12 +2,10 @@
 
 namespace App\Filament\Pages\Concierge;
 
-use App\Enums\SpecialRequestStatus;
-use App\Events\SpecialRequestCreated;
+use App\Actions\SpecialRequest\CreateSpecialRequest;
 use App\Models\Region;
 use App\Models\Restaurant;
 use App\Models\ScheduleTemplate;
-use App\Models\SpecialRequest;
 use App\Models\User;
 use App\Traits\ManagesBookingForms;
 use Carbon\Carbon;
@@ -184,25 +182,23 @@ class SpecialRequests extends Page
 
             return;
         }
+        $specialRequestData = new \App\Data\SpecialRequest\CreateSpecialRequestData(
+            schedule_template_id: $scheduleTemplate->id,
+            restaurant_id: $data['restaurant'],
+            concierge_id: auth()->id(),
+            booking_date: $data['date'],
+            booking_time: $data['reservation_time'],
+            party_size: $data['guest_count'],
+            commission_requested_percentage: $data['commission_requested_percentage'],
+            minimum_spend: $data['minimum_spend'],
+            special_request: $data['special_request'],
+            customer_first_name: $data['customer_first_name'],
+            customer_last_name: $data['customer_last_name'],
+            customer_phone: $data['customer_phone'],
+            customer_email: $data['customer_email'],
+        );
 
-        $specialRequest = SpecialRequest::query()->create([
-            'schedule_template_id' => $scheduleTemplate->id,
-            'restaurant_id' => $data['restaurant'],
-            'concierge_id' => auth()->id(),
-            'booking_date' => $data['date'],
-            'booking_time' => $data['reservation_time'],
-            'party_size' => $data['guest_count'],
-            'commission_requested_percentage' => $data['commission_requested_percentage'],
-            'minimum_spend' => $data['minimum_spend'],
-            'special_request' => $data['special_request'],
-            'customer_first_name' => $data['customer_first_name'],
-            'customer_last_name' => $data['customer_last_name'],
-            'customer_phone' => $data['customer_phone'],
-            'customer_email' => $data['customer_email'],
-            'status' => SpecialRequestStatus::PENDING,
-        ]);
-
-        SpecialRequestCreated::dispatch($specialRequest);
+        CreateSpecialRequest::run($specialRequestData);
 
         Notification::make()
             ->title('Special Request Submitted to the Restaurant')

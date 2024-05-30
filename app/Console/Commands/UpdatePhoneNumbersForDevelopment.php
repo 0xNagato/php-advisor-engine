@@ -7,6 +7,7 @@ use App\Models\Restaurant;
 use App\Models\User;
 use App\Traits\FormatsPhoneNumber;
 use Illuminate\Console\Command;
+use Spatie\LaravelData\DataCollection;
 
 class UpdatePhoneNumbersForDevelopment extends Command
 {
@@ -34,7 +35,7 @@ class UpdatePhoneNumbersForDevelopment extends Command
         if (env('APP_ENV') !== 'local') {
             $this->info('This command can only be run in the local environment.');
 
-            return Command::FAILURE;
+            return \Symfony\Component\Console\Command\Command::FAILURE;
         }
 
         $phone = $this->getInternationalFormattedPhoneNumber($this->argument('phone'));
@@ -44,7 +45,7 @@ class UpdatePhoneNumbersForDevelopment extends Command
 
         $restaurants = Restaurant::all();
         foreach ($restaurants as $restaurant) {
-            /** @var \Spatie\LaravelData\DataCollection<\App\Data\RestaurantContactData> */
+            /** @var DataCollection<RestaurantContactData> */
             $contacts = $restaurant->contacts;
 
             $contacts->each(function (RestaurantContactData $contact) use ($phone) {
@@ -56,6 +57,6 @@ class UpdatePhoneNumbersForDevelopment extends Command
 
         $this->components->info('Phone numbers updated successfully.');
 
-        return Command::SUCCESS;
+        return \Symfony\Component\Console\Command\Command::SUCCESS;
     }
 }

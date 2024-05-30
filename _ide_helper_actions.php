@@ -16,6 +16,22 @@ namespace App\Actions\Booking;
 class CreateBooking
 {
 }
+namespace App\Actions\SpecialRequest;
+
+/**
+ * @method static \Lorisleiva\Actions\Decorators\JobDecorator|\Lorisleiva\Actions\Decorators\UniqueJobDecorator makeJob(\App\Data\SpecialRequest\CreateSpecialRequestData $data)
+ * @method static \Lorisleiva\Actions\Decorators\UniqueJobDecorator makeUniqueJob(\App\Data\SpecialRequest\CreateSpecialRequestData $data)
+ * @method static \Illuminate\Foundation\Bus\PendingDispatch dispatch(\App\Data\SpecialRequest\CreateSpecialRequestData $data)
+ * @method static \Illuminate\Foundation\Bus\PendingDispatch|\Illuminate\Support\Fluent dispatchIf(bool $boolean, \App\Data\SpecialRequest\CreateSpecialRequestData $data)
+ * @method static \Illuminate\Foundation\Bus\PendingDispatch|\Illuminate\Support\Fluent dispatchUnless(bool $boolean, \App\Data\SpecialRequest\CreateSpecialRequestData $data)
+ * @method static dispatchSync(\App\Data\SpecialRequest\CreateSpecialRequestData $data)
+ * @method static dispatchNow(\App\Data\SpecialRequest\CreateSpecialRequestData $data)
+ * @method static dispatchAfterResponse(\App\Data\SpecialRequest\CreateSpecialRequestData $data)
+ * @method static \App\Models\SpecialRequest run(\App\Data\SpecialRequest\CreateSpecialRequestData $data)
+ */
+class CreateSpecialRequest
+{
+}
 namespace Lorisleiva\Actions\Concerns;
 
 /**
