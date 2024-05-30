@@ -199,7 +199,7 @@ class SpecialRequests extends Page
             'customer_last_name' => $data['customer_last_name'],
             'customer_phone' => $data['customer_phone'],
             'customer_email' => $data['customer_email'],
-            'status' => SpecialRequestStatus::Pending,
+            'status' => SpecialRequestStatus::PENDING,
         ]);
 
         SpecialRequestCreated::dispatch($specialRequest);

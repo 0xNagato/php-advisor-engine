@@ -122,7 +122,7 @@
                 </div>
             @endif
 
-            @if ($specialRequest->status === SpecialRequestStatus::Pending)
+            @if ($specialRequest->status === SpecialRequestStatus::PENDING)
                 @if ($showRequestChangesForm)
                     <div class="relative">
                         <div class="absolute inset-0 flex items-center" aria-hidden="true">

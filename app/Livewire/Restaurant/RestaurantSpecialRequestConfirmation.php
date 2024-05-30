@@ -83,14 +83,18 @@ class RestaurantSpecialRequestConfirmation extends Page
                             Action::make('confirmRequest')
                                 ->label('Accept Request')
                                 ->color('success')
-                                ->requiresConfirmation('Are you sure you want to accept this request?')
+                                ->requiresConfirmation()
+                                ->modalHeading('Are you sure you want to accept this request?')
+                                ->modalDescription(null)
                                 ->button()
                                 ->action(fn () => $this->handleConfirmRequest()),
                         ])->fullWidth(),
                         Actions::make([
                             Action::make('denyRequest')
                                 ->label('Deny Request')
-                                ->requiresConfirmation('Are you sure you want to deny this request?')
+                                ->requiresConfirmation()
+                                ->modalHeading('Are you sure you want to deny this request?')
+                                ->modalDescription(null)
                                 ->color(Color::Gray)
                                 ->button()
                                 ->action(fn () => $this->handleDenyRequest()),
@@ -132,7 +136,9 @@ class RestaurantSpecialRequestConfirmation extends Page
                 Actions::make([
                     Action::make('requestChanges')
                         ->label('Submit Changes')
-                        ->requiresConfirmation('Are you sure you want to request changes?')
+                        ->requiresConfirmation()
+                        ->modalHeading('Are you sure you want to submit these changes?')
+                        ->modalDescription(null)
                         ->action(fn () => $this->handleRequestChange())
                         ->button(),
                     Action::make('cancel')
@@ -157,7 +163,7 @@ class RestaurantSpecialRequestConfirmation extends Page
         $data = $this->approvalForm->getState();
 
         $this->specialRequest->update([
-            'status' => SpecialRequestStatus::Accepted,
+            'status' => SpecialRequestStatus::ACCEPTED,
             'restaurant_message' => $data['restaurant_message'],
         ]);
 
@@ -174,7 +180,7 @@ class RestaurantSpecialRequestConfirmation extends Page
         $data = $this->approvalForm->getState();
 
         $this->specialRequest->update([
-            'status' => SpecialRequestStatus::Rejected,
+            'status' => SpecialRequestStatus::REJECTED,
             'restaurant_message' => $data['restaurant_message'],
         ]);
 
@@ -200,7 +206,7 @@ class RestaurantSpecialRequestConfirmation extends Page
         );
 
         $this->specialRequest->update([
-            'status' => SpecialRequestStatus::AwaitingReply,
+            'status' => SpecialRequestStatus::AWAITING_REPLY,
             'conversations' => $conversions,
         ]);
 
@@ -215,8 +221,9 @@ class RestaurantSpecialRequestConfirmation extends Page
     public function resetStatus(): void
     {
         $this->specialRequest->update([
-            'status' => SpecialRequestStatus::Pending,
+            'status' => SpecialRequestStatus::PENDING,
             'restaurant_message' => null,
+            'conversations' => [],
         ]);
     }
 
@@ -245,9 +252,9 @@ class RestaurantSpecialRequestConfirmation extends Page
     public function confirmationMessage(): string
     {
         return match ($this->specialRequest->status) {
-            SpecialRequestStatus::AwaitingReply => 'Your requested changes are being sent to the concierge now. Once the concierge responds, we will notify you!',
-            SpecialRequestStatus::Accepted => 'Thank you for accepting the special request! The client and concierge are being notified now.',
-            SpecialRequestStatus::Rejected => 'The special request has been denied. We will notify the client and concierge and they may resubmit another offer. Thank you!',
+            SpecialRequestStatus::AWAITING_REPLY => 'Your requested changes are being sent to the concierge now. Once the concierge responds, we will notify you!',
+            SpecialRequestStatus::ACCEPTED => 'Thank you for accepting the special request! The client and concierge are being notified now.',
+            SpecialRequestStatus::REJECTED => 'The special request has been denied. We will notify the client and concierge and they may resubmit another offer. Thank you!',
         };
     }
 }

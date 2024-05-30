@@ -4,11 +4,11 @@ namespace App\Enums;
 
 enum SpecialRequestStatus: string
 {
-    case Pending = 'pending';
-    case Accepted = 'accepted';
-    case AwaitingSpend = 'awaiting_spend';
-    case AwaitingReply = 'awaiting_reply';
-    case Rejected = 'rejected';
-    case Completed = 'completed';
-    case Cancelled = 'cancelled';
+    case PENDING = 'pending';
+    case ACCEPTED = 'accepted';
+    case AWAITING_SPEND = 'awaiting_spend';
+    case AWAITING_REPLY = 'awaiting_reply';
+    case REJECTED = 'rejected';
+    case COMPLETED = 'completed';
+    case CANCELLED = 'cancelled';
 }

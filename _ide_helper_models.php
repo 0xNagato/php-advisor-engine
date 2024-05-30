@@ -97,11 +97,11 @@ namespace App\Models{
  * @property-read \App\Models\Concierge $concierge
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Earning> $earnings
  * @property-read int|null $earnings_count
- * @property-read string $guest_name
- * @property-read string $local_formatted_guest_phone
- * @property-read bool $prime_time
+ * @property-read mixed $guest_name
+ * @property-read mixed $local_formatted_guest_phone
  * @property-read \App\Models\Partner|null $partnerConcierge
  * @property-read \App\Models\Partner|null $partnerRestaurant
+ * @property-read mixed $prime_time
  * @property-read \App\Models\Restaurant|null $restaurant
  * @property-read \App\Models\ScheduleWithBooking|null $schedule
  * @method static \Illuminate\Database\Eloquent\Builder|Booking confirmed()
@@ -169,12 +169,12 @@ namespace App\Models{
  * @property-read int|null $bookings_count
  * @property-read \Illuminate\Database\Eloquent\Collection<int, Concierge> $concierges
  * @property-read int|null $concierges_count
- * @property-read int $payout_percentage
- * @property-read int $sales
- * @property-read int $sales_this_month
+ * @property-read mixed $payout_percentage
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Referral> $referrals
  * @property-read int|null $referrals_count
  * @property-read Concierge|null $referringConcierge
+ * @property-read mixed $sales
+ * @property-read mixed $sales_this_month
  * @property-read \App\Models\User $user
  * @method static \Database\Factories\ConciergeFactory factory($count = null, $state = [])
  * @method static \Illuminate\Database\Eloquent\Builder|Concierge newModelQuery()
@@ -464,10 +464,10 @@ namespace App\Models{
  * @property string|null $first_name
  * @property string|null $last_name
  * @property string|null $notified_at
- * @property-read bool $has_secured
- * @property-read string $label
- * @property-read string $local_formatted_phone
- * @property-read string $name
+ * @property-read mixed $has_secured
+ * @property-read mixed $label
+ * @property-read mixed $local_formatted_phone
+ * @property-read mixed $name
  * @property-read \Illuminate\Notifications\DatabaseNotificationCollection<int, \Illuminate\Notifications\DatabaseNotification> $notifications
  * @property-read int|null $notifications_count
  * @property-read \App\Models\User $referrer
@@ -553,8 +553,8 @@ namespace App\Models{
  * @property int|null $minimum_spend
  * @property string $region
  * @property string|null $restaurant_logo_path
- * @property-read string|null $logo
  * @property-read \App\Models\Region|null $inRegion
+ * @property-read mixed $logo
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\ScheduleTemplate> $scheduleTemplates
  * @property-read int|null $schedule_templates_count
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\ScheduleWithBooking> $schedules
@@ -693,9 +693,9 @@ namespace App\Models{
  * @property int $prime_time_fee
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Booking> $bookings
  * @property-read int|null $bookings_count
- * @property-read string $formatted_end_time
- * @property-read string $formatted_start_time
- * @property-read bool $has_low_inventory
+ * @property-read mixed $formatted_end_time
+ * @property-read mixed $formatted_start_time
+ * @property-read mixed $has_low_inventory
  * @property-read \App\Models\Restaurant|null $restaurant
  * @method static \Illuminate\Database\Eloquent\Builder|ScheduleWithBooking newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder|ScheduleWithBooking newQuery()
@@ -803,9 +803,9 @@ namespace App\Models{
  * @property \ArrayObject|null $meta
  * @property-read \App\Models\Booking|null $booking
  * @property-read \App\Models\Concierge $concierge
- * @property-read string $customer_name
- * @property-read float $restaurant_total_fee
+ * @property-read mixed $customer_name
  * @property-read \App\Models\Restaurant $restaurant
+ * @property-read mixed $restaurant_total_fee
  * @property-read \App\Models\ScheduleTemplate|null $scheduleTemplate
  * @method static \Database\Factories\SpecialRequestFactory factory($count = null, $state = [])
  * @method static \Illuminate\Database\Eloquent\Builder|SpecialRequest newModelQuery()
@@ -877,22 +877,21 @@ namespace App\Models{
  * @property string|null $region
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \Rappasoft\LaravelAuthenticationLog\Models\AuthenticationLog> $authentications
  * @property-read int|null $authentications_count
+ * @property-read mixed $avatar
  * @property-read \App\Models\Concierge|null $concierge
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Device> $devices
  * @property-read int|null $devices_count
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Earning> $earnings
  * @property-read int|null $earnings_count
- * @property-read string|null $avatar
- * @property-read bool $has_secured
- * @property-read string $international_formatted_phone_number
- * @property-read string $label
- * @property-read string $local_formatted_phone
- * @property-read string $main_role
- * @property-read string $name
- * @property-read int $unread_message_count
+ * @property-read mixed $has_secured
+ * @property-read mixed $international_formatted_phone_number
+ * @property-read mixed $label
  * @property-read \Rappasoft\LaravelAuthenticationLog\Models\AuthenticationLog|null $latestAuthentication
+ * @property-read mixed $local_formatted_phone
+ * @property-read mixed $main_role
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Message> $messages
  * @property-read int|null $messages_count
+ * @property-read mixed $name
  * @property-read \Illuminate\Notifications\DatabaseNotificationCollection<int, \Illuminate\Notifications\DatabaseNotification> $notifications
  * @property-read int|null $notifications_count
  * @property-read \App\Models\Partner|null $partner
@@ -907,6 +906,7 @@ namespace App\Models{
  * @property-read int|null $roles_count
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Announcement> $sentAnnouncements
  * @property-read int|null $sent_announcements_count
+ * @property-read mixed $unread_message_count
  * @property-read \App\Models\UserCode|null $userCode
  * @method static \Database\Factories\UserFactory factory($count = null, $state = [])
  * @method static \Illuminate\Database\Eloquent\Builder|User newModelQuery()
