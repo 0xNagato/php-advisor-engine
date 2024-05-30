@@ -1,5 +1,16 @@
 <?php
 
+use Illuminate\Auth\Events\Failed;
+use Illuminate\Auth\Events\Login;
+use Illuminate\Auth\Events\Logout;
+use Illuminate\Auth\Events\OtherDeviceLogout;
+use Rappasoft\LaravelAuthenticationLog\Listeners\FailedLoginListener;
+use Rappasoft\LaravelAuthenticationLog\Listeners\LoginListener;
+use Rappasoft\LaravelAuthenticationLog\Listeners\LogoutListener;
+use Rappasoft\LaravelAuthenticationLog\Listeners\OtherDeviceLogoutListener;
+use Rappasoft\LaravelAuthenticationLog\Notifications\FailedLogin;
+use Rappasoft\LaravelAuthenticationLog\Notifications\NewDevice;
+
 return [
     // The database table name
     // You can change this if the database keys get too long for your driver
@@ -10,17 +21,17 @@ return [
 
     // The events the package listens for to log
     'events' => [
-        'login' => \Illuminate\Auth\Events\Login::class,
-        'failed' => \Illuminate\Auth\Events\Failed::class,
-        'logout' => \Illuminate\Auth\Events\Logout::class,
-        'logout-other-devices' => \Illuminate\Auth\Events\OtherDeviceLogout::class,
+        'login' => Login::class,
+        'failed' => Failed::class,
+        'logout' => Logout::class,
+        'logout-other-devices' => OtherDeviceLogout::class,
     ],
 
     'listeners' => [
-        'login' => \Rappasoft\LaravelAuthenticationLog\Listeners\LoginListener::class,
-        'failed' => \Rappasoft\LaravelAuthenticationLog\Listeners\FailedLoginListener::class,
-        'logout' => \Rappasoft\LaravelAuthenticationLog\Listeners\LogoutListener::class,
-        'logout-other-devices' => \Rappasoft\LaravelAuthenticationLog\Listeners\OtherDeviceLogoutListener::class,
+        'login' => LoginListener::class,
+        'failed' => FailedLoginListener::class,
+        'logout' => LogoutListener::class,
+        'logout-other-devices' => OtherDeviceLogoutListener::class,
     ],
 
     'notifications' => [
@@ -32,7 +43,7 @@ return [
             'location' => true,
 
             // The Notification class to send
-            'template' => \Rappasoft\LaravelAuthenticationLog\Notifications\NewDevice::class,
+            'template' => NewDevice::class,
         ],
         'failed-login' => [
             // Send the FailedLogin notification
@@ -42,7 +53,7 @@ return [
             'location' => true,
 
             // The Notification class to send
-            'template' => \Rappasoft\LaravelAuthenticationLog\Notifications\FailedLogin::class,
+            'template' => FailedLogin::class,
         ],
     ],
 

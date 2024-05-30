@@ -6,7 +6,7 @@ use App\Filament\Resources\PartnerResource;
 use App\Livewire\Partner\PartnerLeaderboard;
 use App\Livewire\Partner\PartnerRecentBookings;
 use App\Livewire\Partner\PartnerStats;
-use Filament\Actions;
+use Filament\Actions\EditAction;
 use Filament\Resources\Pages\ViewRecord;
 use Illuminate\Contracts\Support\Htmlable;
 use STS\FilamentImpersonate\Pages\Actions\Impersonate;
@@ -44,7 +44,7 @@ class ViewPartner extends ViewRecord
             Impersonate::make()
                 ->iconButton()
                 ->record($this->getRecord()->user),
-            Actions\EditAction::make()
+            EditAction::make()
                 ->icon('heroicon-m-pencil-square')
                 ->iconButton(),
         ];

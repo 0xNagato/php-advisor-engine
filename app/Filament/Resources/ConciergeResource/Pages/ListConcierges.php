@@ -3,7 +3,7 @@
 namespace App\Filament\Resources\ConciergeResource\Pages;
 
 use App\Filament\Resources\ConciergeResource;
-use Filament\Actions;
+use Filament\Actions\CreateAction;
 use Filament\Resources\Pages\ListRecords;
 
 class ListConcierges extends ListRecords
@@ -15,7 +15,7 @@ class ListConcierges extends ListRecords
     protected function getHeaderActions(): array
     {
         return [
-            Actions\CreateAction::make()->iconButton()->icon('heroicon-s-plus-circle'),
+            CreateAction::make()->iconButton()->icon('heroicon-s-plus-circle'),
         ];
     }
 }

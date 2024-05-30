@@ -9,10 +9,12 @@ use App\Livewire\Partner\PartnerLeaderboard;
 use App\Livewire\Restaurant\RestaurantLeaderboard;
 use Filament\Forms\Components\DatePicker;
 use Filament\Pages\Dashboard;
+use Filament\Pages\Dashboard\Actions\FilterAction;
+use Filament\Pages\Dashboard\Concerns\HasFiltersAction;
 
 class AdminDashboard extends Dashboard
 {
-    use Dashboard\Concerns\HasFiltersAction;
+    use HasFiltersAction;
 
     protected static ?string $title = 'Dashboard';
 
@@ -55,7 +57,7 @@ class AdminDashboard extends Dashboard
     protected function getHeaderActions(): array
     {
         return [
-            Dashboard\Actions\FilterAction::make()
+            FilterAction::make()
                 ->label('Date Range')
                 ->iconButton()
                 ->icon('heroicon-o-calendar')

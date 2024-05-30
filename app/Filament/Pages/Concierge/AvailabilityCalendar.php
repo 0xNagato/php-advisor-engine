@@ -84,7 +84,7 @@ class AvailabilityCalendar extends Page
 
     public function updatedData($data, $key): void
     {
-        if ($key === 'guest_count' && empty($data)) {
+        if ($key === 'guest_count' && blank($data)) {
             $this->data['guest_count'] = 2;
         }
 

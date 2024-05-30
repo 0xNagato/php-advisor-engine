@@ -9,6 +9,7 @@ use App\Models\User;
 use Filament\Forms\Components\Actions;
 use Filament\Forms\Components\Actions\Action;
 use Filament\Forms\Components\Tabs;
+use Filament\Forms\Components\Tabs\Tab;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Form;
 use Filament\Forms\Get;
@@ -57,7 +58,7 @@ class ConciergeReferral extends Page
                 Tabs::make('tabs')
                     ->extraAttributes(['class' => 'single-col-tabs'])
                     ->tabs([
-                        Tabs\Tab::make('Send SMS')
+                        Tab::make('Send SMS')
                             ->icon('gmdi-phone-android-o')
                             ->schema([
                                 TextInput::make('first_name')
@@ -90,7 +91,7 @@ class ConciergeReferral extends Page
                                 Actions::make([
                                     Action::make('sendText')
                                         ->label('Send SMS')
-                                        ->disabled(fn (Get $get) => empty($get('phone')) || $get('first_name') === '' || $get('last_name') === '')
+                                        ->disabled(fn (Get $get) => blank($get('phone')) || $get('first_name') === '' || $get('last_name') === '')
                                         ->action(function () {
                                             $this->sendInviteViaText();
                                         }),
@@ -101,7 +102,7 @@ class ConciergeReferral extends Page
                             ->columns([
                                 'default' => '2',
                             ]),
-                        Tabs\Tab::make('Send Email')
+                        Tab::make('Send Email')
                             ->icon('gmdi-email-o')
                             ->schema([
                                 TextInput::make('first_name')
@@ -125,7 +126,7 @@ class ConciergeReferral extends Page
                                 Actions::make([
                                     Action::make('sendEmail')
                                         ->label('Send Email')
-                                        ->disabled(fn (Get $get) => empty($get('email')) || $get('first_name') === '' || $get('last_name') === '')
+                                        ->disabled(fn (Get $get) => blank($get('email')) || $get('first_name') === '' || $get('last_name') === '')
                                         ->action(function () {
                                             $this->sendInviteViaEmail();
                                         }),

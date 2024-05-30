@@ -6,7 +6,7 @@ use App\Filament\Resources\RestaurantResource;
 use App\Livewire\Restaurant\RestaurantLeaderboard;
 use App\Livewire\Restaurant\RestaurantRecentBookings;
 use App\Livewire\Restaurant\RestaurantStats;
-use Filament\Actions;
+use Filament\Actions\EditAction;
 use Filament\Resources\Pages\ViewRecord;
 use Illuminate\Contracts\Support\Htmlable;
 use STS\FilamentImpersonate\Pages\Actions\Impersonate;
@@ -31,7 +31,7 @@ class ViewRestaurant extends ViewRecord
             Impersonate::make()
                 ->iconButton()
                 ->record($this->getRecord()->user),
-            Actions\EditAction::make()
+            EditAction::make()
                 ->icon('heroicon-m-pencil-square')
                 ->iconButton(),
         ];

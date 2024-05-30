@@ -6,10 +6,12 @@ use App\Livewire\Restaurant\RestaurantRecentBookings;
 use App\Livewire\Restaurant\RestaurantStats;
 use Filament\Forms\Components\DatePicker;
 use Filament\Pages\Dashboard;
+use Filament\Pages\Dashboard\Actions\FilterAction;
+use Filament\Pages\Dashboard\Concerns\HasFiltersAction;
 
 class RestaurantDashboard extends Dashboard
 {
-    use Dashboard\Concerns\HasFiltersAction;
+    use HasFiltersAction;
 
     protected static ?string $navigationIcon = 'heroicon-o-currency-dollar';
 
@@ -35,7 +37,7 @@ class RestaurantDashboard extends Dashboard
     protected function getHeaderActions(): array
     {
         return [
-            Dashboard\Actions\FilterAction::make()
+            FilterAction::make()
                 ->label('Date Range')
                 ->icon('heroicon-o-calendar')
                 ->iconButton()

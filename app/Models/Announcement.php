@@ -31,11 +31,17 @@ class Announcement extends Model
         'published_at',
     ];
 
+    /**
+     * @return BelongsTo<User, \App\Models\Announcement>
+     */
     public function sender(): BelongsTo
     {
         return $this->belongsTo(User::class, 'sender_id');
     }
 
+    /**
+     * @return HasMany<Message>
+     */
     public function messages(): HasMany
     {
         return $this->hasMany(Message::class);

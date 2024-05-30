@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Traits\FormatsPhoneNumber;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -31,11 +32,17 @@ class Referral extends Model
         'notified_at',
     ];
 
+    /**
+     * @return BelongsTo<User, \App\Models\Referral>
+     */
     public function referrer(): BelongsTo
     {
         return $this->belongsTo(User::class, 'referrer_id');
     }
 
+    /**
+     * @return BelongsTo<User, \App\Models\Referral>
+     */
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
@@ -46,23 +53,23 @@ class Referral extends Model
         return $this->phone ?? '';
     }
 
-    public function getNameAttribute(): string
+    protected function name(): Attribute
     {
-        return $this->first_name.' '.$this->last_name;
+        return Attribute::make(get: fn () => $this->first_name.' '.$this->last_name);
     }
 
-    public function getHasSecuredAttribute(): bool
+    protected function hasSecured(): Attribute
     {
-        return ! blank($this->secured_at);
+        return Attribute::make(get: fn () => ! blank($this->secured_at));
     }
 
-    public function getLabelAttribute(): string
+    protected function label(): Attribute
     {
-        return $this->has_secured ? $this->user->name : $this->email ?? $this->local_formatted_phone;
+        return Attribute::make(get: fn () => $this->has_secured ? $this->user->name : $this->email ?? $this->local_formatted_phone);
     }
 
-    public function getLocalFormattedPhoneAttribute(): string
+    protected function localFormattedPhone(): Attribute
     {
-        return $this->getLocalFormattedPhoneNumber($this->phone);
+        return Attribute::make(get: fn () => $this->getLocalFormattedPhoneNumber($this->phone));
     }
 }

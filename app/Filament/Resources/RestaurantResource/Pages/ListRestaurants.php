@@ -3,7 +3,7 @@
 namespace App\Filament\Resources\RestaurantResource\Pages;
 
 use App\Filament\Resources\RestaurantResource;
-use Filament\Actions;
+use Filament\Actions\CreateAction;
 use Filament\Resources\Pages\ListRecords;
 
 class ListRestaurants extends ListRecords
@@ -13,7 +13,7 @@ class ListRestaurants extends ListRecords
     protected function getHeaderActions(): array
     {
         return [
-            Actions\CreateAction::make()->iconButton()->icon('heroicon-s-plus-circle'),
+            CreateAction::make()->iconButton()->icon('heroicon-s-plus-circle'),
         ];
     }
 }

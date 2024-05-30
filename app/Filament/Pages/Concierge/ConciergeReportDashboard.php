@@ -7,10 +7,12 @@ use App\Livewire\Concierge\ConciergeRecentBookings;
 use App\Livewire\Concierge\ConciergeStats;
 use Filament\Forms\Components\DatePicker;
 use Filament\Pages\Dashboard;
+use Filament\Pages\Dashboard\Actions\FilterAction;
+use Filament\Pages\Dashboard\Concerns\HasFiltersAction;
 
 class ConciergeReportDashboard extends Dashboard
 {
-    use Dashboard\Concerns\HasFiltersAction;
+    use HasFiltersAction;
 
     protected static ?string $title = 'My Earnings';
 
@@ -61,7 +63,7 @@ class ConciergeReportDashboard extends Dashboard
     protected function getHeaderActions(): array
     {
         return [
-            Dashboard\Actions\FilterAction::make()
+            FilterAction::make()
                 ->label('Date Range')
                 ->icon('heroicon-o-calendar')
                 ->iconButton()

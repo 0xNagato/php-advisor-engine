@@ -7,10 +7,12 @@ use App\Livewire\Partner\PartnerRecentBookings;
 use App\Livewire\Partner\PartnerStats;
 use Filament\Forms\Components\DatePicker;
 use Filament\Pages\Dashboard;
+use Filament\Pages\Dashboard\Actions\FilterAction;
+use Filament\Pages\Dashboard\Concerns\HasFiltersAction;
 
 class PartnerReportDashboard extends Dashboard
 {
-    use Dashboard\Concerns\HasFiltersAction;
+    use HasFiltersAction;
 
     protected static ?string $title = 'My Earnings';
 
@@ -55,7 +57,7 @@ class PartnerReportDashboard extends Dashboard
     protected function getHeaderActions(): array
     {
         return [
-            Dashboard\Actions\FilterAction::make()
+            FilterAction::make()
                 ->label('Date Range')
                 ->icon('heroicon-o-calendar')
                 ->iconButton()

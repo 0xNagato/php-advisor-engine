@@ -21,11 +21,17 @@ class Payment extends Model
         'status',
     ];
 
+    /**
+     * @return HasMany<Earning>
+     */
     public function earnings(): HasMany
     {
         return $this->hasMany(Earning::class);
     }
 
+    /**
+     * @return HasMany<PaymentItem>
+     */
     public function items(): HasMany
     {
         return $this->hasMany(PaymentItem::class);

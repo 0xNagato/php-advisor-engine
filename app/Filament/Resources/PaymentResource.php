@@ -3,7 +3,9 @@
 namespace App\Filament\Resources;
 
 use App\Enums\EarningType;
-use App\Filament\Resources\PaymentResource\Pages;
+use App\Filament\Resources\PaymentResource\Pages\CreatePayment;
+use App\Filament\Resources\PaymentResource\Pages\ListPayments;
+use App\Filament\Resources\PaymentResource\Pages\ViewPayment;
 use App\Filament\Resources\PaymentResource\RelationManagers\ItemsRelationManager;
 use App\Models\Earning;
 use App\Models\Payment;
@@ -18,7 +20,9 @@ use Filament\Infolists\Components\TextEntry;
 use Filament\Infolists\Infolist;
 use Filament\Resources\Resource;
 use Filament\Support\RawJs;
-use Filament\Tables;
+use Filament\Tables\Actions\Action;
+use Filament\Tables\Actions\ViewAction;
+use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 
 class PaymentResource extends Resource
@@ -100,31 +104,31 @@ class PaymentResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('title')
+                TextColumn::make('title')
                     ->label('Type')
                     ->searchable()
                     ->visible(fn () => auth()->user()->hasRole('super_admin')),
-                Tables\Columns\TextColumn::make('status')
+                TextColumn::make('status')
                     ->label('Status')
                     ->badge(),
-                Tables\Columns\TextColumn::make('created_at')
+                TextColumn::make('created_at')
                     ->label('Date')
                     ->formatStateUsing(fn (string $state): string => Carbon::parse($state)->format('F j, Y')),
-                Tables\Columns\TextColumn::make('amount')
+                TextColumn::make('amount')
                     ->money(fn (Payment $record) => $record->currency, divideBy: 100)
                     ->label('Total'),
             ])
             ->filters([
             ])
             ->actions([
-                Tables\Actions\Action::make('mark_as_paid')
+                Action::make('mark_as_paid')
                     ->label('Mark as Paid')
                     ->color('success')
                     ->icon('heroicon-o-check-circle')
                     ->requiresConfirmation()
                     ->visible(auth()->user()->hasRole('super_admin'))
                     ->action(fn (Payment $record) => $record->markAsPaid()),
-                Tables\Actions\ViewAction::make(),
+                ViewAction::make(),
             ]);
     }
 
@@ -138,9 +142,9 @@ class PaymentResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ListPayments::route('/'),
-            'create' => Pages\CreatePayment::route('/create'),
-            'view' => Pages\ViewPayment::route('/{record}'),
+            'index' => ListPayments::route('/'),
+            'create' => CreatePayment::route('/create'),
+            'view' => ViewPayment::route('/{record}'),
             //            'edit' => Pages\EditPayment::route('/{record}/edit'),
         ];
     }

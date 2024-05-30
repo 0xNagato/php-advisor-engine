@@ -16,6 +16,9 @@ class SpecialPricingRestaurant extends Model
         'fee',
     ];
 
+    /**
+     * @return BelongsTo<Restaurant, \App\Models\SpecialPricingRestaurant>
+     */
     public function restaurant(): BelongsTo
     {
         return $this->belongsTo(Restaurant::class);

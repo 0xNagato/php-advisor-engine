@@ -62,7 +62,7 @@ class ResetPassword extends \Filament\Pages\Auth\PasswordReset\ResetPassword
         ];
 
         // Add fields for first_name, last_name, and hotel_name if they are blank.
-        if (empty($this->user->first_name) && empty($this->user->last_name)) {
+        if (blank($this->user->first_name) && blank($this->user->last_name)) {
             array_unshift(
                 $formSchema,
                 TextInput::make('first_name')
@@ -111,7 +111,7 @@ class ResetPassword extends \Filament\Pages\Auth\PasswordReset\ResetPassword
         return Placeholder::make('termsAndConditions')
             ->content($label)
             ->hiddenLabel()
-            ->hidden(fn () => ! (empty($this->user->secured_at) && in_array($lowercaseRole, ['concierge', 'restaurant'])));
+            ->hidden(fn () => ! (blank($this->user->secured_at) && in_array($lowercaseRole, ['concierge', 'restaurant'])));
     }
 
     public function resetPassword(): ?PasswordResetResponse
@@ -125,7 +125,7 @@ class ResetPassword extends \Filament\Pages\Auth\PasswordReset\ResetPassword
             $user->save();
         }
 
-        if (empty($this->user->first_name) && empty($this->user->last_name)) {
+        if (blank($this->user->first_name) && blank($this->user->last_name)) {
             $user->update([
                 'first_name' => $this->first_name,
                 'last_name' => $this->last_name,

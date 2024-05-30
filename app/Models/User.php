@@ -9,6 +9,7 @@ use Filament\Models\Contracts\FilamentUser;
 use Filament\Models\Contracts\HasAvatar;
 use Filament\Panel;
 use Illuminate\Database\Eloquent\Casts\AsArrayObject;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -85,11 +86,17 @@ class User extends Authenticatable implements FilamentUser, HasAvatar
         'label',
     ];
 
+    /**
+     * @return HasOne<Concierge>
+     */
     public function concierge(): HasOne
     {
         return $this->hasOne(Concierge::class);
     }
 
+    /**
+     * @return HasOne<Restaurant>
+     */
     public function restaurant(): HasOne
     {
         return $this->hasOne(Restaurant::class);
@@ -113,14 +120,14 @@ class User extends Authenticatable implements FilamentUser, HasAvatar
         return $this->phone;
     }
 
-    public function getNameAttribute(): string
+    protected function name(): Attribute
     {
-        return $this->getFilamentName();
+        return Attribute::make(get: fn () => $this->getFilamentName());
     }
 
-    public function getAvatarAttribute(): ?string
+    protected function avatar(): Attribute
     {
-        return $this->getFilamentAvatarUrl();
+        return Attribute::make(get: fn () => $this->getFilamentAvatarUrl());
     }
 
     public function getFilamentName(): string
@@ -128,87 +135,116 @@ class User extends Authenticatable implements FilamentUser, HasAvatar
         return "$this->first_name $this->last_name";
     }
 
-    public function getMainRoleAttribute(): string
+    protected function mainRole(): Attribute
     {
-        /**
-         * @var Role $role
-         */
-        $role = self::with('roles')
-            ->find($this->id)
-            ->roles
-            ->firstWhere('name', '!=', 'panel_user');
+        return Attribute::make(get: function () {
+            /**
+             * @var Role $role
+             */
+            $role = self::with('roles')
+                ->find($this->id)
+                ->roles
+                ->firstWhere('name', '!=', 'panel_user');
 
-        return Str::of($role->name)
-            ->snake()
-            ->replace('_', ' ')
-            ->title();
+            return Str::of($role->name)
+                ->snake()
+                ->replace('_', ' ')
+                ->title();
+        });
     }
 
+    /**
+     * @return HasOne<Partner>
+     */
     public function partner(): HasOne
     {
         return $this->hasOne(Partner::class);
     }
 
+    /**
+     * @return HasMany<Referral>
+     */
     public function referrals(): HasMany
     {
         return $this->hasMany(Referral::class, 'referrer_id');
     }
 
+    /**
+     * @return HasOne<Referral>
+     */
     public function referral(): HasOne
     {
         return $this->hasOne(Referral::class);
     }
 
+    /**
+     * @return HasOneThrough<\App\Models\User>
+     */
     public function referrer(): HasOneThrough
     {
         return $this->hasOneThrough(self::class, Referral::class, 'user_id', 'id', 'id', 'referrer_id');
     }
 
-    public function getHasSecuredAttribute(): bool
+    protected function hasSecured(): Attribute
     {
-        return ! blank($this->secured_at);
+        return Attribute::make(get: fn () => ! blank($this->secured_at));
     }
 
-    public function getLabelAttribute(): string
+    protected function label(): Attribute
     {
-        return $this->has_secured ? $this->getFilamentName() : $this->email;
+        return Attribute::make(get: fn () => $this->has_secured ? $this->getFilamentName() : $this->email);
     }
 
+    /**
+     * @return HasMany<Earning>
+     */
     public function earnings(): HasMany
     {
         return $this->hasMany(Earning::class);
     }
 
+    /**
+     * @return HasMany<Announcement>
+     */
     public function sentAnnouncements(): HasMany
     {
         return $this->hasMany(Announcement::class, 'sender_id');
     }
 
+    /**
+     * @return HasMany<Message>
+     */
     public function messages(): HasMany
     {
         return $this->hasMany(Message::class);
     }
 
-    public function getUnreadMessageCountAttribute(): int
+    protected function unreadMessageCount(): Attribute
     {
-        return $this->messages()->whereNull('read_at')->count();
+        return Attribute::make(get: fn () => $this->messages()->whereNull('read_at')->count());
     }
 
-    public function getLocalFormattedPhoneAttribute(): string
+    protected function localFormattedPhone(): Attribute
     {
-        return $this->getLocalFormattedPhoneNumber($this->phone);
+        return Attribute::make(get: fn () => $this->getLocalFormattedPhoneNumber($this->phone));
     }
 
-    public function getInternationalFormattedPhoneNumberAttribute(): string
+    protected function internationalFormattedPhoneNumber(): Attribute
     {
-        return $this->getInternationalFormattedPhoneNumber($this->phone);
+        return Attribute::make(get: fn () => $this->getInternationalFormattedPhoneNumber($this->phone));
     }
 
+    /**
+     * @return HasMany<Device>
+     */
     public function devices(): HasMany
     {
         return $this->hasMany(Device::class);
     }
 
+    /**
+     * @return HasOne<UserCode>
+     */
     public function userCode(): HasOne
     {
         return $this->hasOne(UserCode::class);

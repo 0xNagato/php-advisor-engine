@@ -4,7 +4,7 @@ namespace App\Livewire\Partner;
 
 use App\Models\Earning;
 use App\Models\Partner;
-use Filament\Tables;
+use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Filament\Widgets\TableWidget as BaseWidget;
 use Illuminate\Database\Eloquent\Model;
@@ -45,10 +45,10 @@ class PartnerLeaderboard extends BaseWidget
             })
             ->paginated(false)
             ->columns(components: [
-                Tables\Columns\TextColumn::make('rank')
+                TextColumn::make('rank')
                     ->label('Rank')
                     ->rowIndex(),
-                Tables\Columns\TextColumn::make('user_name')
+                TextColumn::make('user_name')
                     ->label('Partner Name')
                     ->formatStateUsing(function ($state, $record) {
                         if ($this->showFilters) {
@@ -61,7 +61,7 @@ class PartnerLeaderboard extends BaseWidget
 
                         return $state;
                     }),
-                Tables\Columns\TextColumn::make('total_earned')
+                TextColumn::make('total_earned')
                     ->label('Earned')
                     ->money('USD', divideBy: 100),
             ]);

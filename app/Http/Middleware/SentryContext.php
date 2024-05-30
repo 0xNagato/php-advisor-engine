@@ -4,6 +4,9 @@ namespace App\Http\Middleware;
 
 use Closure;
 use Illuminate\Http\Request;
+use Sentry\State\Scope;
+
+use function Sentry\configureScope;
 
 class SentryContext
 {
@@ -15,7 +18,7 @@ class SentryContext
     public function handle(Request $request, Closure $next)
     {
         if (auth()->check()) {
-            \Sentry\configureScope(function (\Sentry\State\Scope $scope): void {
+            configureScope(function (Scope $scope): void {
                 $user = auth()->user();
 
                 $scope->setUser([

@@ -1,5 +1,7 @@
 <?php
 
+use App\Models\User;
+
 $shouldRegisterNavigation = env('APP_ENV') === 'local';
 
 return [
@@ -15,7 +17,7 @@ return [
     ],
 
     'auth_provider_model' => [
-        'fqcn' => \App\Models\User::class,
+        'fqcn' => User::class,
     ],
 
     'super_admin' => [

@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Data\SpecialRequest\SpecialRequestConversionData;
 use App\Enums\SpecialRequestStatus;
 use Illuminate\Database\Eloquent\Casts\AsArrayObject;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -59,36 +60,50 @@ class SpecialRequest extends Model
         });
     }
 
+    /**
+     * @return BelongsTo<Restaurant, \App\Models\SpecialRequest>
+     */
     public function restaurant(): BelongsTo
     {
         return $this->belongsTo(Restaurant::class);
     }
 
+    /**
+     * @return BelongsTo<Concierge, \App\Models\SpecialRequest>
+     */
     public function concierge(): BelongsTo
     {
         return $this->belongsTo(Concierge::class);
     }
 
+    /**
+     * @return BelongsTo<Booking, \App\Models\SpecialRequest>
+     */
     public function booking(): BelongsTo
     {
         return $this->belongsTo(Booking::class);
     }
 
+    /**
+     * @return BelongsTo<ScheduleTemplate, \App\Models\SpecialRequest>
+     */
     public function scheduleTemplate(): BelongsTo
     {
         return $this->belongsTo(ScheduleTemplate::class);
     }
 
-    public function getCustomerNameAttribute(): string
+    protected function customerName(): Attribute
     {
-        return $this->customer_first_name.' '.$this->customer_last_name;
+        return Attribute::make(get: fn () => $this->customer_first_name.' '.$this->customer_last_name);
     }
 
-    public function getRestaurantTotalFeeAttribute(): float
+    protected function restaurantTotalFee(): Attribute
     {
-        $commissionValue = ($this->commission_requested_percentage / 100) * $this->minimum_spend;
-        $additionalFee = 0.07 * $commissionValue;
+        return Attribute::make(get: function () {
+            $commissionValue = ($this->commission_requested_percentage / 100) * $this->minimum_spend;
+            $additionalFee = 0.07 * $commissionValue;
 
-        return $commissionValue + $additionalFee;
+            return $commissionValue + $additionalFee;
+        });
     }
 }

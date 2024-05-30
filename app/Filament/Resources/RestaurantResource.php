@@ -10,7 +10,8 @@ use App\Models\Region;
 use App\Models\Restaurant;
 use Exception;
 use Filament\Resources\Resource;
-use Filament\Tables;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 
 class RestaurantResource extends Resource
@@ -33,19 +34,19 @@ class RestaurantResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('restaurant_name')
+                TextColumn::make('restaurant_name')
                     ->searchable(),
-                Tables\Columns\TextColumn::make('user.name')
+                TextColumn::make('user.name')
                     ->searchable(['first_name', 'last_name'])
                     ->numeric()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('created_at')
+                TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
-                Tables\Filters\SelectFilter::make('region')
+                SelectFilter::make('region')
                     ->options(Region::pluck('name', 'id')),
             ]);
     }

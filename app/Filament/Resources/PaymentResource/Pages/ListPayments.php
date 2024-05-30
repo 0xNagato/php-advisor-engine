@@ -5,9 +5,10 @@ namespace App\Filament\Resources\PaymentResource\Pages;
 use App\Enums\PaymentStatus;
 use App\Filament\Resources\PaymentResource;
 use App\Models\Payment;
-use Filament\Actions;
+use Filament\Actions\CreateAction;
 use Filament\Resources\Components\Tab;
 use Filament\Resources\Pages\ListRecords;
+use Illuminate\Contracts\Database\Query\Builder;
 
 class ListPayments extends ListRecords
 {
@@ -25,7 +26,7 @@ class ListPayments extends ListRecords
                         ->where('status', PaymentStatus::PENDING)
                         ->when(
                             ! auth()->user()->hasRole('super_admin'),
-                            fn ($query) => $query->where('user_id', auth()->id())
+                            fn (Builder $query) => $query->where('user_id', auth()->id())
                         )
                         ->count()
                 )
@@ -45,7 +46,7 @@ class ListPayments extends ListRecords
     protected function getHeaderActions(): array
     {
         return [
-            Actions\CreateAction::make(),
+            CreateAction::make(),
         ];
     }
 }

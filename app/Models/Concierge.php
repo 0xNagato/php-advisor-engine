@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Enums\BookingStatus;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -31,6 +32,9 @@ class Concierge extends Model
         //
     ];
 
+    /**
+     * @return BelongsTo<User, \App\Models\Concierge>
+     */
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
@@ -41,19 +45,19 @@ class Concierge extends Model
      *
      * @return int The payout percentage.
      */
-    public function getPayoutPercentageAttribute(): int
+    protected function payoutPercentage(): Attribute
     {
-        $sales = $this->sales_this_month;
+        return Attribute::make(get: function () {
+            $sales = $this->sales_this_month;
+            if ($sales >= 0 && $sales <= 20) {
+                return 10;
+            }
+            if ($sales >= 21 && $sales <= 50) {
+                return 12;
+            }
 
-        if ($sales >= 0 && $sales <= 20) {
-            return 10;
-        }
-
-        if ($sales >= 21 && $sales <= 50) {
-            return 12;
-        }
-
-        return 15;
+            return 15;
+        });
     }
 
     /**
@@ -61,9 +65,9 @@ class Concierge extends Model
      *
      * @return int The amount confirmed bookings.
      */
-    public function getSalesAttribute(): int
+    protected function sales(): Attribute
     {
-        return $this->bookings()->where('status', BookingStatus::CONFIRMED)->count();
+        return Attribute::make(get: fn () => $this->bookings()->where('status', BookingStatus::CONFIRMED)->count());
     }
 
     public function bookings(): HasMany
@@ -77,14 +81,17 @@ class Concierge extends Model
      *
      * @return int The amount confirmed bookings.
      */
-    public function getSalesThisMonthAttribute(): int
+    protected function salesThisMonth(): Attribute
     {
-        return $this->bookings()
+        return Attribute::make(get: fn () => $this->bookings()
             ->where('status', BookingStatus::CONFIRMED)
             ->whereMonth('created_at', now()->month)
-            ->count();
+            ->count());
     }
 
+    /**
+     * @return HasOneThrough<\App\Models\Concierge>
+     */
     public function referringConcierge(): HasOneThrough
     {
         return $this->hasOneThrough(
@@ -97,6 +104,9 @@ class Concierge extends Model
         );
     }
 
+    /**
+     * @return HasManyThrough<\App\Models\Concierge>
+     */
     public function concierges(): HasManyThrough
     {
         return $this->hasManyThrough(
@@ -106,6 +116,9 @@ class Concierge extends Model
         );
     }
 
+    /**
+     * @return HasManyThrough<Referral>
+     */
     public function referrals(): HasManyThrough
     {
         return $this->hasManyThrough(

@@ -2,12 +2,15 @@
 
 namespace App\Filament\Resources;
 
-use App\Filament\Resources\BookingResource\Pages;
+use App\Filament\Resources\BookingResource\Pages\CreateBooking;
+use App\Filament\Resources\BookingResource\Pages\EditBooking;
+use App\Filament\Resources\BookingResource\Pages\ListBookings;
+use App\Filament\Resources\BookingResource\Pages\ViewBooking;
 use App\Models\Booking;
-use Filament\Forms;
+use Filament\Forms\Components\TextInput;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
-use Filament\Tables;
+use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 
 class BookingResource extends Resource
@@ -29,30 +32,30 @@ class BookingResource extends Resource
     {
         return $form
             ->schema([
-                Forms\Components\TextInput::make('concierge_id')
+                TextInput::make('concierge_id')
                     ->required()
                     ->numeric(),
-                Forms\Components\TextInput::make('guest_name')
+                TextInput::make('guest_name')
                     ->required()
                     ->maxLength(255),
-                Forms\Components\TextInput::make('guest_email')
+                TextInput::make('guest_email')
                     ->email()
                     ->maxLength(255),
-                Forms\Components\TextInput::make('guest_phone')
+                TextInput::make('guest_phone')
                     ->tel()
                     ->required()
                     ->maxLength(255),
-                Forms\Components\TextInput::make('guest_count')
+                TextInput::make('guest_count')
                     ->required()
                     ->numeric(),
-                Forms\Components\TextInput::make('total_fee')
+                TextInput::make('total_fee')
                     ->required()
                     ->numeric(),
-                Forms\Components\TextInput::make('currency')
+                TextInput::make('currency')
                     ->required()
                     ->maxLength(255)
                     ->default('USD'),
-                Forms\Components\TextInput::make('status')
+                TextInput::make('status')
                     ->required()
                     ->maxLength(255)
                     ->default('confirmed'),
@@ -64,44 +67,44 @@ class BookingResource extends Resource
         return $table
             ->columns([
 
-                Tables\Columns\TextColumn::make('concierge.user.name')
+                TextColumn::make('concierge.user.name')
                     ->label('Concierge')
                     ->numeric()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('schedule.restaurant.restaurant_name')
+                TextColumn::make('schedule.restaurant.restaurant_name')
                     ->label('Restaurant')
                     ->searchable()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('schedule.start_time')
+                TextColumn::make('schedule.start_time')
                     ->label('When')
                     ->dateTime()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('guest_name')
+                TextColumn::make('guest_name')
                     ->searchable(),
-                Tables\Columns\TextColumn::make('guest_email')
+                TextColumn::make('guest_email')
                     ->searchable()
                     ->toggleable(isToggledHiddenByDefault: true),
-                Tables\Columns\TextColumn::make('guest_phone')
+                TextColumn::make('guest_phone')
                     ->searchable()
                     ->toggleable(isToggledHiddenByDefault: true),
-                Tables\Columns\TextColumn::make('guest_count')
+                TextColumn::make('guest_count')
                     ->numeric()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
-                Tables\Columns\TextColumn::make('total_fee')
+                TextColumn::make('total_fee')
                     ->money(fn ($record) => $record->currency, divideBy: 100)
                     ->sortable(),
-                Tables\Columns\TextColumn::make('currency')
+                TextColumn::make('currency')
                     ->searchable()
                     ->toggleable(isToggledHiddenByDefault: true),
-                Tables\Columns\TextColumn::make('status')
+                TextColumn::make('status')
                     ->searchable()
                     ->toggleable(isToggledHiddenByDefault: true),
-                Tables\Columns\TextColumn::make('created_at')
+                TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
-                Tables\Columns\TextColumn::make('updated_at')
+                TextColumn::make('updated_at')
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
@@ -117,10 +120,10 @@ class BookingResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ListBookings::route('/'),
-            'create' => Pages\CreateBooking::route('/create'),
-            'view' => Pages\ViewBooking::route('/{record}'),
-            'edit' => Pages\EditBooking::route('/{record}/edit'),
+            'index' => ListBookings::route('/'),
+            'create' => CreateBooking::route('/create'),
+            'view' => ViewBooking::route('/{record}'),
+            'edit' => EditBooking::route('/{record}/edit'),
         ];
     }
 }

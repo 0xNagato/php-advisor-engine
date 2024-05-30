@@ -2,7 +2,8 @@
 
 namespace App\Filament\Resources;
 
-use App\Filament\Resources\MessageResource\Pages;
+use App\Filament\Resources\MessageResource\Pages\ListMessages;
+use App\Filament\Resources\MessageResource\Pages\ViewMessage;
 use App\Models\Message;
 use Filament\Resources\Resource;
 
@@ -40,8 +41,8 @@ class MessageResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ListMessages::route('/'),
-            'view' => Pages\ViewMessage::route('/{record}'),
+            'index' => ListMessages::route('/'),
+            'view' => ViewMessage::route('/{record}'),
         ];
     }
 }

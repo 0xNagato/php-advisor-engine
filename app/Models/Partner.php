@@ -19,16 +19,25 @@ class Partner extends Model
         'percentage',
     ];
 
+    /**
+     * @return BelongsTo<User, \App\Models\Partner>
+     */
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
     }
 
+    /**
+     * @return HasMany<Booking>
+     */
     public function conciergeBookings(): HasMany
     {
         return $this->hasMany(Booking::class, 'partner_concierge_id');
     }
 
+    /**
+     * @return HasMany<Booking>
+     */
     public function restaurantBookings(): HasMany
     {
         return $this->hasMany(Booking::class, 'partner_restaurant_id');

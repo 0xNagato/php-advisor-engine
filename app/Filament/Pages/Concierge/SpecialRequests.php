@@ -8,6 +8,7 @@ use App\Models\Region;
 use App\Models\Restaurant;
 use App\Models\ScheduleTemplate;
 use App\Models\SpecialRequest;
+use App\Models\User;
 use App\Traits\ManagesBookingForms;
 use Carbon\Carbon;
 use Exception;
@@ -45,7 +46,7 @@ class SpecialRequests extends Page
 
     public static function canAccess(): bool
     {
-        /** @var \App\Models\User $user */
+        /** @var User $user */
         $user = auth()->user();
 
         return $user->hasRole('concierge');

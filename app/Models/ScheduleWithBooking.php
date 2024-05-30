@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -31,6 +32,9 @@ class ScheduleWithBooking extends Model
 
     public $timestamps = false;
 
+    /**
+     * @return BelongsTo<Restaurant, \App\Models\ScheduleWithBooking>
+     */
     public function restaurant(): BelongsTo
     {
         return $this->belongsTo(Restaurant::class);
@@ -53,34 +57,37 @@ class ScheduleWithBooking extends Model
         return 0;
     }
 
+    /**
+     * @return HasMany<Booking>
+     */
     public function bookings(): HasMany
     {
         return $this->hasMany(Booking::class);
     }
 
-    public function getBookingAtAttribute(): string
+    protected function bookingAt(): Attribute
     {
-        return $this->schedule_start;
+        return Attribute::make(get: fn () => $this->schedule_start);
     }
 
-    public function getFormattedStartTimeAttribute(): string
+    protected function formattedStartTime(): Attribute
     {
-        return date('g:ia', strtotime($this->start_time));
+        return Attribute::make(get: fn () => date('g:ia', strtotime($this->start_time)));
     }
 
-    public function getFormattedEndTimeAttribute(): string
+    protected function formattedEndTime(): Attribute
     {
-        return date('g:ia', strtotime($this->end_time));
+        return Attribute::make(get: fn () => date('g:ia', strtotime($this->end_time)));
     }
 
-    public function getIsBookableAttribute(): bool
+    protected function isBookable(): Attribute
     {
-        return $this->is_available && $this->remaining_tables > 0;
+        return Attribute::make(get: fn () => $this->is_available && $this->remaining_tables > 0);
     }
 
-    public function getHasLowInventoryAttribute(): bool
+    protected function hasLowInventory(): Attribute
     {
-        return $this->is_bookable && $this->remaining_tables <= 5;
+        return Attribute::make(get: fn () => $this->is_bookable && $this->remaining_tables <= 5);
     }
 
     protected function casts(): array

@@ -15,15 +15,11 @@ class SmsNotificationChannel
      */
     public function send($notifiable, Notification $notification): void
     {
-        if (! method_exists($notification, 'toSms')) {
-            throw new Exception('The notification must have a toSms method');
-        }
+        throw_unless(method_exists($notification, 'toSms'), new Exception('The notification must have a toSms method'));
 
         $data = $notification->toSms($notifiable);
 
-        if (! $data instanceof SmsData) {
-            throw new Exception('toSms should return SmsData');
-        }
+        throw_unless($data instanceof SmsData, new Exception('toSms should return SmsData'));
 
         $response = (new SmsService())->sendMessage(
             contactPhone: $data->phone,

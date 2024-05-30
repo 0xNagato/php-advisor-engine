@@ -75,7 +75,7 @@ class AddSpecialPartySize extends Command
             }
         }
 
-        if (! empty($schedulesData)) {
+        if (filled($schedulesData)) {
             $restaurant->scheduleTemplates()->insert($schedulesData);
         }
     }

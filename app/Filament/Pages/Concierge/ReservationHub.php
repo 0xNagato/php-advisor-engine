@@ -151,7 +151,7 @@ class ReservationHub extends Page
             return;
         }
 
-        if ($key === 'guest_count' && empty($data)) {
+        if ($key === 'guest_count' && blank($data)) {
             $this->data['guest_count'] = 2;
         }
 

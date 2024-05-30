@@ -24,11 +24,17 @@ class Message extends Model
         'read_at',
     ];
 
+    /**
+     * @return BelongsTo<Announcement, \App\Models\Message>
+     */
     public function announcement(): BelongsTo
     {
         return $this->belongsTo(Announcement::class);
     }
 
+    /**
+     * @return BelongsTo<User, \App\Models\Message>
+     */
     public function recipient(): BelongsTo
     {
         return $this->belongsTo(User::class);

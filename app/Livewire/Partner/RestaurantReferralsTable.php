@@ -11,6 +11,7 @@ use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Filament\Widgets\TableWidget as BaseWidget;
+use Illuminate\Contracts\Database\Query\Builder;
 use STS\FilamentImpersonate\Impersonate;
 
 class RestaurantReferralsTable extends BaseWidget
@@ -29,7 +30,7 @@ class RestaurantReferralsTable extends BaseWidget
     public function table(Table $table): Table
     {
         return $table
-            ->query(fn () => User::whereHas('referral', static function ($query) {
+            ->query(fn () => User::whereHas('referral', static function (Builder $query) {
                 $query->where('type', 'restaurant')
                     ->where('referrer_id', auth()->id());
             }))
@@ -48,8 +49,8 @@ class RestaurantReferralsTable extends BaseWidget
                 IconColumn::make('has_secured')
                     ->label('Active')
                     ->alignCenter()
-                    ->icon(fn (string $state): string => empty($state) ? 'heroicon-o-x-circle' : 'heroicon-o-check-circle')
-                    ->color(fn (string $state): string => empty($state) ? 'danger' : 'success'),
+                    ->icon(fn (string $state): string => blank($state) ? 'heroicon-o-x-circle' : 'heroicon-o-check-circle')
+                    ->color(fn (string $state): string => blank($state) ? 'danger' : 'success'),
             ])
             ->actions([
                 Impersonate::make(),

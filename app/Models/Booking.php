@@ -6,6 +6,7 @@ use App\Data\Stripe\StripeChargeData;
 use App\Enums\BookingStatus;
 use App\Traits\FormatsPhoneNumber;
 use AssertionError;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -14,7 +15,8 @@ use Illuminate\Database\Eloquent\Relations\HasOneThrough;
 use Illuminate\Log\Logger;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
-use Sentry;
+
+use function Sentry\captureException;
 
 /**
  * @mixin IdeHelperBooking
@@ -284,13 +286,16 @@ class Booking extends Model
                     ]);
 
                     if (app()->environment('production')) {
-                        Sentry\captureException($e);
+                        captureException($e);
                     }
                 }
             });
         });
     }
 
+    /**
+     * @return HasMany<Earning>
+     */
     public function earnings(): HasMany
     {
         return $this->hasMany(Earning::class);
@@ -322,6 +327,9 @@ class Booking extends Model
             ->whereColumn('booking_at', 'schedule_with_bookings.booking_at');
     }
 
+    /**
+     * @return HasOneThrough<Restaurant>
+     */
     public function restaurant(): HasOneThrough
     {
         return $this->hasOneThrough(
@@ -334,34 +342,43 @@ class Booking extends Model
         );
     }
 
+    /**
+     * @return BelongsTo<Concierge, \App\Models\Booking>
+     */
     public function concierge(): BelongsTo
     {
         return $this->belongsTo(Concierge::class);
     }
 
+    /**
+     * @return BelongsTo<Partner, \App\Models\Booking>
+     */
     public function partnerConcierge(): BelongsTo
     {
         return $this->belongsTo(Partner::class, 'partner_concierge_id');
     }
 
+    /**
+     * @return BelongsTo<Partner, \App\Models\Booking>
+     */
     public function partnerRestaurant(): BelongsTo
     {
         return $this->belongsTo(Partner::class, 'partner_restaurant_id');
     }
 
-    public function getGuestNameAttribute(): string
+    protected function guestName(): Attribute
     {
-        return $this->guest_first_name.' '.$this->guest_last_name;
+        return Attribute::make(get: fn () => $this->guest_first_name.' '.$this->guest_last_name);
     }
 
-    public function getPrimeTimeAttribute(): bool
+    protected function primeTime(): Attribute
     {
-        return $this->schedule->prime_time;
+        return Attribute::make(get: fn () => $this->schedule->prime_time);
     }
 
-    public function getLocalFormattedGuestPhoneAttribute(): string
+    protected function localFormattedGuestPhone(): Attribute
     {
-        return $this->getLocalFormattedPhoneNumber($this->guest_phone);
+        return Attribute::make(get: fn () => $this->getLocalFormattedPhoneNumber($this->guest_phone));
     }
 
     public static function calculateNonPrimeEarnings(Booking $booking, $reconfirm = false): void

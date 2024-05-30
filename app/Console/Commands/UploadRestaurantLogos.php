@@ -55,7 +55,7 @@ class UploadRestaurantLogos extends Command
         }
 
         $this->info("Total successful uploads: $successfulUploads");
-        if (! empty($failedUploads)) {
+        if (filled($failedUploads)) {
             $this->info('Failed uploads:');
             foreach ($failedUploads as $failedUpload) {
                 $this->info($failedUpload);

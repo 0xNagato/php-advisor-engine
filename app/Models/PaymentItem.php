@@ -20,11 +20,17 @@ class PaymentItem extends Model
         'amount',
     ];
 
+    /**
+     * @return BelongsTo<User, \App\Models\PaymentItem>
+     */
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
     }
 
+    /**
+     * @return BelongsTo<Payment, \App\Models\PaymentItem>
+     */
     public function payment(): BelongsTo
     {
         return $this->belongsTo(Payment::class);

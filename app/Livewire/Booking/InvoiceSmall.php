@@ -35,7 +35,7 @@ class InvoiceSmall extends Widget
         }
 
         $bookingDate = $this->booking->booking_at->startOfDay();
-        $today = now($timezone)->startOfDay();
+        $today = today();
         $tomorrow = now($timezone)->addDay()->startOfDay();
 
         if ($bookingDate->format('Y-m-d') === $today->format('Y-m-d')) {

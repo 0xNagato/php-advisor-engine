@@ -5,7 +5,7 @@ namespace App\Filament\Pages;
 use App\Models\PaymentItem;
 use Carbon\Carbon;
 use Filament\Pages\Page;
-use Filament\Tables;
+use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Concerns\InteractsWithTable;
 use Filament\Tables\Contracts\HasTable;
 use Filament\Tables\Table;
@@ -34,13 +34,13 @@ class MyPayments extends Page implements HasTable
         return $table
             ->query($query)
             ->columns([
-                Tables\Columns\TextColumn::make('payment.status')
+                TextColumn::make('payment.status')
                     ->label('Status')
                     ->badge(),
-                Tables\Columns\TextColumn::make('created_at')
+                TextColumn::make('created_at')
                     ->label('Date')
                     ->formatStateUsing(fn (string $state): string => Carbon::parse($state)->format('F j, Y')),
-                Tables\Columns\TextColumn::make('amount')
+                TextColumn::make('amount')
                     ->money(fn (PaymentItem $record) => $record->currency, divideBy: 100)
                     ->label('Total'),
             ]);

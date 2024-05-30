@@ -4,7 +4,7 @@ namespace App\Livewire\Concierge;
 
 use App\Models\Concierge;
 use App\Models\Earning;
-use Filament\Tables;
+use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Filament\Widgets\TableWidget as BaseWidget;
 use Illuminate\Database\Eloquent\Model;
@@ -49,10 +49,10 @@ class ConciergeLeaderboard extends BaseWidget
             })
             ->paginated(false)
             ->columns(components: [
-                Tables\Columns\TextColumn::make('rank')
+                TextColumn::make('rank')
                     ->label('Rank')
                     ->rowIndex(),
-                Tables\Columns\TextColumn::make('user_name')
+                TextColumn::make('user_name')
                     ->label('Concierge Name')
                     ->formatStateUsing(function ($state, $record) {
                         // current user is concierge display their name if not display the name of the ******* else display names
@@ -66,7 +66,7 @@ class ConciergeLeaderboard extends BaseWidget
 
                         return $state;
                     }),
-                Tables\Columns\TextColumn::make('total_earned')
+                TextColumn::make('total_earned')
                     ->label('Earned')
                     ->money('USD', divideBy: 100),
             ]);

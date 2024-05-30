@@ -50,9 +50,7 @@ class Twilio extends Connector
      */
     public function whatsapp(string $phone, string $text): Response
     {
-        if (Str::startsWith($phone, 'whatsapp:')) {
-            throw new Exception('Phone Number should not start with whatsapp:');
-        }
+        throw_if(Str::startsWith($phone, 'whatsapp:'), new Exception('Phone Number should not start with whatsapp:'));
 
         Log::info('Sending WhatsApp message to '.$phone, [
             'text' => $text,

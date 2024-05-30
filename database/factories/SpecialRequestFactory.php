@@ -2,10 +2,11 @@
 
 namespace Database\Factories;
 
+use App\Models\SpecialRequest;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\SpecialRequest>
+ * @extends Factory<SpecialRequest>
  */
 class SpecialRequestFactory extends Factory
 {

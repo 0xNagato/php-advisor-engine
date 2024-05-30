@@ -23,16 +23,25 @@ class Earning extends Model
         'confirmed_at',
     ];
 
+    /**
+     * @return BelongsTo<User, \App\Models\Earning>
+     */
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
     }
 
+    /**
+     * @return BelongsTo<Booking, \App\Models\Earning>
+     */
     public function booking(): BelongsTo
     {
         return $this->belongsTo(Booking::class);
     }
 
+    /**
+     * @return BelongsTo<Payment, \App\Models\Earning>
+     */
     public function payment(): BelongsTo
     {
         return $this->belongsTo(Payment::class);

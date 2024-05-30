@@ -28,6 +28,9 @@ class RestaurantTimeSlot extends Model
         'prime_time_fee',
     ];
 
+    /**
+     * @return BelongsTo<ScheduleTemplate, \App\Models\RestaurantTimeSlot>
+     */
     public function scheduleTemplate(): BelongsTo
     {
         return $this->belongsTo(ScheduleTemplate::class);

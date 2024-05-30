@@ -4,6 +4,7 @@ use App\Models\Restaurant;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Str;
 
 return new class extends Migration
 {
@@ -18,7 +19,7 @@ return new class extends Migration
 
         $restaurants = Restaurant::all();
         foreach ($restaurants as $restaurant) {
-            $restaurant->slug = \Illuminate\Support\Str::slug($restaurant->region.' '.$restaurant->restaurant_name);
+            $restaurant->slug = Str::slug($restaurant->region.' '.$restaurant->restaurant_name);
             $restaurant->save();
         }
 

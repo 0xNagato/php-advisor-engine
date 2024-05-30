@@ -22,6 +22,9 @@ class ScheduleTemplate extends Model
         'party_size',
     ];
 
+    /**
+     * @return BelongsTo<Restaurant, \App\Models\ScheduleTemplate>
+     */
     public function restaurant(): BelongsTo
     {
         return $this->belongsTo(Restaurant::class);

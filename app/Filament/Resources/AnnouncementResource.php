@@ -3,16 +3,20 @@
 namespace App\Filament\Resources;
 
 use App\Events\AnnouncementCreated;
-use App\Filament\Resources\AnnouncementResource\Pages;
+use App\Filament\Resources\AnnouncementResource\Pages\CreateAnnouncement;
+use App\Filament\Resources\AnnouncementResource\Pages\EditAnnouncement;
+use App\Filament\Resources\AnnouncementResource\Pages\ListAnnouncements;
 use App\Models\Announcement;
 use App\Models\Region;
 use App\Models\User;
-use Filament\Forms;
+use Filament\Forms\Components\MarkdownEditor;
 use Filament\Forms\Components\Section;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\TextInput;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
-use Filament\Tables;
 use Filament\Tables\Actions\Action;
+use Filament\Tables\Actions\EditAction;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Spatie\Permission\Models\Role;
@@ -43,18 +47,18 @@ class AnnouncementResource extends Resource
                 Section::make('New Annoucement')
                     ->icon('heroicon-o-newspaper')
                     ->schema([
-                        Forms\Components\TextInput::make('title'),
-                        Forms\Components\MarkdownEditor::make('message'),
-                        Forms\Components\TextInput::make('call_to_action_title'),
-                        Forms\Components\TextInput::make('call_to_action_url'),
-                        Forms\Components\Select::make('region')
+                        TextInput::make('title'),
+                        MarkdownEditor::make('message'),
+                        TextInput::make('call_to_action_title'),
+                        TextInput::make('call_to_action_url'),
+                        Select::make('region')
                             ->label('Region')
                             ->options(Region::all()->pluck('name', 'id')),
-                        Forms\Components\Select::make('recipient_roles')
+                        Select::make('recipient_roles')
                             ->label('Recipient Roles')
                             ->options($roles)
                             ->multiple(),
-                        Forms\Components\Select::make('recipient_user_ids')
+                        Select::make('recipient_user_ids')
                             ->label('Recipient Users')
                             ->options($recipients)
                             ->multiple()
@@ -78,7 +82,7 @@ class AnnouncementResource extends Resource
                         $announcement->update(['published_at' => now()]);
                         AnnouncementCreated::dispatch($announcement);
                     }),
-                Tables\Actions\EditAction::make(),
+                EditAction::make(),
             ])
             ->paginated(false);
     }
@@ -86,9 +90,9 @@ class AnnouncementResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ListAnnouncements::route('/'),
-            'create' => Pages\CreateAnnouncement::route('/create'),
-            'edit' => Pages\EditAnnouncement::route('/{record}/edit'),
+            'index' => ListAnnouncements::route('/'),
+            'create' => CreateAnnouncement::route('/create'),
+            'edit' => EditAnnouncement::route('/{record}/edit'),
         ];
     }
 }

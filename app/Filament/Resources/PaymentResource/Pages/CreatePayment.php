@@ -6,6 +6,7 @@ use App\Enums\EarningType;
 use App\Filament\Resources\PaymentResource;
 use App\Models\Earning;
 use App\Models\Payment;
+use Filament\Actions\Action;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\CreateRecord;
 
@@ -79,7 +80,7 @@ class CreatePayment extends CreateRecord
             ->title('Payment Created');
     }
 
-    protected function getCreateFormAction(): \Filament\Actions\Action
+    protected function getCreateFormAction(): Action
     {
         return parent::getCreateFormAction()
             ->disabled(

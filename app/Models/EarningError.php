@@ -24,6 +24,9 @@ class EarningError extends Model
         'total_fee',
     ];
 
+    /**
+     * @return BelongsTo<Booking, \App\Models\EarningError>
+     */
     public function booking(): BelongsTo
     {
         return $this->belongsTo(Booking::class);

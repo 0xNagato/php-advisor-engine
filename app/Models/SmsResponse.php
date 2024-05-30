@@ -16,6 +16,9 @@ class SmsResponse extends Model
         'response',
     ];
 
+    /**
+     * @return BelongsTo<Booking, \App\Models\SmsResponse>
+     */
     public function booking(): BelongsTo
     {
         return $this->belongsTo(Booking::class);

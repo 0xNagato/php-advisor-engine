@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Data\RestaurantContactData;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -128,23 +129,31 @@ class Restaurant extends Model
         $this->scheduleTemplates()->insert($schedulesData);
     }
 
+    /**
+     * @return HasMany<ScheduleTemplate>
+     */
     public function scheduleTemplates(): HasMany
     {
         return $this->hasMany(ScheduleTemplate::class);
     }
 
+    /**
+     * @return HasManyThrough<RestaurantTimeSlot>
+     */
     public function timeSlots(): HasManyThrough
     {
         return $this->hasManyThrough(RestaurantTimeSlot::class, ScheduleTemplate::class);
     }
 
-    public function getLogoAttribute(): ?string
+    protected function logo(): Attribute
     {
-        return $this->restaurant_logo_path ? Storage::url($this->restaurant_logo_path) : null;
+        return Attribute::make(get: fn () => $this->restaurant_logo_path ? Storage::url($this->restaurant_logo_path) : null);
     }
 
     /**
      * Get the schedules for the restaurant.
+     *
+     * @return HasMany<ScheduleWithBooking>
      */
     public function schedules(): HasMany
     {
@@ -153,12 +162,17 @@ class Restaurant extends Model
 
     /**
      * Get the user that owns the restaurant.
+     *
+     * @return BelongsTo<User, \App\Models\Restaurant>
      */
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
     }
 
+    /**
+     * @return BelongsTo<Region, \App\Models\Restaurant>
+     */
     public function inRegion(): BelongsTo
     {
         return $this->belongsTo(Region::class, 'region', 'id');
@@ -171,6 +185,9 @@ class Restaurant extends Model
         })->where('is_suspended', false);
     }
 
+    /**
+     * @return HasMany<SpecialPricingRestaurant>
+     */
     public function specialPricing(): HasMany
     {
         return $this->hasMany(SpecialPricingRestaurant::class);

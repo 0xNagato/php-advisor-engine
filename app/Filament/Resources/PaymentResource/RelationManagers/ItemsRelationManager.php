@@ -7,9 +7,9 @@ use App\Models\PaymentItem;
 use Carbon\Carbon;
 use Filament\Actions\Exports\Models\Export;
 use Filament\Resources\RelationManagers\RelationManager;
-use Filament\Tables;
 use Filament\Tables\Actions\ExportAction;
 use Filament\Tables\Columns\Summarizers\Sum;
+use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 
 class ItemsRelationManager extends RelationManager
@@ -21,13 +21,13 @@ class ItemsRelationManager extends RelationManager
         return $table
             ->recordTitleAttribute('user')
             ->columns([
-                Tables\Columns\TextColumn::make('user.first_name')
+                TextColumn::make('user.first_name')
                     ->label('First Name'),
-                Tables\Columns\TextColumn::make('user.last_name')
+                TextColumn::make('user.last_name')
                     ->label('Last Name'),
-                Tables\Columns\TextColumn::make('created_at')
+                TextColumn::make('created_at')
                     ->formatStateUsing(fn (string $state): string => Carbon::parse($state)->format('F j, Y')),
-                Tables\Columns\TextColumn::make('amount')
+                TextColumn::make('amount')
                     ->summarize(
                         Sum::make()->label('Total')->money(
                             fn (PaymentItem $record) => $record->currency, divideBy: 100

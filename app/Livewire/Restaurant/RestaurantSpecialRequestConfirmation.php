@@ -9,6 +9,7 @@ use App\Events\SpecialRequestChangesRequested;
 use App\Events\SpecialRequestRejected;
 use App\Models\SpecialRequest;
 use Filament\Forms\Components\Actions;
+use Filament\Forms\Components\Actions\Action;
 use Filament\Forms\Components\Grid;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
@@ -39,9 +40,7 @@ class RestaurantSpecialRequestConfirmation extends Page
 
     public function mount(string $token): void
     {
-        if (! request()?->hasValidSignature()) {
-            abort(401);
-        }
+        abort_unless(request()?->hasValidSignature(), 401);
 
         $this->specialRequest = SpecialRequest::query()
             ->where('uuid', $token)
@@ -74,14 +73,14 @@ class RestaurantSpecialRequestConfirmation extends Page
                     ->extraAttributes(['class' => 'grid-buttons'])
                     ->schema([
                         Actions::make([
-                            Actions\Action::make('showRequestChangesForm')
+                            Action::make('showRequestChangesForm')
                                 ->label('Make Changes')
                                 ->action(fn () => ($this->showRequestChangesForm = true))
                                 ->visible(fn () => $this->showRequestChangesForm === false)
                                 ->button(),
                         ])->fullWidth(),
                         Actions::make([
-                            Actions\Action::make('confirmRequest')
+                            Action::make('confirmRequest')
                                 ->label('Accept Request')
                                 ->color('success')
                                 ->requiresConfirmation('Are you sure you want to accept this request?')
@@ -89,7 +88,7 @@ class RestaurantSpecialRequestConfirmation extends Page
                                 ->action(fn () => $this->handleConfirmRequest()),
                         ])->fullWidth(),
                         Actions::make([
-                            Actions\Action::make('denyRequest')
+                            Action::make('denyRequest')
                                 ->label('Deny Request')
                                 ->requiresConfirmation('Are you sure you want to deny this request?')
                                 ->color(Color::Gray)
@@ -131,12 +130,12 @@ class RestaurantSpecialRequestConfirmation extends Page
                     ->columnSpanFull()
                     ->placeholder('Message to the Concierge (optional)'),
                 Actions::make([
-                    Actions\Action::make('requestChanges')
+                    Action::make('requestChanges')
                         ->label('Submit Changes')
                         ->requiresConfirmation('Are you sure you want to request changes?')
                         ->action(fn () => $this->handleRequestChange())
                         ->button(),
-                    Actions\Action::make('cancel')
+                    Action::make('cancel')
                         ->label('Cancel')
                         ->color(Color::Gray)
                         ->action(fn () => ($this->showRequestChangesForm = false))

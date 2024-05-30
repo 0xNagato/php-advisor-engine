@@ -4,7 +4,7 @@ namespace App\Livewire\Restaurant;
 
 use App\Models\Earning;
 use App\Models\Restaurant;
-use Filament\Tables;
+use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Filament\Widgets\TableWidget as BaseWidget;
 use Illuminate\Database\Eloquent\Model;
@@ -47,10 +47,10 @@ class RestaurantLeaderboard extends BaseWidget
             })
             ->paginated(false)
             ->columns(components: [
-                Tables\Columns\TextColumn::make('rank')
+                TextColumn::make('rank')
                     ->label('Rank')
                     ->rowIndex(),
-                Tables\Columns\TextColumn::make('restaurant_name')
+                TextColumn::make('restaurant_name')
                     ->label('Restaurant Name')
                     ->formatStateUsing(function ($state, $record) {
                         // current user is restaurant display their name if not display the name of the ******* else display names
@@ -64,7 +64,7 @@ class RestaurantLeaderboard extends BaseWidget
 
                         return $state;
                     }),
-                Tables\Columns\TextColumn::make('total_earned')
+                TextColumn::make('total_earned')
                     ->label('Earned')
                     ->money('USD', divideBy: 100),
             ]);

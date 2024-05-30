@@ -149,7 +149,7 @@ class PrimeCalendar extends Page
         }
 
         // Batch insert new records
-        if (! empty($inserts)) {
+        if (filled($inserts)) {
             RestaurantTimeSlot::insert($inserts);
         }
 

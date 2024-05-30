@@ -18,9 +18,7 @@ class DownloadInvoiceController extends Controller
 
         $disk = Storage::disk('do');
 
-        if (! $disk->exists($invoicePath)) {
-            abort(404, 'File not found.');
-        }
+        abort_unless($disk->exists($invoicePath), 404, 'File not found.');
 
         $fileContents = $disk->get($invoicePath);
 

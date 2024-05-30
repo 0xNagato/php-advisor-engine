@@ -2,11 +2,14 @@
 
 namespace App\Filament\Resources;
 
-use App\Filament\Resources\PartnerResource\Pages;
+use App\Filament\Resources\PartnerResource\Pages\CreatePartner;
+use App\Filament\Resources\PartnerResource\Pages\EditPartner;
+use App\Filament\Resources\PartnerResource\Pages\ListPartners;
+use App\Filament\Resources\PartnerResource\Pages\ViewPartner;
 use App\Models\Partner;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
-use Filament\Tables;
+use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 
 class PartnerResource extends Resource
@@ -40,23 +43,23 @@ class PartnerResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('user.name')
+                TextColumn::make('user.name')
                     ->numeric()
                     ->searchable(['first_name', 'last_name'])
                     ->sortable(),
-                Tables\Columns\TextColumn::make('total_earned')
+                TextColumn::make('total_earned')
                     ->label('Earned')
                     ->alignRight()
                     ->money('USD', divideBy: 100),
-                Tables\Columns\TextColumn::make('bookings')
+                TextColumn::make('bookings')
                     ->label('Bookings')
                     ->alignRight()
                     ->numeric(),
-                Tables\Columns\TextColumn::make('created_at')
+                TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
-                Tables\Columns\TextColumn::make('updated_at')
+                TextColumn::make('updated_at')
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
@@ -72,10 +75,10 @@ class PartnerResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ListPartners::route('/'),
-            'create' => Pages\CreatePartner::route('/create'),
-            'view' => Pages\ViewPartner::route('/{record}'),
-            'edit' => Pages\EditPartner::route('/{record}/edit'),
+            'index' => ListPartners::route('/'),
+            'create' => CreatePartner::route('/create'),
+            'view' => ViewPartner::route('/{record}'),
+            'edit' => EditPartner::route('/{record}/edit'),
         ];
     }
 }
