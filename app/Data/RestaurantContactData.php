@@ -12,11 +12,17 @@ class RestaurantContactData extends Data
         public string $contact_name,
         public string $contact_phone,
         public bool $use_for_reservations,
+        public ?NotificationPreferencesData $preferences = null,
     ) {
     }
 
     public function toNotifiable(): AnonymousNotifiable
     {
         return (new AnonymousNotifiable)->route(TwilioChannel::class, $this->contact_phone);
+    }
+
+    public function toChannel(): array
+    {
+        return $this->preferences?->toChannel() ?? [];
     }
 }

@@ -60,6 +60,7 @@ class User extends Authenticatable implements FilamentUser, HasAvatar
         'state',
         'zip',
         'country',
+        'preferences',
     ];
 
     /**
