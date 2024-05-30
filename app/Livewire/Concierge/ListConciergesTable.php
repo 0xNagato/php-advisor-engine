@@ -24,9 +24,7 @@ class ListConciergesTable extends BaseWidget
             ->recordUrl(fn (Concierge $record) => ViewConcierge::getUrl(['record' => $record]))
             ->columns([
                 TextColumn::make('user')
-                    ->formatStateUsing(function (Concierge $record) {
-                        return view('partials.concierge-user-info-column', ['record' => $record->user]);
-                    }),
+                    ->formatStateUsing(fn(Concierge $record) => view('partials.concierge-user-info-column', ['record' => $record->user])),
                 TextColumn::make('hotel_name')
                     ->label('Co Name'),
                 TextColumn::make('id')
@@ -42,10 +40,8 @@ class ListConciergesTable extends BaseWidget
                     ->alignCenter()
                     ->numeric(),
                 TextColumn::make('user.authentications.login_at')
-                    ->formatStateUsing(function (Concierge $record) {
-                        return Carbon::parse($record->user->authentications()->orderByDesc('login_at')->first()->login_at, auth()->user()->timezone)
-                            ->diffForHumans();
-                    })
+                    ->formatStateUsing(fn(Concierge $record) => Carbon::parse($record->user->authentications()->orderByDesc('login_at')->first()->login_at, auth()->user()->timezone)
+                        ->diffForHumans())
                     ->label('Last Login'),
             ]);
     }

@@ -29,12 +29,10 @@ class RestaurantReferralsTable extends BaseWidget
     public function table(Table $table): Table
     {
         return $table
-            ->query(function () {
-                return User::whereHas('referral', static function ($query) {
-                    $query->where('type', 'restaurant')
-                        ->where('referrer_id', auth()->id());
-                });
-            })
+            ->query(fn() => User::whereHas('referral', static function ($query) {
+                $query->where('type', 'restaurant')
+                    ->where('referrer_id', auth()->id());
+            }))
             ->recordUrl(function (User $record) {
                 if ($record->has_secured) {
                     return RestaurantEarnings::getUrl([$record->restaurant->id]);
@@ -46,9 +44,7 @@ class RestaurantReferralsTable extends BaseWidget
             ->columns([
                 TextColumn::make('restaurant.restaurant_name')
                     ->label('Restaurant')
-                    ->formatStateUsing(function (User $record) {
-                        return view('partials.restaurant-referral-info-column', ['record' => $record]);
-                    }),
+                    ->formatStateUsing(fn(User $record) => view('partials.restaurant-referral-info-column', ['record' => $record])),
                 IconColumn::make('has_secured')
                     ->label('Active')
                     ->alignCenter()

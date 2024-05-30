@@ -30,11 +30,6 @@ class ScheduleWithBooking extends Model
 
     public $timestamps = false;
 
-    protected $casts = [
-        'booking_date' => 'date',
-        'booking_at' => 'datetime',
-    ];
-
     public function restaurant(): BelongsTo
     {
         return $this->belongsTo(Restaurant::class);
@@ -85,5 +80,12 @@ class ScheduleWithBooking extends Model
     public function getHasLowInventoryAttribute(): bool
     {
         return $this->is_bookable && $this->remaining_tables <= 5;
+    }
+    protected function casts(): array
+    {
+        return [
+            'booking_date' => 'date',
+            'booking_at' => 'datetime',
+        ];
     }
 }

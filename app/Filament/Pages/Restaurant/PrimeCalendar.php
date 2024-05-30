@@ -62,7 +62,7 @@ class PrimeCalendar extends Page
             $slots = [];
             $currentTime = $date->copy()->setTimeFromTimeString($earliestStartTime->format('H:i:s'));
             $endTime = $date->copy()->setTimeFromTimeString($latestEndTime->format('H:i:s'));
-            $dayOfWeek = strtolower($date->format('l'));
+            $dayOfWeek = strtolower((string) $date->format('l'));
 
             while ($currentTime->lessThan($endTime)) {
                 $timeSlotStart = $currentTime->copy()->format('H:i:s');

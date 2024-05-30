@@ -21,7 +21,7 @@ class RestaurantRecentBookings extends BaseWidget
 
     protected static ?int $sort = 3;
 
-    public ?Restaurant $restaurant;
+    public ?Restaurant $restaurant = null;
 
     public bool $hideRestaurant = false;
 
@@ -60,9 +60,7 @@ class RestaurantRecentBookings extends BaseWidget
             ->columns([
                 TextColumn::make('guest_name')
                     ->label('Guest')
-                    ->formatStateUsing(function (Booking $booking) {
-                        return "$booking->guest_name ($booking->guest_count)";
-                    })
+                    ->formatStateUsing(fn(Booking $booking) => "$booking->guest_name ($booking->guest_count)")
                     ->searchable(),
                 TextColumn::make('booking_at')
                     ->label('Date')

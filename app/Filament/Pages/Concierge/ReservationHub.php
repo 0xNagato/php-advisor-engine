@@ -50,10 +50,10 @@ class ReservationHub extends Page
     protected $listeners = ['booking-confirmed' => '$refresh'];
 
     #[Session]
-    public ?string $qrCode;
+    public ?string $qrCode = null;
 
     #[Session]
-    public ?string $bookingUrl;
+    public ?string $bookingUrl = null;
 
     #[Session]
     public ?Booking $booking = null;

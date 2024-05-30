@@ -72,8 +72,7 @@ class FilamentRenderHookProvider extends ServiceProvider
         );
 
         if (app()->environment('production')) {
-            Filament::registerRenderHook(PanelsRenderHook::HEAD_START, static function () {
-                return new HtmlString("
+            Filament::registerRenderHook(PanelsRenderHook::HEAD_START, static fn() => new HtmlString("
                 <!-- Google tag (gtag.js) -->
                 <script async src='https://www.googletagmanager.com/gtag/js?id=G-Z8HQ7BTL4F'></script>
                 <script>
@@ -87,8 +86,7 @@ class FilamentRenderHookProvider extends ServiceProvider
                     src='https://js.sentry-cdn.com/13f74541d55ad7fbd95d3eefa72399c9.min.js'
                     crossorigin='anonymous'
                 ></script>
-            ");
-            });
+            "));
         }
 
         FilamentView::registerRenderHook(

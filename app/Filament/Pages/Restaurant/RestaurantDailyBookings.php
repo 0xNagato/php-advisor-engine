@@ -66,9 +66,7 @@ class RestaurantDailyBookings extends Page implements HasTable
             ->columns([
                 TextColumn::make('id')
                     ->label('Booking')
-                    ->formatStateUsing(function (Booking $record) {
-                        return view('partials.booking-info-column', ['record' => $record]);
-                    }),
+                    ->formatStateUsing(fn(Booking $record) => view('partials.booking-info-column', ['record' => $record])),
                 TextColumn::make('earnings')
                     ->label('Earnings')
                     ->alignRight()

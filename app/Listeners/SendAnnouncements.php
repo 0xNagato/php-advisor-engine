@@ -27,12 +27,10 @@ class SendAnnouncements implements ShouldQueue
         $region = $event->announcement->region;
 
         $recipients = collect($recipient_roles)
-            ->flatMap(function ($role) use ($region) {
-                return User::when($region !== null, function ($query) use ($region) {
-                    $query->where('region', $region);
-                })
-                    ->role((int) $role)->pluck('id')->all();
+            ->flatMap(fn($role) => User::when($region !== null, function ($query) use ($region) {
+                $query->where('region', $region);
             })
+                ->role((int) $role)->pluck('id')->all())
             ->concat($recipient_user_ids)
             ->map('intval')
             ->unique();

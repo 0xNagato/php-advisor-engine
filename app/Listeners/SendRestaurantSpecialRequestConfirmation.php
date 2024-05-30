@@ -14,7 +14,7 @@ use Spatie\LaravelData\DataCollection;
 
 class SendRestaurantSpecialRequestConfirmation
 {
-    const int SECURE_LINK_LIFE_IN_DAYS = 7;
+    public const int SECURE_LINK_LIFE_IN_DAYS = 7;
 
     /**
      * Create the event listener.

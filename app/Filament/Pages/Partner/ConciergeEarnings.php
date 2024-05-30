@@ -25,7 +25,7 @@ class ConciergeEarnings extends Page
 
     protected static ?string $slug = 'partner/concierge/earnings/{conciergeId?}';
 
-    public ?int $conciergeId;
+    public ?int $conciergeId = null;
 
     public static function canAccess(): bool
     {

@@ -74,17 +74,6 @@ class User extends Authenticatable implements FilamentUser, HasAvatar
     ];
 
     /**
-     * The attributes that should be cast.
-     *
-     * @var array<string, string>
-     */
-    protected $casts = [
-        'email_verified_at' => 'datetime',
-        'secured_at' => 'datetime',
-        'payout' => AsArrayObject::class,
-    ];
-
-    /**
      * The accessors to append to the model's array form.
      *
      * @var array<int, string>
@@ -172,7 +161,7 @@ class User extends Authenticatable implements FilamentUser, HasAvatar
 
     public function referrer(): HasOneThrough
     {
-        return $this->hasOneThrough(__CLASS__, Referral::class, 'user_id', 'id', 'id', 'referrer_id');
+        return $this->hasOneThrough(self::class, Referral::class, 'user_id', 'id', 'id', 'referrer_id');
     }
 
     public function getHasSecuredAttribute(): bool
@@ -272,5 +261,18 @@ class User extends Authenticatable implements FilamentUser, HasAvatar
     public function deviceKey(): string
     {
         return md5(request()->userAgent().request()->ip().$this->id);
+    }
+    /**
+     * The attributes that should be cast.
+     *
+     * @return array<string, string>
+     */
+    protected function casts(): array
+    {
+        return [
+            'email_verified_at' => 'datetime',
+            'secured_at' => 'datetime',
+            'payout' => AsArrayObject::class,
+        ];
     }
 }

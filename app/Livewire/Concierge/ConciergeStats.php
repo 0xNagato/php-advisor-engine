@@ -15,7 +15,7 @@ class ConciergeStats extends Widget
 
     protected static bool $isLazy = false;
 
-    public ?Concierge $concierge;
+    public ?Concierge $concierge = null;
 
     public array $stats;
 

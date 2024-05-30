@@ -40,9 +40,7 @@ class ListBookings extends ListRecords
             ->columns([
                 TextColumn::make('id')
                     ->label('Booking')
-                    ->formatStateUsing(function (Booking $record) {
-                        return view('partials.booking-info-column', ['record' => $record]);
-                    }),
+                    ->formatStateUsing(fn(Booking $record) => view('partials.booking-info-column', ['record' => $record])),
                 TextColumn::make('total_fee')
                     ->money(fn ($record) => $record->currency, divideBy: 100)
                     ->alignRight(),

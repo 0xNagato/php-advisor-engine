@@ -18,7 +18,7 @@ class ConciergeRecentBookings extends BaseWidget
 
     protected static ?int $sort = 3;
 
-    public ?Concierge $concierge;
+    public ?Concierge $concierge = null;
 
     public bool $hideConcierge = false;
 

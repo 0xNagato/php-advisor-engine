@@ -61,14 +61,6 @@ class Restaurant extends Model
         'non_prime_type',
     ];
 
-    protected $casts = [
-        'open_days' => 'array',
-        'contacts' => DataCollection::class.':'.RestaurantContactData::class,
-        'non_prime_time' => 'array',
-        'business_hours' => 'array',
-        'party_sizes' => 'array',
-    ];
-
     protected static function boot(): void
     {
         parent::boot();
@@ -200,6 +192,16 @@ class Restaurant extends Model
         return [
             'earliest_start_time' => $earliestStartTime,
             'latest_end_time' => $latestEndTime,
+        ];
+    }
+    protected function casts(): array
+    {
+        return [
+            'open_days' => 'array',
+            'contacts' => DataCollection::class.':'.RestaurantContactData::class,
+            'non_prime_time' => 'array',
+            'business_hours' => 'array',
+            'party_sizes' => 'array',
         ];
     }
 }

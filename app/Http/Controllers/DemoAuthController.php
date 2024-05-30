@@ -29,7 +29,7 @@ class DemoAuthController extends Controller
     public function redirect()
     {
         $url = config('app.url');
-        $host = parse_url($url, PHP_URL_HOST);
+        $host = parse_url((string) $url, PHP_URL_HOST);
         $parts = explode('.', $host);
         $domain = '.'.implode('.', array_slice($parts, -2));
 

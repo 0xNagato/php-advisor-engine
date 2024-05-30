@@ -88,7 +88,7 @@ class Concierge extends Model
     public function referringConcierge(): HasOneThrough
     {
         return $this->hasOneThrough(
-            __CLASS__,
+            self::class,
             User::class,
             'id',
             'id',
@@ -100,7 +100,7 @@ class Concierge extends Model
     public function concierges(): HasManyThrough
     {
         return $this->hasManyThrough(
-            __CLASS__,
+            self::class,
             User::class,
             'concierge_referral_id',
         );

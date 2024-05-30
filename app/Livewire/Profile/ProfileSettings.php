@@ -50,9 +50,7 @@ class ProfileSettings extends Widget implements HasForms
                 ->directory('profile-photos')
                 ->optimize('webp')
                 ->moveFiles()
-                ->hidden(function () {
-                    return auth()->user()->hasRole('restaurant');
-                }),
+                ->hidden(fn() => auth()->user()->hasRole('restaurant')),
             TextInput::make('first_name')
                 ->required()
                 ->label('First Name'),

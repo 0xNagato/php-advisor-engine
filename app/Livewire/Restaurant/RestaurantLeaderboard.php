@@ -14,7 +14,7 @@ class RestaurantLeaderboard extends BaseWidget
 {
     protected static bool $isLazy = true;
 
-    public ?Restaurant $restaurant;
+    public ?Restaurant $restaurant = null;
 
     public bool $showFilters = false;
 

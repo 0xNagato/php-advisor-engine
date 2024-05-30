@@ -12,7 +12,7 @@ use Illuminate\Support\Facades\DB;
 
 class PartnerLeaderboard extends BaseWidget
 {
-    public ?Partner $partner;
+    public ?Partner $partner = null;
 
     public bool $showFilters = false;
 

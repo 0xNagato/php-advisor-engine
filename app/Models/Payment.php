@@ -21,10 +21,6 @@ class Payment extends Model
         'status',
     ];
 
-    protected $casts = [
-        'status' => PaymentStatus::class,
-    ];
-
     public function earnings(): HasMany
     {
         return $this->hasMany(Earning::class);
@@ -40,5 +36,11 @@ class Payment extends Model
         $this->update([
             'status' => PaymentStatus::PAID,
         ]);
+    }
+    protected function casts(): array
+    {
+        return [
+            'status' => PaymentStatus::class,
+        ];
     }
 }

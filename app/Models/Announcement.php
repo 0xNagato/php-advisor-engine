@@ -31,16 +31,6 @@ class Announcement extends Model
         'published_at',
     ];
 
-    /**
-     * The attributes that should be cast.
-     *
-     * @var array<string, string>
-     */
-    protected $casts = [
-        'recipient_roles' => 'array',
-        'recipient_user_ids' => 'array',
-    ];
-
     public function sender(): BelongsTo
     {
         return $this->belongsTo(User::class, 'sender_id');
@@ -49,5 +39,17 @@ class Announcement extends Model
     public function messages(): HasMany
     {
         return $this->hasMany(Message::class);
+    }
+    /**
+     * The attributes that should be cast.
+     *
+     * @return array<string, string>
+     */
+    protected function casts(): array
+    {
+        return [
+            'recipient_roles' => 'array',
+            'recipient_user_ids' => 'array',
+        ];
     }
 }

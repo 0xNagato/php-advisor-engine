@@ -65,16 +65,6 @@ class Booking extends Model
 
     protected $appends = ['guest_name', 'local_formatted_guest_phone'];
 
-    protected $casts = [
-        'booking_at' => 'datetime',
-        'status' => BookingStatus::class,
-        'stripe_charge' => StripeChargeData::class,
-        'confirmed_at' => 'datetime',
-        'clicked_at' => 'datetime',
-        'restaurant_confirmed_at' => 'datetime',
-        'resent_restaurant_confirmation_at' => 'datetime',
-    ];
-
     protected static function boot(): void
     {
         parent::boot();
@@ -428,5 +418,17 @@ class Booking extends Model
             'no_show' => true,
             'status' => BookingStatus::NO_SHOW,
         ]);
+    }
+    protected function casts(): array
+    {
+        return [
+            'booking_at' => 'datetime',
+            'status' => BookingStatus::class,
+            'stripe_charge' => StripeChargeData::class,
+            'confirmed_at' => 'datetime',
+            'clicked_at' => 'datetime',
+            'restaurant_confirmed_at' => 'datetime',
+            'resent_restaurant_confirmation_at' => 'datetime',
+        ];
     }
 }

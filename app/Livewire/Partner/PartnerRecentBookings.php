@@ -18,7 +18,7 @@ class PartnerRecentBookings extends BaseWidget
 
     protected static ?int $sort = 3;
 
-    public ?Partner $partner;
+    public ?Partner $partner = null;
 
     public bool $hidePartner = false;
 

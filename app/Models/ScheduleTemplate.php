@@ -22,13 +22,15 @@ class ScheduleTemplate extends Model
         'party_size',
     ];
 
-    protected $casts = [
-        'is_available' => 'boolean',
-        'prime_time' => 'boolean',
-    ];
-
     public function restaurant(): BelongsTo
     {
         return $this->belongsTo(Restaurant::class);
+    }
+    protected function casts(): array
+    {
+        return [
+            'is_available' => 'boolean',
+            'prime_time' => 'boolean',
+        ];
     }
 }

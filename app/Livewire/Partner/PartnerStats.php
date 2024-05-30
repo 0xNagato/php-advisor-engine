@@ -12,7 +12,7 @@ class PartnerStats extends Widget
 
     protected static bool $isLazy = false;
 
-    public ?Partner $partner;
+    public ?Partner $partner = null;
 
     public array $stats;
 

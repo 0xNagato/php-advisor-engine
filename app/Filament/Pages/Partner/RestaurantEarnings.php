@@ -25,7 +25,7 @@ class RestaurantEarnings extends Page
 
     protected static ?string $slug = 'partner/restaurant/earnings/{restaurantId?}';
 
-    public ?int $restaurantId;
+    public ?int $restaurantId = null;
 
     public static function canAccess(): bool
     {

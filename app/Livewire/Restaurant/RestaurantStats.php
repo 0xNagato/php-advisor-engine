@@ -14,7 +14,7 @@ class RestaurantStats extends Widget
 
     protected static bool $isLazy = false;
 
-    public ?Restaurant $restaurant;
+    public ?Restaurant $restaurant = null;
 
     public RestaurantStatData $stats;
 

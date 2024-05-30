@@ -12,7 +12,7 @@ use Illuminate\Support\Facades\DB;
 
 class ConciergeLeaderboard extends BaseWidget
 {
-    public ?Concierge $concierge;
+    public ?Concierge $concierge = null;
 
     public bool $showFilters = false;
 

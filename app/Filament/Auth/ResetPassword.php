@@ -29,7 +29,7 @@ class ResetPassword extends \Filament\Pages\Auth\PasswordReset\ResetPassword
     public string $hotel_name = '';
 
     #[Url(as: 'email')]
-    public ?string $emailQuery;
+    public ?string $emailQuery = null;
 
     public bool $termsAndConditions = false;
 
@@ -111,9 +111,7 @@ class ResetPassword extends \Filament\Pages\Auth\PasswordReset\ResetPassword
         return Placeholder::make('termsAndConditions')
             ->content($label)
             ->hiddenLabel()
-            ->hidden(function () use ($lowercaseRole) {
-                return ! (empty($this->user->secured_at) && in_array($lowercaseRole, ['concierge', 'restaurant']));
-            });
+            ->hidden(fn() => ! (empty($this->user->secured_at) && in_array($lowercaseRole, ['concierge', 'restaurant'])));
     }
 
     public function resetPassword(): ?PasswordResetResponse

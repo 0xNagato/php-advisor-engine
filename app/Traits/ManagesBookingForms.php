@@ -54,9 +54,7 @@ trait ManagesBookingForms
                 ->default(now($this->timezone)->format('Y-m-d'))
                 ->minDate(now($this->timezone)->format('Y-m-d'))
                 ->maxDate(now($this->timezone)->addDays(self::MAX_DAYS_IN_ADVANCE)->format('Y-m-d'))
-                ->hidden(function (Get $get) {
-                    return $get('radio_date') !== 'select_date';
-                })
+                ->hidden(fn(Get $get) => $get('radio_date') !== 'select_date')
                 ->afterStateUpdated(fn ($state, $set) => $set('date', Carbon::parse($state)->format('Y-m-d')))
                 ->prefixIcon('heroicon-m-calendar')
                 ->native(false)
@@ -64,9 +62,7 @@ trait ManagesBookingForms
             $this->getGuestCountInput(),
             Select::make('reservation_time')
                 ->prefixIcon('heroicon-m-clock')
-                ->options(function (Get $get) {
-                    return $this->getReservationTimeOptions($get('date'));
-                })
+                ->options(fn(Get $get) => $this->getReservationTimeOptions($get('date')))
                 ->disableOptionWhen(function (Get $get, $value) {
                     $isCurrentDay = $get('date') === now($this->timezone)->format('Y-m-d');
 

@@ -56,12 +56,12 @@ class ReservationHoursWidget extends Widget
 
     public function updatedStartTimes($value, $key): void
     {
-        $this->startTimes[$key] = Carbon::createFromFormat('H:i', substr($value, 0, 5))->format('H:i:s');
+        $this->startTimes[$key] = Carbon::createFromFormat('H:i', substr((string) $value, 0, 5))->format('H:i:s');
     }
 
     public function updatedEndTimes($value, $key): void
     {
-        $this->endTimes[$key] = Carbon::createFromFormat('H:i', substr($value, 0, 5))->format('H:i:s');
+        $this->endTimes[$key] = Carbon::createFromFormat('H:i', substr((string) $value, 0, 5))->format('H:i:s');
     }
 
     public function saveHours(): void
@@ -84,8 +84,8 @@ class ReservationHoursWidget extends Widget
                     'endTimes.'.$day => ['required', 'date_format:H:i:s', 'after:startTimes.'.$day],
                 ]);
 
-                $startTime = Carbon::createFromFormat('H:i', substr($this->startTimes[$day], 0, 5))->format('H:i:s');
-                $endTime = Carbon::createFromFormat('H:i', substr($this->endTimes[$day], 0, 5))->format('H:i:s');
+                $startTime = Carbon::createFromFormat('H:i', substr((string) $this->startTimes[$day], 0, 5))->format('H:i:s');
+                $endTime = Carbon::createFromFormat('H:i', substr((string) $this->endTimes[$day], 0, 5))->format('H:i:s');
 
                 $this->startTimes[$day] = $startTime;
                 $this->endTimes[$day] = $endTime;

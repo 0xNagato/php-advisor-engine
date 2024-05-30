@@ -25,16 +25,16 @@ class AvailabilityCalendar extends Page
 
     protected static ?int $navigationSort = -2;
 
-    public ?array $data;
+    public ?array $data = null;
 
     public string $currency;
 
-    public ?string $endTimeForQuery;
+    public ?string $endTimeForQuery = null;
 
     /**
      * @var Collection<Restaurant>|null
      */
-    public ?Collection $restaurants;
+    public ?Collection $restaurants = null;
 
     public function mount(): void
     {
