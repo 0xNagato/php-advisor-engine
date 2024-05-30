@@ -2,11 +2,16 @@
 
 namespace App\Livewire\Profile;
 
+use App\Data\NotificationPreferencesData;
+use Closure;
+use Filament\Forms\Components\Fieldset;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Toggle;
 use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
 use Filament\Forms\Form;
+use Filament\Forms\Get;
 use Filament\Notifications\Notification;
 use Filament\Widgets\Widget;
 use Illuminate\Support\Facades\Storage;
@@ -35,6 +40,9 @@ class ProfileSettings extends Widget implements HasForms
             'email' => auth()->user()->email,
             'phone' => auth()->user()->phone,
             'timezone' => auth()->user()->timezone ?? 'UTC',
+            'preferences' => auth()->user()->preferences ?? NotificationPreferencesData::from([
+                'database' => true,
+            ])->toArray(),
         ]);
     }
 
@@ -79,7 +87,52 @@ class ProfileSettings extends Widget implements HasForms
                 ->searchable()
                 ->selectablePlaceholder(false)
                 ->required(),
-
+            Fieldset::make('preferences')
+                ->label('Notification Preferences')
+                ->statePath('preferences')
+                ->columns(1)
+                ->schema([
+                    Toggle::make('email')
+                        ->label('Email')
+                        ->rules([
+                            fn (Get $get): Closure => function (string $attribute, $value, Closure $fail) use ($get) {
+                                if ($get('sms') === false && $get('whatsapp') === false && $value === false) {
+                                    $fail('Email is required if email, whatsapp are disabled.');
+                                }
+                            },
+                        ])
+                        ->inline(),
+                    Toggle::make('sms')
+                        ->label('SMS')
+                        ->rules([
+                            fn (Get $get): Closure => function (string $attribute, $value, Closure $fail) use ($get) {
+                                if ($get('email') === false && $get('whatsapp') === false && $value === false) {
+                                    $fail('SMS is required if email, whatsapp are disabled.');
+                                }
+                            },
+                        ])
+                        ->inline(),
+                    Toggle::make('whatsapp')
+                        ->label('Whatsapp')
+                        ->rules([
+                            fn (Get $get): Closure => function (string $attribute, $value, Closure $fail) use ($get) {
+                                if ($get('email') === false && $get('sms') === false && $value === false) {
+                                    $fail('Whatsapp is required if email, sms are disabled.');
+                                }
+                            },
+                        ])
+                        ->inline(),
+                    Toggle::make('database')
+                        ->label('Application')
+                        ->inline()
+                        ->rules([
+                            fn (Get $get): Closure => function (string $attribute, $value, Closure $fail) use ($get) {
+                                if ($get('email') === false && $get('sms') === false && $get('whatsapp') === false && $value === false) {
+                                    $fail('Application is required if email, sms, and whatsapp are disabled.');
+                                }
+                            },
+                        ]),
+                ]),
         ])
             ->statePath('data');
     }
@@ -106,8 +159,11 @@ class ProfileSettings extends Widget implements HasForms
 
     protected function updateProfileWithoutTwoFactor(array $data, $user)
     {
-        $profilePhotoPath = $data['profile_photo_path'];
-        Storage::disk('do')->setVisibility($profilePhotoPath, 'public');
+        $profilePhotoPath = $data['profile_photo_path'] ?? null;
+
+        if ($profilePhotoPath) {
+            Storage::disk('do')->setVisibility($profilePhotoPath, 'public');
+        }
 
         $user->update($data);
 

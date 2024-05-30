@@ -3,9 +3,9 @@
 namespace App\Filament\Resources\RestaurantResource\Pages;
 
 use App\Filament\Resources\RestaurantResource;
+use App\Filament\Resources\RestaurantResource\Components\RestaurantContactsForm;
 use App\Models\Restaurant;
 use Filament\Actions\Action;
-use Filament\Forms\Components\Checkbox;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Section;
@@ -64,30 +64,13 @@ class EditRestaurant extends EditRecord
                             ->initialCountry('US'),
 
                     ]),
-
                 Repeater::make('contacts')
                     ->columnSpanFull()
                     ->addActionLabel('Add Contact')
                     ->label('Contacts')
-                    ->schema([
-                        TextInput::make('contact_name')
-                            ->label('Contact Name')
-                            ->required(),
-                        PhoneInput::make('contact_phone')
-                            ->label('Contact Phone')
-                            ->required()
-                            ->onlyCountries(config('app.countries'))
-                            ->displayNumberFormat(PhoneInputNumberType::E164)
-                            ->validateFor(
-                                country: config('app.countries'),
-                                type: PhoneNumberType::MOBILE,
-                                lenient: true,
-                            )
-                            ->initialCountry('US'),
-                        Checkbox::make('use_for_reservations')
-                            ->label('Use for Reservations')
-                            ->default(true),
-                    ]),
+                    ->schema(
+                        RestaurantContactsForm::schema()
+                    ),
 
                 Section::make('Payout Information')
                     ->icon('heroicon-m-currency-dollar')
