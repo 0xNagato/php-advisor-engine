@@ -45,7 +45,10 @@ class SpecialRequests extends Page
 
     public static function canAccess(): bool
     {
-        return auth()->user()?->hasRole('concierge');
+        /** @var \App\Models\User $user */
+        $user = auth()->user();
+
+        return $user->hasRole('concierge');
     }
 
     public function mount(): void
@@ -149,18 +152,9 @@ class SpecialRequests extends Page
     {
         return Select::make('guest_count')
             ->prefixIcon('heroicon-m-users')
-            ->options([
-                6 => '6 Guests',
-                7 => '7 Guests',
-                8 => '8 Guests',
-                9 => '9 Guests',
-                10 => '10 Guests',
-                11 => '11 Guests',
-                12 => '12 Guests',
-                13 => '13 Guests',
-                14 => '14 Guests',
-                15 => '15 Guests',
-            ])
+            ->options(fn () => collect()->range(6, 15)
+                ->mapWithKeys(fn ($value) => [$value => $value.' Guests'])
+            )
             ->placeholder('Party Size')
             ->live()
             ->hiddenLabel()

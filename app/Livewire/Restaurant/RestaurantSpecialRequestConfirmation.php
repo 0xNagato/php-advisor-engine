@@ -2,8 +2,10 @@
 
 namespace App\Livewire\Restaurant;
 
+use App\Data\SpecialRequest\SpecialRequestConversionData;
 use App\Enums\SpecialRequestStatus;
 use App\Events\SpecialRequestAccepted;
+use App\Events\SpecialRequestChangesRequested;
 use App\Events\SpecialRequestRejected;
 use App\Models\SpecialRequest;
 use Filament\Forms\Components\Actions;
@@ -76,7 +78,6 @@ class RestaurantSpecialRequestConfirmation extends Page
                                 ->label('Make Changes')
                                 ->action(fn () => ($this->showRequestChangesForm = true))
                                 ->visible(fn () => $this->showRequestChangesForm === false)
-                                ->size('xs')
                                 ->button(),
                         ])->fullWidth(),
                         Actions::make([
@@ -84,18 +85,16 @@ class RestaurantSpecialRequestConfirmation extends Page
                                 ->label('Accept Request')
                                 ->color('success')
                                 ->requiresConfirmation('Are you sure you want to accept this request?')
-                                ->size('xs')
                                 ->button()
-                                ->action(fn () => $this->confirmRequest()),
+                                ->action(fn () => $this->handleConfirmRequest()),
                         ])->fullWidth(),
                         Actions::make([
                             Actions\Action::make('denyRequest')
                                 ->label('Deny Request')
                                 ->requiresConfirmation('Are you sure you want to deny this request?')
                                 ->color(Color::Gray)
-                                ->size('xs')
                                 ->button()
-                                ->action(fn () => $this->denyRequest()),
+                                ->action(fn () => $this->handleDenyRequest()),
                         ])->fullWidth(),
                     ]),
             ])
@@ -135,6 +134,7 @@ class RestaurantSpecialRequestConfirmation extends Page
                     Actions\Action::make('requestChanges')
                         ->label('Submit Changes')
                         ->requiresConfirmation('Are you sure you want to request changes?')
+                        ->action(fn () => $this->handleRequestChange())
                         ->button(),
                     Actions\Action::make('cancel')
                         ->label('Cancel')
@@ -153,7 +153,7 @@ class RestaurantSpecialRequestConfirmation extends Page
             ->statePath('requestChangesFormData');
     }
 
-    public function confirmRequest(): void
+    public function handleConfirmRequest(): void
     {
         $data = $this->approvalForm->getState();
 
@@ -170,7 +170,7 @@ class RestaurantSpecialRequestConfirmation extends Page
             ->send();
     }
 
-    public function denyRequest(): void
+    public function handleDenyRequest(): void
     {
         $data = $this->approvalForm->getState();
 
@@ -183,6 +183,32 @@ class RestaurantSpecialRequestConfirmation extends Page
 
         Notification::make()
             ->title('Special Request Rejected')
+            ->success()
+            ->send();
+    }
+
+    public function handleRequestChange(): void
+    {
+        $data = $this->requestChangesForm->getState();
+
+        $conversions = $this->specialRequest->conversations;
+        $conversions[] = new SpecialRequestConversionData(
+            name: $this->specialRequest->restaurant->restaurant_name,
+            minimum_spend: $data['minimum_spend'],
+            commission_requested_percentage: $data['commission_requested_percentage'],
+            message: $data['message'],
+            create_at: now(),
+        );
+
+        $this->specialRequest->update([
+            'status' => SpecialRequestStatus::AwaitingReply,
+            'conversations' => $conversions,
+        ]);
+
+        SpecialRequestChangesRequested::dispatch($this->specialRequest);
+
+        Notification::make()
+            ->title('Special Request Changes Submitted')
             ->success()
             ->send();
     }
