@@ -67,7 +67,7 @@ class PaymentInformation extends Page
             ];
         }
 
-        $this->user = User::find(auth()->id());
+        $this->user = User::query()->find(auth()->id());
 
         $this->payout_type = $this->user->payout?->payout_type ?? '';
         $this->payout_name = $this->user->payout?->payout_name ?? '';

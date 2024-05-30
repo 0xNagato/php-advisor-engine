@@ -87,7 +87,7 @@ class ReservationHub extends Page
 
     public function mount(): void
     {
-        $region = Region::find(session('region', 'miami'));
+        $region = Region::query()->find(session('region', 'miami'));
         $this->timezone = $region->timezone;
         $this->currency = $region->currency;
 
@@ -103,7 +103,7 @@ class ReservationHub extends Page
         // This is used by the availability calendar to pre-fill the form
         // this should eventually be refactored into its own service.
         if (! $this->booking && $this->scheduleTemplateId && $this->date) {
-            $schedule = ScheduleTemplate::find($this->scheduleTemplateId);
+            $schedule = ScheduleTemplate::query()->find($this->scheduleTemplateId);
 
             $this->form->fill([
                 'date' => $this->date,
@@ -323,7 +323,7 @@ class ReservationHub extends Page
     #[On('region-changed')]
     public function regionChanged(): void
     {
-        $region = Region::find(session('region', 'miami'));
+        $region = Region::query()->find(session('region', 'miami'));
 
         $this->timezone = $region->timezone;
         $this->currency = $region->currency;

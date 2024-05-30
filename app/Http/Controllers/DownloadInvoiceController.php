@@ -12,7 +12,7 @@ class DownloadInvoiceController extends Controller
      */
     public function __invoke(string $uuid)
     {
-        $booking = Booking::where('uuid', $uuid)->firstOrFail();
+        $booking = Booking::query()->where('uuid', $uuid)->firstOrFail();
 
         $invoicePath = $booking->invoice_path;
 

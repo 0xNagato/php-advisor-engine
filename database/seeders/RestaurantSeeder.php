@@ -133,7 +133,7 @@ class RestaurantSeeder extends Seeder
 
         foreach ($regions as $region => $restaurants) {
             foreach ($restaurants as $restaurantName) {
-                $partner = Partner::inRandomOrder()->first();
+                $partner = Partner::query()->inRandomOrder()->first();
                 $email = 'restaurant@'.Str::slug($restaurantName).'-'.$region.'.com';
 
                 $user = User::factory([
@@ -149,7 +149,7 @@ class RestaurantSeeder extends Seeder
 
                 $user->assignRole('restaurant');
 
-                Referral::create([
+                Referral::query()->create([
                     'referrer_id' => $partner?->user->id,
                     'user_id' => $user->id,
                     'email' => $email,

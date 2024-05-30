@@ -149,7 +149,7 @@ class ConciergeInvitation extends SimplePage
 
         $data = $this->form->getState();
 
-        $referrer = User::findOrFail($this->referral->referrer_id);
+        $referrer = User::query()->findOrFail($this->referral->referrer_id);
         $role = strtolower($referrer->main_role);
 
         $userData = [
@@ -167,7 +167,7 @@ class ConciergeInvitation extends SimplePage
             $userData['concierge_referral_id'] = $referrer->concierge->id;
         }
 
-        $user = User::create($userData);
+        $user = User::query()->create($userData);
 
         $this->referral->update([
             'user_id' => $user->id,

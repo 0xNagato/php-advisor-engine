@@ -127,7 +127,7 @@ class Booking extends Model
                 $restaurant_partner_earnings = 0;
                 $concierge_partner_earnings = 0;
 
-                Earning::create([
+                Earning::query()->create([
                     'booking_id' => $booking->id,
                     'user_id' => $booking->restaurant->user->id,
                     'type' => 'restaurant',
@@ -137,7 +137,7 @@ class Booking extends Model
                     'percentage_of' => 'total_fee',
                 ]);
 
-                Earning::create([
+                Earning::query()->create([
                     'booking_id' => $booking->id,
                     'user_id' => $booking->concierge->user->id,
                     'type' => 'concierge',
@@ -155,7 +155,7 @@ class Booking extends Model
                     $platform -= $amount;
                     $concierge_referral_level_1_earnings = $amount;
 
-                    Earning::create([
+                    Earning::query()->create([
                         'booking_id' => $booking->id,
                         'user_id' => $user_id,
                         'type' => 'concierge_referral_1',
@@ -178,7 +178,7 @@ class Booking extends Model
                     $platform -= $amount;
                     $concierge_referral_level_2_earnings = $amount;
 
-                    Earning::create([
+                    Earning::query()->create([
                         'booking_id' => $booking->id,
                         'user_id' => $user_id,
                         'type' => 'concierge_referral_2',
@@ -199,11 +199,9 @@ class Booking extends Model
                     $concierge_partner_earnings =
                         $booking->partner_concierge_fee;
 
-                    $earning = Earning::create([
+                    $earning = Earning::query()->create([
                         'booking_id' => $booking->id,
-                        'user_id' => Partner::find(
-                            $booking->concierge->user->partner_referral_id
-                        )->user_id,
+                        'user_id' => Partner::query()->find($booking->concierge->user->partner_referral_id)->user_id,
                         'type' => 'partner_concierge',
                         'amount' => $booking->partner_concierge_fee,
                         'currency' => $booking->currency,
@@ -228,11 +226,9 @@ class Booking extends Model
                     $restaurant_partner_earnings =
                         $booking->partner_restaurant_fee;
 
-                    Earning::create([
+                    Earning::query()->create([
                         'booking_id' => $booking->id,
-                        'user_id' => Partner::find(
-                            $booking->restaurant->user->partner_referral_id
-                        )->user_id,
+                        'user_id' => Partner::query()->find($booking->restaurant->user->partner_referral_id)->user_id,
                         'type' => 'partner_restaurant',
                         'amount' => $booking->partner_restaurant_fee,
                         'currency' => $booking->currency,
@@ -265,7 +261,7 @@ class Booking extends Model
                     $booking->platform_earnings = $platform;
                     $booking->save();
                 } catch (AssertionError $e) {
-                    EarningError::create([
+                    EarningError::query()->create([
                         'booking_id' => $booking->id,
                         'error_message' => $e->getMessage(),
                         'restaurant_earnings' => $restaurant_earnings,
@@ -390,7 +386,7 @@ class Booking extends Model
         $platform_earnings = $platform_concierge + $platform_restaurant;
         $restaurant_earnings = ($concierge_earnings + $platform_earnings) * -1;
 
-        Earning::create([
+        Earning::query()->create([
             'booking_id' => $booking->id,
             'user_id' => $booking->restaurant->user->id,
             'type' => 'restaurant_paid',
@@ -400,7 +396,7 @@ class Booking extends Model
             'percentage_of' => 'concierge_bounty',
         ]);
 
-        Earning::create([
+        Earning::query()->create([
             'booking_id' => $booking->id,
             'user_id' => $booking->concierge->user->id,
             'type' => 'concierge_bounty',

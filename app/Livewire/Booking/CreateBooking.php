@@ -32,7 +32,7 @@ class CreateBooking extends Component
 
     public function mount(string $token): void
     {
-        $this->booking = Booking::where('uuid', $token)->firstOrFail();
+        $this->booking = Booking::query()->where('uuid', $token)->firstOrFail();
 
         if ($this->booking->clicked_at === null) {
             $this->booking->update(['clicked_at' => now()]);

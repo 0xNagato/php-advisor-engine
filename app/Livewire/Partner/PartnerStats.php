@@ -26,7 +26,7 @@ class PartnerStats extends Widget
         $startDate = $this->filters['startDate'] ?? now()->subDays(30);
         $endDate = $this->filters['endDate'] ?? now();
 
-        $partnerEarningsQuery = Earning::where('user_id', $this->partner->user_id)
+        $partnerEarningsQuery = Earning::query()->where('user_id', $this->partner->user_id)
             ->whereIn('type', ['partner_concierge', 'partner_restaurant'])
             ->whereBetween('confirmed_at', [$startDate, $endDate]);
 

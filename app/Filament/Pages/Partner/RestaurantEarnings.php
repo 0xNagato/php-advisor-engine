@@ -35,7 +35,7 @@ class RestaurantEarnings extends Page
     public function getHeading(): string|Htmlable
     {
         if ($this->restaurantId) {
-            $restaurant = Restaurant::find($this->restaurantId);
+            $restaurant = Restaurant::query()->find($this->restaurantId);
 
             return "{$restaurant->restaurant_name} Bookings";
         }
@@ -57,7 +57,7 @@ class RestaurantEarnings extends Page
     {
         $restaurant = new Restaurant();
         if ($this->restaurantId) {
-            $restaurant = Restaurant::find($this->restaurantId);
+            $restaurant = Restaurant::query()->find($this->restaurantId);
         }
 
         return [

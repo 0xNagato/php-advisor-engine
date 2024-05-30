@@ -60,7 +60,7 @@ class ConciergeSeeder extends Seeder
                 ]))
                 ->create();
 
-            Referral::create([
+            Referral::query()->create([
                 'referrer_id' => $partner->user->id,
                 'user_id' => $user->id,
                 'email' => $email,

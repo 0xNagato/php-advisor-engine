@@ -49,12 +49,12 @@ class PrimeCalendar extends Page
         $latestEndTime = Carbon::parse($operatingHours['latest_end_time']);
 
         // Fetch all schedule templates for the restaurant
-        $scheduleTemplates = ScheduleTemplate::where('restaurant_id', $this->restaurant->id)
+        $scheduleTemplates = ScheduleTemplate::query()->where('restaurant_id', $this->restaurant->id)
             ->get()
             ->groupBy('day_of_week');
 
         // Fetch all overrides in one go and group them by schedule_template_id and booking_date
-        $overrides = RestaurantTimeSlot::whereIn('booking_date', $this->upcomingDates->map(fn ($date) => $date->format('Y-m-d'))->toArray())
+        $overrides = RestaurantTimeSlot::query()->whereIn('booking_date', $this->upcomingDates->map(fn ($date) => $date->format('Y-m-d'))->toArray())
             ->get()
             ->groupBy(['schedule_template_id', 'booking_date']);
 
@@ -102,11 +102,11 @@ class PrimeCalendar extends Page
     public function save(): void
     {
         // Collect all necessary data in advance to minimize queries
-        $scheduleTemplates = ScheduleTemplate::where('restaurant_id', $this->restaurant->id)
+        $scheduleTemplates = ScheduleTemplate::query()->where('restaurant_id', $this->restaurant->id)
             ->get()
             ->groupBy(['day_of_week', 'start_time']);
 
-        $existingOverrides = RestaurantTimeSlot::whereIn('booking_date', array_keys($this->selectedTimeSlots))
+        $existingOverrides = RestaurantTimeSlot::query()->whereIn('booking_date', array_keys($this->selectedTimeSlots))
             ->whereIn('schedule_template_id', $scheduleTemplates->flatten()->pluck('id'))
             ->get()
             ->keyBy(fn ($item) => $item->schedule_template_id.'|'.$item->booking_date);
@@ -145,12 +145,12 @@ class PrimeCalendar extends Page
 
         // Batch update existing records
         foreach ($updates as $update) {
-            RestaurantTimeSlot::where('id', $update['id'])->update(['prime_time' => $update['prime_time']]);
+            RestaurantTimeSlot::query()->where('id', $update['id'])->update(['prime_time' => $update['prime_time']]);
         }
 
         // Batch insert new records
         if (filled($inserts)) {
-            RestaurantTimeSlot::insert($inserts);
+            RestaurantTimeSlot::query()->insert($inserts);
         }
 
         Notification::make()

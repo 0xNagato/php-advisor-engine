@@ -32,7 +32,7 @@ class UploadRestaurantLogos extends Command
             $slug = str_replace('_', '-', pathinfo($fileName, PATHINFO_FILENAME));
 
             // Find the restaurant by matching the name part of the slug.
-            $restaurants = Restaurant::where('slug', 'like', "%-$slug")->get();
+            $restaurants = Restaurant::query()->where('slug', 'like', "%-$slug")->get();
 
             foreach ($restaurants as $restaurant) {
                 // Store the file in a public directory

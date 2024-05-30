@@ -16,7 +16,7 @@ class ExceptionFormController extends Controller
     {
         $data = $request->only(['message', 'exceptionMessage', 'exceptionTrace']);
 
-        $feedback = Feedback::create([
+        $feedback = Feedback::query()->create([
             'user_id' => auth()->id(),
             'message' => $data['message'],
             'exception_message' => $data['exceptionMessage'],

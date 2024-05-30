@@ -118,7 +118,7 @@ class ResetPassword extends \Filament\Pages\Auth\PasswordReset\ResetPassword
     {
         $response = parent::resetPassword();
 
-        $user = User::where('email', $this->email)->firstOrFail();
+        $user = User::query()->where('email', $this->email)->firstOrFail();
 
         if ($user->secured_at === null) {
             $user->secured_at = now();
@@ -149,6 +149,6 @@ class ResetPassword extends \Filament\Pages\Auth\PasswordReset\ResetPassword
     #[Computed]
     public function user(): User
     {
-        return User::where('email', $this->emailQuery)->firstOrFail();
+        return User::query()->where('email', $this->emailQuery)->firstOrFail();
     }
 }

@@ -16,10 +16,10 @@ class CreateBooking
 
     public function handle(int $scheduleTemplateId, array $data, string $timezone, string $currency): Booking
     {
-        $scheduleTemplate = ScheduleTemplate::findOrFail($scheduleTemplateId);
+        $scheduleTemplate = ScheduleTemplate::query()->findOrFail($scheduleTemplateId);
         $bookingAt = Carbon::createFromFormat('Y-m-d H:i:s', $data['date'].' '.$scheduleTemplate->start_time, $timezone);
 
-        $booking = Booking::create([
+        $booking = Booking::query()->create([
             'schedule_template_id' => $scheduleTemplate->id,
             'guest_count' => $data['guest_count'],
             'concierge_id' => Auth::user()->concierge->id,

@@ -39,7 +39,7 @@ class ConciergeLeaderboard extends BaseWidget
         return $table
             ->query($query)
             ->recordUrl(function (Model $record) {
-                $record = Concierge::find($record->concierge_id);
+                $record = Concierge::query()->find($record->concierge_id);
 
                 if (! $record) {
                     return null;

@@ -54,7 +54,7 @@ class SpecialRequests extends Page
 
     public function mount(): void
     {
-        $region = Region::find(session('region', 'miami'));
+        $region = Region::query()->find(session('region', 'miami'));
         $this->timezone = $region->timezone;
         $this->currency = $region->currency;
 
@@ -95,7 +95,7 @@ class SpecialRequests extends Page
                             ->placeholder('00.00')
                             ->numeric()
                             ->mask(RawJs::make('$money($input)'))
-                            ->prefix(Region::find(session('region', 'miami'))->currency_symbol)
+                            ->prefix(Region::query()->find(session('region', 'miami'))->currency_symbol)
                             ->stripCharacters(',')
                             ->required(),
                     ])
@@ -185,7 +185,7 @@ class SpecialRequests extends Page
             return;
         }
 
-        $specialRequest = SpecialRequest::create([
+        $specialRequest = SpecialRequest::query()->create([
             'schedule_template_id' => $scheduleTemplate->id,
             'restaurant_id' => $data['restaurant'],
             'concierge_id' => auth()->id(),

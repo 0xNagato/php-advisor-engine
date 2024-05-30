@@ -30,7 +30,7 @@ class RestaurantReferralsTable extends BaseWidget
     public function table(Table $table): Table
     {
         return $table
-            ->query(fn () => User::whereHas('referral', static function (Builder $query) {
+            ->query(fn () => User::query()->whereHas('referral', static function (Builder $query) {
                 $query->where('type', 'restaurant')
                     ->where('referrer_id', auth()->id());
             }))

@@ -14,7 +14,7 @@ class RestaurantBookingConfirmation extends Component
 
     public function mount(string $token): void
     {
-        $this->booking = Booking::where('uuid', $token)->firstOrFail();
+        $this->booking = Booking::query()->where('uuid', $token)->firstOrFail();
 
         if ($this->booking->restaurant_confirmed_at === null) {
             $this->booking->update(['restaurant_confirmed_at' => now()]);

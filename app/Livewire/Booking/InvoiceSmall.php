@@ -20,7 +20,7 @@ class InvoiceSmall extends Widget
     public function mount(Booking $booking): void
     {
         $this->booking = $booking;
-        $this->region = Region::find($booking->city);
+        $this->region = Region::query()->find($booking->city);
     }
 
     #[Computed]

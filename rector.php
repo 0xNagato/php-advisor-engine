@@ -13,6 +13,7 @@ use RectorLaravel\Rector\If_\AbortIfRector;
 use RectorLaravel\Rector\If_\ThrowIfRector;
 use RectorLaravel\Rector\MethodCall\EloquentWhereRelationTypeHintingParameterRector;
 use RectorLaravel\Rector\MethodCall\ValidationRuleArrayStringValueToArrayRector;
+use RectorLaravel\Rector\StaticCall\EloquentMagicMethodToQueryBuilderRector;
 use RectorLaravel\Set\LaravelSetList;
 
 return RectorConfig::configure()
@@ -38,6 +39,7 @@ return RectorConfig::configure()
         AddGenericReturnTypeToRelationsRector::class,
         AnonymousMigrationsRector::class,
         EloquentWhereRelationTypeHintingParameterRector::class,
+        EloquentMagicMethodToQueryBuilderRector::class,
         EmptyToBlankAndFilledFuncRector::class,
         MigrateToSimplifiedAttributeRector::class,
         NowFuncWithStartOfDayMethodCallToTodayFuncRector::class,

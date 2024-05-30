@@ -18,7 +18,7 @@ class DemoAuthController extends Controller
         abort_if($request->cookie('user_id') !== $user_id, 401);
 
         info('User ID: '.$user_id.' logged in as demo concierge.');
-        $user = User::findOrFail(5);
+        $user = User::query()->findOrFail(5);
         Auth::login($user);
 
         return redirect()->route('filament.admin.pages.concierge.reservation-hub');

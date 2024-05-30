@@ -27,17 +27,17 @@ class RestaurantStats extends Widget
 
     public function mount(): void
     {
-        $this->currency = Region::find($this->restaurant->region)->currency;
+        $this->currency = Region::query()->find($this->restaurant->region)->currency;
 
         $startDate = $this->filters['startDate'] ?? now()->subDays(30);
         $endDate = $this->filters['endDate'] ?? now();
 
         // Get all earnings related to the restaurant
-        $restaurantEarningsQuery = Earning::where('user_id', $this->restaurant->user_id)
+        $restaurantEarningsQuery = Earning::query()->where('user_id', $this->restaurant->user_id)
             ->whereIn('type', ['restaurant'])
             ->whereBetween('confirmed_at', [$startDate, $endDate]);
 
-        $restaurantBountyQuery = Earning::where('user_id', $this->restaurant->user_id)
+        $restaurantBountyQuery = Earning::query()->where('user_id', $this->restaurant->user_id)
             ->whereIn('type', ['restaurant_paid'])
             ->whereBetween('confirmed_at', [$startDate, $endDate]);
 
@@ -52,11 +52,11 @@ class RestaurantStats extends Widget
         $prevStartDate = $startDate->copy()->subDays($timeFrameLength);
         $prevEndDate = $endDate->copy()->subDays($timeFrameLength);
 
-        $prevRestaurantEarningsQuery = Earning::where('user_id', $this->restaurant->user_id)
+        $prevRestaurantEarningsQuery = Earning::query()->where('user_id', $this->restaurant->user_id)
             ->whereIn('type', ['restaurant'])
             ->whereBetween('confirmed_at', [$prevStartDate, $prevEndDate]);
 
-        $prevRestaurantBountyQuery = Earning::where('user_id', $this->restaurant->user_id)
+        $prevRestaurantBountyQuery = Earning::query()->where('user_id', $this->restaurant->user_id)
             ->whereIn('type', ['restaurant_paid'])
             ->whereBetween('confirmed_at', [$prevStartDate, $prevEndDate]);
 

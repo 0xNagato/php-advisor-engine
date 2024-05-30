@@ -31,7 +31,7 @@ class ConciergeStats extends Widget
         $startDate = $this->filters['startDate'] ?? now()->subDays(30);
         $endDate = $this->filters['endDate'] ?? now();
 
-        $conciergeEarningsQuery = Earning::where('user_id', $this->concierge->user_id)
+        $conciergeEarningsQuery = Earning::query()->where('user_id', $this->concierge->user_id)
             ->whereIn('type', ['concierge', 'concierge_referral_1', 'concierge_referral_2', 'concierge_bounty'])
             ->whereBetween('confirmed_at', [$startDate, $endDate]);
 

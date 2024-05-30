@@ -32,7 +32,7 @@ class CreateBookings extends Command
         $scheduleId = $this->argument('schedule');
         $number = $this->argument('number');
 
-        $schedule = ScheduleWithBooking::find($scheduleId);
+        $schedule = ScheduleWithBooking::query()->find($scheduleId);
 
         if (! $schedule) {
             $this->error("Schedule with id $scheduleId not found.");
@@ -44,7 +44,7 @@ class CreateBookings extends Command
 
         for ($i = 0; $i < $number; $i++) {
             $booking = $schedule->bookings()->create([
-                'concierge_id' => Concierge::inRandomOrder()->first()->id,
+                'concierge_id' => Concierge::query()->inRandomOrder()->first()->id,
                 'guest_first_name' => 'John',
                 'guest_last_name' => 'Doe',
                 'guest_email' => 'johndoe@fake.com',

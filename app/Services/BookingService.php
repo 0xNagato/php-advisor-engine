@@ -46,7 +46,7 @@ class BookingService
             'source' => $form['token'],
         ]);
 
-        $region = Region::find($booking->restaurant->region);
+        $region = Region::query()->find($booking->restaurant->region);
 
         return Charge::create([
             'amount' => $booking->total_with_tax_in_cents,

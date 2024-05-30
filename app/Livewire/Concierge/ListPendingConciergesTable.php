@@ -20,7 +20,7 @@ class ListPendingConciergesTable extends BaseWidget
     {
         return $table
             ->query(
-                Referral::where(['type' => 'concierge', 'secured_at' => null])
+                Referral::query()->where(['type' => 'concierge', 'secured_at' => null])
             )
             ->columns([
                 TextColumn::make('id')

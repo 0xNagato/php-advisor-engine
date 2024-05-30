@@ -67,7 +67,7 @@ class CreateAdmin extends CreateRecord
 
     protected function handleRecordCreation(array $data): Model
     {
-        $user = User::create([
+        $user = User::query()->create([
             'first_name' => $data['first_name'],
             'last_name' => $data['last_name'],
             'email' => $data['email'],

@@ -38,7 +38,7 @@ class AvailabilityCalendar extends Page
 
     public function mount(): void
     {
-        $region = Region::find(session('region', 'miami'));
+        $region = Region::query()->find(session('region', 'miami'));
         $this->timezone = $region->timezone;
         $this->currency = $region->currency;
         $this->form->fill();
@@ -149,7 +149,7 @@ class AvailabilityCalendar extends Page
     #[On('region-changed')]
     public function regionChanged(): void
     {
-        $region = Region::find(session('region', 'miami'));
+        $region = Region::query()->find(session('region', 'miami'));
 
         $this->timezone = $region->timezone;
         $this->currency = $region->currency;

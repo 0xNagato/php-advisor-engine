@@ -80,7 +80,7 @@ class SimpleTextingAdapter
             ],
         ]);
 
-        SmsResponse::create([
+        SmsResponse::query()->create([
             'phone_number' => $contactPhone,
             'response' => $response->getBody()->getContents(),
             'message' => $text,

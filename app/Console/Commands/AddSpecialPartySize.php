@@ -35,7 +35,7 @@ class AddSpecialPartySize extends Command
 
     protected function generateScheduleTemplates(Restaurant $restaurant): void
     {
-        $existingTemplates = ScheduleTemplate::where('restaurant_id', $restaurant->id)
+        $existingTemplates = ScheduleTemplate::query()->where('restaurant_id', $restaurant->id)
             ->where('party_size', 'Special Request')
             ->get()
             ->pluck('day_of_week', 'start_time')

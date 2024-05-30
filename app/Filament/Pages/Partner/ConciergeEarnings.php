@@ -35,7 +35,7 @@ class ConciergeEarnings extends Page
     public function getHeading(): string|Htmlable
     {
         if ($this->conciergeId) {
-            $concierge = Concierge::find($this->conciergeId);
+            $concierge = Concierge::query()->find($this->conciergeId);
 
             return "{$concierge->user->name} Bookings";
         }
@@ -57,7 +57,7 @@ class ConciergeEarnings extends Page
     {
         $concierge = new Concierge();
         if ($this->conciergeId) {
-            $concierge = Concierge::find($this->conciergeId);
+            $concierge = Concierge::query()->find($this->conciergeId);
         }
 
         return [

@@ -30,7 +30,7 @@ class SendRestaurantBookingReminder extends Command
      */
     public function handle(): void
     {
-        Booking::whereNull('restaurant_confirmed_at')
+        Booking::query()->whereNull('restaurant_confirmed_at')
             ->whereNull('resent_restaurant_confirmation_at')
             ->where('confirmed_at', '<=', now()->subMinutes(30))
             ->each(function ($booking) {

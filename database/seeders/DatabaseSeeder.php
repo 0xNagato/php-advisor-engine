@@ -66,7 +66,7 @@ class DatabaseSeeder extends Seeder
             'last_name' => 'Restaurant',
             'email' => 'restaurant@primavip.co',
             'password' => bcrypt('demo2024'),
-            'partner_referral_id' => Partner::inRandomOrder()->first()->id,
+            'partner_referral_id' => Partner::query()->inRandomOrder()->first()->id,
         ])
             ->has(Restaurant::factory([
                 'restaurant_name' => 'Demo Restaurant',
@@ -79,7 +79,7 @@ class DatabaseSeeder extends Seeder
             'last_name' => 'Concierge',
             'email' => 'concierge@primavip.co',
             'password' => bcrypt('demo2024'),
-            'partner_referral_id' => Partner::inRandomOrder()->first()->id,
+            'partner_referral_id' => Partner::query()->inRandomOrder()->first()->id,
         ])
             ->has(Concierge::factory([
                 'hotel_name' => 'Demo Hotel',

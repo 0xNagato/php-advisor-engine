@@ -146,7 +146,7 @@ class ConciergeReferral extends Page
     {
         $data = $this->tabbedForm->getState()['emailData'];
 
-        $referral = Referral::create([
+        $referral = Referral::query()->create([
             'referrer_id' => auth()->id(),
             'email' => $data['email'],
             'first_name' => $data['first_name'],
@@ -171,7 +171,7 @@ class ConciergeReferral extends Page
     {
         $data = $this->tabbedForm->getState()['phoneData'];
 
-        $referral = Referral::create([
+        $referral = Referral::query()->create([
             'referrer_id' => auth()->id(),
             'phone' => $data['phone'],
             'first_name' => $data['first_name'],

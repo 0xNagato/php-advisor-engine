@@ -149,7 +149,7 @@ class CreateRestaurant extends CreateRecord
     {
         $partnerId = (auth()->user()->main_role === 'Partner') ? auth()->user()->partner->id : null;
 
-        $user = User::create([
+        $user = User::query()->create([
             'first_name' => $data['first_name'],
             'last_name' => $data['last_name'],
             'email' => $data['email'],
@@ -158,7 +158,7 @@ class CreateRestaurant extends CreateRecord
             'partner_referral_id' => $partnerId,
         ]);
 
-        Referral::create([
+        Referral::query()->create([
             'user_id' => $user->id,
             'type' => 'restaurant',
             'referrer_type' => auth()->user()->main_role,

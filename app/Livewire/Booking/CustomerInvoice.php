@@ -35,11 +35,11 @@ class CustomerInvoice extends Component implements HasForms
 
     public function mount(string $token): void
     {
-        $this->booking = Booking::where('uuid', $token)
+        $this->booking = Booking::query()->where('uuid', $token)
             ->with('earnings.user')
             ->firstOrFail();
 
-        $this->region = Region::find($this->booking->city);
+        $this->region = Region::query()->find($this->booking->city);
     }
 
     public function render(): \Illuminate\Contracts\View\View|\Illuminate\Foundation\Application|Factory|View|Application

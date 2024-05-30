@@ -41,6 +41,6 @@ class ViewBooking extends ViewRecord
         $this->authorizeAccess();
 
         $this->booking = $this->record;
-        $this->region = Region::find($this->booking->city);
+        $this->region = Region::query()->find($this->booking->city);
     }
 }

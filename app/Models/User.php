@@ -257,9 +257,10 @@ class User extends Authenticatable implements FilamentUser, HasAvatar
     {
         $code = random_int(100000, 999999);
 
-        UserCode::updateOrCreate(
-            ['user_id' => $this->id], // field to find
-            ['code' => $code] // field to update
+        UserCode::query()->updateOrCreate(
+            ['user_id' => $this->id],
+            // field to find
+            ['code' => $code]
         );
 
         app(SmsService::class)->sendMessage(
