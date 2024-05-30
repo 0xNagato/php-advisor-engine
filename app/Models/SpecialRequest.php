@@ -2,17 +2,17 @@
 
 namespace App\Models;
 
+use App\Data\SpecialRequest\SpecialRequestConversionData;
 use App\Enums\SpecialRequestStatus;
 use Illuminate\Database\Eloquent\Casts\AsArrayObject;
-use Illuminate\Database\Eloquent\Casts\AsCollection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Str;
+use Illuminate\Support\Str;
+use Spatie\LaravelData\DataCollection;
 
 /**
  * @property string $uuid
- *
  * @mixin IdeHelperSpecialRequest
  */
 class SpecialRequest extends Model
@@ -44,7 +44,7 @@ class SpecialRequest extends Model
     {
         return [
             'status' => SpecialRequestStatus::class,
-            'conversations' => AsCollection::class,
+            'conversations' => DataCollection::class.':'.SpecialRequestConversionData::class,
             'meta' => AsArrayObject::class,
         ];
     }

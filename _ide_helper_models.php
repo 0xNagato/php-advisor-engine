@@ -799,7 +799,7 @@ namespace App\Models{
  * @property int|null $schedule_template_id
  * @property int|null $booking_id
  * @property string|null $restaurant_message
- * @property \Illuminate\Support\Collection|null $conversations
+ * @property \Spatie\LaravelData\DataCollection|null $conversations
  * @property \ArrayObject|null $meta
  * @property-read \App\Models\Booking|null $booking
  * @property-read \App\Models\Concierge $concierge

@@ -5,13 +5,13 @@ namespace App\Listeners;
 use App\Events\RestaurantInvited;
 use App\Services\SmsService;
 use AshAllenDesign\ShortURL\Exceptions\ShortURLException;
+use AshAllenDesign\ShortURL\Facades\ShortURL;
 use Filament\Facades\Filament;
 use GuzzleHttp\Exception\GuzzleException;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Support\Facades\Password;
 use JsonException;
 use Sentry;
-use ShortURL;
 
 class SendRestaurantWelcomeSMS implements ShouldQueue
 {

@@ -1,17 +1,20 @@
-@php use Carbon\Carbon; @endphp
+@php
+    use Carbon\Carbon;
+    use App\Enums\SpecialRequestStatus;
+@endphp
 <x-layouts.simple-wrapper>
-    <div class="mx-4 flex w-full flex-col gap-4 rounded-lg bg-white p-4 shadow-sm ring-1 ring-gray-950/5">
-        <h1 class="text-center text-2xl font-bold tracking-tight text-gray-950 dm-serif">
+    <div class="flex flex-col w-full gap-4 p-4 mx-4 bg-white rounded-lg shadow-sm ring-1 ring-gray-950/5">
+        <h1 class="text-2xl font-bold tracking-tight text-center text-gray-950 dm-serif">
             Confirm Special Request
         </h1>
 
-        <div class="w-full text-sm space-y-3">
+        <div class="w-full space-y-3 text-sm">
             <div class="relative">
                 <div class="absolute inset-0 flex items-center" aria-hidden="true">
                     <div class="w-full border-t border-gray-300"></div>
                 </div>
                 <div class="relative flex justify-center">
-                    <span class="bg-white px-3 text-base font-semibold leading-6 text-gray-900">
+                    <span class="px-3 text-base font-semibold leading-6 text-gray-900 bg-white">
                         Request Info
                     </span>
                 </div>
@@ -64,7 +67,7 @@
                     <span class="text-black">
                         {{ money($this->restaurantTotalFee * 100, $specialRequest->restaurant->inRegion->currency) }}
                     </span>
-                    <div class="text-xs mt-1">
+                    <div class="mt-1 text-xs">
                         ({{ $this->commissionRequestedPercentage }}% Commission + 7% PRIMA Platform Fee)
                     </div>
                 </div>
@@ -75,7 +78,7 @@
                     <div class="w-full border-t border-gray-300"></div>
                 </div>
                 <div class="relative flex justify-center">
-                    <span class="bg-white px-3 text-base font-semibold leading-6 text-gray-900">
+                    <span class="px-3 text-base font-semibold leading-6 text-gray-900 bg-white">
                         Customer Details
                     </span>
                 </div>
@@ -119,37 +122,58 @@
                 </div>
             @endif
 
-            @if ($showRequestChangesForm)
+            @if ($specialRequest->status === SpecialRequestStatus::Pending)
+                @if ($showRequestChangesForm)
+                    <div class="relative">
+                        <div class="absolute inset-0 flex items-center" aria-hidden="true">
+                            <div class="w-full border-t border-gray-300"></div>
+                        </div>
+                        <div class="relative flex justify-center">
+                            <span class="px-3 text-base font-semibold leading-6 text-gray-900 bg-white">
+                                Request Changes
+                            </span>
+                        </div>
+                    </div>
+
+                    <p>
+                        Any changes you submit will be sent back to the concierge. If the concierge and client accept
+                        the changes, you will be notified.
+                    </p>
+
+                    {{ $this->requestChangesForm }}
+                @endif
+
+                @if (!$showRequestChangesForm)
+                    <div class="relative">
+                        <div class="absolute inset-0 flex items-center" aria-hidden="true">
+                            <div class="w-full border-t border-gray-300"></div>
+                        </div>
+                        <div class="relative flex justify-center">
+                            <span class="px-3 text-base font-semibold leading-6 text-gray-900 bg-white">Approval</span>
+                        </div>
+                    </div>
+                    {{ $this->approvalForm }}
+                @endif
+            @else
                 <div class="relative">
                     <div class="absolute inset-0 flex items-center" aria-hidden="true">
                         <div class="w-full border-t border-gray-300"></div>
                     </div>
                     <div class="relative flex justify-center">
-                        <span class="bg-white px-3 text-base font-semibold leading-6 text-gray-900">
-                            Request Changes
-                        </span>
+                        <span class="px-3 text-base font-semibold leading-6 text-gray-900 bg-white">Confirmation</span>
                     </div>
                 </div>
-
                 <p>
-                    Any changes you submit will be sent back to the concierge. If the concierge and client accept the
-                    changes, you will be notified.
+                    {{ $this->confirmationMessage }}
                 </p>
-
-                {{ $this->requestChangesForm }}
-            @endif
-
-            @if (!$showRequestChangesForm)
-                <div class="relative">
-                    <div class="absolute inset-0 flex items-center" aria-hidden="true">
-                        <div class="w-full border-t border-gray-300"></div>
-                    </div>
-                    <div class="relative flex justify-center">
-                        <span class="bg-white px-3 text-base font-semibold leading-6 text-gray-900">Approval</span>
-                    </div>
-                </div>
-                {{ $this->approvalForm }}
             @endif
         </div>
     </div>
+
+    @if (auth()->user()->hasRole('super_user') || app('impersonate')->isImpersonating())
+        <x-filament::button color="gray" class="w-full mt-4" size="sm" icon="polaris-reset-icon"
+            wire:click="resetStatus">
+            Reset Status
+        </x-filament::button>
+    @endif
 </x-layouts.simple-wrapper>

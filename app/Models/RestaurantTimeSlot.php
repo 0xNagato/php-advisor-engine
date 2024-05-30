@@ -10,7 +10,7 @@ use Znck\Eloquent\Traits\BelongsToThrough as BelongsToThroughTrait;
 
 /**
  * Class RestaurantTimeSlot
- *
+ * 
  * Represents a specific time slot for a restaurant. This is an override for a ScheduleTemplate.
  * If a RestaurantTimeSlot is found, it will be used by the ScheduleWithBookings view instead of the default ScheduleTemplate.
  *
