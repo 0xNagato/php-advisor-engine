@@ -40,9 +40,7 @@ class RestaurantLeaderboard extends BaseWidget
 
         return $table
             ->query($query)
-            ->recordUrl(function (Model $record) {
-                return route('filament.admin.resources.restaurants.view', ['record' => $record->restaurant_id]);
-            })
+            ->recordUrl(fn (Model $record) => route('filament.admin.resources.restaurants.view', ['record' => $record->restaurant_id]))
             ->paginated(false)
             ->deferLoading()
             ->columns(components: [

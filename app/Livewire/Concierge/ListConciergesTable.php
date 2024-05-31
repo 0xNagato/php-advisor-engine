@@ -25,13 +25,11 @@ class ListConciergesTable extends BaseWidget
             ->paginated([5, 10])
             ->columns([
                 TextColumn::make('user')
-                    ->getStateUsing(function (Concierge $record) {
-                        return view('partials.concierge-user-info-column', [
-                            'name' => $record->user->name,
-                            'secured_at' => $record->user->secured_at,
-                            'referrer_name' => $record->user->referrer?->name ?? '-',
-                        ]);
-                    }),
+                    ->getStateUsing(fn (Concierge $record) => view('partials.concierge-user-info-column', [
+                        'name' => $record->user->name,
+                        'secured_at' => $record->user->secured_at,
+                        'referrer_name' => $record->user->referrer?->name ?? '-',
+                    ])),
                 TextColumn::make('hotel_name')
                     ->label('Co Name'),
                 TextColumn::make('id')
