@@ -169,11 +169,4 @@
             @endif
         </div>
     </div>
-
-    @if (auth()->user()->hasRole('super_user') || app('impersonate')->isImpersonating())
-        <x-filament::button color="gray" class="w-full mt-4" size="sm" icon="polaris-reset-icon"
-            wire:click="resetStatus">
-            Reset Status
-        </x-filament::button>
-    @endif
 </x-layouts.simple-wrapper>
