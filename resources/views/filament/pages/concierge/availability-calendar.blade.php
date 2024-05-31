@@ -4,7 +4,7 @@
 
     <div>
         @if (!empty($restaurants))
-            <div class="relative bg-white -mx-4 -mt-4 sm:mx-0 sm:mt-0 border-t">
+            <div class="relative -mx-4 -mt-4 bg-white border-t sm:mx-0 sm:mt-0">
                 <table class="w-full table-auto">
                     <thead class="text-xs uppercase">
                         <tr
@@ -22,7 +22,7 @@
                     <tbody>
                         @foreach ($restaurants as $restaurant)
                             <tr class="odd:bg-gray-100">
-                                <td class="pl-2 w-28 text-center">
+                                <td class="pl-2 text-center w-28">
                                     @if ($restaurant->logo)
                                         <img src="{{ \Illuminate\Support\Facades\Storage::disk('do')->url($restaurant->restaurant_logo_path) }}"
                                             alt="{{ $restaurant->restaurant_name }}" class="object-cover max-h-[48px]">

@@ -147,7 +147,10 @@ class Restaurant extends Model
 
     protected function logo(): Attribute
     {
-        return Attribute::make(get: fn () => $this->restaurant_logo_path ? Storage::url($this->restaurant_logo_path) : null);
+        return Attribute::make(get: fn () => $this->restaurant_logo_path
+            ? Storage::disk('do')->url($this->restaurant_logo_path)
+            : 'https://ui-avatars.com/api/?background=312596&color=fff&name='.urlencode($this->restaurant_name)
+        );
     }
 
     /**
