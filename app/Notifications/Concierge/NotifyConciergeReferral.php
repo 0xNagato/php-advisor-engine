@@ -51,7 +51,7 @@ class NotifyConciergeReferral extends Notification
             ->swap([
                 '{first_name}' => $notifiable->first_name,
                 '{referrer}' => $this->referrer->name,
-                '{url}' => $this->shortURL
+                '{url}' => $this->shortURL,
             ])->toString();
 
         return new SmsData(

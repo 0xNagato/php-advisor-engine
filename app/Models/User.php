@@ -4,7 +4,6 @@ namespace App\Models;
 
 use App\Data\NotificationPreferencesData;
 use App\Notifications\User\SendTwoFactorCode;
-use App\Services\SmsService;
 use App\Traits\FormatsPhoneNumber;
 use BezhanSalleh\FilamentShield\Traits\HasPanelShield;
 use Filament\Models\Contracts\FilamentUser;

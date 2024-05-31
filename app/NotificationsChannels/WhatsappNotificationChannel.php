@@ -4,7 +4,6 @@ namespace App\NotificationsChannels;
 
 use App\Data\SmsData;
 use App\Http\Integrations\Twilio\Twilio;
-use App\Services\SmsService;
 use Exception;
 use Illuminate\Notifications\Events\NotificationFailed;
 use Illuminate\Notifications\Notification;
