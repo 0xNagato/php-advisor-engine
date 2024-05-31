@@ -4,11 +4,12 @@
             <div class="font-semibold">
                 {{ $specialRequest->restaurant->restaurant_name }}
             </div>
-            <div class="flex gap-2">
+            <div class="flex gap-2 text-xs">
                 <div>
-                    {{ $specialRequest->booking_date->format('M j, Y') }}
+                    {{ $specialRequest->booking_date->format('M j, Y') }} &dash;
+                    {{ $specialRequest->booking_time->format('g:i A') }}
                 </div>
-                <div>
+                <div class="font-semibold">
                     {{ moneyWithoutCents($specialRequest->minimum_spend * 100, $specialRequest->currency) }}
                 </div>
             </div>

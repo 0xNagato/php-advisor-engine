@@ -46,6 +46,7 @@ class SpecialRequest extends Model
     {
         return [
             'booking_date' => 'date',
+            'booking_time' => 'datetime',
             'status' => SpecialRequestStatus::class,
             'conversations' => DataCollection::class.':'.SpecialRequestConversionData::class,
             'meta' => AsArrayObject::class,

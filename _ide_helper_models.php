@@ -784,7 +784,7 @@ namespace App\Models{
  * @property int $restaurant_id
  * @property int $concierge_id
  * @property \Illuminate\Support\Carbon $booking_date
- * @property string $booking_time
+ * @property \Illuminate\Support\Carbon $booking_time
  * @property int $party_size
  * @property string|null $special_request
  * @property string $customer_first_name
