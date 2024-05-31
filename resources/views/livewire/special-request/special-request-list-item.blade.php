@@ -1,5 +1,6 @@
 <x-filament-widgets::widget>
-    <div class="flex items-center gap-2 px-4 py-2 text-sm">
+    <div wire:click="viewSpecialRequest"
+        class="flex items-center gap-2 px-4 py-2 text-sm cursor-pointer first:rounded-t-2xl last:rounded-b-2xl hover:bg-gray-50">
         <x-filament::avatar src="{{ $specialRequest->restaurant->logo }}" alt="Dan Harrin" />
         <div class="flex flex-col flex-grow gap-y-1">
             <div class="font-semibold">

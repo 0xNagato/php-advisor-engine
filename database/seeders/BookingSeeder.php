@@ -20,6 +20,9 @@ class BookingSeeder extends Seeder
         $concierges = Concierge::all();
         $salesTaxService = app(SalesTaxService::class);
 
+        /**
+         * @var Collection<Restaurant> $restaurants
+         */
         $restaurants = Restaurant::with(['schedules' => function ($query) {
             $query->where('is_available', true)
                 ->where('booking_date', now()->subDay()->format('Y-m-d'))
@@ -49,6 +52,7 @@ class BookingSeeder extends Seeder
             'created_at' => $schedule->booking_at,
             'updated_at' => $schedule->booking_at,
             'currency' => $restaurant->inRegion->currency,
+            'is_prime' => true,
         ]);
 
         $taxData = $salesTaxService->calculateTax($restaurant->region, $booking->total_fee, noTax: config('app.no_tax'));

@@ -24,6 +24,7 @@ class DatabaseSeeder extends Seeder
             'first_name' => 'Andrew',
             'last_name' => 'Weir',
             'email' => 'andru.weir@gmail.com',
+            'phone' => '+16473823326',
             'password' => bcrypt('password'),
         ])->create();
 
@@ -31,6 +32,7 @@ class DatabaseSeeder extends Seeder
             'first_name' => 'Alex',
             'last_name' => 'Zhardanovsky',
             'email' => 'alex.zhard@gmail.com',
+            'phone' => '+19176644415',
             'password' => bcrypt('password'),
         ])->create();
 
@@ -91,7 +93,7 @@ class DatabaseSeeder extends Seeder
             ShieldSeeder::class,
             ConciergeSeeder::class,
             RestaurantSeeder::class,
-            // BookingSeeder::class,
+            BookingSeeder::class,
         ]);
 
         Artisan::call('shield:generate --all');

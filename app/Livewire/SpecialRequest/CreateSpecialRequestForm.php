@@ -140,7 +140,7 @@ class CreateSpecialRequestForm extends Widget implements HasForms
     {
         return Select::make('guest_count')
             ->prefixIcon('heroicon-m-users')
-            ->options(fn () => collect()->range(6, 15)
+            ->options(fn () => collect()->range(6, 20)
                 ->mapWithKeys(fn ($value) => [$value => $value.' Guests'])
             )
             ->placeholder('Party Size')
