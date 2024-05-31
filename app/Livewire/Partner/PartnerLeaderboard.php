@@ -28,7 +28,9 @@ class PartnerLeaderboard extends BaseWidget
         $startDate = $this->filters['startDate'] ?? now()->subDays(30);
         $endDate = $this->filters['endDate'] ?? now();
 
-        $query = Earning::confirmed()->select('earnings.user_id', 'partners.id as partner_id', DB::raw('SUM(amount) as total_earned'), DB::raw("CONCAT(users.first_name, ' ', users.last_name) as user_name"))
+        $query = Earning::query()
+            ->confirmed()
+            ->select('earnings.user_id', 'partners.id as partner_id', DB::raw('SUM(amount) as total_earned'), DB::raw("CONCAT(users.first_name, ' ', users.last_name) as user_name"))
             ->join('users', 'users.id', '=', 'earnings.user_id')
             ->join('partners', 'partners.user_id', '=', 'earnings.user_id')
             ->whereBetween('earnings.created_at', [$startDate, $endDate])

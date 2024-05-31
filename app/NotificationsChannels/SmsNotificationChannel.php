@@ -7,6 +7,7 @@ use App\Services\SmsService;
 use Exception;
 use Illuminate\Notifications\Events\NotificationFailed;
 use Illuminate\Notifications\Notification;
+use RuntimeException;
 
 class SmsNotificationChannel
 {
@@ -15,7 +16,7 @@ class SmsNotificationChannel
      */
     public function send($notifiable, Notification $notification): void
     {
-        throw_unless(method_exists($notification, 'toSms'), new Exception('The notification must have a toSms method'));
+        throw_unless(method_exists($notification, 'toSms'), new RuntimeException('The notification must have a toSms method'));
 
         $data = $notification->toSms($notifiable);
 

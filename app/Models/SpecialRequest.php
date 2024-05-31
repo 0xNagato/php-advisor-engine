@@ -14,6 +14,7 @@ use Spatie\LaravelData\DataCollection;
 
 /**
  * @property string $uuid
+ *
  * @mixin IdeHelperSpecialRequest
  */
 class SpecialRequest extends Model
@@ -44,6 +45,7 @@ class SpecialRequest extends Model
     protected function casts(): array
     {
         return [
+            'booking_date' => 'date',
             'status' => SpecialRequestStatus::class,
             'conversations' => DataCollection::class.':'.SpecialRequestConversionData::class,
             'meta' => AsArrayObject::class,
@@ -60,7 +62,7 @@ class SpecialRequest extends Model
     }
 
     /**
-     * @return BelongsTo<Restaurant, \App\Models\SpecialRequest>
+     * @return BelongsTo<Restaurant, SpecialRequest>
      */
     public function restaurant(): BelongsTo
     {
@@ -68,7 +70,7 @@ class SpecialRequest extends Model
     }
 
     /**
-     * @return BelongsTo<Concierge, \App\Models\SpecialRequest>
+     * @return BelongsTo<Concierge, SpecialRequest>
      */
     public function concierge(): BelongsTo
     {
@@ -76,7 +78,7 @@ class SpecialRequest extends Model
     }
 
     /**
-     * @return BelongsTo<Booking, \App\Models\SpecialRequest>
+     * @return BelongsTo<Booking, SpecialRequest>
      */
     public function booking(): BelongsTo
     {
@@ -84,7 +86,7 @@ class SpecialRequest extends Model
     }
 
     /**
-     * @return BelongsTo<ScheduleTemplate, \App\Models\SpecialRequest>
+     * @return BelongsTo<ScheduleTemplate, SpecialRequest>
      */
     public function scheduleTemplate(): BelongsTo
     {

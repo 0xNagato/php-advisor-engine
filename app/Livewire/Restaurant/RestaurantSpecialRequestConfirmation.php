@@ -202,7 +202,7 @@ class RestaurantSpecialRequestConfirmation extends Page
             minimum_spend: $data['minimum_spend'],
             commission_requested_percentage: $data['commission_requested_percentage'],
             message: $data['message'],
-            create_at: now(),
+            created_at: now(),
         );
 
         $this->specialRequest->update([

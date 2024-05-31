@@ -24,7 +24,7 @@ class SMSBookingForm extends Widget implements HasForms
 {
     use InteractsWithForms;
 
-    protected static string $view = 'livewire.bookings.s-m-s-booking-form';
+    protected static string $view = 'livewire.booking.s-m-s-booking-form';
 
     public ?array $data = [];
 

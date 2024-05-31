@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Listeners;
+namespace App\Listeners\SpecialRequest;
 
 use App\Data\RestaurantContactData;
 use App\Events\SpecialRequestCreated;

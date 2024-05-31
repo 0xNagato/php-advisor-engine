@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Data\NotificationPreferencesData;
 use App\Services\SmsService;
 use App\Traits\FormatsPhoneNumber;
 use BezhanSalleh\FilamentShield\Traits\HasPanelShield;
@@ -311,6 +312,7 @@ class User extends Authenticatable implements FilamentUser, HasAvatar
             'email_verified_at' => 'datetime',
             'secured_at' => 'datetime',
             'payout' => AsArrayObject::class,
+            'preferences' => NotificationPreferencesData::class,
         ];
     }
 }

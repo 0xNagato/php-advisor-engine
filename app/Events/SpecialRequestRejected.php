@@ -16,7 +16,7 @@ class SpecialRequestRejected
     /**
      * Create a new event instance.
      */
-    public function __construct(SpecialRequest $specialRequest)
+    public function __construct(public SpecialRequest $specialRequest)
     {
         //
     }

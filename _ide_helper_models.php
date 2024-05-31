@@ -783,7 +783,7 @@ namespace App\Models{
  * @property int $id
  * @property int $restaurant_id
  * @property int $concierge_id
- * @property string $booking_date
+ * @property \Illuminate\Support\Carbon $booking_date
  * @property string $booking_time
  * @property int $party_size
  * @property string|null $special_request
@@ -875,6 +875,7 @@ namespace App\Models{
  * @property string|null $zip
  * @property string|null $country
  * @property string|null $region
+ * @property \Spatie\LaravelData\Contracts\BaseData|null $preferences
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \Rappasoft\LaravelAuthenticationLog\Models\AuthenticationLog> $authentications
  * @property-read int|null $authentications_count
  * @property-read mixed $avatar
@@ -933,6 +934,7 @@ namespace App\Models{
  * @method static \Illuminate\Database\Eloquent\Builder|User wherePhone($value)
  * @method static \Illuminate\Database\Eloquent\Builder|User wherePmLastFour($value)
  * @method static \Illuminate\Database\Eloquent\Builder|User wherePmType($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|User wherePreferences($value)
  * @method static \Illuminate\Database\Eloquent\Builder|User whereProfilePhotoPath($value)
  * @method static \Illuminate\Database\Eloquent\Builder|User whereRegion($value)
  * @method static \Illuminate\Database\Eloquent\Builder|User whereRememberToken($value)

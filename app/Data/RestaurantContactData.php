@@ -2,8 +2,8 @@
 
 namespace App\Data;
 
+use App\NotificationsChannels\SmsNotificationChannel;
 use Illuminate\Notifications\AnonymousNotifiable;
-use NotificationChannels\Twilio\TwilioChannel;
 use Spatie\LaravelData\Data;
 
 class RestaurantContactData extends Data
@@ -18,7 +18,7 @@ class RestaurantContactData extends Data
 
     public function toNotifiable(): AnonymousNotifiable
     {
-        return (new AnonymousNotifiable)->route(TwilioChannel::class, $this->contact_phone);
+        return (new AnonymousNotifiable)->route(SmsNotificationChannel::class, $this->contact_phone);
     }
 
     public function toChannel(): array

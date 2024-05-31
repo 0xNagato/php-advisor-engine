@@ -3,6 +3,7 @@
 namespace App\Livewire\Profile;
 
 use App\Data\NotificationPreferencesData;
+use App\Models\User;
 use Closure;
 use Filament\Forms\Components\Fieldset;
 use Filament\Forms\Components\FileUpload;
@@ -34,13 +35,18 @@ class ProfileSettings extends Widget implements HasForms
 
     public function mount(): void
     {
+        /**
+         * @var User $user
+         */
+        $user = auth()->user();
+
         $this->form->fill([
-            'first_name' => auth()->user()->first_name,
-            'last_name' => auth()->user()->last_name,
-            'email' => auth()->user()->email,
-            'phone' => auth()->user()->phone,
-            'timezone' => auth()->user()->timezone ?? 'UTC',
-            'preferences' => auth()->user()->preferences ?? NotificationPreferencesData::from([
+            'first_name' => $user->first_name,
+            'last_name' => $user->last_name,
+            'email' => $user->email,
+            'phone' => $user->phone,
+            'timezone' => $user->timezone ?? 'UTC',
+            'preferences' => $user->preferences ?? NotificationPreferencesData::from([
                 'database' => true,
             ])->toArray(),
         ]);
@@ -139,6 +145,9 @@ class ProfileSettings extends Widget implements HasForms
     {
         $data = $this->form->getState();
 
+        /**
+         * @var User $user
+         */
         $user = auth()->user();
 
         if (! $this->requiresTwoFactorAuthentication($user, $data)) {
@@ -148,14 +157,14 @@ class ProfileSettings extends Widget implements HasForms
         }
     }
 
-    protected function updateProfileWithTwoFactor(array $data, $user)
+    protected function updateProfileWithTwoFactor(array $data, User $user)
     {
         session()->put('pending-data.'.$user->id, $data);
 
         return redirect()->route('filament.admin.pages.two-factor-code', ['redirect' => 'filament.admin.pages.my-settings']);
     }
 
-    protected function updateProfileWithoutTwoFactor(array $data, $user)
+    protected function updateProfileWithoutTwoFactor(array $data, User $user)
     {
         $profilePhotoPath = $data['profile_photo_path'] ?? null;
 

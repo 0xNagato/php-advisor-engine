@@ -2,7 +2,7 @@
 
 namespace App\Data\SpecialRequest;
 
-use Carbon\CarbonInterface;
+use Carbon\Carbon;
 use Livewire\Wireable;
 use Spatie\LaravelData\Concerns\WireableData;
 use Spatie\LaravelData\Data;
@@ -16,7 +16,7 @@ class SpecialRequestConversionData extends Data implements Wireable
         public int $minimum_spend,
         public int $commission_requested_percentage,
         public ?string $message,
-        public CarbonInterface $create_at,
+        public Carbon $created_at,
     ) {
     }
 }
