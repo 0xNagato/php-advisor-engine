@@ -60,6 +60,7 @@ class ConciergeReferralBookingsTable extends BaseWidget
             ->recordUrl(fn (Earning $record) => ViewBooking::getUrl([$record->booking]))
             ->emptyStateIcon('heroicon-o-currency-dollar')
             ->emptyStateHeading('Earnings will show here when bookings begin!')
+            ->paginated([5, 10, 25])
             ->columns([
                 TextColumn::make('booking.concierge.user.name')
                     ->label('Concierge'),

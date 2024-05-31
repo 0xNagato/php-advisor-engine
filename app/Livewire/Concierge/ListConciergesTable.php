@@ -18,13 +18,20 @@ class ListConciergesTable extends BaseWidget
         return $table
             ->query(
                 Concierge::query()
-                    ->with(['user.referrer'])
+                    ->with(['user.referrer', 'user.authentications'])
                     ->withCount(['bookings', 'referrals'])
             )
             ->recordUrl(fn (Concierge $record) => ViewConcierge::getUrl(['record' => $record]))
+            ->paginated([5, 10])
             ->columns([
                 TextColumn::make('user')
-                    ->formatStateUsing(fn (Concierge $record) => view('partials.concierge-user-info-column', ['record' => $record->user])),
+                    ->getStateUsing(function (Concierge $record) {
+                        return view('partials.concierge-user-info-column', [
+                            'name' => $record->user->name,
+                            'secured_at' => $record->user->secured_at,
+                            'referrer_name' => $record->user->referrer?->name ?? '-',
+                        ]);
+                    }),
                 TextColumn::make('hotel_name')
                     ->label('Co Name'),
                 TextColumn::make('id')

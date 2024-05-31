@@ -118,7 +118,9 @@ class PaymentResource extends Resource
                     ->money(fn (Payment $record) => $record->currency, divideBy: 100)
                     ->label('Total'),
             ])
+            ->paginated([5, 10, 25])
             ->filters([
+                //
             ])
             ->actions([
                 Action::make('mark_as_paid')

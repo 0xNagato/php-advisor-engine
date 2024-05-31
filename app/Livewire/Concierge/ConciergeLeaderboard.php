@@ -47,6 +47,7 @@ class ConciergeLeaderboard extends BaseWidget
 
                 return route('filament.admin.resources.concierges.view', ['record' => $record]);
             })
+            ->deferLoading()
             ->paginated(false)
             ->columns(components: [
                 TextColumn::make('rank')

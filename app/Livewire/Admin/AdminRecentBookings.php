@@ -36,6 +36,7 @@ class AdminRecentBookings extends BaseWidget
             ->recordUrl(fn (Booking $booking) => route('filament.admin.resources.bookings.view', $booking))
             ->query($query)
             ->paginated(false)
+            ->deferLoading()
             ->searchable(false)
             ->emptyStateIcon('heroicon-o-currency-dollar')
             ->emptyStateHeading('Earnings will show here when bookings begin!')

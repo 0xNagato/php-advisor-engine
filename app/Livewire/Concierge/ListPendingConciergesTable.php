@@ -22,6 +22,7 @@ class ListPendingConciergesTable extends BaseWidget
             ->query(
                 Referral::query()->where(['type' => 'concierge', 'secured_at' => null])
             )
+            ->paginated([5, 10])
             ->columns([
                 TextColumn::make('id')
                     ->label('User')
