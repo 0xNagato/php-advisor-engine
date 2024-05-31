@@ -2,10 +2,9 @@
 
 namespace App\Livewire\Partner;
 
-use App\Events\ConciergeReferredViaText;
 use App\Filament\Pages\Partner\ConciergeEarnings;
 use App\Models\Referral;
-use App\Notifications\ConciergeReferredEmail;
+use App\Notifications\Concierge\NotifyConciergeReferral;
 use Filament\Notifications\Notification;
 use Filament\Tables\Actions\Action;
 use Filament\Tables\Columns\IconColumn;
@@ -65,9 +64,9 @@ class ConciergeReferralsTable extends BaseWidget
                     ->hidden(fn (Referral $record) => $record->has_secured)
                     ->action(function (Referral $record) {
                         if (! blank($record->phone)) {
-                            ConciergeReferredViaText::dispatch($record);
+                            $record->notify(new NotifyConciergeReferral(referral: $record, channel: 'sms'));
                         } elseif (! blank($record->email)) {
-                            $record->notify(new ConciergeReferredEmail($record));
+                            $record->notify(new NotifyConciergeReferral(referral: $record, channel: 'mail'));
                         }
 
                         Notification::make()
