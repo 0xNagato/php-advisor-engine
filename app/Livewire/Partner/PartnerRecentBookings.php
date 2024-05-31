@@ -57,6 +57,7 @@ class PartnerRecentBookings extends BaseWidget
             ->searchable(false)
             ->emptyStateIcon('heroicon-o-currency-dollar')
             ->emptyStateHeading('Earnings will show here when bookings begin!')
+            ->paginated([5, 10, 25])
             ->columns([
                 TextColumn::make('id')
                     ->label('Booking ID')

@@ -52,6 +52,7 @@ class RestaurantReferralsTable extends BaseWidget
                     ->icon(fn (string $state): string => blank($state) ? 'heroicon-o-x-circle' : 'heroicon-o-check-circle')
                     ->color(fn (string $state): string => blank($state) ? 'danger' : 'success'),
             ])
+            ->paginated([5, 10, 25])
             ->actions([
                 Impersonate::make(),
                 Action::make('sendWelcome')

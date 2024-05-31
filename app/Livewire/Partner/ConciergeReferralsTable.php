@@ -56,6 +56,7 @@ class ConciergeReferralsTable extends BaseWidget
                     ->icon(fn (string $state): string => blank($state) ? 'heroicon-o-x-circle' : 'heroicon-o-check-circle')
                     ->color(fn (string $state): string => blank($state) ? 'danger' : 'success'),
             ])
+            ->paginated([5, 10, 25])
             ->actions([
                 Action::make('resendInvitation')
                     ->icon('ri-refresh-line')

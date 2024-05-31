@@ -46,6 +46,7 @@ class ListBookings extends ListRecords
                     ->alignRight(),
 
             ])
+            ->paginated([5, 10])
             ->filters([
                 Filter::make('unconfirmed')
                     ->query(fn (Builder $query) => $query->whereNull('restaurant_confirmed_at')),

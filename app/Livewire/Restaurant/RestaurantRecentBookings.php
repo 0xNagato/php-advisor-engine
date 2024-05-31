@@ -76,6 +76,7 @@ class RestaurantRecentBookings extends BaseWidget
                 //         return money($total, $booking->currency);
                 //     }),
             ])
+            ->paginated([5, 10, 25])
             ->actions([
                 ActionGroup::make([
                     MarkAsNoShowAction::make('mark no show'),
