@@ -3,26 +3,27 @@
 namespace App\NotificationsChannels;
 
 use App\Data\SmsData;
+use App\Http\Integrations\Twilio\Twilio;
 use App\Services\SmsService;
 use Exception;
 use Illuminate\Notifications\Events\NotificationFailed;
 use Illuminate\Notifications\Notification;
 use RuntimeException;
 
-class SmsNotificationChannel
+class WhatsappNotificationChannel
 {
     /**
      * @throws Exception
      */
     public function send($notifiable, Notification $notification): void
     {
-        throw_unless(method_exists($notification, 'toSms'), new RuntimeException('The notification must have a toSms method'));
-        throw_unless($notification->toSms($notifiable) instanceof SmsData, new Exception('toSms should return SmsData'));
+        throw_unless(method_exists($notification, 'toWhatsapp'), new RuntimeException('The notification must have a toWhatsapp method'));
+        throw_unless($notification->toWhatsapp($notifiable) instanceof SmsData, new Exception('toWhatsapp should return SmsData'));
 
-        $data = $notification->toSms($notifiable);
+        $data = $notification->toWhatsapp($notifiable);
 
-        $response = (new SmsService())->sendMessage(
-            contactPhone: $data->phone,
+        $response = (new Twilio())->whatsapp(
+            phone: $data->phone,
             text: $data->text,
         );
 
@@ -30,7 +31,7 @@ class SmsNotificationChannel
             event(new NotificationFailed(
                 $notifiable,
                 $notification,
-                'sms',
+                'whatsapp',
                 [
                     'message' => $response->status(),
                     'exception' => $response->body(),

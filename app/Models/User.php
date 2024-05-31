@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Data\NotificationPreferencesData;
+use App\Notifications\User\SendTwoFactorCode;
 use App\Services\SmsService;
 use App\Traits\FormatsPhoneNumber;
 use BezhanSalleh\FilamentShield\Traits\HasPanelShield;
@@ -264,10 +265,7 @@ class User extends Authenticatable implements FilamentUser, HasAvatar
             ['code' => $code]
         );
 
-        app(SmsService::class)->sendMessage(
-            auth()->user()->phone,
-            'Do not share this code with anyone. Your 2FA login code for PRIMA is '.$code
-        );
+        auth()->user()->notify(new SendTwoFactorCode($code));
     }
 
     public function verify2FACode($code): bool
