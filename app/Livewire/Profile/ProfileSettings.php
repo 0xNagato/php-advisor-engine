@@ -96,7 +96,7 @@ class ProfileSettings extends Widget implements HasForms
                 ->statePath('preferences')
                 ->columns(1)
                 ->schema([
-                    Toggle::make('email')
+                    Toggle::make('mail')
                         ->label('Email')
                         ->rules([
                             fn (Get $get): Closure => function (string $attribute, $value, Closure $fail) use ($get) {
@@ -110,7 +110,7 @@ class ProfileSettings extends Widget implements HasForms
                         ->label('SMS')
                         ->rules([
                             fn (Get $get): Closure => function (string $attribute, $value, Closure $fail) use ($get) {
-                                if ($get('email') === false && $get('whatsapp') === false && $value === false) {
+                                if ($get('mail') === false && $get('whatsapp') === false && $value === false) {
                                     $fail('SMS is required if email, whatsapp are disabled.');
                                 }
                             },
@@ -120,7 +120,7 @@ class ProfileSettings extends Widget implements HasForms
                         ->label('Whatsapp')
                         ->rules([
                             fn (Get $get): Closure => function (string $attribute, $value, Closure $fail) use ($get) {
-                                if ($get('email') === false && $get('sms') === false && $value === false) {
+                                if ($get('mail') === false && $get('sms') === false && $value === false) {
                                     $fail('Whatsapp is required if email, sms are disabled.');
                                 }
                             },
@@ -131,7 +131,7 @@ class ProfileSettings extends Widget implements HasForms
                         ->inline()
                         ->rules([
                             fn (Get $get): Closure => function (string $attribute, $value, Closure $fail) use ($get) {
-                                if ($get('email') === false && $get('sms') === false && $get('whatsapp') === false && $value === false) {
+                                if ($get('mail') === false && $get('sms') === false && $get('whatsapp') === false && $value === false) {
                                     $fail('Application is required if email, sms, and whatsapp are disabled.');
                                 }
                             },
