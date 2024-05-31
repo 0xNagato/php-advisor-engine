@@ -3,7 +3,9 @@
 namespace App\Filament\Pages\SpecialRequest;
 
 use App\Models\SpecialRequest;
+use App\Models\User;
 use Filament\Pages\Page;
+use Livewire\Attributes\Computed;
 
 class ViewSpecialRequest extends Page
 {
@@ -15,9 +17,38 @@ class ViewSpecialRequest extends Page
 
     public SpecialRequest $specialRequest;
 
+    public static function canAccess(): bool
+    {
+        /** @var User $user */
+        $user = auth()->user();
+
+        return $user->hasRole('concierge') || $user->hasRole('restaurant');
+    }
+
     public function mount(SpecialRequest $specialRequest): void
     {
         $this->specialRequest = $specialRequest;
         $this->authorize('view', $specialRequest);
+    }
+
+    #[Computed]
+    public function restaurantTotalFee(): float
+    {
+        $commissionValue = ($this->commissionRequestedPercentage() / 100) * $this->minimumSpend();
+        $platformFee = 0.07 * $commissionValue;
+
+        return $commissionValue + $platformFee;
+    }
+
+    #[Computed]
+    public function minimumSpend(): int
+    {
+        return (int) str_replace(',', '', $this->specialRequest->minimum_spend);
+    }
+
+    #[Computed]
+    public function commissionRequestedPercentage(): float
+    {
+        return $this->specialRequest->commission_requested_percentage;
     }
 }

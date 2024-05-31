@@ -189,6 +189,10 @@ class CreateSpecialRequestForm extends Widget implements HasForms
 
         CreateSpecialRequest::run($specialRequestData);
 
+        $this->form->fill();
+
+        $this->dispatch('special-request-created');
+
         Notification::make()
             ->title('Special Request Submitted to the Restaurant')
             ->success()
