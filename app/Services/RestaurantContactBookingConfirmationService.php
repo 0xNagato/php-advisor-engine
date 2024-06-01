@@ -6,7 +6,6 @@ use App\Data\RestaurantContactData;
 use App\Models\Booking;
 use App\Notifications\Booking\RestaurantContactBookingConfirmed;
 use AshAllenDesign\ShortURL\Exceptions\ShortURLException;
-use Carbon\CarbonInterface;
 use Illuminate\Support\Collection;
 use ShortURL;
 

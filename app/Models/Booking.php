@@ -25,8 +25,8 @@ use function Sentry\captureException;
 class Booking extends Model
 {
     use FormatsPhoneNumber;
-    use Notifiable;
     use HasFactory;
+    use Notifiable;
 
     /**
      * The attributes that are mass assignable.

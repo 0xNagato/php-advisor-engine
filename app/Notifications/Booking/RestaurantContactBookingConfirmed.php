@@ -20,8 +20,7 @@ class RestaurantContactBookingConfirmed extends Notification implements ShouldQu
     public function __construct(
         public RestaurantContactData $contact,
         public string $confirmationUrl,
-    )
-    {
+    ) {
         //
     }
 

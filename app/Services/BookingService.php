@@ -7,7 +7,6 @@ use App\Events\BookingPaid;
 use App\Models\Booking;
 use App\Models\Region;
 use App\Notifications\Booking\GuestBookingConfirmed;
-use App\Notifications\Booking\RestaurantContactBookingConfirmed;
 use App\Traits\FormatsPhoneNumber;
 use Stripe\Charge;
 use Stripe\Customer;

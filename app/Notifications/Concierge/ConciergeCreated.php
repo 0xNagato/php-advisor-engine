@@ -59,7 +59,6 @@ class ConciergeCreated extends Notification
         );
     }
 
-
     /**
      * @throws ShortURLException
      */

@@ -4,12 +4,11 @@ namespace App\Notifications\Booking;
 
 use App\Data\SmsData;
 use App\Models\Booking;
-use ShortURL;
 use App\NotificationsChannels\SmsNotificationChannel;
 use Carbon\CarbonInterface;
 use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Notification;
+use ShortURL;
 
 class GuestBookingConfirmed extends Notification
 {
@@ -19,8 +18,7 @@ class GuestBookingConfirmed extends Notification
      * Create a new notification instance.
      */
     public function __construct(
-    )
-    {
+    ) {
         //
     }
 
@@ -55,8 +53,6 @@ class GuestBookingConfirmed extends Notification
             text: $message
         );
     }
-
-
 
     private function getFormattedDate(CarbonInterface $date): string
     {
