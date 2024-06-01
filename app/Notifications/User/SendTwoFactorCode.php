@@ -3,6 +3,7 @@
 namespace App\Notifications\User;
 
 use App\Data\SmsData;
+use App\Models\User;
 use App\NotificationsChannels\SmsNotificationChannel;
 use Illuminate\Bus\Queueable;
 use Illuminate\Notifications\Notification;
@@ -30,7 +31,7 @@ class SendTwoFactorCode extends Notification
         ];
     }
 
-    public function toSms($notifiable): SMSData
+    public function toSms(User $notifiable): SMSData
     {
         return new SmsData(
             phone: $notifiable->phone,
