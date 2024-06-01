@@ -13,6 +13,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOneThrough;
 use Illuminate\Log\Logger;
+use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
@@ -24,6 +25,7 @@ use function Sentry\captureException;
 class Booking extends Model
 {
     use FormatsPhoneNumber;
+    use Notifiable;
     use HasFactory;
 
     /**

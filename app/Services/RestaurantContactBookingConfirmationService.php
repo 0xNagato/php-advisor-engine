@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Data\RestaurantContactData;
 use App\Models\Booking;
+use App\Notifications\Booking\RestaurantContactBookingConfirmed;
 use AshAllenDesign\ShortURL\Exceptions\ShortURLException;
 use Carbon\CarbonInterface;
 use Illuminate\Support\Collection;
@@ -24,37 +25,11 @@ class RestaurantContactBookingConfirmationService
 
         foreach ($contacts as $contact) {
             if ($contact->use_for_reservations) {
-                $this->sendSMS($booking, $confirmationUrl, $contact);
+                $booking->notify(new RestaurantContactBookingConfirmed(
+                    contact: $contact,
+                    confirmationUrl: $confirmationUrl,
+                ));
             }
         }
-    }
-
-    public function sendSMS(Booking $booking, string $confirmationUrl, RestaurantContactData $contact): void
-    {
-        $bookingDate = $this->getFormattedDate($booking->booking_at);
-
-        $bookingTime = $booking->booking_at->format('g:ia');
-
-        app(SmsService::class)->sendMessage(
-            $contact->contact_phone,
-            "PRIMA Reservation - $bookingDate at $bookingTime, $booking->guest_name, $booking->guest_count guests, $booking->guest_phone. Confirm the reservation by clicking here $confirmationUrl."
-        );
-
-    }
-
-    private function getFormattedDate(CarbonInterface $date): string
-    {
-        $today = now();
-        $tomorrow = now()->addDay();
-
-        if ($date->isSameDay($today)) {
-            return 'today';
-        }
-
-        if ($date->isSameDay($tomorrow)) {
-            return 'tomorrow';
-        }
-
-        return $date->format('l \\t\\h\\e jS');
     }
 }

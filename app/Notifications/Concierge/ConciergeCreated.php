@@ -28,17 +28,6 @@ class ConciergeCreated extends Notification
     }
 
     /**
-     * @throws ShortURLException
-     */
-    protected function passwordResetUrl(): string
-    {
-        $token = Password::createToken($this->user);
-        $url = Filament::getResetPasswordUrl($token, $this->user);
-
-        return ShortURL::destinationUrl($url)->make()->default_short_url;
-    }
-
-    /**
      * Get the notification's delivery channels.
      *
      * @return array<int, string>
@@ -68,5 +57,17 @@ class ConciergeCreated extends Notification
             phone: $this->user->phone,
             text: "Welcome to PRIMA! Your account has been created. Please click $this->passwordResetUrl to login and update your payment info and begin making reservations. Thank you for joining us!"
         );
+    }
+
+
+    /**
+     * @throws ShortURLException
+     */
+    protected function passwordResetUrl(): string
+    {
+        $token = Password::createToken($this->user);
+        $url = Filament::getResetPasswordUrl($token, $this->user);
+
+        return ShortURL::destinationUrl($url)->make()->default_short_url;
     }
 }
