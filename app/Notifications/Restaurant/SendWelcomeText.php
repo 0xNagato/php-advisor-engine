@@ -8,7 +8,6 @@ use App\NotificationsChannels\SmsNotificationChannel;
 use AshAllenDesign\ShortURL\Facades\ShortURL;
 use Filament\Facades\Filament;
 use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Notification;
 use Illuminate\Support\Facades\Password;
 
@@ -26,7 +25,6 @@ class SendWelcomeText extends Notification
 
     /**
      * Get the notification's delivery channels.
-     *
      */
     public function via(object $notifiable): array
     {
