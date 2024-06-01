@@ -153,6 +153,11 @@ class Restaurant extends Model
         );
     }
 
+    protected function name(): Attribute
+    {
+        return Attribute::make(get: fn () => $this->restaurant_name);
+    }
+
     /**
      * Get the schedules for the restaurant.
      *

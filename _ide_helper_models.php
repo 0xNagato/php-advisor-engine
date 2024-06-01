@@ -555,6 +555,7 @@ namespace App\Models{
  * @property string|null $restaurant_logo_path
  * @property-read \App\Models\Region|null $inRegion
  * @property-read mixed $logo
+ * @property-read mixed $name
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\ScheduleTemplate> $scheduleTemplates
  * @property-read int|null $schedule_templates_count
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\ScheduleWithBooking> $schedules

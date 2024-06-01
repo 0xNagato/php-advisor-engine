@@ -4,16 +4,23 @@ namespace App\Filament\Pages\SpecialRequest;
 
 use App\Models\SpecialRequest;
 use App\Models\User;
+use App\Traits\SpecialRequest\UseSpecialRequestFormatting;
 use Filament\Pages\Page;
 use Livewire\Attributes\Computed;
 
 class ViewSpecialRequest extends Page
 {
+    use UseSpecialRequestFormatting;
+
     protected static ?string $navigationIcon = 'heroicon-o-document-text';
 
     protected static string $view = 'filament.pages.special-request.view-special-request';
 
+    public ?string $heading = '';
+
     protected static ?string $slug = '/special-requests/{specialRequest?}';
+
+    protected static bool $shouldRegisterNavigation = false;
 
     public SpecialRequest $specialRequest;
 
