@@ -169,15 +169,29 @@
                                 {{ $conversation->name }}:
                             </span>
                             {{ $conversation->message }}
-                            <div class="flex gap-2 mt-4">
-                                <x-filament::button class="w-full" color="success">
-                                    Accept
-                                </x-filament::button>
-                                <x-filament::button class="w-full" color="gray">
-                                    Reject
-                                </x-filament::button>
-                            </div>
-                            {{-- <pre>@json($conversation, JSON_PRETTY_PRINT)</pre> --}}
+                            <x-filament::section class="-m-4">
+                                <div class="mt-4 font-semibold text-center">
+                                    Counter Offer
+                                </div>
+                                <div class="flex justify-between gap-2 mt-4">
+                                    <div>
+                                        Minimum Spend:
+                                        {{ money($conversation->minimum_spend * 100, $specialRequest->currency) }}
+                                    </div>
+                                    <div>
+                                        Commission: {{ $conversation->commission_requested_percentage }}%
+                                    </div>
+                                </div>
+                                <div class="flex gap-2 mt-4">
+                                    <x-filament::button class="w-full" color="success">
+                                        Accept
+                                    </x-filament::button>
+                                    <x-filament::button class="w-full" color="gray">
+                                        Reject
+                                    </x-filament::button>
+                                </div>
+                            </x-filament::section>
+
                         </div>
                     @endforeach
                 @else
