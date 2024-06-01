@@ -1,8 +1,10 @@
 <?php
 
-namespace App\Notifications;
+namespace App\Notifications\Concierge;
 
+use App\Data\SmsData;
 use App\Models\User;
+use App\NotificationsChannels\SmsNotificationChannel;
 use AshAllenDesign\ShortURL\Exceptions\ShortURLException;
 use AshAllenDesign\ShortURL\Facades\ShortURL;
 use Filament\Facades\Filament;
@@ -43,7 +45,10 @@ class ConciergeCreated extends Notification
      */
     public function via(object $notifiable): array
     {
-        return ['mail'];
+        return [
+            'mail',
+            SmsNotificationChannel::class,
+        ];
     }
 
     /**
@@ -57,13 +62,11 @@ class ConciergeCreated extends Notification
             ->markdown('mail.concierge-welcome-mail', ['passwordResetUrl' => $this->passwordResetUrl]);
     }
 
-    /**
-     * @return array<string, mixed>
-     */
-    public function toArray(object $notifiable): array
+    public function toSMS(object $notifiable): SmsData
     {
-        return [
-
-        ];
+        return new SmsData(
+            phone: $this->user->phone,
+            text: "Welcome to PRIMA! Your account has been created. Please click $this->passwordResetUrl to login and update your payment info and begin making reservations. Thank you for joining us!"
+        );
     }
 }

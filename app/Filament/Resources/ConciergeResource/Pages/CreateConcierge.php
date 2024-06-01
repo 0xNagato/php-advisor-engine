@@ -4,7 +4,7 @@ namespace App\Filament\Resources\ConciergeResource\Pages;
 
 use App\Filament\Resources\ConciergeResource;
 use App\Models\User;
-use App\Notifications\ConciergeCreated;
+use App\Notifications\Concierge\ConciergeCreated;
 use Filament\Forms\Components\Section;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Form;
@@ -82,12 +82,8 @@ class CreateConcierge extends CreateRecord
         $user->assignRole('concierge');
         $user->notify(new ConciergeCreated($user));
 
-        $concierge = $user->concierge()->create([
+        return $user->concierge()->create([
             'hotel_name' => $data['hotel_name'],
         ]);
-
-        \App\Events\ConciergeCreated::dispatch($concierge);
-
-        return $concierge;
     }
 }

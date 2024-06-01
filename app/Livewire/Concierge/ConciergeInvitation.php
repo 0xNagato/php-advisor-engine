@@ -4,7 +4,7 @@ namespace App\Livewire\Concierge;
 
 use App\Models\Referral;
 use App\Models\User;
-use App\Notifications\ConciergeRegisteredEmail;
+use App\Notifications\Concierge\ConciergeRegisteredEmail;
 use DanHarrin\LivewireRateLimiting\Exceptions\TooManyRequestsException;
 use DanHarrin\LivewireRateLimiting\WithRateLimiting;
 use Filament\Actions\Action;
