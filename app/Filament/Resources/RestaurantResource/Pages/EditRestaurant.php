@@ -2,16 +2,19 @@
 
 namespace App\Filament\Resources\RestaurantResource\Pages;
 
+use App\Enums\RestaurantStatus;
 use App\Filament\Resources\RestaurantResource;
 use App\Filament\Resources\RestaurantResource\Components\RestaurantContactsForm;
 use App\Models\Restaurant;
 use Filament\Actions\Action;
+use Filament\Actions\ActionGroup;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Section;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Form;
 use Filament\Resources\Pages\EditRecord;
+use Filament\Support\Enums\ActionSize;
 use Illuminate\Contracts\Support\Htmlable;
 use libphonenumber\PhoneNumberType;
 use Ysfkaya\FilamentPhoneInput\Forms\PhoneInput;
@@ -118,14 +121,41 @@ class EditRestaurant extends EditRecord
     protected function getHeaderActions(): array
     {
         return [
-            Action::make($this->getRecord()->is_suspended ? 'Restore' : 'Suspend')
-                ->action(function () {
-                    $this->getRecord()->update([
-                        'is_suspended' => ! $this->getRecord()->is_suspended,
-                    ]);
-                })
-                ->requiresConfirmation()
-                ->color(fn () => $this->getRecord()->is_suspended ? 'success' : 'danger'),
+            ActionGroup::make([
+                Action::make('Draft')
+                    ->action(function () {
+                        $this->getRecord()->update([
+                            'status' => RestaurantStatus::DRAFT,
+                        ]);
+                    })
+                    ->requiresConfirmation(),
+                Action::make('Pending')
+                    ->action(function () {
+                        $this->getRecord()->update([
+                            'status' => RestaurantStatus::PENDING,
+                        ]);
+                    })
+                    ->requiresConfirmation(),
+                Action::make('Active')
+                    ->action(function () {
+                        $this->getRecord()->update([
+                            'status' => RestaurantStatus::ACTIVE,
+                        ]);
+                    })
+                    ->requiresConfirmation(),
+                Action::make('Suspended')
+                    ->action(function () {
+                        $this->getRecord()->update([
+                            'status' => RestaurantStatus::SUSPENDED,
+                        ]);
+                    })
+                    ->requiresConfirmation(),
+            ])
+                ->label($this->getRecord()->status->getLabel())
+                ->icon('polaris-status-icon')
+                ->size(ActionSize::ExtraLarge)
+                ->color('primary')
+                ->button(),
         ];
     }
 }

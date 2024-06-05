@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Data\RestaurantContactData;
+use App\Enums\RestaurantStatus;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\Attribute;
@@ -60,6 +61,7 @@ class Restaurant extends Model
         'increment_fee',
         'non_prime_fee_per_head',
         'non_prime_type',
+        'status',
     ];
 
     protected static function boot(): void
@@ -228,6 +230,7 @@ class Restaurant extends Model
             'non_prime_time' => 'array',
             'business_hours' => 'array',
             'party_sizes' => 'array',
+            'status' => RestaurantStatus::class,
         ];
     }
 }
