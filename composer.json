@@ -36,6 +36,7 @@
         "livewire/volt": "^1.6",
         "lorisleiva/laravel-actions": "^2.8",
         "opcodesio/log-viewer": "^3.8",
+        "orangehill/iseed": "^3.0",
         "owenvoke/blade-fontawesome": "^2.6",
         "pelmered/filament-money-field": "^1.0",
         "postare/blade-mdi": "^1.0",
