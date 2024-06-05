@@ -91,7 +91,7 @@ class DatabaseSeeder extends Seeder
 
         $this->call([
             ShieldSeeder::class,
-            ConciergeSeeder::class,
+            // ConciergeSeeder::class,
             RestaurantSeeder::class,
             BookingSeeder::class,
         ]);

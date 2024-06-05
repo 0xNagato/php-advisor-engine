@@ -5,6 +5,7 @@ namespace Database\Seeders;
 ini_set('max_execution_time', 0); // 0 = Unlimited
 ini_set('memory_limit', '5G');
 
+use App\Enums\RestaurantStatus;
 use App\Models\Partner;
 use App\Models\Referral;
 use App\Models\Restaurant;
@@ -138,11 +139,13 @@ class RestaurantSeeder extends Seeder
 
                 $user = User::factory([
                     'first_name' => 'Restaurant',
+                    'last_name' => $restaurantName,
                     'partner_referral_id' => $partner?->id,
                     'email' => $email,
                 ])
                     ->has(Restaurant::factory([
                         'restaurant_name' => $restaurantName,
+                        'status' => RestaurantStatus::PENDING,
                         'region' => $region,
                     ]))
                     ->create();
