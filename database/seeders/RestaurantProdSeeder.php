@@ -14,7 +14,7 @@ use App\Models\User;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Str;
 
-class RestaurantSeeder extends Seeder
+class RestaurantProdSeeder extends Seeder
 {
     /**
      * Run the database seeds.
