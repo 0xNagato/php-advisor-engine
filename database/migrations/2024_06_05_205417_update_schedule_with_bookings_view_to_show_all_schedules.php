@@ -51,8 +51,7 @@ return new class extends Migration
             ) b ON st.id = b.schedule_template_id
             LEFT JOIN special_pricing_restaurants sp ON sp.restaurant_id = st.restaurant_id AND sp.date = dr.date
             LEFT JOIN restaurants r ON r.id = st.restaurant_id
-            LEFT JOIN restaurant_time_slots rts ON rts.schedule_template_id = st.id AND rts.booking_date = dr.date
-            WHERE st.is_available = 1;
+            LEFT JOIN restaurant_time_slots rts ON rts.schedule_template_id = st.id AND rts.booking_date = dr.date;
         ");
     }
 

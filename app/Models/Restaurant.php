@@ -173,7 +173,7 @@ class Restaurant extends Model
     /**
      * Get the user that owns the restaurant.
      *
-     * @return BelongsTo<User, \App\Models\Restaurant>
+     * @return BelongsTo<User, Restaurant>
      */
     public function user(): BelongsTo
     {
@@ -181,7 +181,7 @@ class Restaurant extends Model
     }
 
     /**
-     * @return BelongsTo<Region, \App\Models\Restaurant>
+     * @return BelongsTo<Region, Restaurant>
      */
     public function inRegion(): BelongsTo
     {
@@ -192,7 +192,7 @@ class Restaurant extends Model
     {
         return $query->whereHas('user', function (Builder $query) {
             $query->whereNotNull('secured_at');
-        })->where('is_suspended', false);
+        })->where('status', '!=', RestaurantStatus::SUSPENDED);
     }
 
     /**

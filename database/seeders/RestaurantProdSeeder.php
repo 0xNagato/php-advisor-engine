@@ -3,16 +3,15 @@
 namespace Database\Seeders;
 
 use App\Enums\RestaurantStatus;
-
-ini_set('max_execution_time', 0); // 0 = Unlimited
-ini_set('memory_limit', '5G');
-
 use App\Models\Partner;
 use App\Models\Referral;
 use App\Models\Restaurant;
 use App\Models\User;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Str;
+
+ini_set('max_execution_time', 0); // 0 = Unlimited
+ini_set('memory_limit', '5G');
 
 class RestaurantProdSeeder extends Seeder
 {
@@ -46,7 +45,7 @@ class RestaurantProdSeeder extends Seeder
             ],
         ]);
 
-        $partnerUser = User::factory([
+        $partnerUser = User::query()->create([
             'first_name' => 'PRIMA',
             'last_name' => 'Partner',
             'phone' => '+16473823326',
@@ -54,7 +53,7 @@ class RestaurantProdSeeder extends Seeder
             'password' => bcrypt('demo2024'),
         ])->create();
 
-        $partner = Partner::factory([
+        $partner = Partner::query()->create([
             'user_id' => $partnerUser->id,
             'percentage' => 20,
         ])->create();

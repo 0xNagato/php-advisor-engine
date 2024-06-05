@@ -6,7 +6,7 @@
     <x-filament::section class="{{ $this->borderTop }}">
         <div class="flex justify-center mb-2 -mt-2">
             <img src="{{ $specialRequest->restaurant->logo }}" alt="{{ $specialRequest->restaurant->name }}"
-                class="object-cover h-16 grayscale">
+                class="object-cover h-16">
         </div>
         <div class="w-full space-y-3 text-sm">
             <div class="relative">
@@ -199,5 +199,6 @@
                 @endif
 
             </div>
+        </div>
     </x-filament::section>
 </x-filament-panels::page>

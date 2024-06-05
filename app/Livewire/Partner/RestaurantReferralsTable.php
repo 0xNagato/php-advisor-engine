@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Partner;
 
+use App\Enums\RestaurantStatus;
 use App\Events\RestaurantInvited;
 use App\Filament\Pages\Partner\RestaurantEarnings;
 use App\Models\User;
@@ -71,7 +72,7 @@ class RestaurantReferralsTable extends BaseWidget
                         $record->referral->secured_at = now();
                         $record->referral->save();
 
-                        $record->restaurant->is_suspended = true;
+                        $record->restaurant->status = RestaurantStatus::PENDING;
                         $record->restaurant->save();
 
                         Notification::make()
