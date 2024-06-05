@@ -6,7 +6,7 @@
     <x-filament::section class="{{ $this->borderTop }}">
         <div class="flex justify-center mb-2 -mt-2">
             <img src="{{ $specialRequest->restaurant->logo }}" alt="{{ $specialRequest->restaurant->name }}"
-                class="object-cover h-16">
+                 class="object-cover h-16">
         </div>
         <div class="w-full space-y-3 text-sm">
             <div class="relative">
@@ -72,7 +72,7 @@
 
                 <div>
                     <div class="font-medium text-gray-700">
-                        <span class="font-semibold">Example Total Fee:</span>
+                        <span class="font-semibold">Your Commission:</span>
                         <span class="text-black">
                             {{ money($this->restaurantTotalFee * 100, $specialRequest->restaurant->inRegion->currency) }}
                         </span>
@@ -145,7 +145,8 @@
                     </div>
                     <div>
                         <p class="font-medium text-gray-700">
-                            <span class="font-light text-black">{!! nl2br(e($specialRequest->restaurant_message)) !!}</span>
+                            <span
+                                class="font-light text-black">{!! nl2br(e($specialRequest->restaurant_message)) !!}</span>
                         </p>
                     </div>
                 @endif

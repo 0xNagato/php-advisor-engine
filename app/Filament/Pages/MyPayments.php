@@ -37,6 +37,7 @@ class MyPayments extends Page implements HasTable
 
         return $table
             ->query($query)
+            ->emptyStateHeading('No Payments Made Yet')
             ->columns([
                 TextColumn::make('payment.status')
                     ->label('Status')

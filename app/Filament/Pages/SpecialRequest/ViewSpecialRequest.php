@@ -41,10 +41,7 @@ class ViewSpecialRequest extends Page
     #[Computed]
     public function restaurantTotalFee(): float
     {
-        $commissionValue = ($this->commissionRequestedPercentage() / 100) * $this->minimumSpend();
-        $platformFee = 0.07 * $commissionValue;
-
-        return $commissionValue + $platformFee;
+        return ($this->commissionRequestedPercentage() / 100) * $this->minimumSpend();
     }
 
     #[Computed]
