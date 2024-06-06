@@ -4,9 +4,6 @@ namespace App\Livewire\Restaurant;
 
 use App\Data\SpecialRequest\SpecialRequestConversionData;
 use App\Enums\SpecialRequestStatus;
-use App\Events\SpecialRequestAccepted;
-use App\Events\SpecialRequestChangesRequested;
-use App\Events\SpecialRequestRejected;
 use App\Models\SpecialRequest;
 use App\Notifications\Concierge\RestaurantSpecialRequestAccepted;
 use App\Notifications\Concierge\RestaurantSpecialRequestChangeRequest;
