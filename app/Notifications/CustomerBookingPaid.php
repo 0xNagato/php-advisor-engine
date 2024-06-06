@@ -5,7 +5,6 @@ namespace App\Notifications;
 use App\Models\Booking;
 use AshAllenDesign\ShortURL\Exceptions\ShortURLException;
 use Carbon\Carbon;
-use Carbon\CarbonInterface;
 use Illuminate\Bus\Queueable;
 use Illuminate\Notifications\Notification;
 use NotificationChannels\Twilio\TwilioChannel;

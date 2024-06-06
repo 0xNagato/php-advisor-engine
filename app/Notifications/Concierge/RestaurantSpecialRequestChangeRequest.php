@@ -8,8 +8,6 @@ use App\Models\SpecialRequest;
 use App\Models\User;
 use App\NotificationsChannels\SmsNotificationChannel;
 use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldQueue;
-use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 
 class RestaurantSpecialRequestChangeRequest extends Notification
@@ -17,6 +15,7 @@ class RestaurantSpecialRequestChangeRequest extends Notification
     use Queueable;
 
     public string $restaurant;
+
     public string $link;
 
     /**
@@ -24,15 +23,13 @@ class RestaurantSpecialRequestChangeRequest extends Notification
      */
     public function __construct(
         public SpecialRequest $specialRequest,
-    )
-    {
+    ) {
         $this->restaurant = $this->specialRequest->restaurant->restaurant_name;
         $this->link = SpecialRequests::getUrl();
     }
 
     /**
      * Get the notification's delivery channels.
-     *
      */
     public function via(object $notifiable): array
     {

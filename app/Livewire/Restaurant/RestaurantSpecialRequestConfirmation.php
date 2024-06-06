@@ -210,7 +210,6 @@ class RestaurantSpecialRequestConfirmation extends Page
             'conversations' => $conversions,
         ]);
 
-
         $this->specialRequest->concierge->user->notify(new RestaurantSpecialRequestChangeRequest($this->specialRequest));
 
         Notification::make()

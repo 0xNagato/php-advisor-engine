@@ -6,7 +6,6 @@ use App\Data\SmsData;
 use App\Models\Booking;
 use App\NotificationsChannels\SmsNotificationChannel;
 use Carbon\Carbon;
-use Carbon\CarbonInterface;
 use Illuminate\Bus\Queueable;
 use Illuminate\Notifications\Notification;
 use ShortURL;

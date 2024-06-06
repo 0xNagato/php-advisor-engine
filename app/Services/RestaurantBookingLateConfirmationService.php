@@ -5,7 +5,6 @@ namespace App\Services;
 use App\Models\Booking;
 use App\Models\User;
 use Carbon\Carbon;
-use Carbon\CarbonInterface;
 
 class RestaurantBookingLateConfirmationService
 {

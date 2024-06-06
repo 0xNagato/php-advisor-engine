@@ -8,7 +8,6 @@ use App\Services\SmsService;
 use AshAllenDesign\ShortURL\Exceptions\ShortURLException;
 use AshAllenDesign\ShortURL\Facades\ShortURL;
 use Carbon\Carbon;
-use Carbon\CarbonInterface;
 use Illuminate\Support\Facades\URL;
 use Spatie\LaravelData\DataCollection;
 
@@ -89,5 +88,4 @@ class SendRestaurantSpecialRequestConfirmation
             }
         }
     }
-
 }
