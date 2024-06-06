@@ -4,6 +4,7 @@
 
 namespace App\Providers;
 
+use Carbon\Carbon;
 use Filament\Notifications\Notification;
 use Filament\Pages\Page;
 use Filament\Support\Colors\Color;
@@ -43,6 +44,21 @@ class AppServiceProvider extends ServiceProvider
                 ->danger()
                 ->send();
         };
+
+        Carbon::macro('toNotificationFormat', function (Carbon $date): string {
+            $today = now();
+            $tomorrow = now()->addDay();
+
+            if ($date->isSameDay($today)) {
+                return 'today';
+            }
+
+            if ($date->isSameDay($tomorrow)) {
+                return 'tomorrow';
+            }
+
+            return $date->format('l \\t\\h\\e jS');
+        });
 
         Model::preventLazyLoading(! $this->app->isProduction());
     }

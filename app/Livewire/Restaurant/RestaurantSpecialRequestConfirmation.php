@@ -8,6 +8,9 @@ use App\Events\SpecialRequestAccepted;
 use App\Events\SpecialRequestChangesRequested;
 use App\Events\SpecialRequestRejected;
 use App\Models\SpecialRequest;
+use App\Notifications\Concierge\RestaurantSpecialRequestAccepted;
+use App\Notifications\Concierge\RestaurantSpecialRequestChangeRequest;
+use App\Notifications\Concierge\RestaurantSpecialRequestRejected;
 use Filament\Forms\Components\Actions;
 use Filament\Forms\Components\Actions\Action;
 use Filament\Forms\Components\Grid;
@@ -167,7 +170,7 @@ class RestaurantSpecialRequestConfirmation extends Page
             'restaurant_message' => $data['restaurant_message'],
         ]);
 
-        SpecialRequestAccepted::dispatch($this->specialRequest);
+        $this->specialRequest->concierge->user->notify(new RestaurantSpecialRequestAccepted($this->specialRequest));
 
         Notification::make()
             ->title('Special Request Accepted')
@@ -184,7 +187,7 @@ class RestaurantSpecialRequestConfirmation extends Page
             'restaurant_message' => $data['restaurant_message'],
         ]);
 
-        SpecialRequestRejected::dispatch($this->specialRequest);
+        $this->specialRequest->concierge->user->notify(new RestaurantSpecialRequestRejected($this->specialRequest));
 
         Notification::make()
             ->title('Special Request Rejected')
@@ -210,7 +213,8 @@ class RestaurantSpecialRequestConfirmation extends Page
             'conversations' => $conversions,
         ]);
 
-        SpecialRequestChangesRequested::dispatch($this->specialRequest);
+
+        $this->specialRequest->concierge->user->notify(new RestaurantSpecialRequestChangeRequest($this->specialRequest));
 
         Notification::make()
             ->title('Special Request Changes Submitted')

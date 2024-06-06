@@ -37,7 +37,7 @@ class SendRestaurantSpecialRequestConfirmation
         $confirmationUrl = $this->generateConfirmationUrl($event->specialRequest->uuid);
 
         // Format the booking date
-        $bookingDate = $this->getFormattedDate(Carbon::parse($event->specialRequest->booking_date));
+        $bookingDate = Carbon::toNotificationFormat(Carbon::parse($event->specialRequest->booking_date));
 
         // Format the booking time
         $bookingTime = Carbon::parse($event->specialRequest->booking_time)->format('g:ia');
@@ -90,22 +90,4 @@ class SendRestaurantSpecialRequestConfirmation
         }
     }
 
-    /**
-     * Get a formatted date string.
-     */
-    private function getFormattedDate(CarbonInterface $date): string
-    {
-        $today = now();
-        $tomorrow = now()->addDay();
-
-        if ($date->isSameDay($today)) {
-            return 'today';
-        }
-
-        if ($date->isSameDay($tomorrow)) {
-            return 'tomorrow';
-        }
-
-        return $date->format('l \\t\\h\\e jS');
-    }
 }

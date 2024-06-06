@@ -5,6 +5,7 @@ namespace App\Notifications\Booking;
 use App\Data\SmsData;
 use App\Models\Booking;
 use App\NotificationsChannels\SmsNotificationChannel;
+use Carbon\Carbon;
 use Carbon\CarbonInterface;
 use Illuminate\Bus\Queueable;
 use Illuminate\Notifications\Notification;
@@ -36,7 +37,7 @@ class GuestBookingConfirmed extends Notification
 
     public function toSMS(Booking $notifiable): SmsData
     {
-        $bookingDate = $this->getFormattedDate($notifiable->booking_at);
+        $bookingDate = Carbon::toNotificationFormat($notifiable->booking_at);
 
         $bookingTime = $notifiable->booking_at->format('g:ia');
 
@@ -52,21 +53,5 @@ class GuestBookingConfirmed extends Notification
             phone: $notifiable->guest_phone,
             text: $message
         );
-    }
-
-    private function getFormattedDate(CarbonInterface $date): string
-    {
-        $today = now();
-        $tomorrow = now()->addDay();
-
-        if ($date->isSameDay($today)) {
-            return 'today';
-        }
-
-        if ($date->isSameDay($tomorrow)) {
-            return 'tomorrow';
-        }
-
-        return $date->format('l \\t\\h\\e jS');
     }
 }
