@@ -62,7 +62,7 @@ class RestaurantReferralsTable extends BaseWidget
                     ->modalHeading('Send Welcome Email')
                     ->hidden(fn (User $record) => $record->has_secured)
                     ->action(function (User $record) {
-                        $record->restaurant->notify(new SendWelcomeText());
+                        $record->restaurant->user->notify(new SendWelcomeText());
 
                         $record->secured_at = now();
                         $record->save();

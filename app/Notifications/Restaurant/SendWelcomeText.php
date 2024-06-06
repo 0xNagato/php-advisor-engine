@@ -3,7 +3,7 @@
 namespace App\Notifications\Restaurant;
 
 use App\Data\SmsData;
-use App\Models\Restaurant;
+use App\Models\User;
 use App\NotificationsChannels\SmsNotificationChannel;
 use AshAllenDesign\ShortURL\Facades\ShortURL;
 use Filament\Facades\Filament;
@@ -33,7 +33,7 @@ class SendWelcomeText extends Notification
         ];
     }
 
-    public function toSms(Restaurant $notifiable): SMSData
+    public function toSms(User $notifiable): SMSData
     {
         $token = Password::createToken($notifiable->user);
         $url = Filament::getResetPasswordUrl($token, $notifiable->user);
@@ -41,7 +41,7 @@ class SendWelcomeText extends Notification
         $secureUrl = ShortURL::destinationUrl($url)->make()->default_short_url;
 
         return new SmsData(
-            phone: $notifiable->user->phone,
+            phone: $notifiable->phone,
             text: '❤️ Thank you for joining PRIMA! Our concierge team is currently being onboarded and will start generating reservations soon! We will notify you via text as soon as we are ready to launch! With gratitude, Team PRIMA.'
         );
     }

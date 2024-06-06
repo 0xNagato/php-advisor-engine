@@ -24,7 +24,6 @@ use Spatie\LaravelData\DataCollection;
 class Restaurant extends Model
 {
     use HasFactory;
-    use Notifiable;
 
     public const int DEFAULT_TABLES = 10;
 
