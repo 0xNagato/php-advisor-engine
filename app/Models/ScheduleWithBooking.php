@@ -33,7 +33,7 @@ class ScheduleWithBooking extends Model
     public $timestamps = false;
 
     /**
-     * @return BelongsTo<Restaurant, \App\Models\ScheduleWithBooking>
+     * @return BelongsTo<Restaurant, ScheduleWithBooking>
      */
     public function restaurant(): BelongsTo
     {

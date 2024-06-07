@@ -192,7 +192,7 @@ class Restaurant extends Model
     {
         return $query->whereHas('user', function (Builder $query) {
             $query->whereNotNull('secured_at');
-        })->where('status', '!=', RestaurantStatus::SUSPENDED);
+        })->whereIn('status', ['active', 'pending']);
     }
 
     /**
