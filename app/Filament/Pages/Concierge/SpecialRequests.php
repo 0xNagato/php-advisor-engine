@@ -2,10 +2,9 @@
 
 namespace App\Filament\Pages\Concierge;
 
-use App\Models\SpecialRequest;
+use App\Filament\Pages\SpecialRequest\CreateSpecialRequest;
 use App\Models\User;
 use Filament\Actions\Action;
-use Filament\Forms\Components\Select;
 use Filament\Pages\Page;
 
 class SpecialRequests extends Page
@@ -29,17 +28,10 @@ class SpecialRequests extends Page
     protected function getHeaderActions(): array
     {
         return [
-            Action::make('updateAuthor')
-                ->form([
-                    Select::make('authorId')
-                        ->label('Author')
-                        ->options(User::query()->pluck('first_name', 'id'))
-                        ->required(),
-                ])
-                ->action(function (array $data, SpecialRequest $record): void {
-                    $record->author()->associate($data['authorId']);
-                    $record->save();
-                }),
+            Action::make('createRequest')
+                ->url(CreateSpecialRequest::getUrl())
+                ->label('Create Request')
+                ->icon('polaris-page-add-icon'),
         ];
     }
 }
