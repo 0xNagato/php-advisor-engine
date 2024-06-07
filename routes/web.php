@@ -30,3 +30,5 @@ Route::get('/demo/auth/{user_id}', [DemoAuthController::class, 'auth'])->name('d
 Route::get('/demo/redirect', [DemoAuthController::class, 'redirect'])->name('demo.redirect');
 
 Route::post('/exception-form', ExceptionFormController::class)->name('exception.form');
+
+require __DIR__.'/auth.php';
