@@ -12,7 +12,9 @@ class IpDataMiddleware
 {
     public function handle(Request $request, Closure $next)
     {
-        if (! $request->session()->has('region')) {
+        $activeRegions = config('app.active_regions');
+
+        if (! $request->session()->has('region') || ! in_array($request->session()->get('region'), $activeRegions, true)) {
             if (in_array($request->ip(), ['127.0.0.1', '0.0.0.0'])) {
                 $request->session()->put('timezone', config('app.default_timezone'));
                 $request->session()->put('region', config('app.default_region'));

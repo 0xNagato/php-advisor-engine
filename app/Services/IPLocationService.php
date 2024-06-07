@@ -20,7 +20,7 @@ class IPLocationService
         $closestRegion = null;
         $minDistance = PHP_INT_MAX;
 
-        foreach (Region::all() as $region) {
+        foreach (Region::active() as $region) {
             $regionLat = $region['lat'];
             $regionLon = $region['lon'];
 
