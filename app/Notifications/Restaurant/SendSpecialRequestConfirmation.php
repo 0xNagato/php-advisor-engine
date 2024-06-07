@@ -2,52 +2,88 @@
 
 namespace App\Notifications\Restaurant;
 
+use App\Data\RestaurantContactData;
+use App\Data\SmsData;
+use App\Models\SpecialRequest;
+use AshAllenDesign\ShortURL\Exceptions\ShortURLException;
+use AshAllenDesign\ShortURL\Facades\ShortURL;
+use Carbon\Carbon;
 use Illuminate\Bus\Queueable;
-use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
+use Illuminate\Support\Facades\URL;
 
 class SendSpecialRequestConfirmation extends Notification
 {
     use Queueable;
 
+    public const int SECURE_LINK_LIFE_IN_DAYS = 7;
+
+    public string $message;
+
+    public string $confirmationUrl;
+
+    public string $bookingDate;
+
+    public string $bookingTime;
+
     /**
      * Create a new notification instance.
      */
-    public function __construct()
+    public function __construct(
+        public SpecialRequest $specialRequest
+    ) {
+        // Generate the confirmation URL
+        $this->confirmationUrl = $this->generateConfirmationUrl($specialRequest->uuid);
+
+        // Format the booking date
+        $this->bookingDate = Carbon::toNotificationFormat(Carbon::parse($specialRequest->booking_date));
+
+        // Format the booking time
+        $this->bookingTime = Carbon::parse($specialRequest->booking_time)->format('g:ia');
+
+        // Create the message to be sent
+        $this->message = $this->createMessage();
+    }
+
+    public function toSms(RestaurantContactData $notifiable): SmsData
     {
-        //
+        return new SmsData(
+            phone: $notifiable->contact_phone,
+            text: $this->message,
+        );
     }
 
     /**
      * Get the notification's delivery channels.
-     *
-     * @return array<int, string>
      */
-    public function via(object $notifiable): array
+    public function via(RestaurantContactData $notifiable): array
     {
-        return ['mail'];
+        return $notifiable->toChannel();
     }
 
     /**
-     * Get the mail representation of the notification.
+     * Generate the confirmation URL.
+     *
+     * @throws ShortURLException
      */
-    public function toMail(object $notifiable): MailMessage
+    private function generateConfirmationUrl(string $uuid): string
     {
-        return (new MailMessage)
-            ->line('The introduction to the notification.')
-            ->action('Notification Action', url('/'))
-            ->line('Thank you for using our application!');
+        $url = URL::signedRoute('restaurants.confirm-special-request', ['token' => $uuid], now()->addDays(self::SECURE_LINK_LIFE_IN_DAYS));
+
+        return ShortURL::destinationUrl($url)->make()->default_short_url;
     }
 
     /**
-     * Get the array representation of the notification.
-     *
-     * @return array<string, mixed>
+     * Create the message to be sent to contacts.
      */
-    public function toArray(object $notifiable): array
+    private function createMessage(): string
     {
-        return [
-            //
-        ];
+        $bookingDate = ucfirst($this->bookingDate);
+        $currency = $this->specialRequest->restaurant->inRegion->currency;
+        $minimumSpend = moneyWithoutCents($this->specialRequest->minimum_spend * 100, $currency);
+        $customerName = $this->specialRequest->customer_name;
+        $partySize = $this->specialRequest->party_size;
+
+        return "PRIMA Special Request from $customerName: $bookingDate at $this->bookingTime, $partySize guests, Min. Spend $minimumSpend. Click here to view the request: $this->confirmationUrl";
     }
 }
