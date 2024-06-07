@@ -50,7 +50,7 @@ class ConciergeUserMenu extends Widget implements HasForms
                 ->hiddenLabel()
                 ->live()
                 ->placeholder('Select a region')
-                ->options(Region::all()->sortBy('id')->pluck('name', 'id'))
+                ->options(Region::active()->orderBy('id')->pluck('name', 'id'))
                 ->extraAttributes(['class' => 'text-sm'])
                 ->afterStateUpdated(function (Get $get) {
                     session(['region' => $get('region')]);
