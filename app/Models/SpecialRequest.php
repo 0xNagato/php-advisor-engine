@@ -21,6 +21,8 @@ class SpecialRequest extends Model
 {
     use HasFactory;
 
+    public const int PLATFORM_PERCENTAGE = 10;
+
     protected $fillable = [
         'restaurant_id',
         'concierge_id',

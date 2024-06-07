@@ -1,5 +1,5 @@
 @php use App\Enums\BookingStatus; @endphp
-    <!--suppress JSUnresolvedReference, BadExpressionStatementJS -->
+<!--suppress JSUnresolvedReference, BadExpressionStatementJS -->
 <x-filament-panels::page>
     <div x-data="{}" x-init="() => {
         let script = document.createElement('script');
@@ -19,11 +19,17 @@
                                     @if ($schedule->is_bookable) wire:click="createBooking({{ $schedule->schedule_template_id }})" @endif
                                     @class([
                                         'flex flex-col gap-1 items-center p-3 text-sm font-semibold leading-none rounded-xl justify-center',
-                                        'outline outline-2 outline-offset-2 outline-green-600' => $schedule->start_time === $data['reservation_time'] && $schedule->is_bookable,
-                                        'outline outline-2 outline-offset-2 outline-gray-100' => $schedule->start_time === $data['reservation_time'] && !$schedule->is_bookable,
-                                        'bg-green-600 text-white cursor-pointer hover:bg-green-500' => $schedule->is_bookable,
+                                        'outline outline-2 outline-offset-2 outline-green-600' =>
+                                            $schedule->start_time === $data['reservation_time'] &&
+                                            $schedule->is_bookable,
+                                        'outline outline-2 outline-offset-2 outline-gray-100' =>
+                                            $schedule->start_time === $data['reservation_time'] &&
+                                            !$schedule->is_bookable,
+                                        'bg-green-600 text-white cursor-pointer hover:bg-green-500' =>
+                                            $schedule->is_bookable,
                                         'bg-gray-100 text-gray-400 border-none' => !$schedule->is_bookable,
-                                        'hidden md:block' => $index === 0 || $index === $schedulesToday->count() - 1,
+                                        'hidden md:block' =>
+                                            $index === 0 || $index === $schedulesToday->count() - 1,
                                     ])>
                                     <div class="text-center text-lg">
                                         {{ $schedule->formatted_start_time }}
@@ -53,8 +59,7 @@
                         </div>
                         <div class="grid gap-2 grid-cols-3">
                             @foreach ($schedulesThisWeek as $schedule)
-                                <div
-                                    @if ($schedule->is_bookable) wire:click="createBooking({{ $schedule->schedule_template_id }}, '{{ $schedule->booking_date->format('Y-m-d') }}')" @endif
+                                <div @if ($schedule->is_bookable) wire:click="createBooking({{ $schedule->schedule_template_id }}, '{{ $schedule->booking_date->format('Y-m-d') }}')" @endif
                                     @class([
                                         'flex flex-col gap-1 items-center px-3 py-3 text-sm font-semibold leading-none rounded-xl',
                                         'bg-green-600 text-white cursor-pointer hover:bg-green-500' =>
@@ -129,7 +134,7 @@
                     <!-- @todo Refactor this to a separate component -->
 
                     <div wire:ignore class="flex flex-col items-center gap-3" x-data="{}"
-                         x-init="() => {
+                        x-init="() => {
                             function initializeStripe() {
                                 if (window.Stripe) {
                                     setupStripe();
@@ -137,7 +142,7 @@
                                     setTimeout(initializeStripe, 10);
                                 }
                             }
-
+                        
                             function setupStripe() {
                                 const stripe = Stripe('{{ config('services.stripe.key') }}');
                                 const elements = stripe.elements();
@@ -146,17 +151,17 @@
                                     hidePostalCode: true
                                 });
                                 card.mount('#card-element');
-
+                        
                                 const form = document.getElementById('form');
-
+                        
                                 form.addEventListener('submit', async (e) => {
                                     e.preventDefault();
                                     $wire.$set('isLoading', true);
-
-
+                        
+                        
                                     @if($booking->prime_time)
                                     const { token, error } = await stripe.createToken(card);
-
+                        
                                     if (error) {
                                         $wire.$set('isLoading', false);
                                         return;
@@ -164,7 +169,7 @@
                                     @else
                                     var token = { id: '' };
                                     @endif
-
+                        
                                     const formData = {
                                         first_name: document.querySelector('input[name=first_name]').value,
                                         last_name: document.querySelector('input[name=last_name]').value,
@@ -173,12 +178,12 @@
                                         notes: document.querySelector('textarea[name=notes]').value,
                                         token: token?.id ?? ''
                                     }
-
+                        
                                     $wire.$call('completeBooking', formData);
                                 })
-
+                        
                             }
-
+                        
                             initializeStripe();
                         }">
 
@@ -187,37 +192,37 @@
                                 <div class="flex items-center w-full gap-2">
                                     <label class="w-full">
                                         <input name="first_name" type="text"
-                                               class="w-full rounded-lg border border-gray-400 text-sm h-[40px]"
-                                               placeholder="First Name" required>
+                                            class="w-full rounded-lg border border-gray-400 text-sm h-[40px]"
+                                            placeholder="First Name" required>
                                     </label>
 
                                     <label class="w-full">
                                         <input name="last_name" type="text"
-                                               class="w-full rounded-lg border border-gray-400 text-sm h-[40px]"
-                                               placeholder="Last Name" required>
+                                            class="w-full rounded-lg border border-gray-400 text-sm h-[40px]"
+                                            placeholder="Last Name" required>
                                     </label>
 
                                 </div>
 
                                 <label class="w-full">
                                     <input name="phone" type="text"
-                                           class="w-full rounded-lg border border-gray-400 text-sm h-[40px]"
-                                           placeholder="Cell Phone Number" required>
+                                        class="w-full rounded-lg border border-gray-400 text-sm h-[40px]"
+                                        placeholder="Cell Phone Number" required>
                                 </label>
 
                                 <label class="w-full">
                                     <input name="email" type="email"
-                                           class="w-full rounded-lg border border-gray-400 text-sm h-[40px]"
-                                           placeholder="Email Address (optional)">
+                                        class="w-full rounded-lg border border-gray-400 text-sm h-[40px]"
+                                        placeholder="Email Address (optional)">
                                 </label>
 
                                 <label class="w-full">
                                     <textarea name="notes" class="w-full rounded-lg border border-gray-400 text-sm"
-                                              placeholder="Notes/Special Requests (optional)"></textarea>
+                                        placeholder="Notes/Special Requests (optional)"></textarea>
                                 </label>
 
                                 <div id="card-element"
-                                     class="-mt-1.5 w-full rounded-lg border border-gray-400 text-sm bg-white px-2 py-3 h-[40px] {{ !$booking->prime_time ? 'hidden' : '' }}">
+                                    class="-mt-1.5 w-full rounded-lg border border-gray-400 text-sm bg-white px-2 py-3 h-[40px] {{ !$booking->prime_time ? 'hidden' : '' }}">
                                     <!-- A Stripe Element will be inserted here. -->
                                 </div>
 
@@ -260,19 +265,17 @@
             </div>
 
             <x-filament::button wire:click="resetBooking" class="w-full bg-[#421fff] h-[48px]"
-                                icon="gmdi-restaurant-menu">
+                icon="gmdi-restaurant-menu">
                 Back to Reservation Hub
             </x-filament::button>
 
             <div class="flex gap-4">
 
-                <x-filament::button tag="a" class="w-1/2" color="gray"
-                                    :href="route('filament.admin.resources.bookings.view', ['record' => $booking])">
+                <x-filament::button tag="a" class="w-1/2" color="gray" :href="route('filament.admin.resources.bookings.view', ['record' => $booking])">
                     View Booking
                 </x-filament::button>
 
-                <x-filament::button tag="a" class="w-1/2" color="gray"
-                                    :href="route('customer.invoice', ['token' => $booking->uuid])">
+                <x-filament::button tag="a" class="w-1/2" color="gray" :href="route('customer.invoice', ['token' => $booking->uuid])">
                     View Invoice
                 </x-filament::button>
 

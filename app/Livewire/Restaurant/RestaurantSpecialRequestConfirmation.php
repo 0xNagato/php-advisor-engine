@@ -222,7 +222,7 @@ class RestaurantSpecialRequestConfirmation extends Page
     public function restaurantTotalFee(): float
     {
         $commissionValue = ($this->commissionRequestedPercentage() / 100) * $this->minimumSpend();
-        $platformFee = 0.07 * $commissionValue;
+        $platformFee = (SpecialRequest::PLATFORM_PERCENTAGE / 100) * $commissionValue;
 
         return $commissionValue + $platformFee;
     }

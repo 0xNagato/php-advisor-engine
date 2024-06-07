@@ -26,6 +26,10 @@ class Booking extends Model
     use FormatsPhoneNumber;
     use HasFactory;
 
+    public const int PLATFORM_PERCENTAGE_CONCIERGE = 10;
+
+    public const int PLATFORM_PERCENTAGE_RESTAURANT = 10;
+
     /**
      * The attributes that are mass assignable.
      *
@@ -339,7 +343,7 @@ class Booking extends Model
     }
 
     /**
-     * @return BelongsTo<Concierge, \App\Models\Booking>
+     * @return BelongsTo<Concierge, Booking>
      */
     public function concierge(): BelongsTo
     {
@@ -347,7 +351,7 @@ class Booking extends Model
     }
 
     /**
-     * @return BelongsTo<Partner, \App\Models\Booking>
+     * @return BelongsTo<Partner, Booking>
      */
     public function partnerConcierge(): BelongsTo
     {
@@ -355,7 +359,7 @@ class Booking extends Model
     }
 
     /**
-     * @return BelongsTo<Partner, \App\Models\Booking>
+     * @return BelongsTo<Partner, Booking>
      */
     public function partnerRestaurant(): BelongsTo
     {
@@ -380,9 +384,9 @@ class Booking extends Model
     public static function calculateNonPrimeEarnings(Booking $booking, $reconfirm = false): void
     {
         $fee = $booking->restaurant->non_prime_fee_per_head * $booking->guest_count;
-        $concierge_earnings = $fee * 0.90;
-        $platform_concierge = $fee * 0.10;
-        $platform_restaurant = $fee * 0.07;
+        $concierge_earnings = $fee - ($fee * (self::PLATFORM_PERCENTAGE_CONCIERGE / 100));
+        $platform_concierge = $fee * (self::PLATFORM_PERCENTAGE_CONCIERGE / 100);
+        $platform_restaurant = $fee * (self::PLATFORM_PERCENTAGE_RESTAURANT / 100);
         $platform_earnings = $platform_concierge + $platform_restaurant;
         $restaurant_earnings = ($concierge_earnings + $platform_earnings) * -1;
 

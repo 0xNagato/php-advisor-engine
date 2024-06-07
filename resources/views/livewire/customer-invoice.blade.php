@@ -11,7 +11,7 @@
                 Email Invoice
             </x-filament::button>
             <x-filament::button color="indigo" class="w-1/2" size="sm" icon="gmdi-file-download-o" tag="a"
-                                :href="route('customer.invoice.download', ['uuid' => $booking->uuid])">
+                :href="route('customer.invoice.download', ['uuid' => $booking->uuid])">
                 Download PDF
             </x-filament::button>
         </div>
@@ -20,7 +20,7 @@
             <form wire:submit="emailInvoice" class="my-4 bg-gray-100 p-4 rounded-lg border max-w-3xl mx-auto">
                 {{ $this->form }}
                 <button type="submit"
-                        class="bg-indigo-600 w-full text-white px-4 py-2 rounded-lg text-sm font-semibold mt-4">
+                    class="bg-indigo-600 w-full text-white px-4 py-2 rounded-lg text-sm font-semibold mt-4">
                     Send Email
                 </button>
             </form>
@@ -39,7 +39,7 @@
             <!-- SVG Background Element -->
             <figure class="absolute inset-x-0 bottom-0 -mb-px ">
                 <svg preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg" x="0px" y="0px"
-                     viewBox="0 0 1920 100.1">
+                    viewBox="0 0 1920 100.1">
                     <path fill="currentColor" class="fill-white" d="M0,0c0,0,934.4,93.4,1920,0v100.1H0L0,0z"></path>
                 </svg>
             </figure>
@@ -51,7 +51,7 @@
             <span
                 class="mx-auto flex justify-center items-center size-[62px] rounded-full border border-gray-200 bg-white text-gray-700 shadow-sm dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400">
                 <svg class="flex-shrink-0 size-6" xmlns="http://www.w3.org/2000/svg" width="16" height="16"
-                     fill="currentColor" viewBox="0 0 16 16">
+                    fill="currentColor" viewBox="0 0 16 16">
                     <path
                         d="M1.92.506a.5.5 0 0 1 .434.14L3 1.293l.646-.647a.5.5 0 0 1 .708 0L5 1.293l.646-.647a.5.5 0 0 1 .708 0L7 1.293l.646-.647a.5.5 0 0 1 .708 0L9 1.293l.646-.647a.5.5 0 0 1 .708 0l.646.647.646-.647a.5.5 0 0 1 .708 0l.646.647.646-.647a.5.5 0 0 1 .801.13l.5 1A.5.5 0 0 1 15 2v12a.5.5 0 0 1-.053.224l-.5 1a.5.5 0 0 1-.8.13L13 14.707l-.646.647a.5.5 0 0 1-.708 0L11 14.707l-.646.647a.5.5 0 0 1-.708 0L9 14.707l-.646.647a.5.5 0 0 1-.708 0L7 14.707l-.646.647a.5.5 0 0 1-.708 0L5 14.707l-.646.647a.5.5 0 0 1-.708 0L3 14.707l-.646.647a.5.5 0 0 1-.801-.13l-.5-1A.5.5 0 0 1 1 14V2a.5.5 0 0 1 .053-.224l.5-1a.5.5 0 0 1 .367-.27zm.217 1.338L2 2.118v11.764l.137.274.51-.51a.5.5 0 0 1 .707 0l.646.647.646-.646a.5.5 0 0 1 .708 0l.646.646.646-.646a.5.5 0 0 1 .708 0l.646.646.646-.646a.5.5 0 0 1 .708 0l.646.646.646-.646a.5.5 0 0 1 .708 0l.646.646.646-.646a.5.5 0 0 1 .708 0l.509.509.137-.274V2.118l-.137-.274-.51.51a.5.5 0 0 1-.707 0L12 1.707l-.646.647a.5.5 0 0 1-.708 0L10 1.707l-.646.647a.5.5 0 0 1-.708 0L8 1.707l-.646.647a.5.5 0 0 1-.708 0L6 1.707l-.646.647a.5.5 0 0 1-.708 0L4 1.707l-.646.647a.5.5 0 0 1-.708 0l-.509-.51z" />
                     <path
@@ -194,16 +194,16 @@
                         @endforeach
 
                         @role('super_admin')
-                        <div class="mt-2">Platform:</div>
-                        <div class="col-span-2 mt-2 text-right">
-                            {{ money($booking->platform_earnings, $booking->currency) }}
-                        </div>
-                        @if ($booking->is_prime)
-                            <div class="font-semibold mt-2">Total Payout:</div>
-                            <div class="col-span-2 font-semibold mt-2 text-right">
-                                {{ money($booking->earnings->sum('amount'), $booking->currency) }}
+                            <div class="mt-2">Platform:</div>
+                            <div class="col-span-2 mt-2 text-right">
+                                {{ money($booking->platform_earnings, $booking->currency) }}
                             </div>
-                        @endif
+                            @if ($booking->is_prime)
+                                <div class="font-semibold mt-2">Total Payout:</div>
+                                <div class="col-span-2 font-semibold mt-2 text-right">
+                                    {{ money($booking->earnings->sum('amount'), $booking->currency) }}
+                                </div>
+                            @endif
                         @endrole
                     </div>
                 </div>
