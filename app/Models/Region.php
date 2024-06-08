@@ -145,6 +145,11 @@ class Region extends Model
         return $query->whereIn('id', config('app.active_regions'));
     }
 
+    public function scopeDefault(Builder $query): Builder
+    {
+        return $query->where('id', config('app.default_region'));
+    }
+
     /**
      * @return HasMany<Restaurant>
      */

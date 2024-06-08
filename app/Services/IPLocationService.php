@@ -32,7 +32,7 @@ class IPLocationService
             }
         }
 
-        return $closestRegion;
+        return $closestRegion ?? Region::default();
     }
 
     protected function haversineDistance($lat1, $long1, $lat2, $long2): float|int
