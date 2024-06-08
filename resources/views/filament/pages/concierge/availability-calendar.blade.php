@@ -34,7 +34,7 @@
 
                             @foreach ($restaurant->schedules as $index => $schedule)
                                 <td
-                                        class="p-1 [&:nth-child(3n+2)]:pr-2 sm:[&:nth-child(3+n2)]:pr-0 {{ $loop->first ? 'hidden sm:table-cell' : '' }} {{ $loop->last ? 'hidden sm:table-cell' : '' }}">
+                                        class="p-1 pr-2 {{ $loop->first ? 'hidden sm:table-cell' : '' }} {{ $loop->last ? 'hidden sm:table-cell' : '' }}">
                                     <button
                                             @if ($schedule->is_bookable && $restaurant->status === RestaurantStatus::ACTIVE) wire:click="createBooking({{ $schedule->id }}, '{{ $schedule->booking_date->format('Y-m-d') }}')" @endif
                                             @class([
