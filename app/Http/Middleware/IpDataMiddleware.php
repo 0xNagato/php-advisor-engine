@@ -15,14 +15,18 @@ class IpDataMiddleware
         $activeRegions = config('app.active_regions');
 
         if (! $request->session()->has('region') || ! in_array($request->session()->get('region'), $activeRegions, true)) {
-            if (in_array($request->ip(), ['127.0.0.1', '0.0.0.0'])) {
-                $request->session()->put('timezone', config('app.default_timezone'));
-                $request->session()->put('region', config('app.default_region'));
+            if (config('app.dev_ip_address')) {
+                $ip = config('app.dev_ip_address');
+            } else {
+                if (in_array($request->ip(), ['127.0.0.1', '0.0.0.0'])) {
+                    $request->session()->put('timezone', config('app.default_timezone'));
+                    $request->session()->put('region', config('app.default_region'));
 
-                return $next($request);
+                    return $next($request);
+                }
+
+                $ip = $request->ip();
             }
-
-            $ip = $request->ip();
 
             try {
                 $locationData = geoip()->getLocation($ip);

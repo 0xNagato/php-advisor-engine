@@ -204,4 +204,5 @@ return [
     'default_region' => env('LOCAL_ENV_REGION', 'miami'),
     'no_tax' => env('NO_TAX', true),
     'active_regions' => ['miami', 'ibiza'],
+    'dev_ip_address' => env('DEV_IP_ADDRESS'),
 ];
