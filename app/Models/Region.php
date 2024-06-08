@@ -147,7 +147,7 @@ class Region extends Model
 
     public function scopeDefault(Builder $query): Builder
     {
-        return $query->where('id', config('app.default_region'));
+        return $query->firstWhere('id', config('app.default_region'));
     }
 
     /**
