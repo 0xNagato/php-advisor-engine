@@ -22,7 +22,7 @@ class SmsNotificationChannel
 
         $data = $notification->toSms($notifiable);
 
-        if(app()->isLocal()) {
+        if (app()->isLocal()) {
             Log::info('[LOG] Sending SMS to '.$data->phone, [
                 'text' => $data->text,
             ]);
