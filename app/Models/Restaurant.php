@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Data\RestaurantContactData;
+use App\Enums\RestaurantStatus;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\Attribute;
@@ -60,6 +61,7 @@ class Restaurant extends Model
         'increment_fee',
         'non_prime_fee_per_head',
         'non_prime_type',
+        'status',
     ];
 
     protected static function boot(): void
@@ -153,6 +155,11 @@ class Restaurant extends Model
         );
     }
 
+    protected function name(): Attribute
+    {
+        return Attribute::make(get: fn () => $this->restaurant_name);
+    }
+
     /**
      * Get the schedules for the restaurant.
      *
@@ -166,7 +173,7 @@ class Restaurant extends Model
     /**
      * Get the user that owns the restaurant.
      *
-     * @return BelongsTo<User, \App\Models\Restaurant>
+     * @return BelongsTo<User, Restaurant>
      */
     public function user(): BelongsTo
     {
@@ -174,7 +181,7 @@ class Restaurant extends Model
     }
 
     /**
-     * @return BelongsTo<Region, \App\Models\Restaurant>
+     * @return BelongsTo<Region, Restaurant>
      */
     public function inRegion(): BelongsTo
     {
@@ -185,7 +192,7 @@ class Restaurant extends Model
     {
         return $query->whereHas('user', function (Builder $query) {
             $query->whereNotNull('secured_at');
-        })->where('is_suspended', false);
+        })->whereIn('status', ['active', 'pending']);
     }
 
     /**
@@ -223,6 +230,7 @@ class Restaurant extends Model
             'non_prime_time' => 'array',
             'business_hours' => 'array',
             'party_sizes' => 'array',
+            'status' => RestaurantStatus::class,
         ];
     }
 }

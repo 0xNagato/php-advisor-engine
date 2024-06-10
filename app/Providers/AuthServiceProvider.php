@@ -2,8 +2,9 @@
 
 namespace App\Providers;
 
-// use Illuminate\Support\Facades\Gate;
+use App\Models\SpecialRequest;
 use App\Models\User;
+use App\Policies\SpecialRequestPolicy;
 use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ServiceProvider;
 use Illuminate\Support\Facades\Gate;
 
@@ -15,7 +16,7 @@ class AuthServiceProvider extends ServiceProvider
      * @var array<class-string, class-string>
      */
     protected $policies = [
-
+        SpecialRequest::class => SpecialRequestPolicy::class,
     ];
 
     /**
@@ -23,6 +24,7 @@ class AuthServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        $this->registerPolicies();
         Gate::define('viewPulse', fn (User $user) => $user->hasRole('super_admin'));
     }
 }

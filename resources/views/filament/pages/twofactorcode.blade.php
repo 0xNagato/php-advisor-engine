@@ -1,5 +1,6 @@
 <x-filament-panels::page>
-    <div class="bg-white px-6 pt-8 pb-8 shadow-sm ring-1 ring-gray-950/5 rounded-lg mx-4 max-w-md sm:mx-auto">
+    <div class="bg-white px-6 pt-8 pb-8 shadow-sm ring-1 ring-gray-950/5 rounded-lg mx-4 max-w-md sm:mx-auto"
+        data-cy="twoFactorModal">
         <div>
             <div class="font-semibold text-lg mb-4 text-center">
                 {{ $this->heading }}

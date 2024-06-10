@@ -36,6 +36,8 @@ class AvailabilityCalendar extends Page
      */
     public ?Collection $restaurants = null;
 
+    public array $timeslotHeaders = [];
+
     public function mount(): void
     {
         $region = Region::query()->find(session('region', 'miami'));
@@ -98,6 +100,8 @@ class AvailabilityCalendar extends Page
             }
 
             $endTime = $this->calculateEndTime($reservationTime);
+            $this->fillTimeslotHeaders($reservationTime, $endTime);
+
             $guestCount = $this->calculateGuestCount();
 
             $this->restaurants = $this->getAvailableRestaurants($guestCount, $reservationTime, $endTime);
@@ -122,6 +126,17 @@ class AvailabilityCalendar extends Page
         $limitTime = Carbon::createFromTime(23, 59, 0, $this->timezone);
 
         return $endTime->gt($limitTime) ? '23:59:59' : $endTime->format('H:i:s');
+    }
+
+    public function fillTimeslotHeaders($reservationTime, $endTime): void
+    {
+        $this->timeslotHeaders = [];
+        $start = Carbon::createFromFormat('H:i:s', $reservationTime);
+        $end = Carbon::createFromFormat('H:i:s', $endTime);
+
+        for ($time = $start; $time->lte($end); $time->addMinutes(30)) {
+            $this->timeslotHeaders[$time->format('H:i:s')] = $time->format('g:i A');
+        }
     }
 
     private function calculateGuestCount(): int

@@ -2,7 +2,9 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Sushi\Sushi;
 
 /**
@@ -137,4 +139,22 @@ class Region extends Model
             'timezone' => 'America/Los_Angeles',
         ],
     ];
+
+    public function scopeActive(Builder $query): Builder
+    {
+        return $query->whereIn('id', config('app.active_regions'));
+    }
+
+    public static function default(): Region
+    {
+        return self::firstWhere('id', config('app.default_region'));
+    }
+
+    /**
+     * @return HasMany<Restaurant>
+     */
+    public function restaurants(): HasMany
+    {
+        return $this->hasMany(Restaurant::class, 'region', 'id');
+    }
 }

@@ -12,15 +12,21 @@ class IpDataMiddleware
 {
     public function handle(Request $request, Closure $next)
     {
-        if (! $request->session()->has('region')) {
-            if (in_array($request->ip(), ['127.0.0.1', '0.0.0.0'])) {
-                $request->session()->put('timezone', config('app.default_timezone'));
-                $request->session()->put('region', config('app.default_region'));
+        $activeRegions = config('app.active_regions');
 
-                return $next($request);
+        if (! $request->session()->has('region') || ! in_array($request->session()->get('region'), $activeRegions, true)) {
+            if (config('app.dev_ip_address')) {
+                $ip = config('app.dev_ip_address');
+            } else {
+                if (in_array($request->ip(), ['127.0.0.1', '0.0.0.0'])) {
+                    $request->session()->put('timezone', config('app.default_timezone'));
+                    $request->session()->put('region', config('app.default_region'));
+
+                    return $next($request);
+                }
+
+                $ip = $request->ip();
             }
-
-            $ip = $request->ip();
 
             try {
                 $locationData = geoip()->getLocation($ip);

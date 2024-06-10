@@ -1,5 +1,6 @@
 @php
     use Carbon\Carbon;
+    use App\Models\SpecialRequest;
     use App\Enums\SpecialRequestStatus;
 @endphp
 <x-layouts.simple-wrapper>
@@ -68,7 +69,8 @@
                         {{ money($this->restaurantTotalFee * 100, $specialRequest->restaurant->inRegion->currency) }}
                     </span>
                     <div class="mt-1 text-xs">
-                        ({{ $this->commissionRequestedPercentage }}% Commission + 7% PRIMA Platform Fee)
+                        ({{ $this->commissionRequestedPercentage }}% Commission
+                        + {{ SpecialRequest::PLATFORM_PERCENTAGE }}% PRIMA Platform Fee)
                     </div>
                 </div>
             </div>

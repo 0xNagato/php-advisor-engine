@@ -22,6 +22,10 @@ class MyPayments extends Page implements HasTable
 
     public static function canAccess(): bool
     {
+        if (session()->exists('simpleMode')) {
+            return ! session('simpleMode');
+        }
+
         return auth()->user()?->hasRole('concierge') || auth()->user()?->hasRole('restaurant') || auth()->user()?->hasRole('partner');
     }
 
@@ -33,6 +37,7 @@ class MyPayments extends Page implements HasTable
 
         return $table
             ->query($query)
+            ->emptyStateHeading('No Payments Made Yet')
             ->columns([
                 TextColumn::make('payment.status')
                     ->label('Status')

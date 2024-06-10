@@ -59,6 +59,7 @@ class ListPartners extends ListRecords
 
         return $table
             ->query($query)
+            ->paginated([5, 10, 25])
             ->columns([
                 TextColumn::make('user.name')
                     ->numeric()

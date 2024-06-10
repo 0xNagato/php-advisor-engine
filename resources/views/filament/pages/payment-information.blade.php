@@ -1,7 +1,7 @@
 <x-filament-panels::page>
     <p>Payments are made on the 15th of every month for earnings generated in the previous month.</p>
     <x-filament::section>
-        <div class="text-sm text-black font-semibold pb-4">
+        <div class="pb-4 text-sm font-semibold text-black">
             Select your preferred payment choice below:
         </div>
         <form wire:submit="save" class="flex flex-col gap-3">
@@ -59,7 +59,7 @@
 
             {{ $this->form }}
 
-            <div class="text-right mt-4">
+            <div class="mt-4 text-right">
                 <x-filament::button type="submit" form="submit" class="w-full">
                     Update Address
                 </x-filament::button>
@@ -69,7 +69,7 @@
 
     <x-filament::section>
 
-        <div class="text-sm text-black font-semibold pb-4">
+        <div class="pb-4 text-sm font-semibold text-black">
             PRIMA donates 5% of proceeds to help feed the homeless.
             How much would you like to donate?
         </div>

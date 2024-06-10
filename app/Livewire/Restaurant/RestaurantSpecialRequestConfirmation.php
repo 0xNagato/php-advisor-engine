@@ -218,20 +218,11 @@ class RestaurantSpecialRequestConfirmation extends Page
             ->send();
     }
 
-    public function resetStatus(): void
-    {
-        $this->specialRequest->update([
-            'status' => SpecialRequestStatus::PENDING,
-            'restaurant_message' => null,
-            'conversations' => [],
-        ]);
-    }
-
     #[Computed]
     public function restaurantTotalFee(): float
     {
         $commissionValue = ($this->commissionRequestedPercentage() / 100) * $this->minimumSpend();
-        $platformFee = 0.07 * $commissionValue;
+        $platformFee = (SpecialRequest::PLATFORM_PERCENTAGE / 100) * $commissionValue;
 
         return $commissionValue + $platformFee;
     }

@@ -140,7 +140,7 @@ class CreateSpecialRequestForm extends Widget implements HasForms
     {
         return Select::make('guest_count')
             ->prefixIcon('heroicon-m-users')
-            ->options(fn () => collect()->range(6, 15)
+            ->options(fn () => collect()->range(6, 20)
                 ->mapWithKeys(fn ($value) => [$value => $value.' Guests'])
             )
             ->placeholder('Party Size')
@@ -188,6 +188,10 @@ class CreateSpecialRequestForm extends Widget implements HasForms
         );
 
         CreateSpecialRequest::run($specialRequestData);
+
+        $this->form->fill();
+
+        $this->dispatch('special-request-created');
 
         Notification::make()
             ->title('Special Request Submitted to the Restaurant')

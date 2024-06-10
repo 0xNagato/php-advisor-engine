@@ -45,6 +45,7 @@ class PartnerLeaderboard extends BaseWidget
 
                 return route('filament.admin.resources.partners.view', ['record' => $record]);
             })
+            ->deferLoading()
             ->paginated(false)
             ->columns(components: [
                 TextColumn::make('rank')

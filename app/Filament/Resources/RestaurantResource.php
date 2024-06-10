@@ -45,6 +45,7 @@ class RestaurantResource extends Resource
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
+            ->paginated([5, 10, 25])
             ->filters([
                 SelectFilter::make('region')
                     ->options(Region::query()->pluck('name', 'id')),

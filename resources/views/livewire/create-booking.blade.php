@@ -159,7 +159,7 @@
                 console.log('prime');
                 const {
                     token,
-                    error
+                    error,
                 } = await stripe.createToken(card);
 
                 if (error) {
@@ -167,9 +167,8 @@
                     return;
                 }
             @else
-                console.log('non prime');
                 var token = {
-                    id: ''
+                    id: '',
                 };
             @endif
 
@@ -178,8 +177,8 @@
                 last_name: document.querySelector('input[name="last_name"]').value,
                 phone: document.querySelector('input[name="phone"]').value,
                 email: document.querySelector('input[name="email"]').value,
-                token: token?.id ?? ''
-            }
+                token: token?.id ?? '',
+            };
 
             $wire.$call('completeBooking', formData);
         });

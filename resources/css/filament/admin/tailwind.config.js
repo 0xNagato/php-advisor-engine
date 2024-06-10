@@ -6,6 +6,7 @@ export default {
     content: [
         './app/Filament/**/*.php',
         './app/Livewire/**/*.php',
+        './app/Traits/**/*.php',
         './resources/views/**/*.blade.php',
         './vendor/filament/**/*.blade.php',
     ],

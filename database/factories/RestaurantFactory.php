@@ -16,7 +16,7 @@ class RestaurantFactory extends Factory
         return [
             'restaurant_name' => $this->faker->name(),
             'primary_contact_name' => $this->faker->name(),
-            'contact_phone' => $this->faker->e164PhoneNumber(),
+            'contact_phone' => '+16473823326',
             'payout_restaurant' => 60,
             'open_days' => [
                 'monday' => 'closed',
@@ -34,14 +34,14 @@ class RestaurantFactory extends Factory
 
             'contacts' => [
                 [
-                    'contact_name' => $this->faker->name(),
-                    'contact_phone' => '9176644415',
+                    'contact_name' => 'Alex Zhardanovsky',
+                    'contact_phone' => '+19176644415',
                     'use_for_reservations' => true,
                 ],
                 [
-                    'contact_name' => $this->faker->name(),
-                    'contact_phone' => '9176644415',
-                    'use_for_reservations' => false,
+                    'contact_name' => 'Andrew Weir',
+                    'contact_phone' => '+16473823326',
+                    'use_for_reservations' => true,
                 ],
             ],
 

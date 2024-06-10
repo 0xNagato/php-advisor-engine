@@ -5,6 +5,7 @@ namespace App\Livewire\SpecialRequest;
 use App\Models\SpecialRequest;
 use Filament\Widgets\Widget;
 use Illuminate\Database\Eloquent\Collection;
+use Livewire\Attributes\On;
 
 class SpecialRequestList extends Widget
 {
@@ -15,11 +16,15 @@ class SpecialRequestList extends Widget
      */
     public Collection $specialRequests;
 
-    public function mount(int $conciergeId): void
+    public int $conciergeId;
+
+    #[On('special-request-created')]
+    public function mount(): void
     {
         $this->specialRequests = SpecialRequest::query()
             ->with('restaurant')
-            ->where('concierge_id', $conciergeId)
+            ->where('concierge_id', $this->conciergeId)
+            ->orderBy('booking_date', 'desc')
             ->get();
     }
 }

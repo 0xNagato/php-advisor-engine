@@ -203,5 +203,6 @@ return [
     'default_timezone' => env('LOCAL_ENV_TIMEZONE', 'America/New_York'),
     'default_region' => env('LOCAL_ENV_REGION', 'miami'),
     'no_tax' => env('NO_TAX', true),
-
+    'active_regions' => ['miami', 'ibiza'],
+    'dev_ip_address' => env('DEV_IP_ADDRESS'),
 ];

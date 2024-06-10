@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 
 return new class extends Migration
 {
-    public function up()
+    public function up(): void
     {
         // Drop the existing view if it exists
         DB::statement('DROP VIEW IF EXISTS schedule_with_bookings');
@@ -58,10 +58,8 @@ return new class extends Migration
 
     /**
      * Reverse the migrations.
-     *
-     * @return void
      */
-    public function down()
+    public function down(): void
     {
         // Drop the view when rolling back
         DB::statement('DROP VIEW IF EXISTS schedule_with_bookings');

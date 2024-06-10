@@ -553,8 +553,10 @@ namespace App\Models{
  * @property int|null $minimum_spend
  * @property string $region
  * @property string|null $restaurant_logo_path
+ * @property \App\Enums\RestaurantStatus $status
  * @property-read \App\Models\Region|null $inRegion
  * @property-read mixed $logo
+ * @property-read mixed $name
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\ScheduleTemplate> $scheduleTemplates
  * @property-read int|null $schedule_templates_count
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\ScheduleWithBooking> $schedules
@@ -589,6 +591,7 @@ namespace App\Models{
  * @method static \Illuminate\Database\Eloquent\Builder|Restaurant whereRestaurantLogoPath($value)
  * @method static \Illuminate\Database\Eloquent\Builder|Restaurant whereRestaurantName($value)
  * @method static \Illuminate\Database\Eloquent\Builder|Restaurant whereSlug($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Restaurant whereStatus($value)
  * @method static \Illuminate\Database\Eloquent\Builder|Restaurant whereUpdatedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder|Restaurant whereUserId($value)
  * @mixin \Eloquent

@@ -20,7 +20,7 @@ class BookingFactory extends Factory
             'guest_first_name' => $this->faker->firstName(),
             'guest_last_name' => $this->faker->lastName(),
             'guest_email' => $this->faker->unique()->safeEmail(),
-            'guest_phone' => $this->faker->e164PhoneNumber(),
+            'guest_phone' => '+16473823326',
             'guest_count' => $this->faker->numberBetween(2, 8),
             'currency' => 'USD',
             'status' => 'pending',

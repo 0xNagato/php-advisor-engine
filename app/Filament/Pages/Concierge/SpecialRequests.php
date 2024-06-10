@@ -2,7 +2,9 @@
 
 namespace App\Filament\Pages\Concierge;
 
+use App\Filament\Pages\SpecialRequest\CreateSpecialRequest;
 use App\Models\User;
+use Filament\Actions\Action;
 use Filament\Pages\Page;
 
 class SpecialRequests extends Page
@@ -21,5 +23,15 @@ class SpecialRequests extends Page
         $user = auth()->user();
 
         return $user->hasRole('concierge');
+    }
+
+    protected function getHeaderActions(): array
+    {
+        return [
+            Action::make('createRequest')
+                ->url(CreateSpecialRequest::getUrl())
+                ->label('Create Request')
+                ->icon('polaris-page-add-icon'),
+        ];
     }
 }

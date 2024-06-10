@@ -1,0 +1,76 @@
+<?php
+
+namespace App\Policies;
+
+use App\Models\SpecialRequest;
+use App\Models\User;
+use Illuminate\Auth\Access\HandlesAuthorization;
+
+class SpecialRequestPolicy
+{
+    use HandlesAuthorization;
+
+    /**
+     * Determine whether the user can view any models.
+     */
+    public function viewAny(User $user): bool
+    {
+        //
+    }
+
+    /**
+     * Determine whether the user can view the special request.
+     *
+     * @return mixed
+     */
+    public function view(User $user, SpecialRequest $specialRequest)
+    {
+        if ($user->hasRole('concierge')) {
+            return $specialRequest->concierge_id === $user->concierge->id;
+        } elseif ($user->hasRole('restaurant')) {
+            return $specialRequest->restaurant_id === $user->restaurant->id;
+        }
+
+        return false;
+    }
+
+    /**
+     * Determine whether the user can create models.
+     */
+    public function create(User $user): bool
+    {
+        //
+    }
+
+    /**
+     * Determine whether the user can update the model.
+     */
+    public function update(User $user, SpecialRequest $specialRequest): bool
+    {
+        //
+    }
+
+    /**
+     * Determine whether the user can delete the model.
+     */
+    public function delete(User $user, SpecialRequest $specialRequest): bool
+    {
+        //
+    }
+
+    /**
+     * Determine whether the user can restore the model.
+     */
+    public function restore(User $user, SpecialRequest $specialRequest): bool
+    {
+        //
+    }
+
+    /**
+     * Determine whether the user can permanently delete the model.
+     */
+    public function forceDelete(User $user, SpecialRequest $specialRequest): bool
+    {
+        //
+    }
+}

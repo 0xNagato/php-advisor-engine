@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Partner;
 
+use App\Enums\RestaurantStatus;
 use App\Filament\Pages\Partner\RestaurantEarnings;
 use App\Models\User;
 use App\Notifications\Restaurant\SendWelcomeText;
@@ -52,6 +53,7 @@ class RestaurantReferralsTable extends BaseWidget
                     ->icon(fn (string $state): string => blank($state) ? 'heroicon-o-x-circle' : 'heroicon-o-check-circle')
                     ->color(fn (string $state): string => blank($state) ? 'danger' : 'success'),
             ])
+            ->paginated([5, 10, 25])
             ->actions([
                 Impersonate::make(),
                 Action::make('sendWelcome')
@@ -70,7 +72,7 @@ class RestaurantReferralsTable extends BaseWidget
                         $record->referral->secured_at = now();
                         $record->referral->save();
 
-                        $record->restaurant->is_suspended = true;
+                        $record->restaurant->status = RestaurantStatus::PENDING;
                         $record->restaurant->save();
 
                         Notification::make()

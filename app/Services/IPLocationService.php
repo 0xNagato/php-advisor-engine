@@ -20,7 +20,7 @@ class IPLocationService
         $closestRegion = null;
         $minDistance = PHP_INT_MAX;
 
-        foreach (Region::all() as $region) {
+        foreach (Region::active() as $region) {
             $regionLat = $region['lat'];
             $regionLon = $region['lon'];
 
@@ -32,7 +32,7 @@ class IPLocationService
             }
         }
 
-        return $closestRegion;
+        return $closestRegion ?? Region::default();
     }
 
     protected function haversineDistance($lat1, $long1, $lat2, $long2): float|int
