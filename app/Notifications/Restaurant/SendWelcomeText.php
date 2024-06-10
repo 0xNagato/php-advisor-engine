@@ -35,8 +35,8 @@ class SendWelcomeText extends Notification
 
     public function toSms(User $notifiable): SMSData
     {
-        $token = Password::createToken($notifiable->user);
-        $url = Filament::getResetPasswordUrl($token, $notifiable->user);
+        $token = Password::createToken($notifiable);
+        $url = Filament::getResetPasswordUrl($token, $notifiable);
 
         $secureUrl = ShortURL::destinationUrl($url)->make()->default_short_url;
 

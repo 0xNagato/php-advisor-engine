@@ -7,6 +7,7 @@ use App\Services\SmsService;
 use Exception;
 use Illuminate\Notifications\Events\NotificationFailed;
 use Illuminate\Notifications\Notification;
+use Illuminate\Support\Facades\Log;
 use RuntimeException;
 
 class SmsNotificationChannel
@@ -20,6 +21,14 @@ class SmsNotificationChannel
         throw_unless($notification->toSms($notifiable) instanceof SmsData, new Exception('toSms should return SmsData'));
 
         $data = $notification->toSms($notifiable);
+
+        if(app()->isLocal()) {
+            Log::info('[LOG] Sending SMS to '.$data->phone, [
+                'text' => $data->text,
+            ]);
+
+            return;
+        }
 
         $response = (new SmsService())->sendMessage(
             contactPhone: $data->phone,
