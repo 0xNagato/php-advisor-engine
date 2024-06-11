@@ -48,10 +48,17 @@ class ConciergeInvitation extends SimplePage
         return 'Create Your Account';
     }
 
+    public function getSubheading(): string|Htmlable|null
+    {
+        return "Referral from {$this->referral->referrer->name}";
+    }
+
     public function mount(Referral $referral): void
     {
         $this->referral = $referral;
         $this->form->fill([
+            'first_name' => $referral->first_name,
+            'last_name' => $referral->last_name,
             'email' => $referral->email,
             'phone' => $referral->phone,
         ]);

@@ -2,9 +2,13 @@
 @php use Filament\View\PanelsRenderHook; @endphp
 <x-admin.simple>
     <x-filament-panels::form wire:submit="secureAccount">
+        <div class="text-sm text-gray-600 -mt-4 text-center">
+            {{  $this->getSubheading() }}
+        </div>
         {{ $this->form }}
 
-        <x-filament-panels::form.actions :actions="$this->getCachedFormActions()" :full-width="$this->hasFullWidthFormActions()" />
+        <x-filament-panels::form.actions :actions="$this->getCachedFormActions()"
+                                         :full-width="$this->hasFullWidthFormActions()" />
     </x-filament-panels::form>
 
     <div class="h-0">
