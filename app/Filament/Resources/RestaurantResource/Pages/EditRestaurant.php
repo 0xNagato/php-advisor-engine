@@ -123,7 +123,7 @@ class EditRestaurant extends EditRecord
 
     protected function getHeaderActions(): array
     {
-        $currentPartnerName = Partner::find($this->getRecord()->user->partner_referral_id)->user->name;
+        $currentPartnerName = $this->getRecord()->partnerReferral ? $this->getRecord()->partnerReferral->user->name : 'No Partner';
 
         return [
             Action::make('Change Partner')

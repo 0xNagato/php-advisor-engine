@@ -10,6 +10,7 @@ use App\Models\Region;
 use App\Models\Restaurant;
 use Exception;
 use Filament\Resources\Resource;
+use Filament\Tables\Actions\EditAction;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
@@ -36,14 +37,16 @@ class RestaurantResource extends Resource
             ->columns([
                 TextColumn::make('restaurant_name')
                     ->searchable(),
-                TextColumn::make('user.name')
-                    ->searchable(['first_name', 'last_name'])
-                    ->numeric()
-                    ->sortable(),
+                TextColumn::make('partnerReferral.user.name')
+                    ->label('Partner'),
                 TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
+            ])
+            ->actions([
+                EditAction::make()
+                    ->iconButton(),
             ])
             ->paginated([5, 10, 25])
             ->filters([
