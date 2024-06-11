@@ -1,7 +1,6 @@
 <?php
 
 use App\Traits\FormatsPhoneNumber;
-use Carbon\Carbon;
 
 if (! function_exists('formatInternationalPhoneNumber')) {
     function formatInternationalPhoneNumber($phoneNumber): string
