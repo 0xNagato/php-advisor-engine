@@ -45,6 +45,21 @@ class AppServiceProvider extends ServiceProvider
                 ->send();
         };
 
+        Carbon::macro('toNotificationFormat', function (Carbon $date): string {
+            $today = now();
+            $tomorrow = now()->addDay();
+
+            if ($date->isSameDay($today)) {
+                return 'today';
+            }
+
+            if ($date->isSameDay($tomorrow)) {
+                return 'tomorrow';
+            }
+
+            return $date->format('l \\t\\h\\e jS');
+        });
+
         Carbon::macro('inAppTimezone', fn (): Carbon => $this->tz(config('app.default_timezone')));
         Carbon::macro('inUserTimezone', fn (): Carbon => $this->tz(auth()->user()?->timezone ?? config('app.default_timezone')));
 

@@ -3,7 +3,7 @@
 namespace App\Notifications;
 
 use App\Models\Booking;
-use Carbon\CarbonInterface;
+use Carbon\Carbon;
 use Illuminate\Bus\Queueable;
 use Illuminate\Notifications\Notification;
 use NotificationChannels\Twilio\TwilioChannel;
@@ -34,7 +34,7 @@ class RestaurantBookingPaid extends Notification
 
     public function toTwilio(object $notifiable): TwilioSmsMessage|TwilioMessage
     {
-        $bookingDate = $this->getFormattedDate($this->booking->booking_at);
+        $bookingDate = Carbon::toNotificationFormat($this->booking->booking_at);
 
         $bookingTime = $this->booking->booking_at->format('g:ia');
 
@@ -42,22 +42,6 @@ class RestaurantBookingPaid extends Notification
 
         return (new TwilioSmsMessage())
             ->content($message);
-    }
-
-    private function getFormattedDate(CarbonInterface $date): string
-    {
-        $today = now();
-        $tomorrow = now()->addDay();
-
-        if ($date->isSameDay($today)) {
-            return 'today';
-        }
-
-        if ($date->isSameDay($tomorrow)) {
-            return 'tomorrow';
-        }
-
-        return $date->format('l \\t\\h\\e jS');
     }
 
     /**

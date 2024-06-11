@@ -3,9 +3,9 @@
 namespace App\Livewire\Partner;
 
 use App\Enums\RestaurantStatus;
-use App\Events\RestaurantInvited;
 use App\Filament\Pages\Partner\RestaurantEarnings;
 use App\Models\User;
+use App\Notifications\Restaurant\SendWelcomeText;
 use Filament\Notifications\Notification;
 use Filament\Tables\Actions\Action;
 use Filament\Tables\Columns\IconColumn;
@@ -64,7 +64,7 @@ class RestaurantReferralsTable extends BaseWidget
                     ->modalHeading('Send Welcome Email')
                     ->hidden(fn (User $record) => $record->has_secured)
                     ->action(function (User $record) {
-                        RestaurantInvited::dispatch($record->restaurant);
+                        $record->restaurant->user->notify(new SendWelcomeText());
 
                         $record->secured_at = now();
                         $record->save();
