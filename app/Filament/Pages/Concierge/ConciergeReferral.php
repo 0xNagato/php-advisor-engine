@@ -2,6 +2,7 @@
 
 namespace App\Filament\Pages\Concierge;
 
+use App\Actions\Partner\InviteConciergeViaSms;
 use App\Models\Referral;
 use App\Models\User;
 use App\Notifications\Concierge\NotifyConciergeReferral;
@@ -170,20 +171,10 @@ class ConciergeReferral extends Page
     {
         $data = $this->tabbedForm->getState()['phoneData'];
 
-        $referral = Referral::query()->create([
-            'referrer_id' => auth()->id(),
-            'phone' => $data['phone'],
-            'first_name' => $data['first_name'],
-            'last_name' => $data['last_name'],
-            'type' => 'concierge',
-            'referrer_type' => strtolower(auth()->user()->main_role),
-        ]);
-
-        $this->tabbedForm->fill();
-
-        $referral->notify(new NotifyConciergeReferral(referral: $referral, channel: 'sms'));
+        InviteConciergeViaSms::run($data);
 
         $this->dispatch('concierge-referred');
+        $this->tabbedForm->fill();
 
         Notification::make()
             ->title('Invite sent successfully.')

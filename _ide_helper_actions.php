@@ -16,6 +16,22 @@ namespace App\Actions\Booking;
 class CreateBooking
 {
 }
+namespace App\Actions\Partner;
+
+/**
+ * @method static \Lorisleiva\Actions\Decorators\JobDecorator|\Lorisleiva\Actions\Decorators\UniqueJobDecorator makeJob(array $data)
+ * @method static \Lorisleiva\Actions\Decorators\UniqueJobDecorator makeUniqueJob(array $data)
+ * @method static \Illuminate\Foundation\Bus\PendingDispatch dispatch(array $data)
+ * @method static \Illuminate\Foundation\Bus\PendingDispatch|\Illuminate\Support\Fluent dispatchIf(bool $boolean, array $data)
+ * @method static \Illuminate\Foundation\Bus\PendingDispatch|\Illuminate\Support\Fluent dispatchUnless(bool $boolean, array $data)
+ * @method static dispatchSync(array $data)
+ * @method static dispatchNow(array $data)
+ * @method static dispatchAfterResponse(array $data)
+ * @method static \App\Models\Referral run(array $data)
+ */
+class InviteConciergeViaSms
+{
+}
 namespace App\Actions\SpecialRequest;
 
 /**
