@@ -15,6 +15,7 @@ use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use RuntimeException;
 use Spatie\LaravelData\DataCollection;
 use Throwable;
 
@@ -241,11 +242,23 @@ class Restaurant extends Model
      */
     public function updateReferringPartner(int $newPartnerId): void
     {
-        DB::transaction(function () use ($newPartnerId) {
+        // Check if the new partner ID exists and has an associated user
+        $partner = Partner::find($newPartnerId);
+        if (! $partner || ! $partner->user) {
+            throw new RuntimeException('Invalid partner ID or associated user not found.');
+        }
+
+        $newUserId = $partner->user_id;
+
+        DB::transaction(function () use ($newPartnerId, $newUserId) {
+            // Update the user's referring partner
             $this->user->update(['partner_referral_id' => $newPartnerId]);
 
+            // Update the referrals table
             Referral::where('user_id', $this->user_id)
-                ->update(['referrer_id' => $newPartnerId]);
+                ->update(['referrer_id' => $newUserId]);
+
+            // Add any other necessary updates here
         });
     }
 }

@@ -19,6 +19,7 @@ use Filament\Notifications\Notification;
 use Filament\Resources\Pages\EditRecord;
 use Illuminate\Contracts\Support\Htmlable;
 use libphonenumber\PhoneNumberType;
+use RuntimeException;
 use Ysfkaya\FilamentPhoneInput\Forms\PhoneInput;
 use Ysfkaya\FilamentPhoneInput\PhoneInputNumberType;
 
@@ -134,17 +135,24 @@ class EditRestaurant extends EditRecord
                         ->required(),
                 ])
                 ->action(function (array $data) {
-                    $this->getRecord()->updateReferringPartner($data['new_partner_id']);
-
-                    Notification::make()
-                        ->title('Partner Changed Successfully')
-                        ->success()
-                        ->send();
+                    try {
+                        $this->getRecord()->updateReferringPartner($data['new_partner_id']);
+                        Notification::make()
+                            ->title('Partner Changed Successfully')
+                            ->success()
+                            ->send();
+                    } catch (RuntimeException $e) {
+                        Notification::make()
+                            ->title('Error')
+                            ->body($e->getMessage())
+                            ->danger()
+                            ->send();
+                    }
                 })
                 ->requiresConfirmation()
-                ->modalDescription('Are you sure you want to change the partner for this restaurant?')
                 ->icon('gmdi-business-center-o')
                 ->label($currentPartnerName)
+                ->modalDescription('Are you sure you want to change the partner for this restaurant?')
                 ->button(),
             ActionGroup::make([
                 Action::make('Draft')
