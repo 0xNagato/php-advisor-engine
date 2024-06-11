@@ -142,6 +142,7 @@ class EditRestaurant extends EditRecord
                         ->send();
                 })
                 ->requiresConfirmation()
+                ->modalDescription('Are you sure you want to change the partner for this restaurant?')
                 ->icon('gmdi-business-center-o')
                 ->label($currentPartnerName)
                 ->button(),
