@@ -2,10 +2,9 @@
 
 namespace App\Filament\Pages\Concierge;
 
-use App\Events\ConciergeReferredViaEmail;
-use App\Events\ConciergeReferredViaText;
 use App\Models\Referral;
 use App\Models\User;
+use App\Notifications\Concierge\NotifyConciergeReferral;
 use Filament\Forms\Components\Actions;
 use Filament\Forms\Components\Actions\Action;
 use Filament\Forms\Components\Tabs;
@@ -157,7 +156,7 @@ class ConciergeReferral extends Page
 
         $this->tabbedForm->fill();
 
-        ConciergeReferredViaEmail::dispatch($referral);
+        $referral->notify(new NotifyConciergeReferral(referral: $referral, channel: 'mail'));
 
         $this->dispatch('concierge-referred');
 
@@ -182,7 +181,7 @@ class ConciergeReferral extends Page
 
         $this->tabbedForm->fill();
 
-        ConciergeReferredViaText::dispatch($referral);
+        $referral->notify(new NotifyConciergeReferral(referral: $referral, channel: 'sms'));
 
         $this->dispatch('concierge-referred');
 

@@ -13,6 +13,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOneThrough;
 use Illuminate\Log\Logger;
+use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
@@ -25,6 +26,7 @@ class Booking extends Model
 {
     use FormatsPhoneNumber;
     use HasFactory;
+    use Notifiable;
 
     public const int PLATFORM_PERCENTAGE_CONCIERGE = 10;
 
