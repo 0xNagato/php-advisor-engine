@@ -147,7 +147,7 @@ class Region extends Model
 
     public static function default(): Region
     {
-        return self::firstWhere('id', config('app.default_region'));
+        return self::query()->firstWhere('id', config('app.default_region'));
     }
 
     /**

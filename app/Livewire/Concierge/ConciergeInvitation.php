@@ -40,12 +40,12 @@ class ConciergeInvitation extends SimplePage
 
     public function getTitle(): string|Htmlable
     {
-        return 'Secure Your Account';
+        return 'Create Your Account';
     }
 
     public function getHeading(): string|Htmlable
     {
-        return 'Secure Your Account';
+        return 'Create Your Account';
     }
 
     public function mount(Referral $referral): void
@@ -125,7 +125,7 @@ class ConciergeInvitation extends SimplePage
     {
         $label = new HtmlString("
             <div class='font-bold text-center text-indigo-800 underline cursor-pointer' x-data='{}' @click='\$dispatch(\"open-modal\", { id: \"concierge-modal\" })'>
-                Secure Your Account to Accept PRIMA concierge Terms and Conditions
+                Create Your Account to Accept PRIMA Concierge Terms and Conditions
             </div>
         ");
 
@@ -140,7 +140,7 @@ class ConciergeInvitation extends SimplePage
             $this->rateLimit(5);
         } catch (TooManyRequestsException $exception) {
             Notification::make()
-                ->title("Too many requests! Please wait another $exception->secondsUntilAvailable seconds to secure your account.")
+                ->title("Too many requests! Please wait another $exception->secondsUntilAvailable seconds to create your account.")
                 ->danger()
                 ->send();
 
@@ -191,7 +191,7 @@ class ConciergeInvitation extends SimplePage
     {
         return [
             Action::make('secureAccount')
-                ->label(__('Secure Account'))
+                ->label(__('Create Your Account'))
                 ->color('indigo')
                 ->submit('secureAccount'),
         ];

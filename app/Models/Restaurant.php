@@ -207,6 +207,9 @@ class Restaurant extends Model
         return $this->hasMany(SpecialPricingRestaurant::class);
     }
 
+    /**
+     * @return HasOneThrough<Partner>
+     */
     public function partnerReferral(): HasOneThrough
     {
         return $this->hasOneThrough(Partner::class, User::class, 'id', 'id', 'user_id', 'partner_referral_id');
@@ -249,10 +252,8 @@ class Restaurant extends Model
     public function updateReferringPartner(int $newPartnerId): void
     {
         // Check if the new partner ID exists and has an associated user
-        $partner = Partner::find($newPartnerId);
-        if (! $partner || ! $partner->user) {
-            throw new RuntimeException('Invalid partner ID or associated user not found.');
-        }
+        $partner = Partner::query()->find($newPartnerId);
+        throw_if(! $partner || ! $partner->user, new RuntimeException('Invalid partner ID or associated user not found.'));
 
         $newUserId = $partner->user_id;
 
@@ -261,7 +262,7 @@ class Restaurant extends Model
             $this->user->update(['partner_referral_id' => $newPartnerId]);
 
             // Update the referrals table
-            Referral::where('user_id', $this->user_id)
+            Referral::query()->where('user_id', $this->user_id)
                 ->update(['referrer_id' => $newUserId]);
 
             // Add any other necessary updates here

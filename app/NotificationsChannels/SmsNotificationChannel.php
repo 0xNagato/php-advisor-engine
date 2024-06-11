@@ -9,11 +9,13 @@ use Illuminate\Notifications\Events\NotificationFailed;
 use Illuminate\Notifications\Notification;
 use Illuminate\Support\Facades\Log;
 use RuntimeException;
+use Throwable;
 
 class SmsNotificationChannel
 {
     /**
      * @throws Exception
+     * @throws Throwable
      */
     public function send($notifiable, Notification $notification): void
     {

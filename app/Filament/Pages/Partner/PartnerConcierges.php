@@ -57,10 +57,10 @@ class PartnerConcierges extends ConciergeReferral
                                 ->hint('Add a comma after the name and separate each contact with a new line.'),
                         ])
                         ->afterValidation(function (Get $get, Set $set) {
-                            $contacts = collect(explode("\n", $get('import')))
+                            $contacts = collect(explode("\n", (string) $get('import')))
                                 ->map(function ($contact) {
                                     $contact = trim($contact);
-                                    if (! empty($contact)) {
+                                    if (filled($contact)) {
                                         $contact = explode(',', $contact);
                                         $name = trim($contact[0]);
                                         $phone = $this->getInternationalFormattedPhoneNumber(trim($contact[1]));
