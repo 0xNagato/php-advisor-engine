@@ -33,7 +33,7 @@ class Referral extends Model
     ];
 
     /**
-     * @return BelongsTo<User, \App\Models\Referral>
+     * @return BelongsTo<User, Referral>
      */
     public function referrer(): BelongsTo
     {
@@ -41,7 +41,7 @@ class Referral extends Model
     }
 
     /**
-     * @return BelongsTo<User, \App\Models\Referral>
+     * @return BelongsTo<User, Referral>
      */
     public function user(): BelongsTo
     {

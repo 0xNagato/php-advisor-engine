@@ -5,16 +5,18 @@ namespace App\Filament\Resources\RestaurantResource\Pages;
 use App\Enums\RestaurantStatus;
 use App\Filament\Resources\RestaurantResource;
 use App\Filament\Resources\RestaurantResource\Components\RestaurantContactsForm;
+use App\Models\Partner;
 use App\Models\Restaurant;
 use Filament\Actions\Action;
 use Filament\Actions\ActionGroup;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Section;
+use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Form;
+use Filament\Notifications\Notification;
 use Filament\Resources\Pages\EditRecord;
-use Filament\Support\Enums\ActionSize;
 use Illuminate\Contracts\Support\Htmlable;
 use libphonenumber\PhoneNumberType;
 use Ysfkaya\FilamentPhoneInput\Forms\PhoneInput;
@@ -121,6 +123,26 @@ class EditRestaurant extends EditRecord
     protected function getHeaderActions(): array
     {
         return [
+            Action::make('Change Partner')
+                ->form([
+                    Select::make('new_partner_id')
+                        ->label('New Partner')
+                        ->options(Partner::with('user')->get()->pluck('user.name', 'id'))
+                        ->default($this->getRecord()->user->partner_referral_id)
+                        ->required(),
+                ])
+                ->action(function (array $data) {
+                    $this->getRecord()->updateReferringPartner($data['new_partner_id']);
+
+                    Notification::make()
+                        ->title('Partner Changed Successfully')
+                        ->success()
+                        ->send();
+                })
+                ->requiresConfirmation()
+                ->icon('gmdi-business-center-o')
+                ->label('Change Partner')
+                ->button(),
             ActionGroup::make([
                 Action::make('Draft')
                     ->action(function () {
@@ -153,7 +175,6 @@ class EditRestaurant extends EditRecord
             ])
                 ->label($this->getRecord()->status->getLabel())
                 ->icon('polaris-status-icon')
-                ->size(ActionSize::ExtraLarge)
                 ->color('primary')
                 ->button(),
         ];

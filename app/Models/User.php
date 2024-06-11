@@ -179,7 +179,7 @@ class User extends Authenticatable implements FilamentUser, HasAvatar
     }
 
     /**
-     * @return HasOneThrough<\App\Models\User>
+     * @return HasOneThrough<User>
      */
     public function referrer(): HasOneThrough
     {

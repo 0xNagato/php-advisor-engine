@@ -12,9 +12,11 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasManyThrough;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Spatie\LaravelData\DataCollection;
+use Throwable;
 
 /**
  * Class Restaurant
@@ -232,5 +234,18 @@ class Restaurant extends Model
             'party_sizes' => 'array',
             'status' => RestaurantStatus::class,
         ];
+    }
+
+    /**
+     * @throws Throwable
+     */
+    public function updateReferringPartner(int $newPartnerId): void
+    {
+        DB::transaction(function () use ($newPartnerId) {
+            $this->user->update(['partner_referral_id' => $newPartnerId]);
+
+            Referral::where('user_id', $this->user_id)
+                ->update(['referrer_id' => $newPartnerId]);
+        });
     }
 }

@@ -40,7 +40,7 @@ class RestaurantSpecialRequestConfirmation extends Page
 
     public function mount(string $token): void
     {
-        abort_unless(request()?->hasValidSignature(), 401);
+        abort_unless(boolean: request()?->hasValidSignature(), code: 401);
 
         $this->specialRequest = SpecialRequest::query()
             ->where('uuid', $token)
