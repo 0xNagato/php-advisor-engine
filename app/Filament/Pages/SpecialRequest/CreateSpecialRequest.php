@@ -11,6 +11,8 @@ class CreateSpecialRequest extends Page
 
     protected static string $view = 'filament.pages.special-request.create-special-request';
 
+    protected static bool $shouldRegisterNavigation = false;
+
     protected function getHeaderWidgets(): array
     {
         return [
