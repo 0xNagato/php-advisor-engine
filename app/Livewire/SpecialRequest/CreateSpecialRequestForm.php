@@ -121,7 +121,7 @@ class CreateSpecialRequestForm extends Widget implements HasForms
                         Textarea::make('special_request')
                             ->hiddenLabel()
                             ->placeholder('Notes/Special Request')
-                            ->helperText('Please provide any special requests or additional information that you would like the restaurant to know.')
+                            ->helperText('Please provide any additional information to pass on to the restaurant.  Is this a birthday?  Are there any food restrictions?')
                             ->columnSpan(2),
                     ])
                     ->extraAttributes(['class' => 'inline-form'])

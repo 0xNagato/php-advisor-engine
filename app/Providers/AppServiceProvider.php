@@ -60,6 +60,9 @@ class AppServiceProvider extends ServiceProvider
             return $date->format('l \\t\\h\\e jS');
         });
 
+        Carbon::macro('inAppTimezone', fn (): Carbon => $this->tz(config('app.default_timezone')));
+        Carbon::macro('inUserTimezone', fn (): Carbon => $this->tz(auth()->user()?->timezone ?? config('app.default_timezone')));
+
         Model::preventLazyLoading(! $this->app->isProduction());
     }
 
