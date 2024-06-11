@@ -1,7 +1,6 @@
 <?php
 
 use App\Traits\FormatsPhoneNumber;
-use Carbon\Carbon;
 
 if (! function_exists('formatInternationalPhoneNumber')) {
     function formatInternationalPhoneNumber($phoneNumber): string
@@ -19,29 +18,6 @@ if (! function_exists('isPrimaApp')) {
         $request = request();
 
         return $request->userAgent() === 'PrimaApp/1.0';
-    }
-}
-
-if (! function_exists('formatDateFromString')) {
-    function formatDateFromString($date): string
-    {
-        if (auth()->check()) {
-            $user = auth()->user();
-            $timezone = $user->timezone;
-        } else {
-            $timezone = config('app.timezone');
-        }
-
-        $carbonDate = Carbon::createFromFormat('Y-m-d', $date, $timezone);
-        if ($carbonDate?->isToday()) {
-            return 'Today';
-        }
-
-        if ($carbonDate?->isTomorrow()) {
-            return 'Tomorrow';
-        }
-
-        return $carbonDate?->format('D, M j');
     }
 }
 

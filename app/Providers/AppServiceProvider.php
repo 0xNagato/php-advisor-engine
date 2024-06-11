@@ -4,6 +4,7 @@
 
 namespace App\Providers;
 
+use Carbon\Carbon;
 use Filament\Notifications\Notification;
 use Filament\Pages\Page;
 use Filament\Support\Colors\Color;
@@ -43,6 +44,9 @@ class AppServiceProvider extends ServiceProvider
                 ->danger()
                 ->send();
         };
+
+        Carbon::macro('inAppTimezone', fn (): Carbon => $this->tz(config('app.default_timezone')));
+        Carbon::macro('inUserTimezone', fn (): Carbon => $this->tz(auth()->user()?->timezone ?? config('app.default_timezone')));
 
         Model::preventLazyLoading(! $this->app->isProduction());
     }
