@@ -122,6 +122,8 @@ class EditRestaurant extends EditRecord
 
     protected function getHeaderActions(): array
     {
+        $currentPartnerName = Partner::find($this->getRecord()->user->partner_referral_id)->user->name;
+
         return [
             Action::make('Change Partner')
                 ->form([
@@ -141,7 +143,7 @@ class EditRestaurant extends EditRecord
                 })
                 ->requiresConfirmation()
                 ->icon('gmdi-business-center-o')
-                ->label('Change Partner')
+                ->label($currentPartnerName)
                 ->button(),
             ActionGroup::make([
                 Action::make('Draft')
