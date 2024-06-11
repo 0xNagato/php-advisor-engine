@@ -22,29 +22,6 @@ if (! function_exists('isPrimaApp')) {
     }
 }
 
-if (! function_exists('formatDateFromString')) {
-    function formatDateFromString($date): string
-    {
-        if (auth()->check()) {
-            $user = auth()->user();
-            $timezone = $user->timezone;
-        } else {
-            $timezone = config('app.timezone');
-        }
-
-        $carbonDate = Carbon::createFromFormat('Y-m-d', $date, $timezone);
-        if ($carbonDate?->isToday()) {
-            return 'Today';
-        }
-
-        if ($carbonDate?->isTomorrow()) {
-            return 'Tomorrow';
-        }
-
-        return $carbonDate?->format('D, M j');
-    }
-}
-
 if (! function_exists('moneyWithoutCents')) {
     function moneyWithoutCents($amount, $currency): string
     {
