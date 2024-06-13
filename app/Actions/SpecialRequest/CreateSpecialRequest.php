@@ -31,7 +31,7 @@ class CreateSpecialRequest
     {
         foreach ($contacts as $contact) {
             if ($contact->use_for_reservations) {
-                $contact->toNotifiable()->notify(new SendSpecialRequestConfirmation($specialRequest));
+                $contact->notify(new SendSpecialRequestConfirmation($specialRequest));
             }
         }
     }
