@@ -21,7 +21,7 @@ class NotificationPreferencesData extends Data
         return array_filter([
             $this->mail ? 'mail' : null,
             $this->sms ? SMSNotificationChannel::class : null,
-            $this->whatsapp ? WhatsAppNotificationChannel::class : null,
+            // $this->whatsapp ? WhatsAppNotificationChannel::class : null,
             $this->database ? 'database' : null,
         ]);
     }
