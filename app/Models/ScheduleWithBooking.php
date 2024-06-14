@@ -30,6 +30,8 @@ class ScheduleWithBooking extends Model
 {
     protected $table = 'schedule_with_bookings';
 
+    protected $with = ['restaurant'];
+
     public $timestamps = false;
 
     /**
