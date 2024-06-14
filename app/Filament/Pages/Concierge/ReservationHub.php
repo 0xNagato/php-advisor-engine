@@ -147,79 +147,123 @@ class ReservationHub extends Page
 
     public function updatedData($data, $key): void
     {
-        if ($key === 'radio_date' && $data === 'select_date') {
+        if ($this->isRedundantRadioDateUpdate($key, $data)) {
             return;
         }
 
-        if ($key === 'guest_count' && blank($data)) {
-            $this->data['guest_count'] = 2;
-        }
+        $this->setDefaultGuestCountIfBlank($key, $data);
 
-        if (isset($this->data['restaurant'], $this->data['reservation_time'], $this->data['date'], $this->data['guest_count'])) {
+        if ($this->isFormFullyFilled()) {
             $userTimezone = $this->timezone;
+
+            /** @var Carbon $requestedDate */
             $requestedDate = Carbon::createFromFormat('Y-m-d', $this->data['date'], $userTimezone);
             $currentDate = Carbon::now($userTimezone);
 
-            if (($key === 'radio_date' || $key === 'select_date') && $currentDate->isSameDay($requestedDate)) {
+            if ($this->isSameDayReservation($key, $requestedDate, $currentDate) && $this->isPastReservationTime($userTimezone)) {
+                $this->resetSchedules();
 
-                $reservationTime = Carbon::createFromFormat('H:i:s', $this->form->getState()['reservation_time'], $userTimezone);
-                $currentTime = Carbon::now($userTimezone);
-
-                // Check if the reservation time is before the current time
-                if ($reservationTime?->lt($currentTime)) {
-                    $this->schedulesToday = new Collection();
-                    $this->schedulesThisWeek = new Collection();
-
-                    return;
-                }
+                return;
             }
 
-            $reservationTime = Carbon::createFromFormat('H:i:s', $this->form->getState()['reservation_time'], $userTimezone);
-            $currentTime = Carbon::now($userTimezone);
-
-            if ($reservationTime?->copy()->subMinutes(self::MINUTES_PAST)->gt($currentTime)) {
-                $reservationTime = $reservationTime->subMinutes(self::MINUTES_PAST)->format('H:i:s');
-            } else {
-                $reservationTime = $this->form->getState()['reservation_time'];
-            }
-
+            $reservationTime = $this->adjustReservationTime($userTimezone);
             $restaurantId = $this->form->getState()['restaurant'];
+            $endTimeForQuery = $this->calculateEndTimeForQuery($reservationTime, $userTimezone);
 
-            $endTime = Carbon::createFromFormat('H:i:s', $reservationTime, $userTimezone)?->addMinutes(self::MINUTES_FUTURE);
-            $limitTime = Carbon::createFromTime(23, 59, 0, $userTimezone);
+            $guestCount = $this->adjustGuestCount($this->form->getState()['guest_count']);
 
-            if ($endTime->gt($limitTime)) {
-                $endTimeForQuery = '23:59:59';
-            } else {
-                $endTimeForQuery = $endTime->format('H:i:s');
-            }
-
-            $guestCount = $this->form->getState()['guest_count'];
-            $guestCount = ceil($guestCount);
-            if ($guestCount % 2 !== 0) {
-                $guestCount++;
-            }
-
-            $this->schedulesToday = ScheduleWithBooking::with('restaurant')
-                ->where('restaurant_id', $restaurantId)
-                ->where('booking_date', $this->form->getState()['date'])
-                ->where('party_size', $guestCount)
-                ->where('start_time', '>=', $reservationTime)
-                ->where('start_time', '<=', $endTimeForQuery)
-                ->get();
-
-            if ($requestedDate?->isSameDay($currentDate)) {
-                $this->schedulesThisWeek = ScheduleWithBooking::with('restaurant')
-                    ->where('restaurant_id', $restaurantId)
-                    ->where('start_time', $this->form->getState()['reservation_time'])
-                    ->where('party_size', $guestCount)
-                    ->whereDate('booking_date', '>', $currentDate)
-                    ->whereDate('booking_date', '<=', $currentDate->addDays(self::AVAILABILITY_DAYS))
-                    ->get();
-            } else {
-                $this->schedulesThisWeek = new Collection();
-            }
+            $this->schedulesToday = $this->getSchedulesToday($restaurantId, $reservationTime, $endTimeForQuery, $guestCount);
+            $this->schedulesThisWeek = $this->getSchedulesThisWeek($requestedDate, $currentDate, $restaurantId, $guestCount);
         }
+    }
+
+    protected function isRedundantRadioDateUpdate($key, $data): bool
+    {
+        return $key === 'radio_date' && $data === 'select_date';
+    }
+
+    protected function setDefaultGuestCountIfBlank($key, $data): void
+    {
+        if ($key === 'guest_count' && blank($data)) {
+            $this->data['guest_count'] = 2;
+        }
+    }
+
+    protected function isFormFullyFilled(): bool
+    {
+        return isset($this->data['restaurant'], $this->data['reservation_time'], $this->data['date'], $this->data['guest_count']);
+    }
+
+    protected function isSameDayReservation($key, Carbon $requestedDate, Carbon $currentDate): bool
+    {
+        return ($key === 'radio_date' || $key === 'select_date') && $currentDate->isSameDay($requestedDate);
+    }
+
+    protected function isPastReservationTime($userTimezone): bool
+    {
+        $reservationTime = Carbon::createFromFormat('H:i:s', $this->form->getState()['reservation_time'], $userTimezone);
+        $currentTime = Carbon::now($userTimezone);
+
+        return $reservationTime?->lt($currentTime);
+    }
+
+    protected function adjustReservationTime($userTimezone): string
+    {
+        $reservationTime = Carbon::createFromFormat('H:i:s', $this->form->getState()['reservation_time'], $userTimezone);
+        $currentTime = Carbon::now($userTimezone);
+
+        if ($reservationTime?->copy()->subMinutes(self::MINUTES_PAST)->gt($currentTime)) {
+            return $reservationTime?->subMinutes(self::MINUTES_PAST)->format('H:i:s');
+        }
+
+        return $this->form->getState()['reservation_time'];
+    }
+
+    protected function calculateEndTimeForQuery($reservationTime, $userTimezone): string
+    {
+        $endTime = Carbon::createFromFormat('H:i:s', $reservationTime, $userTimezone)?->addMinutes(self::MINUTES_FUTURE);
+        $limitTime = Carbon::createFromTime(23, 59, 0, $userTimezone);
+
+        return $endTime->gt($limitTime) ? '23:59:59' : $endTime->format('H:i:s');
+    }
+
+    protected function adjustGuestCount($guestCount): int
+    {
+        $guestCount = ceil($guestCount);
+
+        return $guestCount % 2 !== 0 ? $guestCount + 1 : $guestCount;
+    }
+
+    protected function getSchedulesToday($restaurantId, $reservationTime, $endTimeForQuery, $guestCount): Collection
+    {
+        return ScheduleWithBooking::with('restaurant')
+            ->where('restaurant_id', $restaurantId)
+            ->where('booking_date', $this->form->getState()['date'])
+            ->where('party_size', $guestCount)
+            ->where('start_time', '>=', $reservationTime)
+            ->where('start_time', '<=', $endTimeForQuery)
+            ->get();
+    }
+
+    protected function getSchedulesThisWeek(Carbon $requestedDate, Carbon $currentDate, $restaurantId, $guestCount): Collection
+    {
+        if ($requestedDate->isSameDay($currentDate)) {
+            return ScheduleWithBooking::with('restaurant')
+                ->where('restaurant_id', $restaurantId)
+                ->where('start_time', $this->form->getState()['reservation_time'])
+                ->where('party_size', $guestCount)
+                ->whereDate('booking_date', '>', $currentDate)
+                ->whereDate('booking_date', '<=', $currentDate->addDays(self::AVAILABILITY_DAYS))
+                ->get();
+        }
+
+        return new Collection();
+    }
+
+    protected function resetSchedules(): void
+    {
+        $this->schedulesToday = new Collection();
+        $this->schedulesThisWeek = new Collection();
     }
 
     public function createBooking(int $scheduleTemplateId, ?string $date = null): void
