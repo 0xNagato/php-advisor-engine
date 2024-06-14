@@ -7,6 +7,7 @@ use Filament\Forms\Components\TextInput;
 use Filament\Forms\Form;
 use Filament\Notifications\Notification;
 use Filament\Pages\Page;
+use Illuminate\Http\RedirectResponse;
 
 class PaymentInformation extends Page
 {
@@ -122,7 +123,7 @@ class PaymentInformation extends Page
             ]);
     }
 
-    public function updatedPayoutType($value): void
+    public function updatedPayoutType(): void
     {
         $this->payout_name = '';
         // $this->routing_number = '';
@@ -130,7 +131,7 @@ class PaymentInformation extends Page
         // $this->account_type = '';
     }
 
-    public function save()
+    public function save(): ?RedirectResponse
     {
         $pendingData = [
             'payout' => [
@@ -148,22 +149,24 @@ class PaymentInformation extends Page
             'country' => $this->country,
         ];
 
-        if ($this->requiresTwoFactorAuthentication($this->user, $pendingData)) {
+        if ($this->requiresTwoFactorAuthentication($this->user)) {
 
             session()->put('pending-data.'.$this->user->id, $pendingData);
 
             return redirect()->route('filament.admin.pages.two-factor-code', ['redirect' => 'filament.admin.pages.payment-information']);
-        } else {
-            $this->user->update($pendingData);
-
-            Notification::make()
-                ->title('Payout information updated successfully.')
-                ->success()
-                ->send();
         }
+
+        $this->user->update($pendingData);
+
+        Notification::make()
+            ->title('Payout information updated successfully.')
+            ->success()
+            ->send();
+
+        return null;
     }
 
-    protected function requiresTwoFactorAuthentication($user, $pendingData): bool
+    protected function requiresTwoFactorAuthentication($user): bool
     {
         $sessionKey = 'usercode.'.$user->id;
 
