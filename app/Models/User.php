@@ -298,6 +298,11 @@ class User extends Authenticatable implements FilamentUser, HasAvatar
         return md5(request()->userAgent().request()->ip().$this->id);
     }
 
+    public function canImpersonate(): true
+    {
+        return true;
+    }
+
     /**
      * The attributes that should be cast.
      *

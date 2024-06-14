@@ -12,9 +12,9 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOneThrough;
-use Illuminate\Log\Logger;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 
 use function Sentry\captureException;
@@ -215,7 +215,7 @@ class Booking extends Model
                         'percentage_of' => 'remainder',
                     ]);
 
-                    app(Logger::class)->info('partner_concierge Earning created', [
+                    Log::info('partner_concierge Earning created', [
                         'partner_concierge_id' => $booking->partner_concierge_id,
                         'partner_id' => $earning->user_id,
                         'earning' => $earning,

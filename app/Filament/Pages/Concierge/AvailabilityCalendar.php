@@ -23,7 +23,7 @@ class AvailabilityCalendar extends Page
 
     protected static string $view = 'filament.pages.concierge.availability-calendar';
 
-    protected static ?int $navigationSort = -2;
+    protected static ?int $navigationSort = -4;
 
     public ?array $data = null;
 

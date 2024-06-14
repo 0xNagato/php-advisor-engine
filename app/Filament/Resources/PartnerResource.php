@@ -7,13 +7,18 @@ use App\Filament\Resources\PartnerResource\Pages\EditPartner;
 use App\Filament\Resources\PartnerResource\Pages\ListPartners;
 use App\Filament\Resources\PartnerResource\Pages\ViewPartner;
 use App\Models\Partner;
+use App\Traits\ImpersonatesOther;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
+use Filament\Tables\Actions\Action;
+use Filament\Tables\Actions\EditAction;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 
 class PartnerResource extends Resource
 {
+    use ImpersonatesOther;
+
     protected static ?string $model = Partner::class;
 
     protected static ?string $navigationIcon = 'gmdi-business-center-o';
@@ -40,6 +45,11 @@ class PartnerResource extends Resource
     }
 
     public static function table(Table $table): Table
+    {
+        return (new self())->configureTable($table);
+    }
+
+    public function configureTable(Table $table): Table
     {
         return $table
             ->columns([
@@ -68,7 +78,12 @@ class PartnerResource extends Resource
                 //
             ])
             ->actions([
-
+                Action::make('impersonate')
+                    ->iconButton()
+                    ->icon('impersonate-icon')
+                    ->action(fn (Partner $record) => $this->impersonate($record->user)),
+                EditAction::make()
+                    ->iconButton(),
             ]);
     }
 

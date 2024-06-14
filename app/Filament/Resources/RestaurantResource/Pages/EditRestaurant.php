@@ -17,6 +17,7 @@ use Filament\Forms\Components\TextInput;
 use Filament\Forms\Form;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\EditRecord;
+use Filament\Support\Enums\ActionSize;
 use Illuminate\Contracts\Support\Htmlable;
 use libphonenumber\PhoneNumberType;
 use RuntimeException;
@@ -153,6 +154,7 @@ class EditRestaurant extends EditRecord
                 ->icon('gmdi-business-center-o')
                 ->label($currentPartnerName)
                 ->modalDescription('Are you sure you want to change the partner for this restaurant?')
+                ->size(ActionSize::ExtraSmall)
                 ->button(),
             ActionGroup::make([
                 Action::make('Draft')
@@ -187,6 +189,7 @@ class EditRestaurant extends EditRecord
                 ->label($this->getRecord()->status->getLabel())
                 ->icon('polaris-status-icon')
                 ->color('primary')
+                ->size(ActionSize::ExtraSmall)
                 ->button(),
         ];
     }

@@ -1,9 +1,9 @@
 <x-filament-widgets::widget>
     <div class="flex items-center w-full gap-4 p-3 bg-white shadow bg-opacity-90 rounded-xl">
         @if ($booking->schedule->restaurant->logo)
-            <img src="{{ \Illuminate\Support\Facades\Storage::disk('do')->url($booking->schedule->restaurant->restaurant_logo_path) }}"
-                alt="{{ $booking->schedule->restaurant->restaurant_name }}"
-                class="object-cover max-h-[48px] max-w-[64px]">
+            <img src="{{ $booking->restaurant->logo }}"
+                 alt="{{ $booking->schedule->restaurant->restaurant_name }}"
+                 class="object-cover max-h-[48px] max-w-[64px]">
         @else
             <span class="text-sm line-clamp-2">
                 {{ $booking->schedule->restaurant->restaurant_name }}

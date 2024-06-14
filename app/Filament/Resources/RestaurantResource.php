@@ -8,8 +8,10 @@ use App\Filament\Resources\RestaurantResource\Pages\ListRestaurants;
 use App\Filament\Resources\RestaurantResource\Pages\ViewRestaurant;
 use App\Models\Region;
 use App\Models\Restaurant;
+use App\Traits\ImpersonatesOther;
 use Exception;
 use Filament\Resources\Resource;
+use Filament\Tables\Actions\Action;
 use Filament\Tables\Actions\EditAction;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
@@ -17,6 +19,8 @@ use Filament\Tables\Table;
 
 class RestaurantResource extends Resource
 {
+    use ImpersonatesOther;
+
     protected static ?string $model = Restaurant::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-building-storefront';
@@ -33,7 +37,16 @@ class RestaurantResource extends Resource
      */
     public static function table(Table $table): Table
     {
+        return (new self())->configureTable($table);
+    }
+
+    /**
+     * @throws Exception
+     */
+    public function configureTable(Table $table): Table
+    {
         return $table
+            ->recordUrl(fn (Restaurant $record) => ViewRestaurant::getUrl(['record' => $record]))
             ->columns([
                 TextColumn::make('restaurant_name')
                     ->searchable(),
@@ -45,6 +58,10 @@ class RestaurantResource extends Resource
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->actions([
+                Action::make('impersonate')
+                    ->iconButton()
+                    ->icon('impersonate-icon')
+                    ->action(fn (Restaurant $record) => $this->impersonate($record->user)),
                 EditAction::make()
                     ->iconButton(),
             ])

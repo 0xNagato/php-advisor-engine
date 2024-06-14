@@ -4,11 +4,14 @@ namespace App\Filament\Resources\PartnerResource\Pages;
 
 use App\Filament\Resources\PartnerResource;
 use App\Models\Partner;
+use App\Traits\ImpersonatesOther;
 use Filament\Actions\CreateAction;
 use Filament\Forms\Components\DatePicker;
 use Filament\Pages\Dashboard\Actions\FilterAction;
 use Filament\Pages\Dashboard\Concerns\HasFiltersAction;
 use Filament\Resources\Pages\ListRecords;
+use Filament\Tables\Actions\Action;
+use Filament\Tables\Actions\EditAction;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Illuminate\Contracts\Database\Query\Builder;
@@ -18,7 +21,7 @@ use Illuminate\Support\Facades\DB;
 
 class ListPartners extends ListRecords
 {
-    use HasFiltersAction;
+    use HasFiltersAction, ImpersonatesOther;
 
     protected static string $resource = PartnerResource::class;
 
@@ -58,6 +61,7 @@ class ListPartners extends ListRecords
             ->limit(10);
 
         return $table
+            ->recordUrl(fn (Partner $record) => ViewPartner::getUrl(['record' => $record]))
             ->query($query)
             ->paginated([5, 10, 25])
             ->columns([
@@ -77,6 +81,14 @@ class ListPartners extends ListRecords
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
+            ])
+            ->actions([
+                Action::make('impersonate')
+                    ->iconButton()
+                    ->icon('impersonate-icon')
+                    ->action(fn (Partner $record) => $this->impersonate($record->user)),
+                EditAction::make()
+                    ->iconButton(),
             ]);
     }
 
@@ -95,7 +107,6 @@ class ListPartners extends ListRecords
                 ->form([
                     DatePicker::make('startDate'),
                     DatePicker::make('endDate'),
-                    // ...
                 ]),
             CreateAction::make()->iconButton()->icon('heroicon-s-plus-circle'),
         ];

@@ -1,22 +1,25 @@
-@php use App\Enums\BookingStatus; @endphp
-<div class="flex flex-col justify-center min-h-screen p-6 antialiased wavy-background h-screen">
-    <x-filament-panels::logo />
-    <div class="flex flex-col items-center pt-20 flex-grow max-w-lg mx-auto">
-        <div class="flex flex-col items-center gap-3" id="form">
-            <h1 class="text-3xl text-center dm-serif">
+@php
+    use Carbon\Carbon;
+    use App\Models\SpecialRequest;
+    use App\Enums\SpecialRequestStatus;
+@endphp
+<x-layouts.simple-wrapper>
+    <div class="flex flex-col w-full gap-4 p-4 mx-4 bg-white rounded-lg shadow-sm ring-1 ring-gray-950/5">
+        <h1 class="text-2xl tracking-tight text-center text-gray-950 dm-serif">
+            @if($booking->restaurant_confirmed_at)
                 Thank You for Confirming the Reservation!
-            </h1>
+            @else
+                Confirm Booking Request
+            @endif
+        </h1>
 
-            <h2 class="text-base text-left">
-                <p>
-                    We've notified the guests and reminded them to be on time for their reservation.
-                </p>
-                <p class="mt-3 font-semibold">Thank you for using PRIMA!</p>
-            </h2>
-        </div>
+        @if($booking->restaurant_confirmed_at)
+            <div class="text-center space-y-4">
+                <p>We've notified the guests and reminded them to be on time for their reservation.</p>
+                <p class="font-semibold">Thank you for using PRIMA!</p>
+            </div>
+        @else
+            {{ $this->confirmBookingAction }}
+        @endif
     </div>
-    <div class="flex items-end justify-center text-sm text-center">
-        &copy; {{ date('Y') }} {{ config('app.name', 'PRIMA VIP') }}. All rights reserved.
-    </div>
-
-</div>
+</x-layouts.simple-wrapper>

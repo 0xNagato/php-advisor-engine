@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Actions\Booking\SendConfirmationToRestaurantContacts;
 use App\Enums\BookingStatus;
 use App\Events\BookingPaid;
 use App\Models\Booking;
@@ -19,8 +20,6 @@ class BookingService
 
     /**
      * @throws ApiErrorException
-     *
-     * @todo Add type hint for $form with DataTransferObject
      */
     public function processBooking(Booking $booking, $form): void
     {
@@ -28,6 +27,7 @@ class BookingService
         $this->updateBooking($booking, $form, $stripeCharge);
 
         $booking->notify(new GuestBookingConfirmed());
+        SendConfirmationToRestaurantContacts::run($booking);
 
         BookingPaid::dispatch($booking);
     }

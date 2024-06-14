@@ -4,13 +4,17 @@ namespace App\Livewire\Concierge;
 
 use App\Filament\Resources\ConciergeResource\Pages\ViewConcierge;
 use App\Models\Concierge;
+use App\Traits\ImpersonatesOther;
 use Carbon\Carbon;
+use Filament\Tables\Actions\Action;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Filament\Widgets\TableWidget as BaseWidget;
 
 class ListConciergesTable extends BaseWidget
 {
+    use ImpersonatesOther;
+
     protected static ?string $heading = 'Concierges';
 
     public function table(Table $table): Table
@@ -48,6 +52,12 @@ class ListConciergesTable extends BaseWidget
                     ->formatStateUsing(fn (Concierge $record) => Carbon::parse($record->user->authentications()->orderByDesc('login_at')->first()->login_at, auth()->user()->timezone)
                         ->diffForHumans())
                     ->label('Last Login'),
+            ])
+            ->actions([
+                Action::make('impersonate')
+                    ->iconButton()
+                    ->icon('impersonate-icon')
+                    ->action(fn (Concierge $record) => $this->impersonate($record->user)),
             ]);
     }
 }

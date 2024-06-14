@@ -1,0 +1,50 @@
+<?php
+
+namespace App\Livewire\Admin;
+
+use App\Actions\Booking\SendConfirmationToRestaurantContacts;
+use App\Models\Booking;
+use Filament\Tables\Actions\Action;
+use Filament\Tables\Actions\ActionGroup;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Table;
+use Filament\Widgets\TableWidget as BaseWidget;
+
+class ConfirmationManagerBookings extends BaseWidget
+{
+    protected static ?string $heading = '';
+
+    protected int|string|array $columnSpan = 'full';
+
+    public function table(Table $table): Table
+    {
+        return $table
+            ->query(
+                Booking::query()
+                    ->confirmed()
+                    ->latest()
+            )
+            ->columns([
+                TextColumn::make('restaurant.restaurant_name')
+                    ->label('Venue')
+                    ->formatStateUsing(fn (Booking $record) => view('partials.booking-confirmation-column', ['record' => $record]))
+                    ->searchable(),
+            ])
+            ->actions([
+                ActionGroup::make([
+                    Action::make('resendConfirmation')
+                        ->hidden(fn (Booking $record) => ! auth()->user()->hasRole('super_admin'))
+                        ->label('Resend Confirmation')
+                        ->requiresConfirmation()
+                        ->icon(fn (Booking $record) => is_null($record->restaurant_confirmed_at) ? 'ri-refresh-line' : 'heroicon-o-check-circle')
+                        ->color(fn (Booking $record) => is_null($record->restaurant_confirmed_at) ? 'indigo' : 'success')
+                        ->requiresConfirmation()
+                        ->hidden(fn (Booking $record) => ! is_null($record->restaurant_confirmed_at))
+                        ->action(function (Booking $record) {
+                            SendConfirmationToRestaurantContacts::run($record);
+                            $record->update(['resent_restaurant_confirmation_at' => now()]);
+                        }),
+                ]),
+            ]);
+    }
+}

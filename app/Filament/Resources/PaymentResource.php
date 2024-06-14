@@ -31,6 +31,8 @@ class PaymentResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-o-banknotes';
 
+    protected static ?int $navigationSort = 5;
+
     public static function canAccess(): bool
     {
         return auth()->user()->hasRole('super_admin');

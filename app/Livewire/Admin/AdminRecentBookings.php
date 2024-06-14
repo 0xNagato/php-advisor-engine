@@ -18,6 +18,8 @@ class AdminRecentBookings extends BaseWidget
 
     public int|string|array $columnSpan;
 
+    protected static ?string $heading = 'Recent Bookings';
+
     public function getColumnSpan(): int|string|array
     {
         return $this->columnSpan ?? 'full';
