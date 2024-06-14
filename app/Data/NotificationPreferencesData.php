@@ -3,7 +3,6 @@
 namespace App\Data;
 
 use App\NotificationsChannels\SmsNotificationChannel;
-use App\NotificationsChannels\WhatsappNotificationChannel;
 use Spatie\LaravelData\Data;
 
 class NotificationPreferencesData extends Data
@@ -20,7 +19,7 @@ class NotificationPreferencesData extends Data
     {
         return array_filter([
             $this->mail ? 'mail' : null,
-            $this->sms ? SMSNotificationChannel::class : null,
+            $this->sms ? SmsNotificationChannel::class : null,
             // $this->whatsapp ? WhatsAppNotificationChannel::class : null,
             $this->database ? 'database' : null,
         ]);
