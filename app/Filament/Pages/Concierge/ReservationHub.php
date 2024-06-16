@@ -5,7 +5,6 @@ namespace App\Filament\Pages\Concierge;
 use App\Actions\Booking\CreateBooking;
 use App\Enums\BookingStatus;
 use App\Events\BookingCancelled;
-use App\Events\BookingCreated;
 use App\Models\Booking;
 use App\Models\Region;
 use App\Models\Restaurant;
@@ -13,8 +12,6 @@ use App\Models\ScheduleTemplate;
 use App\Models\ScheduleWithBooking;
 use App\Services\BookingService;
 use App\Traits\ManagesBookingForms;
-use AshAllenDesign\ShortURL\Facades\ShortURL;
-use chillerlan\QRCode\QRCode;
 use Exception;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Form;
@@ -25,7 +22,6 @@ use Illuminate\Support\Carbon;
 use Livewire\Attributes\On;
 use Livewire\Attributes\Session;
 use Livewire\Attributes\Url;
-use Sentry;
 use Stripe\Exception\ApiErrorException;
 
 /**
@@ -269,53 +265,22 @@ class ReservationHub extends Page
     public function createBooking(int $scheduleTemplateId, ?string $date = null): void
     {
         $userTimezone = $this->timezone;
-        $bookingDate = Carbon::createFromFormat('Y-m-d', $this->data['date'], $userTimezone);
-        $currentDate = Carbon::now($userTimezone);
-
-        if ($bookingDate?->gt($currentDate->copy()->addDays(self::MAX_DAYS_IN_ADVANCE))) {
-            Notification::make()
-                ->title('Booking cannot be created more than '.self::MAX_DAYS_IN_ADVANCE.' days in advance.')
-                ->danger()
-                ->send();
-
-            return;
-        }
-
         $data = $this->form->getState();
         $data['date'] = $date ?? $data['date'];
 
-        $this->booking = CreateBooking::run($scheduleTemplateId, $data, $userTimezone, $this->currency);
-
         try {
-            $shortUrlQr = ShortURL::destinationUrl(
-                route('bookings.create', [
-                    'token' => $this->booking->uuid,
-                    'r' => 'qr',
-                ])
-            )->make();
+            $result = CreateBooking::run($scheduleTemplateId, $data, $userTimezone, $this->currency);
 
-            $shortUrl = ShortURL::destinationUrl(
-                route('bookings.create', [
-                    'token' => $this->booking->uuid,
-                    'r' => 'sms',
-                ])
-            )->make();
+            $this->booking = $result['booking'];
+            $this->bookingUrl = $result['bookingUrl'];
+            $this->qrCode = $result['qrCode'];
         } catch (Exception $e) {
-            Sentry::captureException($e);
-
-            $this->booking->delete();
             Notification::make()
-                ->title('An error occurred while creating the booking.')
+                ->title('Error')
+                ->body($e->getMessage())
                 ->danger()
                 ->send();
-
-            return;
         }
-
-        $this->bookingUrl = $shortUrl->default_short_url;
-        $this->qrCode = (new QRCode())->render($shortUrlQr->default_short_url);
-
-        BookingCreated::dispatch($this->booking);
     }
 
     /**

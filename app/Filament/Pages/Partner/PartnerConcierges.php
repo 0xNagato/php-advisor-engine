@@ -115,10 +115,7 @@ class PartnerConcierges extends ConciergeReferral
                 ])
                 ->action(function (array $data) {
                     $contacts = collect($data['contacts']);
-                    $contacts->each(function ($contact) {
-                        ds($contact);
-                        InviteConciergeViaSms::run($contact);
-                    });
+                    $contacts->each(fn ($contact) => InviteConciergeViaSms::run($contact));
 
                     $this->dispatch('concierge-referred');
 

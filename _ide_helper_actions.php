@@ -11,9 +11,23 @@ namespace App\Actions\Booking;
  * @method static dispatchSync(int $scheduleTemplateId, array $data, string $timezone, string $currency)
  * @method static dispatchNow(int $scheduleTemplateId, array $data, string $timezone, string $currency)
  * @method static dispatchAfterResponse(int $scheduleTemplateId, array $data, string $timezone, string $currency)
- * @method static \App\Models\Booking run(int $scheduleTemplateId, array $data, string $timezone, string $currency)
+ * @method static array run(int $scheduleTemplateId, array $data, string $timezone, string $currency)
  */
 class CreateBooking
+{
+}
+/**
+ * @method static \Lorisleiva\Actions\Decorators\JobDecorator|\Lorisleiva\Actions\Decorators\UniqueJobDecorator makeJob(\App\Models\Booking $booking)
+ * @method static \Lorisleiva\Actions\Decorators\UniqueJobDecorator makeUniqueJob(\App\Models\Booking $booking)
+ * @method static \Illuminate\Foundation\Bus\PendingDispatch dispatch(\App\Models\Booking $booking)
+ * @method static \Illuminate\Foundation\Bus\PendingDispatch|\Illuminate\Support\Fluent dispatchIf(bool $boolean, \App\Models\Booking $booking)
+ * @method static \Illuminate\Foundation\Bus\PendingDispatch|\Illuminate\Support\Fluent dispatchUnless(bool $boolean, \App\Models\Booking $booking)
+ * @method static dispatchSync(\App\Models\Booking $booking)
+ * @method static dispatchNow(\App\Models\Booking $booking)
+ * @method static dispatchAfterResponse(\App\Models\Booking $booking)
+ * @method static void run(\App\Models\Booking $booking)
+ */
+class SendConfirmationToRestaurantContacts
 {
 }
 namespace App\Actions\Partner;
@@ -30,22 +44,6 @@ namespace App\Actions\Partner;
  * @method static \App\Models\Referral run(array $data)
  */
 class InviteConciergeViaSms
-{
-}
-namespace App\Actions\Restaurant;
-
-/**
- * @method static \Lorisleiva\Actions\Decorators\JobDecorator|\Lorisleiva\Actions\Decorators\UniqueJobDecorator makeJob(\App\Models\Booking $booking)
- * @method static \Lorisleiva\Actions\Decorators\UniqueJobDecorator makeUniqueJob(\App\Models\Booking $booking)
- * @method static \Illuminate\Foundation\Bus\PendingDispatch dispatch(\App\Models\Booking $booking)
- * @method static \Illuminate\Foundation\Bus\PendingDispatch|\Illuminate\Support\Fluent dispatchIf(bool $boolean, \App\Models\Booking $booking)
- * @method static \Illuminate\Foundation\Bus\PendingDispatch|\Illuminate\Support\Fluent dispatchUnless(bool $boolean, \App\Models\Booking $booking)
- * @method static dispatchSync(\App\Models\Booking $booking)
- * @method static dispatchNow(\App\Models\Booking $booking)
- * @method static dispatchAfterResponse(\App\Models\Booking $booking)
- * @method static void run(\App\Models\Booking $booking)
- */
-class SendBookingConfirmationToContacts
 {
 }
 namespace App\Actions\SpecialRequest;
