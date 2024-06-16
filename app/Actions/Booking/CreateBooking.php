@@ -2,6 +2,7 @@
 
 namespace App\Actions\Booking;
 
+use App\Data\Booking\CreateBookingReturnData;
 use App\Enums\BookingStatus;
 use App\Events\BookingCreated;
 use App\Models\Booking;
@@ -29,7 +30,7 @@ class CreateBooking
      *
      * @returns array {booking: Booking, bookingUrl: string, qrCode: string}
      */
-    public function handle(int $scheduleTemplateId, array $data, string $timezone, string $currency): array
+    public function handle(int $scheduleTemplateId, array $data, string $timezone, string $currency): CreateBookingReturnData
     {
         $scheduleTemplate = ScheduleTemplate::query()->findOrFail($scheduleTemplateId);
 
@@ -90,10 +91,10 @@ class CreateBooking
 
         BookingCreated::dispatch($booking);
 
-        return [
+        return CreateBookingReturnData::from([
             'booking' => $booking,
             'bookingUrl' => $shortUrl->default_short_url,
             'qrCode' => (new QRCode())->render($shortUrlQr->default_short_url),
-        ];
+        ]);
     }
 }

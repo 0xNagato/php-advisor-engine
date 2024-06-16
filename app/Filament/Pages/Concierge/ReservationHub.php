@@ -271,9 +271,9 @@ class ReservationHub extends Page
         try {
             $result = CreateBooking::run($scheduleTemplateId, $data, $userTimezone, $this->currency);
 
-            $this->booking = $result['booking'];
-            $this->bookingUrl = $result['bookingUrl'];
-            $this->qrCode = $result['qrCode'];
+            $this->booking = $result->booking;
+            $this->bookingUrl = $result->bookingUrl;
+            $this->qrCode = $result->qrCode;
         } catch (Exception $e) {
             Notification::make()
                 ->title('Error')

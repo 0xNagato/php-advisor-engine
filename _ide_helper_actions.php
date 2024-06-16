@@ -11,7 +11,7 @@ namespace App\Actions\Booking;
  * @method static dispatchSync(int $scheduleTemplateId, array $data, string $timezone, string $currency)
  * @method static dispatchNow(int $scheduleTemplateId, array $data, string $timezone, string $currency)
  * @method static dispatchAfterResponse(int $scheduleTemplateId, array $data, string $timezone, string $currency)
- * @method static array run(int $scheduleTemplateId, array $data, string $timezone, string $currency)
+ * @method static \App\Data\Booking\CreateBookingReturnData run(int $scheduleTemplateId, array $data, string $timezone, string $currency)
  */
 class CreateBooking
 {
