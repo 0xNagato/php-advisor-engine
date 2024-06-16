@@ -3,11 +3,15 @@
 namespace App\Livewire\Restaurant;
 
 use App\Models\Booking;
+use DateTime;
+use DateTimeZone;
+use Exception;
 use Filament\Actions\Action;
 use Filament\Notifications\Notification;
 use Filament\Pages\Page;
 use Filament\Support\Colors\Color;
 use Illuminate\Support\Facades\Log;
+use Livewire\Attributes\Computed;
 
 class RestaurantBookingConfirmation extends Page
 {
@@ -20,13 +24,6 @@ class RestaurantBookingConfirmation extends Page
     public function mount(string $token): void
     {
         $this->booking = Booking::with('restaurant')->where('uuid', $token)->firstOrFail();
-        // if ($this->booking->restaurant_confirmed_at === null) {
-        //     Log::info('Restaurant confirmed booking', [
-        //         'restaurant_name' => $this->booking->restaurant->restaurant_name,
-        //         'booking' => $this->booking->id,
-        //     ]);
-        //     $this->booking->update(['restaurant_confirmed_at' => now()]);
-        // }
     }
 
     public function confirmBookingAction(): Action
@@ -52,5 +49,39 @@ class RestaurantBookingConfirmation extends Page
             ->title('Thank you for confirming the booking')
             ->success()
             ->send();
+    }
+
+    /**
+     * @throws Exception
+     */
+    /**
+     * Determines if the current time is past the allowable booking confirmation time,
+     * which is one hour after the booking time. This method uses the session timezone
+     * to ensure consistent time comparisons.
+     *
+     * Problems Encountered:
+     * 1. **Carbon Timezone Handling**:
+     *    - Initial attempts using Carbon resulted in incorrect time comparisons.
+     *    — The issue was likely due to implicit timezone handling in Carbon, where the
+     *      `booking_at` time was not always correctly interpreted in the intended timezone.
+     *
+     * 2. **Explicit Timezone Conversion**:
+     *    - Switching to PHP's native `DateTime` and `DateTimeZone` classes provided more
+     *      explicit control over timezone conversions, ensuring that both the booking time,
+     *      and the current time were correctly interpreted and compared.
+     *
+     * @return bool True if the current time is past the booking time plus one hour, false otherwise.
+     *
+     * @throws Exception
+     */
+    #[Computed]
+    public function isPastBookingTime(): bool
+    {
+        $timezone = session('timezone', 'UTC');
+        $bookingTime = new DateTime($this->booking->booking_at, new DateTimeZone($timezone));
+        $bookingTimePlusOneHour = (clone $bookingTime)->modify('+1 hour');
+        $currentTime = new DateTime('now', new DateTimeZone($timezone));
+
+        return $currentTime > $bookingTimePlusOneHour;
     }
 }

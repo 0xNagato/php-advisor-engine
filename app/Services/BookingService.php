@@ -73,6 +73,7 @@ class BookingService
             'stripe_charge' => $booking->prime_time ? $stripeCharge->toArray() : null,
             'stripe_charge_id' => $booking->prime_time ? $stripeCharge->id : null,
             'confirmed_at' => now(),
+            'notes' => $form['notes'] ?? null,
         ]);
     }
 }
