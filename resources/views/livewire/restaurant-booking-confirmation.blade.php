@@ -10,7 +10,7 @@
 
         @if(filled($booking->notes))
             <div class="rounded-md border bg-gray-50 p-4 shadow-sm">
-                <h2 class="mb-2 font-semibold text-gray-800">Special Requests/Notes</h2>
+                <h2 class="mb-2 font-semibold text-gray-800">Reservation Notes</h2>
                 <p class="text-sm text-gray-700">{{ $booking->notes }}</p>
             </div>
         @endif
