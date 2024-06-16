@@ -10,16 +10,7 @@
         </h1>
 
         <div class="w-full space-y-3 text-sm">
-            <div class="relative">
-                <div class="absolute inset-0 flex items-center" aria-hidden="true">
-                    <div class="w-full border-t border-gray-300"></div>
-                </div>
-                <div class="relative flex justify-center">
-                    <span class="px-3 text-base font-semibold leading-6 text-gray-900 bg-white">
-                        Request Info
-                    </span>
-                </div>
-            </div>
+            <x-app.divider message="Request Info" />
 
             <div>
                 <p class="font-medium text-gray-700">
@@ -75,16 +66,7 @@
                 </div>
             </div>
 
-            <div class="relative">
-                <div class="absolute inset-0 flex items-center" aria-hidden="true">
-                    <div class="w-full border-t border-gray-300"></div>
-                </div>
-                <div class="relative flex justify-center">
-                    <span class="px-3 text-base font-semibold leading-6 text-gray-900 bg-white">
-                        Customer Details
-                    </span>
-                </div>
-            </div>
+            <x-app.divider message="Customer Details" />
 
             <div>
                 <p class="font-medium text-gray-700">
@@ -146,14 +128,7 @@
                 @endif
 
                 @if (!$showRequestChangesForm)
-                    <div class="relative">
-                        <div class="absolute inset-0 flex items-center" aria-hidden="true">
-                            <div class="w-full border-t border-gray-300"></div>
-                        </div>
-                        <div class="relative flex justify-center">
-                            <span class="px-3 text-base font-semibold leading-6 text-gray-900 bg-white">Approval</span>
-                        </div>
-                    </div>
+                    <x-app.divider message="Approval" />
                     {{ $this->approvalForm }}
                 @endif
             @else
