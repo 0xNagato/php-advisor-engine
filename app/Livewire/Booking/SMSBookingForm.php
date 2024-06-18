@@ -5,7 +5,7 @@
 namespace App\Livewire\Booking;
 
 use App\Models\Booking;
-use App\Services\SmsService;
+use App\Notifications\Booking\ConfirmReservation;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Concerns\InteractsWithForms;
@@ -83,7 +83,6 @@ class SMSBookingForm extends Widget implements HasForms
     public function handleSubmit(): void
     {
         $data = $this->form->getState();
-        $message = "Your reservation at {$this->booking->restaurant->restaurant_name} is pending. Please click $this->bookingUrl to secure your booking within the next 5 minutes.";
 
         $this->booking->update([
             'guest_first_name' => $data['first_name'],
@@ -93,7 +92,7 @@ class SMSBookingForm extends Widget implements HasForms
             'notes' => $data['notes'],
         ]);
 
-        app(SmsService::class)->sendMessage($data['phone'], $message);
+        $this->booking->notify(new ConfirmReservation(url: $this->bookingUrl));
 
         $this->SMSSent = true;
         $this->dispatch('sms-sent');
