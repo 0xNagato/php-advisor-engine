@@ -1,4 +1,5 @@
 <x-filament-widgets::widget>
+    <h1 class="not-italic font-normal text-center text-[30px] mb-4 leading-[normal]">Talk to PRIMA</h1>
     @if($hasSent)
         <div class="text-center">
             <p class="text-lg font-semibold">Thank you for your message!</p>
