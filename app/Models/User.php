@@ -113,7 +113,7 @@ class User extends Authenticatable implements FilamentUser, HasAvatar
     {
         return $this->profile_photo_path
             ? Storage::disk('do')->url($this->profile_photo_path)
-            : "https://ui-avatars.com/api/?background=312596&color=fff&name=$this->name";
+            : "https://ui-avatars.com/api/?background=312596&color=fff&format=png&name=$this->name";
     }
 
     public function routeNotificationForTwilio(): string
