@@ -731,18 +731,22 @@
     </div>
 </footer>
 <!--- Footer End --->
-<x-filament::modal id="contact">
+<x-filament::modal id="contact" width="2xl">
     <x-slot name="heading">
-        Contact
+        Talk to PRIMA
     </x-slot>
     Contact
 </x-filament::modal>
 
-<x-filament::modal id="video">
+<x-filament::modal id="video" width="2xl">
     <x-slot name="heading">
-        Video
+        Watch Our Explainer
     </x-slot>
-    Video
+    <iframe width="560" height="315" src="https://www.youtube.com/embed/pxyHz-RjHW0?si=Ce3xU7A0J3Fg7WR6"
+            class="youtube-video"
+            title="YouTube video player" frameborder="0"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+            referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
 </x-filament::modal>
 @livewire('notifications')
 @filamentScripts
