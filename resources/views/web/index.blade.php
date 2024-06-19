@@ -411,8 +411,8 @@
                     <span class="flex items-baseline gap-[7px] text-left mt-[20px]">
                      <img src="/assets/images/icon.png" width="15" height="auto" alt="icon" loading="lazy"> Diners enjoy their favorite restaurants at their chosen time. </span>
                 </p>
-                <p class="text-[24px] font-light leading-[normal] md:px-[15px] py-[5px] border-[1px] border-[solid] border-[#000] mt-[31px] md:inline-block">
-                    It's a win-win-win for all!</p>
+                <p class="text-[24px] leading-[normal] md:px-[15px] py-[5px] font-extrabold mt-[31px] md:inline-block">
+                    It's a WIN-WIN-WIN for all!</p>
             </div>
             <!--- Section7 Left End --->
             <!--- Section7 Right --->
