@@ -12,6 +12,10 @@
     width: 100%;
 }
 
+.inline-form {
+    @apply gap-4 gap-x-2 !important;
+}
+
 * {
     margin: 0;
     padding: 0;
