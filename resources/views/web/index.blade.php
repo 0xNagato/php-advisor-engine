@@ -738,11 +738,11 @@
     Contact
 </x-filament::modal>
 
-<x-filament::modal id="video" width="2xl">
+<x-filament::modal id="video" width="7xl">
     <x-slot name="heading">
         Watch Our Explainer
     </x-slot>
-    <iframe width="560" height="315" src="https://www.youtube.com/embed/pxyHz-RjHW0?si=Ce3xU7A0J3Fg7WR6"
+    <iframe src="https://www.youtube.com/embed/pxyHz-RjHW0?si=Ce3xU7A0J3Fg7WR6"
             class="youtube-video"
             title="YouTube video player" frameborder="0"
             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
