@@ -65,7 +65,7 @@ class TalkToPrima extends Widget implements HasForms
                   'Email: '.$data['email']."\n\n".
                   'Phone: '.$data['phone']."\n\n".
                   'Message: '.$data['message'], static function (Message $message) {
-                      $message->to('andru.weir@gmail.com')
+                      $message->to(['andru.weir@gmail.com', 'alex.zhard@gmail.com'])
                           ->subject('Talk to PRIMA Form Submission');
                   });
 
