@@ -13,6 +13,8 @@ Route::get('/', static function () {
     return view('web.index');
 });
 
+Route::redirect('/login', '/platform/login');
+
 Route::get('/invoice/download/{uuid}', DownloadInvoiceController::class)
     ->name('customer.invoice.download');
 

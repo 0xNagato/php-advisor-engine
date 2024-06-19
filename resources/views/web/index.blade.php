@@ -12,14 +12,16 @@
     <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/slick-carousel@1.8.1/slick/slick.css" />
     <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/slick-carousel@1.8.1/slick/slick.min.js"></script>
 
+
     @filamentStyles
     @vite('resources/css/web.css')
+
 </head>
-<body>
+<body x-data="{}">
 <!--- header --->
 <header class="sticky top-0 z-50">
     <!--- announcement bar --->
-    <div class="bg-[#4C42E1]">
+    <div class="bg-indigo-600">
         <div class="max-w-full pl-[30px] pr-[30px] mx-[auto] w-full md:max-w-[1035px]  md:my-[0] md:pl-[50px] md:pr-[50px]">
             <p class="text-[11px] px-[0] py-[10px] md:text-sm not-italic font-semibold text-center text-white leading-[normal] px-[0] md:py-[7px]">
                 Launching in Miami, Las Vegas, New York And Europe!</p>
@@ -37,6 +39,7 @@
                 </div>
                 <div class="header_button">
                     <a href="#"
+                       @click.prevent="$dispatch('open-modal', { id: 'contact' })"
                        class="leading-[normal] text-[#5249C4] rounded-[4px] border-[1px] border-[solid] border-[#5249C4]  px-[10px] py-[7px] text-[10px] md:px-[24px] md:py-[5px] md:text-[14px] [transition:all_.5s_ease] hover:bg-[#5046E5] hover:text-[#fff]  font-semibold">Talk
                         to PRIMA →</a>
                 </div>
@@ -47,7 +50,15 @@
                          class="block">
                 </div>
                 <div class="p-[30px] border-b-[.5px] border-[rgba(0,_0,_0,_0.50)] bg-[#F9F9F9] absolute top-[100%] left-[0] right-[0] md:hidden"
-                     style="display:none"></div>
+                     style="display:none">
+                    @auth()
+                        <a href="/platform/"
+                           class="block text-[#5249C4] font-semibold text-[14px] leading-[normal] py-[10px]">Dashboard</a>
+                    @else
+                        <a class="block text-[#5249C4] font-semibold text-[14px] leading-[normal] py-[10px]"
+                           href="/platform/login">Login</a>
+                    @endauth
+                </div>
             </div>
         </div>
     </div>
@@ -67,9 +78,14 @@
                 <p class="not-italic font-normal md:pt-8 pt-[15px] text-[14px] md:text-[18px]">PRIMA's Concierge Network
                     helps to fill dining rooms with the best customers at all times.</p>
                 <a class="rounded-[5.199px] bg-[#5046E5] w-full min-h-[45px] md:min-h-[57.953px] text-[14px] md:text-[18.196px] not-italic font-semibold leading-[normal] text-[#FFF] [transition:all_.5s_ease] hover:background: transparent hover:bg-transparent hover:text-[#5046E5] inline-flex items-center justify-center border-[1.3px] border-[solid] border-[#5046E5] mt-[26px] md:mt-[32px]"
-                   href="#">Talk to PRIMA →</a>
+                   href="#"
+                   @click.prevent="$dispatch('open-modal', { id: 'contact' })">
+                    Talk to PRIMA →
+                </a>
                 <a class="rounded-[5.199px] bg-transparent w-full min-h-[45px] md:min-h-[57.953px] text-[14px] md:text-[18.196px] not-italic font-semibold leading-[normal] text-[#000] [transition:all_.5s_ease] hover:background: transparent hover:bg-[#000] hover:text-[#fff] inline-flex items-center justify-center border-[1.3px] border-[solid] border-[#000] mt-[8px] underline [text-underline-offset:4px]"
-                   href="#">Watch Our Explainer</a>
+                   href="#"
+                   @click.prevent="$dispatch('open-modal', { id: 'video' })"
+                >Watch Our Explainer</a>
                 <p class="text-[14px] md:text-[18.196px] not-italic font-normal leading-[normal] mt-[22px] md:mt-[29px] text-center">
                     <span class="text-[#DE6520]">★★★★★</span> Rated 5/5 stars by our <a href="#"
                                                                                         class="underline [text-underline-offset:4px]">partners</a>
@@ -292,9 +308,9 @@
                 <h2 class="text-[26.34px] leading-[115.8%] hidden md:block">No more bots and no more last minute
                     cancellations.</h2>
                 <a class="rounded-[5.199px] bg-[#5046E5] w-full min-h-[45px] text-[14px] not-italic font-semibold leading-[normal] text-[#FFF] [transition:all_.5s_ease] hover:background: transparent hover:bg-transparent hover:text-[#5046E5] inline-flex items-center justify-center border-[1.3px] border-[solid] border-[#5046E5] md:mt-[26px] md:mt-[34px]"
-                   href="#">Talk to PRIMA →</a>
+                   href="#" @click.prevent="$dispatch('open-modal', { id: 'contact' })">Talk to PRIMA →</a>
                 <a class="rounded-[5.199px] bg-transparent w-full min-h-[45px] text-[14px]  not-italic font-semibold leading-[normal] text-[#000] [transition:all_.5s_ease] hover:background: transparent hover:bg-[#000] hover:text-[#fff] inline-flex items-center justify-center border-[1.3px] border-[solid] border-[#000] mt-[8px] underline [text-underline-offset:3px]"
-                   href="#">Watch Our Explainer</a>
+                   href="#" @click.prevent="$dispatch('open-modal', { id: 'video' })">Watch Our Explainer</a>
                 <p class="text-[14px] not-italic font-normal leading-[normal] mt-[20px] text-center">
                     <span class="text-[#DE6520]">★★★★★</span> Rated 5/5 stars by our <a href="#"
                                                                                         class="underline [text-underline-offset:4px]">partners</a>
@@ -364,9 +380,9 @@
         <div class="max-w-[630px] mx-[auto] my-[0] pt-[38px] md:pt-[82px] text-center">
             <div class="flex flex-wrap md:flex-nowrap md:gap-x-[17px] md:flex-row-reverse">
                 <a class="rounded-[5.199px] bg-[#5046E5] w-full min-h-[45px] text-[14px] not-italic font-semibold leading-[normal] text-[#FFF] [transition:all_.5s_ease] hover:background: transparent hover:bg-transparent hover:text-[#5046E5] inline-flex items-center justify-center border-[1.3px] border-[solid] border-[#5046E5]"
-                   href="#">Talk to PRIMA →</a>
+                   href="#" @click.prevent="$dispatch('open-modal', { id: 'contact' })">Talk to PRIMA →</a>
                 <a class="rounded-[5.199px] bg-transparent w-full min-h-[45px] text-[14px]  not-italic font-semibold leading-[normal] text-[#000] [transition:all_.5s_ease] hover:background: transparent hover:bg-[#000] hover:text-[#fff] inline-flex items-center justify-center border-[1.3px] border-[solid] border-[#000] mt-[6px] md:mt-[0px] underline [text-underline-offset:3px]"
-                   href="#">Watch Our Explainer</a>
+                   href="#" @click.prevent="$dispatch('open-modal', { id: 'video' })">Watch Our Explainer</a>
             </div>
             <p class="text-[14px] not-italic font-normal leading-[normal] mt-[14px] md:mt-[28px] text-center">
                 <span class="text-[#DE6520]">★★★★★</span> Rated 5/5 stars by our <a href="#"
@@ -427,18 +443,18 @@
                         <p class="pt-[29px] text-[15.67px] font-light leading-[normal]">Reservation Fee</p>
                         <p class="text-[15.67px] font-medium leading-[normal] pt-[10px]">$200</p>
                         <div class="gap-[6px] mt-[17px] flex flex-col">
-                            <div class="h-[182px] bg-[#5DBB00] gap-[27px] pb-[50px] px-[15px] py-[0] max-w-[117px] mx-[auto] my-[0] w-full inline-flex flex-col items-center justify-center">
+                            <div class="h-[182px] bg-indigo-300 gap-[27px] pb-[50px] px-[15px] py-[0] max-w-[117px] mx-[auto] my-[0] w-full inline-flex flex-col items-center justify-center">
                                 <div class="text-[12.71px] font-medium leading-[normal]">Restaurant Commission</div>
                                 <div class="text-[12.71px] font-medium leading-[normal]">60%</div>
                             </div>
-                            <div class="bg-[#FFBA00] h-[65px] gap-[4px] px-[15px] py-[0] max-w-[117px] mx-[auto] my-[0] w-full inline-flex flex-col items-center justify-center">
+                            <div class="bg-indigo-400 h-[65px] gap-[4px] px-[15px] py-[0] max-w-[117px] mx-[auto] my-[0] w-full inline-flex flex-col items-center justify-center">
                                 <div class="text-[12.71px] font-medium leading-[normal]">Concierge Service</div>
                                 <div class="text-[12.71px] font-medium leading-[normal]">10-15%</div>
                             </div>
-                            <div class="h-[75px] bg-[#F00] gap-[2px] pb-[10px] px-[15px] py-[0] max-w-[117px] mx-[auto] my-[0] w-full inline-flex flex-col items-center justify-center">
+                            <div class="h-[75px] text-white bg-indigo-600 gap-[2px] pb-[10px] px-[15px] py-[0] max-w-[117px] mx-[auto] my-[0] w-full inline-flex flex-col items-center justify-center">
                                 <div class="text-[12.71px] font-medium leading-[normal]">PRIMA</div>
                             </div>
-                            <div class="bg-indigo-500 h-[25px] flex-row gap-[7px] -mt-[6px] px-[15px] py-[0] max-w-[117px] mx-[auto] my-[0] w-full inline-flex items-center justify-center">
+                            <div class="bg-indigo-700 text-white h-[25px] flex-row gap-[7px] -mt-[6px] px-[15px] py-[0] max-w-[117px] mx-[auto] my-[0] w-full inline-flex items-center justify-center">
                                 <div class="text-[12.71px] font-medium leading-[normal]">CHARITY</div>
                             </div>
                         </div>
@@ -452,9 +468,9 @@
                 revenue and profits to each participating restaurant.</h2>
             <div class="flex flex-wrap md:flex-nowrap md:gap-x-[17px] md:flex-row-reverse">
                 <a class="rounded-[5.199px] bg-[#5046E5] w-full min-h-[45px] text-[14px] not-italic font-semibold leading-[normal] text-[#FFF] [transition:all_.5s_ease] hover:background: transparent hover:bg-transparent hover:text-[#5046E5] inline-flex items-center justify-center border-[1.3px] border-[solid] border-[#5046E5]"
-                   href="#">Talk to PRIMA →</a>
+                   href="#" @click.prevent="$dispatch('open-modal', { id: 'contact' })">Talk to PRIMA →</a>
                 <a class="rounded-[5.199px] bg-transparent w-full min-h-[45px] text-[14px]  not-italic font-semibold leading-[normal] text-[#000] [transition:all_.5s_ease] hover:background: transparent hover:bg-[#000] hover:text-[#fff] inline-flex items-center justify-center border-[1.3px] border-[solid] border-[#000] mt-[6px] md:mt-[0px] underline [text-underline-offset:3px]"
-                   href="#">Watch Our Explainer</a>
+                   href="#" @click.prevent="$dispatch('open-modal', { id: 'video' })">Watch Our Explainer</a>
             </div>
         </div>
     </div>
@@ -694,9 +710,9 @@
                      <img src="/assets/images/icon.png" width="15" height="auto" alt="icon" loading="lazy"> Ensure Full Occupancy During All Service Times </span>
                 </p>
                 <a class="rounded-[5.199px] bg-[#5046E5] w-full min-h-[45px] text-[14px] not-italic font-semibold leading-[normal] text-[#FFF] [transition:all_.5s_ease] hover:background: transparent hover:bg-transparent hover:text-[#5046E5] inline-flex items-center justify-center border-[1.3px] border-[solid] border-[#5046E5] mt-[26px] md:mt-[34px]"
-                   href="#">Talk to PRIMA →</a>
+                   href="#" @click.prevent="$dispatch('open-modal', { id: 'contact' })">Talk to PRIMA →</a>
                 <a class="rounded-[5.199px] bg-transparent w-full min-h-[45px]  text-[14px]  not-italic font-semibold leading-[normal] text-[#000] [transition:all_.5s_ease] hover:background: transparent hover:bg-[#000] hover:text-[#fff] inline-flex items-center justify-center border-[1.3px] border-[solid] border-[#000] mt-[8px] underline [text-underline-offset:3px]"
-                   href="#">Watch Our Explainer</a>
+                   href="#" @click.prevent="$dispatch('open-modal', { id: 'video' })">Watch Our Explainer</a>
             </div>
         </div>
     </div>
@@ -706,7 +722,8 @@
 <footer class="text-white pt-[28px] px-[0] pb-[21px] md:pt-[34px] md:pb-[25px] bg-[#5046E5]">
     <div class="max-w-full pl-[10px] pr-[10px] mx-[auto] w-full md:max-w-[967px]  md:my-[0] md:pl-[50px] md:pr-[50px]">
         <div class="text-center">
-            <div class="text-[14px] font-normal leading-[normal] opacity-75">© 2024 PRIMA VIP | All Rights Reserved
+            <div class="mt-4 flex items-end justify-center text-center text-sm">
+                &copy; {{ date('Y') }} {{ config('app.name', 'PRIMA VIP') }}. All rights reserved.
             </div>
             <img src="/assets/images/payment_icons.png" width="auto" height="auto" loading="lazy" alt="logo"
                  class="block max-w-[173px] mx-[auto] my-[0] pt-[5px]">
@@ -714,8 +731,22 @@
     </div>
 </footer>
 <!--- Footer End --->
+<x-filament::modal id="contact">
+    <x-slot name="heading">
+        Contact
+    </x-slot>
+    Contact
+</x-filament::modal>
 
-
+<x-filament::modal id="video">
+    <x-slot name="heading">
+        Video
+    </x-slot>
+    Video
+</x-filament::modal>
+@livewire('notifications')
+@filamentScripts
+@vite('resources/js/app.js')
 @vite('resources/js/web.js')
 </body>
 </html>
