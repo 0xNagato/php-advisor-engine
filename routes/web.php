@@ -9,6 +9,10 @@ use App\Livewire\Concierge\ConciergeInvitation;
 use App\Livewire\Restaurant\RestaurantBookingConfirmation;
 use App\Livewire\Restaurant\RestaurantSpecialRequestConfirmation;
 
+Route::get('/', static function () {
+    return view('web.index');
+});
+
 Route::get('/invoice/download/{uuid}', DownloadInvoiceController::class)
     ->name('customer.invoice.download');
 

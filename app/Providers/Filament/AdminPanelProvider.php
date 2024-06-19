@@ -33,7 +33,7 @@ class AdminPanelProvider extends PanelProvider
         $panel
             ->default()
             ->id('admin')
-            ->path('')
+            ->path('/platform')
             ->login(Login::class)
             ->passwordReset(RequestPasswordReset::class, ResetPassword::class)
             ->passwordResetRoutePrefix('/')

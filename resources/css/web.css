@@ -1,0 +1,101 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+[x-cloak] {
+    display: none;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: "Inter", sans-serif;
+    font-optical-sizing: auto;
+    font-weight: 400;
+    font-style: normal;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+    font-family: "DM Serif Display", serif;
+    font-style: normal;
+    font-weight: 400;
+}
+
+ul.slick-dots {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 9px;
+    margin-top: 28px;
+    font-size: 0;
+}
+
+button.slick-arrow {
+    display: none ! IMPORTANT;
+}
+
+ul.slick-dots button {
+    width: 8.005px;
+    height: 8.005px;
+    background: #d9d9d9;
+    border-radius: 100px;
+}
+
+ul.slick-dots li.slick-active button {
+    background: #de6520;
+}
+
+.slick-initialized .slick-slide {
+    height: auto !important;
+}
+
+.slick-slider {
+    display: block !important;
+}
+
+.section8_js_trigger.active {
+    background: #5046e5 !important;
+    color: #fff !important;
+    text-decoration: underline !important;
+}
+
+@media (max-width: 768px) {
+    .section8_js_trigger_item:not(.active) {
+        display: none !important;
+    }
+}
+
+/* menu css code start */
+@media (max-width: 768px) {
+    .menu_trigger_js.active > img:first-child {
+        display: block !important;
+    }
+
+    .menu_trigger_js.active > img:first-child + img {
+        display: none;
+    }
+
+    .section10_slider_js .slick-list.draggable {
+        padding-right: 40px !important;
+    }
+
+    .section4_slider_js .slick-list.draggable {
+        padding-right: 35px !important;
+    }
+
+    .section4_slider_js {
+        max-width: calc(100% + 30px);
+        width: calc(100% + 30px);
+    }
+}
+
+/* menu css code end */
