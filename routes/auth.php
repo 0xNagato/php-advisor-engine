@@ -3,7 +3,7 @@
 use App\Http\Controllers\App\UpdateRegionController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
 
-Route::prefix('app')->group(function () {
+Route::prefix('platform/app')->group(function () {
     Route::post('/login', [AuthenticatedSessionController::class, 'store'])
         ->middleware('guest')
         ->name('login');
