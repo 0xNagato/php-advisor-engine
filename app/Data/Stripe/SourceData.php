@@ -35,6 +35,5 @@ class SourceData extends Data implements Wireable
         public ?string $addressZipCheck,
         public ?string $addressLine1Check,
         public ?string $tokenizationMethod
-    ) {
-    }
+    ) {}
 }

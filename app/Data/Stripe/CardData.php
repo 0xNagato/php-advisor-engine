@@ -37,6 +37,5 @@ class CardData extends Data implements Wireable
         public ExtendedAuthorizationData $extendedAuthorization,
         #[MapInputName('incremental_authorization')]
         public IncrementalAuthorizationData $incrementalAuthorization
-    ) {
-    }
+    ) {}
 }

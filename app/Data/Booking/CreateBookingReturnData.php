@@ -15,6 +15,5 @@ class CreateBookingReturnData extends Data implements Wireable
         public Booking $booking,
         public string $bookingUrl,
         public string $qrCode
-    ) {
-    }
+    ) {}
 }

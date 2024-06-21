@@ -15,6 +15,5 @@ class BillingDetailsData extends Data implements Wireable
         public null $email,
         public null $phone,
         public AddressData $address
-    ) {
-    }
+    ) {}
 }

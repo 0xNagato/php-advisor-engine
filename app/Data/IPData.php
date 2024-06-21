@@ -20,6 +20,5 @@ class IPData extends Data
         public string $org,
         public string $as,
         public string $query
-    ) {
-    }
+    ) {}
 }

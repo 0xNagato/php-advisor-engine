@@ -30,8 +30,7 @@ class BookingCalculationData extends Data
         public int $platformCharityEarned,
 
         public int $charityTotalEarned,
-    ) {
-    }
+    ) {}
 
     public function calculateTotalEarnings(): int
     {

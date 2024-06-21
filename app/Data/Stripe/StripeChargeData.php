@@ -62,6 +62,5 @@ class StripeChargeData extends Data implements Wireable
         public ?string $failureBalanceTransaction,
         public ?string $statementDescriptorSuffix,
         public ?string $calculatedStatementDescriptor
-    ) {
-    }
+    ) {}
 }

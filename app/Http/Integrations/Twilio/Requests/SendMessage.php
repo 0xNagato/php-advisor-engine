@@ -20,8 +20,7 @@ class SendMessage extends Request implements HasBody
         public string $phone,
         public string $text,
         public ?string $from = null,
-    ) {
-    }
+    ) {}
 
     protected function defaultBody(): array
     {

@@ -10,7 +10,5 @@ class OvercaptureData extends Data implements Wireable
 {
     use WireableData;
 
-    public function __construct(public ?string $status, public ?int $maximumAmountCapturable)
-    {
-    }
+    public function __construct(public ?string $status, public ?int $maximumAmountCapturable) {}
 }

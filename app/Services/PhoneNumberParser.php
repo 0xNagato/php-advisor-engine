@@ -15,8 +15,7 @@ class PhoneNumberParser
 
     public function __construct(
         protected string $phone,
-    ) {
-    }
+    ) {}
 
     public static function make(string $phone): self
     {

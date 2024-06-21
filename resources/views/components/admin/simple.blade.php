@@ -2,7 +2,18 @@
 @props([
     'heading' => null,
     'subheading' => null,
+    'size' => 'md',
+    'showWrapper' => true
 ])
+
+@php
+    $containerSize = [
+        'md' => 'max-w-md',
+        'lg' => 'max-w-lg',
+        'xl' => 'max-w-xl',
+        '2xl' => 'max-w-4xl',
+    ][$size];
+@endphp
 
 <div class="pb-4">
     <div class="w-full text-3xl font-bold text-center pt-6 leading-5 tracking-tight text-gray-950">
@@ -12,16 +23,26 @@
         Everybody Wins
     </div>
 
-    <div class="bg-white px-6 pt-8 pb-8 shadow-sm ring-1 ring-gray-950/5 rounded-lg mx-4 max-w-md sm:mx-auto">
-        <div class="font-semibold text-lg mb-4 text-center">
-            {{ $this->getHeading() }}
-        </div>
+    @if ($showWrapper)
+        <div class="bg-white px-6 pt-8 pb-8 shadow-sm ring-1 ring-gray-950/5 rounded-lg mx-4 {{ $containerSize }} sm:mx-auto">
+            @endif
+            <div class="font-semibold text-lg mb-4 text-center">
+                {{ $this->getHeading() }}
+            </div>
 
-        {{ $slot }}
-    </div>
+            {{ $slot }}
+            @if ($showWrapper)
+        </div>
+    @endif
 
     @if (!$this instanceof HasTable)
         <x-filament-actions::modals />
+    @endif
+
+    @if(request()->route()->uri() === 'platform/login')
+        <div class="items-end justify-center text-sm text-center mt-4">
+            <a class="font-bold " href="{{ route('restaurant.login') }}">Restaurant Contact Login</a>
+        </div>
     @endif
 
     <div class="flex items-end justify-center text-sm text-center mt-4">

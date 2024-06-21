@@ -7,6 +7,8 @@ use App\Livewire\Booking\CreateBooking;
 use App\Livewire\Booking\CustomerInvoice;
 use App\Livewire\Concierge\ConciergeInvitation;
 use App\Livewire\Restaurant\RestaurantBookingConfirmation;
+use App\Livewire\Restaurant\RestaurantContactLogin;
+use App\Livewire\Restaurant\RestaurantContactRecentBookings;
 use App\Livewire\Restaurant\RestaurantSpecialRequestConfirmation;
 
 Route::get('/', static function () {
@@ -34,6 +36,9 @@ Route::get('/invitation/{referral}', ConciergeInvitation::class)
 
 Route::get('/demo/auth/{user_id}', [DemoAuthController::class, 'auth'])->name('demo.auth');
 Route::get('/demo/redirect', [DemoAuthController::class, 'redirect'])->name('demo.redirect');
+
+Route::get('/platform/login/restaurant', RestaurantContactLogin::class)->name('restaurant.login');
+Route::get('/restaurants/contact-bookings', RestaurantContactRecentBookings::class)->name('restaurant.contact.bookings')->middleware('signed');
 
 Route::post('/exception-form', ExceptionFormController::class)->name('exception.form');
 

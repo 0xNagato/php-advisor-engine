@@ -24,6 +24,5 @@ class CreateSpecialRequestData extends Data
         public string $customer_phone,
         public ?string $customer_email,
         public ?SpecialRequestStatus $status = SpecialRequestStatus::PENDING,
-    ) {
-    }
+    ) {}
 }

@@ -17,6 +17,5 @@ class OutcomeData extends Data implements Wireable
         public ?int $riskScore,
         public ?string $networkStatus,
         public ?string $sellerMessage
-    ) {
-    }
+    ) {}
 }

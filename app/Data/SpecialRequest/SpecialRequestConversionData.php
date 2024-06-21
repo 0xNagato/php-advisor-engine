@@ -17,6 +17,5 @@ class SpecialRequestConversionData extends Data implements Wireable
         public int $commission_requested_percentage,
         public ?string $message,
         public Carbon $created_at,
-    ) {
-    }
+    ) {}
 }

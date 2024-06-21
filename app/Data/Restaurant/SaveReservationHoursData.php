@@ -12,6 +12,5 @@ class SaveReservationHoursData extends Data
         public array $startTimes,
         public array $endTimes,
         public array $selectedDays,
-    ) {
-    }
+    ) {}
 }

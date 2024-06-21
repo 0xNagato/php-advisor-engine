@@ -12,8 +12,7 @@ class NotificationPreferencesData extends Data
         public ?bool $sms = false,
         public ?bool $whatsapp = false,
         public ?bool $database = false,
-    ) {
-    }
+    ) {}
 
     public function toChannel(): array
     {

@@ -26,12 +26,10 @@ class AuthenticatedSessionController extends Controller
         return response()->json([
             'success' => true,
             'data' => [
-                'regions' => Region::active()->get()->transform(function ($region) {
-                    return [
-                        'id' => $region->id,
-                        'name' => $region->name,
-                    ];
-                }),
+                'regions' => Region::active()->get()->transform(fn ($region) => [
+                    'id' => $region->id,
+                    'name' => $region->name,
+                ]),
                 'user' => [
                     'name' => $user->name,
                     'avatar' => $user->avatar,

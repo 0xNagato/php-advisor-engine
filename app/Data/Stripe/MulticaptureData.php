@@ -10,7 +10,5 @@ class MulticaptureData extends Data implements Wireable
 {
     use WireableData;
 
-    public function __construct(public string $status)
-    {
-    }
+    public function __construct(public string $status) {}
 }

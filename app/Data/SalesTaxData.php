@@ -11,6 +11,5 @@ class SalesTaxData extends Data
         public string $region,
         public float $tax,
         public int $taxWhole,
-    ) {
-    }
+    ) {}
 }

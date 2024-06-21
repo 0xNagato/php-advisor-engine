@@ -22,8 +22,7 @@ class SendMessage extends Request implements HasBody
     public function __construct(
         protected string $phone,
         protected string $text,
-    ) {
-    }
+    ) {}
 
     protected function defaultBody(): array
     {

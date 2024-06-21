@@ -16,9 +16,7 @@ class BookingCreated
     /**
      * Create a new event instance.
      */
-    public function __construct(public Booking $booking)
-    {
-    }
+    public function __construct(public Booking $booking) {}
 
     /**
      * Get the channels the event should broadcast on.

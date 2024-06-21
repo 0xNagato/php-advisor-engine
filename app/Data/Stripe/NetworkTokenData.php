@@ -10,7 +10,5 @@ class NetworkTokenData extends Data implements Wireable
 {
     use WireableData;
 
-    public function __construct(public bool $used)
-    {
-    }
+    public function __construct(public bool $used) {}
 }

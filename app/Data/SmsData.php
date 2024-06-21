@@ -9,6 +9,5 @@ class SmsData extends Data
     public function __construct(
         public string $phone,
         public string $text,
-    ) {
-    }
+    ) {}
 }
