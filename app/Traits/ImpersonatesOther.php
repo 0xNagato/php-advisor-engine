@@ -21,6 +21,6 @@ trait ImpersonatesOther
 
     public function getRedirectTo(): ?string
     {
-        return config('filament-impersonate.redirect_to');
+        return config('app.platform_url');
     }
 }

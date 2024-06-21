@@ -22,7 +22,8 @@
                     You do not have permission to access this page.
                 </p>
                 <p class="mt-2 text-center text-sm text-gray-600">
-                    <a href="/" class="font-medium text-indigo-600 hover:text-indigo-500">
+                    <a href="{{ config('app.platform_url') }}"
+                       class="font-medium text-indigo-600 hover:text-indigo-500">
                         Return to Dashboard
                     </a>
                 </p>

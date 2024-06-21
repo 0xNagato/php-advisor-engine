@@ -205,4 +205,5 @@ return [
     'no_tax' => env('NO_TAX', true),
     'active_regions' => ['miami', 'ibiza'],
     'dev_ip_address' => env('DEV_IP_ADDRESS'),
+    'platform_url' => env('PLATFORM_URL', '/platform'),
 ];
