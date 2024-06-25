@@ -28,7 +28,7 @@
             <h2 class="text-[28.177px] leading-[115.8%] pt-[34px]">What Our Partners Say</h2>
             <p class="text-[14px] leading-[normal] pt-[17px]">Success Stories from Restaurants & Concierges</p>
         </div>
-        <div class="section10_slider_js">
+        <div class="section10_slider_js flex space-x-4">
             @foreach ($testimonials as $testimonial)
                 <x-web.testimonial-item :testimonial="$testimonial" />
             @endforeach
