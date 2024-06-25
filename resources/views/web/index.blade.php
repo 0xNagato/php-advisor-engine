@@ -101,10 +101,15 @@
     </div>
 </section>
 <!--- Section1 End --->
-<iframe src="https://www.youtube.com/embed/pxyHz-RjHW0?enablejsapi=1"
-        class="youtube-video" title="YouTube video player"
-        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-        referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+<section class="pt-[20px] px-[0] pb-[18px] md:pt-[30px] md:pb-[48px]">
+    <div
+            class="max-w-full pl-[20px] pr-[20px] mx-[auto] w-full  md:my-[0] md:pl-[50px] md:pr-[50px] md:max-w-[1043px] youtube-container">
+        <iframe src="https://www.youtube.com/embed/pxyHz-RjHW0?enablejsapi=1&controls=0&modestbranding=1"
+                class="youtube-video" title="YouTube video player"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+    </div>
+</section>
 <!--- Section2 --->
 <section class="pt-[20px] px-[0] pb-[18px] md:pt-[30px] md:pb-[48px]">
     <div
@@ -159,8 +164,13 @@
     </div>
 </section>
 <!--- Section3 End --->
-<img src="/assets/images/restaurant2.jpeg" width="auto" height="auto" loading="lazy"
-     alt="Restaurant" class="block">
+<section class="pt-[20px] px-[0] pb-[18px] md:pt-[30px] md:pb-[48px]">
+    <div
+            class="max-w-full pl-[20px] pr-[20px] mx-[auto] w-full  md:my-[0] md:pl-[50px] md:pr-[50px] md:max-w-[1043px]">
+        <img src="/assets/images/restaurant2.jpeg" width="auto" height="auto" loading="lazy"
+             alt="Restaurant" class="block">
+    </div>
+</section>
 <!--- Section4 --->
 <section class="pt-[50px] md:pt-[30px] px-[0] pb-[20px] md:pb-[50px]">
     <div
@@ -784,10 +794,12 @@
     <x-slot name="heading">
         Watch Our Explainer
     </x-slot>
-    <iframe x-ref="videoIframe" id="youtubeIframe" src="https://www.youtube.com/embed/pxyHz-RjHW0?enablejsapi=1"
-            class="youtube-video" title="YouTube video player"
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-            referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+    <div class="youtube-container">
+        <iframe x-ref="videoIframe" id="youtubeIframe" src="https://www.youtube.com/embed/pxyHz-RjHW0?enablejsapi=1"
+                class="youtube-video" title="YouTube video player"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+    </div>
 </x-filament::modal>
 
 @livewire('notifications')
