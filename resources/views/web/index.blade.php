@@ -13,12 +13,10 @@
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
     <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/slick-carousel@1.8.1/slick/slick.css" />
     <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/slick-carousel@1.8.1/slick/slick.min.js"></script>
+
     <script src="https://www.youtube.com/iframe_api"></script>
-
-
     @filamentStyles
     @vite('resources/css/web.css')
-
 </head>
 
 <body x-data="modalHandler">
@@ -91,8 +89,8 @@
                    href="#" @click.prevent="$dispatch('open-modal', { id: 'contact' })">
                     Talk to PRIMA →
                 </a>
-                <a class="rounded-[5.199px] bg-transparent w-full min-h-[45px] md:min-h-[57.953px] text-[14px] md:text-[18.196px] not-italic font-semibold leading-[normal] text-[#000] [transition:all_.5s_ease] hover:background: transparent hover:bg-[#000] hover:text-[#fff] inline-flex items-center justify-center border-[1.3px] border-[solid] border-[#000] mt-[8px] underline [text-underline-offset:4px]"
-                   href="#" @click.prevent="$dispatch('open-modal', { id: 'video' })">Watch Our Explainer</a>
+                {{--                <a class="rounded-[5.199px] bg-transparent w-full min-h-[45px] md:min-h-[57.953px] text-[14px] md:text-[18.196px] not-italic font-semibold leading-[normal] text-[#000] [transition:all_.5s_ease] hover:background: transparent hover:bg-[#000] hover:text-[#fff] inline-flex items-center justify-center border-[1.3px] border-[solid] border-[#000] mt-[8px] underline [text-underline-offset:4px]"--}}
+                {{--                   href="#" @click.prevent="$dispatch('open-modal', { id: 'video' })">Watch Our Explainer</a>--}}
                 <p
                         class="text-[14px] md:text-[18.196px] not-italic font-normal leading-[normal] mt-[22px] md:mt-[29px] text-center">
                     <span class="text-[#DE6520]">★★★★★</span> Rated 5/5 stars by our <a href="#"
@@ -103,6 +101,10 @@
     </div>
 </section>
 <!--- Section1 End --->
+<iframe src="https://www.youtube.com/embed/pxyHz-RjHW0?enablejsapi=1"
+        class="youtube-video" title="YouTube video player"
+        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+        referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
 <!--- Section2 --->
 <section class="pt-[20px] px-[0] pb-[18px] md:pt-[30px] md:pb-[48px]">
     <div
@@ -157,8 +159,8 @@
     </div>
 </section>
 <!--- Section3 End --->
-<img src="/assets/images/image5.png" width="auto" height="auto" loading="lazy" alt="logo"
-     class="block md:hidden">
+<img src="/assets/images/restaurant2.jpeg" width="auto" height="auto" loading="lazy"
+     alt="Restaurant" class="block">
 <!--- Section4 --->
 <section class="pt-[50px] md:pt-[30px] px-[0] pb-[20px] md:pb-[50px]">
     <div
@@ -728,7 +730,7 @@
         <div class="flex flex-wrap items-center">
             <div class="w-full md:w-7/12">
                 <img src="/assets/images/restaurant.jpeg" width="auto" height="auto" loading="lazy"
-                     alt="logo" class="block">
+                     alt="Restaurant" class="block">
             </div>
             <div class="w-full pt-[30px] pl-[30px] pr-[30px] md:pt-[0px] md:pr-[0px] md:pl-[63px] md:w-5/12">
                 <h2 class="text-[28.177px] font-normal leading-[115.8%] text-center md:text-left">Join PRIMA</h2>
@@ -784,7 +786,7 @@
     </x-slot>
     <iframe x-ref="videoIframe" id="youtubeIframe" src="https://www.youtube.com/embed/pxyHz-RjHW0?enablejsapi=1"
             class="youtube-video" title="YouTube video player"
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
             referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
 </x-filament::modal>
 
