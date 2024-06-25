@@ -9,7 +9,7 @@
     <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Inter:wght@100..900&display=swap"
           rel="stylesheet">
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
-    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/slick-carousel@1.8.1/slick/slick.css" />
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/slick-carousel@1.8.1/slick/slick.css"/>
     <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/slick-carousel@1.8.1/slick/slick.min.js"></script>
 
 
@@ -131,8 +131,9 @@
                 <div class="text-[14px] font-medium leading-[normal] text-center rounded-[15.157px] bg-[#5046E5] px-[10px] py-[5px] text-[#fff]">
                     INTRODUCING PRIMA VIP
                 </div>
-                <h2 class="text-[23.25px] leading-[100%] mt-[30px]">PRIMA allows in-demand venue to take control over
-                    the sale of their primetime reservations... </h2>
+                <h2 class="text-[23.25px] leading-[100%] mt-[30px]">
+                    PRIMA allows in-demand venues to take control over the sale of their prime time reservations.
+                </h2>
                 <p class="text-[15px] leading-[normal] mt-[20px]">Reservations are sold through a network of vetted and
                     reputable hospitality concierges, eliminating bots, fake reservations and last minute cancellations.
                     All while helping fill dining rooms during non-peak hours.</p>
@@ -610,11 +611,12 @@
             <div class="text-center relative px-[4px] py-[0] h-auto">
                 <div class="rounded-[5px] border-[0.3px] border-[solid] border-[#000] bg-[#FFF] pt-[37px] px-[14px] pb-[26px] rounded-[5px]
                      ">
-                    <h3 class="text-[18px] font-medium leading-[normal] font-[Inter]">"PRIMA has revolutionized our
-                        reservation system."</h3>
-                    <p class="text-[16px] font-light leading-[normal] pt-[36px]">We now fill prime-time tables
-                        effortlessly and have seen a significant increase in profits.</p>
-                    <p class="text-[16px] font-normal leading-[normal] pt-[49px]">Nikolas E. - Restaurant Owner</p>
+                    <p class="text-[16px] font-light leading-[normal] text-left">
+                        "We've been waiting for a solution like PRIMA for a while to help book coveted reservations for
+                        our community. I'm very excited to begin using the platform."
+                    </p>
+
+                    <p class="text-[16px] font-normal leading-[normal] pt-[49px]">Jorge Bargioni (Murano Portofino)</p>
                     <p class="pt-[14px] text-[#DE6520] text-[20.193px] leading-[normal]">★★★★★</p>
                 </div>
             </div>
@@ -623,11 +625,16 @@
             <div class="text-center relative px-[4px] py-[0] h-auto">
                 <div class="rounded-[5px] border-[0.3px] border-[solid] border-[#000] bg-[#FFF] pt-[37px] px-[14px] pb-[26px] rounded-[5px]
                      ">
-                    <h3 class="text-[18px] font-medium leading-[normal] font-[Inter]">"PRIMA has revolutionized our
-                        reservation system."</h3>
-                    <p class="text-[16px] font-light leading-[normal] pt-[36px]">We now fill prime-time tables
-                        effortlessly and have seen a significant increase in profits.</p>
-                    <p class="text-[16px] font-normal leading-[normal] pt-[49px]">Nikolas E. - Restaurant Owner</p>
+                    <p class="text-[16px] font-light leading-[normal] text-left">
+                        "PRIMA will make it much easier for us to book reservations for our residents. We consistently
+                        receive many requests that we cannot handle because reservations at top restaurants around the
+                        city are impossible to book. We're excited to partner with PRIMA to make this process much
+                        easier."
+                    </p>
+
+                    <p class="text-[16px] font-normal leading-[normal] pt-[49px]">
+                        Edgar Gonzalez (Continuum On South Beach)
+                    </p>
                     <p class="pt-[14px] text-[#DE6520] text-[20.193px] leading-[normal]">★★★★★</p>
                 </div>
             </div>
@@ -636,11 +643,13 @@
             <div class="text-center relative px-[4px] py-[0] h-auto">
                 <div class="rounded-[5px] border-[0.3px] border-[solid] border-[#000] bg-[#FFF] pt-[37px] px-[14px] pb-[26px] rounded-[5px]
                      ">
-                    <h3 class="text-[18px] font-medium leading-[normal] font-[Inter]">"PRIMA has revolutionized our
-                        reservation system."</h3>
-                    <p class="text-[16px] font-light leading-[normal] pt-[36px]">We now fill prime-time tables
-                        effortlessly and have seen a significant increase in profits.</p>
-                    <p class="text-[16px] font-normal leading-[normal] pt-[49px]">Nikolas E. - Restaurant Owner</p>
+                    <p class="text-[16px] font-light leading-[normal] text-left">
+                        PRIMA comes at the right time to help us deal with the onslaught of bots, fake reservations and
+                        cancellations.
+                    </p>
+                    <p class="text-[16px] font-normal leading-[normal] pt-[49px]">
+                        Adam Borden (Groot Hospitality Group)
+                    </p>
                     <p class="pt-[14px] text-[#DE6520] text-[20.193px] leading-[normal]">★★★★★</p>
                 </div>
             </div>
@@ -649,41 +658,19 @@
             <div class="text-center relative px-[4px] py-[0] h-auto">
                 <div class="rounded-[5px] border-[0.3px] border-[solid] border-[#000] bg-[#FFF] pt-[37px] px-[14px] pb-[26px] rounded-[5px]
                      ">
-                    <h3 class="text-[18px] font-medium leading-[normal] font-[Inter]">"PRIMA has revolutionized our
-                        reservation system."</h3>
-                    <p class="text-[16px] font-light leading-[normal] pt-[36px]">We now fill prime-time tables
-                        effortlessly and have seen a significant increase in profits.</p>
-                    <p class="text-[16px] font-normal leading-[normal] pt-[49px]">Nikolas E. - Restaurant Owner</p>
+                    <p class="text-[16px] font-light leading-[normal] text-left">
+                        "Our concierge team is excited to use PRIMA to help book reservations for our guests as it is
+                        often very difficult to do so during the busy time of the season. We're excited to partner with
+                        PRIMA to also help fill our dining room."
+                    </p>
+                    <p class="text-[16px] font-normal leading-[normal] pt-[49px]">
+                        Iria Urgell (Aguamadera Hotel)
+                    </p>
                     <p class="pt-[14px] text-[#DE6520] text-[20.193px] leading-[normal]">★★★★★</p>
                 </div>
             </div>
             <!--- Section10 Item End --->
-            <!--- Section10 Item --->
-            <div class="text-center relative px-[4px] py-[0] h-auto">
-                <div class="rounded-[5px] border-[0.3px] border-[solid] border-[#000] bg-[#FFF] pt-[37px] px-[14px] pb-[26px] rounded-[5px]
-                     ">
-                    <h3 class="text-[18px] font-medium leading-[normal] font-[Inter]">"PRIMA has revolutionized our
-                        reservation system."</h3>
-                    <p class="text-[16px] font-light leading-[normal] pt-[36px]">We now fill prime-time tables
-                        effortlessly and have seen a significant increase in profits.</p>
-                    <p class="text-[16px] font-normal leading-[normal] pt-[49px]">Nikolas E. - Restaurant Owner</p>
-                    <p class="pt-[14px] text-[#DE6520] text-[20.193px] leading-[normal]">★★★★★</p>
-                </div>
-            </div>
-            <!--- Section10 Item End --->
-            <!--- Section10 Item --->
-            <div class="text-center relative px-[4px] py-[0] h-auto">
-                <div class="rounded-[5px] border-[0.3px] border-[solid] border-[#000] bg-[#FFF] pt-[37px] px-[14px] pb-[26px] rounded-[5px]
-                     ">
-                    <h3 class="text-[18px] font-medium leading-[normal] font-[Inter]">"PRIMA has revolutionized our
-                        reservation system."</h3>
-                    <p class="text-[16px] font-light leading-[normal] pt-[36px]">We now fill prime-time tables
-                        effortlessly and have seen a significant increase in profits.</p>
-                    <p class="text-[16px] font-normal leading-[normal] pt-[49px]">Nikolas E. - Restaurant Owner</p>
-                    <p class="pt-[14px] text-[#DE6520] text-[20.193px] leading-[normal]">★★★★★</p>
-                </div>
-            </div>
-            <!--- Section10 Item End --->
+
         </div>
     </div>
 </section>
@@ -693,7 +680,8 @@
     <div class="max-w-full pl-[00px] pr-[00px] mx-[auto] w-full md:max-w-[967px]  md:my-[0] md:pl-[50px] md:pr-[50px]">
         <div class="flex items-center flex-wrap">
             <div class="w-full md:w-7/12">
-                <img src="/assets/images/image5.png" width="auto" height="auto" loading="lazy" alt="logo" class="block">
+                <img src="/assets/images/restaurant.jpeg" width="auto" height="auto" loading="lazy" alt="logo"
+                     class="block">
             </div>
             <div class="w-full pt-[30px] pl-[30px] pr-[30px] md:pt-[0px] md:pr-[0px] md:pl-[63px] md:w-5/12">
                 <h2 class="text-[28.177px] font-normal leading-[115.8%] text-center md:text-left">Join PRIMA</h2>
@@ -731,11 +719,17 @@
     </div>
 </footer>
 <!--- Footer End --->
-<x-filament::modal id="contact" width="2xl">
-    <livewire:talk-to-prima />
+<x-filament::modal id="contact" width="2xl" :close-button="true">
+    <x-slot name="heading">
+        Talk to PRIMA
+    </x-slot>
+    <livewire:talk-to-prima/>
 </x-filament::modal>
 
-<x-filament::modal id="video" width="7xl">
+<x-filament::modal id="video" width="7xl" :close-button="true">
+    <x-slot name="heading">
+        Watch Our Explainer
+    </x-slot>
     <iframe
             x-ref="iframe"
             src="https://www.youtube.com/embed/pxyHz-RjHW0?si=Ce3xU7A0J3Fg7WR6"
