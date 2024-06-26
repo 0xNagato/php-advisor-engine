@@ -167,12 +167,9 @@
     </div>
 </section>
 <!--- Section3 End --->
-<section class="pt-[20px] px-[0] pb-[18px] md:pt-[30px] md:pb-[48px]">
-    <div
-            class="max-w-full pl-[20px] pr-[20px] mx-[auto] w-full  md:my-[0] md:pl-[50px] md:pr-[50px] md:max-w-[1043px]">
-        <img src="/assets/images/restaurant2.jpeg" width="auto" height="auto" loading="lazy"
-             alt="Restaurant" class="block">
-    </div>
+<section class="max-w-4xl mx-auto">
+    <img src="/assets/images/restaurant2.jpeg" width="auto" height="auto" loading="lazy"
+         alt="Restaurant" class="block">
 </section>
 <!--- Section4 --->
 <section class="pt-[50px] md:pt-[30px] px-[0] pb-[20px] md:pb-[50px]">
@@ -786,19 +783,21 @@
     </div>
 </footer>
 <!--- Footer End --->
-<x-filament::modal id="contact" width="2xl" :close-button="true">
-    <x-slot name="heading">
-        Talk to PRIMA
-    </x-slot>
-    <livewire:talk-to-prima />
-</x-filament::modal>
+<div class="h-0">
+    <x-filament::modal id="contact" width="2xl" :close-button="true">
+        <x-slot name="heading">
+            Talk to PRIMA
+        </x-slot>
+        <livewire:talk-to-prima />
+    </x-filament::modal>
 
-<x-filament::modal id="video" width="7xl" :close-button="true">
-    <x-slot name="heading">
-        Watch Our Explainer
-    </x-slot>
-    <div class="youtube-player-modal" data-plyr-provider="youtube" data-plyr-embed-id="pxyHz-RjHW0"></div>
-</x-filament::modal>
+    <x-filament::modal id="video" width="7xl" :close-button="true">
+        <x-slot name="heading">
+            Watch Our Explainer
+        </x-slot>
+        <div class="youtube-player-modal" data-plyr-provider="youtube" data-plyr-embed-id="pxyHz-RjHW0"></div>
+    </x-filament::modal>
+</div>
 
 @livewire('notifications')
 @filamentScripts
