@@ -27,6 +27,23 @@
 </head>
 
 <body x-data="modalHandler">
+{{--Modals--}}
+<div class="h-0">
+    <x-filament::modal id="contact" width="2xl" :close-button="true">
+        <x-slot name="heading">
+            Talk to PRIMA
+        </x-slot>
+        <livewire:talk-to-prima />
+    </x-filament::modal>
+
+    <x-filament::modal id="video" width="7xl" :close-button="true">
+        <x-slot name="heading">
+            Watch Our Explainer
+        </x-slot>
+        <div class="youtube-player-modal" data-plyr-provider="youtube" data-plyr-embed-id="pxyHz-RjHW0"></div>
+    </x-filament::modal>
+</div>
+
 <!--- header --->
 <header class="sticky top-0 z-50">
     <!--- announcement bar --->
@@ -783,21 +800,6 @@
     </div>
 </footer>
 <!--- Footer End --->
-<div class="h-0">
-    <x-filament::modal id="contact" width="2xl" :close-button="true">
-        <x-slot name="heading">
-            Talk to PRIMA
-        </x-slot>
-        <livewire:talk-to-prima />
-    </x-filament::modal>
-
-    <x-filament::modal id="video" width="7xl" :close-button="true">
-        <x-slot name="heading">
-            Watch Our Explainer
-        </x-slot>
-        <div class="youtube-player-modal" data-plyr-provider="youtube" data-plyr-embed-id="pxyHz-RjHW0"></div>
-    </x-filament::modal>
-</div>
 
 @livewire('notifications')
 @filamentScripts
