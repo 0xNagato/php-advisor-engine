@@ -102,12 +102,10 @@
 </section>
 <!--- Section1 End --->
 <section class="pt-[20px] px-[0] pb-[18px] md:pt-[30px] md:pb-[48px]">
-    <div
-            class="max-w-full pl-[20px] pr-[20px] mx-[auto] w-full  md:my-[0] md:pl-[50px] md:pr-[50px] md:max-w-[1043px] youtube-container">
-        <iframe src="https://www.youtube.com/embed/pxyHz-RjHW0?enablejsapi=1&controls=0&modestbranding=1"
-                class="youtube-video" title="YouTube video player"
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+    <div class="max-w-4xl mx-[auto] w-full youtube-container">
+
+        <div class="youtube-player-main" data-plyr-provider="youtube" data-plyr-embed-id="pxyHz-RjHW0"></div>
+
     </div>
 </section>
 <!--- Section2 --->
@@ -794,58 +792,13 @@
     <x-slot name="heading">
         Watch Our Explainer
     </x-slot>
-    <div class="youtube-container">
-        <iframe x-ref="videoIframe" id="youtubeIframe" src="https://www.youtube.com/embed/pxyHz-RjHW0?enablejsapi=1"
-                class="youtube-video" title="YouTube video player"
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
-    </div>
+    <div class="youtube-player-modal" data-plyr-provider="youtube" data-plyr-embed-id="pxyHz-RjHW0"></div>
 </x-filament::modal>
 
 @livewire('notifications')
 @filamentScripts
 @vite('resources/js/app.js')
 @vite('resources/js/web.js')
-
-<script>
-  document.addEventListener('alpine:init', () => {
-    Alpine.data('modalHandler', () => ({
-      player: null,
-
-      init() {
-        console.log('modalHandler initialized');
-
-        // Initialize YouTube player when the API is ready
-        window.onYouTubeIframeAPIReady = () => {
-          this.player = new YT.Player('youtubeIframe', {
-            events: {
-              'onReady': this.onPlayerReady,
-            },
-          });
-        };
-
-        // Listen for the close-modal event and call pauseVideo if the video modal is closed
-        window.addEventListener('close-modal', (event) => {
-          if (event.detail.id === 'video') {
-            this.pauseVideo();
-          }
-        });
-      },
-
-      onPlayerReady(event) {
-        console.log('YouTube Player is ready');
-      },
-
-      pauseVideo() {
-        if (this.player) {
-          this.player.pauseVideo();
-        }
-      },
-    }));
-  });
-</script>
-
-
 </body>
 
 </html>

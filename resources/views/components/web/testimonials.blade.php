@@ -62,4 +62,4 @@
             <div class="swiper-pagination"></div>
         </div>
     </div>
-</section>}
+</section>

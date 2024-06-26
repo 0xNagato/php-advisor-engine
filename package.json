@@ -26,6 +26,7 @@
         "vite": "^5.1.6"
     },
     "dependencies": {
+        "plyr": "^3.7.8",
         "puppeteer": "^22.11.0",
         "swiper": "^11.1.4"
     }

@@ -5,6 +5,18 @@ import { Pagination } from 'swiper/modules';
 import 'swiper/css';
 import 'swiper/css/pagination';
 
+// Import Plyr
+import Plyr from 'plyr';
+// Import Plyr styles
+import 'plyr/dist/plyr.css';
+
+// Initialize Plyr for the main video
+const mainPlayer = new Plyr('.youtube-player-main', {
+  youtube: {
+    noCookie: true,
+  },
+});
+
 const swiper = new Swiper('.testimonial-swiper', {
   modules: [Pagination],
   loop: true,
@@ -35,6 +47,36 @@ const swiper = new Swiper('.testimonial-swiper', {
     },
 
   },
+});
+
+document.addEventListener('alpine:init', () => {
+  Alpine.data('modalHandler', () => ({
+    player: null,
+
+    init() {
+      console.log('modalHandler initialized');
+
+      // Initialize Plyr player
+      this.player = new Plyr('.youtube-player-modal', {
+        youtube: {
+          noCookie: true,
+        },
+      });
+
+      // Listen for the close-modal event and call pauseVideo if the video modal is closed
+      window.addEventListener('close-modal', (event) => {
+        if (event.detail.id === 'video') {
+          this.pauseVideo();
+        }
+      });
+    },
+
+    pauseVideo() {
+      if (this.player) {
+        this.player.pause();
+      }
+    },
+  }));
 });
 
 
