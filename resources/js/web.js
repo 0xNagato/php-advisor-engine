@@ -1,9 +1,10 @@
 // import Swiper JS
 import Swiper from 'swiper';
-import { Pagination } from 'swiper/modules';
+import { Autoplay, Pagination } from 'swiper/modules';
 // import Swiper styles
 import 'swiper/css';
 import 'swiper/css/pagination';
+import 'swiper/css/autoplay';
 
 // Import Plyr
 import Plyr from 'plyr';
@@ -18,9 +19,8 @@ const mainPlayer = new Plyr('.youtube-player-main', {
 });
 mainPlayer.poster = '/assets/images/yt-thumbnail.png';
 
-
 const swiper = new Swiper('.testimonial-swiper', {
-  modules: [Pagination],
+  modules: [Pagination, Autoplay],
   loop: true,
   centeredSlides: true,
   autoplay: {
