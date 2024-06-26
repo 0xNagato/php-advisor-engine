@@ -58,7 +58,8 @@
                     <img src="/assets/images/icon-menu.png" width="25" height="auto" loading="lazy"
                          alt="icon-menu" class="block">
                 </div>
-                <div class="p-[30px] border-b-[.5px] border-[rgba(0,_0,_0,_0.50)] bg-[#F9F9F9] absolute top-[100%] left-[0] right-[0] md:hidden">
+                <div class="p-[30px] border-b-[.5px] border-[rgba(0,_0,_0,_0.50)] bg-[#F9F9F9] absolute top-[100%] left-[0] right-[0] md:hidden"
+                     style="display:none">
                     @auth()
                         <a href="/platform/"
                            class="block text-[#5249C4] font-semibold text-[14px] leading-[normal] py-[10px]">Dashboard</a>

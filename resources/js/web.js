@@ -24,7 +24,7 @@ const swiper = new Swiper('.testimonial-swiper', {
   loop: true,
   centeredSlides: true,
   autoplay: {
-    delay: 2500,
+    delay: 4000,
     disableOnInteraction: false,
   },
 
@@ -258,6 +258,4 @@ $(document).ready(function() {
     $(this).next().slideToggle();
   });
   /* menu js code end */
-
-
 });
