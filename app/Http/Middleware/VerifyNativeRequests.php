@@ -10,7 +10,6 @@ class VerifyNativeRequests
 {
     /**
      * Handle an incoming request.
-     *
      */
     public function handle(Request $request, Closure $next): Response
     {

@@ -17,6 +17,13 @@ class RedirectIfAuthenticated
      */
     public function handle(Request $request, Closure $next, string ...$guards): Response
     {
+        if (
+            $request->header('User-Agent') === 'PrimaApp/1.0' &&
+            $request->header('Prima-Key') === config('app.native_key')
+        ) {
+            return $next($request);
+        }
+
         $guards = blank($guards) ? [null] : $guards;
 
         foreach ($guards as $guard) {
