@@ -21,6 +21,7 @@
     <style>
         :root {
             --plyr-color-main: #5046E5;
+            --plyr-video-background: #FFF;
         }
     </style>
 </head>
@@ -30,10 +31,8 @@
 <header class="sticky top-0 z-50">
     <!--- announcement bar --->
     <div class="bg-indigo-600">
-        <div
-                class="max-w-full pl-[30px] pr-[30px] mx-[auto] w-full md:max-w-[1035px]  md:my-[0] md:pl-[50px] md:pr-[50px]">
-            <p
-                    class="text-[11px] px-[0] py-[10px] md:text-sm not-italic font-semibold text-center text-white leading-[normal] px-[0] md:py-[7px]">
+        <div class="max-w-full pl-[30px] pr-[30px] mx-[auto] w-full md:max-w-[1035px]  md:my-[0] md:pl-[50px] md:pr-[50px]">
+            <p class="text-[11px] px-[0] py-[10px] md:text-sm not-italic font-semibold text-center text-white leading-[normal] px-[0] md:py-[7px]">
                 Launching in Miami, Las Vegas, New York And Europe!
             </p>
         </div>
