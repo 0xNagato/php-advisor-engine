@@ -9,6 +9,7 @@
 .swiper {
     --swiper-navigation-color: #4e46dc !important;
     --swiper-pagination-color: #4e46dc !important;
+    --plyr-color-main: #4e46dc;
 }
 
 .youtube-video {

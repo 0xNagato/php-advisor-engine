@@ -16,6 +16,8 @@ const mainPlayer = new Plyr('.youtube-player-main', {
     noCookie: true,
   },
 });
+mainPlayer.poster = '/assets/images/yt-thumbnail.png';
+
 
 const swiper = new Swiper('.testimonial-swiper', {
   modules: [Pagination],
@@ -62,6 +64,8 @@ document.addEventListener('alpine:init', () => {
           noCookie: true,
         },
       });
+
+      this.player.poster = '/assets/images/yt-thumbnail.png';
 
       // Listen for the close-modal event and call pauseVideo if the video modal is closed
       window.addEventListener('close-modal', (event) => {
