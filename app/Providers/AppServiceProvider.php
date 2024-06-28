@@ -10,6 +10,7 @@ use Filament\Pages\Page;
 use Filament\Support\Colors\Color;
 use Filament\Support\Facades\FilamentColor;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Validation\ValidationException;
@@ -62,6 +63,22 @@ class AppServiceProvider extends ServiceProvider
 
         Carbon::macro('inAppTimezone', fn (): Carbon => $this->tz(config('app.default_timezone')));
         Carbon::macro('inUserTimezone', fn (): Carbon => $this->tz(auth()->user()?->timezone ?? config('app.default_timezone')));
+
+        Blade::directive('mobileapp', static function ($expression) {
+            return '<?php if(isPrimaApp()): ?>';
+        });
+
+        Blade::directive('endmobileapp', static function ($expression) {
+            return '<?php endif; ?>';
+        });
+
+        Blade::directive('nonmobileapp', static function ($expression) {
+            return '<?php if(!isPrimaApp()): ?>';
+        });
+
+        Blade::directive('endnonmobileapp', static function ($expression) {
+            return '<?php endif; ?>';
+        });
 
         Model::preventLazyLoading(! $this->app->isProduction());
     }
