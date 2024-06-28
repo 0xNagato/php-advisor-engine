@@ -63,11 +63,11 @@ class AdminPanelProvider extends PanelProvider
             ])
             ->userMenuItems([
                 'profile' => MenuItem::make()
-                    ->url('/my-settings'),
+                    ->url('/platform/my-settings'),
                 'change-password' => MenuItem::make()
                     ->label('Change Password')
                     ->icon('heroicon-o-lock-closed')
-                    ->url('/change-password'),
+                    ->url('/platform/change-password'),
             ])
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\\Filament\\Resources')
             ->discoverPages(in: app_path('Filament/Pages'), for: 'App\\Filament\\Pages')
