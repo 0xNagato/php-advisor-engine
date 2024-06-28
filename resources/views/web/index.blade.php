@@ -55,19 +55,38 @@
         </div>
     </div>
     <!--- announcement bar end --->
-    <div class="border-b-[.5px] [border-bottom-color:rgba(0,_0,_0,_0.50)] bg-[#F9F9F9] relative">
+    <div class="border-b bg-[#F9F9F9] relative">
         <div class="pl-[40px] pr-[65px] md:max-w-[1035px] mx-[auto] md:my-[0] md:pl-[50px] md:pr-[50px] w-full">
             <div class="flex items-center justify-between">
                 <div class="max-w-[72px] md:max-w-[75px]">
                     <a href="#" class="block pl-[0] pr-[0] py-[21px] md:pl-[0] md:pr-[0] md:py-[13px]">
-                        <img src="/assets/images/logo.png" width="auto" height="auto" loading="lazy"
-                             alt="logo" class="block">
+                        <img src="/assets/images/logo.png" width="auto" height="auto" loading="lazy" alt="logo"
+                             class="block">
                     </a>
                 </div>
-                <div class="header_button">
-                    <a href="#" @click.prevent="$dispatch('open-modal', { id: 'contact' })"
-                       class="leading-[normal] text-[#5249C4] rounded-[4px] border-[1px] border-[solid] border-[#5249C4]  px-[10px] py-[7px] text-[10px] md:px-[24px] md:py-[5px] md:text-[14px] [transition:all_.5s_ease] hover:bg-[#5046E5] hover:text-[#fff]  font-semibold">Talk
-                        to PRIMA →</a>
+                <div class="header_button space-x-1">
+                    @auth()
+                        {{-- Welcome message to first name --}}
+                        <span class="hidden md:inline-block text-sm font-semibold">Welcome back, {{ auth()->user()->first_name }}</span>
+
+                        <a href="/platform/"
+                           class="leading-[normal] hidden md:inline-block text-[#5249C4] rounded-[4px] border-[1px] border-[solid] border-[#5249C4]  px-[10px] py-[7px] text-[10px] md:px-[24px] md:py-[5px] md:text-[14px] [transition:all_.5s_ease] hover:bg-[#5046E5] hover:text-[#fff]  font-semibold">
+                            Dashboard
+                        </a>
+
+                        <form action="/platform/logout" method="POST" class="inline-block">
+                            @csrf
+                            <button type="submit"
+                                    class="leading-[normal] hidden md:inline-block text-[#5249C4] rounded-[4px] border-[1px] border-[solid] border-[#5249C4] px-[10px] py-[7px] text-[10px] md:px-[24px] md:py-[5px] md:text-[14px] [transition:all_.5s_ease] hover:bg-[#5046E5] hover:text-[#fff] font-semibold">
+                                Sign Out
+                            </button>
+                        </form>
+                    @else
+                        <a class="leading-[normal] hidden md:inline-block text-[#5249C4] rounded-[4px] border-[1px] border-[solid] border-[#5249C4]  px-[10px] py-[7px] text-[10px] md:px-[24px] md:py-[5px] md:text-[14px] [transition:all_.5s_ease] hover:bg-[#5046E5] hover:text-[#fff]  font-semibold"
+                           href="/platform/login">
+                            Login
+                        </a>
+                    @endauth
                 </div>
                 <div class="menu_trigger_js absolute right-[20px] top-[17px] md:hidden">
                     <img src="/assets/images/icon-close.png" width="20" height="auto" loading="lazy"
@@ -75,11 +94,18 @@
                     <img src="/assets/images/icon-menu.png" width="25" height="auto" loading="lazy"
                          alt="icon-menu" class="block">
                 </div>
-                <div class="p-[30px] border-b-[.5px] border-[rgba(0,_0,_0,_0.50)] bg-[#F9F9F9] absolute top-[100%] left-[0] right-[0] md:hidden"
+                <div class="p-6 border-b bg-[#F9F9F9] absolute top-[100%] left-[0] right-[0] md:hidden"
                      style="display:none">
                     @auth()
                         <a href="/platform/"
                            class="block text-[#5249C4] font-semibold text-[14px] leading-[normal] py-[10px]">Dashboard</a>
+                        <form action="/platform/logout" method="POST" class="inline-block">
+                            @csrf
+                            <button type="submit"
+                                    class="block text-[#5249C4] font-semibold text-[14px] leading-[normal] py-[10px]">
+                                Sign Out
+                            </button>
+                        </form>
                     @else
                         <a class="block text-[#5249C4] font-semibold text-[14px] leading-[normal] py-[10px]"
                            href="/platform/login">Login</a>
