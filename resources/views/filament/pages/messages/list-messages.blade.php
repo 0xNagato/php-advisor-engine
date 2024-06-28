@@ -14,6 +14,7 @@
                 We are excited to have you as a part of our team when PRIMA fully launches. Restaurants are being
                 onboarded now and we expect to be fully functioning in the coming weeks.
             </p>
+            @nonmobileapp
             <p>
                 So that you may fully experience the potential of PRIMA, we have created a demo concierge account
                 for you to explore.
@@ -24,10 +25,12 @@
                     try out the Reservation Hub as well as other features of PRIMA.
                 </p>
                 <x-filament::button tag="a"
-                    href="https://demo.primavip.co/login?email=concierge@primavip.co&password=demo2024" target="_blank">
+                                    href="https://demo.primavip.co/login?email=concierge@primavip.co&password=demo2024"
+                                    target="_blank">
                     Access Demo Account
                 </x-filament::button>
             @endunless
+            @endnonmobileapp
 
             <div>
                 <p>Welcome aboard!</p>
@@ -44,7 +47,7 @@
                         <div class="flex flex-row items-center">
                             <div class="w-2/12 sm:w-1/12 mr-2">
                                 <x-filament::avatar src="{{ $message->announcement->sender->getFilamentAvatarUrl() }}"
-                                    alt="User Avatar" size="w-12 h-12" />
+                                                    alt="User Avatar" size="w-12 h-12" />
                             </div>
 
                             <div class="w-10/12">
@@ -54,7 +57,7 @@
                                     </span>
                                     @if (is_null($message->read_at))
                                         <x-heroicon-s-information-circle
-                                            class="h-4 w-4 -mt-0.5 text-xs text-green-600" />
+                                                class="h-4 w-4 -mt-0.5 text-xs text-green-600" />
                                     @endif
                                     <span class="grow self-start text-xs text-right">
                                         {{ $message->created_at->format('M j h:i A') }}
