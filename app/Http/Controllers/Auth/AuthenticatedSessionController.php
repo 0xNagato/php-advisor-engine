@@ -17,6 +17,10 @@ class AuthenticatedSessionController extends Controller
      */
     public function store(LoginRequest $request): JsonResponse
     {
+        if (isPrimaApp()) {
+            $request->merge(['remember' => true]);
+        }
+
         $request->authenticate();
 
         $request->session()->regenerate();
