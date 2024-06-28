@@ -114,6 +114,7 @@
                                 <x-gmdi-qr-code class="w-6 h-6 font-semibold" />
                                 <div>QR Code</div>
                             </button>
+                            @nonmobileapp
                             <button
                                     :class="{ 'bg-indigo-600 text-white': tab === 'collectPayment', 'bg-gray-100': tab !== 'collectPayment' }"
                                     @click="tab = 'collectPayment'"
@@ -121,12 +122,14 @@
                                 <x-gmdi-credit-card class="w-6 h-6 font-semibold text-center" />
                                 <div>Collect CC</div>
                             </button>
+                            @endnonmobileapp
                         </div>
                     </div>
                 @else
                     <div class="-mt-6"></div>
                 @endif
 
+                @nonmobileapp
                 <div x-show="tab === 'collectPayment'" class="mt-6">
                     <!-- @todo Refactor this to a separate component -->
 
@@ -230,7 +233,8 @@
                         </form>
                     </div>
                 </div>
-
+                @endnonmobileapp
+                    
                 <div x-show="tab === 'smsPayment'" class="flex flex-col gap-4 mt-4">
                     <!-- SMS Payment Link Tab Content -->
                     <livewire:booking.s-m-s-booking-form :booking="$booking" :booking-url="$bookingUrl" />
