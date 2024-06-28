@@ -31,8 +31,11 @@ class AuthenticatedSessionController extends Controller
                     'name' => $region->name,
                 ]),
                 'user' => [
+                    'id' => $user->id,
+                    'email' => $user->email,
                     'name' => $user->name,
                     'avatar' => $user->avatar,
+                    'timezone' => $user->timezone,
                 ],
             ],
         ]);
