@@ -41,9 +41,17 @@
 
     @if(request()->route()->uri() === 'platform/login')
         <div class="items-end justify-center text-sm text-center mt-4">
-            <a class="font-bold " href="{{ route('restaurant.login') }}">Restaurant Contact Login</a>
+            <a class="font-bold " href="{{ route('restaurant.login') }}">Venue Admin Login</a>
         </div>
     @endif
+
+    <script>
+      if (window.ReactNativeWebView) {
+        window.ReactNativeWebView.postMessage(JSON.stringify({
+          route: '{{ request()->route()->uri() }}',
+        }));
+      }
+    </script>
 
     <div class="flex items-end justify-center text-sm text-center mt-4">
         &copy; {{ date('Y') }} {{ config('app.name', 'PRIMA VIP') }}. All rights reserved.
