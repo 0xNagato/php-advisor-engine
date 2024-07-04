@@ -532,16 +532,16 @@
         },
         {
             "name": "amphp/pipeline",
-            "version": "v1.2.0",
+            "version": "v1.2.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/amphp/pipeline.git",
-                "reference": "f1c2ce35d27ae86ead018adb803eccca7421dd9b"
+                "reference": "66c095673aa5b6e689e63b52d19e577459129ab3"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/amphp/pipeline/zipball/f1c2ce35d27ae86ead018adb803eccca7421dd9b",
-                "reference": "f1c2ce35d27ae86ead018adb803eccca7421dd9b",
+                "url": "https://api.github.com/repos/amphp/pipeline/zipball/66c095673aa5b6e689e63b52d19e577459129ab3",
+                "reference": "66c095673aa5b6e689e63b52d19e577459129ab3",
                 "shasum": ""
             },
             "require": {
@@ -587,7 +587,7 @@
             ],
             "support": {
                 "issues": "https://github.com/amphp/pipeline/issues",
-                "source": "https://github.com/amphp/pipeline/tree/v1.2.0"
+                "source": "https://github.com/amphp/pipeline/tree/v1.2.1"
             },
             "funding": [
                 {
@@ -595,7 +595,7 @@
                     "type": "github"
                 }
             ],
-            "time": "2024-03-10T14:48:16+00:00"
+            "time": "2024-07-04T00:56:47+00:00"
         },
         {
             "name": "amphp/process",
@@ -1266,16 +1266,16 @@
         },
         {
             "name": "aws/aws-sdk-php",
-            "version": "3.315.4",
+            "version": "3.315.5",
             "source": {
                 "type": "git",
                 "url": "https://github.com/aws/aws-sdk-php.git",
-                "reference": "8d2cf34e22262b983ce3d7e38d11667c5792b93f"
+                "reference": "3e6d619d45d8e1a8681dd58de61ddfe90e8341e6"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/aws/aws-sdk-php/zipball/8d2cf34e22262b983ce3d7e38d11667c5792b93f",
-                "reference": "8d2cf34e22262b983ce3d7e38d11667c5792b93f",
+                "url": "https://api.github.com/repos/aws/aws-sdk-php/zipball/3e6d619d45d8e1a8681dd58de61ddfe90e8341e6",
+                "reference": "3e6d619d45d8e1a8681dd58de61ddfe90e8341e6",
                 "shasum": ""
             },
             "require": {
@@ -1355,9 +1355,9 @@
             "support": {
                 "forum": "https://forums.aws.amazon.com/forum.jspa?forumID=80",
                 "issues": "https://github.com/aws/aws-sdk-php/issues",
-                "source": "https://github.com/aws/aws-sdk-php/tree/3.315.4"
+                "source": "https://github.com/aws/aws-sdk-php/tree/3.315.5"
             },
-            "time": "2024-07-02T18:09:03+00:00"
+            "time": "2024-07-03T18:12:51+00:00"
         },
         {
             "name": "bezhansalleh/filament-shield",
@@ -13996,16 +13996,16 @@
         },
         {
             "name": "vonage/client-core",
-            "version": "4.8.1",
+            "version": "4.8.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/Vonage/vonage-php-sdk-core.git",
-                "reference": "a8b0c057dac12e20564cc76e4ac42af74b539ce0"
+                "reference": "2b0131c60b4f1a9beca7e095800ad9efb7d8e6b2"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/Vonage/vonage-php-sdk-core/zipball/a8b0c057dac12e20564cc76e4ac42af74b539ce0",
-                "reference": "a8b0c057dac12e20564cc76e4ac42af74b539ce0",
+                "url": "https://api.github.com/repos/Vonage/vonage-php-sdk-core/zipball/2b0131c60b4f1a9beca7e095800ad9efb7d8e6b2",
+                "reference": "2b0131c60b4f1a9beca7e095800ad9efb7d8e6b2",
                 "shasum": ""
             },
             "require": {
@@ -14056,7 +14056,7 @@
                 "issues": "https://github.com/Vonage/vonage-php-sdk-core/issues",
                 "source": "https://github.com/Vonage/vonage-php-sdk-core"
             },
-            "time": "2024-07-02T13:42:09+00:00"
+            "time": "2024-07-04T10:18:25+00:00"
         },
         {
             "name": "vonage/jwt",
