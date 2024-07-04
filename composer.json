@@ -26,7 +26,6 @@
         "laravel-notification-channels/twilio": "^3.3",
         "laravel/framework": "^11.0",
         "laravel/horizon": "^5.23",
-        "laravel/octane": "^2.5",
         "laravel/pail": "^1.1",
         "laravel/pulse": "^1.0@beta",
         "laravel/sanctum": "^4.0",
