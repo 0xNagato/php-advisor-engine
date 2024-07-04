@@ -15,6 +15,8 @@ Route::get('/', static function () {
     return view('web.index');
 });
 
+Route::get('/static', static fn (Request $request) => Response::json(['status' => true]))->name('static');
+
 Route::redirect('/login', '/platform/login');
 
 Route::get('/invoice/download/{uuid}', DownloadInvoiceController::class)
