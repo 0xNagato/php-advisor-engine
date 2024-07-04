@@ -43,20 +43,16 @@
     ];
 @endphp
 
-<section class="pt-8 px-0 pb-10 md:pt-20 md:pb-16">
+<section class="px-0 pb-10 md:pb-16">
     <div class="max-w-full px-5 mx-auto w-full md:max-w-screen-xl">
         <div class="pb-8 text-center">
-            <p class="text-sm leading-normal">
-                <span class="text-orange-500">★★★★★</span> Rated 5/5 stars by our
-                <a href="#" class="underline">partners</a>
-            </p>
             <h2 class="text-2xl leading-tight pt-8">What Our Partners Say</h2>
             <p class="text-sm leading-normal pt-4">Success Stories from Restaurants & Concierges</p>
         </div>
         <div class="swiper testimonial-swiper">
             <div class="swiper-wrapper">
                 @foreach ($testimonials as $testimonial)
-                    <x-web.testimonial-item :testimonial="$testimonial" class="swiper-slide mb-8" />
+                    <x-web.testimonial-item :testimonial="$testimonial" class="swiper-slide mb-8"/>
                 @endforeach
             </div>
             <div class="swiper-pagination"></div>
