@@ -23,3 +23,7 @@ yarn-error.log
 /prima.test.pem
 /prima.test-key.pem
 .php-cs-fixer.cache
+
+/caddy
+frankenphp
+frankenphp-worker.php

@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "c67d302553ce0b0a7e647902bab63adf",
+    "content-hash": "f6db4e830425f7930fb657a8866134ea",
     "packages": [
         {
             "name": "akaunting/laravel-money",
@@ -5190,6 +5190,96 @@
                 "source": "https://github.com/laravel/horizon/tree/v5.24.5"
             },
             "time": "2024-05-31T16:18:41+00:00"
+        },
+        {
+            "name": "laravel/octane",
+            "version": "v2.5.1",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/laravel/octane.git",
+                "reference": "21b319dd699c20821554a8f806c2487c6cb2cf59"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/laravel/octane/zipball/21b319dd699c20821554a8f806c2487c6cb2cf59",
+                "reference": "21b319dd699c20821554a8f806c2487c6cb2cf59",
+                "shasum": ""
+            },
+            "require": {
+                "laminas/laminas-diactoros": "^3.0",
+                "laravel/framework": "^10.10.1|^11.0",
+                "laravel/prompts": "^0.1.24",
+                "laravel/serializable-closure": "^1.3.0",
+                "nesbot/carbon": "^2.66.0|^3.0",
+                "php": "^8.1.0",
+                "symfony/console": "^6.0|^7.0",
+                "symfony/psr-http-message-bridge": "^2.2.0|^6.4|^7.0"
+            },
+            "conflict": {
+                "spiral/roadrunner": "<2023.1.0",
+                "spiral/roadrunner-cli": "<2.6.0",
+                "spiral/roadrunner-http": "<3.3.0"
+            },
+            "require-dev": {
+                "guzzlehttp/guzzle": "^7.6.1",
+                "inertiajs/inertia-laravel": "^0.6.9|^1.0",
+                "laravel/scout": "^10.2.1",
+                "laravel/socialite": "^5.6.1",
+                "livewire/livewire": "^2.12.3|^3.0",
+                "mockery/mockery": "^1.5.1",
+                "nunomaduro/collision": "^6.4.0|^7.5.2|^8.0",
+                "orchestra/testbench": "^8.5.2|^9.0",
+                "phpstan/phpstan": "^1.10.15",
+                "phpunit/phpunit": "^10.4",
+                "spiral/roadrunner-cli": "^2.6.0",
+                "spiral/roadrunner-http": "^3.3.0"
+            },
+            "bin": [
+                "bin/roadrunner-worker",
+                "bin/swoole-server"
+            ],
+            "type": "library",
+            "extra": {
+                "branch-alias": {
+                    "dev-master": "2.x-dev"
+                },
+                "laravel": {
+                    "providers": [
+                        "Laravel\\Octane\\OctaneServiceProvider"
+                    ],
+                    "aliases": {
+                        "Octane": "Laravel\\Octane\\Facades\\Octane"
+                    }
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "Laravel\\Octane\\": "src"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Taylor Otwell",
+                    "email": "taylor@laravel.com"
+                }
+            ],
+            "description": "Supercharge your Laravel application's performance.",
+            "keywords": [
+                "frankenphp",
+                "laravel",
+                "octane",
+                "roadrunner",
+                "swoole"
+            ],
+            "support": {
+                "issues": "https://github.com/laravel/octane/issues",
+                "source": "https://github.com/laravel/octane"
+            },
+            "time": "2024-07-01T20:50:27+00:00"
         },
         {
             "name": "laravel/pail",
