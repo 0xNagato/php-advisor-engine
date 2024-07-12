@@ -1,6 +1,6 @@
 <x-filament-panels::page>
     @mobileapp
-    <div class="-mb-4 w-full">
+    <div class="-mt-4 -mb-4">
         <x-filament-actions::actions :actions="$this->getHeaderActions()"/>
     </div>
     @endmobileapp
