@@ -27,6 +27,8 @@ class AuthenticatedSessionController extends Controller
 
         $user = $request->user();
 
+        $token = $request->user()->createToken('primaVip');
+
         return response()->json([
             'success' => true,
             'data' => [
@@ -42,6 +44,7 @@ class AuthenticatedSessionController extends Controller
                     'avatar' => $user->avatar,
                     'timezone' => $user->timezone,
                 ],
+                'token' => $token->plainTextToken
             ],
         ]);
     }
