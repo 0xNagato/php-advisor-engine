@@ -3,8 +3,6 @@
     use Carbon\Carbon;
 
     $stickyHeaderTopPosition = isPrimaApp() ? 'top-0' : 'top-16';
-
-    ds($stickyHeaderTopPosition);
 @endphp
 <x-filament-panels::page>
     {{ $this->form }}
