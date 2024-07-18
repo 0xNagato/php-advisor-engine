@@ -2,7 +2,9 @@
     use App\Enums\RestaurantStatus;
     use Carbon\Carbon;
 
-    $stickyHeaderTopPosition = isPrimaApp() ? 'top-16' : 'top-0';
+    $stickyHeaderTopPosition = isPrimaApp() ? 'top-0' : 'top-16';
+
+    ds($stickyHeaderTopPosition);
 @endphp
 <x-filament-panels::page>
     {{ $this->form }}
