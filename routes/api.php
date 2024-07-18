@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Api\TimeslotController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -39,4 +40,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
         return response()->json($data);
     });
+
+    Route::get('/timeslots', TimeslotController::class)
+        ->name('timeslots.index');
 });
