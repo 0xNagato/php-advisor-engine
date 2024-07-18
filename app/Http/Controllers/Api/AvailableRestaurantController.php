@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Enums\RestaurantStatus;
 use App\Http\Controllers\Controller;
 use App\Models\Region;
 use App\Models\Restaurant;
@@ -16,6 +17,8 @@ class AvailableRestaurantController extends Controller
     use ManagesBookingForms;
 
     public array $timeslotHeaders = [];
+
+    private string $currency;
 
     public function __invoke(Request $request): JsonResponse
     {
@@ -33,6 +36,7 @@ class AvailableRestaurantController extends Controller
 
         $region = Region::query()->find(session('region', 'miami'));
         $this->timezone = $region->timezone;
+        $this->currency = $region->currency;
 
         $requestedDate = \Carbon\Carbon::createFromFormat('Y-m-d', $date, $this->timezone);
         $currentDate = Carbon::now($this->timezone);
@@ -49,24 +53,10 @@ class AvailableRestaurantController extends Controller
         $restaurants = $this->getAvailableRestaurants($guestCount, $reservationTime, $endTime, $date);
 
         return response()->json([
-            'available_restaurants' => $restaurants,
+//            'available_restaurants' => $restaurants,
+            'filtered_restaurants' => $this->getAvailableRestaurantsFiltered($guestCount, $reservationTime, $endTime, $date),
             'timeslot_headers' => $this->timeslotHeaders,
         ]);
-    }
-
-    /**
-     * @return Collection<Restaurant>
-     */
-    public function restaurants($guestCount, $reservationTime, $endTime, $date): Collection
-    {
-        return Restaurant::available()
-            ->where('region', session('region', 'miami'))
-            ->with(['schedules' => function ($query) use ($guestCount, $reservationTime, $endTime, $date) {
-                $query->where('booking_date', $date)
-                    ->where('party_size', $guestCount)
-                    ->where('start_time', '>=', $reservationTime)
-                    ->where('start_time', '<=', $endTime);
-            }])->get();
     }
 
     private function adjustReservationTime($reservationTime): string
@@ -118,5 +108,44 @@ class AvailableRestaurantController extends Controller
                     ->where('start_time', '>=', $reservationTime)
                     ->where('start_time', '<=', $endTime);
             }])->get();
+    }
+
+    private function getAvailableRestaurantsFiltered($guestCount, $reservationTime, $endTime, $date)
+    {
+        $restaurants = Restaurant::available()
+            ->where('region', session('region', 'miami'))
+            ->with(['schedules' => function ($query) use ($guestCount, $reservationTime, $endTime, $date) {
+                $query->where('booking_date', $date)
+                    ->where('party_size', $guestCount)
+                    ->where('start_time', '>=', $reservationTime)
+                    ->where('start_time', '<=', $endTime);
+            }])->get();
+
+        // Map the restaurants collection to include only the required fields
+        return $restaurants->map(function ($restaurant) use ($guestCount) {
+            return [
+                'id' => $restaurant->id,
+                'logo' => $restaurant->logo,
+                'restaurant_name' => $restaurant->restaurant_name,
+                'schedules' => collect($restaurant->schedules)->map(function ($schedule) use ($restaurant, $guestCount){
+
+                    $isBookable = $schedule->is_bookable;
+                    $primeTime = $schedule->prime_time;
+                    $hasLowInventory = $schedule->has_low_inventory;
+                    $fee = moneyWithoutCents($schedule->fee($guestCount), $this->currency);
+                    $booking_date = $schedule->booking_date->format('Y-m-d');
+
+                    return [
+                        'id' => $schedule->id,
+                        'is_bookable' => $isBookable,
+                        'status' => $restaurant->status === RestaurantStatus::ACTIVE,
+                        'booking_date' => $booking_date,
+                        'prime_time' => $primeTime,
+                        'has_low_inventory' => $hasLowInventory,
+                        'fee' => $fee,
+                    ];
+                })->values()
+            ];
+        });
     }
 }
