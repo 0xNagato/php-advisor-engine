@@ -5,7 +5,7 @@
 
 /**
  * A helper file for Laravel, to provide autocomplete information to your IDE
- * Generated for Laravel 11.15.0.
+ * Generated for Laravel 11.16.0.
  *
  * This file should not be included in your code, only analyzed by your IDE!
  *
@@ -9020,7 +9020,7 @@ namespace Illuminate\Support\Facades {
          * Assert if a mailable was sent based on a truth-test callback.
          *
          * @param string|\Closure $mailable
-         * @param callable|int|null $callback
+         * @param callable|array|string|int|null $callback
          * @return void 
          * @static 
          */        public static function assertSent($mailable, $callback = null)
@@ -9044,7 +9044,7 @@ namespace Illuminate\Support\Facades {
          * Determine if a mailable was not sent based on a truth-test callback.
          *
          * @param string|\Closure $mailable
-         * @param callable|null $callback
+         * @param callable|array|string|null $callback
          * @return void 
          * @static 
          */        public static function assertNotSent($mailable, $callback = null)
@@ -9076,7 +9076,7 @@ namespace Illuminate\Support\Facades {
          * Assert if a mailable was queued based on a truth-test callback.
          *
          * @param string|\Closure $mailable
-         * @param callable|int|null $callback
+         * @param callable|array|string|int|null $callback
          * @return void 
          * @static 
          */        public static function assertQueued($mailable, $callback = null)
@@ -9088,7 +9088,7 @@ namespace Illuminate\Support\Facades {
          * Determine if a mailable was not queued based on a truth-test callback.
          *
          * @param string|\Closure $mailable
-         * @param callable|null $callback
+         * @param callable|array|string|null $callback
          * @return void 
          * @static 
          */        public static function assertNotQueued($mailable, $callback = null)
@@ -25127,7 +25127,7 @@ namespace  {
              *
              * @param string|\Illuminate\Contracts\Database\Query\Expression $column
              * @param string|null $key
-             * @return \Illuminate\Support\Collection<int|string, mixed> 
+             * @return \Illuminate\Support\Collection<array-key, mixed> 
              * @static 
              */            public static function pluck($column, $key = null)
             {
@@ -25667,7 +25667,6 @@ namespace  {
              * @param string $operator
              * @param int $count
              * @param string $boolean
-             * @param \Closure|null $callback
              * @return \Illuminate\Database\Eloquent\Builder|static 
              * @throws \RuntimeException
              * @static 
@@ -25694,7 +25693,6 @@ namespace  {
              *
              * @param \Illuminate\Database\Eloquent\Relations\Relation<*,  *, *>|string  $relation
              * @param string $boolean
-             * @param \Closure|null $callback
              * @return \Illuminate\Database\Eloquent\Builder|static 
              * @static 
              */            public static function doesntHave($relation, $boolean = 'and', $callback = null)
@@ -25717,7 +25715,6 @@ namespace  {
              * Add a relationship count / exists condition to the query with where clauses.
              *
              * @param \Illuminate\Database\Eloquent\Relations\Relation<*,  *, *>|string  $relation
-             * @param \Closure|null $callback
              * @param string $operator
              * @param int $count
              * @return \Illuminate\Database\Eloquent\Builder|static 
@@ -25733,7 +25730,6 @@ namespace  {
              * Also load the relationship with same condition.
              *
              * @param \Illuminate\Database\Eloquent\Relations\Relation<*,  *, *>|string  $relation
-             * @param \Closure|null $callback
              * @param string $operator
              * @param int $count
              * @return \Illuminate\Database\Eloquent\Builder|static 
@@ -25747,7 +25743,6 @@ namespace  {
              * Add a relationship count / exists condition to the query with where clauses and an "or".
              *
              * @param \Illuminate\Database\Eloquent\Relations\Relation<*,  *, *>|string  $relation
-             * @param \Closure|null $callback
              * @param string $operator
              * @param int $count
              * @return \Illuminate\Database\Eloquent\Builder|static 
@@ -25761,7 +25756,6 @@ namespace  {
              * Add a relationship count / exists condition to the query with where clauses.
              *
              * @param \Illuminate\Database\Eloquent\Relations\Relation<*,  *, *>|string  $relation
-             * @param \Closure|null $callback
              * @return \Illuminate\Database\Eloquent\Builder|static 
              * @static 
              */            public static function whereDoesntHave($relation, $callback = null)
@@ -25773,7 +25767,6 @@ namespace  {
              * Add a relationship count / exists condition to the query with where clauses and an "or".
              *
              * @param \Illuminate\Database\Eloquent\Relations\Relation<*,  *, *>|string  $relation
-             * @param \Closure|null $callback
              * @return \Illuminate\Database\Eloquent\Builder|static 
              * @static 
              */            public static function orWhereDoesntHave($relation, $callback = null)
@@ -25789,7 +25782,6 @@ namespace  {
              * @param string $operator
              * @param int $count
              * @param string $boolean
-             * @param \Closure|null $callback
              * @return \Illuminate\Database\Eloquent\Builder|static 
              * @static 
              */            public static function hasMorph($relation, $types, $operator = '>=', $count = 1, $boolean = 'and', $callback = null)
@@ -25817,7 +25809,6 @@ namespace  {
              * @param \Illuminate\Database\Eloquent\Relations\MorphTo<*, *>|string $relation
              * @param string|array $types
              * @param string $boolean
-             * @param \Closure|null $callback
              * @return \Illuminate\Database\Eloquent\Builder|static 
              * @static 
              */            public static function doesntHaveMorph($relation, $types, $boolean = 'and', $callback = null)
@@ -25842,7 +25833,6 @@ namespace  {
              *
              * @param \Illuminate\Database\Eloquent\Relations\MorphTo<*, *>|string $relation
              * @param string|array $types
-             * @param \Closure|null $callback
              * @param string $operator
              * @param int $count
              * @return \Illuminate\Database\Eloquent\Builder|static 
@@ -25857,7 +25847,6 @@ namespace  {
              *
              * @param \Illuminate\Database\Eloquent\Relations\MorphTo<*, *>|string $relation
              * @param string|array $types
-             * @param \Closure|null $callback
              * @param string $operator
              * @param int $count
              * @return \Illuminate\Database\Eloquent\Builder|static 
@@ -25872,7 +25861,6 @@ namespace  {
              *
              * @param \Illuminate\Database\Eloquent\Relations\MorphTo<*, *>|string $relation
              * @param string|array $types
-             * @param \Closure|null $callback
              * @return \Illuminate\Database\Eloquent\Builder|static 
              * @static 
              */            public static function whereDoesntHaveMorph($relation, $types, $callback = null)
@@ -25885,7 +25873,6 @@ namespace  {
              *
              * @param \Illuminate\Database\Eloquent\Relations\MorphTo<*, *>|string $relation
              * @param string|array $types
-             * @param \Closure|null $callback
              * @return \Illuminate\Database\Eloquent\Builder|static 
              * @static 
              */            public static function orWhereDoesntHaveMorph($relation, $types, $callback = null)

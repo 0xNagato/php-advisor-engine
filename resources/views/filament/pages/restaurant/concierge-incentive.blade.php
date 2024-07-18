@@ -18,7 +18,7 @@
 
             @if ($this->data['non_prime_type'] === 'paid')
                 <p>
-                    PRIMA will bill your account the incentive amount plus 7%.
+                    PRIMA will bill your account the incentive amount plus {{ $this->conciergeIncentivePercentage }}%.
                 </p>
             @endif
 

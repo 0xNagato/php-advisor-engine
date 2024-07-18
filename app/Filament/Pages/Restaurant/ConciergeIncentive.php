@@ -2,6 +2,7 @@
 
 namespace App\Filament\Pages\Restaurant;
 
+use App\Models\Booking;
 use App\Models\Region;
 use App\Models\Restaurant;
 use Filament\Forms\Components\Radio;
@@ -11,6 +12,7 @@ use Filament\Forms\Get;
 use Filament\Notifications\Notification;
 use Filament\Pages\Page;
 use Filament\Support\RawJs;
+use Livewire\Attributes\Computed;
 
 /**
  * @property Form $form
@@ -43,6 +45,12 @@ class ConciergeIncentive extends Page
             'non_prime_type' => $this->restaurant->non_prime_type,
             'non_prime_fee_per_head' => $this->restaurant->non_prime_fee_per_head,
         ]);
+    }
+
+    #[Computed]
+    public function conciergeIncentivePercentage(): int
+    {
+        return Booking::PLATFORM_PERCENTAGE_CONCIERGE;
     }
 
     public function form(Form $form): Form

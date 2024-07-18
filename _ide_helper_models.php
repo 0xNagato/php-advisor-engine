@@ -99,6 +99,8 @@ namespace App\Models{
  * @property-read int|null $earnings_count
  * @property-read mixed $guest_name
  * @property-read mixed $local_formatted_guest_phone
+ * @property-read \Illuminate\Notifications\DatabaseNotificationCollection<int, \Illuminate\Notifications\DatabaseNotification> $notifications
+ * @property-read int|null $notifications_count
  * @property-read \App\Models\Partner|null $partnerConcierge
  * @property-read \App\Models\Partner|null $partnerRestaurant
  * @property-read mixed $prime_time
@@ -508,6 +510,9 @@ namespace App\Models{
  * @property string $tax_rate_term
  * @property string $country
  * @property string $timezone
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Restaurant> $restaurants
+ * @property-read int|null $restaurants_count
+ * @method static \Illuminate\Database\Eloquent\Builder|Region active()
  * @method static \Illuminate\Database\Eloquent\Builder|Region newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder|Region newQuery()
  * @method static \Illuminate\Database\Eloquent\Builder|Region query()
@@ -557,6 +562,7 @@ namespace App\Models{
  * @property-read \App\Models\Region|null $inRegion
  * @property-read mixed $logo
  * @property-read mixed $name
+ * @property-read \App\Models\Partner|null $partnerReferral
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\ScheduleTemplate> $scheduleTemplates
  * @property-read int|null $schedule_templates_count
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\ScheduleWithBooking> $schedules
@@ -879,6 +885,8 @@ namespace App\Models{
  * @property string|null $country
  * @property string|null $region
  * @property \Spatie\LaravelData\Contracts\BaseData|null $preferences
+ * @property string $userable_type
+ * @property int $userable_id
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \Rappasoft\LaravelAuthenticationLog\Models\AuthenticationLog> $authentications
  * @property-read int|null $authentications_count
  * @property-read mixed $avatar
@@ -950,6 +958,8 @@ namespace App\Models{
  * @method static \Illuminate\Database\Eloquent\Builder|User whereTwoFactorRecoveryCodes($value)
  * @method static \Illuminate\Database\Eloquent\Builder|User whereTwoFactorSecret($value)
  * @method static \Illuminate\Database\Eloquent\Builder|User whereUpdatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|User whereUserableId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|User whereUserableType($value)
  * @method static \Illuminate\Database\Eloquent\Builder|User whereZip($value)
  * @method static \Illuminate\Database\Eloquent\Builder|User withoutPermission($permissions)
  * @method static \Illuminate\Database\Eloquent\Builder|User withoutRole($roles, $guard = null)
