@@ -25,10 +25,10 @@ class CreateBooking
     public const int MAX_DAYS_IN_ADVANCE = 30;
 
     /**
+     * @return array {booking: Booking, bookingUrl: string, qrCode: string}
+     *
      * @throws Exception
      * @throws Throwable
-     *
-     * @returns array {booking: Booking, bookingUrl: string, qrCode: string}
      */
     public function handle(int $scheduleTemplateId, array $data, string $timezone, string $currency): CreateBookingReturnData
     {
