@@ -50,11 +50,9 @@ class AvailableRestaurantController extends Controller
 
         $guestCount = $this->calculateGuestCount($guestCount);
 
-        $restaurants = $this->getAvailableRestaurants($guestCount, $reservationTime, $endTime, $date);
-
         return response()->json([
-//            'available_restaurants' => $restaurants,
-            'filtered_restaurants' => $this->getAvailableRestaurantsFiltered($guestCount, $reservationTime, $endTime, $date),
+//            'available_restaurants' => $this->getAvailableRestaurants($guestCount, $reservationTime, $endTime, $date),
+            'available_restaurants' => $this->getAvailableRestaurantsFiltered($guestCount, $reservationTime, $endTime, $date),
             'timeslot_headers' => $this->timeslotHeaders,
         ]);
     }
