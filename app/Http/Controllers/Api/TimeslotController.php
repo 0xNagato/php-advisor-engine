@@ -26,7 +26,7 @@ class TimeslotController extends Controller
         $reservationTimeOptions = $this->getReservationTimeOptions($date);
 
         return response()->json([
-            'reservation_time_options' => $reservationTimeOptions,
+            'timeslots' => $reservationTimeOptions,
         ]);
     }
 }
