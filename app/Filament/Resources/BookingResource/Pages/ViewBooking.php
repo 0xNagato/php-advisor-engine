@@ -8,6 +8,9 @@ use App\Enums\BookingStatus;
 use App\Filament\Resources\BookingResource;
 use App\Models\Booking;
 use App\Models\Region;
+use App\Notifications\Booking\GuestBookingConfirmed;
+use Filament\Actions\Action;
+use Filament\Notifications\Notification;
 use Filament\Resources\Pages\ViewRecord;
 
 /**
@@ -42,5 +45,26 @@ class ViewBooking extends ViewRecord
 
         $this->booking = $this->record;
         $this->region = Region::query()->find($this->booking->city);
+    }
+
+    public function resendInvoice(): void
+    {
+        $this->booking->notify(new GuestBookingConfirmed());
+
+        Notification::make()
+            ->title('Customer Invoice Resent')
+            ->success()
+            ->send();
+    }
+
+    public function resendInvoiceAction(): Action
+    {
+        return Action::make('resendInvoice')
+            ->label('Resend Customer Invoice')
+            ->color('indigo')
+            ->icon('gmdi-message')
+            ->requiresConfirmation()
+            ->extraAttributes(['class' => 'w-full mt-4'])
+            ->action(fn () => $this->resendInvoice());
     }
 }
