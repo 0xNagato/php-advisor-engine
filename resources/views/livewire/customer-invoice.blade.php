@@ -183,7 +183,7 @@
                 @endif
             </div>
 
-            @if (auth()->user()->hasRole('super_admin'))
+            @if (auth()->check() && auth()->user()->hasRole('super_admin'))
                 <div class="mt-4">
                     <div class="text-xs font-semibold capitalize">EARNINGS</div>
                     <div class="grid grid-cols-3 gap-2 mt-2 text-xs">
