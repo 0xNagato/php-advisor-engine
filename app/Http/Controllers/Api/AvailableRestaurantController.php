@@ -25,9 +25,9 @@ class AvailableRestaurantController extends Controller
         $request->headers->set('Accept', 'application/json');
 
         $validated = $request->validate([
-            'date' => 'required|date',
-            'guest_count' => 'required|integer|min:2',
-            'reservation_time' => 'required|date_format:H:i:s',
+            'date' => ['required','date'],
+            'guest_count' => ['required','integer','min:2'],
+            'reservation_time' => ['required','date_format:H:i:s'],
         ]);
 
         $date = $validated['date'];
@@ -51,9 +51,11 @@ class AvailableRestaurantController extends Controller
         $guestCount = $this->calculateGuestCount($guestCount);
 
         return response()->json([
-//            'available_restaurants' => $this->getAvailableRestaurants($guestCount, $reservationTime, $endTime, $date),
-            'available_restaurants' => $this->getAvailableRestaurantsFiltered($guestCount, $reservationTime, $endTime, $date),
-            'timeslot_headers' => $this->timeslotHeaders,
+            'data' => [
+                //            'available_restaurants' => $this->getAvailableRestaurants($guestCount, $reservationTime, $endTime, $date),
+                'available_restaurants' => $this->getAvailableRestaurantsFiltered($guestCount, $reservationTime, $endTime, $date),
+                'timeslot_headers' => $this->timeslotHeaders,
+            ]
         ]);
     }
 
