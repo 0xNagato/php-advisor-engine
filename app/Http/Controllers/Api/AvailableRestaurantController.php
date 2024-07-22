@@ -11,6 +11,7 @@ use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Validator;
 
 class AvailableRestaurantController extends Controller
 {
@@ -22,13 +23,17 @@ class AvailableRestaurantController extends Controller
 
     public function __invoke(Request $request): JsonResponse
     {
-        $request->headers->set('Accept', 'application/json');
-
-        $validated = $request->validate([
+        $validator = Validator::make($request->all(), [
             'date' => ['required','date'],
             'guest_count' => ['required','integer','min:2'],
             'reservation_time' => ['required','date_format:H:i:s'],
         ]);
+
+        if ($validator->fails()) {
+            return response()->json($validator->errors(), 422);
+        }
+
+        $validated = $validator->validated();
 
         $date = $validated['date'];
         $guestCount = $validated['guest_count'];
