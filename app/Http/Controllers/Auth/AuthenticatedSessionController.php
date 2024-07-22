@@ -27,7 +27,7 @@ class AuthenticatedSessionController extends Controller
 
         $user = $request->user();
 
-        $token = $request->user()->createToken('primaVip');
+        $token = $request->user()->createToken('prima-mobile');
 
         return response()->json([
             'success' => true,
