@@ -11,26 +11,6 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 
 Route::middleware('auth:sanctum')->group(function () {
 
-    Route::get('/{region}/test', function ($region) {
-        $data = [
-            'region' => $region,
-            'bookings' => [
-                [
-                    'id' => 1,
-                    'name' => 'Booking 1',
-                    'date' => '2021-01-01',
-                ],
-                [
-                    'id' => 2,
-                    'name' => 'Booking 2',
-                    'date' => '2021-01-02',
-                ],
-            ],
-        ];
-
-        return response()->json($data);
-    });
-
     Route::get('/timeslots', TimeslotController::class)
         ->name('timeslots.index');
 
