@@ -24,6 +24,7 @@ use Random\RandomException;
 use Rappasoft\LaravelAuthenticationLog\Traits\AuthenticationLoggable;
 use Spatie\Permission\Models\Role;
 use Spatie\Permission\Traits\HasRoles;
+use Laravel\Sanctum\HasApiTokens;
 
 /**
  * @mixin IdeHelperUser
@@ -36,6 +37,7 @@ class User extends Authenticatable implements FilamentUser, HasAvatar
     use HasPanelShield;
     use HasRoles;
     use Notifiable;
+    use HasApiTokens;
 
     /**
      * The attributes that are mass assignable.
