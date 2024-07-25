@@ -13,15 +13,8 @@ class RegionController extends Controller
 
     public function __invoke(): JsonResponse
     {
-        $regions = Region::active()->get()->transform(fn($region) => [
-            'id' => $region->id,
-            'name' => $region->name,
-        ]);
-
         return response()->json([
-            'data' => [
-                'regions' => $regions,
-            ],
+            'data' => Region::active()->pluck('name', 'id'),
         ]);
     }
 }

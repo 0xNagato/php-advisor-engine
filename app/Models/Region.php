@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Http\Request;
 use Sushi\Sushi;
 
 /**
@@ -142,6 +143,11 @@ class Region extends Model
     public function scopeActive(Builder $query): Builder
     {
         return $query->whereIn('id', config('app.active_regions'));
+    }
+
+    public function scopeUser(Builder $query): Builder
+    {
+        return $query->where('id', request()->user()?->region ?? 'miami');
     }
 
     public static function default(): Region
