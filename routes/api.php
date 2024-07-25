@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Api\AvailabilityCalendarController;
 use App\Http\Controllers\Api\AvailableRestaurantController;
 use App\Http\Controllers\Api\TimeslotController;
 use Illuminate\Http\Request;
@@ -16,4 +17,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::get('/{region}/available-restaurants', AvailableRestaurantController::class)
         ->name('available-restaurants.index');
+
+    Route::get('/{region}/availability-calendar', AvailabilityCalendarController::class)
+        ->name('availability-calendar.index');
 });
