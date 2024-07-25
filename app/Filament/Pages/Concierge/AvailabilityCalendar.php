@@ -4,6 +4,7 @@ namespace App\Filament\Pages\Concierge;
 
 use App\Models\Region;
 use App\Models\Restaurant;
+use App\Services\ReservationService;
 use App\Traits\ManagesBookingForms;
 use Carbon\Carbon;
 use Exception;
@@ -91,75 +92,18 @@ class AvailabilityCalendar extends Page
         }
 
         if (isset($this->data['reservation_time'], $this->data['date'], $this->data['guest_count'])) {
-            $requestedDate = Carbon::createFromFormat('Y-m-d', $this->data['date'], $this->timezone);
-            $currentDate = Carbon::now($this->timezone);
+            $reservation = new ReservationService(
+                date: $this->data['date'],
+                guestCount: $this->data['guest_count'],
+                reservationTime: $this->data['reservation_time'],
+            );
 
-            $reservationTime = $this->form->getState()['reservation_time'];
-            if ($currentDate->isSameDay($requestedDate)) {
-                $reservationTime = $this->adjustReservationTime($reservationTime);
-            }
-
-            $endTime = $this->calculateEndTime($reservationTime);
-            $this->fillTimeslotHeaders($reservationTime, $endTime);
-
-            $guestCount = $this->calculateGuestCount();
-
-            $this->restaurants = $this->getAvailableRestaurants($guestCount, $reservationTime, $endTime);
+            $this->timeslotHeaders = $reservation->getTimeslotHeaders();
+            $this->restaurants = $reservation->getAvailableRestaurants();
         }
     }
 
-    private function adjustReservationTime($reservationTime): string
-    {
-        $reservationTime = Carbon::createFromFormat('H:i:s', $reservationTime, $this->timezone);
-        $currentTime = Carbon::now($this->timezone);
 
-        if ($reservationTime->copy()->subMinutes(self::MINUTES_PAST)->gt($currentTime)) {
-            return $reservationTime->subMinutes(self::MINUTES_PAST)->format('H:i:s');
-        }
-
-        return $reservationTime->format('H:i:s');
-    }
-
-    private function calculateEndTime($reservationTime): string
-    {
-        $endTime = Carbon::createFromFormat('H:i:s', $reservationTime, $this->timezone)?->addMinutes(self::MINUTES_FUTURE);
-        $limitTime = Carbon::createFromTime(23, 59, 0, $this->timezone);
-
-        return $endTime->gt($limitTime) ? '23:59:59' : $endTime->format('H:i:s');
-    }
-
-    public function fillTimeslotHeaders($reservationTime, $endTime): void
-    {
-        $this->timeslotHeaders = [];
-        $start = Carbon::createFromFormat('H:i:s', $reservationTime);
-        $end = Carbon::createFromFormat('H:i:s', $endTime);
-
-        for ($time = $start; $time->lte($end); $time->addMinutes(30)) {
-            $this->timeslotHeaders[$time->format('H:i:s')] = $time->format('g:i A');
-        }
-    }
-
-    private function calculateGuestCount(): int
-    {
-        $guestCount = ceil($this->form->getState()['guest_count']);
-
-        return (int) ($guestCount % 2 !== 0 ? $guestCount + 1 : $guestCount);
-    }
-
-    /**
-     * @return Collection<Restaurant>
-     */
-    private function getAvailableRestaurants($guestCount, $reservationTime, $endTime): Collection
-    {
-        return Restaurant::available()
-            ->where('region', session('region', 'miami'))
-            ->with(['schedules' => function ($query) use ($guestCount, $reservationTime, $endTime) {
-                $query->where('booking_date', $this->form->getState()['date'])
-                    ->where('party_size', $guestCount)
-                    ->where('start_time', '>=', $reservationTime)
-                    ->where('start_time', '<=', $endTime);
-            }])->get();
-    }
 
     #[On('region-changed')]
     public function regionChanged(): void
