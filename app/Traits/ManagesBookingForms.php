@@ -2,6 +2,7 @@
 
 namespace App\Traits;
 
+use App\Actions\Reservations\GetReservationTimeOptions;
 use App\Models\Restaurant;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Hidden;
@@ -62,7 +63,7 @@ trait ManagesBookingForms
             $this->getGuestCountInput(),
             Select::make('reservation_time')
                 ->prefixIcon('heroicon-m-clock')
-                ->options(fn (Get $get) => $this->getReservationTimeOptions($get('date')))
+                ->options(fn (Get $get) => GetReservationTimeOptions::run(date: $get('date')))
                 ->disableOptionWhen(function (Get $get, $value) {
                     $isCurrentDay = $get('date') === now($this->timezone)->format('Y-m-d');
 
@@ -94,25 +95,5 @@ trait ManagesBookingForms
             ->hiddenLabel()
             ->columnSpan(1)
             ->required();
-    }
-
-    protected function getReservationTimeOptions(string $date, $onlyShowFuture = false): array
-    {
-        $currentDate = ($date === Carbon::now($this->timezone)->format('Y-m-d'));
-
-        $currentTime = Carbon::now($this->timezone);
-        $startTime = Carbon::createFromTime(Restaurant::DEFAULT_START_HOUR, 0, 0, $this->timezone);
-        $endTime = Carbon::createFromTime(Restaurant::DEFAULT_END_HOUR, 0, 0, $this->timezone);
-
-        $reservationTimes = [];
-
-        for ($time = $startTime; $time->lte($endTime); $time->addMinutes(30)) {
-            if ($onlyShowFuture && $currentDate && $time->lt($currentTime)) {
-                continue;
-            }
-            $reservationTimes[$time->format('H:i:s')] = $time->format('g:i A');
-        }
-
-        return $reservationTimes;
     }
 }

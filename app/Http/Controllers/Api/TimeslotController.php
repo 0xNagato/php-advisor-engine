@@ -2,33 +2,38 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Actions\Reservations\GetReservationTimeOptions;
 use App\Http\Controllers\Controller;
-use App\Models\Region;
-use App\Traits\ManagesBookingForms;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Validator;
 
 class TimeslotController extends Controller
 {
-    use ManagesBookingForms;
-
     public function __invoke(Request $request): JsonResponse
     {
-        // Get the region from the session or default to Miami
-        $region = Region::query()->find(session('region', 'miami'));
+        // Validate the requested date
+        $validatedDate = $this->validateDate($request);
 
-        // Set the timezone from the region
-        $this->timezone = $region->timezone;
-
-        // Get the date from the request or default to today
-        $date = $request->input('date', now($this->timezone)->format('Y-m-d'));
-
-        $reservationTimeOptions = $this->getReservationTimeOptions($date);
+        if ($validatedDate instanceof JsonResponse) {
+            return $validatedDate;
+        }
 
         return response()->json([
-            'data' => [
-                'timeslots' => $reservationTimeOptions,
-            ],
+            'data' => GetReservationTimeOptions::run(date: $validatedDate),
         ]);
+    }
+
+    private function validateDate(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'date' => ['required','date'],
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json($validator->errors(), 422);
+        }
+
+        return $validator->validated()['date'];
     }
 }

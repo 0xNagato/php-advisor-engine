@@ -10,6 +10,7 @@ use Filament\Pages\Page;
 use Filament\Support\Colors\Color;
 use Filament\Support\Facades\FilamentColor;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\ServiceProvider;
@@ -81,6 +82,8 @@ class AppServiceProvider extends ServiceProvider
         });
 
         Model::preventLazyLoading(! $this->app->isProduction());
+
+        JsonResource::withoutWrapping();
     }
 
     /**

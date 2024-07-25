@@ -32,10 +32,6 @@ class AuthenticatedSessionController extends Controller
         return response()->json([
             'success' => true,
             'data' => [
-                'regions' => Region::active()->get()->transform(fn ($region) => [
-                    'id' => $region->id,
-                    'name' => $region->name,
-                ]),
                 'user' => [
                     'id' => $user->id,
                     'role' => $user->main_role,
@@ -43,6 +39,7 @@ class AuthenticatedSessionController extends Controller
                     'name' => $user->name,
                     'avatar' => $user->avatar,
                     'timezone' => $user->timezone,
+                    'region' => $user->region ?? 'miami',
                 ],
                 'token' => $token->plainTextToken
             ],
