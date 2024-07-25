@@ -15,6 +15,32 @@ class TimeslotController extends Controller
 
     public function __invoke(Request $request, $region = 'miami'): JsonResponse
     {
+        $region = Region::query()->find($region);
+
+        if (!$region) {
+            return response()->json(['error' => 'Region not found'], 404);
+        }
+
+        // Validate the requested date
+        $validatedDate = $this->validateDate($request);
+        if ($validatedDate instanceof JsonResponse) {
+            return $validatedDate;
+        }
+
+        // Set the timezone from the region
+        $this->timezone = $region->timezone;
+
+        $reservationTimeOptions = $this->getReservationTimeOptions($validatedDate);
+
+        return response()->json([
+            'data' => [
+                'timeslots' => $reservationTimeOptions,
+            ],
+        ]);
+    }
+
+    private function validateDate(Request $request)
+    {
         $validator = Validator::make($request->all(), [
             'date' => ['required','date'],
         ]);
@@ -23,23 +49,6 @@ class TimeslotController extends Controller
             return response()->json($validator->errors(), 422);
         }
 
-        $validated = $validator->validated();
-
-        // Get the validated date from the request
-        $date = $validated['date'];
-
-        // Get the region from the session or default to Miami
-        $region = Region::query()->find($region);
-
-        // Set the timezone from the region
-        $this->timezone = $region->timezone;
-
-        $reservationTimeOptions = $this->getReservationTimeOptions($date);
-
-        return response()->json([
-            'data' => [
-                'timeslots' => $reservationTimeOptions,
-            ],
-        ]);
+        return $validator->validated()['date'];
     }
 }
