@@ -8,7 +8,7 @@ use App\Models\Region;
 use App\Models\Restaurant;
 use Illuminate\Http\JsonResponse;
 
-class AvailableRestaurantController extends Controller
+class RestaurantController extends Controller
 {
     public function __invoke(Request $request): JsonResponse
     {
