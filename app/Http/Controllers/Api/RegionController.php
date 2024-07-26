@@ -8,6 +8,7 @@ use App\Rules\ActiveRegion;
 use App\Traits\ManagesBookingForms;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
 
@@ -22,25 +23,25 @@ class RegionController extends Controller
         ]);
     }
 
-    public function store(Request $request): JsonResponse
+    public function store(Request $request): JsonResponse | Response
     {
-        $validatedData = $this->validateReservationData($request);
+        $validatedData = $this->validateRegionData($request);
 
         if ($validatedData instanceof JsonResponse) {
             return $validatedData;
         }
 
-        auth()->user()->update(['region' => $validatedData['region']]);
-
-        return response()->json([
-            'data' => auth()->user()->region,
+        $request->user()->update([
+            'region' => $validatedData['region']
         ]);
+
+        return response()->noContent();
     }
 
     /**
      * @throws ValidationException
      */
-    private function validateReservationData(Request $request): JsonResponse|array
+    private function validateRegionData(Request $request): JsonResponse|array
     {
         $validator = Validator::make($request->all(), [
             'region' => ['required', new ActiveRegion()],
