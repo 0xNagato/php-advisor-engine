@@ -12,7 +12,8 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 });
 
 Route::middleware('auth:sanctum')->group(function () {
-    Route::get('/regions', RegionController::class);
+    Route::get('/regions', [RegionController::class, 'index']);
+    Route::post('/regions', [RegionController::class, 'store']);
     Route::get('/timeslots', TimeslotController::class);
     Route::get('/restaurants', RestaurantController::class);
     Route::get('/calendar', AvailabilityCalendarController::class);
