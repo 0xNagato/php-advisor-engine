@@ -18,7 +18,7 @@ class ReservationService
         public int $guestCount,
         public string $reservationTime,
     ) {
-        $this->region = Region::query()->find(request()->user()->region ?? 'miami')->first();
+        $this->region = Region::user()->first();
     }
 
     public function getAvailableRestaurants(): Collection
