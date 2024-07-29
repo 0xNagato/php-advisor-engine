@@ -145,11 +145,6 @@ class Region extends Model
         return $query->whereIn('id', config('app.active_regions'));
     }
 
-    public function scopeUser(Builder $query): Builder
-    {
-        return $query->where('id', request()->user()?->region ?? 'miami');
-    }
-
     public static function default(): Region
     {
         return self::query()->firstWhere('id', config('app.default_region'));

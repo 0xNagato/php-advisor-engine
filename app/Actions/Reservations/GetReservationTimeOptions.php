@@ -2,7 +2,7 @@
 
 namespace App\Actions\Reservations;
 
-use App\Models\Region;
+use App\Actions\Region\GetUserRegion;
 use App\Models\Restaurant;
 use Illuminate\Support\Carbon;
 use Lorisleiva\Actions\Concerns\AsAction;
@@ -13,7 +13,7 @@ class GetReservationTimeOptions
 
     public function handle(string $date, $onlyShowFuture = false): array
     {
-        $region = Region::user()->first();
+        $region = GetUserRegion::run();
         $currentDate = ($date === Carbon::now($region->timezone)->format('Y-m-d'));
 
         $currentTime = Carbon::now($region->timezone);

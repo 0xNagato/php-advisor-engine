@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Actions\Region\GetUserRegion;
 use App\Models\Region;
 use App\Models\Restaurant;
 use Illuminate\Database\Eloquent\Collection;
@@ -18,7 +19,7 @@ class ReservationService
         public int $guestCount,
         public string $reservationTime,
     ) {
-        $this->region = Region::user()->first();
+        $this->region = GetUserRegion::run();
     }
 
     public function getAvailableRestaurants(): Collection
