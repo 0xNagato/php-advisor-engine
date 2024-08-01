@@ -126,7 +126,7 @@ This approach to using Actions has significantly improved our ability to maintai
 
 1. **Booking Management**: Uses Actions to handle prime and non-prime reservations, ensuring consistent logic across web interfaces and API endpoints.
 2. **User Management**: Employs role-specific Actions for managing restaurants, concierges, and partners, maintaining consistency between admin operations and API functionalities.
-3. **Earnings Calculation**: Utilizes complex Actions for calculating and distributing earnings, which can be triggered from various parts of the application including scheduled tasks and manual admin operations.
+3. **[Earnings/Booking Calculation](./docs/booking_calculations.md)**: Utilizes complex Actions for calculating and distributing earnings, which can be triggered from various parts of the application including scheduled tasks and manual admin operations.
 4. **Reporting and Analytics**: Leverages Actions for data aggregation and processing, allowing the same reports to be generated for the admin panel and API responses.
 5. **Notification System**: Uses notification-specific Actions that can be triggered from multiple contexts, ensuring consistent communication logic across the platform.
 6. **Integration Layer**: Implements Actions for standardized data exchange with restaurant management systems, usable both in background jobs and real-time API interactions.
