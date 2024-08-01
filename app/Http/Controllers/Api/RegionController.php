@@ -23,7 +23,7 @@ class RegionController extends Controller
         ]);
     }
 
-    public function store(Request $request): JsonResponse | Response
+    public function store(Request $request): JsonResponse|Response
     {
         $validatedData = $this->validateRegionData($request);
 
@@ -32,7 +32,7 @@ class RegionController extends Controller
         }
 
         $request->user()->update([
-            'region' => $validatedData['region']
+            'region' => $validatedData['region'],
         ]);
 
         return response()->noContent();
@@ -44,7 +44,7 @@ class RegionController extends Controller
     private function validateRegionData(Request $request): JsonResponse|array
     {
         $validator = Validator::make($request->all(), [
-            'region' => ['required', new ActiveRegion()],
+            'region' => ['required', new ActiveRegion],
         ]);
 
         if ($validator->fails()) {

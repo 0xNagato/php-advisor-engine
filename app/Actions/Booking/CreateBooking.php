@@ -94,7 +94,7 @@ class CreateBooking
         return CreateBookingReturnData::from([
             'booking' => $booking,
             'bookingUrl' => $shortUrl->default_short_url,
-            'qrCode' => (new QRCode())->render($shortUrlQr->default_short_url),
+            'qrCode' => (new QRCode)->render($shortUrlQr->default_short_url),
         ]);
     }
 }

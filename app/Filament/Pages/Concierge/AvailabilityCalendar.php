@@ -6,7 +6,6 @@ use App\Models\Region;
 use App\Models\Restaurant;
 use App\Services\ReservationService;
 use App\Traits\ManagesBookingForms;
-use Carbon\Carbon;
 use Exception;
 use Filament\Forms\Form;
 use Filament\Pages\Page;
@@ -102,8 +101,6 @@ class AvailabilityCalendar extends Page
             $this->restaurants = $reservation->getAvailableRestaurants();
         }
     }
-
-
 
     #[On('region-changed')]
     public function regionChanged(): void

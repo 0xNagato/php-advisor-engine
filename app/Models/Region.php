@@ -5,7 +5,6 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Http\Request;
 use Sushi\Sushi;
 
 /**
@@ -19,6 +18,7 @@ use Sushi\Sushi;
  * @property string $tax_rate_term
  * @property string $country
  * @property string $timezone
+ *
  * @mixin IdeHelperRegion
  */
 class Region extends Model

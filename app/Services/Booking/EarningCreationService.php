@@ -11,7 +11,7 @@ class EarningCreationService
 {
     public function createEarning(Booking $booking, string $type, float $amount, float $percentage, string $percentageOf): void
     {
-        $earning = Earning::create([
+        $earning = Earning::query()->create([
             'booking_id' => $booking->id,
             'user_id' => $this->getUserIdForEarningType($booking, $type),
             'type' => $type,
@@ -36,8 +36,8 @@ class EarningCreationService
             'concierge', 'concierge_bounty' => $booking->concierge->user_id,
             'concierge_referral_1' => $booking->concierge->referringConcierge->user_id,
             'concierge_referral_2' => $booking->concierge->referringConcierge->referringConcierge->user_id,
-            'partner_concierge' => Partner::find($booking->concierge->user->partner_referral_id)->user_id,
-            'partner_restaurant' => Partner::find($booking->restaurant->user->partner_referral_id)->user_id,
+            'partner_concierge' => Partner::query()->find($booking->concierge->user->partner_referral_id)->user_id,
+            'partner_restaurant' => Partner::query()->find($booking->restaurant->user->partner_referral_id)->user_id,
             default => null,
         };
     }

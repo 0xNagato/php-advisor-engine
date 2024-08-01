@@ -3,7 +3,6 @@
 namespace App\Traits;
 
 use App\Actions\Reservations\GetReservationTimeOptions;
-use App\Models\Restaurant;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Hidden;
 use Filament\Forms\Components\Select;

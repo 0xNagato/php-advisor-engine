@@ -49,7 +49,7 @@ class ViewBooking extends ViewRecord
 
     public function resendInvoice(): void
     {
-        $this->booking->notify(new GuestBookingConfirmed());
+        $this->booking->notify(new GuestBookingConfirmed);
 
         Notification::make()
             ->title('Customer Invoice Resent')

@@ -4,10 +4,9 @@ namespace App\Http\Controllers\Api;
 
 use App\Actions\Region\GetUserRegion;
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
-use App\Models\Region;
 use App\Models\Restaurant;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 
 class RestaurantController extends Controller
 {

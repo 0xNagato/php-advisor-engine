@@ -73,7 +73,7 @@ readonly class PrimeEarningsCalculationService
         $totalPartnerEarnings = 0;
 
         if ($booking->concierge->user->partner_referral_id) {
-            $partner = Partner::find($booking->concierge->user->partner_referral_id);
+            $partner = Partner::query()->find($booking->concierge->user->partner_referral_id);
             $amount = $remainder * ($partner->percentage / 100);
             $this->earningCreationService->createEarning($booking, 'partner_concierge', $amount, $partner->percentage, 'remainder');
             $totalPartnerEarnings += $amount;
@@ -82,7 +82,7 @@ readonly class PrimeEarningsCalculationService
         }
 
         if ($booking->restaurant->user->partner_referral_id) {
-            $partner = Partner::find($booking->restaurant->user->partner_referral_id);
+            $partner = Partner::query()->find($booking->restaurant->user->partner_referral_id);
             $amount = $remainder * ($partner->percentage / 100);
             $this->earningCreationService->createEarning($booking, 'partner_restaurant', $amount, $partner->percentage, 'remainder');
             $totalPartnerEarnings += $amount;

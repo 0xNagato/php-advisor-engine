@@ -46,7 +46,7 @@ class PartnerResource extends Resource
 
     public static function table(Table $table): Table
     {
-        return (new self())->configureTable($table);
+        return (new self)->configureTable($table);
     }
 
     public function configureTable(Table $table): Table

@@ -32,7 +32,7 @@ class SmsNotificationChannel
             return;
         }
 
-        $response = (new SmsService())->sendMessage(
+        $response = (new SmsService)->sendMessage(
             contactPhone: $data->phone,
             text: $data->text,
         );

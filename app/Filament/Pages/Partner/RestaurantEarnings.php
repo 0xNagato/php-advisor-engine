@@ -55,7 +55,7 @@ class RestaurantEarnings extends Page
 
     public function getHeaderWidgets(): array
     {
-        $restaurant = new Restaurant();
+        $restaurant = new Restaurant;
         if ($this->restaurantId) {
             $restaurant = Restaurant::query()->find($this->restaurantId);
         }

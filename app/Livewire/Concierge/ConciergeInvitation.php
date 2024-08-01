@@ -187,7 +187,7 @@ class ConciergeInvitation extends SimplePage
             'hotel_name' => $data['hotel_name'],
         ]);
 
-        $user->notify(new ConciergeRegisteredEmail());
+        $user->notify(new ConciergeRegisteredEmail);
 
         Auth::login($user);
 

@@ -37,7 +37,7 @@ class RestaurantResource extends Resource
      */
     public static function table(Table $table): Table
     {
-        return (new self())->configureTable($table);
+        return (new self)->configureTable($table);
     }
 
     /**

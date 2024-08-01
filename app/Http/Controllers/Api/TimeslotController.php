@@ -27,7 +27,7 @@ class TimeslotController extends Controller
     private function validateDate(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'date' => ['required','date'],
+            'date' => ['required', 'date'],
         ]);
 
         if ($validator->fails()) {

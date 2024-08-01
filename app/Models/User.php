@@ -20,11 +20,11 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use Laravel\Sanctum\HasApiTokens;
 use Random\RandomException;
 use Rappasoft\LaravelAuthenticationLog\Traits\AuthenticationLoggable;
 use Spatie\Permission\Models\Role;
 use Spatie\Permission\Traits\HasRoles;
-use Laravel\Sanctum\HasApiTokens;
 
 /**
  * @mixin IdeHelperUser
@@ -33,11 +33,11 @@ class User extends Authenticatable implements FilamentUser, HasAvatar
 {
     use AuthenticationLoggable;
     use FormatsPhoneNumber;
+    use HasApiTokens;
     use HasFactory;
     use HasPanelShield;
     use HasRoles;
     use Notifiable;
-    use HasApiTokens;
 
     /**
      * The attributes that are mass assignable.

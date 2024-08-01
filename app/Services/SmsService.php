@@ -15,13 +15,13 @@ class SmsService
         $phoneNumber = PhoneNumberParser::make($contactPhone)->parse();
 
         if ($phoneNumber->country === 'US') {
-            return (new SimpleTexting())->sms(
+            return (new SimpleTexting)->sms(
                 phone: $phoneNumber->phone,
                 text: $text,
             );
         }
 
-        return (new Twilio())->sms(
+        return (new Twilio)->sms(
             phone: $phoneNumber->phone,
             text: $text
         );

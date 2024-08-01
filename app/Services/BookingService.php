@@ -26,7 +26,7 @@ class BookingService
         $stripeCharge = $this->handleStripeCharge($booking, $form);
         $this->updateBooking($booking, $form, $stripeCharge);
 
-        $booking->notify(new GuestBookingConfirmed());
+        $booking->notify(new GuestBookingConfirmed);
         SendConfirmationToRestaurantContacts::run($booking);
 
         BookingPaid::dispatch($booking);

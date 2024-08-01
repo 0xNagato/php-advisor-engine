@@ -10,8 +10,10 @@ use Illuminate\Support\Carbon;
 
 class ReservationService
 {
-    private Region $region;
+    private readonly Region $region;
+
     public const int MINUTES_PAST = 60;
+
     public const int MINUTES_FUTURE = 120;
 
     public function __construct(
@@ -82,6 +84,6 @@ class ReservationService
 
     public function getGuestCount(): int
     {
-        return ($this->guestCount % 2 !== 0 ? $this->guestCount + 1 : $this->guestCount);
+        return $this->guestCount % 2 !== 0 ? $this->guestCount + 1 : $this->guestCount;
     }
 }

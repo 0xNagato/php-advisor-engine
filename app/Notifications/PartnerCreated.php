@@ -50,7 +50,7 @@ class PartnerCreated extends Notification
      */
     public function toMail(object $notifiable): MailMessage
     {
-        return (new MailMessage())
+        return (new MailMessage)
             ->from('welcome@primavip.co', 'PRIMA')
             ->subject('Welcome to PRIMA!')
             ->markdown('mail.partner-welcome-mail', ['passwordResetUrl' => $this->passwordResetUrl]);
@@ -58,7 +58,7 @@ class PartnerCreated extends Notification
 
     public function toTwilio(object $notifiable): TwilioSmsMessage|TwilioMessage
     {
-        return (new TwilioSmsMessage())
+        return (new TwilioSmsMessage)
             ->content("Welcome to PRIMA! Your account has been created. Please click {$this->passwordResetUrl} to login and update your payment info and begin making reservations. Thank you for joining us!");
     }
 

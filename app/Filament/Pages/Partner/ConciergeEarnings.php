@@ -55,7 +55,7 @@ class ConciergeEarnings extends Page
 
     public function getHeaderWidgets(): array
     {
-        $concierge = new Concierge();
+        $concierge = new Concierge;
         if ($this->conciergeId) {
             $concierge = Concierge::query()->find($this->conciergeId);
         }

@@ -21,7 +21,7 @@ class WhatsappNotificationChannel
 
         $data = $notification->toWhatsapp($notifiable);
 
-        $response = (new Twilio())->whatsapp(
+        $response = (new Twilio)->whatsapp(
             phone: $data->phone,
             text: $data->text,
         );

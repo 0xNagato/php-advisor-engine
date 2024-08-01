@@ -70,44 +70,28 @@ class AppServiceProvider extends ServiceProvider
         Carbon::macro('inAppTimezone', fn (): Carbon => $this->tz(config('app.default_timezone')));
         Carbon::macro('inUserTimezone', fn (): Carbon => $this->tz(auth()->user()?->timezone ?? config('app.default_timezone')));
 
-        Blade::directive('mobileapp', static function () {
-            return '<?php if(isPrimaApp()): ?>';
-        });
+        Blade::directive('mobileapp', static fn () => '<?php if(isPrimaApp()): ?>');
 
-        Blade::directive('endmobileapp', static function () {
-            return '<?php endif; ?>';
-        });
+        Blade::directive('endmobileapp', static fn () => '<?php endif; ?>');
 
-        Blade::directive('nonmobileapp', static function () {
-            return '<?php if(!isPrimaApp()): ?>';
-        });
+        Blade::directive('nonmobileapp', static fn () => '<?php if(!isPrimaApp()): ?>');
 
-        Blade::directive('endnonmobileapp', static function () {
-            return '<?php endif; ?>';
-        });
+        Blade::directive('endnonmobileapp', static fn () => '<?php endif; ?>');
 
-        $this->app->bind(EarningCreationService::class, function () {
-            return new EarningCreationService;
-        });
+        $this->app->bind(EarningCreationService::class, fn () => new EarningCreationService);
 
-        $this->app->bind(PrimeEarningsCalculationService::class, function ($app) {
-            return new PrimeEarningsCalculationService(
-                $app->make(EarningCreationService::class)
-            );
-        });
+        $this->app->bind(PrimeEarningsCalculationService::class, fn ($app) => new PrimeEarningsCalculationService(
+            $app->make(EarningCreationService::class)
+        ));
 
-        $this->app->bind(NonPrimeEarningsCalculationService::class, function ($app) {
-            return new NonPrimeEarningsCalculationService(
-                $app->make(EarningCreationService::class)
-            );
-        });
+        $this->app->bind(NonPrimeEarningsCalculationService::class, fn ($app) => new NonPrimeEarningsCalculationService(
+            $app->make(EarningCreationService::class)
+        ));
 
-        $this->app->bind(BookingCalculationService::class, function ($app) {
-            return new BookingCalculationService(
-                $app->make(PrimeEarningsCalculationService::class),
-                $app->make(NonPrimeEarningsCalculationService::class)
-            );
-        });
+        $this->app->bind(BookingCalculationService::class, fn ($app) => new BookingCalculationService(
+            $app->make(PrimeEarningsCalculationService::class),
+            $app->make(NonPrimeEarningsCalculationService::class)
+        ));
 
         Model::preventLazyLoading(! $this->app->isProduction());
 

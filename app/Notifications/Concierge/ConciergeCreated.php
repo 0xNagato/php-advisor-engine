@@ -45,7 +45,7 @@ class ConciergeCreated extends Notification
      */
     public function toMail(object $notifiable): MailMessage
     {
-        return (new MailMessage())
+        return (new MailMessage)
             ->from('welcome@primavip.co', 'PRIMA')
             ->subject('Welcome to PRIMA!')
             ->markdown('mail.concierge-welcome-mail', ['passwordResetUrl' => $this->passwordResetUrl]);

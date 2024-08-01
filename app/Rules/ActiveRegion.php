@@ -2,14 +2,15 @@
 
 namespace App\Rules;
 
-use Illuminate\Contracts\Validation\Rule;
 use App\Models\Region;
+use Illuminate\Contracts\Validation\Rule;
 
 class ActiveRegion implements Rule
 {
     public function passes($attribute, $value)
     {
         $region = Region::active()->find($value);
+
         return $region !== null;
     }
 

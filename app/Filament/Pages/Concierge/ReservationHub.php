@@ -93,8 +93,8 @@ class ReservationHub extends Page
 
         $this->form->fill();
 
-        $this->schedulesToday = new Collection();
-        $this->schedulesThisWeek = new Collection();
+        $this->schedulesToday = new Collection;
+        $this->schedulesThisWeek = new Collection;
 
         // This is used by the availability calendar to pre-fill the form
         // this should eventually be refactored into its own service.
@@ -253,13 +253,13 @@ class ReservationHub extends Page
                 ->get();
         }
 
-        return new Collection();
+        return new Collection;
     }
 
     protected function resetSchedules(): void
     {
-        $this->schedulesToday = new Collection();
-        $this->schedulesThisWeek = new Collection();
+        $this->schedulesToday = new Collection;
+        $this->schedulesThisWeek = new Collection;
     }
 
     public function createBooking(int $scheduleTemplateId, ?string $date = null): void
@@ -317,8 +317,8 @@ class ReservationHub extends Page
 
     public function resetBooking(): void
     {
-        $this->schedulesThisWeek = new Collection();
-        $this->schedulesToday = new Collection();
+        $this->schedulesThisWeek = new Collection;
+        $this->schedulesToday = new Collection;
 
         $this->booking = null;
         $this->qrCode = null;

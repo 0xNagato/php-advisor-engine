@@ -47,7 +47,7 @@ class CustomerBookingPaid extends Notification
 
         $message = "PRIMA reservation at {$this->booking->restaurant->restaurant_name} $bookingDate at $bookingTime with {$this->booking->guest_count} guests. View your invoice at $invoiceUrl.";
 
-        return (new TwilioSmsMessage())
+        return (new TwilioSmsMessage)
             ->content($message);
     }
 

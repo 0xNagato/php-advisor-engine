@@ -11,6 +11,6 @@ class GetUserRegion
 
     public function handle(): Region
     {
-        return Region::where('id', request()->user()?->region ?? 'miami')->first();
+        return Region::query()->where('id', request()->user()?->region ?? 'miami')->first();
     }
 }

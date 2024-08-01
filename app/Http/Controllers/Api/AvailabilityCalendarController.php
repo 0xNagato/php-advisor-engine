@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers\Api;
 
-
 use App\Http\Controllers\Controller;
 use App\Http\Resources\RestaurantResource;
 use App\Services\ReservationService;
@@ -13,7 +12,6 @@ use Illuminate\Validation\ValidationException;
 
 class AvailabilityCalendarController extends Controller
 {
-
     public function __invoke(Request $request): JsonResponse
     {
         $validatedData = $this->validateReservationData($request);
@@ -32,7 +30,7 @@ class AvailabilityCalendarController extends Controller
             'data' => [
                 'restaurants' => RestaurantResource::collection($reservation->getAvailableRestaurants()),
                 'timeslots' => $reservation->getTimeslotHeaders(),
-            ]
+            ],
         ]);
     }
 
