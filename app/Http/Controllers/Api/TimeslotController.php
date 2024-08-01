@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Actions\Region\GetUserRegion;
 use App\Actions\Reservations\GetReservationTimeOptions;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\JsonResponse;
@@ -20,7 +21,7 @@ class TimeslotController extends Controller
         }
 
         return response()->json([
-            'data' => GetReservationTimeOptions::run(date: $validatedDate),
+            'data' => $this->availableTimeslots(date: $validatedDate),
         ]);
     }
 
@@ -35,5 +36,24 @@ class TimeslotController extends Controller
         }
 
         return $validator->validated()['date'];
+    }
+
+    private function availableTimeslots($date): array
+    {
+        // Get the user's current date and time
+        $region = GetUserRegion::run();
+        $isCurrentDay = $date === now($region->timezone)->format('Y-m-d');
+        $currentTime = now($region->timezone)->format('H:i:s');
+
+        $timeslots = GetReservationTimeOptions::run(date: $date);
+
+        return collect($timeslots)
+            ->map(fn ($formattedTime, $time) => [
+                'label' => $formattedTime,
+                'value' => $time,
+                'available' => !($isCurrentDay && $time < $currentTime),
+            ])
+            ->values()
+            ->all();
     }
 }
