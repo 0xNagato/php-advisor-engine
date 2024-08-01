@@ -14,9 +14,9 @@ class PaymentFactory extends Factory
     public function definition(): array
     {
         return [
-            'stripe_payment_id' => $this->faker->word(),
-            'amount' => $this->faker->randomNumber(),
-            'status' => $this->faker->word(),
+            'stripe_payment_id' => fake()->word(),
+            'amount' => fake()->randomNumber(),
+            'status' => fake()->word(),
             'created_at' => Carbon::now(),
             'updated_at' => Carbon::now(),
 

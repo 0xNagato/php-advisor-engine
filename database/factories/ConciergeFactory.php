@@ -14,7 +14,7 @@ class ConciergeFactory extends Factory
     public function definition(): array
     {
         return [
-            'hotel_name' => $this->faker->name(),
+            'hotel_name' => fake()->name(),
             'created_at' => Carbon::now(),
             'updated_at' => Carbon::now(),
 

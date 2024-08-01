@@ -4,8 +4,8 @@ namespace App\Models;
 
 use App\Data\Stripe\StripeChargeData;
 use App\Enums\BookingStatus;
+use App\Services\Booking\BookingCalculationService;
 use App\Traits\FormatsPhoneNumber;
-use AssertionError;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -14,10 +14,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOneThrough;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
-
-use function Sentry\captureException;
 
 /**
  * @mixin IdeHelperBooking
@@ -29,8 +26,6 @@ class Booking extends Model
     use Notifiable;
 
     public const int PLATFORM_PERCENTAGE_CONCIERGE = 10;
-
-    public const int PLATFORM_PERCENTAGE_RESTAURANT = 10;
 
     /**
      * The attributes that are mass assignable.
@@ -113,185 +108,7 @@ class Booking extends Model
         });
 
         static::created(static function (Booking $booking) {
-            if (! $booking->is_prime && $booking->restaurant->non_prime_type === 'paid') {
-                static::calculateNonPrimeEarnings($booking);
-
-                return;
-            }
-
-            DB::transaction(static function () use ($booking) {
-                $remainder =
-                    $booking->total_fee -
-                    $booking->restaurant_earnings -
-                    $booking->concierge_earnings;
-                $platform = $remainder;
-
-                $restaurant_earnings = $booking->restaurant_earnings;
-                $concierge_earnings = $booking->concierge_earnings;
-                $concierge_referral_level_1_earnings = 0;
-                $concierge_referral_level_2_earnings = 0;
-                $restaurant_partner_earnings = 0;
-                $concierge_partner_earnings = 0;
-
-                Earning::query()->create([
-                    'booking_id' => $booking->id,
-                    'user_id' => $booking->restaurant->user->id,
-                    'type' => 'restaurant',
-                    'amount' => $booking->restaurant_earnings,
-                    'currency' => $booking->currency,
-                    'percentage' => $booking->restaurant->payout_restaurant,
-                    'percentage_of' => 'total_fee',
-                ]);
-
-                Earning::query()->create([
-                    'booking_id' => $booking->id,
-                    'user_id' => $booking->concierge->user->id,
-                    'type' => 'concierge',
-                    'amount' => $booking->concierge_earnings,
-                    'currency' => $booking->currency,
-                    'percentage' => $booking->concierge->payout_percentage,
-                    'percentage_of' => 'total_fee',
-                ]);
-
-                if ($booking->concierge->referringConcierge) {
-                    $user_id =
-                        $booking->concierge->referringConcierge->user->id;
-                    $referralPercentage = 10;
-                    $amount = $remainder * ($referralPercentage / 100);
-                    $platform -= $amount;
-                    $concierge_referral_level_1_earnings = $amount;
-
-                    Earning::query()->create([
-                        'booking_id' => $booking->id,
-                        'user_id' => $user_id,
-                        'type' => 'concierge_referral_1',
-                        'amount' => $amount,
-                        'currency' => $booking->currency,
-                        'percentage' => $referralPercentage,
-                        'percentage_of' => 'platform',
-                    ]);
-                }
-
-                if (
-                    $booking->concierge->referringConcierge &&
-                    $booking->concierge->referringConcierge->referringConcierge
-                ) {
-                    $user_id =
-                        $booking->concierge->referringConcierge
-                            ->referringConcierge->user->id;
-                    $referralPercentage = 5;
-                    $amount = $remainder * ($referralPercentage / 100);
-                    $platform -= $amount;
-                    $concierge_referral_level_2_earnings = $amount;
-
-                    Earning::query()->create([
-                        'booking_id' => $booking->id,
-                        'user_id' => $user_id,
-                        'type' => 'concierge_referral_2',
-                        'amount' => $amount,
-                        'currency' => $booking->currency,
-                        'percentage' => $referralPercentage,
-                        'percentage_of' => 'platform',
-                    ]);
-                }
-
-                // Calculate partner's fees based on initial platform earnings
-                if ($booking->concierge->user->partner_referral_id) {
-                    $booking->partner_concierge_id =
-                        $booking->concierge->user->partner_referral_id;
-                    $booking->partner_concierge_fee =
-                        $platform *
-                        ($booking->partnerConcierge->percentage / 100);
-                    $concierge_partner_earnings =
-                        $booking->partner_concierge_fee;
-
-                    $earning = Earning::query()->create([
-                        'booking_id' => $booking->id,
-                        'user_id' => Partner::query()->find($booking->concierge->user->partner_referral_id)->user_id,
-                        'type' => 'partner_concierge',
-                        'amount' => $booking->partner_concierge_fee,
-                        'currency' => $booking->currency,
-                        'percentage' => $booking->partnerConcierge->percentage,
-                        'percentage_of' => 'remainder',
-                    ]);
-
-                    Log::info('partner_concierge Earning created', [
-                        'partner_concierge_id' => $booking->partner_concierge_id,
-                        'partner_id' => $earning->user_id,
-                        'earning' => $earning,
-                        'booking' => $booking,
-                    ]);
-                }
-
-                if ($booking->restaurant->user->partner_referral_id) {
-                    $booking->partner_restaurant_id =
-                        $booking->restaurant->user->partner_referral_id;
-                    $booking->partner_restaurant_fee =
-                        $platform *
-                        ($booking->partnerRestaurant->percentage / 100);
-                    $restaurant_partner_earnings =
-                        $booking->partner_restaurant_fee;
-
-                    Earning::query()->create([
-                        'booking_id' => $booking->id,
-                        'user_id' => Partner::query()->find($booking->restaurant->user->partner_referral_id)->user_id,
-                        'type' => 'partner_restaurant',
-                        'amount' => $booking->partner_restaurant_fee,
-                        'currency' => $booking->currency,
-                        'percentage' => $booking->partnerRestaurant->percentage,
-                        'percentage_of' => 'remainder',
-                    ]);
-                }
-
-                // Deduct partner's fees from platform earnings
-                $platform -=
-                    $booking->partner_concierge_fee +
-                    $booking->partner_restaurant_fee;
-
-                $platform_earnings = $platform;
-
-                $totalLocal =
-                    $restaurant_earnings +
-                    $concierge_earnings +
-                    $concierge_referral_level_1_earnings +
-                    $concierge_referral_level_2_earnings +
-                    $restaurant_partner_earnings +
-                    $concierge_partner_earnings +
-                    $platform_earnings;
-
-                try {
-                    assert(
-                        (int) $totalLocal === (int) $booking->total_fee,
-                        'The sum of all earnings does not equal the total fee.'
-                    );
-                    $booking->platform_earnings = $platform;
-                    $booking->save();
-                } catch (AssertionError $e) {
-                    EarningError::query()->create([
-                        'booking_id' => $booking->id,
-                        'error_message' => $e->getMessage(),
-                        'restaurant_earnings' => $restaurant_earnings,
-                        'concierge_earnings' => $concierge_earnings,
-                        'concierge_referral_level_1_earnings' => $concierge_referral_level_1_earnings,
-                        'concierge_referral_level_2_earnings' => $concierge_referral_level_2_earnings,
-                        'restaurant_partner_earnings' => $restaurant_partner_earnings,
-                        'concierge_partner_earnings' => $concierge_partner_earnings,
-                        'platform_earnings' => $platform_earnings,
-                        'total_local' => $restaurant_earnings +
-                            $concierge_earnings +
-                            $concierge_referral_level_1_earnings +
-                            $concierge_referral_level_2_earnings +
-                            $restaurant_partner_earnings +
-                            $concierge_partner_earnings +
-                            $platform_earnings,
-                        'total_fee' => $booking->total_fee,
-                    ]);
-
-                    if (app()->environment('production')) {
-                        captureException($e);
-                    }
-                }
-            });
+            app(BookingCalculationService::class)->calculateEarnings($booking);
         });
     }
 
@@ -385,32 +202,7 @@ class Booking extends Model
 
     public static function calculateNonPrimeEarnings(Booking $booking, $reconfirm = false): void
     {
-        $fee = $booking->restaurant->non_prime_fee_per_head * $booking->guest_count;
-        $concierge_earnings = $fee - ($fee * (self::PLATFORM_PERCENTAGE_CONCIERGE / 100));
-        $platform_concierge = $fee * (self::PLATFORM_PERCENTAGE_CONCIERGE / 100);
-        $platform_restaurant = $fee * (self::PLATFORM_PERCENTAGE_RESTAURANT / 100);
-        $platform_earnings = $platform_concierge + $platform_restaurant;
-        $restaurant_earnings = ($concierge_earnings + $platform_earnings) * -1;
-
-        Earning::query()->create([
-            'booking_id' => $booking->id,
-            'user_id' => $booking->restaurant->user->id,
-            'type' => 'restaurant_paid',
-            'amount' => $restaurant_earnings * 100,
-            'currency' => $booking->currency,
-            'percentage' => -107,
-            'percentage_of' => 'concierge_bounty',
-        ]);
-
-        Earning::query()->create([
-            'booking_id' => $booking->id,
-            'user_id' => $booking->concierge->user->id,
-            'type' => 'concierge_bounty',
-            'amount' => $concierge_earnings * 100,
-            'currency' => $booking->currency,
-            'percentage' => 90,
-            'percentage_of' => 'concierge_bounty',
-        ]);
+        app(BookingCalculationService::class)->calculateNonPrimeEarnings($booking);
 
         if ($reconfirm) {
             $booking->update([
@@ -418,12 +210,6 @@ class Booking extends Model
                 'status' => BookingStatus::CONFIRMED,
             ]);
         }
-
-        $booking->update([
-            'concierge_earnings' => $concierge_earnings * 100,
-            'restaurant_earnings' => $restaurant_earnings * 100,
-            'platform_earnings' => $platform_earnings * 100,
-        ]);
     }
 
     public static function reverseNonPrimeEarnings(Booking $booking): void

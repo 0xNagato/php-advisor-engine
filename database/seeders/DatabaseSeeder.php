@@ -93,7 +93,7 @@ class DatabaseSeeder extends Seeder
             ShieldSeeder::class,
             // ConciergeSeeder::class,
             RestaurantSeeder::class,
-            BookingSeeder::class,
+            // BookingSeeder::class,
         ]);
 
         Artisan::call('shield:generate --all');

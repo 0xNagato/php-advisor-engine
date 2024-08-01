@@ -145,7 +145,7 @@ class RestaurantSeeder extends Seeder
                 ])
                     ->has(Restaurant::factory([
                         'restaurant_name' => $restaurantName,
-                        'status' => RestaurantStatus::PENDING,
+                        'status' => RestaurantStatus::ACTIVE,
                         'region' => $region,
                     ]))
                     ->create();

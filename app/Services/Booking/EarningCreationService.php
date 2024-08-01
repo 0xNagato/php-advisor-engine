@@ -1,0 +1,44 @@
+<?php
+
+namespace App\Services\Booking;
+
+use App\Models\Booking;
+use App\Models\Earning;
+use App\Models\Partner;
+use Illuminate\Support\Facades\Log;
+
+class EarningCreationService
+{
+    public function createEarning(Booking $booking, string $type, float $amount, float $percentage, string $percentageOf): void
+    {
+        $earning = Earning::create([
+            'booking_id' => $booking->id,
+            'user_id' => $this->getUserIdForEarningType($booking, $type),
+            'type' => $type,
+            'amount' => $amount,
+            'currency' => $booking->currency,
+            'percentage' => $percentage,
+            'percentage_of' => $percentageOf,
+        ]);
+
+        Log::info('Earning created', [
+            'booking_id' => $booking->id,
+            'type' => $type,
+            'amount' => $amount,
+            'earning' => $earning,
+        ]);
+    }
+
+    private function getUserIdForEarningType(Booking $booking, string $type): ?int
+    {
+        return match ($type) {
+            'restaurant', 'restaurant_paid' => $booking->restaurant->user_id,
+            'concierge', 'concierge_bounty' => $booking->concierge->user_id,
+            'concierge_referral_1' => $booking->concierge->referringConcierge->user_id,
+            'concierge_referral_2' => $booking->concierge->referringConcierge->referringConcierge->user_id,
+            'partner_concierge' => Partner::find($booking->concierge->user->partner_referral_id)->user_id,
+            'partner_restaurant' => Partner::find($booking->restaurant->user->partner_referral_id)->user_id,
+            default => null,
+        };
+    }
+}

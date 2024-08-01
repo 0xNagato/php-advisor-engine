@@ -23,14 +23,14 @@ observers:
   gate: false
 logs:
   info: true
-  warning: false
+  warning: true
   emergency: false
-  alert: false
-  debug: false
+  alert: true
+  debug: true
   error: true
   critical: true
   notice: true
   vendor: false
-  deprecated_message: false
+  deprecated_message: true
 slow_queries:
   threshold_in_ms: 500

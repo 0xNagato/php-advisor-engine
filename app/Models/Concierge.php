@@ -28,12 +28,8 @@ class Concierge extends Model
         'hotel_name',
     ];
 
-    protected $appends = [
-        //
-    ];
-
     /**
-     * @return BelongsTo<User, \App\Models\Concierge>
+     * @return BelongsTo<User, Concierge>
      */
     public function user(): BelongsTo
     {
@@ -42,8 +38,6 @@ class Concierge extends Model
 
     /**
      * Calculate the payout percentage based on the amount sales.
-     *
-     * @return int The payout percentage.
      */
     protected function payoutPercentage(): Attribute
     {
@@ -62,8 +56,6 @@ class Concierge extends Model
 
     /**
      * Get the amount confirmed bookings.
-     *
-     * @return int The amount confirmed bookings.
      */
     protected function sales(): Attribute
     {
@@ -78,8 +70,6 @@ class Concierge extends Model
 
     /**
      * Get the amount confirmed bookings.
-     *
-     * @return int The amount confirmed bookings.
      */
     protected function salesThisMonth(): Attribute
     {
@@ -90,7 +80,7 @@ class Concierge extends Model
     }
 
     /**
-     * @return HasOneThrough<\App\Models\Concierge>
+     * @return HasOneThrough<Concierge>
      */
     public function referringConcierge(): HasOneThrough
     {
@@ -105,7 +95,7 @@ class Concierge extends Model
     }
 
     /**
-     * @return HasManyThrough<\App\Models\Concierge>
+     * @return HasManyThrough<Concierge>
      */
     public function concierges(): HasManyThrough
     {

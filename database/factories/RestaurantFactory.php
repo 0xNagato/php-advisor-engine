@@ -14,8 +14,8 @@ class RestaurantFactory extends Factory
     public function definition(): array
     {
         return [
-            'restaurant_name' => $this->faker->name(),
-            'primary_contact_name' => $this->faker->name(),
+            'restaurant_name' => fake()->company(),
+            'primary_contact_name' => fake()->name(),
             'contact_phone' => '+16473823326',
             'payout_restaurant' => 60,
             'open_days' => [

@@ -5,7 +5,7 @@
 
 /**
  * A helper file for Laravel, to provide autocomplete information to your IDE
- * Generated for Laravel 11.16.0.
+ * Generated for Laravel 11.19.0.
  *
  * This file should not be included in your code, only analyzed by your IDE!
  *
@@ -3580,6 +3580,16 @@ namespace Illuminate\Support\Facades {
         {
                         /** @var \Illuminate\Support\Testing\Fakes\BusFake $instance */
                         return $instance->serializeAndRestore($serializeAndRestore);
+        }
+                    /**
+         * Get the batches that have been dispatched.
+         *
+         * @return array 
+         * @static 
+         */        public static function dispatchedBatches()
+        {
+                        /** @var \Illuminate\Support\Testing\Fakes\BusFake $instance */
+                        return $instance->dispatchedBatches();
         }
             }
             /**
@@ -18000,7 +18010,7 @@ namespace Illuminate\Support\Facades {
          * @param string $asset
          * @param string|null $buildDirectory
          * @return string 
-         * @throws \Exception
+         * @throws \Illuminate\Foundation\ViteException
          * @static 
          */        public static function content($asset, $buildDirectory = null)
         {
@@ -22621,7 +22631,7 @@ namespace Livewire\Features\SupportTesting {
          * 
          *
          * @see \Filament\Forms\Testing\TestsForms::fillForm()
-         * @param array $state
+         * @param \Closure|array $state
          * @param string $formName
          * @return static 
          * @static 
@@ -22633,7 +22643,7 @@ namespace Livewire\Features\SupportTesting {
          * 
          *
          * @see \Filament\Forms\Testing\TestsForms::assertFormSet()
-         * @param array $state
+         * @param \Closure|array $state
          * @param string $formName
          * @return static 
          * @static 
@@ -22679,6 +22689,31 @@ namespace Livewire\Features\SupportTesting {
                     /**
          * 
          *
+         * @see \Filament\Forms\Testing\TestsForms::assertFormComponentExists()
+         * @param string $componentKey
+         * @param \Closure|string $formName
+         * @param \Closure|null $checkComponentUsing
+         * @return static 
+         * @static 
+         */        public static function assertFormComponentExists($componentKey, $formName = 'form', $checkComponentUsing = null)
+        {
+                        return \Livewire\Features\SupportTesting\Testable::assertFormComponentExists($componentKey, $formName, $checkComponentUsing);
+        }
+                    /**
+         * 
+         *
+         * @see \Filament\Forms\Testing\TestsForms::assertFormComponentDoesNotExist()
+         * @param string $componentKey
+         * @param string $formName
+         * @return static 
+         * @static 
+         */        public static function assertFormComponentDoesNotExist($componentKey, $formName = 'form')
+        {
+                        return \Livewire\Features\SupportTesting\Testable::assertFormComponentDoesNotExist($componentKey, $formName);
+        }
+                    /**
+         * 
+         *
          * @see \Filament\Forms\Testing\TestsForms::assertFormFieldExists()
          * @param string $fieldName
          * @param \Closure|string $formName
@@ -22688,6 +22723,18 @@ namespace Livewire\Features\SupportTesting {
          */        public static function assertFormFieldExists($fieldName, $formName = 'form', $checkFieldUsing = null)
         {
                         return \Livewire\Features\SupportTesting\Testable::assertFormFieldExists($fieldName, $formName, $checkFieldUsing);
+        }
+                    /**
+         * 
+         *
+         * @see \Filament\Forms\Testing\TestsForms::assertFormFieldDoesNotExist()
+         * @param string $fieldName
+         * @param string $formName
+         * @return static 
+         * @static 
+         */        public static function assertFormFieldDoesNotExist($fieldName, $formName = 'form')
+        {
+                        return \Livewire\Features\SupportTesting\Testable::assertFormFieldDoesNotExist($fieldName, $formName);
         }
                     /**
          * 
@@ -23596,22 +23643,26 @@ namespace Livewire\Features\SupportTesting {
          *
          * @see \Filament\Tables\Testing\TestsActions::assertTableActionExists()
          * @param array|string $name
+         * @param \Closure|null $checkActionUsing
+         * @param mixed $record
          * @return static 
          * @static 
-         */        public static function assertTableActionExists($name)
+         */        public static function assertTableActionExists($name, $checkActionUsing = null, $record = null)
         {
-                        return \Livewire\Features\SupportTesting\Testable::assertTableActionExists($name);
+                        return \Livewire\Features\SupportTesting\Testable::assertTableActionExists($name, $checkActionUsing, $record);
         }
                     /**
          * 
          *
          * @see \Filament\Tables\Testing\TestsActions::assertTableActionDoesNotExist()
          * @param array|string $name
+         * @param \Closure|null $checkActionUsing
+         * @param mixed $record
          * @return static 
          * @static 
-         */        public static function assertTableActionDoesNotExist($name)
+         */        public static function assertTableActionDoesNotExist($name, $checkActionUsing = null, $record = null)
         {
-                        return \Livewire\Features\SupportTesting\Testable::assertTableActionDoesNotExist($name);
+                        return \Livewire\Features\SupportTesting\Testable::assertTableActionDoesNotExist($name, $checkActionUsing, $record);
         }
                     /**
          * 
@@ -24202,6 +24253,19 @@ namespace Livewire\Features\SupportTesting {
          */        public static function assertTableColumnExists($name, $checkColumnUsing = null, $record = null)
         {
                         return \Livewire\Features\SupportTesting\Testable::assertTableColumnExists($name, $checkColumnUsing, $record);
+        }
+                    /**
+         * 
+         *
+         * @see \Filament\Tables\Testing\TestsColumns::assertTableColumnDoesNotExist()
+         * @param string $name
+         * @param \Closure|null $checkColumnUsing
+         * @param mixed $record
+         * @return static 
+         * @static 
+         */        public static function assertTableColumnDoesNotExist($name, $checkColumnUsing = null, $record = null)
+        {
+                        return \Livewire\Features\SupportTesting\Testable::assertTableColumnDoesNotExist($name, $checkColumnUsing, $record);
         }
                     /**
          * 
@@ -25667,6 +25731,7 @@ namespace  {
              * @param string $operator
              * @param int $count
              * @param string $boolean
+             * @param \Closure|null $callback
              * @return \Illuminate\Database\Eloquent\Builder|static 
              * @throws \RuntimeException
              * @static 
@@ -25693,6 +25758,7 @@ namespace  {
              *
              * @param \Illuminate\Database\Eloquent\Relations\Relation<*,  *, *>|string  $relation
              * @param string $boolean
+             * @param \Closure|null $callback
              * @return \Illuminate\Database\Eloquent\Builder|static 
              * @static 
              */            public static function doesntHave($relation, $boolean = 'and', $callback = null)
@@ -25715,6 +25781,7 @@ namespace  {
              * Add a relationship count / exists condition to the query with where clauses.
              *
              * @param \Illuminate\Database\Eloquent\Relations\Relation<*,  *, *>|string  $relation
+             * @param \Closure|null $callback
              * @param string $operator
              * @param int $count
              * @return \Illuminate\Database\Eloquent\Builder|static 
@@ -25730,6 +25797,7 @@ namespace  {
              * Also load the relationship with same condition.
              *
              * @param \Illuminate\Database\Eloquent\Relations\Relation<*,  *, *>|string  $relation
+             * @param \Closure|null $callback
              * @param string $operator
              * @param int $count
              * @return \Illuminate\Database\Eloquent\Builder|static 
@@ -25743,6 +25811,7 @@ namespace  {
              * Add a relationship count / exists condition to the query with where clauses and an "or".
              *
              * @param \Illuminate\Database\Eloquent\Relations\Relation<*,  *, *>|string  $relation
+             * @param \Closure|null $callback
              * @param string $operator
              * @param int $count
              * @return \Illuminate\Database\Eloquent\Builder|static 
@@ -25756,6 +25825,7 @@ namespace  {
              * Add a relationship count / exists condition to the query with where clauses.
              *
              * @param \Illuminate\Database\Eloquent\Relations\Relation<*,  *, *>|string  $relation
+             * @param \Closure|null $callback
              * @return \Illuminate\Database\Eloquent\Builder|static 
              * @static 
              */            public static function whereDoesntHave($relation, $callback = null)
@@ -25767,6 +25837,7 @@ namespace  {
              * Add a relationship count / exists condition to the query with where clauses and an "or".
              *
              * @param \Illuminate\Database\Eloquent\Relations\Relation<*,  *, *>|string  $relation
+             * @param \Closure|null $callback
              * @return \Illuminate\Database\Eloquent\Builder|static 
              * @static 
              */            public static function orWhereDoesntHave($relation, $callback = null)
@@ -25782,6 +25853,7 @@ namespace  {
              * @param string $operator
              * @param int $count
              * @param string $boolean
+             * @param \Closure|null $callback
              * @return \Illuminate\Database\Eloquent\Builder|static 
              * @static 
              */            public static function hasMorph($relation, $types, $operator = '>=', $count = 1, $boolean = 'and', $callback = null)
@@ -25809,6 +25881,7 @@ namespace  {
              * @param \Illuminate\Database\Eloquent\Relations\MorphTo<*, *>|string $relation
              * @param string|array $types
              * @param string $boolean
+             * @param \Closure|null $callback
              * @return \Illuminate\Database\Eloquent\Builder|static 
              * @static 
              */            public static function doesntHaveMorph($relation, $types, $boolean = 'and', $callback = null)
@@ -25833,6 +25906,7 @@ namespace  {
              *
              * @param \Illuminate\Database\Eloquent\Relations\MorphTo<*, *>|string $relation
              * @param string|array $types
+             * @param \Closure|null $callback
              * @param string $operator
              * @param int $count
              * @return \Illuminate\Database\Eloquent\Builder|static 
@@ -25847,6 +25921,7 @@ namespace  {
              *
              * @param \Illuminate\Database\Eloquent\Relations\MorphTo<*, *>|string $relation
              * @param string|array $types
+             * @param \Closure|null $callback
              * @param string $operator
              * @param int $count
              * @return \Illuminate\Database\Eloquent\Builder|static 
@@ -25861,6 +25936,7 @@ namespace  {
              *
              * @param \Illuminate\Database\Eloquent\Relations\MorphTo<*, *>|string $relation
              * @param string|array $types
+             * @param \Closure|null $callback
              * @return \Illuminate\Database\Eloquent\Builder|static 
              * @static 
              */            public static function whereDoesntHaveMorph($relation, $types, $callback = null)
@@ -25873,6 +25949,7 @@ namespace  {
              *
              * @param \Illuminate\Database\Eloquent\Relations\MorphTo<*, *>|string $relation
              * @param string|array $types
+             * @param \Closure|null $callback
              * @return \Illuminate\Database\Eloquent\Builder|static 
              * @static 
              */            public static function orWhereDoesntHaveMorph($relation, $types, $callback = null)
@@ -26913,6 +26990,61 @@ namespace  {
                                 return $instance->orWhereRaw($sql, $bindings);
             }
                             /**
+             * Add a "where like" clause to the query.
+             *
+             * @param \Illuminate\Contracts\Database\Query\Expression|string $column
+             * @param string $value
+             * @param bool $caseSensitive
+             * @param string $boolean
+             * @param bool $not
+             * @return \Illuminate\Database\Query\Builder 
+             * @static 
+             */            public static function whereLike($column, $value, $caseSensitive = false, $boolean = 'and', $not = false)
+            {
+                                /** @var \Illuminate\Database\Query\Builder $instance */
+                                return $instance->whereLike($column, $value, $caseSensitive, $boolean, $not);
+            }
+                            /**
+             * Add an "or where like" clause to the query.
+             *
+             * @param \Illuminate\Contracts\Database\Query\Expression|string $column
+             * @param string $value
+             * @param bool $caseSensitive
+             * @return \Illuminate\Database\Query\Builder 
+             * @static 
+             */            public static function orWhereLike($column, $value, $caseSensitive = false)
+            {
+                                /** @var \Illuminate\Database\Query\Builder $instance */
+                                return $instance->orWhereLike($column, $value, $caseSensitive);
+            }
+                            /**
+             * Add a "where not like" clause to the query.
+             *
+             * @param \Illuminate\Contracts\Database\Query\Expression|string $column
+             * @param string $value
+             * @param bool $caseSensitive
+             * @param string $boolean
+             * @return \Illuminate\Database\Query\Builder 
+             * @static 
+             */            public static function whereNotLike($column, $value, $caseSensitive = false, $boolean = 'and')
+            {
+                                /** @var \Illuminate\Database\Query\Builder $instance */
+                                return $instance->whereNotLike($column, $value, $caseSensitive, $boolean);
+            }
+                            /**
+             * Add an "or where not like" clause to the query.
+             *
+             * @param \Illuminate\Contracts\Database\Query\Expression|string $column
+             * @param string $value
+             * @param bool $caseSensitive
+             * @return \Illuminate\Database\Query\Builder 
+             * @static 
+             */            public static function orWhereNotLike($column, $value, $caseSensitive = false)
+            {
+                                /** @var \Illuminate\Database\Query\Builder $instance */
+                                return $instance->orWhereNotLike($column, $value, $caseSensitive);
+            }
+                            /**
              * Add a "where in" clause to the query.
              *
              * @param \Illuminate\Contracts\Database\Query\Expression|string $column
@@ -27662,7 +27794,7 @@ namespace  {
                                 return $instance->orWhereAll($columns, $operator, $value);
             }
                             /**
-             * Add an "where" clause to the query for multiple columns with "or" conditions between them.
+             * Add a "where" clause to the query for multiple columns with "or" conditions between them.
              *
              * @param string[] $columns
              * @param string $operator
@@ -27687,6 +27819,33 @@ namespace  {
             {
                                 /** @var \Illuminate\Database\Query\Builder $instance */
                                 return $instance->orWhereAny($columns, $operator, $value);
+            }
+                            /**
+             * Add a "where not" clause to the query for multiple columns where none of the conditions should be true.
+             *
+             * @param string[] $columns
+             * @param string $operator
+             * @param mixed $value
+             * @param string $boolean
+             * @return \Illuminate\Database\Query\Builder 
+             * @static 
+             */            public static function whereNone($columns, $operator = null, $value = null, $boolean = 'and')
+            {
+                                /** @var \Illuminate\Database\Query\Builder $instance */
+                                return $instance->whereNone($columns, $operator, $value, $boolean);
+            }
+                            /**
+             * Add an "or where not" clause to the query for multiple columns where none of the conditions should be true.
+             *
+             * @param string[] $columns
+             * @param string $operator
+             * @param mixed $value
+             * @return \Illuminate\Database\Query\Builder 
+             * @static 
+             */            public static function orWhereNone($columns, $operator = null, $value = null)
+            {
+                                /** @var \Illuminate\Database\Query\Builder $instance */
+                                return $instance->orWhereNone($columns, $operator, $value);
             }
                             /**
              * Add a "group by" clause to the query.

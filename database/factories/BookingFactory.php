@@ -17,11 +17,11 @@ class BookingFactory extends Factory
         $partners = Partner::all(); // Get all partners
 
         return [
-            'guest_first_name' => $this->faker->firstName(),
-            'guest_last_name' => $this->faker->lastName(),
-            'guest_email' => $this->faker->unique()->safeEmail(),
+            'guest_first_name' => fake()->firstName(),
+            'guest_last_name' => fake()->lastName(),
+            'guest_email' => fake()->unique()->safeEmail(),
             'guest_phone' => '+16473823326',
-            'guest_count' => $this->faker->numberBetween(2, 8),
+            'guest_count' => fake()->numberBetween(2, 8),
             'currency' => 'USD',
             'status' => 'pending',
             'created_at' => Carbon::now(),

@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
@@ -10,6 +11,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  */
 class ScheduleTemplate extends Model
 {
+    use HasFactory;
+
     protected $fillable = [
         'restaurant_id',
         'day_of_week',
@@ -23,7 +26,7 @@ class ScheduleTemplate extends Model
     ];
 
     /**
-     * @return BelongsTo<Restaurant, \App\Models\ScheduleTemplate>
+     * @return BelongsTo<Restaurant, ScheduleTemplate>
      */
     public function restaurant(): BelongsTo
     {

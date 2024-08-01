@@ -2,7 +2,7 @@
 
 namespace App\Filament\Pages\Restaurant;
 
-use App\Models\Booking;
+use App\Constants\BookingPercentages;
 use App\Models\Region;
 use App\Models\Restaurant;
 use Filament\Forms\Components\Radio;
@@ -50,7 +50,7 @@ class ConciergeIncentive extends Page
     #[Computed]
     public function conciergeIncentivePercentage(): int
     {
-        return Booking::PLATFORM_PERCENTAGE_CONCIERGE;
+        return BookingPercentages::PLATFORM_PERCENTAGE_CONCIERGE;
     }
 
     public function form(Form $form): Form

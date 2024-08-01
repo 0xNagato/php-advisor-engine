@@ -1,9 +1,14 @@
 <?php
 
+/** @noinspection UnknownInspectionInspection */
 /** @noinspection JSUnresolvedReference, JSUnresolvedLibraryURL */
 
 namespace App\Providers;
 
+use App\Services\Booking\BookingCalculationService;
+use App\Services\Booking\EarningCreationService;
+use App\Services\Booking\NonPrimeEarningsCalculationService;
+use App\Services\Booking\PrimeEarningsCalculationService;
 use Carbon\Carbon;
 use Filament\Notifications\Notification;
 use Filament\Pages\Page;
@@ -47,7 +52,7 @@ class AppServiceProvider extends ServiceProvider
                 ->send();
         };
 
-        Carbon::macro('toNotificationFormat', function (Carbon $date): string {
+        Carbon::macro('toNotificationFormat', static function (Carbon $date): string {
             $today = now();
             $tomorrow = now()->addDay();
 
@@ -65,20 +70,43 @@ class AppServiceProvider extends ServiceProvider
         Carbon::macro('inAppTimezone', fn (): Carbon => $this->tz(config('app.default_timezone')));
         Carbon::macro('inUserTimezone', fn (): Carbon => $this->tz(auth()->user()?->timezone ?? config('app.default_timezone')));
 
-        Blade::directive('mobileapp', static function ($expression) {
+        Blade::directive('mobileapp', static function () {
             return '<?php if(isPrimaApp()): ?>';
         });
 
-        Blade::directive('endmobileapp', static function ($expression) {
+        Blade::directive('endmobileapp', static function () {
             return '<?php endif; ?>';
         });
 
-        Blade::directive('nonmobileapp', static function ($expression) {
+        Blade::directive('nonmobileapp', static function () {
             return '<?php if(!isPrimaApp()): ?>';
         });
 
-        Blade::directive('endnonmobileapp', static function ($expression) {
+        Blade::directive('endnonmobileapp', static function () {
             return '<?php endif; ?>';
+        });
+
+        $this->app->bind(EarningCreationService::class, function () {
+            return new EarningCreationService;
+        });
+
+        $this->app->bind(PrimeEarningsCalculationService::class, function ($app) {
+            return new PrimeEarningsCalculationService(
+                $app->make(EarningCreationService::class)
+            );
+        });
+
+        $this->app->bind(NonPrimeEarningsCalculationService::class, function ($app) {
+            return new NonPrimeEarningsCalculationService(
+                $app->make(EarningCreationService::class)
+            );
+        });
+
+        $this->app->bind(BookingCalculationService::class, function ($app) {
+            return new BookingCalculationService(
+                $app->make(PrimeEarningsCalculationService::class),
+                $app->make(NonPrimeEarningsCalculationService::class)
+            );
         });
 
         Model::preventLazyLoading(! $this->app->isProduction());
