@@ -972,35 +972,35 @@ CREATE TABLE `users`
 /*!50001 SET character_set_client = utf8mb4 */;
 /*!50001 SET character_set_results = utf8mb4 */;
 /*!50001 SET collation_connection = utf8mb4_unicode_ci */;
-/*!50001 CREATE ALGORITHM = UNDEFINED */ /*!50013 DEFINER =`root`@`localhost` SQL SECURITY DEFINER */ /*!50001 VIEW `schedule_with_bookings` AS
+/*!50001 CREATE ALGORITHM = UNDEFINED SQL SECURITY INVOKER */ /*!50001 VIEW `schedule_with_bookings` AS
 with recursive `date_range` as (select (curdate() - interval 1 day) AS `date`
                                 union all
                                 select (`date_range`.`date` + interval 1 day) AS `DATE_ADD(date, INTERVAL 1 DAY)`
                                 from `date_range`
                                 where (`date_range`.`date` < (curdate() + interval 30 day)))
-select `st`.`id`                                                                                                 AS `id`,
-       `st`.`id`                                                                                                 AS `schedule_template_id`,
-       `st`.`restaurant_id`                                                                                      AS `restaurant_id`,
-       `st`.`day_of_week`                                                                                        AS `day_of_week`,
-       `st`.`start_time`                                                                                         AS `start_time`,
-       `st`.`end_time`                                                                                           AS `end_time`,
-       `st`.`is_available`                                                                                       AS `is_available`,
-       `st`.`available_tables`                                                                                   AS `available_tables`,
-       coalesce(`rts`.`prime_time`, `st`.`prime_time`)                                                           AS `prime_time`,
-       `st`.`prime_time_fee`                                                                                     AS `prime_time_fee`,
-       `st`.`party_size`                                                                                         AS `party_size`,
-       `dr`.`date`                                                                                               AS `booking_date`,
+select `st`.`id`                                                 AS `id`,
+       `st`.`id`                                                 AS `schedule_template_id`,
+       `st`.`restaurant_id`                                      AS `restaurant_id`,
+       `st`.`day_of_week`                                        AS `day_of_week`,
+       `st`.`start_time`                                         AS `start_time`,
+       `st`.`end_time`                                           AS `end_time`,
+       `st`.`is_available`                                       AS `is_available`,
+       `st`.`available_tables`                                   AS `available_tables`,
+       coalesce(`rts`.`prime_time`, `st`.`prime_time`)           AS `prime_time`,
+       `st`.`prime_time_fee`                                     AS `prime_time_fee`,
+       `st`.`party_size`                                         AS `party_size`,
+       `dr`.`date`                                               AS `booking_date`,
        date_format(cast(concat(date_format(`dr`.`date`, '%Y-%m-%d'), ' ',
                                time_format(`st`.`start_time`, '%H:%i:%s')) as datetime(6)),
-                   '%Y-%m-%d %H:%i:%s')                                                                          AS `booking_at`,
+                   '%Y-%m-%d %H:%i:%s')                          AS `booking_at`,
        date_format(cast(concat(date_format(`dr`.`date`, '%Y-%m-%d'), ' ',
                                time_format(`st`.`start_time`, '%H:%i:%s')) as datetime(6)),
-                   '%Y-%m-%d %H:%i:%s')                                                                          AS `schedule_start`,
+                   '%Y-%m-%d %H:%i:%s')                          AS `schedule_start`,
        date_format(cast(concat(date_format(`dr`.`date`, '%Y-%m-%d'), ' ',
                                time_format(`st`.`end_time`, '%H:%i:%s')) as datetime(6)),
-                   '%Y-%m-%d %H:%i:%s')                                                                          AS `schedule_end`,
-       (`st`.`available_tables` - ifnull(`b`.`booked_count`, 0))                                                 AS `remaining_tables`,
-       coalesce(`sp`.`fee`, `r`.`booking_fee`)                                                                   AS `effective_fee`
+                   '%Y-%m-%d %H:%i:%s')                          AS `schedule_end`,
+       (`st`.`available_tables` - ifnull(`b`.`booked_count`, 0)) AS `remaining_tables`,
+       coalesce(`sp`.`fee`, `r`.`booking_fee`)                   AS `effective_fee`
 from (((((`date_range` `dr` join `schedule_templates` `st`
           on ((dayname(`dr`.`date`) = `st`.`day_of_week`))) left join (select `bookings`.`schedule_template_id` AS `schedule_template_id`,
                                                                               count(0)                          AS `booked_count`
