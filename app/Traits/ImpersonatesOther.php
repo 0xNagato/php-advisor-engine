@@ -16,7 +16,7 @@ trait ImpersonatesOther
 
     public function getGuard(): ?string
     {
-        return Filament::getCurrentPanel()->getAuthGuard();
+        return Filament::getCurrentPanel()?->getAuthGuard();
     }
 
     public function getRedirectTo(): ?string

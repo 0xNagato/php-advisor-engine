@@ -14,6 +14,8 @@ use STS\FilamentImpersonate\Pages\Actions\Impersonate;
 
 /**
  * @method Concierge getRecord()
+ *
+ * @property Concierge $record
  */
 class ViewConcierge extends ViewRecord
 {
@@ -29,6 +31,7 @@ class ViewConcierge extends ViewRecord
         return [
             Impersonate::make()
                 ->iconButton()
+                ->redirectTo(config('app.platform_url'))
                 ->record($this->getRecord()->user),
             EditAction::make()
                 ->icon('heroicon-m-pencil-square')

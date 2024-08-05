@@ -6,11 +6,17 @@ use App\Filament\Resources\VenueResource;
 use App\Livewire\Venue\VenueLeaderboard;
 use App\Livewire\Venue\VenueRecentBookings;
 use App\Livewire\Venue\VenueStats;
+use App\Models\Venue;
 use Filament\Actions\EditAction;
 use Filament\Resources\Pages\ViewRecord;
 use Illuminate\Contracts\Support\Htmlable;
 use STS\FilamentImpersonate\Pages\Actions\Impersonate;
 
+/**
+ * @method Venue getRecord()
+ *
+ * @property Venue $record
+ */
 class ViewVenue extends ViewRecord
 {
     protected static string $resource = VenueResource::class;
@@ -20,16 +26,12 @@ class ViewVenue extends ViewRecord
         return $this->getRecord()->name;
     }
 
-    // public function getSubheading(): string|Htmlable|null
-    // {
-    //     return $this->getRecord()->user->name;
-    // }
-
     protected function getHeaderActions(): array
     {
         return [
             Impersonate::make()
                 ->iconButton()
+                ->redirectTo(config('app.platform_url'))
                 ->record($this->getRecord()->user),
             EditAction::make()
                 ->icon('heroicon-m-pencil-square')

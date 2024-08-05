@@ -6,11 +6,17 @@ use App\Filament\Resources\PartnerResource;
 use App\Livewire\Partner\PartnerLeaderboard;
 use App\Livewire\Partner\PartnerRecentBookings;
 use App\Livewire\Partner\PartnerStats;
+use App\Models\Partner;
 use Filament\Actions\EditAction;
 use Filament\Resources\Pages\ViewRecord;
 use Illuminate\Contracts\Support\Htmlable;
 use STS\FilamentImpersonate\Pages\Actions\Impersonate;
 
+/**
+ * @method Partner getRecord()
+ *
+ * @property Partner $record
+ */
 class ViewPartner extends ViewRecord
 {
     protected static string $resource = PartnerResource::class;
@@ -43,6 +49,7 @@ class ViewPartner extends ViewRecord
         return [
             Impersonate::make()
                 ->iconButton()
+                ->redirectTo(config('app.platform_url'))
                 ->record($this->getRecord()->user),
             EditAction::make()
                 ->icon('heroicon-m-pencil-square')
