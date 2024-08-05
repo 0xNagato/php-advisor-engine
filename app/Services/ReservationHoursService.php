@@ -2,22 +2,22 @@
 
 namespace App\Services;
 
-use App\Data\Restaurant\LoadReservationHoursData;
-use App\Data\Restaurant\SaveReservationHoursData;
-use App\Models\Restaurant;
+use App\Data\Vendor\LoadReservationHoursData;
+use App\Data\Vendor\SaveReservationHoursData;
+use App\Models\Venue;
 
 class ReservationHoursService
 {
     protected array $daysOfWeek = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
 
-    public function loadHours(Restaurant $restaurant): LoadReservationHoursData
+    public function loadHours(Venue $venue): LoadReservationHoursData
     {
         $startTimes = [];
         $endTimes = [];
         $selectedDays = [];
 
         foreach ($this->daysOfWeek as $day) {
-            $schedules = $restaurant->scheduleTemplates()->where('day_of_week', $day)->orderBy('start_time')->get();
+            $schedules = $venue->scheduleTemplates()->where('day_of_week', $day)->orderBy('start_time')->get();
 
             $selectedDays[$day] = ! $schedules->every(fn ($schedule) => $schedule->is_available === false);
             if ($selectedDays[$day]) {
@@ -32,9 +32,9 @@ class ReservationHoursService
     public function saveHours(SaveReservationHoursData $data): void
     {
         foreach ($this->daysOfWeek as $day) {
-            $schedules = $data->restaurant->scheduleTemplates()->where('day_of_week', $day)->get();
+            $schedules = $data->venue->scheduleTemplates()->where('day_of_week', $day)->get();
 
-            $data->restaurant->open_days = [
+            $data->venue->open_days = [
                 'monday' => $data->selectedDays['monday'] ? 'open' : 'closed',
                 'tuesday' => $data->selectedDays['tuesday'] ? 'open' : 'closed',
                 'wednesday' => $data->selectedDays['wednesday'] ? 'open' : 'closed',
@@ -44,7 +44,7 @@ class ReservationHoursService
                 'sunday' => $data->selectedDays['sunday'] ? 'open' : 'closed',
             ];
 
-            $data->restaurant->save();
+            $data->venue->save();
 
             foreach ($schedules as $schedule) {
                 $schedule->update(['is_available' => $data->selectedDays[$day] && $schedule->start_time >= $data->startTimes[$day] && $schedule->start_time <= $data->endTimes[$day]]);

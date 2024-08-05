@@ -27,8 +27,8 @@ class SpecialRequestPolicy
     {
         if ($user->hasRole('concierge')) {
             return $specialRequest->concierge_id === $user->concierge->id;
-        } elseif ($user->hasRole('restaurant')) {
-            return $specialRequest->restaurant_id === $user->restaurant->id;
+        } elseif ($user->hasRole('venue')) {
+            return $specialRequest->venue_id === $user->venue->id;
         }
 
         return false;

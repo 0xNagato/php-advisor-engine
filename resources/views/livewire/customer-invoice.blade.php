@@ -11,7 +11,7 @@
                 Email Invoice
             </x-filament::button>
             <x-filament::button color="indigo" class="w-1/2" size="sm" icon="gmdi-file-download-o" tag="a"
-                :href="route('customer.invoice.download', ['uuid' => $booking->uuid])">
+                                :href="route('customer.invoice.download', ['uuid' => $booking->uuid])">
                 Download PDF
             </x-filament::button>
         </div>
@@ -20,7 +20,7 @@
             <form wire:submit="emailInvoice" class="max-w-3xl p-4 mx-auto my-4 bg-gray-100 border rounded-lg">
                 {{ $this->form }}
                 <button type="submit"
-                    class="w-full px-4 py-2 mt-4 text-sm font-semibold text-white bg-indigo-600 rounded-lg">
+                        class="w-full px-4 py-2 mt-4 text-sm font-semibold text-white bg-indigo-600 rounded-lg">
                     Send Email
                 </button>
             </form>
@@ -29,7 +29,7 @@
     @endif
 
     <div
-        class="bg-white rounded-xl shadow sm:max-w-3xl lg:mx-auto invoice-container flex flex-col @if ($download) min-h-[10in] @endif">
+            class="bg-white rounded-xl shadow sm:max-w-3xl lg:mx-auto invoice-container flex flex-col @if ($download) min-h-[10in] @endif">
         <div class="relative overflow-hidden bg-indigo-800 min-h-32 rounded-t-xl">
             @if (!isset($customerInvoice) && !$download)
                 <button class="p-4 font-semibold text-white" onclick="window.history.back();">
@@ -39,7 +39,7 @@
             <!-- SVG Background Element -->
             <figure class="absolute inset-x-0 bottom-0 -mb-px ">
                 <svg preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg" x="0px" y="0px"
-                    viewBox="0 0 1920 100.1">
+                     viewBox="0 0 1920 100.1">
                     <path fill="currentColor" class="fill-white" d="M0,0c0,0,934.4,93.4,1920,0v100.1H0L0,0z"></path>
                 </svg>
             </figure>
@@ -49,13 +49,13 @@
         <div class="relative z-10 -mt-12">
             <!-- Icon -->
             <span
-                class="mx-auto flex justify-center items-center size-[62px] rounded-full border border-gray-200 bg-white text-gray-700 shadow-sm dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400">
+                    class="mx-auto flex justify-center items-center size-[62px] rounded-full border border-gray-200 bg-white text-gray-700 shadow-sm dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400">
                 <svg class="flex-shrink-0 size-6" xmlns="http://www.w3.org/2000/svg" width="16" height="16"
-                    fill="currentColor" viewBox="0 0 16 16">
+                     fill="currentColor" viewBox="0 0 16 16">
                     <path
-                        d="M1.92.506a.5.5 0 0 1 .434.14L3 1.293l.646-.647a.5.5 0 0 1 .708 0L5 1.293l.646-.647a.5.5 0 0 1 .708 0L7 1.293l.646-.647a.5.5 0 0 1 .708 0L9 1.293l.646-.647a.5.5 0 0 1 .708 0l.646.647.646-.647a.5.5 0 0 1 .708 0l.646.647.646-.647a.5.5 0 0 1 .801.13l.5 1A.5.5 0 0 1 15 2v12a.5.5 0 0 1-.053.224l-.5 1a.5.5 0 0 1-.8.13L13 14.707l-.646.647a.5.5 0 0 1-.708 0L11 14.707l-.646.647a.5.5 0 0 1-.708 0L9 14.707l-.646.647a.5.5 0 0 1-.708 0L7 14.707l-.646.647a.5.5 0 0 1-.708 0L5 14.707l-.646.647a.5.5 0 0 1-.708 0L3 14.707l-.646.647a.5.5 0 0 1-.801-.13l-.5-1A.5.5 0 0 1 1 14V2a.5.5 0 0 1 .053-.224l.5-1a.5.5 0 0 1 .367-.27zm.217 1.338L2 2.118v11.764l.137.274.51-.51a.5.5 0 0 1 .707 0l.646.647.646-.646a.5.5 0 0 1 .708 0l.646.646.646-.646a.5.5 0 0 1 .708 0l.646.646.646-.646a.5.5 0 0 1 .708 0l.646.646.646-.646a.5.5 0 0 1 .708 0l.646.646.646-.646a.5.5 0 0 1 .708 0l.509.509.137-.274V2.118l-.137-.274-.51.51a.5.5 0 0 1-.707 0L12 1.707l-.646.647a.5.5 0 0 1-.708 0L10 1.707l-.646.647a.5.5 0 0 1-.708 0L8 1.707l-.646.647a.5.5 0 0 1-.708 0L6 1.707l-.646.647a.5.5 0 0 1-.708 0L4 1.707l-.646.647a.5.5 0 0 1-.708 0l-.509-.51z" />
+                            d="M1.92.506a.5.5 0 0 1 .434.14L3 1.293l.646-.647a.5.5 0 0 1 .708 0L5 1.293l.646-.647a.5.5 0 0 1 .708 0L7 1.293l.646-.647a.5.5 0 0 1 .708 0L9 1.293l.646-.647a.5.5 0 0 1 .708 0l.646.647.646-.647a.5.5 0 0 1 .708 0l.646.647.646-.647a.5.5 0 0 1 .801.13l.5 1A.5.5 0 0 1 15 2v12a.5.5 0 0 1-.053.224l-.5 1a.5.5 0 0 1-.8.13L13 14.707l-.646.647a.5.5 0 0 1-.708 0L11 14.707l-.646.647a.5.5 0 0 1-.708 0L9 14.707l-.646.647a.5.5 0 0 1-.708 0L7 14.707l-.646.647a.5.5 0 0 1-.708 0L5 14.707l-.646.647a.5.5 0 0 1-.708 0L3 14.707l-.646.647a.5.5 0 0 1-.801-.13l-.5-1A.5.5 0 0 1 1 14V2a.5.5 0 0 1 .053-.224l.5-1a.5.5 0 0 1 .367-.27zm.217 1.338L2 2.118v11.764l.137.274.51-.51a.5.5 0 0 1 .707 0l.646.647.646-.646a.5.5 0 0 1 .708 0l.646.646.646-.646a.5.5 0 0 1 .708 0l.646.646.646-.646a.5.5 0 0 1 .708 0l.646.646.646-.646a.5.5 0 0 1 .708 0l.646.646.646-.646a.5.5 0 0 1 .708 0l.509.509.137-.274V2.118l-.137-.274-.51.51a.5.5 0 0 1-.707 0L12 1.707l-.646.647a.5.5 0 0 1-.708 0L10 1.707l-.646.647a.5.5 0 0 1-.708 0L8 1.707l-.646.647a.5.5 0 0 1-.708 0L6 1.707l-.646.647a.5.5 0 0 1-.708 0L4 1.707l-.646.647a.5.5 0 0 1-.708 0l-.509-.51z"/>
                     <path
-                        d="M3 4.5a.5.5 0 0 1 .5-.5h6a.5.5 0 1 1 0 1h-6a.5.5 0 0 1-.5-.5zm0 2a.5.5 0 0 1 .5-.5h6a.5.5 0 1 1 0 1h-6a.5.5 0 0 1-.5-.5zm0 2a.5.5 0 0 1 .5-.5h6a.5.5 0 1 1 0 1h-6a.5.5 0 0 1-.5-.5zm0 2a.5.5 0 0 1 .5-.5h6a.5.5 0 0 1 0 1h-6a.5.5 0 0 1-.5-.5zm8-6a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 0 1h-1a.5.5 0 0 1-.5-.5zm0 2a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 0 1h-1a.5.5 0 0 1-.5-.5zm0 2a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 0 1h-1a.5.5 0 0 1-.5-.5zm0 2a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 0 1h-1a.5.5 0 0 1-.5-.5z" />
+                            d="M3 4.5a.5.5 0 0 1 .5-.5h6a.5.5 0 1 1 0 1h-6a.5.5 0 0 1-.5-.5zm0 2a.5.5 0 0 1 .5-.5h6a.5.5 0 1 1 0 1h-6a.5.5 0 0 1-.5-.5zm0 2a.5.5 0 0 1 .5-.5h6a.5.5 0 1 1 0 1h-6a.5.5 0 0 1-.5-.5zm0 2a.5.5 0 0 1 .5-.5h6a.5.5 0 0 1 0 1h-6a.5.5 0 0 1-.5-.5zm8-6a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 0 1h-1a.5.5 0 0 1-.5-.5zm0 2a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 0 1h-1a.5.5 0 0 1-.5-.5zm0 2a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 0 1h-1a.5.5 0 0 1-.5-.5zm0 2a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 0 1h-1a.5.5 0 0 1-.5-.5z"/>
                 </svg>
             </span>
             <!-- End Icon -->
@@ -78,10 +78,10 @@
                     <span class="block text-xs text-gray-500 uppercase">Customer:</span>
                     <div class="block text-sm font-medium text-gray-800 dark:text-gray-200">
                         {{ $booking->guest_name }}
-                        <br />
+                        <br/>
                         {{ $booking->local_formatted_guest_phone }}
                         @if ($booking->guest_email)
-                            <br />
+                            <br/>
                             {{ $booking->guest_email }}
                         @endif
                     </div>
@@ -111,13 +111,13 @@
 
                         @if ($booking->stripe_charge)
                             @if ($booking->stripe_charge->paymentMethodDetails->card->brand === 'visa')
-                                <x-fab-cc-visa class="w-6 h-6" />
+                                <x-fab-cc-visa class="w-6 h-6"/>
                             @endif
                             @if ($booking->stripe_charge->paymentMethodDetails->card->brand === 'mastercard')
-                                <x-fab-cc-mastercard class="w-6 h-6" />
+                                <x-fab-cc-mastercard class="w-6 h-6"/>
                             @endif
                             @if ($booking->stripe_charge->paymentMethodDetails->card->brand === 'amex')
-                                <x-fab-cc-amex class="w-6 h-6" />
+                                <x-fab-cc-amex class="w-6 h-6"/>
                             @endif
                             <span class="block text-sm font-medium text-gray-800 dark:text-gray-200">
                                 ••••{{ $booking->stripe_charge->paymentMethodDetails->card->last4 }}</span>
@@ -142,10 +142,10 @@
 
                 <ul class="flex flex-col mt-3">
                     <li
-                        class="inline-flex items-center px-4 py-3 -mt-px text-sm text-gray-800 border gap-x-2 first:rounded-t-lg first:mt-0 last:rounded-b-lg dark:border-gray-700 dark:text-gray-200">
+                            class="inline-flex items-center px-4 py-3 -mt-px text-sm text-gray-800 border gap-x-2 first:rounded-t-lg first:mt-0 last:rounded-b-lg dark:border-gray-700 dark:text-gray-200">
                         <div class="flex items-center justify-between w-full">
                             <span>
-                                {{ $booking->restaurant->restaurant_name }} ({{ $booking->guest_count }} guests)
+                                {{ $booking->venue->name }} ({{ $booking->guest_count }} guests)
                             </span>
                             <span>
                                 {{ money($booking->total_fee, $booking->currency) }}
@@ -154,7 +154,7 @@
                     </li>
                     @if ($booking->tax > 0)
                         <li
-                            class="inline-flex items-center px-4 py-3 -mt-px text-sm text-gray-800 border gap-x-2 first:rounded-t-lg first:mt-0 last:rounded-b-lg dark:border-gray-700 dark:text-gray-200">
+                                class="inline-flex items-center px-4 py-3 -mt-px text-sm text-gray-800 border gap-x-2 first:rounded-t-lg first:mt-0 last:rounded-b-lg dark:border-gray-700 dark:text-gray-200">
                             <div class="flex items-center justify-between w-full">
                                 <span>{{ $region->tax_rate_term }} ({{ $booking->tax * 100 }}%)</span>
                                 <span>
@@ -164,7 +164,7 @@
                         </li>
                     @endif
                     <li
-                        class="inline-flex items-center px-4 py-3 -mt-px text-sm font-semibold text-gray-800 border gap-x-2 bg-gray-50 first:rounded-t-lg first:mt-0 last:rounded-b-lg dark:bg-slate-800 dark:border-gray-700 dark:text-gray-200">
+                            class="inline-flex items-center px-4 py-3 -mt-px text-sm font-semibold text-gray-800 border gap-x-2 bg-gray-50 first:rounded-t-lg first:mt-0 last:rounded-b-lg dark:bg-slate-800 dark:border-gray-700 dark:text-gray-200">
                         <div class="flex items-center justify-between w-full">
                             <span>Amount Paid</span>
                             <span>
@@ -176,10 +176,10 @@
 
                 @if (isset($customerInvoice) || $download)
                     <div class="mt-4 font-semibold text-center">
-                        Fees paid are for reservation only. Not applicable towards restaurant bill.
+                        Fees paid are for reservation only. Not applicable towards venue bill.
                     </div>
                 @else
-                    <x-filament::actions :actions="$this->resendInvoiceAction" class="w-full" />
+                    <x-filament::actions :actions="$this->resendInvoiceAction" class="w-full"/>
                 @endif
             </div>
 
@@ -196,16 +196,16 @@
                         @endforeach
 
                         @role('super_admin')
-                            <div class="mt-2">Platform:</div>
-                            <div class="col-span-2 mt-2 text-right">
-                                {{ money($booking->platform_earnings, $booking->currency) }}
+                        <div class="mt-2">Platform:</div>
+                        <div class="col-span-2 mt-2 text-right">
+                            {{ money($booking->platform_earnings, $booking->currency) }}
+                        </div>
+                        @if ($booking->is_prime)
+                            <div class="mt-2 font-semibold">Total Payout:</div>
+                            <div class="col-span-2 mt-2 font-semibold text-right">
+                                {{ money($booking->earnings->sum('amount'), $booking->currency) }}
                             </div>
-                            @if ($booking->is_prime)
-                                <div class="mt-2 font-semibold">Total Payout:</div>
-                                <div class="col-span-2 mt-2 font-semibold text-right">
-                                    {{ money($booking->earnings->sum('amount'), $booking->currency) }}
-                                </div>
-                            @endif
+                        @endif
                         @endrole
                     </div>
                 </div>
@@ -218,5 +218,5 @@
 
         </div> --}}
     </div>
-    <x-filament-actions::modals />
+    <x-filament-actions::modals/>
 </div>

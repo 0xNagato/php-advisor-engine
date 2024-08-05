@@ -2,7 +2,7 @@
 
 namespace App\Services;
 
-use App\Actions\Booking\SendConfirmationToRestaurantContacts;
+use App\Actions\Booking\SendConfirmationToVenueContacts;
 use App\Enums\BookingStatus;
 use App\Events\BookingPaid;
 use App\Models\Booking;
@@ -27,7 +27,7 @@ class BookingService
         $this->updateBooking($booking, $form, $stripeCharge);
 
         $booking->notify(new GuestBookingConfirmed);
-        SendConfirmationToRestaurantContacts::run($booking);
+        SendConfirmationToVenueContacts::run($booking);
 
         BookingPaid::dispatch($booking);
     }
@@ -50,13 +50,13 @@ class BookingService
             'source' => $form['token'],
         ]);
 
-        $region = Region::query()->find($booking->restaurant->region);
+        $region = Region::query()->find($booking->venue->region);
 
         return Charge::create([
             'amount' => $booking->total_with_tax_in_cents,
             'currency' => $region->currency,
             'customer' => $stripeCustomer->id,
-            'description' => 'Booking for '.$booking->restaurant->restaurant_name,
+            'description' => 'Booking for '.$booking->venue->name,
         ]);
     }
 

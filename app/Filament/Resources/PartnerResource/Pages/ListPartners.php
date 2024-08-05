@@ -50,7 +50,7 @@ class ListPartners extends ListRecords
         $endDate = $this->filters['endDate'] ?? now();
 
         $query = Partner::query()
-            ->select('partners.id', 'users.id as user_id', DB::raw("CONCAT(users.first_name, ' ', users.last_name) as user_name"), DB::raw('COALESCE(SUM(amount), 0) as total_earned'), DB::raw('COALESCE(COUNT(case when earnings.type in ("partner_concierge", "partner_restaurant") then 1 else null end), 0) as bookings'))
+            ->select('partners.id', 'users.id as user_id', DB::raw("CONCAT(users.first_name, ' ', users.last_name) as user_name"), DB::raw('COALESCE(SUM(amount), 0) as total_earned'), DB::raw('COALESCE(COUNT(case when earnings.type in ("partner_concierge", "partner_venue") then 1 else null end), 0) as bookings'))
             ->join('users', 'users.id', '=', 'partners.user_id')
             ->leftJoin('earnings', function (Builder $join) use ($startDate, $endDate) {
                 $join->on('earnings.user_id', '=', 'users.id')

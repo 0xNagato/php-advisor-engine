@@ -20,7 +20,7 @@ class Partner extends Model
     ];
 
     /**
-     * @return BelongsTo<User, \App\Models\Partner>
+     * @return BelongsTo<User, Partner>
      */
     public function user(): BelongsTo
     {
@@ -38,13 +38,13 @@ class Partner extends Model
     /**
      * @return HasMany<Booking>
      */
-    public function restaurantBookings(): HasMany
+    public function venueBookings(): HasMany
     {
-        return $this->hasMany(Booking::class, 'partner_restaurant_id');
+        return $this->hasMany(Booking::class, 'partner_venue_id');
     }
 
     public function scopeWithAllBookings($query)
     {
-        return $query->with(['conciergeBookings', 'restaurantBookings']);
+        return $query->with(['conciergeBookings', 'venueBookings']);
     }
 }

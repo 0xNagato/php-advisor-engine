@@ -5,7 +5,7 @@ namespace App\Filament\Resources\BookingResource\Pages;
 use App\Enums\BookingStatus;
 use App\Filament\Resources\BookingResource;
 use App\Models\Booking;
-use App\Services\RestaurantContactBookingConfirmationService;
+use App\Services\VenueContactBookingConfirmationService;
 use Filament\Resources\Pages\ListRecords;
 use Filament\Tables\Actions\Action;
 use Filament\Tables\Columns\TextColumn;
@@ -22,16 +22,16 @@ class ListBookings extends ListRecords
         return $table
             ->modifyQueryUsing(function ($query) {
                 $query = $query
-                    ->with('restaurant')
+                    ->with('venue')
                     ->orderByDesc('created_at')->where('status', BookingStatus::CONFIRMED);
 
                 if (auth()->user()->hasRole('concierge')) {
                     return $query->where('concierge_id', auth()->user()->concierge->id);
                 }
 
-                if (auth()->user()->hasRole('restaurant')) {
-                    return $query->whereHas('schedule.restaurant', function (Builder $query) {
-                        $query->where('id', auth()->user()->restaurant->id);
+                if (auth()->user()->hasRole('venue')) {
+                    return $query->whereHas('schedule.venue', function (Builder $query) {
+                        $query->where('id', auth()->user()->venue->id);
                     });
                 }
 
@@ -49,20 +49,20 @@ class ListBookings extends ListRecords
             ->paginated([5, 10])
             ->filters([
                 Filter::make('unconfirmed')
-                    ->query(fn (Builder $query) => $query->whereNull('restaurant_confirmed_at')),
+                    ->query(fn (Builder $query) => $query->whereNull('venue_confirmed_at')),
             ])
             ->actions([
                 Action::make('resendNotification')
                     ->hidden(fn (Booking $record) => ! auth()->user()->hasRole('super_admin'))
                     ->label('Resend Notification')
                     ->requiresConfirmation()
-                    ->icon(fn (Booking $record) => is_null($record->restaurant_confirmed_at) ? 'ri-refresh-line' : 'heroicon-o-check-circle')
+                    ->icon(fn (Booking $record) => is_null($record->venue_confirmed_at) ? 'ri-refresh-line' : 'heroicon-o-check-circle')
                     ->iconButton()
-                    ->color(fn (Booking $record) => is_null($record->restaurant_confirmed_at) ? 'indigo' : 'success')
+                    ->color(fn (Booking $record) => is_null($record->venue_confirmed_at) ? 'indigo' : 'success')
                     ->requiresConfirmation()
                     ->action(function (Booking $record) {
-                        app(RestaurantContactBookingConfirmationService::class)->sendConfirmation($record);
-                        $record->update(['resent_restaurant_confirmation_at' => now()]);
+                        app(VenueContactBookingConfirmationService::class)->sendConfirmation($record);
+                        $record->update(['resent_venue_confirmation_at' => now()]);
                     }),
             ]);
     }

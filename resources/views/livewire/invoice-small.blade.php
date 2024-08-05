@@ -1,17 +1,17 @@
 <x-filament-widgets::widget>
     <div class="flex items-center w-full gap-4 p-3 bg-white shadow bg-opacity-90 rounded-xl">
-        @if ($booking->schedule->restaurant->logo)
-            <img src="{{ $booking->restaurant->logo }}"
-                 alt="{{ $booking->schedule->restaurant->restaurant_name }}"
+        @if ($booking->schedule->venue->logo)
+            <img src="{{ $booking->venue->logo }}"
+                 alt="{{ $booking->schedule->venue->name }}"
                  class="object-cover max-h-[48px] max-w-[64px]">
         @else
             <span class="text-sm line-clamp-2">
-                {{ $booking->schedule->restaurant->restaurant_name }}
+                {{ $booking->schedule->venue->name }}
             </span>
         @endif
 
         <div class="flex flex-col flex-grow gap-1">
-            <div class="font-semibold">{{ $booking->schedule->restaurant->restaurant_name }}</div>
+            <div class="font-semibold">{{ $booking->schedule->venue->name }}</div>
             <div class="text-xs text-slate-600">
                 <div>{{ $this->dayDisplay }} at {{ $booking->booking_at->format('g:i a') }}</div>
                 <div>{{ $booking->guest_count }} Guests</div>

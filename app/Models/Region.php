@@ -151,10 +151,10 @@ class Region extends Model
     }
 
     /**
-     * @return HasMany<Restaurant>
+     * @return HasMany<Venue>
      */
-    public function restaurants(): HasMany
+    public function venues(): HasMany
     {
-        return $this->hasMany(Restaurant::class, 'region', 'id');
+        return $this->hasMany(Venue::class, 'region', 'id');
     }
 }

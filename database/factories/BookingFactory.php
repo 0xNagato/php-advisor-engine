@@ -30,7 +30,7 @@ class BookingFactory extends Factory
             'concierge_id' => Concierge::factory(),
 
             'partner_concierge_id' => $partners->random()->id, // Assign a random partner
-            'partner_restaurant_id' => $partners->random()->id, // Assign a random partner
+            'partner_venue_id' => $partners->random()->id, // Assign a random partner
         ];
     }
 }

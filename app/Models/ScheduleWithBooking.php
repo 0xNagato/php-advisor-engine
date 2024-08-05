@@ -10,7 +10,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 /**
  * @property int $schedule_id
  * @property int $schedule_template_id
- * @property int $restaurant_id
+ * @property int $venue_id
  * @property string $schedule_start
  * @property string $schedule_end
  * @property int $is_available
@@ -30,16 +30,16 @@ class ScheduleWithBooking extends Model
 {
     protected $table = 'schedule_with_bookings';
 
-    protected $with = ['restaurant'];
+    protected $with = ['venue'];
 
     public $timestamps = false;
 
     /**
-     * @return BelongsTo<Restaurant, ScheduleWithBooking>
+     * @return BelongsTo<Venue, ScheduleWithBooking>
      */
-    public function restaurant(): BelongsTo
+    public function venue(): BelongsTo
     {
-        return $this->belongsTo(Restaurant::class);
+        return $this->belongsTo(Venue::class);
     }
 
     public function fee(int $partySize): int
@@ -47,11 +47,11 @@ class ScheduleWithBooking extends Model
         if ($this->prime_time) {
             $extraPeople = max(0, $partySize - 2);
 
-            if (! $this->relationLoaded('restaurant')) {
-                $this->load('restaurant');
+            if (! $this->relationLoaded('venue')) {
+                $this->load('venue');
             }
 
-            $extraFee = $extraPeople * $this->restaurant->increment_fee;
+            $extraFee = $extraPeople * $this->venue->increment_fee;
 
             return ($this->effective_fee + $extraFee) * 100;
         }

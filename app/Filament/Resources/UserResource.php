@@ -68,7 +68,7 @@ class UserResource extends Resource
                     ->color(fn (string $state): string => match ($state) {
                         'Super Admin' => 'danger',
                         'Concierge' => 'info',
-                        'Restaurant' => 'success',
+                        'Venue' => 'success',
                         'Partner' => 'warning',
                         default => '',
                     })

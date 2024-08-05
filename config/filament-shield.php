@@ -32,14 +32,14 @@ return [
         'name' => 'concierge',
     ],
 
-    'restaurant' => [
+    'venue' => [
         'enabled' => true,
-        'name' => 'restaurant',
+        'name' => 'venue',
     ],
 
     'partner' => [
         'enabled' => true,
-        'name' => 'restaurant',
+        'name' => 'venue',
     ],
 
     'permission_prefixes' => [

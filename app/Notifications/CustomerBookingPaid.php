@@ -45,7 +45,7 @@ class CustomerBookingPaid extends Notification
 
         $invoiceUrl = ShortURL::destinationUrl(route('customer.invoice', $this->booking->uuid))->make()->default_short_url;
 
-        $message = "PRIMA reservation at {$this->booking->restaurant->restaurant_name} $bookingDate at $bookingTime with {$this->booking->guest_count} guests. View your invoice at $invoiceUrl.";
+        $message = "PRIMA reservation at {$this->booking->venue->name} $bookingDate at $bookingTime with {$this->booking->guest_count} guests. View your invoice at $invoiceUrl.";
 
         return (new TwilioSmsMessage)
             ->content($message);

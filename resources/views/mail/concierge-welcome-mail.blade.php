@@ -12,10 +12,10 @@
     With PRIMA, your clients will have access to top venues around the globe without having to book reservations 30+
     days in advance and you will be able to earn commission on any bookings made through your concierge account.
 
-    As a PRIMA concierge, you will have access to our entire restaurant network and can offer value to your customers
+    As a PRIMA concierge, you will have access to our entire venue network and can offer value to your customers
     far beyond your initial interaction.
 
-    Additionally, if you would like to refer a restaurant or concierge to the PRIMA Network, please contact us to join
+    Additionally, if you would like to refer a venue or concierge to the PRIMA Network, please contact us to join
     our partner team, we would love to have you help us grow our network.
 
     As always, if you have any questions, please do not hesitate to contact your PRIMA partner.

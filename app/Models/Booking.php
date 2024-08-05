@@ -51,11 +51,11 @@ class Booking extends Model
         'no_show',
         'notes',
         'partner_concierge_id',
-        'partner_restaurant_id',
+        'partner_venue_id',
         'platform_earnings',
-        'resent_restaurant_confirmation_at',
-        'restaurant_confirmed_at',
-        'restaurant_earnings',
+        'resent_venue_confirmation_at',
+        'venue_confirmed_at',
+        'venue_earnings',
         'schedule_template_id',
         'status',
         'stripe_charge',
@@ -98,9 +98,9 @@ class Booking extends Model
             $booking->total_fee = $booking->totalFee();
 
             if ($booking->is_prime) {
-                $booking->restaurant_earnings =
+                $booking->venue_earnings =
                     $booking->total_fee *
-                    ($booking->restaurant->payout_restaurant / 100);
+                    ($booking->venue->payout_venue / 100);
                 $booking->concierge_earnings =
                     $booking->total_fee *
                     ($booking->concierge->payout_percentage / 100);
@@ -147,17 +147,17 @@ class Booking extends Model
     }
 
     /**
-     * @return HasOneThrough<Restaurant>
+     * @return HasOneThrough<Venue>
      */
-    public function restaurant(): HasOneThrough
+    public function venue(): HasOneThrough
     {
         return $this->hasOneThrough(
-            Restaurant::class,
+            Venue::class,
             ScheduleTemplate::class,
             'id',
             'id',
             'schedule_template_id',
-            'restaurant_id'
+            'venue_id'
         );
     }
 
@@ -180,9 +180,9 @@ class Booking extends Model
     /**
      * @return BelongsTo<Partner, Booking>
      */
-    public function partnerRestaurant(): BelongsTo
+    public function partnerVenue(): BelongsTo
     {
-        return $this->belongsTo(Partner::class, 'partner_restaurant_id');
+        return $this->belongsTo(Partner::class, 'partner_venue_id');
     }
 
     protected function guestName(): Attribute
@@ -218,7 +218,7 @@ class Booking extends Model
 
         $booking->update([
             'concierge_earnings' => 0,
-            'restaurant_earnings' => 0,
+            'venue_earnings' => 0,
             'platform_earnings' => 0,
             'no_show' => true,
             'status' => BookingStatus::NO_SHOW,
@@ -233,8 +233,8 @@ class Booking extends Model
             'stripe_charge' => StripeChargeData::class,
             'confirmed_at' => 'datetime',
             'clicked_at' => 'datetime',
-            'restaurant_confirmed_at' => 'datetime',
-            'resent_restaurant_confirmation_at' => 'datetime',
+            'venue_confirmed_at' => 'datetime',
+            'resent_venue_confirmation_at' => 'datetime',
         ];
     }
 }

@@ -8,7 +8,7 @@
 </p>
 <p dir="ltr">
     PRIMA connects customers with prime-time reservations at in-demand
-    restaurants (“Reservations”) via PRIMA’s platform (the “Platform”). The
+    venues (“Reservations”) via PRIMA’s platform (the “Platform”). The
     Concierge desires to refer customers to the Platform to make Reservations.
 </p>
 <p dir="ltr">

@@ -10,7 +10,7 @@ class CreateSpecialRequestData extends Data
 {
     public function __construct(
         public int $schedule_template_id,
-        public int $restaurant_id,
+        public int $venue_id,
         public int $concierge_id,
         public string $booking_date,
         public string $booking_time,

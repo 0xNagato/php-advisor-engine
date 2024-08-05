@@ -2,8 +2,8 @@
 
 namespace Database\Seeders;
 
-use App\Models\Restaurant;
 use App\Models\Schedule;
+use App\Models\Venue;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Carbon;
 
@@ -14,9 +14,9 @@ class ScheduleSeeder extends Seeder
      */
     public function run(): void
     {
-        $restaurants = Restaurant::all();
+        $venues = Venue::all();
 
-        $restaurants->each(function ($restaurant) {
+        $venues->each(function ($venue) {
             $startTime = Carbon::createFromTime(12, 0, 0);
             $endTime = Carbon::createFromTime(24, 0, 0);
 
@@ -24,7 +24,7 @@ class ScheduleSeeder extends Seeder
                 Schedule::factory()->create([
                     'start_time' => $time->format('H:i:s'),
                     'end_time' => $time->copy()->addMinutes(30)->format('H:i:s'),
-                    'restaurant_id' => $restaurant->id,
+                    'venue_id' => $venue->id,
                 ]);
             }
         });

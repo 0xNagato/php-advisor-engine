@@ -20,9 +20,9 @@ class PartnerSeeder extends Seeder
             $user->assignRole('partner');
         });
 
-        // now each partner should randomly refer to 1-5 concierge or restaurant users
+        // now each partner should randomly refer to 1-5 concierge or venue users
         // $partners = Partner::all();
-        // $users = User::role(['restaurant', 'concierge'])->inRandomOrder()->take(20);
+        // $users = User::role(['venue', 'concierge'])->inRandomOrder()->take(20);
         // $users->each(function ($user) use ($partners) {
         //     $partner = $partners->random();
         //     $user->partner_referral_id = $partner->id;

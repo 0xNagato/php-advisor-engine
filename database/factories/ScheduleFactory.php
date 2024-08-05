@@ -2,8 +2,8 @@
 
 namespace Database\Factories;
 
-use App\Models\Restaurant;
 use App\Models\Schedule;
+use App\Models\Venue;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Carbon;
 
@@ -27,7 +27,7 @@ class ScheduleFactory extends Factory
             'created_at' => Carbon::now(),
             'updated_at' => Carbon::now(),
 
-            'restaurant_id' => Restaurant::factory(),
+            'venue_id' => Venue::factory(),
         ];
     }
 }

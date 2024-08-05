@@ -32,12 +32,12 @@ class EarningCreationService
     private function getUserIdForEarningType(Booking $booking, string $type): ?int
     {
         return match ($type) {
-            'restaurant', 'restaurant_paid' => $booking->restaurant->user_id,
+            'venue', 'venue_paid' => $booking->venue->user_id,
             'concierge', 'concierge_bounty' => $booking->concierge->user_id,
             'concierge_referral_1' => $booking->concierge->referringConcierge->user_id,
             'concierge_referral_2' => $booking->concierge->referringConcierge->referringConcierge->user_id,
             'partner_concierge' => Partner::query()->find($booking->concierge->user->partner_referral_id)->user_id,
-            'partner_restaurant' => Partner::query()->find($booking->restaurant->user->partner_referral_id)->user_id,
+            'partner_venue' => Partner::query()->find($booking->venue->user->partner_referral_id)->user_id,
             default => null,
         };
     }

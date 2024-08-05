@@ -35,7 +35,7 @@ class ConfirmReservation extends Notification
 
     public function toSms(Booking $notifiable): SmsData
     {
-        $message = "Your reservation at {$notifiable->restaurant->restaurant_name} is pending. Please click $this->url to secure your booking within the next 5 minutes.";
+        $message = "Your reservation at {$notifiable->venue->name} is pending. Please click $this->url to secure your booking within the next 5 minutes.";
 
         return new SmsData(
             phone: $notifiable->guest_phone,

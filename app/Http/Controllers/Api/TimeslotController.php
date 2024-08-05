@@ -51,7 +51,7 @@ class TimeslotController extends Controller
             ->map(fn ($formattedTime, $time) => [
                 'label' => $formattedTime,
                 'value' => $time,
-                'available' => !($isCurrentDay && $time < $currentTime),
+                'available' => ! ($isCurrentDay && $time < $currentTime),
             ])
             ->values()
             ->all();

@@ -2,7 +2,7 @@
 
 namespace App\Livewire\Admin;
 
-use App\Actions\Booking\SendConfirmationToRestaurantContacts;
+use App\Actions\Booking\SendConfirmationToVenueContacts;
 use App\Models\Booking;
 use Filament\Tables\Actions\Action;
 use Filament\Tables\Actions\ActionGroup;
@@ -25,7 +25,7 @@ class ConfirmationManagerBookings extends BaseWidget
                     ->latest()
             )
             ->columns([
-                TextColumn::make('restaurant.restaurant_name')
+                TextColumn::make('venue.name')
                     ->label('Venue')
                     ->formatStateUsing(fn (Booking $record) => view('partials.booking-confirmation-column', ['record' => $record]))
                     ->searchable(),
@@ -36,13 +36,13 @@ class ConfirmationManagerBookings extends BaseWidget
                         ->hidden(fn (Booking $record) => ! auth()->user()->hasRole('super_admin'))
                         ->label('Resend Confirmation')
                         ->requiresConfirmation()
-                        ->icon(fn (Booking $record) => is_null($record->restaurant_confirmed_at) ? 'ri-refresh-line' : 'heroicon-o-check-circle')
-                        ->color(fn (Booking $record) => is_null($record->restaurant_confirmed_at) ? 'indigo' : 'success')
+                        ->icon(fn (Booking $record) => is_null($record->venue_confirmed_at) ? 'ri-refresh-line' : 'heroicon-o-check-circle')
+                        ->color(fn (Booking $record) => is_null($record->venue_confirmed_at) ? 'indigo' : 'success')
                         ->requiresConfirmation()
-                        ->hidden(fn (Booking $record) => ! is_null($record->restaurant_confirmed_at))
+                        ->hidden(fn (Booking $record) => ! is_null($record->venue_confirmed_at))
                         ->action(function (Booking $record) {
-                            SendConfirmationToRestaurantContacts::run($record);
-                            $record->update(['resent_restaurant_confirmation_at' => now()]);
+                            SendConfirmationToVenueContacts::run($record);
+                            $record->update(['resent_venue_confirmation_at' => now()]);
                         }),
                 ]),
             ]);

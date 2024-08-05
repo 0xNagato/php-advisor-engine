@@ -29,7 +29,7 @@ class ViewSpecialRequest extends Page
         /** @var User $user */
         $user = auth()->user();
 
-        return $user->hasRole('concierge') || $user->hasRole('restaurant');
+        return $user->hasRole('concierge') || $user->hasRole('venue');
     }
 
     public function mount(SpecialRequest $specialRequest): void
@@ -39,7 +39,7 @@ class ViewSpecialRequest extends Page
     }
 
     #[Computed]
-    public function restaurantTotalFee(): float
+    public function venueTotalFee(): float
     {
         return ($this->commissionRequestedPercentage() / 100) * $this->minimumSpend();
     }

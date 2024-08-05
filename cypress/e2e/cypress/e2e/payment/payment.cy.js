@@ -9,7 +9,7 @@ describe('Outgoing Payments Test', () => {
         // Login as admin user
         cy.login('demo@primavip.co', 'demo2024');
         cy.wait(3000);
-        cy.url().should('eq', `${Cypress.env('url')}/admin`);
+        cy.url().should('eq', `${ Cypress.env('url') }/admin`);
 
         // Go to Payments
         cy.get('.fi-sidebar-nav-groups')
@@ -26,9 +26,9 @@ describe('Outgoing Payments Test', () => {
 
         cy.wait(10000);
 
-        // Select a type ( Restaurant ) the month should be dynamic based on the current month and currency = USD
+        // Select a type ( Venue ) the month should be dynamic based on the current month and currency = USD
         cy.get('#data\\.type')
-            .select('Restaurant');
+            .select('Venue');
 
         const currentMonth = new Date().toLocaleString('default', {
             month: 'long',
@@ -60,7 +60,7 @@ describe('Outgoing Payments Test', () => {
         // Login as admin user
         cy.login('demo@primavip.co', 'demo2024');
         cy.wait(3000);
-        cy.url().should('eq', `${Cypress.env('url')}/admin`);
+        cy.url().should('eq', `${ Cypress.env('url') }/admin`);
 
         // Go to Payments
         cy.get('.fi-sidebar-nav-groups')
@@ -91,17 +91,17 @@ describe('Outgoing Payments Test', () => {
         cy.wait(10000);
 
         cy.get('.fi-no-notification-title')
-        .should(
-            'contain.text',
-            'Export started',
-        );
+            .should(
+                'contain.text',
+                'Export started',
+            );
     });
 
-    it('can view Payments as Restaurant user', () => {
-        // Login as Restaurant user
-        cy.login('restaurant@primavip.co', 'demo2024');
+    it('can view Payments as Venue user', () => {
+        // Login as Venue user
+        cy.login('venue@primavip.co', 'demo2024');
         cy.wait(3000);
-        cy.url().should('eq', `${Cypress.env('url')}/restaurant`);
+        cy.url().should('eq', `${ Cypress.env('url') }/restaurant`);
 
         // Go to Payments
         cy.get('.fi-sidebar-nav-groups')

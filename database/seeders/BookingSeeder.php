@@ -5,8 +5,8 @@ namespace Database\Seeders;
 use App\Enums\BookingStatus;
 use App\Models\Booking;
 use App\Models\Concierge;
-use App\Models\Restaurant;
 use App\Models\ScheduleWithBooking;
+use App\Models\Venue;
 use App\Services\SalesTaxService;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Collection;
@@ -21,24 +21,24 @@ class BookingSeeder extends Seeder
         $salesTaxService = app(SalesTaxService::class);
 
         /**
-         * @var Collection<Restaurant> $restaurants
+         * @var Collection<Venue> $venues
          */
-        $restaurants = Restaurant::with(['schedules' => function ($query) {
+        $venues = Venue::with(['schedules' => function ($query) {
             $query->where('is_available', true)
                 ->where('booking_date', now()->subDay()->format('Y-m-d'))
-                ->with('restaurant');
+                ->with('venue');
         }, 'inRegion'])->get();
 
-        foreach ($restaurants as $restaurant) {
-            $availableSchedules = $restaurant->schedules->shuffle()->take(self::BOOKINGS_COUNT);
+        foreach ($venues as $venue) {
+            $availableSchedules = $venue->schedules->shuffle()->take(self::BOOKINGS_COUNT);
 
             foreach ($availableSchedules as $schedule) {
-                $this->createBooking($restaurant, $schedule, $concierges, $salesTaxService);
+                $this->createBooking($venue, $schedule, $concierges, $salesTaxService);
             }
         }
     }
 
-    private function createBooking(Restaurant $restaurant, ScheduleWithBooking $schedule, Collection $concierges, SalesTaxService $salesTaxService): void
+    private function createBooking(Venue $venue, ScheduleWithBooking $schedule, Collection $concierges, SalesTaxService $salesTaxService): void
     {
         /**
          * @var Booking $booking
@@ -51,11 +51,11 @@ class BookingSeeder extends Seeder
             'guest_count' => $schedule->party_size,
             'created_at' => $schedule->booking_at,
             'updated_at' => $schedule->booking_at,
-            'currency' => $restaurant->inRegion->currency,
+            'currency' => $venue->inRegion->currency,
             'is_prime' => true,
         ]);
 
-        $taxData = $salesTaxService->calculateTax($restaurant->region, $booking->total_fee, noTax: config('app.no_tax'));
+        $taxData = $salesTaxService->calculateTax($venue->region, $booking->total_fee, noTax: config('app.no_tax'));
         $totalWithTaxInCents = $booking->total_fee + $taxData->amountInCents;
 
         $booking->update([

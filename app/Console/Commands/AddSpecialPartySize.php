@@ -2,40 +2,40 @@
 
 namespace App\Console\Commands;
 
-use App\Models\Restaurant;
 use App\Models\ScheduleTemplate;
+use App\Models\Venue;
 use Carbon\Carbon;
 use Illuminate\Console\Command;
 
 class AddSpecialPartySize extends Command
 {
-    protected $signature = 'restaurants:add-special-party-size';
+    protected $signature = 'venues:add-special-party-size';
 
-    protected $description = 'Add special party size to all restaurants and generate schedule templates';
+    protected $description = 'Add special party size to all venues and generate schedule templates';
 
     public function handle(): int
     {
-        $restaurants = Restaurant::all();
+        $venues = Venue::all();
 
-        foreach ($restaurants as $restaurant) {
-            $partySizes = $restaurant->party_sizes;
+        foreach ($venues as $venue) {
+            $partySizes = $venue->party_sizes;
             if (! isset($partySizes['Special Request'])) {
                 $partySizes['Special Request'] = 0;
-                $restaurant->party_sizes = $partySizes;
-                $restaurant->save();
-                $this->generateScheduleTemplates($restaurant);
-                $this->info("Added special party size to restaurant: $restaurant->restaurant_name");
+                $venue->party_sizes = $partySizes;
+                $venue->save();
+                $this->generateScheduleTemplates($venue);
+                $this->info("Added special party size to venue: $venue->name");
             }
         }
 
-        $this->info('Special party size added to all restaurants and schedule templates generated.');
+        $this->info('Special party size added to all venues and schedule templates generated.');
 
         return Command::SUCCESS;
     }
 
-    protected function generateScheduleTemplates(Restaurant $restaurant): void
+    protected function generateScheduleTemplates(Venue $venue): void
     {
-        $existingTemplates = ScheduleTemplate::query()->where('restaurant_id', $restaurant->id)
+        $existingTemplates = ScheduleTemplate::query()->where('venue_id', $venue->id)
             ->where('party_size', 'Special Request')
             ->get()
             ->pluck('day_of_week', 'start_time')
@@ -46,24 +46,24 @@ class AddSpecialPartySize extends Command
         $partySize = 0;
 
         foreach ($daysOfWeek as $dayOfWeek) {
-            $startTime = Carbon::createFromTime(Restaurant::DEFAULT_START_HOUR);
-            $endTime = Carbon::createFromTime(Restaurant::DEFAULT_END_HOUR, 30);
+            $startTime = Carbon::createFromTime(Venue::DEFAULT_START_HOUR);
+            $endTime = Carbon::createFromTime(Venue::DEFAULT_END_HOUR, 30);
 
             while ($startTime->lessThanOrEqualTo($endTime)) {
                 $startTimeFormatted = $startTime->format('H:i:s');
 
                 if (! isset($existingTemplates[$startTimeFormatted]) || $existingTemplates[$startTimeFormatted] !== $dayOfWeek) {
-                    $isAvailable = $startTime->hour >= Restaurant::DEFAULT_START_HOUR && ($startTime->hour < Restaurant::DEFAULT_END_HOUR || ($startTime->hour === Restaurant::DEFAULT_END_HOUR && $startTime->minute < 30));
+                    $isAvailable = $startTime->hour >= Venue::DEFAULT_START_HOUR && ($startTime->hour < Venue::DEFAULT_END_HOUR || ($startTime->hour === Venue::DEFAULT_END_HOUR && $startTime->minute < 30));
 
                     $timeSlotStart = clone $startTime;
 
                     $schedulesData[] = [
-                        'restaurant_id' => $restaurant->id,
+                        'venue_id' => $venue->id,
                         'start_time' => $timeSlotStart->format('H:i:s'),
                         'end_time' => $timeSlotStart->addMinutes(30)->format('H:i:s'),
                         'is_available' => $isAvailable,
                         'prime_time' => $isAvailable,
-                        'available_tables' => $isAvailable ? Restaurant::DEFAULT_TABLES : 0,
+                        'available_tables' => $isAvailable ? Venue::DEFAULT_TABLES : 0,
                         'day_of_week' => $dayOfWeek,
                         'party_size' => $partySize,
                         'created_at' => now(),
@@ -76,7 +76,7 @@ class AddSpecialPartySize extends Command
         }
 
         if (filled($schedulesData)) {
-            $restaurant->scheduleTemplates()->insert($schedulesData);
+            $venue->scheduleTemplates()->insert($schedulesData);
         }
     }
 }

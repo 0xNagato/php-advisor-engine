@@ -27,7 +27,7 @@ class PartnerStats extends Widget
         $endDate = $this->filters['endDate'] ?? now();
 
         $partnerEarningsQuery = Earning::query()->where('user_id', $this->partner->user_id)
-            ->whereIn('type', ['partner_concierge', 'partner_restaurant'])
+            ->whereIn('type', ['partner_concierge', 'partner_venue'])
             ->whereBetween('confirmed_at', [$startDate, $endDate]);
 
         $numberOfBookings = $partnerEarningsQuery->count();

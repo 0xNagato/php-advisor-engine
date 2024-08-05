@@ -6,7 +6,7 @@
             'venue' => 'Murano Portofino'
         ],
         [
-            'quote' => "PRIMA will make it much easier for us to book reservations for our residents. We consistently receive many requests that we cannot handle because reservations at top restaurants around the city are impossible to book. We're excited to partner with PRIMA to make this process much easier.",
+            'quote' => "PRIMA will make it much easier for us to book reservations for our residents. We consistently receive many requests that we cannot handle because reservations at top venues around the city are impossible to book. We're excited to partner with PRIMA to make this process much easier.",
             'author' => 'Edgar Gonzalez',
             'venue' => 'Continuum On South Beach'
         ],
@@ -26,7 +26,7 @@
             'venue' => 'Murano Portofino'
         ],
         [
-            'quote' => "PRIMA will make it much easier for us to book reservations for our residents. We consistently receive many requests that we cannot handle because reservations at top restaurants around the city are impossible to book. We're excited to partner with PRIMA to make this process much easier.",
+            'quote' => "PRIMA will make it much easier for us to book reservations for our residents. We consistently receive many requests that we cannot handle because reservations at top venues around the city are impossible to book. We're excited to partner with PRIMA to make this process much easier.",
             'author' => 'Edgar Gonzalez',
             'venue' => 'Continuum On South Beach'
         ],
@@ -47,7 +47,7 @@
     <div class="max-w-full px-5 mx-auto w-full md:max-w-screen-xl">
         <div class="pb-8 text-center">
             <h2 class="text-2xl leading-tight pt-8">What Our Partners Say</h2>
-            <p class="text-sm leading-normal pt-4">Success Stories from Restaurants & Concierges</p>
+            <p class="text-sm leading-normal pt-4">Success Stories from Venues & Concierges</p>
         </div>
         <div class="swiper testimonial-swiper">
             <div class="swiper-wrapper">

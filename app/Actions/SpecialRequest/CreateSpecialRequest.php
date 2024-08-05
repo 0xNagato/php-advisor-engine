@@ -2,10 +2,10 @@
 
 namespace App\Actions\SpecialRequest;
 
-use App\Data\RestaurantContactData;
 use App\Data\SpecialRequest\CreateSpecialRequestData;
+use App\Data\VenueContactData;
 use App\Models\SpecialRequest;
-use App\Notifications\Restaurant\SendSpecialRequestConfirmation;
+use App\Notifications\Venue\SendSpecialRequestConfirmation;
 use Lorisleiva\Actions\Concerns\AsAction;
 use Spatie\LaravelData\DataCollection;
 
@@ -17,15 +17,15 @@ class CreateSpecialRequest
     {
         $specialRequest = SpecialRequest::query()->create($data->toArray());
 
-        $this->sendMessagesToContacts($specialRequest->restaurant->contacts, $specialRequest);
+        $this->sendMessagesToContacts($specialRequest->venue->contacts, $specialRequest);
 
         return $specialRequest;
     }
 
     /**
-     * Send the message to the restaurant contacts.
+     * Send the message to the venue contacts.
      *
-     * @param  DataCollection<RestaurantContactData>  $contacts
+     * @param  DataCollection<VenueContactData>  $contacts
      */
     private function sendMessagesToContacts(DataCollection $contacts, SpecialRequest $specialRequest): void
     {

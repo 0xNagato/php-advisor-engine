@@ -13,9 +13,7 @@ namespace App\Actions\Booking;
  * @method static dispatchAfterResponse(int $scheduleTemplateId, array $data, string $timezone, string $currency)
  * @method static \App\Data\Booking\CreateBookingReturnData run(int $scheduleTemplateId, array $data, string $timezone, string $currency)
  */
-class CreateBooking
-{
-}
+class CreateBooking {}
 /**
  * @method static \Lorisleiva\Actions\Decorators\JobDecorator|\Lorisleiva\Actions\Decorators\UniqueJobDecorator makeJob(\App\Models\Booking $booking)
  * @method static \Lorisleiva\Actions\Decorators\UniqueJobDecorator makeUniqueJob(\App\Models\Booking $booking)
@@ -27,9 +25,8 @@ class CreateBooking
  * @method static dispatchAfterResponse(\App\Models\Booking $booking)
  * @method static void run(\App\Models\Booking $booking)
  */
-class SendConfirmationToRestaurantContacts
-{
-}
+class SendConfirmationToVenueContacts {}
+
 namespace App\Actions\Partner;
 
 /**
@@ -43,9 +40,8 @@ namespace App\Actions\Partner;
  * @method static dispatchAfterResponse(array $data)
  * @method static \App\Models\Referral run(array $data)
  */
-class InviteConciergeViaSms
-{
-}
+class InviteConciergeViaSms {}
+
 namespace App\Actions\SpecialRequest;
 
 /**
@@ -59,32 +55,23 @@ namespace App\Actions\SpecialRequest;
  * @method static dispatchAfterResponse(\App\Data\SpecialRequest\CreateSpecialRequestData $data)
  * @method static \App\Models\SpecialRequest run(\App\Data\SpecialRequest\CreateSpecialRequestData $data)
  */
-class CreateSpecialRequest
-{
-}
+class CreateSpecialRequest {}
+
 namespace Lorisleiva\Actions\Concerns;
 
 /**
  * @method void asController()
  */
-trait AsController
-{
-}
+trait AsController {}
 /**
  * @method void asListener()
  */
-trait AsListener
-{
-}
+trait AsListener {}
 /**
  * @method void asJob()
  */
-trait AsJob
-{
-}
+trait AsJob {}
 /**
  * @method void asCommand(\Illuminate\Console\Command $command)
  */
-trait AsCommand
-{
-}
+trait AsCommand {}

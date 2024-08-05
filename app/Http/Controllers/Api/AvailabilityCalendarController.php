@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Http\Resources\RestaurantResource;
+use App\Http\Resources\VenueResource;
 use App\Services\ReservationService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -28,7 +28,7 @@ class AvailabilityCalendarController extends Controller
 
         return response()->json([
             'data' => [
-                'restaurants' => RestaurantResource::collection($reservation->getAvailableRestaurants()),
+                'venues' => VenueResource::collection($reservation->getAvailableVenues()),
                 'timeslots' => $reservation->getTimeslotHeaders(),
             ],
         ]);

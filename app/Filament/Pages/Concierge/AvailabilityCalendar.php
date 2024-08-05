@@ -3,7 +3,7 @@
 namespace App\Filament\Pages\Concierge;
 
 use App\Models\Region;
-use App\Models\Restaurant;
+use App\Models\Venue;
 use App\Services\ReservationService;
 use App\Traits\ManagesBookingForms;
 use Exception;
@@ -32,9 +32,9 @@ class AvailabilityCalendar extends Page
     public ?string $endTimeForQuery = null;
 
     /**
-     * @var Collection<Restaurant>|null
+     * @var Collection<Venue>|null
      */
-    public ?Collection $restaurants = null;
+    public ?Collection $venues = null;
 
     public array $timeslotHeaders = [];
 
@@ -54,7 +54,7 @@ class AvailabilityCalendar extends Page
         //     'reservation_time' => now(auth()->user()->timezone)->format('H:i:s'),
         // ]);
         //
-        // $this->restaurants = Restaurant::available()->with(['schedules' => function ($query) {
+        // $this->venues = Venue::available()->with(['schedules' => function ($query) {
         //     $query->where('booking_date', now(auth()->user()->timezone)->format('Y-m-d'))
         //         ->where('party_size', 2)
         //         ->where('start_time', '>=', now(auth()->user()->timezone)->format('H:i:s'))
@@ -79,9 +79,9 @@ class AvailabilityCalendar extends Page
             ->statePath('data');
     }
 
-    public function conciergePayout(Restaurant $restaurant): int
+    public function conciergePayout(Venue $venue): int
     {
-        return ($restaurant->non_prime_fee_per_head * $this->data['guest_count']) * 90;
+        return ($venue->non_prime_fee_per_head * $this->data['guest_count']) * 90;
     }
 
     public function updatedData($data, $key): void
@@ -98,7 +98,7 @@ class AvailabilityCalendar extends Page
             );
 
             $this->timeslotHeaders = $reservation->getTimeslotHeaders();
-            $this->restaurants = $reservation->getAvailableRestaurants();
+            $this->venues = $reservation->getAvailableVenues();
         }
     }
 
@@ -110,7 +110,7 @@ class AvailabilityCalendar extends Page
         $this->timezone = $region->timezone;
         $this->currency = $region->currency;
 
-        $this->restaurants = null;
+        $this->venues = null;
         $this->form->fill();
     }
 

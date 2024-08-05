@@ -6,7 +6,7 @@ use App\Livewire\Admin\AdminRecentBookings;
 use App\Livewire\Admin\AdminStats;
 use App\Livewire\Concierge\ConciergeLeaderboard;
 use App\Livewire\Partner\PartnerLeaderboard;
-use App\Livewire\Restaurant\RestaurantLeaderboard;
+use App\Livewire\Venue\VenueLeaderboard;
 use Filament\Forms\Components\DatePicker;
 use Filament\Pages\Dashboard;
 use Filament\Pages\Dashboard\Actions\FilterAction;
@@ -42,7 +42,7 @@ class AdminDashboard extends Dashboard
             AdminRecentBookings::make([
                 'columnSpan' => '1',
             ]),
-            RestaurantLeaderboard::make([
+            VenueLeaderboard::make([
                 'columnSpan' => '1',
             ]),
             ConciergeLeaderboard::make([

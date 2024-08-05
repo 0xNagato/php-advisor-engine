@@ -54,7 +54,7 @@ class CreateBooking
         ]);
 
         $taxData = app(SalesTaxService::class)->calculateTax(
-            $booking->restaurant->region,
+            $booking->venue->region,
             $booking->total_fee,
             noTax: config('app.no_tax')
         );

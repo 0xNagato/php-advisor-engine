@@ -42,11 +42,11 @@ class PartnerRecentBookings extends BaseWidget
         $query = Booking::confirmed()
             ->with('earnings', function ($query) {
                 $query->where('user_id', $this->partner->user_id)
-                    ->whereIn('type', ['partner_restaurant', 'partner_concierge']);
+                    ->whereIn('type', ['partner_venue', 'partner_concierge']);
             })
             ->where(function ($query) {
                 $query->where('partner_concierge_id', $this->partner->id)
-                    ->orWhere('partner_restaurant_id', $this->partner->id);
+                    ->orWhere('partner_venue_id', $this->partner->id);
             })
             ->whereBetween('created_at', [$startDate, $endDate])
             ->orderByDesc('created_at');
@@ -62,8 +62,8 @@ class PartnerRecentBookings extends BaseWidget
                 TextColumn::make('id')
                     ->label('Booking ID')
                     ->toggleable(isToggledHiddenByDefault: true),
-                TextColumn::make('schedule.restaurant.restaurant_name')
-                    ->label('Restaurant')
+                TextColumn::make('schedule.venue.name')
+                    ->label('Venue')
                     ->searchable(),
                 TextColumn::make('booking_at')
                     ->label('Date')
@@ -85,8 +85,8 @@ class PartnerRecentBookings extends BaseWidget
                             $types[] = 'Concierge';
                         }
 
-                        if ($booking->partner_restaurant_id && $booking->partner_restaurant_id == $this->partner->id) {
-                            $types[] = 'Restaurant';
+                        if ($booking->partner_venue_id && $booking->partner_venue_id == $this->partner->id) {
+                            $types[] = 'Venue';
                         }
 
                         return implode(' & ', $types) ?: 'Unknown'; // Join types with '&' if both exist, default to 'Unknown'

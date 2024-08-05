@@ -56,7 +56,7 @@ class PaymentInformation extends Page
             return ! session('simpleMode');
         }
 
-        return auth()->user()->hasRole('concierge') || auth()->user()->hasRole('restaurant');
+        return auth()->user()->hasRole('concierge') || auth()->user()->hasRole('venue');
     }
 
     public function mount(): void

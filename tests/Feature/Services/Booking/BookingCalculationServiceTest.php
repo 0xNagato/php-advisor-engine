@@ -10,8 +10,8 @@ namespace Tests\Feature\Services\Booking;
 use App\Models\Booking;
 use App\Models\Concierge;
 use App\Models\Partner;
-use App\Models\Restaurant;
 use App\Models\ScheduleTemplate;
+use App\Models\Venue;
 use App\Services\Booking\BookingCalculationService;
 use App\Services\Booking\EarningCreationService;
 use App\Services\Booking\NonPrimeEarningsCalculationService;
@@ -26,7 +26,7 @@ class BookingCalculationServiceTest extends TestCase
 
     protected BookingCalculationService $service;
 
-    protected Restaurant $restaurant;
+    protected Venue $venue;
 
     protected Concierge $concierge;
 
@@ -45,8 +45,8 @@ class BookingCalculationServiceTest extends TestCase
             $nonPrimeEarningsCalculationService
         );
 
-        $this->restaurant = Restaurant::factory()->create([
-            'payout_restaurant' => 60,
+        $this->venue = Venue::factory()->create([
+            'payout_venue' => 60,
             'non_prime_fee_per_head' => 10,
         ]);
         $this->concierge = Concierge::factory()->create();
@@ -57,42 +57,42 @@ class BookingCalculationServiceTest extends TestCase
         });
     }
 
-    public function test_scenario_1_partner_referred_both_concierge_and_restaurant(): void
+    public function test_scenario_1_partner_referred_both_concierge_and_venue(): void
     {
         Booking::withoutEvents(function () {
             $this->concierge->user->update(['partner_referral_id' => $this->partner->id]);
-            $this->restaurant->user->update(['partner_referral_id' => $this->partner->id]);
+            $this->venue->user->update(['partner_referral_id' => $this->partner->id]);
 
             $booking = $this->createBooking();
 
             $this->service->calculateEarnings($booking);
 
             $this->assertDatabaseCount('earnings', 4);
-            $this->assertEarningExists($booking, 'restaurant', 12000);
+            $this->assertEarningExists($booking, 'venue', 12000);
             $this->assertEarningExists($booking, 'concierge', 2000);
-            $this->assertEarningExists($booking, 'partner_restaurant', 360);
+            $this->assertEarningExists($booking, 'partner_venue', 360);
             $this->assertEarningExists($booking, 'partner_concierge', 360);
             $this->assertEquals(5280, $booking->fresh()->platform_earnings);
         });
     }
 
-    public function test_scenario_2_different_partners_referred_concierge_and_restaurant(): void
+    public function test_scenario_2_different_partners_referred_concierge_and_venue(): void
     {
         Booking::withoutEvents(function () {
             $partnerConcierge = Partner::factory()->create(['percentage' => 6]);
-            $partnerRestaurant = Partner::factory()->create(['percentage' => 6]);
+            $partnerVenue = Partner::factory()->create(['percentage' => 6]);
 
             $this->concierge->user->update(['partner_referral_id' => $partnerConcierge->id]);
-            $this->restaurant->user->update(['partner_referral_id' => $partnerRestaurant->id]);
+            $this->venue->user->update(['partner_referral_id' => $partnerVenue->id]);
 
             $booking = $this->createBooking();
 
             $this->service->calculateEarnings($booking);
 
             $this->assertDatabaseCount('earnings', 4);
-            $this->assertEarningExists($booking, 'restaurant', 12000);
+            $this->assertEarningExists($booking, 'venue', 12000);
             $this->assertEarningExists($booking, 'concierge', 2000);
-            $this->assertEarningExists($booking, 'partner_restaurant', 360);
+            $this->assertEarningExists($booking, 'partner_venue', 360);
             $this->assertEarningExists($booking, 'partner_concierge', 360);
             $this->assertEquals(5280, $booking->fresh()->platform_earnings);
         });
@@ -109,7 +109,7 @@ class BookingCalculationServiceTest extends TestCase
             $this->service->calculateEarnings($booking);
 
             $this->assertDatabaseCount('earnings', 3);
-            $this->assertEarningExists($booking, 'restaurant', 12000);
+            $this->assertEarningExists($booking, 'venue', 12000);
             $this->assertEarningExists($booking, 'concierge', 2000);
             $this->assertEarningExists($booking, 'concierge_referral_1', 600);
             $this->assertEquals(5400, $booking->fresh()->platform_earnings);
@@ -129,7 +129,7 @@ class BookingCalculationServiceTest extends TestCase
             $this->service->calculateEarnings($booking);
 
             $this->assertDatabaseCount('earnings', 4);
-            $this->assertEarningExists($booking, 'restaurant', 12000);
+            $this->assertEarningExists($booking, 'venue', 12000);
             $this->assertEarningExists($booking, 'concierge', 2000);
             $this->assertEarningExists($booking, 'concierge_referral_1', 600);
             $this->assertEarningExists($booking, 'concierge_referral_2', 300);
@@ -145,12 +145,12 @@ class BookingCalculationServiceTest extends TestCase
             $this->service->calculateNonPrimeEarnings($booking);
 
             $this->assertDatabaseCount('earnings', 2);
-            $this->assertEarningExists($booking, 'restaurant_paid', -2200);
+            $this->assertEarningExists($booking, 'venue_paid', -2200);
             $this->assertEarningExists($booking, 'concierge_bounty', 1800);
 
             $freshBooking = $booking->fresh();
             $this->assertEquals(1800, $freshBooking->concierge_earnings);
-            $this->assertEquals(-2200, $freshBooking->restaurant_earnings);
+            $this->assertEquals(-2200, $freshBooking->venue_earnings);
             $this->assertEquals(400, $freshBooking->platform_earnings);
         });
     }
@@ -163,12 +163,12 @@ class BookingCalculationServiceTest extends TestCase
             $this->service->calculateNonPrimeEarnings($booking);
 
             $this->assertDatabaseCount('earnings', 2);
-            $this->assertEarningExists($booking, 'restaurant_paid', -5500);
+            $this->assertEarningExists($booking, 'venue_paid', -5500);
             $this->assertEarningExists($booking, 'concierge_bounty', 4500);
 
             $freshBooking = $booking->fresh();
             $this->assertEquals(4500, $freshBooking->concierge_earnings);
-            $this->assertEquals(-5500, $freshBooking->restaurant_earnings);
+            $this->assertEquals(-5500, $freshBooking->venue_earnings);
             $this->assertEquals(1000, $freshBooking->platform_earnings);
         });
     }
@@ -176,33 +176,33 @@ class BookingCalculationServiceTest extends TestCase
     public function test_non_prime_booking_with_custom_fee(): void
     {
         Booking::withoutEvents(function () {
-            $this->restaurant->update(['non_prime_fee_per_head' => 15]);
+            $this->venue->update(['non_prime_fee_per_head' => 15]);
             $booking = $this->createNonPrimeBooking();
 
             $this->service->calculateNonPrimeEarnings($booking);
 
             $this->assertDatabaseCount('earnings', 2);
-            $this->assertEarningExists($booking, 'restaurant_paid', -3300);
+            $this->assertEarningExists($booking, 'venue_paid', -3300);
             $this->assertEarningExists($booking, 'concierge_bounty', 2700);
 
             $freshBooking = $booking->fresh();
             $this->assertEquals(2700, $freshBooking->concierge_earnings);
-            $this->assertEquals(-3300, $freshBooking->restaurant_earnings);
+            $this->assertEquals(-3300, $freshBooking->venue_earnings);
             $this->assertEquals(600, $freshBooking->platform_earnings);
         });
     }
 
     private function createNonPrimeBooking(int $guestCount = 2): Booking
     {
-        $restaurant = $this->restaurant;
+        $venue = $this->venue;
 
         return Booking::factory()->create([
             'uuid' => Str::uuid(),
             'is_prime' => false,
             'guest_count' => $guestCount,
             'concierge_id' => $this->concierge->id,
-            'schedule_template_id' => ScheduleTemplate::factory()->create(['restaurant_id' => $restaurant->id])->id,
-            'total_fee' => $restaurant->non_prime_fee_per_head * $guestCount * 100,
+            'schedule_template_id' => ScheduleTemplate::factory()->create(['venue_id' => $venue->id])->id,
+            'total_fee' => $venue->non_prime_fee_per_head * $guestCount * 100,
         ]);
     }
 
@@ -213,7 +213,7 @@ class BookingCalculationServiceTest extends TestCase
             'is_prime' => true,
             'total_fee' => 20000,
             'concierge_id' => $this->concierge->id,
-            'schedule_template_id' => ScheduleTemplate::factory()->create(['restaurant_id' => $this->restaurant->id])->id,
+            'schedule_template_id' => ScheduleTemplate::factory()->create(['venue_id' => $this->venue->id])->id,
         ]);
     }
 

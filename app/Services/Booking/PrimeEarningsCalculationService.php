@@ -15,33 +15,33 @@ readonly class PrimeEarningsCalculationService
 
     public function calculate(Booking $booking): void
     {
-        $restaurant_earnings = $this->calculateRestaurantEarnings($booking);
+        $venue_earnings = $this->calculateVenueEarnings($booking);
         $concierge_earnings = $this->calculateConciergeEarnings($booking);
 
-        $this->earningCreationService->createEarning($booking, 'restaurant', $restaurant_earnings, $booking->restaurant->payout_restaurant, 'total_fee');
+        $this->earningCreationService->createEarning($booking, 'venue', $venue_earnings, $booking->venue->payout_venue, 'total_fee');
         $this->earningCreationService->createEarning($booking, 'concierge', $concierge_earnings, $booking->concierge->payout_percentage, 'total_fee');
 
-        $remainder = $booking->total_fee - $restaurant_earnings - $concierge_earnings;
+        $remainder = $booking->total_fee - $venue_earnings - $concierge_earnings;
 
         $remainder -= $this->calculateAndCreateReferralEarnings($booking, $remainder);
         $remainder -= $this->calculateAndCreatePartnerEarnings($booking, $remainder);
 
-        $booking->restaurant_earnings = $restaurant_earnings;
+        $booking->venue_earnings = $venue_earnings;
         $booking->concierge_earnings = $concierge_earnings;
         $booking->platform_earnings = $remainder;
         $booking->save();
 
         Log::info('Prime earnings calculated', [
             'booking_id' => $booking->id,
-            'restaurant_earnings' => $restaurant_earnings,
+            'venue_earnings' => $venue_earnings,
             'concierge_earnings' => $concierge_earnings,
             'platform_earnings' => $remainder,
         ]);
     }
 
-    private function calculateRestaurantEarnings(Booking $booking): float
+    private function calculateVenueEarnings(Booking $booking): float
     {
-        return $booking->total_fee * ($booking->restaurant->payout_restaurant / 100);
+        return $booking->total_fee * ($booking->venue->payout_venue / 100);
     }
 
     private function calculateConciergeEarnings(Booking $booking): float
@@ -81,13 +81,13 @@ readonly class PrimeEarningsCalculationService
             $booking->partner_concierge_fee = $amount;
         }
 
-        if ($booking->restaurant->user->partner_referral_id) {
-            $partner = Partner::query()->find($booking->restaurant->user->partner_referral_id);
+        if ($booking->venue->user->partner_referral_id) {
+            $partner = Partner::query()->find($booking->venue->user->partner_referral_id);
             $amount = $remainder * ($partner->percentage / 100);
-            $this->earningCreationService->createEarning($booking, 'partner_restaurant', $amount, $partner->percentage, 'remainder');
+            $this->earningCreationService->createEarning($booking, 'partner_venue', $amount, $partner->percentage, 'remainder');
             $totalPartnerEarnings += $amount;
-            $booking->partner_restaurant_id = $partner->id;
-            $booking->partner_restaurant_fee = $amount;
+            $booking->partner_venue_id = $partner->id;
+            $booking->partner_venue_fee = $amount;
         }
 
         return $totalPartnerEarnings;

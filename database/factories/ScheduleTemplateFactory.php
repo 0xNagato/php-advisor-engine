@@ -2,8 +2,8 @@
 
 namespace Database\Factories;
 
-use App\Models\Restaurant;
 use App\Models\ScheduleTemplate;
+use App\Models\Venue;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Carbon;
 
@@ -14,7 +14,7 @@ class ScheduleTemplateFactory extends Factory
     public function definition(): array
     {
         return [
-            'restaurant_id' => Restaurant::factory(),
+            'venue_id' => Venue::factory(),
             'day_of_week' => $this->faker->randomElement(['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday']),
             'start_time' => $this->faker->time('H:i:s'),
             'end_time' => $this->faker->time('H:i:s'),

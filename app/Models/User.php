@@ -100,11 +100,11 @@ class User extends Authenticatable implements FilamentUser, HasAvatar
     }
 
     /**
-     * @return HasOne<Restaurant>
+     * @return HasOne<Venue>
      */
-    public function restaurant(): HasOne
+    public function venue(): HasOne
     {
-        return $this->hasOne(Restaurant::class);
+        return $this->hasOne(Venue::class);
     }
 
     public function canAccessPanel(Panel $panel): bool

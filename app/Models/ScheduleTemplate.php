@@ -14,7 +14,7 @@ class ScheduleTemplate extends Model
     use HasFactory;
 
     protected $fillable = [
-        'restaurant_id',
+        'venue_id',
         'day_of_week',
         'start_time',
         'end_time',
@@ -26,11 +26,11 @@ class ScheduleTemplate extends Model
     ];
 
     /**
-     * @return BelongsTo<Restaurant, ScheduleTemplate>
+     * @return BelongsTo<Venue, ScheduleTemplate>
      */
-    public function restaurant(): BelongsTo
+    public function venue(): BelongsTo
     {
-        return $this->belongsTo(Restaurant::class);
+        return $this->belongsTo(Venue::class);
     }
 
     protected function casts(): array

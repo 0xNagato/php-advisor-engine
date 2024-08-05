@@ -6,8 +6,8 @@
 <x-filament-panels::page>
     <x-filament::section class="{{ $this->borderTop }}">
         <div class="flex justify-center mb-2 -mt-2">
-            <img src="{{ $specialRequest->restaurant->logo }}" alt="{{ $specialRequest->restaurant->name }}"
-                class="object-cover h-16">
+            <img src="{{ $specialRequest->venue->logo }}" alt="{{ $specialRequest->venue->name }}"
+                 class="object-cover h-16">
         </div>
         <div class="w-full space-y-3 text-sm">
             <div class="relative">
@@ -58,7 +58,7 @@
                     <p class="font-medium text-gray-700">
                         <span class="font-semibold">Minimum Spend:</span>
                         <span class="text-black">
-                            {{ money($this->minimumSpend * 100, $specialRequest->restaurant->inRegion->currency) }}
+                            {{ money($this->minimumSpend * 100, $specialRequest->venue->inRegion->currency) }}
                         </span>
                     </p>
                 </div>
@@ -75,7 +75,7 @@
                     <div class="font-medium text-gray-700">
                         <span class="font-semibold">Your Commission:</span>
                         <span class="text-black">
-                            {{ money($this->restaurantTotalFee * 100, $specialRequest->restaurant->inRegion->currency) }}
+                            {{ money($this->venueTotalFee * 100, $specialRequest->venue->inRegion->currency) }}
                         </span>
                         <div class="mt-1 text-xs">
                             ({{ $this->commissionRequestedPercentage }}% Commission)
@@ -132,21 +132,21 @@
                     </div>
                 @endif
 
-                {{-- Check if message from restaurant if there is display it --}}
-                @if ($specialRequest->restaurant_message)
+                {{-- Check if message from venue if there is display it --}}
+                @if ($specialRequest->venue_message)
                     <div class="relative">
                         <div class="absolute inset-0 flex items-center" aria-hidden="true">
                             <div class="w-full border-t border-gray-300"></div>
                         </div>
                         <div class="relative flex justify-center">
                             <span class="px-3 text-base font-semibold leading-6 text-gray-900 bg-white">
-                                Message from Restaurant
+                                Message from Venue
                             </span>
                         </div>
                     </div>
                     <div>
                         <p class="font-medium text-gray-700">
-                            <span class="font-light text-black">{!! nl2br(e($specialRequest->restaurant_message)) !!}</span>
+                            <span class="font-light text-black">{!! nl2br(e($specialRequest->venue_message)) !!}</span>
                         </p>
                     </div>
                 @endif

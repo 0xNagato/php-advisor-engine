@@ -4,7 +4,7 @@ namespace App\Services;
 
 use App\Actions\Region\GetUserRegion;
 use App\Models\Region;
-use App\Models\Restaurant;
+use App\Models\Venue;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Carbon;
 
@@ -24,7 +24,7 @@ class ReservationService
         $this->region = GetUserRegion::run();
     }
 
-    public function getAvailableRestaurants(): Collection
+    public function getAvailableVenues(): Collection
     {
         $requestedDate = Carbon::createFromFormat('Y-m-d', $this->date, $this->region->timezone);
 
@@ -34,7 +34,7 @@ class ReservationService
             $this->reservationTime = $this->adjustTime();
         }
 
-        return Restaurant::available()
+        return Venue::available()
             ->where('region', $this->region->id)
             ->with(['schedules' => function ($query) {
                 $query->where('booking_date', $this->date)

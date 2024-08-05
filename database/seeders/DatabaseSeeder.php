@@ -5,8 +5,8 @@ namespace Database\Seeders;
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use App\Models\Concierge;
 use App\Models\Partner;
-use App\Models\Restaurant;
 use App\Models\User;
+use App\Models\Venue;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Artisan;
 use Spatie\Permission\Models\Role;
@@ -56,7 +56,7 @@ class DatabaseSeeder extends Seeder
         ]);
 
         Role::create(['name' => 'concierge']);
-        Role::create(['name' => 'restaurant']);
+        Role::create(['name' => 'venue']);
         Role::create(['name' => 'partner']);
 
         $this->call([
@@ -65,16 +65,16 @@ class DatabaseSeeder extends Seeder
 
         User::factory([
             'first_name' => 'Demo',
-            'last_name' => 'Restaurant',
-            'email' => 'restaurant@primavip.co',
+            'last_name' => 'Venue',
+            'email' => 'venue@primavip.co',
             'password' => bcrypt('demo2024'),
             'partner_referral_id' => Partner::query()->inRandomOrder()->first()->id,
         ])
-            ->has(Restaurant::factory([
-                'restaurant_name' => 'Demo Restaurant',
+            ->has(Venue::factory([
+                'name' => 'Demo Venue',
             ]))
             ->create()
-            ->assignRole('restaurant');
+            ->assignRole('venue');
 
         User::factory([
             'first_name' => 'Demo',
@@ -92,7 +92,7 @@ class DatabaseSeeder extends Seeder
         $this->call([
             ShieldSeeder::class,
             // ConciergeSeeder::class,
-            RestaurantSeeder::class,
+            VenueSeeder::class,
             // BookingSeeder::class,
         ]);
 

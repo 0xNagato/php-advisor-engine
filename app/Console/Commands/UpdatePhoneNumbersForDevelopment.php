@@ -2,9 +2,9 @@
 
 namespace App\Console\Commands;
 
-use App\Data\RestaurantContactData;
-use App\Models\Restaurant;
+use App\Data\VenueContactData;
 use App\Models\User;
+use App\Models\Venue;
 use App\Traits\FormatsPhoneNumber;
 use Illuminate\Console\Command;
 use Spatie\LaravelData\DataCollection;
@@ -43,16 +43,16 @@ class UpdatePhoneNumbersForDevelopment extends Command
 
         User::query()->update(['phone' => $phone]);
 
-        $restaurants = Restaurant::all();
-        foreach ($restaurants as $restaurant) {
-            /** @var DataCollection<RestaurantContactData> */
-            $contacts = $restaurant->contacts;
+        $venues = Venue::all();
+        foreach ($venues as $venue) {
+            /** @var DataCollection<VenueContactData> */
+            $contacts = $venue->contacts;
 
-            $contacts->each(function (RestaurantContactData $contact) use ($phone) {
+            $contacts->each(function (VenueContactData $contact) use ($phone) {
                 $contact->contact_phone = $phone;
             });
 
-            $restaurant->save();
+            $venue->save();
         }
 
         $this->components->info('Phone numbers updated successfully.');

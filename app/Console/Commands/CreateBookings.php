@@ -52,7 +52,7 @@ class CreateBookings extends Command
                 'guest_count' => $schedule->party_size,
                 'booking_at' => $schedule->booking_at,
                 'partner_concierge_id' => $partners->random()->id,
-                'partner_restaurant_id' => $partners->random()->id,
+                'partner_venue_id' => $partners->random()->id,
                 'status' => 'confirmed',
             ]);
 

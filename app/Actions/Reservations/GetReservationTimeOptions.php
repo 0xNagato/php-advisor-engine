@@ -3,7 +3,7 @@
 namespace App\Actions\Reservations;
 
 use App\Actions\Region\GetUserRegion;
-use App\Models\Restaurant;
+use App\Models\Venue;
 use Illuminate\Support\Carbon;
 use Lorisleiva\Actions\Concerns\AsAction;
 
@@ -17,8 +17,8 @@ class GetReservationTimeOptions
         $currentDate = ($date === Carbon::now($region->timezone)->format('Y-m-d'));
 
         $currentTime = Carbon::now($region->timezone);
-        $startTime = Carbon::createFromTime(Restaurant::DEFAULT_START_HOUR, 0, 0, $region->timezone);
-        $endTime = Carbon::createFromTime(Restaurant::DEFAULT_END_HOUR, 0, 0, $region->timezone);
+        $startTime = Carbon::createFromTime(Venue::DEFAULT_START_HOUR, 0, 0, $region->timezone);
+        $endTime = Carbon::createFromTime(Venue::DEFAULT_END_HOUR, 0, 0, $region->timezone);
 
         $reservationTimes = [];
 

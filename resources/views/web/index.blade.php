@@ -128,7 +128,7 @@
             <div class="w-12/12 md:w-6/12 md:pl-[56px]">
                 <h1
                         class="not-italic font-normal text-[26.25px] mt-[20px] md:mt-[0px] md:text-[34.117px] leading-[100%] ">
-                    PRIMA Increases Restaurant Profitability While Reducing Bots, Fake Reservations And
+                    PRIMA Increases Venue Profitability While Reducing Bots, Fake Reservations And
                     Cancellations.</h1>
                 <p class="not-italic font-normal md:pt-8 pt-[15px] text-[14px] md:text-[18px]">PRIMA's Concierge
                     Network
@@ -175,11 +175,11 @@
                         class="text-[14px] font-medium leading-[normal] text-center rounded-[15.157px] bg-[#818181] px-[10px] py-[5px] text-[#fff]">
                     THE PROBLEM
                 </div>
-                <h2 class="text-[23.25px] leading-[100%] mt-[30px]">Many Top Restaurants Are Fully Booked,
+                <h2 class="text-[23.25px] leading-[100%] mt-[30px]">Many Top Venues Are Fully Booked,
                     Sometimes
                     Months In Advance!</h2>
                 <p class="text-[15px] leading-[normal] mt-[20px]">Affluent consumers cannot gain access to these
-                    restaurants, and bots have overtaken reservation systems creating fake bookings only to re-sell
+                    venues, and bots have overtaken reservation systems creating fake bookings only to re-sell
                     them
                     on the grey market for a profit.
                 </p>
@@ -204,8 +204,8 @@
 </section>
 <!--- Section3 End --->
 <section class="max-w-4xl mx-auto">
-    <img src="/assets/images/restaurant2.jpeg" width="auto" height="auto" loading="lazy"
-         alt="Restaurant" class="block">
+    <img src="/assets/images/venue2.jpeg" width="auto" height="auto" loading="lazy"
+         alt="Venue" class="block">
 </section>
 <!--- Section4 --->
 <section class="pt-[50px] md:pt-[30px] px-[0] pb-[20px] md:pb-[50px]">
@@ -256,7 +256,7 @@
                         <h3 class="pt-[11px] text-[18.25px] leading-[normal]">Automated Concierge Commissions</h3>
                         <p class="pt-[16px] md:pt-[13px] text-[16px] font-light leading-[normal]">Automate
                             commission
-                            calculations and payments, making it easy for concierges to earn and for restaurants to
+                            calculations and payments, making it easy for concierges to earn and for venues to
                             manage payouts efficiently.</p>
                     </div>
                     <!--- Section4 Item End --->
@@ -272,7 +272,7 @@
                         <h3 class="pt-[11px] text-[18.25px] leading-[normal]">Attract High-Value Clients</h3>
                         <p class="pt-[16px] md:pt-[13px] text-[16px] font-light leading-[normal]">Offer exclusive
                             reservations to high-value clients who are willing to pay a premium, elevating your
-                            restaurant’s status and attracting discerning diners.</p>
+                            venue’s status and attracting discerning diners.</p>
                     </div>
                     <!--- Section4 Item End --->
                     <!--- Section4 Item --->
@@ -347,7 +347,7 @@
                         <h3 class="pt-[11px] text-[18.25px] leading-[normal]">Automated Concierge Commissions</h3>
                         <p class="pt-[16px] md:pt-[13px] text-[16px] font-light leading-[normal]">Automate
                             commission
-                            calculations and payments, making it easy for concierges to earn and for restaurants to
+                            calculations and payments, making it easy for concierges to earn and for venues to
                             manage payouts efficiently.</p>
                     </div>
                     <!--- Section4 Item End --->
@@ -359,7 +359,7 @@
                         <h3 class="pt-[11px] text-[18.25px] leading-[normal]">Attract High-Value Clients</h3>
                         <p class="pt-[16px] md:pt-[13px] text-[16px] font-light leading-[normal]">Offer exclusive
                             reservations to high-value clients who are willing to pay a premium, elevating your
-                            restaurant’s status and attracting discerning diners.</p>
+                            venue’s status and attracting discerning diners.</p>
                     </div>
                     <!--- Section4 Item End --->
                 </div>
@@ -431,7 +431,7 @@
             <h2 class="text-[30.25px] leading-[115.8%]">How PRIMA Works</h2>
             <p class="text-[17px] leading-[normal] max-w-[248px] mx-[auto] my-[0] pt-[12px]">A Seamless Solution
                 for
-                Restaurants and Concierges</p>
+                Venues and Concierges</p>
         </div>
         <div class="flex flex-wrap items-stretch">
             <!--- Section6 Item --->
@@ -463,7 +463,7 @@
                 </div>
                 <h3
                         class="text-[18.25px] leading-[normal] md:max-w-[170px] mx-[auto] my-[0] pt-[5px] md:pt-[13px]">
-                    Choose Restaurant</h3>
+                    Choose Venue</h3>
                 <p class="text-[16px] leading-[normal] md:max-w-[240px] mx-[auto] my-[0] pt-[17px] font-light">
                     Concierges across the PRIMA Network have access to the PRIMA Availability Calendar</p>
             </div>
@@ -527,13 +527,13 @@
                 <p class="text-[16px] leading-[normal] max-w-[308px] mx-[auto] my-[0] pt-[29px]">
                         <span class="flex items-baseline gap-[7px] text-left">
                             <img src="/assets/images/icon.png" width="15" height="auto" alt="icon"
-                                 loading="lazy"> Restaurants maximize their revenue. </span>
+                                 loading="lazy"> Venues maximize their revenue. </span>
                     <span class="flex items-baseline gap-[7px] text-left mt-[20px]">
                             <img src="/assets/images/icon.png" width="15" height="auto" alt="icon"
                                  loading="lazy"> Concierges earn additional income. </span>
                     <span class="flex items-baseline gap-[7px] text-left mt-[20px]">
                             <img src="/assets/images/icon.png" width="15" height="auto" alt="icon"
-                                 loading="lazy"> Diners enjoy their favorite restaurants at their chosen time. </span>
+                                 loading="lazy"> Diners enjoy their favorite venues at their chosen time. </span>
                 </p>
             </div>
             <!--- Section7 Left End --->
@@ -568,7 +568,7 @@
                         <div class="gap-[6px] mt-[17px] flex flex-col">
                             <div
                                     class="h-[182px] bg-indigo-300 gap-[27px] pb-[50px] px-[15px] py-[0] max-w-[117px] mx-[auto] my-[0] w-full inline-flex flex-col items-center justify-center">
-                                <div class="text-[12.71px] font-medium leading-[normal]">Restaurant Commission
+                                <div class="text-[12.71px] font-medium leading-[normal]">Venue Commission
                                 </div>
                                 <div class="text-[12.71px] font-medium leading-[normal]">60%</div>
                             </div>
@@ -593,7 +593,7 @@
         </div>
         <div class="max-w-[630px] mx-[auto] my-[0] pt-[34px] md:pt-[82px] text-center">
             <h2 class="text-[28.177px] leading-[115.8%] pb-[20px] md:pb-[37px]">
-                PRIMA Provides Additional Bottom-Line Profits To Each Participating Restaurant, Without Additional Fees.
+                PRIMA Provides Additional Bottom-Line Profits To Each Participating Venue, Without Additional Fees.
             </h2>
             <div class="flex flex-wrap md:flex-nowrap md:gap-x-[17px] md:flex-row-reverse">
                 <a class="rounded-[5.199px] bg-[#5046E5] w-full min-h-[45px] text-[14px] not-italic font-semibold leading-[normal] text-[#FFF] [transition:all_.5s_ease] hover:background: transparent hover:bg-transparent hover:text-[#5046E5] inline-flex items-center justify-center border-[1.3px] border-[solid] border-[#5046E5]"
@@ -625,7 +625,7 @@
             <h3 class="text-[rgba(0,_0,_0,_0.50)] text-[16.07px] px-[0] py-[11px] max-w-[calc(33.33% -(6px)* 2 / 3)] bg-[#F4F4F4] border-[.34px] border-[solid] border-[rgba(0,0,0,0.50)] [transition:all_.5s_ease] w-full text-center section8_js_trigger active"
                 data_tab="1">Diners</h3>
             <h3 class="text-[rgba(0,_0,_0,_0.50)] text-[16.07px] px-[0] py-[11px] max-w-[calc(33.33% -(6px)* 2 / 3)] bg-[#F4F4F4] border-[.34px] border-[solid] border-[rgba(0,0,0,0.50)] [transition:all_.5s_ease] w-full text-center section8_js_trigger"
-                data_tab="2">Restaurants</h3>
+                data_tab="2">Venues</h3>
             <h3 class="text-[rgba(0,_0,_0,_0.50)] text-[16.07px] px-[0] py-[11px] max-w-[calc(33.33% -(6px)* 2 / 3)] bg-[#F4F4F4] border-[.34px] border-[solid] border-[rgba(0,0,0,0.50)] [transition:all_.5s_ease] w-full text-center section8_js_trigger"
                 data_tab="3">Concierges</h3>
         </div>
@@ -646,7 +646,7 @@
                                  loading="lazy" class="absolute left-[0] top-[3px]">
                             <strong
                                     class='text-[19px] not-italic font-normal leading-[120.9%] font-["DM_Serif_Display"] block pb-[6px]'>Guaranteed
-                                Reservations</strong> Secure tables at fully booked, high-demand restaurants </span>
+                                Reservations</strong> Secure tables at fully booked, high-demand venues </span>
                     <span class="block pl-[21px] relative text-left mt-[21px]">
                             <img src="/assets/images/icon.png" width="15" height="auto" alt="icon"
                                  loading="lazy" class="absolute left-[0] top-[3px]">
@@ -667,7 +667,7 @@
                  data_tab="2">
                 <h3
                         class="text-[26.07px] font-semibold leading-[normal] font-[Inter] absolute -top-[47px] left-[0] right-[0] p-[4px] bg-[#5046E5] hidden md:block text-white">
-                    Restaurants</h3>
+                    Venues</h3>
                 <h3 class="pt-[29px] text-[25.18px] font-normal leading-[115.8%]">Maximize Profits and Control Your
                     Reservations</h3>
                 <p class="pt-[20px] text-[16px] font-light leading-[normal]">Eliminate the grey market, regain
@@ -714,7 +714,7 @@
                     Commissions</h3>
                 <p class="pt-[20px] text-[16px] font-light leading-[normal]">Earn attractive commissions by
                     securing
-                    reservations for high-demand restaurants.</p>
+                    reservations for high-demand venues.</p>
                 <p class="pt-[18px] max-w-full text-[16px] leading-[normal] mx-[auto] my-[0]">
                         <span class="block pl-[21px] relative text-left">
                             <img src="/assets/images/icon.png" width="15" height="auto" alt="icon"
@@ -763,8 +763,8 @@
             class="max-w-full pl-[00px] pr-[00px] mx-[auto] w-full md:max-w-[967px]  md:my-[0] md:pl-[50px] md:pr-[50px]">
         <div class="flex flex-wrap items-center">
             <div class="w-full md:w-7/12">
-                <img src="/assets/images/restaurant.jpeg" width="auto" height="auto" loading="lazy"
-                     alt="Restaurant" class="block">
+                <img src="/assets/images/venue.jpeg" width="auto" height="auto" loading="lazy"
+                     alt="Venue" class="block">
             </div>
             <div class="w-full pt-[30px] pl-[30px] pr-[30px] md:pt-[0px] md:pr-[0px] md:pl-[63px] md:w-5/12">
                 <h2 class="text-[28.177px] font-normal leading-[115.8%] text-center md:text-left">Join PRIMA</h2>

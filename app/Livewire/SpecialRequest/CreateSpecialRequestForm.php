@@ -5,8 +5,8 @@ namespace App\Livewire\SpecialRequest;
 use App\Actions\SpecialRequest\CreateSpecialRequest;
 use App\Data\SpecialRequest\CreateSpecialRequestData;
 use App\Models\Region;
-use App\Models\Restaurant;
 use App\Models\ScheduleTemplate;
+use App\Models\Venue;
 use App\Traits\ManagesBookingForms;
 use Carbon\Carbon;
 use Exception;
@@ -53,14 +53,14 @@ class CreateSpecialRequestForm extends Widget implements HasForms
         return $form
             ->schema([
                 ...$this->commonFormComponents(),
-                Select::make('restaurant')
+                Select::make('venue')
                     ->prefixIcon('heroicon-m-building-storefront')
                     ->options(
-                        fn () => Restaurant::available()
+                        fn () => Venue::available()
                             ->where('region', session('region', 'miami'))
-                            ->pluck('restaurant_name', 'id')
+                            ->pluck('name', 'id')
                     )
-                    ->placeholder('Select Restaurant')
+                    ->placeholder('Select Venue')
                     ->required()
                     ->live()
                     ->hiddenLabel()
@@ -121,7 +121,7 @@ class CreateSpecialRequestForm extends Widget implements HasForms
                         Textarea::make('special_request')
                             ->hiddenLabel()
                             ->placeholder('Notes/Special Request')
-                            ->helperText('Please provide any additional information to pass on to the restaurant. Is this a birthday?  Are there any food restrictions?')
+                            ->helperText('Please provide any additional information to pass on to the venue. Is this a birthday?  Are there any food restrictions?')
                             ->columnSpan(2),
                     ])
                     ->extraAttributes(['class' => 'inline-form'])
@@ -156,7 +156,7 @@ class CreateSpecialRequestForm extends Widget implements HasForms
 
         try {
             $scheduleTemplate = ScheduleTemplate::query()
-                ->where('restaurant_id', $data['restaurant'])
+                ->where('venue_id', $data['venue'])
                 ->where('day_of_week', Carbon::parse($data['date'])->format('l'))
                 ->where('start_time', $data['reservation_time'])
                 ->where('party_size', 0)
@@ -165,7 +165,7 @@ class CreateSpecialRequestForm extends Widget implements HasForms
             Sentry::captureException($e);
 
             Notification::make()
-                ->title('Restaurant is not available at the selected time')
+                ->title('Venue is not available at the selected time')
                 ->warning()
                 ->send();
 
@@ -173,7 +173,7 @@ class CreateSpecialRequestForm extends Widget implements HasForms
         }
         $specialRequestData = new CreateSpecialRequestData(
             schedule_template_id: $scheduleTemplate->id,
-            restaurant_id: $data['restaurant'],
+            venue_id: $data['venue'],
             concierge_id: auth()->user()->concierge->id,
             booking_date: $data['date'],
             booking_time: $data['reservation_time'],
@@ -194,7 +194,7 @@ class CreateSpecialRequestForm extends Widget implements HasForms
         $this->dispatch('special-request-created');
 
         Notification::make()
-            ->title('Special Request Submitted to the Restaurant')
+            ->title('Special Request Submitted to the Venue')
             ->success()
             ->send();
     }

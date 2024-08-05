@@ -7,9 +7,9 @@ use App\Enums\BookingStatus;
 use App\Events\BookingCancelled;
 use App\Models\Booking;
 use App\Models\Region;
-use App\Models\Restaurant;
 use App\Models\ScheduleTemplate;
 use App\Models\ScheduleWithBooking;
+use App\Models\Venue;
 use App\Services\BookingService;
 use App\Traits\ManagesBookingForms;
 use Exception;
@@ -88,7 +88,7 @@ class ReservationHub extends Page
         $this->currency = $region->currency;
 
         if ($this->booking !== null) {
-            $this->booking = Booking::with('schedule.restaurant')->find($this->booking->id);
+            $this->booking = Booking::with('schedule.venue')->find($this->booking->id);
         }
 
         $this->form->fill();
@@ -105,7 +105,7 @@ class ReservationHub extends Page
                 'date' => $this->date,
                 'guest_count' => $schedule->party_size,
                 'reservation_time' => $schedule->start_time,
-                'restaurant' => $schedule->restaurant_id,
+                'venue' => $schedule->venue_id,
                 'select_date' => now($this->timezone)->format('Y-m-d'),
                 'radio_date' => now($this->timezone)->format('Y-m-d'),
             ]);
@@ -119,14 +119,14 @@ class ReservationHub extends Page
         return $form
             ->schema([
                 ...$this->commonFormComponents(),
-                Select::make('restaurant')
+                Select::make('venue')
                     ->prefixIcon('heroicon-m-building-storefront')
                     ->options(
-                        fn () => Restaurant::available()
+                        fn () => Venue::available()
                             ->where('region', session('region', 'miami'))
-                            ->pluck('restaurant_name', 'id')
+                            ->pluck('name', 'id')
                     )
-                    ->placeholder('Select Restaurant')
+                    ->placeholder('Select Venue')
                     ->required()
                     ->live()
                     ->hiddenLabel()
@@ -163,13 +163,13 @@ class ReservationHub extends Page
             }
 
             $reservationTime = $this->adjustReservationTime($userTimezone);
-            $restaurantId = $this->form->getState()['restaurant'];
+            $venueId = $this->form->getState()['venue'];
             $endTimeForQuery = $this->calculateEndTimeForQuery($reservationTime, $userTimezone);
 
             $guestCount = $this->adjustGuestCount($this->form->getState()['guest_count']);
 
-            $this->schedulesToday = $this->getSchedulesToday($restaurantId, $reservationTime, $endTimeForQuery, $guestCount);
-            $this->schedulesThisWeek = $this->getSchedulesThisWeek($requestedDate, $currentDate, $restaurantId, $guestCount);
+            $this->schedulesToday = $this->getSchedulesToday($venueId, $reservationTime, $endTimeForQuery, $guestCount);
+            $this->schedulesThisWeek = $this->getSchedulesThisWeek($requestedDate, $currentDate, $venueId, $guestCount);
         }
     }
 
@@ -187,7 +187,7 @@ class ReservationHub extends Page
 
     protected function isFormFullyFilled(): bool
     {
-        return isset($this->data['restaurant'], $this->data['reservation_time'], $this->data['date'], $this->data['guest_count']);
+        return isset($this->data['venue'], $this->data['reservation_time'], $this->data['date'], $this->data['guest_count']);
     }
 
     protected function isSameDayReservation($key, Carbon $requestedDate, Carbon $currentDate): bool
@@ -230,10 +230,10 @@ class ReservationHub extends Page
         return $guestCount % 2 !== 0 ? $guestCount + 1 : $guestCount;
     }
 
-    protected function getSchedulesToday($restaurantId, $reservationTime, $endTimeForQuery, $guestCount): Collection
+    protected function getSchedulesToday($venueId, $reservationTime, $endTimeForQuery, $guestCount): Collection
     {
-        return ScheduleWithBooking::with('restaurant')
-            ->where('restaurant_id', $restaurantId)
+        return ScheduleWithBooking::with('venue')
+            ->where('venue_id', $venueId)
             ->where('booking_date', $this->form->getState()['date'])
             ->where('party_size', $guestCount)
             ->where('start_time', '>=', $reservationTime)
@@ -241,11 +241,11 @@ class ReservationHub extends Page
             ->get();
     }
 
-    protected function getSchedulesThisWeek(Carbon $requestedDate, Carbon $currentDate, $restaurantId, $guestCount): Collection
+    protected function getSchedulesThisWeek(Carbon $requestedDate, Carbon $currentDate, $venueId, $guestCount): Collection
     {
         if ($requestedDate->isSameDay($currentDate)) {
-            return ScheduleWithBooking::with('restaurant')
-                ->where('restaurant_id', $restaurantId)
+            return ScheduleWithBooking::with('venue')
+                ->where('venue_id', $venueId)
                 ->where('start_time', $this->form->getState()['reservation_time'])
                 ->where('party_size', $guestCount)
                 ->whereDate('booking_date', '>', $currentDate)

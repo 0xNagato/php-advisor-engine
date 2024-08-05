@@ -43,9 +43,9 @@ class GuestBookingConfirmed extends Notification
         $invoiceUrl = ShortURL::destinationUrl(route('customer.invoice', $notifiable->uuid))->make()->default_short_url;
 
         if ($notifiable->is_prime) {
-            $message = "PRIMA reservation at {$notifiable->restaurant->restaurant_name} $bookingDate at $bookingTime with {$notifiable->guest_count} guests. View your invoice at $invoiceUrl.";
+            $message = "PRIMA reservation at {$notifiable->venue->name} $bookingDate at $bookingTime with {$notifiable->guest_count} guests. View your invoice at $invoiceUrl.";
         } else {
-            $message = "Hello from PRIMA VIP! Your reservation at {$notifiable->restaurant->restaurant_name} $bookingDate at $bookingTime has been booked by {$notifiable->concierge->user->name} and is now confirmed. Please arrive within 15 minutes of your reservation or your table may be released. Thank you for booking with us!";
+            $message = "Hello from PRIMA VIP! Your reservation at {$notifiable->venue->name} $bookingDate at $bookingTime has been booked by {$notifiable->concierge->user->name} and is now confirmed. Please arrive within 15 minutes of your reservation or your table may be released. Thank you for booking with us!";
         }
 
         return new SmsData(

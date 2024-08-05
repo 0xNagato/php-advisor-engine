@@ -36,21 +36,21 @@
     @endif
 
     @if (!$this instanceof HasTable)
-        <x-filament-actions::modals />
+        <x-filament-actions::modals/>
     @endif
 
     @if(request()->route()->uri() === 'platform/login')
         <div class="items-end justify-center text-sm text-center mt-4">
-            <a class="font-bold " href="{{ route('restaurant.login') }}">Venue Admin Login</a>
+            <a class="font-bold " href="{{ route('venue.login') }}">Venue Admin Login</a>
         </div>
     @endif
 
     <script>
-      if (window.ReactNativeWebView) {
-        window.ReactNativeWebView.postMessage(JSON.stringify({
-          route: '{{ request()->route()->uri() }}',
-        }));
-      }
+        if (window.ReactNativeWebView) {
+            window.ReactNativeWebView.postMessage(JSON.stringify({
+                route: '{{ request()->route()->uri() }}',
+            }));
+        }
     </script>
 
     <div class="flex items-end justify-center text-sm text-center mt-4">

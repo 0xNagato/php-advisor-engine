@@ -24,7 +24,7 @@ class SpecialRequest extends Model
     public const int PLATFORM_PERCENTAGE = 10;
 
     protected $fillable = [
-        'restaurant_id',
+        'venue_id',
         'concierge_id',
         'booking_id',
         'schedule_template_id',
@@ -39,7 +39,7 @@ class SpecialRequest extends Model
         'customer_phone',
         'customer_email',
         'status',
-        'restaurant_message',
+        'venue_message',
         'conversations',
         'meta',
     ];
@@ -65,11 +65,11 @@ class SpecialRequest extends Model
     }
 
     /**
-     * @return BelongsTo<Restaurant, SpecialRequest>
+     * @return BelongsTo<Venue, SpecialRequest>
      */
-    public function restaurant(): BelongsTo
+    public function venue(): BelongsTo
     {
-        return $this->belongsTo(Restaurant::class);
+        return $this->belongsTo(Venue::class);
     }
 
     /**
@@ -101,7 +101,7 @@ class SpecialRequest extends Model
         return Attribute::make(get: fn () => $this->customer_first_name.' '.$this->customer_last_name);
     }
 
-    protected function restaurantTotalFee(): Attribute
+    protected function venueTotalFee(): Attribute
     {
         return Attribute::make(get: function () {
             $commissionValue = ($this->commission_requested_percentage / 100) * $this->minimum_spend;

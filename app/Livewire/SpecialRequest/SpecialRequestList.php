@@ -22,7 +22,7 @@ class SpecialRequestList extends Widget
     public function mount(): void
     {
         $this->specialRequests = SpecialRequest::query()
-            ->with('restaurant')
+            ->with('venue')
             ->where('concierge_id', $this->conciergeId)
             ->orderBy('booking_date', 'desc')
             ->get();
