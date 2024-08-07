@@ -24,6 +24,7 @@ class AvailabilityCalendarController extends Controller
             date: $validatedData['date'],
             guestCount: $validatedData['guest_count'],
             reservationTime: $validatedData['reservation_time'],
+            venueId: $validatedData['venue_id'] ?? null,
         );
 
         return response()->json([
@@ -43,6 +44,7 @@ class AvailabilityCalendarController extends Controller
             'date' => ['required', 'date'],
             'guest_count' => ['required', 'integer', 'min:2'],
             'reservation_time' => ['required', 'date_format:H:i:s'],
+            'venue_id' => ['sometimes', 'integer'],
         ]);
 
         if ($validator->fails()) {

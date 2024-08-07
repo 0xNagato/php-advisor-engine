@@ -8,6 +8,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Str;
 
 class AuthenticatedSessionController extends Controller
 {
@@ -33,7 +34,7 @@ class AuthenticatedSessionController extends Controller
             'data' => [
                 'user' => [
                     'id' => $user->id,
-                    'role' => $user->main_role,
+                    'role' => Str::of($user->main_role)->snake(),
                     'email' => $user->email,
                     'name' => $user->name,
                     'avatar' => $user->avatar,

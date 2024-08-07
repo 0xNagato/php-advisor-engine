@@ -20,6 +20,7 @@ class ReservationService
         public string|Carbon $date,
         public int $guestCount,
         public string $reservationTime,
+        public ?int $venueId,
     ) {
         $this->region = GetUserRegion::run();
     }
@@ -36,6 +37,7 @@ class ReservationService
 
         return Venue::available()
             ->where('region', $this->region->id)
+            ->when($this->venueId, fn ($query) => $query->where('id', $this->venueId))
             ->with(['schedules' => function ($query) {
                 $query->where('booking_date', $this->date)
                     ->where('party_size', $this->getGuestCount())
