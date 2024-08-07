@@ -35,7 +35,7 @@ class SendTwoFactorCode extends Notification
     {
         return new SmsData(
             phone: $notifiable->phone,
-            text: 'Do not share this code with anyone. Your 2FA login code for PRIMA is'.$this->code,
+            text: 'Do not share this code with anyone. Your 2FA login code for PRIMA is '.$this->code,
         );
     }
 }

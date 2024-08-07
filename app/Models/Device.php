@@ -16,7 +16,7 @@ class Device extends Model
     protected $fillable = ['key', 'verified'];
 
     /**
-     * @return BelongsTo<User, \App\Models\Device>
+     * @return BelongsTo<User, Device>
      */
     public function user(): BelongsTo
     {

@@ -3,10 +3,13 @@
 namespace App\Filament\Pages\Profile;
 
 use App\Livewire\Profile\ProfileSettings;
+use App\Traits\RequiresTwoFactorAuthentication;
 use Filament\Pages\Page;
 
 class MySettings extends Page
 {
+    use RequiresTwoFactorAuthentication;
+
     protected static ?string $navigationIcon = 'heroicon-o-cog';
 
     protected static string $view = 'filament.pages.my-settings';

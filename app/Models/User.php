@@ -3,7 +3,6 @@
 namespace App\Models;
 
 use App\Data\NotificationPreferencesData;
-use App\Notifications\User\SendTwoFactorCode;
 use App\Traits\FormatsPhoneNumber;
 use BezhanSalleh\FilamentShield\Traits\HasPanelShield;
 use Filament\Models\Contracts\FilamentUser;
@@ -12,7 +11,6 @@ use Filament\Panel;
 use Illuminate\Database\Eloquent\Casts\AsArrayObject;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\HasOneThrough;
@@ -21,10 +19,9 @@ use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Laravel\Sanctum\HasApiTokens;
-use Random\RandomException;
 use Rappasoft\LaravelAuthenticationLog\Traits\AuthenticationLoggable;
-use Spatie\Permission\Models\Role;
 use Spatie\Permission\Traits\HasRoles;
+use Throwable;
 
 /**
  * @mixin IdeHelperUser
@@ -39,58 +36,33 @@ class User extends Authenticatable implements FilamentUser, HasAvatar
     use HasRoles;
     use Notifiable;
 
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var array<int, string>
-     */
+    // Attributes
     protected $fillable = [
-        'first_name',
-        'last_name',
-        'email',
-        'password',
-        'phone',
-        'profile_photo_path',
-        'payout',
-        'charity_percentage',
-        'partner_referral_id',
-        'concierge_referral_id',
-        'timezone',
-        'secured_at',
-        'address_1',
-        'address_2',
-        'city',
-        'state',
-        'zip',
-        'country',
-        'preferences',
-        'region',
+        'first_name', 'last_name', 'email', 'password', 'phone', 'profile_photo_path',
+        'payout', 'charity_percentage', 'partner_referral_id', 'concierge_referral_id',
+        'timezone', 'secured_at', 'address_1', 'address_2', 'city', 'state', 'zip',
+        'country', 'preferences', 'region',
     ];
 
-    /**
-     * The attributes that should be hidden for serialization.
-     *
-     * @var array<int, string>
-     */
     protected $hidden = [
-        'password',
-        'remember_token',
-        'two_factor_recovery_codes',
-        'two_factor_secret',
+        'password', 'remember_token', 'two_factor_recovery_codes', 'two_factor_secret',
     ];
 
-    /**
-     * The accessors to append to the model's array form.
-     *
-     * @var array<int, string>
-     */
     protected $appends = [
-        'main_role',
-        'name',
-        'has_secured',
-        'label',
+        'main_role', 'name', 'has_secured', 'label',
     ];
 
+    protected function casts(): array
+    {
+        return [
+            'email_verified_at' => 'datetime',
+            'secured_at' => 'datetime',
+            'payout' => AsArrayObject::class,
+            'preferences' => NotificationPreferencesData::class,
+        ];
+    }
+
+    // Relationships
     /**
      * @return HasOne<Concierge>
      */
@@ -105,56 +77,6 @@ class User extends Authenticatable implements FilamentUser, HasAvatar
     public function venue(): HasOne
     {
         return $this->hasOne(Venue::class);
-    }
-
-    public function canAccessPanel(Panel $panel): bool
-    {
-        return true;
-    }
-
-    public function getFilamentAvatarUrl(): ?string
-    {
-        return $this->profile_photo_path
-            ? Storage::disk('do')->url($this->profile_photo_path)
-            : "https://ui-avatars.com/api/?background=312596&color=fff&format=png&name=$this->name";
-    }
-
-    public function routeNotificationForTwilio(): string
-    {
-        return $this->phone;
-    }
-
-    protected function name(): Attribute
-    {
-        return Attribute::make(get: fn () => $this->getFilamentName());
-    }
-
-    protected function avatar(): Attribute
-    {
-        return Attribute::make(get: fn () => $this->getFilamentAvatarUrl());
-    }
-
-    public function getFilamentName(): string
-    {
-        return "$this->first_name $this->last_name";
-    }
-
-    protected function mainRole(): Attribute
-    {
-        return Attribute::make(get: function () {
-            /**
-             * @var Role $role
-             */
-            $role = self::with('roles')
-                ->find($this->id)
-                ->roles
-                ->firstWhere('name', '!=', 'panel_user');
-
-            return Str::of($role->name)
-                ->snake()
-                ->replace('_', ' ')
-                ->title();
-        });
     }
 
     /**
@@ -189,16 +111,6 @@ class User extends Authenticatable implements FilamentUser, HasAvatar
         return $this->hasOneThrough(self::class, Referral::class, 'user_id', 'id', 'id', 'referrer_id');
     }
 
-    protected function hasSecured(): Attribute
-    {
-        return Attribute::make(get: fn () => ! blank($this->secured_at));
-    }
-
-    protected function label(): Attribute
-    {
-        return Attribute::make(get: fn () => $this->has_secured ? $this->getFilamentName() : $this->email);
-    }
-
     /**
      * @return HasMany<Earning>
      */
@@ -223,21 +135,6 @@ class User extends Authenticatable implements FilamentUser, HasAvatar
         return $this->hasMany(Message::class);
     }
 
-    protected function unreadMessageCount(): Attribute
-    {
-        return Attribute::make(get: fn () => $this->messages()->whereNull('read_at')->count());
-    }
-
-    protected function localFormattedPhone(): Attribute
-    {
-        return Attribute::make(get: fn () => $this->getLocalFormattedPhoneNumber($this->phone));
-    }
-
-    protected function internationalFormattedPhoneNumber(): Attribute
-    {
-        return Attribute::make(get: fn () => $this->getInternationalFormattedPhoneNumber($this->phone));
-    }
-
     /**
      * @return HasMany<Device>
      */
@@ -254,51 +151,79 @@ class User extends Authenticatable implements FilamentUser, HasAvatar
         return $this->hasOne(UserCode::class);
     }
 
-    /**
-     * @throws RandomException
-     */
-    public function generateCode(): void
+    // Filament-related methods
+    public function canAccessPanel(Panel $panel): bool
     {
-        $code = random_int(100000, 999999);
-
-        UserCode::query()->updateOrCreate(
-            ['user_id' => $this->id],
-            // field to find
-            ['code' => $code]
-        );
-
-        auth()->user()->notify(new SendTwoFactorCode($code));
+        return true;
     }
 
-    public function verify2FACode($code): bool
+    public function getFilamentAvatarUrl(): ?string
     {
-        return $this->userCode->code === $code;
+        return $this->profile_photo_path
+            ? Storage::disk('do')->url($this->profile_photo_path)
+            : "https://ui-avatars.com/api/?background=312596&color=fff&format=png&name=$this->name";
     }
 
-    public function markDeviceAsVerified(): void
+    public function getFilamentName(): string
     {
-        $deviceKey = $this->deviceKey();
-
-        $this->devices()
-            ->where('key', $deviceKey)
-            ->update(['verified' => true]);
-
-        session()->put('usercode.'.$this->id, true);
+        return "$this->first_name $this->last_name";
     }
 
-    public function registerDevice(): Model
+    // Attribute accessors and mutators
+    protected function name(): Attribute
     {
-        $deviceKey = $this->deviceKey();
-
-        return $this->devices()->firstOrCreate(
-            ['key' => $deviceKey],
-            ['verified' => false]
-        );
+        return Attribute::make(get: fn () => $this->getFilamentName());
     }
 
-    public function deviceKey(): string
+    protected function avatar(): Attribute
     {
-        return md5(request()->userAgent().request()->ip().$this->id);
+        return Attribute::make(get: fn () => $this->getFilamentAvatarUrl());
+    }
+
+    protected function mainRole(): Attribute
+    {
+        return Attribute::make(get: function () {
+            $role = self::with('roles')
+                ->find($this->id)
+                ->roles
+                ->firstWhere('name', '!=', 'panel_user');
+
+            return Str::of($role->name)
+                ->snake()
+                ->replace('_', ' ')
+                ->title();
+        });
+    }
+
+    protected function hasSecured(): Attribute
+    {
+        return Attribute::make(get: fn () => ! blank($this->secured_at));
+    }
+
+    protected function label(): Attribute
+    {
+        return Attribute::make(get: fn () => $this->has_secured ? $this->getFilamentName() : $this->email);
+    }
+
+    protected function unreadMessageCount(): Attribute
+    {
+        return Attribute::make(get: fn () => $this->messages()->whereNull('read_at')->count());
+    }
+
+    protected function localFormattedPhone(): Attribute
+    {
+        return Attribute::make(get: fn () => $this->getLocalFormattedPhoneNumber($this->phone));
+    }
+
+    protected function internationalFormattedPhoneNumber(): Attribute
+    {
+        return Attribute::make(get: fn () => $this->getInternationalFormattedPhoneNumber($this->phone));
+    }
+
+    // Miscellaneous methods
+    public function routeNotificationForTwilio(): string
+    {
+        return $this->phone;
     }
 
     public function canImpersonate(): true
@@ -307,17 +232,14 @@ class User extends Authenticatable implements FilamentUser, HasAvatar
     }
 
     /**
-     * The attributes that should be cast.
+     * Generate a two-factor code for the user.
      *
-     * @return array<string, string>
+     * @return int The generated code
+     *
+     * @throws Throwable
      */
-    protected function casts(): array
+    public function generateTwoFactorCode(): int
     {
-        return [
-            'email_verified_at' => 'datetime',
-            'secured_at' => 'datetime',
-            'payout' => AsArrayObject::class,
-            'preferences' => NotificationPreferencesData::class,
-        ];
+        return $this->userCode::generateCodeForUser($this);
     }
 }

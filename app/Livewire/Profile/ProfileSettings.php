@@ -46,7 +46,7 @@ class ProfileSettings extends Widget implements HasForms
             'email' => $user->email,
             'phone' => $user->phone,
             'timezone' => $user->timezone ?? 'UTC',
-            'preferences' => $user->preferences ?? NotificationPreferencesData::from([
+            'preferences' => $user->preferences?->toArray() ?? NotificationPreferencesData::from([
                 'database' => true,
             ])->toArray(),
         ]);
@@ -100,39 +100,42 @@ class ProfileSettings extends Widget implements HasForms
                         ->label('Email')
                         ->rules([
                             fn (Get $get): Closure => function (string $attribute, $value, Closure $fail) use ($get) {
-                                if ($get('sms') === false && $get('whatsapp') === false && $value === false) {
-                                    $fail('Email is required if email, whatsapp are disabled.');
+                                if (! $value && ! $get('sms') && ! $get('whatsapp')) {
+                                    $fail('At least one notification method must be enabled.');
                                 }
                             },
                         ])
                         ->inline(),
+
                     Toggle::make('sms')
                         ->label('SMS')
                         ->rules([
                             fn (Get $get): Closure => function (string $attribute, $value, Closure $fail) use ($get) {
-                                if ($get('mail') === false && $get('whatsapp') === false && $value === false) {
-                                    $fail('SMS is required if email, whatsapp are disabled.');
+                                if (! $value && ! $get('mail') && ! $get('whatsapp')) {
+                                    $fail('At least one notification method must be enabled.');
                                 }
                             },
                         ])
                         ->inline(),
+
                     Toggle::make('whatsapp')
                         ->label('Whatsapp')
                         ->rules([
                             fn (Get $get): Closure => function (string $attribute, $value, Closure $fail) use ($get) {
-                                if ($get('mail') === false && $get('sms') === false && $value === false) {
-                                    $fail('Whatsapp is required if email, sms are disabled.');
+                                if (! $value && ! $get('mail') && ! $get('sms')) {
+                                    $fail('At least one notification method must be enabled.');
                                 }
                             },
                         ])
                         ->inline(),
+
                     Toggle::make('database')
                         ->label('Application')
                         ->inline()
                         ->rules([
                             fn (Get $get): Closure => function (string $attribute, $value, Closure $fail) use ($get) {
-                                if ($get('mail') === false && $get('sms') === false && $get('whatsapp') === false && $value === false) {
-                                    $fail('Application is required if email, sms, and whatsapp are disabled.');
+                                if (! $value && ! $get('mail') && ! $get('sms') && ! $get('whatsapp')) {
+                                    $fail('At least one notification method must be enabled.');
                                 }
                             },
                         ]),
@@ -141,31 +144,13 @@ class ProfileSettings extends Widget implements HasForms
             ->statePath('data');
     }
 
-    public function save()
+    public function save(): void
     {
         $data = $this->form->getState();
 
-        /**
-         * @var User $user
-         */
+        /** @var User $user */
         $user = auth()->user();
 
-        if (! $this->requiresTwoFactorAuthentication($user, $data)) {
-            $this->updateProfileWithoutTwoFactor($data, $user);
-        } else {
-            $this->updateProfileWithTwoFactor($data, $user);
-        }
-    }
-
-    protected function updateProfileWithTwoFactor(array $data, User $user)
-    {
-        session()->put('pending-data.'.$user->id, $data);
-
-        return redirect()->route('filament.admin.pages.two-factor-code', ['redirect' => 'filament.admin.pages.my-settings']);
-    }
-
-    protected function updateProfileWithoutTwoFactor(array $data, User $user)
-    {
         $profilePhotoPath = $data['profile_photo_path'] ?? null;
 
         if ($profilePhotoPath) {
@@ -178,23 +163,5 @@ class ProfileSettings extends Widget implements HasForms
             ->title('Profile updated successfully.')
             ->success()
             ->send();
-    }
-
-    // if user has not verified the device and the user details have changed
-    protected function requiresTwoFactorAuthentication($user, array $data): bool
-    {
-        $sessionKey = 'usercode.'.$user->id;
-
-        return ! $this->deviceIsVerified($sessionKey) && $this->userDetailsChanged($user, $data);
-    }
-
-    protected function deviceIsVerified($sessionKey): bool
-    {
-        return session()->has($sessionKey) && session($sessionKey) === true;
-    }
-
-    protected function userDetailsChanged($user, array $data): bool
-    {
-        return $data['email'] !== $user->email || $data['phone'] !== $user->phone;
     }
 }

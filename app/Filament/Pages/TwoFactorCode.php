@@ -2,23 +2,27 @@
 
 namespace App\Filament\Pages;
 
+use App\Services\TwoFactorAuthenticationService;
+use Carbon\Carbon;
 use Filament\Actions\Concerns\InteractsWithActions;
-use Filament\Actions\Contracts\HasActions;
 use Filament\Facades\Filament;
 use Filament\Forms\Concerns\InteractsWithForms;
-use Filament\Forms\Contracts\HasForms;
 use Filament\Forms\Form;
 use Filament\Notifications\Notification;
 use Filament\Pages\Page;
 use HasanAhani\FilamentOtpInput\Components\OtpInput;
 use Illuminate\Contracts\View\View;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Session;
+use Livewire\Attributes\Computed;
+use Livewire\Features\SupportRedirects\Redirector;
+use Throwable;
 
-class TwoFactorCode extends Page implements HasActions, HasForms
+class TwoFactorCode extends Page
 {
     use InteractsWithActions;
     use InteractsWithForms;
-
-    protected static ?string $navigationIcon = 'heroicon-o-document-text';
 
     protected static string $view = 'filament.pages.twofactorcode';
 
@@ -34,9 +38,92 @@ class TwoFactorCode extends Page implements HasActions, HasForms
 
     public int $regenerate = 0;
 
-    public string $phoneNumber;
+    public string $phoneNumberSuffix;
 
-    public string $redirectRoute;
+    public string $redirectUrl;
+
+    protected ?TwoFactorAuthenticationService $twoFactorService = null;
+
+    protected ?Request $request = null;
+
+    public ?Carbon $nextCodeAvailableAt = null;
+
+    public bool $codeSent = false;
+
+    public bool $formVisible = false;
+
+    public function boot(TwoFactorAuthenticationService $twoFactorService, Request $request): void
+    {
+        $this->twoFactorService = $twoFactorService;
+        $this->request = $request;
+    }
+
+    /**
+     * @throws Throwable
+     */
+    public function mount(): void
+    {
+        Filament::getPanel()->navigation(false);
+        $this->phoneNumberSuffix = substr(auth()->user()->phone, -4);
+        $this->redirectUrl = $this->request->query('redirect') ?? config('app.platform_url');
+
+        $this->nextCodeAvailableAt = $this->twoFactorService->getNextCodeAvailableAt(auth()->user());
+        $this->formVisible = $this->codeWasSent;
+    }
+
+    /**
+     * @throws Throwable
+     */
+    public function sendCode(): void
+    {
+        $this->generateNewCode();
+        $this->formVisible = true;
+    }
+
+    /**
+     * @throws Throwable
+     */
+    public function generateNewCode(): void
+    {
+        $code = $this->twoFactorService->generateCode(auth()->user());
+
+        if ($code === null) {
+            $this->nextCodeAvailableAt = $this->twoFactorService->getNextCodeAvailableAt(auth()->user());
+        } else {
+            $this->nextCodeAvailableAt = Carbon::now()->addMinutes(2);
+        }
+
+        $this->reset('data');
+    }
+
+    #[Computed]
+    public function canResendCode(): bool
+    {
+        return $this->nextCodeAvailableAt === null || $this->nextCodeAvailableAt->isPast();
+    }
+
+    #[Computed]
+    public function formattedNextCodeAvailableAt(): string
+    {
+        if (! $this->nextCodeAvailableAt || $this->nextCodeAvailableAt->isPast()) {
+            return '';
+        }
+
+        return $this->nextCodeAvailableAt
+            ->setTimezone(auth()->user()->timezone)
+            ->format('g:i A');
+    }
+
+    #[Computed]
+    public function codeWasSent(): bool
+    {
+        return $this->nextCodeAvailableAt !== null && $this->nextCodeAvailableAt->isFuture();
+    }
+
+    public function getHeader(): ?View
+    {
+        return view('filament.pages.twofactorcode-header');
+    }
 
     public function form(Form $form): Form
     {
@@ -49,86 +136,55 @@ class TwoFactorCode extends Page implements HasActions, HasForms
             ])->statePath('data');
     }
 
-    public function mount()
-    {
-        $sessionKey = 'usercode.'.auth()->id();
-
-        // if this device is verified, redirect to the dashboard
-        if (session()->has($sessionKey) && session($sessionKey) === true) {
-            return redirect()->route('filament.admin.pages.admin-dashboard');
-        }
-
-        // hide the navigation for the 2FA page
-        Filament::getPanel()
-            ->navigation(false);
-
-        // send the code to the user
-        auth()->user()->generateCode();
-
-        $this->phoneNumber = substr(auth()->user()->phone, -4);
-
-        $this->redirectRoute = request()->query('redirect') ?? 'filament.admin.resources.messages.index';
-    }
-
-    public function save()
+    /**
+     * @throws Throwable
+     */
+    public function save(): RedirectResponse|Redirector|null
     {
         $code = $this->form->getState()['code'];
 
-        if (! auth()->user()->verify2FACode($code)) {
-            $this->tries++;
-
-            if ($this->tries >= 3) {
-                Filament::auth()->logout();
-                session()->invalidate();
-                session()->regenerateToken();
-
-                return redirect()->route('filament.admin.auth.login');
-            }
-
-            $this->addError('data.code', 'The provided 2FA code is incorrect.');
-            $this->reset('data');
-        } else {
-            auth()->user()->markDeviceAsVerified();
-
-            // Update the user with the pending data
-            $sessionKey = 'pending-data.'.auth()->id();
-            $pendingData = session()->get($sessionKey);
-
-            Notification::make()
-                ->title('Changes updated successfully.')
-                ->success()
-                ->send();
-
-            // Check if there is pending data to update
-            if ($pendingData) {
-                auth()->user()->update($pendingData);
-
-                session()->forget($sessionKey);
-            }
-
-            return redirect()->route($this->redirectRoute);
+        if (! $this->twoFactorService->verifyCode(auth()->user(), $code)) {
+            return $this->handleIncorrectCode();
         }
+
+        return $this->handleCorrectCode();
     }
 
-    public function regenerateCode()
+    /**
+     * @throws Throwable
+     */
+    private function handleIncorrectCode(): RedirectResponse|Redirector|null
     {
-        $this->regenerate++;
+        $this->tries++;
 
-        if ($this->regenerate >= 3) {
-            Filament::auth()->logout();
-            session()->invalidate();
-            session()->regenerateToken();
-
-            return redirect()->route('filament.admin.auth.login');
+        if ($this->tries >= 3) {
+            return $this->handleTooManyAttempts();
         }
 
-        auth()->user()->generateCode();
+        $this->addError('data.code', 'The provided 2FA code is incorrect.');
         $this->reset('data');
-        $this->tries = 0;
+
+        return null;
     }
 
-    public function getHeader(): ?View
+    private function handleCorrectCode(): RedirectResponse|Redirector
     {
-        return view('filament.pages.twofactorcode-header');
+        $this->twoFactorService->markDeviceAsVerified(auth()->user(), $this->request);
+
+        Notification::make()
+            ->title('2FA code inputted successfully.')
+            ->success()
+            ->send();
+
+        return redirect($this->redirectUrl);
+    }
+
+    private function handleTooManyAttempts(): RedirectResponse|Redirector
+    {
+        Filament::auth()->logout();
+        Session::invalidate();
+        Session::regenerateToken();
+
+        return redirect()->route('filament.admin.auth.login');
     }
 }
