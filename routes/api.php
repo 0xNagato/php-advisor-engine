@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Api\AvailabilityCalendarController;
 use App\Http\Controllers\Api\RegionController;
+use App\Http\Controllers\Api\ReservationHubController;
 use App\Http\Controllers\Api\TimeslotController;
 use App\Http\Controllers\Api\VenueController;
 use Illuminate\Http\Request;
@@ -17,4 +18,5 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/timeslots', TimeslotController::class);
     Route::get('/venues', VenueController::class);
     Route::get('/calendar', AvailabilityCalendarController::class);
+    Route::get('/hub', ReservationHubController::class);
 });

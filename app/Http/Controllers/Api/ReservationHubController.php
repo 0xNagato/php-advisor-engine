@@ -3,14 +3,13 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Http\Resources\VenueResource;
 use App\Services\ReservationService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
 
-class AvailabilityCalendarController extends Controller
+class ReservationHubController extends Controller
 {
     public function __invoke(Request $request): JsonResponse
     {
@@ -28,8 +27,7 @@ class AvailabilityCalendarController extends Controller
 
         return response()->json([
             'data' => [
-                'venues' => VenueResource::collection($reservation->getAvailableVenues()),
-                'timeslots' => $reservation->getTimeslotHeaders(),
+                $reservation->getVenueSchedules($validatedData['venue_id']),
             ],
         ]);
     }
@@ -41,8 +39,9 @@ class AvailabilityCalendarController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'date' => ['required', 'date'],
-            'guest_count' => ['required', 'integer', 'min:2'],
+            'guest_count' => ['required', 'integer'],
             'reservation_time' => ['required', 'date_format:H:i:s'],
+            'venue_id' => ['required', 'integer'],
         ]);
 
         if ($validator->fails()) {

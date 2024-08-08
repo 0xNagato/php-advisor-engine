@@ -3,7 +3,9 @@
 namespace App\Services;
 
 use App\Actions\Region\GetUserRegion;
+use App\Http\Resources\VenueScheduleResource;
 use App\Models\Region;
+use App\Models\ScheduleWithBooking;
 use App\Models\Venue;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Carbon;
@@ -16,11 +18,12 @@ class ReservationService
 
     public const int MINUTES_FUTURE = 120;
 
+    public const int AVAILABILITY_DAYS = 3;
+
     public function __construct(
         public string|Carbon $date,
         public int $guestCount,
         public string $reservationTime,
-        public ?int $venueId,
     ) {
         $this->region = GetUserRegion::run();
     }
@@ -37,7 +40,6 @@ class ReservationService
 
         return Venue::available()
             ->where('region', $this->region->id)
-            ->when($this->venueId, fn ($query) => $query->where('id', $this->venueId))
             ->with(['schedules' => function ($query) {
                 $query->where('booking_date', $this->date)
                     ->where('party_size', $this->getGuestCount())
@@ -87,5 +89,52 @@ class ReservationService
     public function getGuestCount(): int
     {
         return $this->guestCount % 2 !== 0 ? $this->guestCount + 1 : $this->guestCount;
+    }
+
+    public function getVenueSchedules($venueId): array
+    {
+        $schedulesByDate = VenueScheduleResource::collection($this->getSchedulesByDate($venueId));
+
+        if ($this->isDateToday()) {
+            $schedulesThisWeek = VenueScheduleResource::collection($this->getSchedulesThisWeek($venueId));
+            return [
+                'schedulesByDate' => $schedulesByDate,
+                'schedulesThisWeek' => $schedulesThisWeek,
+            ];
+        }
+
+        return [
+            'schedulesByDate' => $schedulesByDate,
+        ];
+    }
+
+    public function getSchedulesByDate($venueId): Collection
+    {
+        $endTimeForQuery = $this->calculateEndTime();
+
+        return ScheduleWithBooking::where('venue_id', $venueId)
+            ->where('booking_date', $this->date)
+            ->where('party_size', $this->getGuestCount())
+            ->where('start_time', '>=', $this->reservationTime)
+            ->where('start_time', '<=', $endTimeForQuery)
+            ->get();
+    }
+
+    public function getSchedulesThisWeek($venueId): Collection
+    {
+        $currentDate = Carbon::now($this->region->timezone);
+
+        return ScheduleWithBooking::where('venue_id', $venueId)
+            ->where('start_time', $this->reservationTime)
+            ->where('party_size', $this->getGuestCount())
+            ->whereDate('booking_date', '>', $currentDate)
+            ->whereDate('booking_date', '<=', $currentDate->addDays(self::AVAILABILITY_DAYS))
+            ->get();
+    }
+
+    protected function isDateToday(): bool
+    {
+        $requestedDate = Carbon::createFromFormat('Y-m-d', $this->date, $this->region->timezone);
+        return $requestedDate->isToday();
     }
 }
