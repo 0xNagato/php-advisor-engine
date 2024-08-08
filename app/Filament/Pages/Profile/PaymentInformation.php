@@ -3,6 +3,7 @@
 namespace App\Filament\Pages\Profile;
 
 use App\Models\User;
+use App\Traits\RequiresTwoFactorAuthentication;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Form;
 use Filament\Notifications\Notification;
@@ -11,6 +12,8 @@ use Illuminate\Http\RedirectResponse;
 
 class PaymentInformation extends Page
 {
+    use RequiresTwoFactorAuthentication;
+
     protected static ?string $navigationIcon = 'gmdi-payment-o';
 
     protected static string $view = 'filament.pages.payment-information';
@@ -52,7 +55,7 @@ class PaymentInformation extends Page
 
     public static function canAccess(): bool
     {
-        if (session()->exists('simpleMode')) {
+        if (session()?->exists('simpleMode')) {
             return ! session('simpleMode');
         }
 
@@ -149,13 +152,6 @@ class PaymentInformation extends Page
             'country' => $this->country,
         ];
 
-        if ($this->requiresTwoFactorAuthentication($this->user)) {
-
-            session()->put('pending-data.'.$this->user->id, $pendingData);
-
-            return redirect()->route('filament.admin.pages.two-factor-code', ['redirect' => 'filament.admin.pages.payment-information']);
-        }
-
         $this->user->update($pendingData);
 
         Notification::make()
@@ -164,17 +160,5 @@ class PaymentInformation extends Page
             ->send();
 
         return null;
-    }
-
-    protected function requiresTwoFactorAuthentication($user): bool
-    {
-        $sessionKey = 'usercode.'.$user->id;
-
-        return ! $this->deviceIsVerified($sessionKey);
-    }
-
-    protected function deviceIsVerified($sessionKey): bool
-    {
-        return session()->has($sessionKey) && session($sessionKey) === true;
     }
 }

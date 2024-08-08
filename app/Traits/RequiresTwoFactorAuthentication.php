@@ -3,6 +3,7 @@
 namespace App\Traits;
 
 use App\Filament\Pages\TwoFactorCode;
+use App\Models\User;
 use App\Services\TwoFactorAuthenticationService;
 use Filament\Pages\Page;
 use Illuminate\Http\Request;
@@ -13,9 +14,19 @@ trait RequiresTwoFactorAuthentication
     {
         abort_unless(is_subclass_of($this, Page::class), 500, 'RequiresTwoFactorAuthentication trait can only be used on FilamentPHP pages.');
 
-        $twoFactorAuthenticationService->registerDevice(auth()->user(), $request);
+        /**
+         * If a super_admin is impersonating another user, they are not required to use two-factor authentication.
+         */
+        if (app('impersonate')->isImpersonating()) {
+            return;
+        }
 
-        if (! $twoFactorAuthenticationService->isDeviceVerified(auth()->user(), $request)) {
+        /** @var User $user */
+        $user = auth()->user();
+
+        $twoFactorAuthenticationService->registerDevice($user, $request);
+
+        if (! $twoFactorAuthenticationService->isDeviceVerified($user, $request)) {
             $this->redirect(TwoFactorCode::getUrl([
                 'redirect' => request()->fullUrl(),
             ]));

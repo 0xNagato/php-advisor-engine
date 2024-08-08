@@ -240,6 +240,6 @@ class User extends Authenticatable implements FilamentUser, HasAvatar
      */
     public function generateTwoFactorCode(): int
     {
-        return $this->userCode::generateCodeForUser($this);
+        return UserCode::generateCodeForUser($this);
     }
 }

@@ -3,10 +3,13 @@
 namespace App\Filament\Pages\Profile;
 
 use App\Livewire\Profile\PasswordSettings;
+use App\Traits\RequiresTwoFactorAuthentication;
 use Filament\Pages\Page;
 
 class ChangePassword extends Page
 {
+    use RequiresTwoFactorAuthentication;
+
     protected static ?string $navigationIcon = 'heroicon-o-lock-closed';
 
     protected static string $view = 'filament.pages.change-password';
