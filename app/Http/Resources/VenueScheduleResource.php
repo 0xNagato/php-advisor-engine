@@ -20,16 +20,19 @@ class VenueScheduleResource extends JsonResource
 
         return [
             'id' => $this->id,
+            'schedule_template_id' => $this->schedule_template_id,
+            'is_bookable' => (bool) $this->is_bookable,
             'prime_time' => (bool) $this->prime_time,
-            'is_bookable' => $this->is_bookable,
-            'start_time' => Carbon::createFromFormat('H:i:s', $this->start_time)->format('g:i A'),
-            'venue_id' => $this->venue_id,
+            'time' => [
+                'value' => Carbon::createFromFormat('H:i:s', $this->start_time)->format('g:i A'),
+                'raw' => Carbon::createFromFormat('H:i:s', $this->start_time)->format('H:i:s'),
+            ],
             'date' => $this->booking_date->format('Y-m-d'),
             'fee' => moneyWithoutCents(
                 $this->resource->fee($request->guest_count),
                 $region->currency
             ),
-            'has_low_inventory' => $this->has_low_inventory,
+            'has_low_inventory' => (bool) $this->has_low_inventory,
         ];
     }
 }
