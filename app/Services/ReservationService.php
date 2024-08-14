@@ -35,7 +35,7 @@ class ReservationService
         $currentDate = Carbon::now($this->region->timezone);
 
         if ($currentDate->isSameDay($requestedDate)) {
-            $this->reservationTime = $this->adjustTime();
+            $this->reservationTime = $this->adjustTime($this->reservationTime, $this->region->timezone);
         }
 
         return Venue::available()
@@ -44,31 +44,27 @@ class ReservationService
                 $query->where('booking_date', $this->date)
                     ->where('party_size', $this->getGuestCount())
                     ->where('start_time', '>=', $this->reservationTime)
-                    ->where('start_time', '<=', $this->calculateEndTime());
+                    ->where('start_time', '<=', $this->calculateEndTime($this->reservationTime, $this->region->timezone));
             }])
             ->get();
     }
 
-    public function adjustTime(): string
+    public function adjustTime($reservation, $userTimezone): string
     {
-        $reservationTime = Carbon::createFromFormat('H:i:s', $this->reservationTime, $this->region->timezone);
+        $reservationTime = Carbon::createFromFormat('H:i:s', $reservation, $userTimezone);
+        $currentTime = Carbon::now($userTimezone);
 
-        if ($reservationTime->copy()->subMinutes(self::MINUTES_PAST)->gt(Carbon::now($this->region->timezone))) {
-            return $reservationTime->subMinutes(self::MINUTES_PAST)->format('H:i:s');
+        if ($reservationTime?->copy()->subMinutes(self::MINUTES_PAST)->gt($currentTime)) {
+            return $reservationTime?->subMinutes(self::MINUTES_PAST)->format('H:i:s');
         }
 
-        return $reservationTime->format('H:i:s');
+        return $reservation;
     }
 
-    public function calculateEndTime(): string
+    public function calculateEndTime($reservationTime, $userTimezone): string
     {
-        $endTime = Carbon::createFromFormat(
-            'H:i:s',
-            $this->reservationTime,
-            $this->region->timezone
-        )->addMinutes(self::MINUTES_FUTURE);
-
-        $limitTime = Carbon::createFromTime(23, 59, 0, $this->region->timezone);
+        $endTime = Carbon::createFromFormat('H:i:s', $reservationTime, $userTimezone)?->addMinutes(self::MINUTES_FUTURE);
+        $limitTime = Carbon::createFromTime(23, 59, 0, $userTimezone);
 
         return $endTime->gt($limitTime) ? '23:59:59' : $endTime->format('H:i:s');
     }
@@ -77,7 +73,7 @@ class ReservationService
     {
         $headers = [];
         $start = Carbon::createFromFormat('H:i:s', $this->reservationTime);
-        $end = Carbon::createFromFormat('H:i:s', $this->calculateEndTime());
+        $end = Carbon::createFromFormat('H:i:s', $this->calculateEndTime($this->reservationTime, $this->region->timezone));
 
         for ($time = $start; $time->lte($end); $time->addMinutes(30)) {
             $headers[$time->format('H:i:s')] = $time->format('g:i A');
@@ -110,12 +106,13 @@ class ReservationService
 
     public function getSchedulesByDate($venueId): Collection
     {
-        $endTimeForQuery = $this->calculateEndTime();
+        $reservationTime = $this->adjustTime($this->reservationTime, $this->region->timezone);
+        $endTimeForQuery = $this->calculateEndTime($reservationTime, $this->region->timezone);
 
         return ScheduleWithBooking::where('venue_id', $venueId)
             ->where('booking_date', $this->date)
             ->where('party_size', $this->getGuestCount())
-            ->where('start_time', '>=', $this->reservationTime)
+            ->where('start_time', '>=', $reservationTime)
             ->where('start_time', '<=', $endTimeForQuery)
             ->get();
     }

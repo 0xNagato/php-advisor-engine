@@ -97,8 +97,8 @@ class AvailabilityCalendar extends Page
                 reservationTime: $this->data['reservation_time'],
             );
 
-            $this->timeslotHeaders = $reservation->getTimeslotHeaders();
             $this->venues = $reservation->getAvailableVenues();
+            $this->timeslotHeaders = $reservation->getTimeslotHeaders();
         }
     }
 
