@@ -6,24 +6,18 @@ use App\Actions\Booking\CreateBooking;
 use App\Actions\Region\GetUserRegion;
 use App\Events\BookingCancelled;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Api\BookingRequest;
 use App\Http\Resources\BookingResource;
 use App\Models\Booking;
 use Exception;
-use Filament\Notifications\Notification;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
 use Illuminate\Http\Response;
-use Illuminate\Support\Facades\Validator;
 
 class BookingController extends Controller
 {
-    public function store(Request $request): JsonResponse|Response
+    public function store(BookingRequest $request): JsonResponse|Response
     {
-        $validatedData = $this->validateRegionData($request);
-
-        if ($validatedData instanceof JsonResponse) {
-            return $validatedData;
-        }
+        $validatedData = $request->validated();
 
         $region = GetUserRegion::run();
 
@@ -64,21 +58,6 @@ class BookingController extends Controller
         return response()->json([
             'message' => 'Booking Cancelled',
         ]);
-    }
-
-    private function validateRegionData(Request $request): JsonResponse|array
-    {
-        $validator = Validator::make($request->all(), [
-            'schedule_template_id' => ['required', 'integer'],
-            'guest_count' => ['required', 'integer'],
-            'date' => ['required', 'date'],
-        ]);
-
-        if ($validator->fails()) {
-            return response()->json($validator->errors(), 422);
-        }
-
-        return $validator->validated();
     }
 
     public function dayDisplay($timezone, $booking): string

@@ -5,37 +5,16 @@ namespace App\Http\Controllers\Api;
 use App\Actions\Region\GetUserRegion;
 use App\Actions\Reservations\GetReservationTimeOptions;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Api\TimeslotRequest;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Validator;
 
 class TimeslotController extends Controller
 {
-    public function __invoke(Request $request): JsonResponse
+    public function __invoke(TimeslotRequest $request): JsonResponse
     {
-        // Validate the requested date
-        $validatedDate = $this->validateDate($request);
-
-        if ($validatedDate instanceof JsonResponse) {
-            return $validatedDate;
-        }
-
         return response()->json([
-            'data' => $this->availableTimeslots(date: $validatedDate),
+            'data' => $this->availableTimeslots(date: $request->validated()['date']),
         ]);
-    }
-
-    private function validateDate(Request $request)
-    {
-        $validator = Validator::make($request->all(), [
-            'date' => ['required', 'date'],
-        ]);
-
-        if ($validator->fails()) {
-            return response()->json($validator->errors(), 422);
-        }
-
-        return $validator->validated()['date'];
     }
 
     private function availableTimeslots($date): array
