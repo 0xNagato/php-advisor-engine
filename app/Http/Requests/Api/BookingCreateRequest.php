@@ -6,7 +6,7 @@ use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Http\Exceptions\HttpResponseException;
 
-class BookingRequest extends FormRequest
+class BookingCreateRequest extends FormRequest
 {
     public function rules(): array
     {

@@ -4,18 +4,21 @@ namespace App\Http\Controllers\Api;
 
 use App\Actions\Booking\CreateBooking;
 use App\Actions\Region\GetUserRegion;
+use App\Enums\BookingStatus;
 use App\Events\BookingCancelled;
 use App\Http\Controllers\Controller;
-use App\Http\Requests\Api\BookingRequest;
+use App\Http\Requests\Api\BookingCreateRequest;
+use App\Http\Requests\Api\BookingUpdateRequest;
 use App\Http\Resources\BookingResource;
 use App\Models\Booking;
+use App\Notifications\Booking\ConfirmReservation;
 use Exception;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Response;
 
 class BookingController extends Controller
 {
-    public function store(BookingRequest $request): JsonResponse|Response
+    public function store(BookingCreateRequest $request): JsonResponse|Response
     {
         $validatedData = $request->validated();
 
@@ -46,6 +49,32 @@ class BookingController extends Controller
 
         return response()->json([
             'data' => $bookingResource,
+        ]);
+    }
+
+
+    public function update(BookingUpdateRequest $request,Booking $booking): JsonResponse
+    {
+        $validatedData = $request->validated();
+
+        if ($booking->status !== BookingStatus::PENDING) {
+            return response()->json([
+                'message' => 'Booking already confirmed or cancelled',
+            ], 404);
+        }
+
+        $booking->update([
+            'guest_first_name' => $validatedData['first_name'],
+            'guest_last_name' => $validatedData['last_name'],
+            'guest_phone' => $validatedData['phone'],
+            'guest_email' => $validatedData['email'],
+            'notes' => $validatedData['notes'],
+        ]);
+
+        $booking->notify(new ConfirmReservation(url: $validatedData['bookingUrl']));
+
+        return response()->json([
+            'message' => 'SMS Message Sent Successfully',
         ]);
     }
 
