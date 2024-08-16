@@ -34,4 +34,11 @@ class BookingUpdateRequest extends FormRequest
             $validator->errors(), 422)
         );
     }
+
+    public function messages(): array
+    {
+        return [
+            'phone' => 'The phone field must be a valid phone number.',
+        ];
+    }
 }
