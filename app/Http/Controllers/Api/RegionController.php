@@ -3,14 +3,11 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Api\RegionRequest;
 use App\Models\Region;
-use App\Rules\ActiveRegion;
 use App\Traits\ManagesBookingForms;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
 use Illuminate\Http\Response;
-use Illuminate\Support\Facades\Validator;
-use Illuminate\Validation\ValidationException;
 
 class RegionController extends Controller
 {
@@ -23,34 +20,12 @@ class RegionController extends Controller
         ]);
     }
 
-    public function store(Request $request): JsonResponse|Response
+    public function store(RegionRequest $request): JsonResponse|Response
     {
-        $validatedData = $this->validateRegionData($request);
-
-        if ($validatedData instanceof JsonResponse) {
-            return $validatedData;
-        }
-
         $request->user()->update([
-            'region' => $validatedData['region'],
+            'region' => $request->validated()['region'],
         ]);
 
         return response()->noContent();
-    }
-
-    /**
-     * @throws ValidationException
-     */
-    private function validateRegionData(Request $request): JsonResponse|array
-    {
-        $validator = Validator::make($request->all(), [
-            'region' => ['required', new ActiveRegion],
-        ]);
-
-        if ($validator->fails()) {
-            return response()->json($validator->errors(), 422);
-        }
-
-        return $validator->validated();
     }
 }

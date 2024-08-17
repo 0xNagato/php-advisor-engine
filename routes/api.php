@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Api\AvailabilityCalendarController;
+use App\Http\Controllers\Api\BookingController;
 use App\Http\Controllers\Api\RegionController;
 use App\Http\Controllers\Api\ReservationHubController;
 use App\Http\Controllers\Api\TimeslotController;
@@ -19,4 +20,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/venues', VenueController::class);
     Route::get('/calendar', AvailabilityCalendarController::class);
     Route::get('/hub', ReservationHubController::class);
+    Route::post('/bookings', [BookingController::class, 'store']);
+    Route::put('/bookings/{booking}', [BookingController::class, 'update']);
+    Route::delete('/bookings/{booking}', [BookingController::class, 'destroy']);
 });
