@@ -93,6 +93,7 @@ class ReservationService
 
         if ($this->isDateToday()) {
             $schedulesThisWeek = VenueScheduleResource::collection($this->getSchedulesThisWeek($venueId));
+
             return [
                 'schedulesByDate' => $schedulesByDate,
                 'schedulesThisWeek' => $schedulesThisWeek,
@@ -109,7 +110,7 @@ class ReservationService
         $reservationTime = $this->adjustTime($this->reservationTime, $this->region->timezone);
         $endTimeForQuery = $this->calculateEndTime($reservationTime, $this->region->timezone);
 
-        return ScheduleWithBooking::where('venue_id', $venueId)
+        return ScheduleWithBooking::query()->where('venue_id', $venueId)
             ->where('booking_date', $this->date)
             ->where('party_size', $this->getGuestCount())
             ->where('start_time', '>=', $reservationTime)
@@ -121,7 +122,7 @@ class ReservationService
     {
         $currentDate = Carbon::now($this->region->timezone);
 
-        return ScheduleWithBooking::where('venue_id', $venueId)
+        return ScheduleWithBooking::query()->where('venue_id', $venueId)
             ->where('start_time', $this->reservationTime)
             ->where('party_size', $this->getGuestCount())
             ->whereDate('booking_date', '>', $currentDate)
@@ -132,6 +133,7 @@ class ReservationService
     protected function isDateToday(): bool
     {
         $requestedDate = Carbon::createFromFormat('Y-m-d', $this->date, $this->region->timezone);
+
         return $requestedDate->isToday();
     }
 }

@@ -31,7 +31,7 @@ class BookingController extends Controller
                 $region->timezone,
                 $region->currency
             );
-        } catch (Exception $e) {
+        } catch (Exception) {
             return response()->json([
                 'message' => 'Booking failed',
             ], 404);
@@ -52,8 +52,7 @@ class BookingController extends Controller
         ]);
     }
 
-
-    public function update(BookingUpdateRequest $request,Booking $booking): JsonResponse
+    public function update(BookingUpdateRequest $request, Booking $booking): JsonResponse
     {
         $validatedData = $request->validated();
 
@@ -80,7 +79,7 @@ class BookingController extends Controller
 
     public function destroy($id): JsonResponse
     {
-        $booking = Booking::findOrFail($id);
+        $booking = Booking::query()->findOrFail($id);
         $booking->update(['status' => 'cancelled']);
         BookingCancelled::dispatch($booking);
 
@@ -97,13 +96,13 @@ class BookingController extends Controller
         $tomorrow = now($timezone)->addDay()->startOfDay();
 
         if ($bookingDate->format('Y-m-d') === $today->format('Y-m-d')) {
-            return 'Today at ' . $time;
+            return 'Today at '.$time;
         }
 
         if ($bookingDate->format('Y-m-d') === $tomorrow->format('Y-m-d')) {
-            return 'Tomorrow at ' . $time;
+            return 'Tomorrow at '.$time;
         }
 
-        return $bookingDate->format('D, M j') . ' at ' . $time;
+        return $bookingDate->format('D, M j').' at '.$time;
     }
 }

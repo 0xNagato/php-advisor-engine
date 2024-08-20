@@ -13,18 +13,18 @@ class BookingUpdateRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'first_name' => 'required|string|max:255',
-            'last_name' => 'required|string|max:255',
+            'first_name' => ['required', 'string', 'max:255'],
+            'last_name' => ['required', 'string', 'max:255'],
             'phone' => [
                 'required',
-                (new Phone())
+                (new Phone)
                     ->country(config('app.countries'))
                     ->type(PhoneNumberType::MOBILE)
                     ->lenient(),
             ],
-            'email' => 'nullable|email',
-            'notes' => 'nullable|string|max:1000',
-            'bookingUrl' => 'required|url',
+            'email' => ['nullable', 'email'],
+            'notes' => ['nullable', 'string', 'max:1000'],
+            'bookingUrl' => ['required', 'url'],
         ];
     }
 
