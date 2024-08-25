@@ -7,6 +7,13 @@ export default {
         './app/Filament/**/*.php',
         './resources/views/**/*.blade.php',
         './vendor/filament/**/*.blade.php',
+
+        './app/Filament/**/*.php',
+        './app/Livewire/**/*.php',
+        './app/Traits/**/*.php',
+        './resources/views/**/*.blade.php',
+        './vendor/filament/**/*.blade.php',
+        './resources/js/**/*.{vue,js,ts,jsx,tsx}',
     ],
 
     plugins: [

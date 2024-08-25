@@ -22,6 +22,8 @@ class VenueSettings extends Page
 
     public function mount(): void
     {
+        abort_unless(auth()->user()->hasRole('venue'), 403);
+
         $this->venue = auth()->user()->venue;
     }
 }

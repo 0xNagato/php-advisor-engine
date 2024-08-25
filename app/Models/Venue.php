@@ -229,6 +229,24 @@ class Venue extends Model
         ];
     }
 
+    public function getDetailedSchedule(): array
+    {
+        $schedule = [];
+        $daysOfWeek = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
+
+        foreach ($daysOfWeek as $day) {
+            $daySchedule = $this->scheduleTemplates()
+                ->where('day_of_week', $day)
+                ->where('is_available', true)
+                ->orderBy('start_time')
+                ->get(['start_time', 'end_time', 'is_available', 'prime_time']);
+
+            $schedule[$day] = $daySchedule->isEmpty() ? 'closed' : $daySchedule->toArray();
+        }
+
+        return $schedule;
+    }
+
     protected function casts(): array
     {
         return [

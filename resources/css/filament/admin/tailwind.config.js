@@ -9,9 +9,10 @@ export default {
         './app/Traits/**/*.php',
         './resources/views/**/*.blade.php',
         './vendor/filament/**/*.blade.php',
+        './resources/js/**/*.{vue,js,ts,jsx,tsx}',
     ],
     plugins: [
-        plugin(function ({ addVariant }) {
+        plugin(function ({addVariant}) {
             return addVariant('prima-native', [
                 '&.prima-native',
                 '.prima-native &',
