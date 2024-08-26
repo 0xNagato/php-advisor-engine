@@ -83,9 +83,18 @@ class VenueDashboard extends Dashboard
     protected function getHeaderWidgets(): array
     {
         return [
-            VenueOverview::make(['venue' => auth()->user()->venue, 'columnSpan' => 'full']),
-            VenueRecentBookings::make(['venue' => auth()->user()->venue, 'columnSpan' => 'full']),
-            // VenueLeaderboard::make(['venue' => auth()->user()->venue, 'columnSpan' => '1']),
+            VenueOverview::make([
+                'venue' => auth()->user()->venue,
+                'columnSpan' => 'full',
+                'startDate' => Carbon::parse($this->filters['startDate']),
+                'endDate' => Carbon::parse($this->filters['endDate']),
+            ]),
+            VenueRecentBookings::make([
+                'venue' => auth()->user()->venue,
+                'columnSpan' => 'full',
+                'startDate' => Carbon::parse($this->filters['startDate']),
+                'endDate' => Carbon::parse($this->filters['endDate']),
+            ]),
         ];
     }
 }

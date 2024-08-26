@@ -98,10 +98,23 @@ class ViewVenue extends ViewRecord
     protected function getHeaderWidgets(): array
     {
         return [
-            VenueOverview::make(['venue' => $this->getRecord(), 'columnSpan' => 'full']),
-            // VenueStats::make(['venue' => $this->getRecord(), 'columnSpan' => 'full']),
-            VenueRecentBookings::make(['venue' => $this->getRecord(), 'columnSpan' => '1']),
-            VenueLeaderboard::make(['venue' => $this->getRecord(), 'columnSpan' => '1']),
+            VenueOverview::make([
+                'venue' => $this->getRecord(),
+                'startDate' => Carbon::parse($this->filters['startDate']),
+                'endDate' => Carbon::parse($this->filters['endDate']),
+            ]),
+            VenueRecentBookings::make([
+                'venue' => $this->getRecord(),
+                'startDate' => Carbon::parse($this->filters['startDate']),
+                'endDate' => Carbon::parse($this->filters['endDate']),
+                'columnSpan' => '1',
+            ]),
+            VenueLeaderboard::make([
+                'venue' => $this->getRecord(),
+                'startDate' => Carbon::parse($this->filters['startDate']),
+                'endDate' => Carbon::parse($this->filters['endDate']),
+                'columnSpan' => '1',
+            ]),
         ];
     }
 }

@@ -28,16 +28,27 @@
                         </thead>
                         <tbody class="divide-y divide-gray-200">
                         @foreach($this->getLeaderboardData() as $index => $concierge)
-                            <tr class="hover:bg-gray-50 cursor-pointer"
-                                wire:click="viewConcierge({{ $concierge['concierge_id'] }})">
+                            <tr class="{{ auth()->user()->hasRole('super_admin') ? 'hover:bg-gray-50 cursor-pointer' : '' }}"
+                                @if(auth()->user()->hasRole('super_admin'))
+                                    wire:click="viewConcierge({{ $concierge['concierge_id'] }})"
+                                    @endif
+                            >
                                 <td class="px-6 py-[1.13rem] whitespace-nowrap text-sm font-medium text-gray-950">
                                     {{ $index + 1 }}
                                 </td>
                                 <td class="px-6 py-[1.13rem] whitespace-nowrap text-sm text-gray-950">
                                     @if(auth()->user()->concierge && auth()->user()->concierge->user_id === $concierge['user_id'])
                                         You
-                                    @else
+                                    @elseif(auth()->user()->hasRole('super_admin'))
                                         {{ $concierge['user_name'] }}
+                                    @else
+                                        @php
+                                            $nameParts = explode(' ', $concierge['user_name']);
+                                            $obfuscatedName = implode(' ', array_map(function($part) {
+                                                return substr($part, 0, 1) . str_repeat('*', strlen($part) - 1);
+                                            }, $nameParts));
+                                        @endphp
+                                        {{ $obfuscatedName }}
                                     @endif
                                 </td>
                                 <td class="px-6 py-[1.13rem] whitespace-nowrap text-sm text-gray-950">
