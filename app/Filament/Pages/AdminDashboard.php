@@ -3,24 +3,28 @@
 namespace App\Filament\Pages;
 
 use App\Livewire\Admin\AdminRecentBookings;
-use App\Livewire\Admin\AdminStats;
+use App\Livewire\BookingsOverview;
 use App\Livewire\Concierge\ConciergeLeaderboard;
 use App\Livewire\Partner\PartnerLeaderboard;
 use App\Livewire\Venue\VenueLeaderboard;
+use Carbon\Carbon;
+use Filament\Forms\Components\Actions;
+use Filament\Forms\Components\Actions\Action;
 use Filament\Forms\Components\DatePicker;
+use Filament\Forms\Form;
+use Filament\Forms\Set;
 use Filament\Pages\Dashboard;
 use Filament\Pages\Dashboard\Actions\FilterAction;
-use Filament\Pages\Dashboard\Concerns\HasFiltersAction;
+use Illuminate\Contracts\Support\Htmlable;
 
+/**
+ * @property Form $form
+ */
 class AdminDashboard extends Dashboard
 {
-    use HasFiltersAction;
-
-    protected static ?string $title = 'Dashboard';
+    use Dashboard\Concerns\HasFiltersAction;
 
     protected static string $routePath = 'admin';
-
-    protected static string $view = 'filament.pages.admin-dashboard';
 
     public static function canAccess(): bool
     {
@@ -29,16 +33,39 @@ class AdminDashboard extends Dashboard
 
     public function mount(): void
     {
-        $this->filters = [
-            'startDate' => $this->filters['startDate'] ?? now()->subDays(30),
-            'endDate' => $this->filters['endDate'] ?? now(),
-        ];
+        $this->filters['startDate'] ?? now()->subDays(30)->format('Y-m-d');
+        $this->filters['endDate'] ?? now()->format('Y-m-d');
     }
 
-    public function getHeaderWidgets(): array
+    public function getHeading(): string|Htmlable
+    {
+        return 'Dashboard';
+    }
+
+    public function getSubheading(): string|Htmlable|null
+    {
+        if ($this->filters['startDate'] && $this->filters['endDate']) {
+            $startDate = Carbon::parse($this->filters['startDate']);
+            $endDate = Carbon::parse($this->filters['endDate']);
+
+            $formattedStartDate = $startDate->format('M j');
+            $formattedEndDate = $endDate->format('M j');
+
+            return "$formattedStartDate - $formattedEndDate";
+        }
+
+        return null;
+    }
+
+    protected function getHeaderWidgets(): array
     {
         return [
-            AdminStats::make(),
+            BookingsOverview::make([
+                'filters' => [
+                    'startDate' => $this->filters['startDate'] ?? null,
+                    'endDate' => $this->filters['endDate'] ?? null,
+                ],
+            ]),
             AdminRecentBookings::make([
                 'columnSpan' => '1',
             ]),
@@ -61,9 +88,26 @@ class AdminDashboard extends Dashboard
                 ->label('Date Range')
                 ->iconButton()
                 ->icon('heroicon-o-calendar')
+                ->color('primary')
                 ->form([
-                    DatePicker::make('startDate'),
-                    DatePicker::make('endDate'),
+                    Actions::make([
+                        Action::make('last30Days')
+                            ->label('Last 30 Days')
+                            ->action(function (Set $set) {
+                                $set('startDate', now()->subDays(30)->format('Y-m-d'));
+                                $set('endDate', now()->format('Y-m-d'));
+                            }),
+                        Action::make('monthToDate')
+                            ->label('Month to Date')
+                            ->action(function (Set $set) {
+                                $set('startDate', now()->startOfMonth()->format('Y-m-d'));
+                                $set('endDate', now()->format('Y-m-d'));
+                            }),
+                    ]),
+                    DatePicker::make('startDate')
+                        ->native(false),
+                    DatePicker::make('endDate')
+                        ->native(false),
                 ]),
         ];
     }

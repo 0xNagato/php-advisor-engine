@@ -25,8 +25,6 @@ class Booking extends Model
     use HasFactory;
     use Notifiable;
 
-    public const int PLATFORM_PERCENTAGE_CONCIERGE = 10;
-
     /**
      * The attributes that are mass assignable.
      *

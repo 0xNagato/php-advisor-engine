@@ -20,6 +20,7 @@ use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Validation\ValidationException;
+use Lorisleiva\Actions\Facades\Actions;
 use Opcodes\LogViewer\Facades\LogViewer;
 
 class AppServiceProvider extends ServiceProvider
@@ -33,6 +34,8 @@ class AppServiceProvider extends ServiceProvider
             ($this->{'app'}['request'] ?? null)?->server?->set('HTTPS', 'on');
             URL::forceScheme('https');
         }
+
+        Actions::registerCommands();
 
         LogViewer::auth(static fn ($request) => $request->user()
             && $request->user()->hasRole('super_admin'));

@@ -5,7 +5,6 @@ namespace App\Services\Booking;
 use App\Constants\BookingPercentages;
 use App\Models\Booking;
 use App\Models\Partner;
-use Illuminate\Support\Facades\Log;
 
 readonly class PrimeEarningsCalculationService
 {
@@ -30,13 +29,6 @@ readonly class PrimeEarningsCalculationService
         $booking->concierge_earnings = $concierge_earnings;
         $booking->platform_earnings = $remainder;
         $booking->save();
-
-        Log::info('Prime earnings calculated', [
-            'booking_id' => $booking->id,
-            'venue_earnings' => $venue_earnings,
-            'concierge_earnings' => $concierge_earnings,
-            'platform_earnings' => $remainder,
-        ]);
     }
 
     private function calculateVenueEarnings(Booking $booking): float
@@ -73,6 +65,7 @@ readonly class PrimeEarningsCalculationService
         $totalPartnerEarnings = 0;
 
         if ($booking->concierge->user->partner_referral_id) {
+            /** @var Partner $partner */
             $partner = Partner::query()->find($booking->concierge->user->partner_referral_id);
             $amount = $remainder * ($partner->percentage / 100);
             $this->earningCreationService->createEarning($booking, 'partner_concierge', $amount, $partner->percentage, 'remainder');
@@ -82,6 +75,7 @@ readonly class PrimeEarningsCalculationService
         }
 
         if ($booking->venue->user->partner_referral_id) {
+            /** @var Partner $partner */
             $partner = Partner::query()->find($booking->venue->user->partner_referral_id);
             $amount = $remainder * ($partner->percentage / 100);
             $this->earningCreationService->createEarning($booking, 'partner_venue', $amount, $partner->percentage, 'remainder');

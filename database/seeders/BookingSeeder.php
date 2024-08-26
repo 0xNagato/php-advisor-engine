@@ -8,24 +8,28 @@ use App\Models\Concierge;
 use App\Models\ScheduleWithBooking;
 use App\Models\Venue;
 use App\Services\SalesTaxService;
+use Carbon\Carbon;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Collection;
 
 class BookingSeeder extends Seeder
 {
-    public const int BOOKINGS_COUNT = 20;
+    public const int BOOKINGS_COUNT = 200;
 
     public function run(): void
     {
         $concierges = Concierge::all();
         $salesTaxService = app(SalesTaxService::class);
 
+        $startDate = now()->subDays(30);
+        $endDate = now()->addDays(15);
+
         /**
          * @var Collection<Venue> $venues
          */
-        $venues = Venue::with(['schedules' => function ($query) {
+        $venues = Venue::with(['schedules' => function ($query) use ($startDate, $endDate) {
             $query->where('is_available', true)
-                ->where('booking_date', now()->subDay()->format('Y-m-d'))
+                ->whereBetween('booking_date', [$startDate->format('Y-m-d'), $endDate->format('Y-m-d')])
                 ->with('venue');
         }, 'inRegion'])->get();
 
@@ -40,6 +44,8 @@ class BookingSeeder extends Seeder
 
     private function createBooking(Venue $venue, ScheduleWithBooking $schedule, Collection $concierges, SalesTaxService $salesTaxService): void
     {
+        $bookingDate = Carbon::parse($schedule->booking_date)->setTimeFromTimeString($schedule->start_time);
+
         /**
          * @var Booking $booking
          */
@@ -47,10 +53,10 @@ class BookingSeeder extends Seeder
             'schedule_template_id' => $schedule->schedule_template_id,
             'concierge_id' => $concierges->random()->id,
             'status' => BookingStatus::CONFIRMED,
-            'booking_at' => $schedule->booking_at,
+            'booking_at' => $bookingDate,
             'guest_count' => $schedule->party_size,
-            'created_at' => $schedule->booking_at,
-            'updated_at' => $schedule->booking_at,
+            'created_at' => $bookingDate,
+            'updated_at' => $bookingDate,
             'currency' => $venue->inRegion->currency,
             'is_prime' => true,
         ]);
@@ -63,7 +69,7 @@ class BookingSeeder extends Seeder
             'tax_amount_in_cents' => $taxData->amountInCents,
             'city' => $taxData->region,
             'total_with_tax_in_cents' => $totalWithTaxInCents,
-            'confirmed_at' => $schedule->booking_at,
+            'confirmed_at' => $bookingDate,
         ]);
     }
 }

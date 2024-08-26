@@ -40,6 +40,7 @@ class ConciergeRecentBookings extends BaseWidget
         $endDate = $this->filters['endDate'] ?? now();
 
         $query = Booking::confirmed()
+            ->limit(10)
             ->with('earnings', function ($query) {
                 $query->where('user_id', $this->concierge->user_id);
             })
@@ -50,6 +51,7 @@ class ConciergeRecentBookings extends BaseWidget
             ->recordUrl(fn (Booking $booking) => route('filament.admin.resources.bookings.view', $booking))
             ->query($query)
             ->searchable(false)
+            ->paginated(false)
             ->emptyStateIcon('heroicon-o-currency-dollar')
             ->emptyStateHeading('Earnings will show here when bookings begin!')
             ->columns([

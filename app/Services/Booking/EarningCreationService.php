@@ -5,13 +5,12 @@ namespace App\Services\Booking;
 use App\Models\Booking;
 use App\Models\Earning;
 use App\Models\Partner;
-use Illuminate\Support\Facades\Log;
 
 class EarningCreationService
 {
     public function createEarning(Booking $booking, string $type, float $amount, float $percentage, string $percentageOf): void
     {
-        $earning = Earning::query()->create([
+        Earning::query()->create([
             'booking_id' => $booking->id,
             'user_id' => $this->getUserIdForEarningType($booking, $type),
             'type' => $type,
@@ -19,13 +18,6 @@ class EarningCreationService
             'currency' => $booking->currency,
             'percentage' => $percentage,
             'percentage_of' => $percentageOf,
-        ]);
-
-        Log::info('Earning created', [
-            'booking_id' => $booking->id,
-            'type' => $type,
-            'amount' => $amount,
-            'earning' => $earning,
         ]);
     }
 

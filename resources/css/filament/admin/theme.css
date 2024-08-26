@@ -160,13 +160,22 @@ body::before {
     }
 }
 
-.fi-ac {
-    top: 0;
-    @apply flex-grow text-right justify-end;
-    @media only screen and (max-width: 640px) {
-
-    }
+.fi-header-subheading {
+    @apply text-xs sm:text-sm md:text-base mt-0;
 }
+
+.fi-header {
+    @apply flex items-center justify-between;
+}
+
+.fi-header .fi-ac {
+    @apply ml-auto flex justify-end gap-1.5 sm:gap-3;
+}
+
+.fi-header > div:first-child {
+    @apply text-left;
+}
+
 
 @media only screen and (max-width: 768px) {
     .fi-otp-input {

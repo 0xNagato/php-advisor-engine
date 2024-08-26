@@ -13,7 +13,9 @@ namespace App\Actions\Booking;
  * @method static dispatchAfterResponse(int $scheduleTemplateId, array $data, string $timezone, string $currency)
  * @method static \App\Data\Booking\CreateBookingReturnData run(int $scheduleTemplateId, array $data, string $timezone, string $currency)
  */
-class CreateBooking {}
+class CreateBooking
+{
+}
 /**
  * @method static \Lorisleiva\Actions\Decorators\JobDecorator|\Lorisleiva\Actions\Decorators\UniqueJobDecorator makeJob(\App\Models\Booking $booking)
  * @method static \Lorisleiva\Actions\Decorators\UniqueJobDecorator makeUniqueJob(\App\Models\Booking $booking)
@@ -25,8 +27,25 @@ class CreateBooking {}
  * @method static dispatchAfterResponse(\App\Models\Booking $booking)
  * @method static void run(\App\Models\Booking $booking)
  */
-class SendConfirmationToVenueContacts {}
+class SendConfirmationToVenueContacts
+{
+}
+namespace App\Actions;
 
+/**
+ * @method static \Lorisleiva\Actions\Decorators\JobDecorator|\Lorisleiva\Actions\Decorators\UniqueJobDecorator makeJob()
+ * @method static \Lorisleiva\Actions\Decorators\UniqueJobDecorator makeUniqueJob()
+ * @method static \Illuminate\Foundation\Bus\PendingDispatch dispatch()
+ * @method static \Illuminate\Foundation\Bus\PendingDispatch|\Illuminate\Support\Fluent dispatchIf(bool $boolean)
+ * @method static \Illuminate\Foundation\Bus\PendingDispatch|\Illuminate\Support\Fluent dispatchUnless(bool $boolean)
+ * @method static dispatchSync()
+ * @method static dispatchNow()
+ * @method static dispatchAfterResponse()
+ * @method static string run()
+ */
+class GenerateDemoBookings
+{
+}
 namespace App\Actions\Partner;
 
 /**
@@ -40,8 +59,41 @@ namespace App\Actions\Partner;
  * @method static dispatchAfterResponse(array $data)
  * @method static \App\Models\Referral run(array $data)
  */
-class InviteConciergeViaSms {}
+class InviteConciergeViaSms
+{
+}
+namespace App\Actions\Region;
 
+/**
+ * @method static \Lorisleiva\Actions\Decorators\JobDecorator|\Lorisleiva\Actions\Decorators\UniqueJobDecorator makeJob()
+ * @method static \Lorisleiva\Actions\Decorators\UniqueJobDecorator makeUniqueJob()
+ * @method static \Illuminate\Foundation\Bus\PendingDispatch dispatch()
+ * @method static \Illuminate\Foundation\Bus\PendingDispatch|\Illuminate\Support\Fluent dispatchIf(bool $boolean)
+ * @method static \Illuminate\Foundation\Bus\PendingDispatch|\Illuminate\Support\Fluent dispatchUnless(bool $boolean)
+ * @method static dispatchSync()
+ * @method static dispatchNow()
+ * @method static dispatchAfterResponse()
+ * @method static \App\Models\Region run()
+ */
+class GetUserRegion
+{
+}
+namespace App\Actions\Reservations;
+
+/**
+ * @method static \Lorisleiva\Actions\Decorators\JobDecorator|\Lorisleiva\Actions\Decorators\UniqueJobDecorator makeJob(string $date, mixed $onlyShowFuture = false)
+ * @method static \Lorisleiva\Actions\Decorators\UniqueJobDecorator makeUniqueJob(string $date, mixed $onlyShowFuture = false)
+ * @method static \Illuminate\Foundation\Bus\PendingDispatch dispatch(string $date, mixed $onlyShowFuture = false)
+ * @method static \Illuminate\Foundation\Bus\PendingDispatch|\Illuminate\Support\Fluent dispatchIf(bool $boolean, string $date, mixed $onlyShowFuture = false)
+ * @method static \Illuminate\Foundation\Bus\PendingDispatch|\Illuminate\Support\Fluent dispatchUnless(bool $boolean, string $date, mixed $onlyShowFuture = false)
+ * @method static dispatchSync(string $date, mixed $onlyShowFuture = false)
+ * @method static dispatchNow(string $date, mixed $onlyShowFuture = false)
+ * @method static dispatchAfterResponse(string $date, mixed $onlyShowFuture = false)
+ * @method static array run(string $date, mixed $onlyShowFuture = false)
+ */
+class GetReservationTimeOptions
+{
+}
 namespace App\Actions\SpecialRequest;
 
 /**
@@ -55,23 +107,32 @@ namespace App\Actions\SpecialRequest;
  * @method static dispatchAfterResponse(\App\Data\SpecialRequest\CreateSpecialRequestData $data)
  * @method static \App\Models\SpecialRequest run(\App\Data\SpecialRequest\CreateSpecialRequestData $data)
  */
-class CreateSpecialRequest {}
-
+class CreateSpecialRequest
+{
+}
 namespace Lorisleiva\Actions\Concerns;
 
 /**
  * @method void asController()
  */
-trait AsController {}
+trait AsController
+{
+}
 /**
  * @method void asListener()
  */
-trait AsListener {}
+trait AsListener
+{
+}
 /**
  * @method void asJob()
  */
-trait AsJob {}
+trait AsJob
+{
+}
 /**
  * @method void asCommand(\Illuminate\Console\Command $command)
  */
-trait AsCommand {}
+trait AsCommand
+{
+}

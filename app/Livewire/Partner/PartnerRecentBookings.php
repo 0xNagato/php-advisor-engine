@@ -40,6 +40,7 @@ class PartnerRecentBookings extends BaseWidget
         $endDate = $this->filters['endDate'] ?? now();
 
         $query = Booking::confirmed()
+            ->limit(10)
             ->with('earnings', function ($query) {
                 $query->where('user_id', $this->partner->user_id)
                     ->whereIn('type', ['partner_venue', 'partner_concierge']);
@@ -57,11 +58,8 @@ class PartnerRecentBookings extends BaseWidget
             ->searchable(false)
             ->emptyStateIcon('heroicon-o-currency-dollar')
             ->emptyStateHeading('Earnings will show here when bookings begin!')
-            ->paginated([5, 10, 25])
+            ->paginated(false)
             ->columns([
-                TextColumn::make('id')
-                    ->label('Booking ID')
-                    ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('schedule.venue.name')
                     ->label('Venue')
                     ->searchable(),

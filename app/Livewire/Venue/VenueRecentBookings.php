@@ -43,6 +43,7 @@ class VenueRecentBookings extends BaseWidget
         $endDate = $this->filters['endDate'] ?? now();
 
         $query = Booking::confirmedOrNoShow()
+            ->limit(10)
             ->with('earnings', function ($query) {
                 $query->where('user_id', $this->venue->user_id);
             })
@@ -76,7 +77,7 @@ class VenueRecentBookings extends BaseWidget
                 //         return money($total, $booking->currency);
                 //     }),
             ])
-            ->paginated([5, 10, 25])
+            ->paginated(false)
             ->actions([
                 ActionGroup::make([
                     MarkAsNoShowAction::make('mark no show'),
