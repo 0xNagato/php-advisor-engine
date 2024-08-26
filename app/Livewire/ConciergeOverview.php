@@ -2,7 +2,6 @@
 
 namespace App\Livewire;
 
-use App\Livewire\Traits\HasEarningsOverview;
 use App\Models\Concierge;
 use App\Models\Earning;
 use App\Services\CurrencyConversionService;
@@ -13,7 +12,6 @@ use Illuminate\Support\Facades\DB;
 
 class ConciergeOverview extends BaseWidget
 {
-    use HasEarningsOverview;
     use InteractsWithPageFilters;
 
     public ?Concierge $concierge = null;
