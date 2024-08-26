@@ -41,7 +41,7 @@ class BookingsOverview extends BaseWidget
         $chartData = $this->getChartData($startDate, $endDate);
 
         return [
-            $this->createStat('Total Bookings', $totalBookings)
+            $this->createStat('Bookings', $totalBookings)
                 ->chart($chartData['bookings'])
                 ->color('success'),
             $this->createStat('Total Amount (converted to USD)', $totalAmountUSD, 'USD', $bookings->pluck('total_amount', 'currency')->toArray())

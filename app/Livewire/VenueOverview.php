@@ -27,7 +27,7 @@ class VenueOverview extends BaseWidget
         $currencySymbol = $this->venue->inRegion->currency_symbol;
 
         return [
-            $this->createStat('Total Bookings', $earnings['number_of_bookings'], null, $prevEarnings['number_of_bookings'])
+            $this->createStat('Bookings', $earnings['number_of_bookings'], null, $prevEarnings['number_of_bookings'])
                 ->chart($chartData['bookings'])
                 ->color('success'),
             $this->createStat('PRIME Earnings', $earnings['venue_earnings'] / 100, $currencySymbol, $prevEarnings['venue_earnings'] / 100)

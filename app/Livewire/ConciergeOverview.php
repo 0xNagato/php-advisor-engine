@@ -33,13 +33,13 @@ class ConciergeOverview extends BaseWidget
         $prevAvgBookingValue = $this->getAverageBookingValue($startDate->copy()->subDays($startDate->diffInDays($endDate)), $startDate);
 
         return [
-            $this->createStat('Total Bookings', $earnings['number_of_bookings'], null, $prevEarnings['number_of_bookings'])
+            $this->createStat('Bookings', $earnings['number_of_bookings'], null, $prevEarnings['number_of_bookings'])
                 ->chart($chartData['bookings'])
                 ->color('success'),
             $this->createEarningsStat($totalEarningsUSD, $prevTotalEarningsUSD, $earnings['earnings'])
                 ->chart($chartData['earnings'])
                 ->color('success'),
-            $this->createStat('Average Earning per Booking', $avgBookingValue, 'USD', $prevAvgBookingValue)
+            $this->createStat('Avg. Earning per Booking (converted to USD)', $avgBookingValue, 'USD', $prevAvgBookingValue)
                 ->chart($chartData['avg_booking_value'])
                 ->color('info'),
         ];
