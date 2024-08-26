@@ -31,9 +31,10 @@ class ViewVenue extends ViewRecord
 
     public function mount(int|string $record): void
     {
+        $this->filters['startDate'] = $this->filters['startDate'] ?? now()->subDays(30)->format('Y-m-d');
+        $this->filters['endDate'] = $this->filters['endDate'] ?? now()->format('Y-m-d');
+
         parent::mount($record);
-        $this->filters['startDate'] ?? now()->subDays(30)->format('Y-m-d');
-        $this->filters['endDate'] ?? now()->format('Y-m-d');
     }
 
     public function getHeading(): string|Htmlable

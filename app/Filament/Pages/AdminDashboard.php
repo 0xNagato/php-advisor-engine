@@ -33,8 +33,8 @@ class AdminDashboard extends Dashboard
 
     public function mount(): void
     {
-        $this->filters['startDate'] ?? now()->subDays(30)->format('Y-m-d');
-        $this->filters['endDate'] ?? now()->format('Y-m-d');
+        $this->filters['startDate'] = $this->filters['startDate'] ?? now()->subDays(30)->format('Y-m-d');
+        $this->filters['endDate'] = $this->filters['endDate'] ?? now()->format('Y-m-d');
     }
 
     public function getHeading(): string|Htmlable
