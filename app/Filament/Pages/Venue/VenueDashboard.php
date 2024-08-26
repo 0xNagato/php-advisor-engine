@@ -36,17 +36,17 @@ class VenueDashboard extends Dashboard
 
     public function getSubheading(): string|null|Htmlable
     {
-        if ($this->filters['startDate'] && $this->filters['endDate']) {
-            $startDate = Carbon::parse($this->filters['startDate']);
-            $endDate = Carbon::parse($this->filters['endDate']);
-
-            $formattedStartDate = $startDate->format('M j');
-            $formattedEndDate = $endDate->format('M j');
-
-            return "$formattedStartDate - $formattedEndDate";
+        if (! isset($this->filters['startDate'], $this->filters['endDate'])) {
+            return null; // or return a default value like 'N/A' or an empty string
         }
 
-        return null;
+        $startDate = Carbon::parse($this->filters['startDate']);
+        $endDate = Carbon::parse($this->filters['endDate']);
+
+        $formattedStartDate = $startDate->format('M j');
+        $formattedEndDate = $endDate->format('M j');
+
+        return $formattedStartDate.' - '.$formattedEndDate;
     }
 
     protected function getHeaderActions(): array
