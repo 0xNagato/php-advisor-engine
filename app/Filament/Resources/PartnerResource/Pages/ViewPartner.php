@@ -5,7 +5,7 @@ namespace App\Filament\Resources\PartnerResource\Pages;
 use App\Filament\Resources\PartnerResource;
 use App\Livewire\Partner\PartnerLeaderboard;
 use App\Livewire\Partner\PartnerRecentBookings;
-use App\Livewire\Partner\PartnerStats;
+use App\Livewire\PartnerOverview;
 use App\Models\Partner;
 use Filament\Actions\EditAction;
 use Filament\Resources\Pages\ViewRecord;
@@ -29,9 +29,8 @@ class ViewPartner extends ViewRecord
     public function getHeaderWidgets(): array
     {
         return [
-            PartnerStats::make([
+            PartnerOverview::make([
                 'partner' => $this->record,
-                'columnSpan' => 'full',
             ]),
             PartnerRecentBookings::make([
                 'partner' => $this->record,
