@@ -3,7 +3,7 @@
 namespace App\Filament\Resources\PartnerResource\Pages;
 
 use App\Filament\Resources\PartnerResource;
-use App\Livewire\Partner\PartnerLeaderboard;
+use App\Livewire\Partner\PartnerOverallLeaderboard;
 use App\Livewire\Partner\PartnerRecentBookings;
 use App\Livewire\PartnerOverview;
 use App\Models\Partner;
@@ -13,7 +13,7 @@ use Filament\Forms\Components\Actions;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Set;
 use Filament\Pages\Dashboard\Actions\FilterAction;
-use Filament\Pages\Dashboard\Concerns\HasFiltersAction;
+use Filament\Pages\Dashboard\Concerns\HasFilters;
 use Filament\Resources\Pages\ViewRecord;
 use Illuminate\Contracts\Support\Htmlable;
 use STS\FilamentImpersonate\Pages\Actions\Impersonate;
@@ -25,14 +25,14 @@ use STS\FilamentImpersonate\Pages\Actions\Impersonate;
  */
 class ViewPartner extends ViewRecord
 {
-    use HasFiltersAction;
+    use HasFilters;
 
     protected static string $resource = PartnerResource::class;
 
     public function mount(int|string $record): void
     {
-        $this->filters['startDate'] = $this->filters['startDate'] ?? now()->subDays(30)->format('Y-m-d');
-        $this->filters['endDate'] = $this->filters['endDate'] ?? now()->format('Y-m-d');
+        $this->filters['startDate'] = $this->filters['startDate'] ?? now()->subDays(30)->startOfDay()->format('Y-m-d');
+        $this->filters['endDate'] = $this->filters['endDate'] ?? now()->endOfDay()->format('Y-m-d');
 
         parent::mount($record);
     }
@@ -62,14 +62,20 @@ class ViewPartner extends ViewRecord
         return [
             PartnerOverview::make([
                 'partner' => $this->record,
+                'startDate' => Carbon::parse($this->filters['startDate']),
+                'endDate' => Carbon::parse($this->filters['endDate']),
             ]),
             PartnerRecentBookings::make([
                 'partner' => $this->record,
                 'columnSpan' => '1',
+                'startDate' => Carbon::parse($this->filters['startDate']),
+                'endDate' => Carbon::parse($this->filters['endDate']),
             ]),
-            PartnerLeaderboard::make([
+            PartnerOverallLeaderboard::make([
                 'partner' => $this->record,
                 'columnSpan' => '1',
+                'startDate' => Carbon::parse($this->filters['startDate']),
+                'endDate' => Carbon::parse($this->filters['endDate']),
             ]),
         ];
     }

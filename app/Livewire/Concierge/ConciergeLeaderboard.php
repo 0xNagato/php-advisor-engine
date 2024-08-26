@@ -10,6 +10,9 @@ use Filament\Widgets\TableWidget as BaseWidget;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
 
+/**
+ * @deprecated Use ConciergeOverallLeaderboard instead
+ */
 class ConciergeLeaderboard extends BaseWidget
 {
     public ?Concierge $concierge = null;

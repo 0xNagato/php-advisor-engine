@@ -5,21 +5,26 @@ namespace App\Livewire;
 use App\Models\Concierge;
 use App\Models\Earning;
 use App\Services\CurrencyConversionService;
-use Filament\Widgets\Concerns\InteractsWithPageFilters;
+use Carbon\Carbon;
 use Filament\Widgets\StatsOverviewWidget as BaseWidget;
 use Filament\Widgets\StatsOverviewWidget\Stat;
 use Illuminate\Support\Facades\DB;
+use Livewire\Attributes\Reactive;
 
 class ConciergeOverview extends BaseWidget
 {
-    use InteractsWithPageFilters;
-
     public ?Concierge $concierge = null;
+
+    #[Reactive]
+    public ?Carbon $startDate = null;
+
+    #[Reactive]
+    public ?Carbon $endDate = null;
 
     protected function getStats(): array
     {
-        $startDate = $this->filters['startDate'] ?? now()->subDays(30)->startOfDay();
-        $endDate = $this->filters['endDate'] ?? now()->endOfDay();
+        $startDate = $this->startDate ?? now()->subDays(30)->startOfDay();
+        $endDate = $this->endDate ?? now()->endOfDay();
 
         $earnings = $this->getEarnings($startDate, $endDate);
         $prevEarnings = $this->getEarnings($startDate->copy()->subDays($startDate->diffInDays($endDate)), $startDate);

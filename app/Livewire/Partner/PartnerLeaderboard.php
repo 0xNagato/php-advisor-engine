@@ -1,56 +1,72 @@
 <?php
 
+/** @noinspection UnknownInspectionInspection */
+/** @noinspection CallableParameterUseCaseInTypeContextInspection */
+
 namespace App\Livewire\Partner;
 
 use App\Models\Earning;
 use App\Models\Partner;
+use Carbon\Carbon;
+use Exception;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Filament\Widgets\TableWidget as BaseWidget;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
+use Livewire\Attributes\Reactive;
 
+/**
+ * @deprecated Use PartnerOverallLeaderboard instead
+ */
 class PartnerLeaderboard extends BaseWidget
 {
     public ?Partner $partner = null;
 
-    public bool $showFilters = false;
-
     public int|string|array $columnSpan;
 
-    public function getColumnSpan(): int|string|array
-    {
-        return $this->columnSpan ?? 'full';
-    }
+    public bool $showFilters = false;
 
-    public function table(Table $table): Table
-    {
-        $startDate = $this->filters['startDate'] ?? now()->subDays(30);
-        $endDate = $this->filters['endDate'] ?? now();
+    #[Reactive]
+    public ?Carbon $startDate = null;
 
-        $query = Earning::query()
-            ->confirmed()
-            ->select('earnings.user_id', 'partners.id as partner_id', DB::raw('SUM(amount) as total_earned'), DB::raw("CONCAT(users.first_name, ' ', users.last_name) as user_name"))
+    #[Reactive]
+    public ?Carbon $endDate = null;
+
+    protected function getTableQuery(): Builder
+    {
+        return Earning::query()
+            ->join('bookings', 'earnings.booking_id', '=', 'bookings.id')
             ->join('users', 'users.id', '=', 'earnings.user_id')
             ->join('partners', 'partners.user_id', '=', 'earnings.user_id')
-            ->whereBetween('earnings.created_at', [$startDate, $endDate])
-            ->groupBy('earnings.user_id', 'partners.id')
-            ->orderBy('total_earned', 'desc')
+            ->whereNotNull('bookings.confirmed_at')
+            ->whereBetween('bookings.booking_at', [$this->startDate, $this->endDate])
+            ->whereIn('earnings.type', ['partner_concierge', 'partner_venue'])
+            ->groupBy('earnings.user_id', 'partners.id', 'earnings.currency')
+            ->select(
+                'earnings.user_id',
+                'partners.id as partner_id',
+                DB::raw('SUM(earnings.amount) as total_earned'),
+                DB::raw("CONCAT(users.first_name, ' ', users.last_name) as user_name"),
+                'earnings.currency'
+            )
+            ->orderByDesc('total_earned')
             ->limit(10);
+    }
 
+    /**
+     * @throws Exception
+     */
+    public function table(Table $table): Table
+    {
         return $table
-            ->query($query)
-            ->recordUrl(function (Earning $record) {
-                $record = Partner::query()->firstWhere(['user_id' => $record->user_id]);
-
-                return route('filament.admin.resources.partners.view', ['record' => $record]);
-            })
-            ->deferLoading()
-            ->paginated(false)
-            ->columns(components: [
+            ->query($this->getTableQuery())
+            ->columns([
                 TextColumn::make('rank')
                     ->label('Rank')
-                    ->rowIndex(),
+                    ->getStateUsing(fn ($record, $rowLoop) => $rowLoop->iteration),
                 TextColumn::make('user_name')
                     ->label('Partner Name')
                     ->formatStateUsing(function ($state, $record) {
@@ -66,12 +82,33 @@ class PartnerLeaderboard extends BaseWidget
                     }),
                 TextColumn::make('total_earned')
                     ->label('Earned')
-                    ->money('USD', divideBy: 100),
-            ]);
+                    ->formatStateUsing(fn ($state, $record) => $record->currency.' '.number_format($state / 100, 2)),
+                TextColumn::make('currency')
+                    ->label('Currency'),
+            ])
+            ->filters([
+                SelectFilter::make('currency')
+                    ->options([
+                        'USD' => 'USD',
+                        'EUR' => 'EUR',
+                        'GBP' => 'GBP',
+                    ])
+                    ->attribute('earnings.currency')
+                    ->default('USD'),
+            ])
+            ->paginated(false);
     }
 
     public function getTableRecordKey(Model $record): string
     {
         return 'partners.user_id';
+    }
+
+    public function getTableHeading(): ?string
+    {
+        $startDate = Carbon::parse($this->startDate)->format('M j');
+        $endDate = Carbon::parse($this->endDate)->format('M j');
+
+        return "Partner Leaderboards ($startDate - $endDate)";
     }
 }

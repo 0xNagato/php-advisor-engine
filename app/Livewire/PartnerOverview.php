@@ -5,31 +5,33 @@ namespace App\Livewire;
 use App\Models\Earning;
 use App\Models\Partner;
 use App\Services\CurrencyConversionService;
-use Filament\Widgets\Concerns\InteractsWithPageFilters;
+use Carbon\Carbon;
 use Filament\Widgets\StatsOverviewWidget as BaseWidget;
 use Filament\Widgets\StatsOverviewWidget\Stat;
+use Livewire\Attributes\Reactive;
 
 class PartnerOverview extends BaseWidget
 {
-    use InteractsWithPageFilters;
-
     public ?Partner $partner = null;
+
+    #[Reactive]
+    public ?Carbon $startDate = null;
+
+    #[Reactive]
+    public ?Carbon $endDate = null;
 
     protected function getStats(): array
     {
-        $startDate = $this->filters['startDate'] ?? now()->subDays(30)->startOfDay();
-        $endDate = $this->filters['endDate'] ?? now()->endOfDay();
-
-        $earnings = $this->getEarnings($startDate, $endDate);
-        $prevEarnings = $this->getEarnings($startDate->copy()->subDays($startDate->diffInDays($endDate)), $startDate);
-        $chartData = $this->getChartData($startDate, $endDate);
+        $earnings = $this->getEarnings($this->startDate, $this->endDate);
+        $prevEarnings = $this->getEarnings($this->startDate->copy()->subDays($this->startDate->diffInDays($this->endDate)), $this->startDate);
+        $chartData = $this->getChartData($this->startDate, $this->endDate);
 
         $currencyService = app(CurrencyConversionService::class);
         $totalEarningsUSD = $currencyService->convertToUSD($earnings['earnings']);
         $prevTotalEarningsUSD = $currencyService->convertToUSD($prevEarnings['earnings']);
 
-        $avgBookingValue = $this->getAverageBookingValue($startDate, $endDate);
-        $prevAvgBookingValue = $this->getAverageBookingValue($startDate->copy()->subDays($startDate->diffInDays($endDate)), $startDate);
+        $avgBookingValue = $this->getAverageBookingValue($this->startDate, $this->endDate);
+        $prevAvgBookingValue = $this->getAverageBookingValue($this->startDate->copy()->subDays($this->startDate->diffInDays($this->endDate)), $this->startDate);
 
         return [
             $this->createStat('Bookings', $earnings['number_of_bookings'], null, $prevEarnings['number_of_bookings'])
@@ -157,7 +159,6 @@ class PartnerOverview extends BaseWidget
             'EUR' => '€',
             'GBP' => '£',
             'JPY' => '¥',
-
             default => $currency ?? '',
         };
     }

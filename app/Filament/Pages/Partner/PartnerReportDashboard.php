@@ -2,7 +2,7 @@
 
 namespace App\Filament\Pages\Partner;
 
-use App\Livewire\Partner\PartnerLeaderboard;
+use App\Livewire\Partner\PartnerOverallLeaderboard;
 use App\Livewire\Partner\PartnerRecentBookings;
 use App\Livewire\PartnerOverview;
 use Carbon\Carbon;
@@ -57,14 +57,18 @@ class PartnerReportDashboard extends Dashboard
         return [
             PartnerOverview::make([
                 'partner' => auth()->user()->partner,
+                'startDate' => Carbon::parse($this->filters['startDate']),
+                'endDate' => Carbon::parse($this->filters['endDate']),
             ]),
             PartnerRecentBookings::make([
                 'partner' => auth()->user()->partner,
                 'columnSpan' => '1',
             ]),
-            PartnerLeaderboard::make([
+            PartnerOverallLeaderboard::make([
                 'partner' => auth()->user()->partner,
                 'columnSpan' => '1',
+                'startDate' => Carbon::parse($this->filters['startDate']),
+                'endDate' => Carbon::parse($this->filters['endDate']),
             ]),
         ];
     }

@@ -2,7 +2,7 @@
 
 namespace App\Filament\Pages\Concierge;
 
-use App\Livewire\Concierge\ConciergeLeaderboard;
+use App\Livewire\Concierge\ConciergeOverallLeaderboard;
 use App\Livewire\Concierge\ConciergeRecentBookings;
 use App\Livewire\ConciergeOverview;
 use Carbon\Carbon;
@@ -63,14 +63,17 @@ class ConciergeReportDashboard extends Dashboard
         return [
             ConciergeOverview::make([
                 'concierge' => auth()->user()->concierge,
+                'startDate' => Carbon::parse($this->filters['startDate']),
+                'endDate' => Carbon::parse($this->filters['endDate']),
             ]),
             ConciergeRecentBookings::make([
                 'concierge' => auth()->user()->concierge,
                 'columnSpan' => '1',
             ]),
-            ConciergeLeaderboard::make([
+            ConciergeOverallLeaderboard::make([
                 'concierge' => auth()->user()->concierge,
-                'showFilters' => true,
+                'startDate' => Carbon::parse($this->filters['startDate']),
+                'endDate' => Carbon::parse($this->filters['endDate']),
                 'columnSpan' => 1,
             ]),
         ];

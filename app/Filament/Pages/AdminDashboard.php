@@ -4,8 +4,8 @@ namespace App\Filament\Pages;
 
 use App\Livewire\Admin\AdminRecentBookings;
 use App\Livewire\BookingsOverview;
-use App\Livewire\Concierge\ConciergeLeaderboard;
-use App\Livewire\Partner\PartnerLeaderboard;
+use App\Livewire\Concierge\ConciergeOverallLeaderboard;
+use App\Livewire\Partner\PartnerOverallLeaderboard;
 use App\Livewire\Venue\VenueLeaderboard;
 use Carbon\Carbon;
 use Filament\Forms\Components\Actions;
@@ -72,11 +72,15 @@ class AdminDashboard extends Dashboard
             VenueLeaderboard::make([
                 'columnSpan' => '1',
             ]),
-            ConciergeLeaderboard::make([
+            ConciergeOverallLeaderboard::make([
                 'columnSpan' => '1',
+                'startDate' => Carbon::parse($this->filters['startDate']),
+                'endDate' => Carbon::parse($this->filters['endDate']),
             ]),
-            PartnerLeaderboard::make([
+            PartnerOverallLeaderboard::make([
                 'columnSpan' => '1',
+                'startDate' => Carbon::parse($this->filters['startDate']),
+                'endDate' => Carbon::parse($this->filters['endDate']),
             ]),
         ];
     }

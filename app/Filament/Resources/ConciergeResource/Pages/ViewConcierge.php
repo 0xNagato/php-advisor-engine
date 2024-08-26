@@ -3,7 +3,7 @@
 namespace App\Filament\Resources\ConciergeResource\Pages;
 
 use App\Filament\Resources\ConciergeResource;
-use App\Livewire\Concierge\ConciergeLeaderboard;
+use App\Livewire\Concierge\ConciergeOverallLeaderboard;
 use App\Livewire\Concierge\ConciergeRecentBookings;
 use App\Livewire\ConciergeOverview;
 use App\Models\Concierge;
@@ -100,15 +100,20 @@ class ViewConcierge extends ViewRecord
         return [
             ConciergeOverview::make([
                 'concierge' => $this->getRecord(),
+                'startDate' => Carbon::parse($this->filters['startDate']),
+                'endDate' => Carbon::parse($this->filters['endDate']),
             ]),
             ConciergeRecentBookings::make([
                 'concierge' => $this->getRecord(),
                 'hideConcierge' => true,
                 'columnSpan' => '1',
+                'startDate' => Carbon::parse($this->filters['startDate']),
+                'endDate' => Carbon::parse($this->filters['endDate']),
             ]),
-            ConciergeLeaderboard::make([
+            ConciergeOverallLeaderboard::make([
                 'concierge' => $this->getRecord(),
-                'showFilters' => false,
+                'startDate' => Carbon::parse($this->filters['startDate']),
+                'endDate' => Carbon::parse($this->filters['endDate']),
                 'columnSpan' => '1',
             ]),
         ];

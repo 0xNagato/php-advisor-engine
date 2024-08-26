@@ -9,7 +9,7 @@ class CurrencyConversionService
      *
      * @var array<string, float>
      */
-    protected array $exchangeRates = [
+    public array $exchangeRates = [
         'USD' => 1,
         'EUR' => 1.1,
         'GBP' => 1.3,
