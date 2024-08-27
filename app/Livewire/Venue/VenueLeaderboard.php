@@ -48,7 +48,7 @@ class VenueLeaderboard extends BaseWidget
                 'earnings.currency',
                 DB::raw('COUNT(DISTINCT bookings.id) as booking_count'),
             ])
-            ->whereNotNull('earnings.confirmed_at')
+            ->whereNotNull('bookings.confirmed_at')
             ->join('bookings', 'earnings.booking_id', '=', 'bookings.id')
             ->join('users', 'users.id', '=', 'earnings.user_id')
             ->join('venues', 'venues.user_id', '=', 'earnings.user_id')

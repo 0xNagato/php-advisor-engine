@@ -44,7 +44,7 @@ class ConciergeReferralBookingsTable extends BaseWidget
             ->where('earnings.user_id', $userId)
             ->whereIn('earnings.type', ['concierge_referral_1', 'concierge_referral_2'])
             ->whereBetween('earnings.created_at', [$startDate, $endDate])
-            ->whereNotNull('earnings.confirmed_at') // Explicitly specify the table name here
+            ->whereNotNull('bookings.confirmed_at') // Explicitly specify the table name here
             ->join('bookings', 'earnings.booking_id', '=', 'bookings.id')
             ->orderBy('bookings.created_at', 'desc')
             ->with('booking.concierge.user');
