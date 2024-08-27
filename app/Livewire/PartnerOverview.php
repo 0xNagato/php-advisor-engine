@@ -49,13 +49,13 @@ class PartnerOverview extends BaseWidget
     protected function getEarnings($startDate, $endDate): array
     {
         $partnerEarningsQuery = Earning::query()
-            ->whereNotNull('earnings.confirmed_at')
+            ->whereNotNull('bookings.confirmed_at')
             ->join('bookings', 'earnings.booking_id', '=', 'bookings.id')
             ->where('earnings.user_id', $this->partner->user_id)
             ->whereBetween('bookings.booking_at', [$startDate, $endDate])
             ->whereIn('earnings.type', ['partner_concierge', 'partner_venue']);
 
-        $numberOfBookings = $partnerEarningsQuery->count();
+        $numberOfBookings = $partnerEarningsQuery->distinct('bookings.id')->count('bookings.id');
 
         $partnerEarnings = $partnerEarningsQuery
             ->selectRaw('earnings.currency, SUM(earnings.amount) as total_earnings')
@@ -71,12 +71,12 @@ class PartnerOverview extends BaseWidget
     protected function getAverageBookingValue($startDate, $endDate): float
     {
         $result = Earning::query()
-            ->whereNotNull('earnings.confirmed_at')
+            ->whereNotNull('bookings.confirmed_at')
             ->join('bookings', 'earnings.booking_id', '=', 'bookings.id')
             ->where('earnings.user_id', $this->partner->user_id)
             ->whereBetween('bookings.booking_at', [$startDate, $endDate])
             ->whereIn('earnings.type', ['partner_concierge', 'partner_venue'])
-            ->selectRaw('earnings.currency, AVG(earnings.amount) as average_earning, COUNT(*) as booking_count')
+            ->selectRaw('earnings.currency, AVG(earnings.amount) as average_earning, COUNT(DISTINCT bookings.id) as booking_count')
             ->groupBy('earnings.currency')
             ->get();
 
@@ -100,12 +100,12 @@ class PartnerOverview extends BaseWidget
     protected function getChartData($startDate, $endDate): array
     {
         $dailyData = Earning::query()
-            ->whereNotNull('earnings.confirmed_at')
+            ->whereNotNull('bookings.confirmed_at')
             ->join('bookings', 'earnings.booking_id', '=', 'bookings.id')
             ->where('earnings.user_id', $this->partner->user_id)
             ->whereBetween('bookings.booking_at', [$startDate, $endDate])
             ->whereIn('earnings.type', ['partner_concierge', 'partner_venue'])
-            ->selectRaw('DATE(bookings.booking_at) as date, earnings.currency, COUNT(*) as bookings, SUM(earnings.amount) as total_earnings, AVG(earnings.amount) as avg_earning')
+            ->selectRaw('DATE(bookings.booking_at) as date, earnings.currency, COUNT(DISTINCT bookings.id) as bookings, SUM(earnings.amount) as total_earnings, AVG(earnings.amount) as avg_earning')
             ->groupBy('date', 'earnings.currency')
             ->orderBy('date')
             ->get();

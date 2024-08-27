@@ -40,7 +40,8 @@ class PartnerOverallLeaderboard extends Widget
                 'partners.id as partner_id',
                 DB::raw('SUM(earnings.amount) as total_earned'),
                 DB::raw("CONCAT(users.first_name, ' ', users.last_name) as user_name"),
-                'earnings.currency'
+                'earnings.currency',
+                DB::raw('COUNT(DISTINCT bookings.id) as booking_count')
             )
             ->get();
 
@@ -52,6 +53,7 @@ class PartnerOverallLeaderboard extends Widget
                 'partner_id' => $partnerEarnings->first()->partner_id,
                 'user_name' => $partnerEarnings->first()->user_name,
                 'total_usd' => $totalUSD,
+                'booking_count' => $partnerEarnings->sum('booking_count'),
                 'earnings_breakdown' => $partnerEarnings->map(fn ($earning) => [
                     'amount' => $earning->total_earned,
                     'currency' => $earning->currency,
