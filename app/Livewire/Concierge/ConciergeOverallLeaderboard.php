@@ -41,7 +41,8 @@ class ConciergeOverallLeaderboard extends Widget
                 'concierges.id as concierge_id',
                 DB::raw('SUM(earnings.amount) as total_earned'),
                 'earnings.currency',
-                DB::raw("CONCAT(users.first_name, ' ', users.last_name) as user_name")
+                DB::raw("CONCAT(users.first_name, ' ', users.last_name) as user_name"),
+                DB::raw('COUNT(DISTINCT bookings.id) as booking_count')
             )
             ->join('bookings', 'earnings.booking_id', '=', 'bookings.id')
             ->join('users', 'users.id', '=', 'earnings.user_id')
@@ -53,7 +54,7 @@ class ConciergeOverallLeaderboard extends Widget
             ->get();
 
         $conciergeTotals = $earnings->groupBy('user_id')
-            ->map(function ($userEarnings) use ($currencyService) {
+            ->map(function (Collection $userEarnings) use ($currencyService) {
                 $totalUSD = $userEarnings->sum(fn ($earning) => $currencyService->convertToUSD([$earning->currency => $earning->total_earned]));
 
                 return [
@@ -61,6 +62,7 @@ class ConciergeOverallLeaderboard extends Widget
                     'concierge_id' => $userEarnings->first()->concierge_id,
                     'user_name' => $userEarnings->first()->user_name,
                     'total_usd' => $totalUSD,
+                    'booking_count' => $userEarnings->first()->booking_count,
                     'earnings_breakdown' => $userEarnings->map(fn ($earning) => [
                         'amount' => $earning->total_earned,
                         'currency' => $earning->currency,

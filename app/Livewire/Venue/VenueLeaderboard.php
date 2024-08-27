@@ -46,6 +46,7 @@ class VenueLeaderboard extends BaseWidget
                 'venues.name',
                 'venues.region',
                 'earnings.currency',
+                DB::raw('COUNT(DISTINCT bookings.id) as booking_count'),
             ])
             ->whereNotNull('earnings.confirmed_at')
             ->join('bookings', 'earnings.booking_id', '=', 'bookings.id')
@@ -78,6 +79,9 @@ class VenueLeaderboard extends BaseWidget
 
                         return $state;
                     }),
+                TextColumn::make('booking_count')
+                    ->label('Bookings')
+                    ->alignRight(),
                 TextColumn::make('total_earned')
                     ->label('Earned')
                     ->money(fn ($record) => $record->currency, divideBy: 100),
