@@ -25,11 +25,11 @@
                         </th>
                         <th scope="col"
                             class="px-3 text-left text-sm font-semibold py-3.5 first-of-type:ps-4 last-of-type:pe-4 sm:first-of-type:ps-6 sm:last-of-type:pe-6">
-                            Number of Bookings
+                            Bookings
                         </th>
                         <th scope="col"
                             class="px-3 text-left text-sm font-semibold py-3.5 first-of-type:ps-4 last-of-type:pe-4 sm:first-of-type:ps-6 sm:last-of-type:pe-6">
-                            Total Earned
+                            Earned
                         </th>
                     </tr>
                     </thead>
