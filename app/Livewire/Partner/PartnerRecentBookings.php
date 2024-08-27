@@ -36,12 +36,20 @@ class PartnerRecentBookings extends BaseWidget
 
     public function table(Table $table): Table
     {
+        if (! $this->partner) {
+            return $table->query(Booking::query()->whereNull('id'));
+        }
+
         $startDate = $this->filters['startDate'] ?? now()->subDays(30);
         $endDate = $this->filters['endDate'] ?? now();
 
         $query = Booking::confirmed()
             ->limit(10)
-            ->with('earnings', function ($query) {
+            ->with(['earnings' => function ($query) {
+                $query->where('user_id', $this->partner->user_id)
+                    ->whereIn('type', ['partner_venue', 'partner_concierge']);
+            }])
+            ->whereHas('earnings', function ($query) {
                 $query->where('user_id', $this->partner->user_id)
                     ->whereIn('type', ['partner_venue', 'partner_concierge']);
             })
@@ -70,24 +78,24 @@ class PartnerRecentBookings extends BaseWidget
                     ->alignRight()
                     ->label('Earned')
                     ->formatStateUsing(function (Booking $booking) {
-                        $total = $booking->earnings->sum('amount');
+                        $total = $booking->earnings->where('user_id', $this->partner->user_id)->sum('amount');
 
-                        return money($total, $booking->currency);
+                        return $total > 0 ? money($total, $booking->currency) : '-';
                     }),
                 TextColumn::make('partner_type')
                     ->label('Partner Type')
                     ->getStateUsing(function (Booking $booking) {
                         $types = [];
-
-                        if ($booking->partner_concierge_id && $booking->partner_concierge_id == $this->partner->id) {
-                            $types[] = 'Concierge';
+                        if ($booking->earnings->contains('user_id', $this->partner->user_id)) {
+                            if ($booking->partner_concierge_id === $this->partner->id) {
+                                $types[] = 'Concierge';
+                            }
+                            if ($booking->partner_venue_id === $this->partner->id) {
+                                $types[] = 'Venue';
+                            }
                         }
 
-                        if ($booking->partner_venue_id && $booking->partner_venue_id == $this->partner->id) {
-                            $types[] = 'Venue';
-                        }
-
-                        return implode(' & ', $types) ?: 'Unknown'; // Join types with '&' if both exist, default to 'Unknown'
+                        return implode(' & ', $types) ?: '-';
                     }),
             ]);
     }
