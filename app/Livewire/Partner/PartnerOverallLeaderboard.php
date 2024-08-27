@@ -45,22 +45,18 @@ class PartnerOverallLeaderboard extends Widget
             ->get();
 
         $partnerTotals = $earnings->groupBy('user_id')->map(function ($partnerEarnings) use ($currencyService) {
-            $totalUSD = $partnerEarnings->sum(function ($earning) use ($currencyService) {
-                return $currencyService->convertToUSD([$earning->currency => $earning->total_earned]);
-            });
+            $totalUSD = $partnerEarnings->sum(fn ($earning) => $currencyService->convertToUSD([$earning->currency => $earning->total_earned]));
 
             return [
                 'user_id' => $partnerEarnings->first()->user_id,
                 'partner_id' => $partnerEarnings->first()->partner_id,
                 'user_name' => $partnerEarnings->first()->user_name,
                 'total_usd' => $totalUSD,
-                'earnings_breakdown' => $partnerEarnings->map(function ($earning) use ($currencyService) {
-                    return [
-                        'amount' => $earning->total_earned,
-                        'currency' => $earning->currency,
-                        'usd_equivalent' => $currencyService->convertToUSD([$earning->currency => $earning->total_earned]),
-                    ];
-                })->toArray(),
+                'earnings_breakdown' => $partnerEarnings->map(fn ($earning) => [
+                    'amount' => $earning->total_earned,
+                    'currency' => $earning->currency,
+                    'usd_equivalent' => $currencyService->convertToUSD([$earning->currency => $earning->total_earned]),
+                ])->toArray(),
             ];
         })->sortByDesc('total_usd')->take($this->limit)->values();
 

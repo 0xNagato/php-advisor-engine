@@ -15,6 +15,7 @@ use Filament\Forms\Form;
 use Filament\Forms\Set;
 use Filament\Pages\Dashboard;
 use Filament\Pages\Dashboard\Actions\FilterAction;
+use Filament\Pages\Dashboard\Concerns\HasFiltersAction;
 use Illuminate\Contracts\Support\Htmlable;
 
 /**
@@ -22,7 +23,7 @@ use Illuminate\Contracts\Support\Htmlable;
  */
 class AdminDashboard extends Dashboard
 {
-    use Dashboard\Concerns\HasFiltersAction;
+    use HasFiltersAction;
 
     protected static string $routePath = 'admin';
 
@@ -33,8 +34,8 @@ class AdminDashboard extends Dashboard
 
     public function mount(): void
     {
-        $this->filters['startDate'] = $this->filters['startDate'] ?? now()->subDays(30)->format('Y-m-d');
-        $this->filters['endDate'] = $this->filters['endDate'] ?? now()->format('Y-m-d');
+        $this->filters['startDate'] ??= now()->subDays(30)->format('Y-m-d');
+        $this->filters['endDate'] ??= now()->format('Y-m-d');
     }
 
     public function getHeading(): string|Htmlable

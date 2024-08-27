@@ -7,6 +7,7 @@ use App\Livewire\Concierge\ConciergeRecentBookings;
 use App\Livewire\ConciergeOverview;
 use Carbon\Carbon;
 use Filament\Forms\Components\Actions;
+use Filament\Forms\Components\Actions\Action;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Set;
 use Filament\Pages\Dashboard;
@@ -39,8 +40,8 @@ class ConciergeReportDashboard extends Dashboard
 
     public function mount(): void
     {
-        $this->filters['startDate'] = $this->filters['startDate'] ?? now()->subDays(30)->format('Y-m-d');
-        $this->filters['endDate'] = $this->filters['endDate'] ?? now()->format('Y-m-d');
+        $this->filters['startDate'] ??= now()->subDays(30)->format('Y-m-d');
+        $this->filters['endDate'] ??= now()->format('Y-m-d');
     }
 
     public function getSubheading(): string|Htmlable|null
@@ -89,13 +90,13 @@ class ConciergeReportDashboard extends Dashboard
                 ->color('primary')
                 ->form([
                     Actions::make([
-                        Actions\Action::make('last30Days')
+                        Action::make('last30Days')
                             ->label('Last 30 Days')
                             ->action(function (Set $set) {
                                 $set('startDate', now()->subDays(30)->format('Y-m-d'));
                                 $set('endDate', now()->format('Y-m-d'));
                             }),
-                        Actions\Action::make('monthToDate')
+                        Action::make('monthToDate')
                             ->label('Month to Date')
                             ->action(function (Set $set) {
                                 $set('startDate', now()->startOfMonth()->format('Y-m-d'));

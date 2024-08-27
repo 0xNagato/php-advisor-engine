@@ -73,7 +73,7 @@ class GenerateDemoBookings
     {
         $bookingDate = Carbon::parse($schedule->booking_date)->setTimeFromTimeString($schedule->start_time);
 
-        $booking = Booking::create([
+        $booking = Booking::query()->create([
             'schedule_template_id' => $schedule->schedule_template_id,
             'concierge_id' => $concierge->id,
             'status' => BookingStatus::CONFIRMED,

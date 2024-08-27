@@ -8,6 +8,7 @@ use App\Models\Earning;
 use App\Services\CurrencyConversionService;
 use Carbon\Carbon;
 use Filament\Widgets\Widget;
+use Illuminate\Contracts\Database\Query\Builder;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Livewire\Attributes\Reactive;
@@ -47,30 +48,24 @@ class ConciergeOverallLeaderboard extends Widget
             ->join('concierges', 'concierges.user_id', '=', 'earnings.user_id')
             ->whereIn('earnings.type', $conciergeEarningTypes)
             ->whereNotNull('bookings.confirmed_at')
-            ->when($this->startDate && $this->endDate, function ($query) {
-                return $query->whereBetween('bookings.booking_at', [$this->startDate, $this->endDate]);
-            })
+            ->when($this->startDate && $this->endDate, fn (Builder $query) => $query->whereBetween('bookings.booking_at', [$this->startDate, $this->endDate]))
             ->groupBy('earnings.user_id', 'concierges.id', 'earnings.currency')
             ->get();
 
         $conciergeTotals = $earnings->groupBy('user_id')
             ->map(function ($userEarnings) use ($currencyService) {
-                $totalUSD = $userEarnings->sum(function ($earning) use ($currencyService) {
-                    return $currencyService->convertToUSD([$earning->currency => $earning->total_earned]);
-                });
+                $totalUSD = $userEarnings->sum(fn ($earning) => $currencyService->convertToUSD([$earning->currency => $earning->total_earned]));
 
                 return [
                     'user_id' => $userEarnings->first()->user_id,
                     'concierge_id' => $userEarnings->first()->concierge_id,
                     'user_name' => $userEarnings->first()->user_name,
                     'total_usd' => $totalUSD,
-                    'earnings_breakdown' => $userEarnings->map(function ($earning) use ($currencyService) {
-                        return [
-                            'amount' => $earning->total_earned,
-                            'currency' => $earning->currency,
-                            'usd_equivalent' => $currencyService->convertToUSD([$earning->currency => $earning->total_earned]),
-                        ];
-                    })->toArray(),
+                    'earnings_breakdown' => $userEarnings->map(fn ($earning) => [
+                        'amount' => $earning->total_earned,
+                        'currency' => $earning->currency,
+                        'usd_equivalent' => $currencyService->convertToUSD([$earning->currency => $earning->total_earned]),
+                    ])->toArray(),
                 ];
             })
             ->sortByDesc('total_usd')

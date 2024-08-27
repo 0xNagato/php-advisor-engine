@@ -93,7 +93,7 @@ class BookingsOverview extends BaseWidget
 
     protected function formatCurrency(float $amount, string $currency): string
     {
-        $region = Region::where('currency', $currency)->first();
+        $region = Region::query()->where('currency', $currency)->first();
 
         return $region?->currency_symbol.number_format($amount, 2);
     }

@@ -11,15 +11,12 @@ class CurrencyConversionService
 
     private const string CACHE_KEY = 'exchange_rates';
 
-    private const int CACHE_DURATION = 3600; // 1 hour
-
-    private Client $httpClient;
+    private const int CACHE_DURATION = 3600;
 
     private array $exchangeRates;
 
-    public function __construct(Client $httpClient)
+    public function __construct(private readonly Client $httpClient)
     {
-        $this->httpClient = $httpClient;
         $this->exchangeRates = $this->getExchangeRates();
     }
 
