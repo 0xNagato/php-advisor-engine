@@ -29,6 +29,7 @@ class VenueBookings extends Page implements HasTable
 
     public function table(Table $table): Table
     {
+        /** @var \Illuminate\Database\Eloquent\Builder $query */
         $query = Booking::confirmedOrNoShow()
             ->selectRaw('MIN(bookings.id) as id, DATE(booking_at) as booking_date, COUNT(*) as number_of_bookings')
             ->addSelect(DB::raw('SUM(earnings.amount) as earnings'))
