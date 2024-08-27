@@ -47,6 +47,7 @@ class VenueLeaderboard extends BaseWidget
                 'venues.region',
                 'earnings.currency',
             ])
+            ->whereNotNull('earnings.confirmed_at')
             ->join('bookings', 'earnings.booking_id', '=', 'bookings.id')
             ->join('users', 'users.id', '=', 'earnings.user_id')
             ->join('venues', 'venues.user_id', '=', 'earnings.user_id')
@@ -69,10 +70,10 @@ class VenueLeaderboard extends BaseWidget
                     ->formatStateUsing(function ($state, $record) {
                         if ($this->showFilters) {
                             if (auth()->user()->venue?->user_id === $record->user_id) {
-                                return 'You';
+                                return 'Your Venue';
                             }
 
-                            return '*********';
+                            return $record->name[0].str_repeat('*', strlen($record->name) - 1);
                         }
 
                         return $state;

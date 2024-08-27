@@ -53,6 +53,7 @@ class ConciergeOverview extends BaseWidget
     protected function getEarnings($startDate, $endDate): array
     {
         $earnings = Earning::query()
+            ->whereNotNull('earnings.confirmed_at')
             ->join('bookings', 'earnings.booking_id', '=', 'bookings.id')
             ->where('earnings.user_id', $this->concierge->user_id)
             ->whereBetween('bookings.booking_at', [$startDate, $endDate])
@@ -74,6 +75,7 @@ class ConciergeOverview extends BaseWidget
     protected function getAverageBookingValue($startDate, $endDate): float
     {
         $result = Earning::query()
+            ->whereNotNull('earnings.confirmed_at')
             ->join('bookings', 'earnings.booking_id', '=', 'bookings.id')
             ->where('earnings.user_id', $this->concierge->user_id)
             ->whereBetween('bookings.booking_at', [$startDate, $endDate])
@@ -102,6 +104,7 @@ class ConciergeOverview extends BaseWidget
     protected function getChartData($startDate, $endDate): array
     {
         $dailyData = Earning::query()
+            ->whereNotNull('earnings.confirmed_at')
             ->join('bookings', 'earnings.booking_id', '=', 'bookings.id')
             ->where('earnings.user_id', $this->concierge->user_id)
             ->whereBetween('bookings.booking_at', [$startDate, $endDate])

@@ -52,7 +52,7 @@
                                     @php
                                         $nameParts = explode(' ', $partner['user_name']);
                                         $obfuscatedName = implode(' ', array_map(function($part) {
-                                            return substr($part, 0, 1) . str_repeat('*', strlen($part) - 1);
+                                            return $part[0] . str_repeat('*', strlen($part) - 1);
                                         }, $nameParts));
                                     @endphp
                                     {{ $obfuscatedName }}
