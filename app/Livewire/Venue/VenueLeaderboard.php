@@ -81,6 +81,7 @@ class VenueLeaderboard extends BaseWidget
                     }),
                 TextColumn::make('booking_count')
                     ->label('Bookings')
+                    ->visibleFrom('sm')
                     ->alignRight(),
                 TextColumn::make('total_earned')
                     ->label('Earned')
