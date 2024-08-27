@@ -41,7 +41,7 @@ class UploadVenueLogos extends Command
 
                 // // Update the venue's logo path
                 $venue->update([
-                    'venue_logo_path' => $path,
+                    'logo_path' => $path,
                 ]);
 
                 $this->info("Uploaded logo for $venue->name in $venue->region");
