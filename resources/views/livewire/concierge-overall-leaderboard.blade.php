@@ -6,29 +6,29 @@
             </div>
         </x-slot>
 
-        <div class="flex flex-col -m-6">
+        <div class="-m-6 flex flex-col">
             @php
                 $leaderboardData = $this->getLeaderboardData();
             @endphp
 
             @if($leaderboardData->isEmpty())
-                <div class="text-center py-6">
-                    <p class="text-gray-500 text-lg">No data available for the selected date range.</p>
+                <div class="py-6 text-center">
+                    <p class="text-lg text-gray-500">No data available for the selected date range.</p>
                 </div>
             @else
-                <table class="divide-y divide-gray-200">
+                <table class="overflow-hidden rounded-xl divide-y divide-gray-200">
                     <thead class="bg-gray-50">
                     <tr>
                         <th scope="col"
-                            class="px-3 py-3.5 text-left text-sm font-semibold first-of-type:ps-4 last-of-type:pe-4 sm:first-of-type:ps-6 sm:last-of-type:pe-6">
+                            class="px-3 text-left text-sm font-semibold py-3.5 first-of-type:ps-4 last-of-type:pe-4 sm:first-of-type:ps-6 sm:last-of-type:pe-6">
                             Rank
                         </th>
                         <th scope="col"
-                            class="px-3 py-3.5 text-left text-sm font-semibold first-of-type:ps-4 last-of-type:pe-4 sm:first-of-type:ps-6 sm:last-of-type:pe-6">
+                            class="px-3 text-left text-sm font-semibold py-3.5 first-of-type:ps-4 last-of-type:pe-4 sm:first-of-type:ps-6 sm:last-of-type:pe-6">
                             Concierge
                         </th>
                         <th scope="col"
-                            class="px-3 py-3.5 text-left text-sm font-semibold first-of-type:ps-4 last-of-type:pe-4 sm:first-of-type:ps-6 sm:last-of-type:pe-6">
+                            class="px-3 text-left text-sm font-semibold py-3.5 first-of-type:ps-4 last-of-type:pe-4 sm:first-of-type:ps-6 sm:last-of-type:pe-6">
                             Earned
                         </th>
                     </tr>
@@ -40,10 +40,10 @@
                                 wire:click="viewConcierge({{ $concierge['concierge_id'] }})"
                                 @endif
                         >
-                            <td class="px-3 py-[1.13rem] whitespace-nowrap text-sm font-medium text-gray-950 first-of-type:ps-4 last-of-type:pe-4 sm:first-of-type:ps-6 sm:last-of-type:pe-6">
+                            <td class="whitespace-nowrap px-3 text-sm font-medium py-[1.13rem] text-gray-950 first-of-type:ps-4 last-of-type:pe-4 sm:first-of-type:ps-6 sm:last-of-type:pe-6">
                                 {{ $index + 1 }}
                             </td>
-                            <td class="px-3 py-[1.13rem] whitespace-nowrap text-sm text-gray-950 first-of-type:ps-4 last-of-type:pe-4 sm:first-of-type:ps-6 sm:last-of-type:pe-6">
+                            <td class="whitespace-nowrap px-3 text-sm py-[1.13rem] text-gray-950 first-of-type:ps-4 last-of-type:pe-4 sm:first-of-type:ps-6 sm:last-of-type:pe-6">
                                 @if(auth()->user()->concierge && auth()->user()->concierge->user_id === $concierge['user_id'])
                                     You
                                 @elseif(auth()->user()->hasRole('super_admin'))
@@ -58,7 +58,7 @@
                                     {{ $obfuscatedName }}
                                 @endif
                             </td>
-                            <td class="px-3 py-[1.13rem] whitespace-nowrap text-sm text-gray-950 first-of-type:ps-4 last-of-type:pe-4 sm:first-of-type:ps-6 sm:last-of-type:pe-6">
+                            <td class="whitespace-nowrap px-3 text-sm py-[1.13rem] text-gray-950 first-of-type:ps-4 last-of-type:pe-4 sm:first-of-type:ps-6 sm:last-of-type:pe-6">
                                 ${{ number_format($concierge['total_usd'], 2) }}
                             </td>
                         </tr>

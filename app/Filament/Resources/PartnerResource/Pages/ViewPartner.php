@@ -5,6 +5,8 @@ namespace App\Filament\Resources\PartnerResource\Pages;
 use App\Filament\Resources\PartnerResource;
 use App\Livewire\Partner\PartnerOverallLeaderboard;
 use App\Livewire\Partner\PartnerRecentBookings;
+use App\Livewire\Partner\TopConcierges;
+use App\Livewire\Partner\TopVenues;
 use App\Livewire\PartnerOverview;
 use App\Models\Partner;
 use Carbon\Carbon;
@@ -73,6 +75,18 @@ class ViewPartner extends ViewRecord
                 'endDate' => Carbon::parse($this->filters['endDate']),
             ]),
             PartnerOverallLeaderboard::make([
+                'partner' => $this->record,
+                'columnSpan' => '1',
+                'startDate' => Carbon::parse($this->filters['startDate']),
+                'endDate' => Carbon::parse($this->filters['endDate']),
+            ]),
+            TopConcierges::make([
+                'partner' => $this->record,
+                'columnSpan' => '1',
+                'startDate' => Carbon::parse($this->filters['startDate']),
+                'endDate' => Carbon::parse($this->filters['endDate']),
+            ]),
+            TopVenues::make([
                 'partner' => $this->record,
                 'columnSpan' => '1',
                 'startDate' => Carbon::parse($this->filters['startDate']),
