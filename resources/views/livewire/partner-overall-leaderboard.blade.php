@@ -16,7 +16,7 @@
                     <p class="text-lg text-gray-500">No data available for the selected date range.</p>
                 </div>
             @else
-                <table class="min-w-full overflow-hidden rounded-xl divide-y divide-gray-200">
+                <table class="min-w-full overflow-hidden rounded-b-xl divide-y divide-gray-200">
                     <thead class="bg-gray-50">
                     <tr>
                         <th scope="col"

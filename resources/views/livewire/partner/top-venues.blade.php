@@ -16,12 +16,12 @@
                     <p class="text-lg text-gray-500">No data available for the selected date range.</p>
                 </div>
             @else
-                <table class="min-w-full overflow-hidden rounded-xl divide-y divide-gray-200">
+                <table class="min-w-full overflow-hidden rounded-b-xl divide-y divide-gray-200">
                     <thead class="bg-gray-50">
                     <tr>
                         <th scope="col"
                             class="px-3 text-left text-sm font-semibold py-3.5 first-of-type:ps-4 last-of-type:pe-4 sm:first-of-type:ps-6 sm:last-of-type:pe-6">
-                            Venue Name
+                            Venue
                         </th>
                         <th scope="col"
                             class="px-3 text-left text-sm font-semibold py-3.5 first-of-type:ps-4 last-of-type:pe-4 sm:first-of-type:ps-6 sm:last-of-type:pe-6">

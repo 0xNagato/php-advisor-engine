@@ -83,6 +83,7 @@ class PartnerRecentBookings extends BaseWidget
                         return $total > 0 ? money($total, $booking->currency) : '-';
                     }),
                 TextColumn::make('partner_type')
+                    ->visibleFrom('sm')
                     ->label('Partner Type')
                     ->getStateUsing(function (Booking $booking) {
                         $types = [];
