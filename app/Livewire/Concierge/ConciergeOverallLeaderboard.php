@@ -42,7 +42,8 @@ class ConciergeOverallLeaderboard extends Widget
                 DB::raw('SUM(earnings.amount) as total_earned'),
                 'earnings.currency',
                 DB::raw("CONCAT(users.first_name, ' ', users.last_name) as user_name"),
-                DB::raw('COUNT(DISTINCT bookings.id) as booking_count')
+                DB::raw('COUNT(DISTINCT CASE WHEN earnings.type = "concierge" THEN bookings.id END) as direct_booking_count'),
+                DB::raw('COUNT(DISTINCT CASE WHEN earnings.type IN ("concierge_referral_1", "concierge_referral_2") THEN bookings.id END) as referral_booking_count')
             )
             ->join('bookings', 'earnings.booking_id', '=', 'bookings.id')
             ->join('users', 'users.id', '=', 'earnings.user_id')
@@ -62,7 +63,9 @@ class ConciergeOverallLeaderboard extends Widget
                     'concierge_id' => $userEarnings->first()->concierge_id,
                     'user_name' => $userEarnings->first()->user_name,
                     'total_usd' => $totalUSD,
-                    'booking_count' => $userEarnings->first()->booking_count,
+                    'direct_booking_count' => $userEarnings->sum('direct_booking_count'),
+                    'referral_booking_count' => $userEarnings->sum('referral_booking_count'),
+                    'total_booking_count' => $userEarnings->sum('direct_booking_count') + $userEarnings->sum('referral_booking_count'),
                     'earnings_breakdown' => $userEarnings->map(fn ($earning) => [
                         'amount' => $earning->total_earned,
                         'currency' => $earning->currency,

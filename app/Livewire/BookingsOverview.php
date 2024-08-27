@@ -44,10 +44,10 @@ class BookingsOverview extends BaseWidget
             $this->createStat('Bookings', $totalBookings)
                 ->chart($chartData['bookings'])
                 ->color('success'),
-            $this->createStat('Total Amount (converted to USD)', $totalAmountUSD, 'USD', $bookings->pluck('total_amount', 'currency')->toArray())
+            $this->createStat('Total Amount', $totalAmountUSD, 'USD', $bookings->pluck('total_amount', 'currency')->toArray())
                 ->chart($chartData['amounts'])
                 ->color('success'),
-            $this->createStat('Platform Earnings (converted to USD)', $platformEarningsUSD, 'USD', $bookings->pluck('platform_earnings', 'currency')->toArray())
+            $this->createStat('Platform Earnings', $platformEarningsUSD, 'USD', $bookings->pluck('platform_earnings', 'currency')->toArray())
                 ->chart($chartData['earnings'])
                 ->color('success'),
         ];

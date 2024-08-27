@@ -38,13 +38,16 @@ class ConciergeOverview extends BaseWidget
         $prevAvgBookingValue = $this->getAverageBookingValue($startDate->copy()->subDays($startDate->diffInDays($endDate)), $startDate);
 
         return [
-            $this->createStat('Bookings', $earnings['number_of_bookings'], null, $prevEarnings['number_of_bookings'])
-                ->chart($chartData['bookings'])
+            $this->createStat('Direct Bookings', $earnings['number_of_direct_bookings'], null, $prevEarnings['number_of_direct_bookings'])
+                ->chart($chartData['direct_bookings'])
                 ->color('success'),
+            $this->createStat('Referral Bookings', $earnings['number_of_referral_bookings'], null, $prevEarnings['number_of_referral_bookings'])
+                ->chart($chartData['referral_bookings'])
+                ->color('info'),
             $this->createEarningsStat($totalEarningsUSD, $prevTotalEarningsUSD, $earnings['earnings'])
                 ->chart($chartData['earnings'])
                 ->color('success'),
-            $this->createStat('Avg. Earning per Booking (converted to USD)', $avgBookingValue, 'USD', $prevAvgBookingValue)
+            $this->createStat('Avg. Earning per Direct Booking', $avgBookingValue, 'USD', $prevAvgBookingValue)
                 ->chart($chartData['avg_booking_value'])
                 ->color('info'),
         ];
@@ -59,7 +62,8 @@ class ConciergeOverview extends BaseWidget
             ->whereBetween('bookings.booking_at', [$startDate, $endDate])
             ->whereIn('earnings.type', ['concierge', 'concierge_referral_1', 'concierge_referral_2'])
             ->select(
-                DB::raw('COUNT(DISTINCT bookings.id) as number_of_bookings'),
+                DB::raw('COUNT(DISTINCT CASE WHEN earnings.type = "concierge" THEN bookings.id END) as number_of_direct_bookings'),
+                DB::raw('COUNT(DISTINCT CASE WHEN earnings.type IN ("concierge_referral_1", "concierge_referral_2") THEN bookings.id END) as number_of_referral_bookings'),
                 DB::raw('SUM(earnings.amount) as total_earnings'),
                 'earnings.currency'
             )
@@ -67,7 +71,8 @@ class ConciergeOverview extends BaseWidget
             ->get();
 
         return [
-            'number_of_bookings' => $earnings->sum('number_of_bookings'),
+            'number_of_direct_bookings' => $earnings->sum('number_of_direct_bookings'),
+            'number_of_referral_bookings' => $earnings->sum('number_of_referral_bookings'),
             'earnings' => $earnings->pluck('total_earnings', 'currency')->toArray(),
         ];
     }
@@ -79,7 +84,7 @@ class ConciergeOverview extends BaseWidget
             ->join('bookings', 'earnings.booking_id', '=', 'bookings.id')
             ->where('earnings.user_id', $this->concierge->user_id)
             ->whereBetween('bookings.booking_at', [$startDate, $endDate])
-            ->where('earnings.type', 'concierge')
+            ->where('earnings.type', 'concierge') // Only consider direct bookings
             ->selectRaw('earnings.currency, AVG(earnings.amount) as average_earning, COUNT(*) as booking_count')
             ->groupBy('earnings.currency')
             ->get();
@@ -108,33 +113,37 @@ class ConciergeOverview extends BaseWidget
             ->join('bookings', 'earnings.booking_id', '=', 'bookings.id')
             ->where('earnings.user_id', $this->concierge->user_id)
             ->whereBetween('bookings.booking_at', [$startDate, $endDate])
-            ->where('earnings.type', 'concierge')
-            ->selectRaw('DATE(bookings.booking_at) as date, earnings.currency, COUNT(*) as bookings, SUM(earnings.amount) as total_earnings, AVG(earnings.amount) as avg_earning')
-            ->groupBy('date', 'earnings.currency')
+            ->whereIn('earnings.type', ['concierge', 'concierge_referral_1', 'concierge_referral_2'])
+            ->selectRaw('DATE(bookings.booking_at) as date, earnings.currency, earnings.type, COUNT(*) as bookings, SUM(earnings.amount) as total_earnings, AVG(earnings.amount) as avg_earning')
+            ->groupBy('date', 'earnings.currency', 'earnings.type')
             ->orderBy('date')
             ->get();
 
         $currencyService = app(CurrencyConversionService::class);
 
         $chartData = $dailyData->groupBy('date')->map(function ($dayData) use ($currencyService) {
-            $totalBookings = $dayData->sum('bookings');
+            $directBookings = $dayData->where('type', 'concierge')->sum('bookings');
+            $referralBookings = $dayData->whereIn('type', ['concierge_referral_1', 'concierge_referral_2'])->sum('bookings');
             $totalEarningsUSD = $currencyService->convertToUSD($dayData->pluck('total_earnings', 'currency')->toArray());
 
-            $avgEarningUSD = 0;
-            foreach ($dayData as $item) {
-                $avgEarningUSD += $currencyService->convertToUSD([$item->currency => $item->avg_earning]) * $item->bookings;
+            $avgDirectEarningUSD = 0;
+            $directBookingsData = $dayData->where('type', 'concierge');
+            foreach ($directBookingsData as $item) {
+                $avgDirectEarningUSD += $currencyService->convertToUSD([$item->currency => $item->avg_earning]) * $item->bookings;
             }
-            $avgEarningUSD = $totalBookings > 0 ? $avgEarningUSD / $totalBookings : 0;
+            $avgDirectEarningUSD = $directBookings > 0 ? $avgDirectEarningUSD / $directBookings : 0;
 
             return [
-                'bookings' => $totalBookings,
+                'direct_bookings' => $directBookings,
+                'referral_bookings' => $referralBookings,
                 'earnings' => $totalEarningsUSD,
-                'avg_booking_value' => $avgEarningUSD,
+                'avg_booking_value' => $avgDirectEarningUSD,
             ];
         });
 
         return [
-            'bookings' => $chartData->pluck('bookings')->toArray(),
+            'direct_bookings' => $chartData->pluck('direct_bookings')->toArray(),
+            'referral_bookings' => $chartData->pluck('referral_bookings')->toArray(),
             'earnings' => $chartData->pluck('earnings')->toArray(),
             'avg_booking_value' => $chartData->pluck('avg_booking_value')->toArray(),
         ];
@@ -173,10 +182,14 @@ class ConciergeOverview extends BaseWidget
 
     protected function createEarningsStat(float $totalEarningsUSD, float $prevTotalEarningsUSD, array $currencyBreakdown): Stat
     {
-        $stat = Stat::make('Earnings (converted to USD)', '$'.number_format($totalEarningsUSD, 2));
+        $stat = Stat::make('Earnings', '$'.number_format($totalEarningsUSD, 2));
 
         $breakdownDescription = collect($currencyBreakdown)
-            ->map(fn ($amount, $currency) => "$currency ".number_format($amount / 100, 2))
+            ->map(function ($amount, $currency) {
+                $symbol = $this->getCurrencySymbol($currency);
+
+                return $symbol.number_format($amount / 100, 2);
+            })
             ->implode(', ');
 
         $stat->description($breakdownDescription);

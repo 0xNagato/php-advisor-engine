@@ -40,7 +40,7 @@ class PartnerOverview extends BaseWidget
             $this->createEarningsStat($totalEarningsUSD, $prevTotalEarningsUSD, $earnings['earnings'])
                 ->chart($chartData['earnings'])
                 ->color('success'),
-            $this->createStat('Avg. Earning (converted to USD)', $avgBookingValue, 'USD', $prevAvgBookingValue)
+            $this->createStat('Avg. Earning', $avgBookingValue, 'USD', $prevAvgBookingValue)
                 ->chart($chartData['avg_booking_value'])
                 ->color('info'),
         ];
@@ -168,10 +168,14 @@ class PartnerOverview extends BaseWidget
 
     protected function createEarningsStat(float $totalEarningsUSD, float $prevTotalEarningsUSD, array $currencyBreakdown): Stat
     {
-        $stat = Stat::make('Earnings (converted to USD)', '$'.number_format($totalEarningsUSD, 2));
+        $stat = Stat::make('Earnings', '$'.number_format($totalEarningsUSD, 2));
 
         $breakdownDescription = collect($currencyBreakdown)
-            ->map(fn ($amount, $currency) => "$currency ".number_format($amount / 100, 2))
+            ->map(function ($amount, $currency) {
+                $symbol = $this->getCurrencySymbol($currency);
+
+                return $symbol.number_format($amount / 100, 2);
+            })
             ->implode(', ');
 
         $stat->description($breakdownDescription);
