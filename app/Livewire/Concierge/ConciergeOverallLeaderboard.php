@@ -11,7 +11,6 @@ use Filament\Widgets\Widget;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Livewire\Attributes\Reactive;
-use Log;
 
 class ConciergeOverallLeaderboard extends Widget
 {
@@ -54,8 +53,6 @@ class ConciergeOverallLeaderboard extends Widget
             ->groupBy('earnings.user_id', 'concierges.id', 'earnings.currency')
             ->get();
 
-        Log::info('Raw earnings data:', $earnings->toArray());
-
         $conciergeTotals = $earnings->groupBy('user_id')
             ->map(function ($userEarnings) use ($currencyService) {
                 $totalUSD = $userEarnings->sum(function ($earning) use ($currencyService) {
@@ -84,8 +81,6 @@ class ConciergeOverallLeaderboard extends Widget
 
                 return $item;
             });
-
-        Log::info('Concierge totals:', $conciergeTotals->toArray());
 
         return collect($conciergeTotals);
     }

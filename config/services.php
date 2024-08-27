@@ -53,4 +53,8 @@ return [
         'from' => env('TWILIO_FROM'),
         'from_whatsapp' => env('TWILIO_FROM_WHATSAPP'),
     ],
+
+    'openexchangerates' => [
+        'app_id' => env('OPEN_EXCHANGE_RATES_APP_ID'),
+    ],
 ];
