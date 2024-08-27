@@ -23,8 +23,8 @@ class ConciergeOverview extends BaseWidget
 
     protected function getStats(): array
     {
-        $startDate = $this->startDate ?? now()->subDays(30)->startOfDay();
-        $endDate = $this->endDate ?? now()->endOfDay();
+        $startDate = $this->startDate ?? now()->subDays(30);
+        $endDate = $this->endDate ?? now();
 
         $earnings = $this->getEarnings($startDate, $endDate);
         $prevEarnings = $this->getEarnings($startDate->copy()->subDays($startDate->diffInDays($endDate)), $startDate);
@@ -176,8 +176,7 @@ class ConciergeOverview extends BaseWidget
             ->map(fn ($amount, $currency) => "$currency ".number_format($amount / 100, 2))
             ->implode(', ');
 
-        $stat->description($breakdownDescription)
-            ->descriptionIcon('heroicon-m-currency-dollar');
+        $stat->description($breakdownDescription);
 
         if ($prevTotalEarningsUSD > 0) {
             $percentageChange = (($totalEarningsUSD - $prevTotalEarningsUSD) / $prevTotalEarningsUSD) * 100;
