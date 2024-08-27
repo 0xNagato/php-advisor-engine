@@ -6,7 +6,7 @@
             </div>
         </x-slot>
 
-        <div class="-m-6 flex flex-col">
+        <div class="-m-6 flex flex-col overflow-x-auto">
             @php
                 $leaderboardData = $this->getLeaderboardData();
             @endphp
@@ -16,7 +16,7 @@
                     <p class="text-lg text-gray-500">No data available for the selected date range.</p>
                 </div>
             @else
-                <table class="overflow-hidden rounded-xl divide-y divide-gray-200">
+                <table class="rounded-xl divide-y divide-gray-200">
                     <thead class="bg-gray-50">
                     <tr>
                         <th scope="col"
@@ -28,7 +28,7 @@
                             Concierge
                         </th>
                         <th scope="col"
-                            class="px-3 text-left text-sm font-semibold py-3.5 first-of-type:ps-4 last-of-type:pe-4 sm:first-of-type:ps-6 sm:last-of-type:pe-6">
+                            class="hidden sm:table-cell px-3 text-left text-sm font-semibold py-3.5 first-of-type:ps-4 last-of-type:pe-4 sm:first-of-type:ps-6 sm:last-of-type:pe-6">
                             Direct
                         </th>
                         <th scope="col"
@@ -66,7 +66,7 @@
                                     {{ $obfuscatedName }}
                                 @endif
                             </td>
-                            <td class="whitespace-nowrap px-3 text-sm py-[1.13rem] text-gray-950 first-of-type:ps-4 last-of-type:pe-4 sm:first-of-type:ps-6 sm:last-of-type:pe-6">
+                            <td class="hidden sm:table-cell whitespace-nowrap px-3 text-sm py-[1.13rem] text-gray-950 first-of-type:ps-4 last-of-type:pe-4 sm:first-of-type:ps-6 sm:last-of-type:pe-6">
                                 {{ number_format($concierge['direct_booking_count']) }}
                             </td>
                             <td class="hidden sm:table-cell whitespace-nowrap px-3 text-sm py-[1.13rem] text-gray-950 first-of-type:ps-4 last-of-type:pe-4 sm:first-of-type:ps-6 sm:last-of-type:pe-6">
