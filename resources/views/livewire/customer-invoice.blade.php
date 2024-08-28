@@ -25,7 +25,7 @@
             <form wire:submit="emailInvoice" class="max-w-3xl p-4 mx-auto my-4 bg-gray-100 border rounded-lg">
                 {{ $this->form }}
                 <button type="submit"
-                    class="w-full px-4 py-2 mt-4 text-sm font-semibold text-white bg-indigo-600 rounded-lg">
+                    class="w-full px-4 py-2 mt-4 text-xs font-semibold text-white bg-indigo-600 rounded-lg sm:text-xs sm:text-sm">
                     Send Email
                 </button>
             </form>
@@ -57,7 +57,7 @@
                 <svg class="flex-shrink-0 size-6" xmlns="http://www.w3.org/2000/svg" width="16" height="16"
                     fill="currentColor" viewBox="0 0 16 16">
                     <path
-                        d="M1.92.506a.5.5 0 0 1 .434.14L3 1.293l.646-.647a.5.5 0 0 1 .708 0L5 1.293l.646-.647a.5.5 0 0 1 .708 0L7 1.293l.646-.647a.5.5 0 0 1 .708 0L9 1.293l.646-.647a.5.5 0 0 1 .708 0l.646.647.646-.647a.5.5 0 0 1 .801.13l.5 1A.5.5 0 0 1 15 2v12a.5.5 0 0 1-.053.224l-.5 1a.5.5 0 0 1-.8.13L13 14.707l-.646.647a.5.5 0 0 1-.708 0L11 14.707l-.646.647a.5.5 0 0 1-.708 0L9 14.707l-.646.647a.5.5 0 0 1-.708 0L7 14.707l-.646.647a.5.5 0 0 1-.708 0L5 14.707l-.646.647a.5.5 0 0 1-.708 0L3 14.707l-.646.647a.5.5 0 0 1-.801-.13l-.5-1A.5.5 0 0 1 1 14V2a.5.5 0 0 1 .053-.224l.5-1a.5.5 0 0 1 .367-.27zm.217 1.338L2 2.118v11.764l.137.274.51-.51a.5.5 0 0 1 .707 0l.646.647.646-.646a.5.5 0 0 1 .708 0l.646.646.646-.646a.5.5 0 0 1 .708 0l.646.646.646-.646a.5.5 0 0 1 .708 0l.646.646.646-.646a.5.5 0 0 1 .708 0l.509.509.137-.274V2.118l-.137-.274-.51.51a.5.5 0 0 1-.707 0L12 1.707l-.646.647a.5.5 0 0 1-.708 0L10 1.707l-.646.647a.5.5 0 0 1-.708 0L8 1.707l-.646.647a.5.5 0 0 1-.708 0L6 1.707l-.646.647a.5.5 0 0 1-.708 0L4 1.707l-.646.647a.5.5 0 0 1-.708 0l-.509-.51z" />
+                        d="M1.92.506a.5.5 0 0 1 .434.14L3 1.293l.646-.647a.5.5 0 0 1 .708 0L5 1.293l.646-.647a.5.5 0 0 1 .708 0L7 1.293l.646-.647a.5.5 0 0 1 .708 0L9 1.293l.646-.647a.5.5 0 0 1 .708 0l.646.647.646-.647a.5.5 0 0 1 .708 0l.646.647.646-.647a.5.5 0 0 1 .801.13l.5 1A.5.5 0 0 1 15 2v12a.5.5 0 0 1-.053.224l-.5 1a.5.5 0 0 1-.8.13L13 14.707l-.646.647a.5.5 0 0 1-.708 0L11 14.707l-.646.647a.5.5 0 0 1-.708 0L9 14.707l-.646.647a.5.5 0 0 1-.708 0L7 14.707l-.646.647a.5.5 0 0 1-.708 0L5 14.707l-.646.647a.5.5 0 0 1-.708 0L3 14.707l-.646.647a.5.5 0 0 1-.801-.13l-.5-1A.5.5 0 0 1 1 14V2a.5.5 0 0 1 .053-.224l.5-1a.5.5 0 0 1 .367-.27zm.217 1.338L2 2.118v11.764l.137.274.51-.51a.5.5 0 0 1 .707 0l.646.647.646-.646a.5.5 0 0 1 .708 0l.646.646.646-.646a.5.5 0 0 1 .708 0l.646.646.646-.646a.5.5 0 0 1 .708 0l.646.646.646-.646a.5.5 0 0 1 .708 0l.646.646.646-.646a.5.5 0 0 1 .708 0l.509.509.137-.274V2.118l-.137-.274-.51.51a.5.5 0 0 1-.707 0L12 1.707l-.646.647a.5.5 0 0 1-.708 0L10 1.707l-.646.647a.5.5 0 0 1-.708 0L8 1.707l-.646.647a.5.5 0 0 1-.708 0L6 1.707l-.646.647a.5.5 0 0 1-.708 0L4 1.707l-.646.647a.5.5 0 0 1-.708 0l-.509-.51z" />
                     <path
                         d="M3 4.5a.5.5 0 0 1 .5-.5h6a.5.5 0 1 1 0 1h-6a.5.5 0 0 1-.5-.5zm0 2a.5.5 0 0 1 .5-.5h6a.5.5 0 1 1 0 1h-6a.5.5 0 0 1-.5-.5zm0 2a.5.5 0 0 1 .5-.5h6a.5.5 0 1 1 0 1h-6a.5.5 0 0 1-.5-.5zm0 2a.5.5 0 0 1 .5-.5h6a.5.5 0 0 1 0 1h-6a.5.5 0 0 1-.5-.5zm8-6a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 0 1h-1a.5.5 0 0 1-.5-.5zm0 2a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 0 1h-1a.5.5 0 0 1-.5-.5zm0 2a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 0 1h-1a.5.5 0 0 1-.5-.5zm0 2a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 0 1h-1a.5.5 0 0 1-.5-.5z" />
                 </svg>
@@ -71,7 +71,7 @@
                 <h3 class="text-xl font-bold leading-5 tracking-tight text-gray-950">
                     PRIMA
                 </h3>
-                <p class="text-sm text-gray-500">
+                <p class="text-xs text-gray-500 sm:text-xs sm:text-sm">
                     Invoice #{{ $booking->id }}
                 </p>
             </div>
@@ -80,7 +80,7 @@
             <div class="grid grid-cols-2 gap-5 mt-5 sm:mt-10 sm:grid-cols-4">
                 <div>
                     <span class="block text-xs text-gray-500 uppercase">Customer:</span>
-                    <div class="block text-sm font-medium text-gray-800 dark:text-gray-200">
+                    <div class="block text-xs font-medium text-gray-800 sm:text-sm dark:text-gray-200">
                         {{ $booking->guest_name }}
                         <br />
                         {{ $booking->local_formatted_guest_phone }}
@@ -90,22 +90,6 @@
                         @endif
                     </div>
                 </div>
-
-                <div>
-                    <span class="block text-xs text-gray-500 uppercase">Amount Paid:</span>
-                    <span class="block text-sm font-medium text-gray-800 dark:text-gray-200">
-                        {{ money($booking->total_with_tax_in_cents, $booking->currency) }}
-                    </span>
-                </div>
-                <!-- End Col -->
-
-                <div>
-                    <span class="block text-xs text-gray-500 uppercase">Date Paid:</span>
-                    <span class="block text-sm font-medium text-gray-800 dark:text-gray-200">
-                        {{ $booking->confirmed_at->format('M d, Y') }}
-                    </span>
-                </div>
-                <!-- End Col -->
 
                 <div>
                     <span class="block text-xs text-gray-500 uppercase">Payment Method:</span>
@@ -120,40 +104,61 @@
                             @if ($booking->stripe_charge->paymentMethodDetails->card->brand === 'amex')
                                 <x-fab-cc-amex class="w-6 h-6" />
                             @endif
-                            <span class="block text-sm font-medium text-gray-800 dark:text-gray-200">
+                            <span class="block text-xs font-medium text-gray-800 sm:text-sm dark:text-gray-200">
                                 ••••{{ $booking->stripe_charge->paymentMethodDetails->card->last4 }}</span>
                         @else
-                            <span class="block text-sm font-medium text-gray-800 dark:text-gray-200">Unknown</span>
+                            <span
+                                class="block text-xs font-medium text-gray-800 sm:text-sm dark:text-gray-200">Unknown</span>
                         @endif
                     </div>
                 </div>
-                <!-- End Col -->
+
+                <div>
+                    <span class="block text-xs text-gray-500 uppercase">Booking Date:</span>
+                    <span class="block text-xs font-medium text-gray-800 sm:text-sm dark:text-gray-200">
+                        {{ $booking->booking_at->format('M d, Y g:i A') }}
+                    </span>
+                </div>
+
+                <div>
+                    <span class="block text-xs text-gray-500 uppercase">Date Paid:</span>
+                    <span class="block text-xs font-medium text-gray-800 sm:text-sm dark:text-gray-200">
+                        {{ $booking->confirmed_at->format('M d, Y g:i A') }}
+                    </span>
+                </div>
+
             </div>
             <!-- End Grid -->
 
             <div class="mt-5 sm:mt-10">
                 @if ($booking->notes)
                     <h4 class="text-xs font-semibold text-gray-800 uppercase dark:text-gray-200">Notes</h4>
-                    <p class="mb-3 text-sm text-gray-800 dark:text-gray-200">{{ $booking->notes }}</p>
+                    <p class="mb-3 text-xs text-gray-800 sm:text-xs sm:text-sm dark:text-gray-200">{{ $booking->notes }}
+                    </p>
                 @endif
 
                 <h4 class="text-xs font-semibold text-gray-800 uppercase dark:text-gray-200">Summary</h4>
 
-                <ul class="flex flex-col mt-3">
+                <ul class="flex flex-col mt-3 overflow-hidden border rounded-lg">
                     <li
-                        class="inline-flex items-center px-4 py-3 -mt-px text-sm text-gray-800 border gap-x-2 first:mt-0 first:rounded-t-lg last:rounded-b-lg dark:border-gray-700 dark:text-gray-200">
-                        <div class="flex items-center justify-between w-full">
-                            <span>
-                                {{ $booking->venue->name }} ({{ $booking->guest_count }} guests)
-                            </span>
-                            <span>
-                                {{ money($booking->total_fee, $booking->currency) }}
-                            </span>
+                        class="inline-flex items-center px-4 py-3 text-xs text-gray-800 border-b sm:text-sm gap-x-2 last:border-b-0 dark:border-gray-700 dark:text-gray-200">
+                        <div class="flex flex-col w-full">
+                            <div class="flex items-center justify-between w-full">
+                                <span class="font-medium">{{ $booking->venue->name }} ({{ $booking->guest_count }}
+                                    guests)</span>
+                                <span class="font-medium">
+                                    {{ money($booking->total_fee, $booking->currency) }}
+                                </span>
+                            </div>
+                            <div class="mt-1 text-xs text-gray-500">
+                                {{ money($booking->venue->booking_fee * 100, $booking->currency) }} for 2,
+                                {{ money($booking->venue->increment_fee * 100, $booking->currency) }}/additional guest
+                            </div>
                         </div>
                     </li>
                     @if ($booking->tax > 0)
                         <li
-                            class="inline-flex items-center px-4 py-3 -mt-px text-sm text-gray-800 border gap-x-2 first:mt-0 first:rounded-t-lg last:rounded-b-lg dark:border-gray-700 dark:text-gray-200">
+                            class="inline-flex items-center px-4 py-3 text-xs text-gray-800 border-b sm:text-sm last:border-b-0 dark:border-gray-700 dark:text-gray-200">
                             <div class="flex items-center justify-between w-full">
                                 <span>{{ $region->tax_rate_term }} ({{ $booking->tax * 100 }}%)</span>
                                 <span>
@@ -163,7 +168,7 @@
                         </li>
                     @endif
                     <li
-                        class="inline-flex items-center px-4 py-3 -mt-px text-sm font-semibold text-gray-800 border gap-x-2 bg-gray-50 first:mt-0 first:rounded-t-lg last:rounded-b-lg dark:border-gray-700 dark:bg-slate-800 dark:text-gray-200">
+                        class="inline-flex items-center px-4 py-3 text-xs font-semibold text-gray-800 sm:text-sm bg-gray-50 dark:bg-slate-800 dark:text-gray-200">
                         <div class="flex items-center justify-between w-full">
                             <span>Amount Paid</span>
                             <span>

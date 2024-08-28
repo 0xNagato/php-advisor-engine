@@ -41,6 +41,7 @@ class ConciergeRecentBookings extends BaseWidget
 
         $query = Booking::confirmed()
             ->limit(10)
+            ->orderByDesc('booking_at')
             ->with('earnings', function ($query) {
                 $query->where('user_id', $this->concierge->user_id);
             })
