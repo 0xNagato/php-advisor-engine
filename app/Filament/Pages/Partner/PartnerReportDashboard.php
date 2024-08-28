@@ -4,6 +4,8 @@ namespace App\Filament\Pages\Partner;
 
 use App\Livewire\Partner\PartnerOverallLeaderboard;
 use App\Livewire\Partner\PartnerRecentBookings;
+use App\Livewire\Partner\TopConcierges;
+use App\Livewire\Partner\TopVenues;
 use App\Livewire\PartnerOverview;
 use Carbon\Carbon;
 use Filament\Forms\Components\Actions;
@@ -66,6 +68,18 @@ class PartnerReportDashboard extends Dashboard
                 'columnSpan' => '1',
             ]),
             PartnerOverallLeaderboard::make([
+                'partner' => auth()->user()->partner,
+                'columnSpan' => '1',
+                'startDate' => Carbon::parse($this->filters['startDate']),
+                'endDate' => Carbon::parse($this->filters['endDate']),
+            ]),
+            TopConcierges::make([
+                'partner' => auth()->user()->partner,
+                'columnSpan' => '1',
+                'startDate' => Carbon::parse($this->filters['startDate']),
+                'endDate' => Carbon::parse($this->filters['endDate']),
+            ]),
+            TopVenues::make([
                 'partner' => auth()->user()->partner,
                 'columnSpan' => '1',
                 'startDate' => Carbon::parse($this->filters['startDate']),
