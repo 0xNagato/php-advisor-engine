@@ -178,7 +178,8 @@
                     <div class="mt-4 font-semibold text-center">
                         Fees paid are for reservation only. Not applicable towards venue bill.
                     </div>
-                @else
+                @endif
+                @if (auth()->check() && auth()->user()->hasRole('super_admin'))
                     <x-filament::actions :actions="$this->resendInvoiceAction" class="w-full"/>
                 @endif
             </div>
