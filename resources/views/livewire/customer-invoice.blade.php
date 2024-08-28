@@ -189,6 +189,12 @@
             </div>
 
             @if (auth()->check() && auth()->user()->hasRole('super_admin'))
+                @php
+                    $booking->load('earnings.user.venue', 'earnings.user.concierge', 'earnings.user.partner');
+                    // Eager loading because resend customer invoice would break everytime
+                    // I'll buy you lunch if you fix this and can explain why this is happening
+                    // - Andrew
+                @endphp
                 <div class="mt-6">
                     <div class="flex flex-col gap-8 lg:flex-row">
                         <div class="w-full lg:w-1/2">
