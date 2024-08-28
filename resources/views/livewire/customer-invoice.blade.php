@@ -248,7 +248,7 @@
                                     </div>
                                 @endforeach
 
-                                <div class="col-span-2">Platform Earnings:</div>
+                                <div class="col-span-2">PRIMA Earnings:</div>
                                 <div class="text-right">
                                     {{ money($booking->platform_earnings, $booking->currency) }}
                                 </div>

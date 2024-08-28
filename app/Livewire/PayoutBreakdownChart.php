@@ -28,7 +28,7 @@ class PayoutBreakdownChart extends ChartWidget
         ])->toArray();
 
         $data[] = [
-            'label' => 'Platform',
+            'label' => 'PRIMA',
             'value' => $this->booking->platform_earnings,
         ];
 
