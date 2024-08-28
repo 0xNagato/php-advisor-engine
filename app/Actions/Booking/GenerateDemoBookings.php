@@ -126,12 +126,15 @@ class GenerateDemoBookings
             /** @var Region $region */
             $region = $regions[$venue->region];
 
+            // Ensure guest count is between 2 and 8
+            $guestCount = max(2, min(8, $schedule->party_size));
+
             $booking = Booking::query()->create([
                 'schedule_template_id' => $schedule->schedule_template_id,
                 'concierge_id' => $concierge->id,
                 'status' => BookingStatus::CONFIRMED,
                 'booking_at' => $bookingDate,
-                'guest_count' => $schedule->party_size,
+                'guest_count' => $guestCount,
                 'created_at' => $bookingDate,
                 'updated_at' => $bookingDate,
                 'currency' => $region->currency,
@@ -141,7 +144,7 @@ class GenerateDemoBookings
                 'guest_last_name' => $this->fakeNames[array_rand($this->fakeNames)],
                 'guest_email' => $this->fakeEmails[array_rand($this->fakeEmails)],
                 'guest_phone' => $this->fakePhones[array_rand($this->fakePhones)],
-                'total_fee' => $schedule->fee($schedule->party_size),
+                'total_fee' => $schedule->fee($guestCount),
             ]);
 
             $taxData = $salesTaxService->calculateTax($region->id, $booking->total_fee, noTax: config('app.no_tax'));
