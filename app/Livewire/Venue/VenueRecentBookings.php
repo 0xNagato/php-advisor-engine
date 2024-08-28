@@ -47,6 +47,7 @@ class VenueRecentBookings extends BaseWidget
             ->with('earnings', function ($query) {
                 $query->where('user_id', $this->venue->user_id);
             })
+            ->orderByDesc('booking_at')
             ->whereBetween('created_at', [$startDate, $endDate])->orderByDesc('created_at')
             ->whereHas('schedule', function ($query) {
                 $query->where('venue_id', $this->venue->id);
@@ -68,14 +69,15 @@ class VenueRecentBookings extends BaseWidget
                     ->dateTime('D, M j g:ia'),
                 TextColumn::make('concierge.user.name')
                     ->label('Booked By'),
-                // TextColumn::make('venue_earnings')
-                //     ->alignRight()
-                //     ->label('Earned')
-                //     ->formatStateUsing(function (Booking $booking) {
-                //         $total = $booking->earnings->sum('amount');
-                //
-                //         return money($total, $booking->currency);
-                //     }),
+                TextColumn::make('venue_earnings')
+                    ->alignRight()
+                    ->visible(fn () => auth()->user()->hasRole('venue'))
+                    ->label('Earned')
+                    ->formatStateUsing(function (Booking $booking) {
+                        $total = $booking->earnings->sum('amount');
+
+                        return money($total, $booking->currency);
+                    }),
             ])
             ->paginated(false)
             ->actions([
