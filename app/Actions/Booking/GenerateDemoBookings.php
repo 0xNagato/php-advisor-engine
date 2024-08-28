@@ -30,6 +30,12 @@ class GenerateDemoBookings
 
     protected const int DAYS_TO_GENERATE = 4; // Today + 3 future days
 
+    private array $fakeNames = ['John', 'Jane', 'Alice', 'Bob', 'Charlie', 'Diana', 'Edward', 'Fiona', 'George', 'Hannah'];
+
+    private array $fakeEmails = ['john@example.com', 'jane@example.com', 'alice@example.com', 'bob@example.com', 'charlie@example.com'];
+
+    private array $fakePhones = ['+11234567890', '+19876543210', '+15551234567', '+14159876543', '+17778889999'];
+
     /**
      * @throws Exception
      */
@@ -49,20 +55,19 @@ class GenerateDemoBookings
             $regions = Region::all()->keyBy('id');
 
             $startDate = now();
-            now()->addDays(self::DAYS_TO_GENERATE - 1);
+            $endDate = now()->addDays(self::DAYS_TO_GENERATE - 1);
 
             foreach ($venues as $venue) {
                 Log::info('Generating bookings for venue: '.$venue->id);
-                $this->generateBookingsForVenue($venue, $concierges, $salesTaxService, $regions, $startDate);
+                $this->generateBookingsForVenue($venue, $concierges, $salesTaxService, $regions, $startDate, $endDate);
             }
 
             return 'Demo bookings generated successfully.';
         } catch (Exception $e) {
             Log::error('Error generating demo bookings: '.$e->getMessage());
             Log::error('Stack trace: '.$e->getTraceAsString());
+            throw $e;
         }
-
-        return 'Demo bookings generation test completed successfully.';
     }
 
     public function asCommand(Command $command): int
@@ -81,11 +86,11 @@ class GenerateDemoBookings
     }
 
     /**
-     * @@param Collection<Region> $regions
+     * @param  Collection<Region>  $regions
      *
      * @throws Exception
      */
-    protected function generateBookingsForVenue(Venue $venue, Collection $concierges, SalesTaxService $salesTaxService, Collection $regions, Carbon $startDate): void
+    protected function generateBookingsForVenue(Venue $venue, Collection $concierges, SalesTaxService $salesTaxService, Collection $regions, Carbon $startDate, Carbon $endDate): void
     {
         try {
             $dateRange = collect(range(0, self::DAYS_TO_GENERATE - 1))->map(fn ($days) => $startDate->copy()->addDays($days));
@@ -104,7 +109,7 @@ class GenerateDemoBookings
             }
         } catch (Exception $e) {
             Log::error("Error generating bookings for venue $venue->id: ".$e->getMessage());
-
+            throw $e;
         }
     }
 
@@ -132,10 +137,10 @@ class GenerateDemoBookings
                 'currency' => $region->currency,
                 'is_prime' => true,
                 'uuid' => Str::uuid(),
-                'guest_first_name' => fake()->firstName(),
-                'guest_last_name' => fake()->lastName(),
-                'guest_email' => fake()->safeEmail(),
-                'guest_phone' => fake()->phoneNumber(),
+                'guest_first_name' => $this->fakeNames[array_rand($this->fakeNames)],
+                'guest_last_name' => $this->fakeNames[array_rand($this->fakeNames)],
+                'guest_email' => $this->fakeEmails[array_rand($this->fakeEmails)],
+                'guest_phone' => $this->fakePhones[array_rand($this->fakePhones)],
                 'total_fee' => $schedule->fee($schedule->party_size),
             ]);
 
@@ -151,6 +156,7 @@ class GenerateDemoBookings
             ]);
         } catch (Exception $e) {
             Log::error("Error creating booking for venue $venue->id, schedule $schedule->id: ".$e->getMessage());
+            throw $e;
         }
     }
 }
