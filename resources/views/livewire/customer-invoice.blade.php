@@ -114,7 +114,7 @@
                 </div>
 
                 <div>
-                    <span class="block text-xs text-gray-500 uppercase">Booking Date:</span>
+                    <span class="block text-xs text-gray-500 uppercase">Booking Time:</span>
                     <span class="block text-xs font-medium text-gray-800 sm:text-sm dark:text-gray-200">
                         {{ $booking->booking_at->format('M d, Y g:i A') }}
                     </span>
@@ -189,7 +189,7 @@
             </div>
 
             @if (auth()->check() && auth()->user()->hasRole('super_admin'))
-                <div class="mt-8">
+                <div class="mt-6">
                     <div class="flex flex-col gap-8 lg:flex-row">
                         <div class="w-full lg:w-1/2">
                             <div class="mb-4 text-xs font-semibold capitalize">Earnings Breakdown</div>
@@ -249,13 +249,6 @@
                             </div>
 
                             <div class="grid grid-cols-3 gap-2 text-xs font-semibold">
-                                <div class="col-span-2">Total Payout:</div>
-                                <div class="text-right">
-                                    {{ money($booking->earnings->sum('amount'), $booking->currency) }}
-                                </div>
-
-                                <hr class="col-span-3 my-2 border-gray-300">
-
                                 <div class="col-span-2">Total Amount:</div>
                                 <div class="text-right">
                                     {{ money($booking->total_with_tax_in_cents, $booking->currency) }}
@@ -263,7 +256,7 @@
                             </div>
 
                         </div>
-                        <div class="w-full -mt-4 lg:w-1/2">
+                        <div class="w-full -mt-2 lg:w-1/2">
                             <livewire:payout-breakdown-chart :booking="$booking" />
                         </div>
                     </div>
