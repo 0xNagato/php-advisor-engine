@@ -3,7 +3,7 @@
 namespace App\Filament\Resources\VenueResource\Pages;
 
 use App\Filament\Resources\VenueResource;
-use App\Livewire\Venue\VenueLeaderboard;
+use App\Livewire\Venue\VenueOverallLeaderboard;
 use App\Livewire\Venue\VenueRecentBookings;
 use App\Livewire\VenueOverview;
 use App\Models\Venue;
@@ -110,11 +110,10 @@ class ViewVenue extends ViewRecord
                 'endDate' => Carbon::parse($this->filters['endDate']),
                 'columnSpan' => '1',
             ]),
-            VenueLeaderboard::make([
+            VenueOverallLeaderboard::make([
                 'venue' => $this->getRecord(),
                 'startDate' => Carbon::parse($this->filters['startDate']),
                 'endDate' => Carbon::parse($this->filters['endDate']),
-                'columnSpan' => '1',
             ]),
         ];
     }

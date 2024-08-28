@@ -6,7 +6,7 @@ use App\Livewire\Admin\AdminRecentBookings;
 use App\Livewire\BookingsOverview;
 use App\Livewire\Concierge\ConciergeOverallLeaderboard;
 use App\Livewire\Partner\PartnerOverallLeaderboard;
-use App\Livewire\Venue\VenueLeaderboard;
+use App\Livewire\Venue\VenueOverallLeaderboard;
 use Carbon\Carbon;
 use Filament\Forms\Components\Actions;
 use Filament\Forms\Components\Actions\Action;
@@ -70,7 +70,7 @@ class AdminDashboard extends Dashboard
             AdminRecentBookings::make([
                 'columnSpan' => '1',
             ]),
-            VenueLeaderboard::make([
+            VenueOverallLeaderboard::make([
                 'columnSpan' => '1',
                 'startDate' => Carbon::parse($this->filters['startDate']),
                 'endDate' => Carbon::parse($this->filters['endDate']),
