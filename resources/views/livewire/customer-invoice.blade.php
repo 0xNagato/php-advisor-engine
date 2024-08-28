@@ -231,7 +231,7 @@
                                             {{ $earning->user->name }}
                                         @endif
                                     </div>
-                                    <div>
+                                    <div title="{{ \Illuminate\Support\Str::title($earning->type) }}">
                                         @php
                                             $type = match ($earning->type) {
                                                 'concierge_referral_1' => 'Con. Ref. 1',

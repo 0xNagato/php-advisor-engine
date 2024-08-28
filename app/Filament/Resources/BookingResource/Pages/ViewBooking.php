@@ -9,15 +9,19 @@ use App\Filament\Resources\BookingResource;
 use App\Models\Booking;
 use App\Models\Region;
 use App\Notifications\Booking\GuestBookingConfirmed;
+use App\Traits\FormatsPhoneNumber;
 use Filament\Actions\Action;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\ViewRecord;
+use Illuminate\Support\HtmlString;
 
 /**
  * @property Booking $record
  */
 class ViewBooking extends ViewRecord
 {
+    use FormatsPhoneNumber;
+
     protected static string $resource = BookingResource::class;
 
     protected static string $view = 'livewire.customer-invoice';
@@ -64,6 +68,14 @@ class ViewBooking extends ViewRecord
             ->color('indigo')
             ->icon('gmdi-message')
             ->requiresConfirmation()
+            ->modalDescription(function () {
+                $formattedNumber = $this->getFormattedPhoneNumber($this->record->guest_phone);
+
+                return new HtmlString(
+                    'Are you sure you want to resend the invoice?<br>'.
+                    "<span class='block mt-2 text-lg font-bold'>{$formattedNumber}</span>"
+                );
+            })
             ->extraAttributes(['class' => 'w-full mt-4'])
             ->action(fn () => $this->resendInvoice());
     }
