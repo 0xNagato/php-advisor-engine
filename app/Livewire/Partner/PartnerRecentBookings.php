@@ -45,6 +45,7 @@ class PartnerRecentBookings extends BaseWidget
 
         $query = Booking::confirmed()
             ->limit(10)
+            ->orderByDesc('booking_at')
             ->with(['earnings' => function ($query) {
                 $query->where('user_id', $this->partner->user_id)
                     ->whereIn('type', ['partner_venue', 'partner_concierge']);

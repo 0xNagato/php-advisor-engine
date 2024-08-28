@@ -195,7 +195,7 @@
                             <div class="mb-4 text-xs font-semibold capitalize">Earnings Breakdown</div>
                             <div class="grid grid-cols-3 gap-2 pb-4 mb-4 text-xs border-b">
                                 @foreach ($booking->earnings as $earning)
-                                    <div class="truncate">
+                                    <div class="truncate" title="{{ $earning->user->name }}">
                                         @php
                                             $earning->user->load('venue', 'concierge', 'partner');
                                             $url = match ($earning->type) {
