@@ -29,7 +29,7 @@
                     <p class="text-lg text-gray-500">No data available for the selected date range and region.</p>
                 </div>
             @else
-                <table class="divide-y divide-gray-200 rounded-xl">
+                <table class="min-w-full overflow-hidden divide-y divide-gray-200 rounded-b-xl">
                     <thead class="bg-gray-50">
                         <tr>
                             <th scope="col"
