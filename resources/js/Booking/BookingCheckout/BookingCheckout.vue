@@ -35,6 +35,7 @@ interface MingleData {
   stripeKey: string;
   expiresAt: string;
   status: string;
+  allowedPaymentMethods: string[];
   formData: {
     firstName: string;
     lastName: string;
@@ -109,6 +110,11 @@ onMounted(async () => {
       const options: StripePaymentElementOptions = {
         layout: {
           type: 'accordion',
+        },
+        paymentMethodOrder: mingleData.allowedPaymentMethods,
+        wallets: {
+          applePay: 'auto',
+          googlePay: 'auto',
         },
       };
 

@@ -56,7 +56,7 @@ class BookingCheckout extends Component implements HasMingles
         $paymentIntent = $stripe->paymentIntents->create([
             'amount' => $this->booking->total_with_tax_in_cents,
             'currency' => $this->booking->currency,
-            'automatic_payment_methods' => ['enabled' => true],
+            'payment_method_types' => ['card', 'link'],
         ]);
 
         return $paymentIntent->client_secret;
@@ -82,6 +82,7 @@ class BookingCheckout extends Component implements HasMingles
                 'phone' => $this->booking->guest_phone ?? '',
                 'notes' => $this->booking->notes ?? '',
             ],
+            'allowedPaymentMethods' => ['card', 'link'],
         ];
     }
 
