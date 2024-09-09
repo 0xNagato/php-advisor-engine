@@ -1,11 +1,7 @@
 {
   "disabled": [],
   "hooks": {
-    "pre-commit": [
-      "./vendor/bin/pint --dirty"
-    ],
-    "pre-push": [
-      "php artisan test"
-    ]
+    "pre-commit": ["./vendor/bin/pint --dirty"],
+    "pre-push": ["php artisan test --parallel"]
   }
 }

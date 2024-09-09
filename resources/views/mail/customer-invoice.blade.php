@@ -24,7 +24,15 @@
         </tr>
         <tr>
             <td><strong>PAYMENT METHOD:</strong></td>
-            <td>••••{{ $booking->stripe_charge->paymentMethodDetails->card->last4 }}</td>
+            <td>
+                @if ($booking->stripe_charge && $booking->stripe_charge->paymentMethodDetails->card)
+                    ••••{{ $booking->stripe_charge->paymentMethodDetails->card->last4 }}
+                @elseif ($booking->stripe_charge)
+                    Stripe
+                @else
+                    Unknown
+                @endif
+            </td>
         </tr>
         <tr>
             <td colspan="2" style="line-height:20px;">&nbsp;</td>

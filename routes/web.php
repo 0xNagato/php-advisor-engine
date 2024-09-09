@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Booking\BookingCheckoutController;
 use App\Http\Controllers\DemoAuthController;
 use App\Http\Controllers\DownloadInvoiceController;
 use App\Http\Controllers\ExceptionFormController;
@@ -28,7 +29,11 @@ Route::get('/venues/confirm/{token}', VenueBookingConfirmation::class)
 Route::get('/venues/confirm/special-request/{token}', VenueSpecialRequestConfirmation::class)
     ->name('venues.confirm-special-request');
 
+// Old customer booking flow
 Route::get('/bookings/create/{token}', CreateBooking::class)->name('bookings.create');
+
+// New customer booking flow
+Route::get('/checkout/{booking:uuid}', BookingCheckoutController::class)->name('booking.checkout');
 
 Route::get('/invitation/{referral}', ConciergeInvitation::class)
     ->name('concierge.invitation')

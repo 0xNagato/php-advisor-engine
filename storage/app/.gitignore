@@ -1,3 +1,5 @@
 *
 !public/
 !.gitignore
+!apple-pay/
+!apple-pay/**

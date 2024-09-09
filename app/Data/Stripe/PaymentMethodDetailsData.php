@@ -10,5 +10,5 @@ class PaymentMethodDetailsData extends Data implements Wireable
 {
     use WireableData;
 
-    public function __construct(public CardData $card, public string $type) {}
+    public function __construct(public ?CardData $card, public string $type) {}
 }

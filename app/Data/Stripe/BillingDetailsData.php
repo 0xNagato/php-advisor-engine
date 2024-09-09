@@ -11,9 +11,9 @@ class BillingDetailsData extends Data implements Wireable
     use WireableData;
 
     public function __construct(
-        public null $name,
-        public null $email,
-        public null $phone,
+        public ?string $name,
+        public ?string $email,
+        public ?string $phone,
         public AddressData $address
     ) {}
 }

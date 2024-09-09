@@ -3,6 +3,20 @@
 namespace App\Actions\Booking;
 
 /**
+ * @method static \Lorisleiva\Actions\Decorators\JobDecorator|\Lorisleiva\Actions\Decorators\UniqueJobDecorator makeJob(\App\Models\Booking $booking, string $paymentIntentId, array $formData)
+ * @method static \Lorisleiva\Actions\Decorators\UniqueJobDecorator makeUniqueJob(\App\Models\Booking $booking, string $paymentIntentId, array $formData)
+ * @method static \Illuminate\Foundation\Bus\PendingDispatch dispatch(\App\Models\Booking $booking, string $paymentIntentId, array $formData)
+ * @method static \Illuminate\Foundation\Bus\PendingDispatch|\Illuminate\Support\Fluent dispatchIf(bool $boolean, \App\Models\Booking $booking, string $paymentIntentId, array $formData)
+ * @method static \Illuminate\Foundation\Bus\PendingDispatch|\Illuminate\Support\Fluent dispatchUnless(bool $boolean, \App\Models\Booking $booking, string $paymentIntentId, array $formData)
+ * @method static dispatchSync(\App\Models\Booking $booking, string $paymentIntentId, array $formData)
+ * @method static dispatchNow(\App\Models\Booking $booking, string $paymentIntentId, array $formData)
+ * @method static dispatchAfterResponse(\App\Models\Booking $booking, string $paymentIntentId, array $formData)
+ * @method static array run(\App\Models\Booking $booking, string $paymentIntentId, array $formData)
+ */
+class CompleteBooking
+{
+}
+/**
  * @method static \Lorisleiva\Actions\Decorators\JobDecorator|\Lorisleiva\Actions\Decorators\UniqueJobDecorator makeJob(int $scheduleTemplateId, array $data, string $timezone, string $currency)
  * @method static \Lorisleiva\Actions\Decorators\UniqueJobDecorator makeUniqueJob(int $scheduleTemplateId, array $data, string $timezone, string $currency)
  * @method static \Illuminate\Foundation\Bus\PendingDispatch dispatch(int $scheduleTemplateId, array $data, string $timezone, string $currency)

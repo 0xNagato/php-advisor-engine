@@ -90,14 +90,12 @@ class VenueOverallLeaderboard extends Widget
 
     public function getRegions(): Collection
     {
-        return Venue::distinct()
+        return Venue::query()->distinct()
             ->pluck('region')
-            ->map(function ($region) {
-                return [
-                    'value' => $region,
-                    'label' => $this->formatRegionName($region),
-                ];
-            });
+            ->map(fn ($region) => [
+                'value' => $region,
+                'label' => $this->formatRegionName($region),
+            ]);
     }
 
     public function updatedSelectedRegion()

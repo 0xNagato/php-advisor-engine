@@ -11,6 +11,7 @@
         "@eslint/js": "^9.9.1",
         "@prettier/plugin-php": "^0.22.2",
         "@shufo/prettier-plugin-blade": "^1.14.1",
+        "@stripe/stripe-js": "^4.4.0",
         "@tailwindcss/forms": "^0.5.7",
         "@tailwindcss/typography": "^0.5.10",
         "@types/stripe-v3": "^3.1.33",
@@ -21,6 +22,8 @@
         "cypress": "^13.9.0",
         "dotenv": "^16.4.5",
         "eslint": "^9.9.1",
+        "eslint-config-prettier": "^9.1.0",
+        "eslint-plugin-prettier": "^5.2.1",
         "eslint-plugin-tailwindcss": "^3.17.4",
         "eslint-plugin-vue": "^9.27.0",
         "laravel-vite-plugin": "^1.0.2",
@@ -36,10 +39,12 @@
     "dependencies": {
         "@vitejs/plugin-vue": "^5.1.2",
         "dayjs": "^1.11.13",
+        "intl-tel-input": "^24.3.6",
         "lucide-vue-next": "^0.435.0",
         "plyr": "^3.7.8",
         "puppeteer": "^22.11.0",
         "swiper": "^11.1.4",
-        "vue": "^3.4.38"
+        "vue": "^3.4.38",
+        "vue3-flip-countdown": "^0.1.6"
     }
 }

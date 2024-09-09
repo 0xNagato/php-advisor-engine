@@ -70,15 +70,15 @@ class CreateBooking
 
         try {
             $shortUrlQr = ShortURL::destinationUrl(
-                route('bookings.create', [
-                    'token' => $booking->uuid,
+                route('booking.checkout', [
+                    'booking' => $booking->uuid,
                     'r' => 'qr',
                 ])
             )->make();
 
             $shortUrl = ShortURL::destinationUrl(
-                route('bookings.create', [
-                    'token' => $booking->uuid,
+                route('booking.checkout', [
+                    'booking' => $booking->uuid,
                     'r' => 'sms',
                 ])
             )->make();

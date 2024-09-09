@@ -11,11 +11,11 @@ class AddressData extends Data implements Wireable
     use WireableData;
 
     public function __construct(
-        public null $city,
-        public null $line1,
-        public null $line2,
-        public null $state,
-        public null $country,
-        public null $postalCode
+        public ?string $city,
+        public ?string $line1,
+        public ?string $line2,
+        public ?string $state,
+        public ?string $country,
+        public ?string $postalCode
     ) {}
 }

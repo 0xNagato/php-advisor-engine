@@ -96,7 +96,7 @@ class GenerateDemoBookings
             $dateRange = collect(range(0, self::DAYS_TO_GENERATE - 1))->map(fn ($days) => $startDate->copy()->addDays($days));
 
             foreach ($dateRange as $date) {
-                $availableSchedules = ScheduleWithBooking::where('venue_id', $venue->id)
+                $availableSchedules = ScheduleWithBooking::query()->where('venue_id', $venue->id)
                     ->where('is_available', true)
                     ->where('booking_date', $date->format('Y-m-d'))
                     ->inRandomOrder()
