@@ -2,7 +2,7 @@
 
 namespace App\Providers;
 
-use App\Models\User;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Gate;
 use Laravel\Telescope\IncomingEntry;
 use Laravel\Telescope\Telescope;
@@ -15,7 +15,7 @@ class TelescopeServiceProvider extends TelescopeApplicationServiceProvider
      */
     public function register(): void
     {
-        Telescope::night();
+        // Telescope::night();
 
         $this->hideSensitiveRequestDetails();
 
@@ -47,17 +47,15 @@ class TelescopeServiceProvider extends TelescopeApplicationServiceProvider
         ]);
     }
 
-    /**
-     * Register the Telescope gate.
-     *
-     * This gate determines who can access Telescope in non-local environments.
-     */
     protected function gate(): void
     {
-        Gate::define('viewTelescope', function (User $user) {
-            return in_array($user->email, [
-                'andru.weir@gmail.com',
-            ]);
-        });
+        Gate::define('viewTelescope', fn ($user) => $user->can(config('filament-debugger.permissions.telescope')));
+    }
+
+    protected function authorization(): void
+    {
+        Auth::setDefaultDriver(config('filament.auth.guard'));
+
+        parent::authorization();
     }
 }

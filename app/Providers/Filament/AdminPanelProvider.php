@@ -22,6 +22,7 @@ use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\Session\Middleware\AuthenticateSession;
 use Illuminate\Session\Middleware\StartSession;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
+use Stephenjude\FilamentDebugger\DebuggerPlugin;
 
 class AdminPanelProvider extends PanelProvider
 {
@@ -90,6 +91,7 @@ class AdminPanelProvider extends PanelProvider
             ])
             ->plugins([
                 FilamentShieldPlugin::make(),
+                DebuggerPlugin::make(),
             ])
             ->favicon('/favicon.ico')
             ->darkMode(false)
