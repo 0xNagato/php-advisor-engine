@@ -20,6 +20,7 @@ use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Validation\ValidationException;
+use Laravel\Telescope\TelescopeApplicationServiceProvider;
 use Lorisleiva\Actions\Facades\Actions;
 use Opcodes\LogViewer\Facades\LogViewer;
 
@@ -106,9 +107,10 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        if ($this->app->environment('local')) {
-            $this->app->register(\Laravel\Telescope\TelescopeServiceProvider::class);
+        if ($this->app->environment('local') ||
+            $this->app->environment('production') && in_array(request()->getHost(), ['demo.primavip.co', 'dev.primavip.co'])) {
             $this->app->register(TelescopeServiceProvider::class);
+            $this->app->register(TelescopeApplicationServiceProvider::class);
         }
     }
 }

@@ -11,6 +11,7 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Filament\Widgets\Concerns\InteractsWithPageFilters;
 use Filament\Widgets\TableWidget as BaseWidget;
+use Illuminate\Contracts\Database\Query\Builder;
 use Illuminate\Contracts\Support\Htmlable;
 
 class ConciergeReferralBookingsTable extends BaseWidget
@@ -50,7 +51,7 @@ class ConciergeReferralBookingsTable extends BaseWidget
             ->with('booking.concierge.user');
 
         if ($this->concierge->exists) {
-            $bookingsQuery->whereHas('booking', function ($query) {
+            $bookingsQuery->whereHas('booking', function (Builder $query) {
                 $query->where('concierge_id', $this->concierge->id);
             });
         }
