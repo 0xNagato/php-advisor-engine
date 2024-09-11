@@ -57,7 +57,8 @@ class ListConciergesTable extends BaseWidget
                 Action::make('impersonate')
                     ->iconButton()
                     ->icon('impersonate-icon')
-                    ->action(fn (Concierge $record) => $this->impersonate($record->user)),
+                    ->action(fn (Concierge $record) => $this->impersonate($record->user))
+                    ->hidden(fn () => isPrimaApp()),
             ]);
     }
 }

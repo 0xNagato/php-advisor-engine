@@ -70,6 +70,7 @@
     "laradumps/laradumps": "^3.0",
     "larastan/larastan": "^2.0",
     "laravel/pint": "^1.13",
+    "laravel/telescope": "^5.2",
     "mockery/mockery": "^1.4.4",
     "nunomaduro/collision": "^8.1",
     "nunomaduro/phpinsights": "^2.11",
@@ -114,7 +115,9 @@
   },
   "extra": {
     "laravel": {
-      "dont-discover": []
+      "dont-discover": [
+        "laravel/telescope"
+      ]
     }
   },
   "config": {

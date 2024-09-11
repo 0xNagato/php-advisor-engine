@@ -86,7 +86,8 @@ class ListPartners extends ListRecords
                 Action::make('impersonate')
                     ->iconButton()
                     ->icon('impersonate-icon')
-                    ->action(fn (Partner $record) => $this->impersonate($record->user)),
+                    ->action(fn (Partner $record) => $this->impersonate($record->user))
+                    ->hidden(fn () => isPrimaApp()),
                 EditAction::make()
                     ->iconButton(),
             ]);

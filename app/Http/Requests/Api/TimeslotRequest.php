@@ -11,7 +11,7 @@ class TimeslotRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'date' => ['required', 'date', 'after_or_equal:today'],
+            'date' => ['required', 'date'],
         ];
     }
 

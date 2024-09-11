@@ -255,7 +255,10 @@
                 <div x-show="tab === 'smsPayment'" class="flex flex-col gap-4 mt-4">
                     <!-- SMS Payment Link Tab Content -->
                     @env('local')
-                    <a href="{{ $bookingUrl }}" target="_blank">{{ $bookingUrl }}</a>
+                    <x-filament::button tag="a" href="{{ $bookingUrl }}" target="_blank" color="success"
+                        icon="gmdi-open-in-new" class="w-full">
+                        Open Booking URL
+                    </x-filament::button>
                     @endenv
                     <livewire:booking.s-m-s-booking-form :booking="$booking" :booking-url="$bookingUrl" />
                 </div>
@@ -266,7 +269,7 @@
                         Show QR code below to customer to accept secure payment.
                     </div>
 
-                    <img src="{{ $qrCode }}" alt="QR Code" class="w-1/2 mx-auto shadow-lg">
+                    <img src="{{ $qrCode }}" alt="QR Code" class="w-1/2 mx-auto shadow-lg max-w-[400px]">
 
                     <livewire:booking.booking-status-widget :booking="$booking" />
                 </div>

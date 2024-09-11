@@ -61,7 +61,8 @@ class VenueResource extends Resource
                 Action::make('impersonate')
                     ->iconButton()
                     ->icon('impersonate-icon')
-                    ->action(fn (Venue $record) => $this->impersonate($record->user)),
+                    ->action(fn (Venue $record) => $this->impersonate($record->user))
+                    ->hidden(fn () => isPrimaApp()),
                 EditAction::make()
                     ->iconButton(),
             ])

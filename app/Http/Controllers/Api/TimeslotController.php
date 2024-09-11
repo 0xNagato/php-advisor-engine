@@ -12,9 +12,34 @@ class TimeslotController extends Controller
 {
     public function __invoke(TimeslotRequest $request): JsonResponse
     {
+        $date = $request->input('date');
+        $region = GetUserRegion::run();
+        $currentDate = now($region->timezone)->format('Y-m-d');
+
+        if (! $date || $date < $currentDate) {
+            // If date is invalid or in the past, return all times as unavailable
+            return response()->json([
+                'data' => $this->allTimesUnavailable(),
+            ]);
+        }
+
         return response()->json([
-            'data' => $this->availableTimeslots(date: $request->validated()['date']),
+            'data' => $this->availableTimeslots(date: $date),
         ]);
+    }
+
+    private function allTimesUnavailable(): array
+    {
+        $timeslots = GetReservationTimeOptions::run(date: now()->format('Y-m-d'));
+
+        return collect($timeslots)
+            ->map(fn ($formattedTime, $time) => [
+                'label' => $formattedTime,
+                'value' => $time,
+                'available' => false,
+            ])
+            ->values()
+            ->all();
     }
 
     private function availableTimeslots($date): array
