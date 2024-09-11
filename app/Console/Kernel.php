@@ -16,6 +16,8 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule): void
     {
+        Schedule::command('telescope:prune')->daily();
+
         /**
          * Send reminders for bookings that are due.
          */
