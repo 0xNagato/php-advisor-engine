@@ -73,6 +73,8 @@ class CreateConciergesAndBookings extends Command
             ]);
         })->get();
 
+        $this->info('Found '.$concierges->count().' concierges');
+
         $generateDemoBookings = new GenerateDemoBookings;
 
         foreach ($concierges as $concierge) {
@@ -85,6 +87,8 @@ class CreateConciergesAndBookings extends Command
                 ->whereBetween('booking_at', [$startDate, $endDate])
                 ->count();
 
+            $this->info("Existing bookings count: {$existingBookingsCount}");
+
             if ($existingBookingsCount >= 20) {
                 $this->info("20 bookings already exist for {$concierge->user->first_name} Concierge");
 
@@ -92,9 +96,16 @@ class CreateConciergesAndBookings extends Command
             }
 
             $bookingsToCreate = 20 - $existingBookingsCount;
+            $this->info("Attempting to create {$bookingsToCreate} bookings");
+
             $generateDemoBookings->generateBookingsForConcierge($concierge, $startDate, $endDate, $bookingsToCreate);
 
-            $this->info("{$bookingsToCreate} bookings created for {$concierge->user->first_name} Concierge");
+            $newBookingsCount = Booking::query()->where('concierge_id', $concierge->id)
+                ->whereBetween('booking_at', [$startDate, $endDate])
+                ->count();
+
+            $this->info("New bookings count: {$newBookingsCount}");
+            $this->info('Total bookings created: '.($newBookingsCount - $existingBookingsCount));
         }
     }
 }
