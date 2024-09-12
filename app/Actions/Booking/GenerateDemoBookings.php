@@ -162,4 +162,31 @@ class GenerateDemoBookings
             throw $e;
         }
     }
+
+    public function generateBookingsForConcierge(Concierge $concierge, Carbon $startDate, Carbon $endDate, int $count): void
+    {
+        $salesTaxService = app(SalesTaxService::class);
+        $regions = Region::all()->keyBy('id');
+
+        $dateRange = collect(range(0, $endDate->diffInDays($startDate)))->map(fn ($days) => $startDate->copy()->addDays($days));
+
+        $bookingsCreated = 0;
+        foreach ($dateRange as $date) {
+            if ($bookingsCreated >= $count) {
+                break;
+            }
+
+            $availableSchedules = ScheduleWithBooking::query()
+                ->where('is_available', true)
+                ->where('booking_date', $date->format('Y-m-d'))
+                ->inRandomOrder()
+                ->take($count - $bookingsCreated)
+                ->get();
+
+            foreach ($availableSchedules as $schedule) {
+                $this->createBooking($schedule->venue, $schedule, $concierge, $salesTaxService, $regions);
+                $bookingsCreated++;
+            }
+        }
+    }
 }
