@@ -107,10 +107,12 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        if ($this->app->environment('local') ||
-            ($this->app->environment('production') && in_array(request()->getHost(), ['demo.primavip.co', 'dev.primavip.co']))) {
-            $this->app->register(TelescopeServiceProvider::class);
-            $this->app->register(TelescopeApplicationServiceProvider::class);
-        }
+        $this->app->register(TelescopeServiceProvider::class);
+        $this->app->register(TelescopeApplicationServiceProvider::class);
+        // if ($this->app->environment('local') ||
+        //     ($this->app->environment('production') && in_array(request()->getHost(), ['demo.primavip.co', 'dev.primavip.co']))) {
+        //     $this->app->register(TelescopeServiceProvider::class);
+        //     $this->app->register(TelescopeApplicationServiceProvider::class);
+        // }
     }
 }

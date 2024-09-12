@@ -53,7 +53,6 @@
     "spatie/laravel-pdf": "^1.4",
     "staudenmeir/belongs-to-through": "^2.5",
     "stechstudio/filament-impersonate": "^3.6",
-    "stephenjude/filament-debugger": "^3.0",
     "stripe/stripe-php": "^14.5",
     "symfony/http-client": "^7.0",
     "symfony/mailgun-mailer": "^7.0",
