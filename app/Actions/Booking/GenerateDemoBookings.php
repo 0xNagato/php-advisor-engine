@@ -151,6 +151,8 @@ class GenerateDemoBookings
                 'total_fee' => $schedule->fee($guestCount),
             ]);
 
+            Log::info("Booking created with ID: {$booking->id}");
+
             $taxData = $salesTaxService->calculateTax($region->id, $booking->total_fee, noTax: config('app.no_tax'));
             $totalWithTaxInCents = $booking->total_fee + $taxData->amountInCents;
 
@@ -163,15 +165,20 @@ class GenerateDemoBookings
             ]);
         } catch (Exception $e) {
             Log::error("Error creating booking for venue {$venue->id}, schedule {$schedule->id}: ".$e->getMessage());
+            Log::error('Stack trace: '.$e->getTraceAsString());
             throw $e;
         }
     }
 
     public function generateBookingsForConcierge(Concierge $concierge, Carbon $startDate, Carbon $endDate, int $count)
     {
+        Log::info("Generating bookings for concierge: {$concierge->id}, count: {$count}");
+
         $salesTaxService = new SalesTaxService;
-        $regions = Region::all()->keyBy('id');  // Use keyBy('id') to make lookup easier
+        $regions = Region::all()->keyBy('id');
         $venues = Venue::inRandomOrder()->take(5)->get();
+
+        Log::info("Venues fetched: {$venues->count()}");
 
         $dateRange = collect(range(0, $endDate->diffInDays($startDate)))
             ->map(function ($day) use ($startDate) {
@@ -194,9 +201,16 @@ class GenerateDemoBookings
                     ->take(1)
                     ->get();
 
+                Log::info("Available schedules for venue {$venue->id} on {$date->format('Y-m-d')}: {$availableSchedules->count()}");
+
                 foreach ($availableSchedules as $schedule) {
-                    $this->createBooking($venue, $schedule, $concierge, $salesTaxService, $regions);
-                    $createdBookings++;
+                    try {
+                        $this->createBooking($venue, $schedule, $concierge, $salesTaxService, $regions);
+                        $createdBookings++;
+                        Log::info("Booking created for concierge {$concierge->id}, venue {$venue->id}, schedule {$schedule->id}");
+                    } catch (Exception $e) {
+                        Log::error('Error creating booking: '.$e->getMessage());
+                    }
 
                     if ($createdBookings >= $count) {
                         break 3;
@@ -204,5 +218,7 @@ class GenerateDemoBookings
                 }
             }
         }
+
+        Log::info("Total bookings created for concierge {$concierge->id}: {$createdBookings}");
     }
 }
