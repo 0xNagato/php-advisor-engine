@@ -8,6 +8,7 @@ use App\Models\Concierge;
 use App\Models\Partner;
 use App\Models\User;
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\Hash;
 
 class CreateConciergesAndBookings extends Command
 {
@@ -40,17 +41,18 @@ class CreateConciergesAndBookings extends Command
                 continue;
             }
 
-            $user = User::factory([
+            $user = User::create([
                 'first_name' => $conciergeData['first_name'],
                 'last_name' => 'Concierge',
                 'email' => $conciergeData['email'],
-                'password' => bcrypt('password'),
+                'password' => Hash::make('password'),
                 'partner_referral_id' => Partner::query()->inRandomOrder()->first()->id,
-            ])->create();
+            ]);
 
-            Concierge::factory([
+            Concierge::create([
+                'user_id' => $user->id,
                 'hotel_name' => "{$conciergeData['first_name']}'s Hotel",
-            ])->for($user)->create();
+            ]);
 
             $user->assignRole('concierge');
 
