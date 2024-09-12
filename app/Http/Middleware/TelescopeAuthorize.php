@@ -2,19 +2,16 @@
 
 namespace App\Http\Middleware;
 
+use Closure;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Log;
 use Laravel\Telescope\Telescope;
 
 class TelescopeAuthorize
 {
-    public function handle($request, $next)
+    public function handle(Request $request, Closure $next)
     {
-        Log::info('Telescope Authorize Middleware');
-
         if (Auth::check() && Auth::user()?->hasRole('super_admin')) {
-            Log::info('Telescope Authorize Middleware - User is super admin');
-
             return $next($request);
         }
 

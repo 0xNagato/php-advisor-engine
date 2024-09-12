@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Middleware\TelescopeAuthorize;
 use Laravel\Telescope\Watchers\BatchWatcher;
 use Laravel\Telescope\Watchers\CacheWatcher;
 use Laravel\Telescope\Watchers\ClientRequestWatcher;
@@ -109,7 +110,7 @@ return [
 
     'middleware' => [
         'web',
-        \App\Http\Middleware\TelescopeAuthorize::class,
+        TelescopeAuthorize::class,
     ],
 
     /*

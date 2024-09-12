@@ -19,11 +19,9 @@ class TelescopeServiceProvider extends TelescopeApplicationServiceProvider
         $isLocalOrAllowed = $this->app->environment('local') ||
             in_array(request()->getHost(), ['demo.primavip.co', 'dev.primavip.co']);
 
-        Telescope::filter(function (IncomingEntry $entry) use ($isLocalOrAllowed) {
-            return $isLocalOrAllowed || $entry->isReportableException() ||
-                   $entry->isFailedRequest() || $entry->isFailedJob() ||
-                   $entry->isScheduledTask() || $entry->hasMonitoredTag();
-        });
+        Telescope::filter(fn (IncomingEntry $entry) => $isLocalOrAllowed || $entry->isReportableException() ||
+               $entry->isFailedRequest() || $entry->isFailedJob() ||
+               $entry->isScheduledTask() || $entry->hasMonitoredTag());
     }
 
     /**
@@ -46,11 +44,9 @@ class TelescopeServiceProvider extends TelescopeApplicationServiceProvider
 
     protected function gate(): void
     {
-        Gate::define('viewTelescope', function ($user) {
-            return in_array($user->email, [
-                'andru.weir@gmail.com',
-                'andrew@primavip.co',
-            ]);
-        });
+        Gate::define('viewTelescope', fn ($user) => in_array($user->email, [
+            'andru.weir@gmail.com',
+            'andrew@primavip.co',
+        ]));
     }
 }
