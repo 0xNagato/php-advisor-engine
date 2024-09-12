@@ -2,7 +2,6 @@
 
 namespace App\Providers;
 
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Gate;
 use Laravel\Telescope\IncomingEntry;
 use Laravel\Telescope\Telescope;
@@ -49,13 +48,11 @@ class TelescopeServiceProvider extends TelescopeApplicationServiceProvider
 
     protected function gate(): void
     {
-        Gate::define('viewTelescope', fn ($user) => $user->can(config('filament-debugger.permissions.telescope')));
-    }
-
-    protected function authorization(): void
-    {
-        Auth::setDefaultDriver(config('filament.auth.guard'));
-
-        parent::authorization();
+        Gate::define('viewTelescope', function ($user) {
+            return in_array($user->email, [
+                'andru.weir@gmail.com',
+                'andrew@primavip.co',
+            ]);
+        });
     }
 }
