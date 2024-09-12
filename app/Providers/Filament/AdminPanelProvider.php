@@ -43,23 +43,34 @@ class AdminPanelProvider extends PanelProvider
                 'primary' => Color::Indigo,
             ])
             ->navigationItems([
-
                 NavigationItem::make('Horizon')
                     ->url('/horizon')
                     ->icon('heroicon-o-sun')
                     ->sort(1000)
+                    ->openUrlInNewTab()
+                    ->group('Admin Tools')
                     ->visible(fn () => auth()->user()->email === 'andru.weir@gmail.com'),
                 NavigationItem::make('Pulse')
                     ->url('/pulse')
                     ->icon('ri-pulse-line')
                     ->sort(999)
+                    ->openUrlInNewTab()
+                    ->group('Admin Tools')
                     ->visible(fn () => auth()->user()->email === 'andru.weir@gmail.com'),
                 NavigationItem::make('Logs')
                     ->url('/log-viewer')
                     ->icon('gmdi-list-o')
                     ->sort(999)
+                    ->openUrlInNewTab()
+                    ->group('Admin Tools')
                     ->visible(fn () => auth()->user()->email === 'andru.weir@gmail.com'),
-
+                NavigationItem::make('Telescope')
+                    ->url('/telescope')
+                    ->icon('gmdi-query-stats-o')
+                    ->sort(1000)
+                    ->openUrlInNewTab()
+                    ->group('Admin Tools')
+                    ->visible(fn () => auth()->user()->email === 'andru.weir@gmail.com'),
             ])
             ->userMenuItems([
                 'profile' => MenuItem::make()
@@ -83,7 +94,6 @@ class AdminPanelProvider extends PanelProvider
                 SubstituteBindings::class,
                 DisableBladeIconComponents::class,
                 DispatchServingFilamentEvent::class,
-                //                TwoFactorAuthentication::class,
             ])
             ->authMiddleware([
                 Authenticate::class,
