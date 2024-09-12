@@ -46,8 +46,16 @@ class CreateConciergesAndBookings extends Command
 
             $concierge = Concierge::firstOrCreate(
                 ['user_id' => $user->id],
-                ['hotel_name' => "{$conciergeData['first_name']}'s Hotel"]
+                [
+                    'hotel_name' => "{$conciergeData['first_name']}'s Hotel",
+                    'secured_at' => now(),  // Add this line
+                ]
             );
+
+            // Update secured_at if it's null (for existing concierges)
+            if ($concierge->secured_at === null) {
+                $concierge->update(['secured_at' => now()]);
+            }
 
             $user->assignRole('concierge');
 
