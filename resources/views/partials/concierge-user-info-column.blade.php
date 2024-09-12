@@ -2,7 +2,7 @@
     {{ $name }}
     <dt class="text-xs font-semibold">Date Joined:</dt>
     <dd>
-        {{ $secured_at->format('D M j, Y') }}<br />
+        {{ $secured_at ? $secured_at->format('D M j, Y') : 'N/A' }}<br />
     </dd>
     <dt class="text-xs font-semibold">Referred By:</dt>
     <dd>
