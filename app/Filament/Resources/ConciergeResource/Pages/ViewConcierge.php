@@ -64,6 +64,7 @@ class ViewConcierge extends ViewRecord
             Impersonate::make()
                 ->iconButton()
                 ->redirectTo(config('app.platform_url'))
+                ->hidden(fn () => isPrimaApp())
                 ->record($this->getRecord()->user),
             EditAction::make()
                 ->icon('heroicon-m-pencil-square')
