@@ -14,17 +14,17 @@ class CreateConciergesAndBookings extends Command
 {
     protected $signature = 'demo:create-concierges-and-bookings';
 
-    protected $description = 'Create concierge accounts for Andrew, Alex, and Kevin, and generate 20 bookings each for the past 10 days';
+    protected $description = 'Create or update concierge accounts for Andrew, Alex, and Kevin, and generate 20 bookings each for the past 10 days';
 
     public function handle()
     {
-        $this->createConcierges();
+        $this->createOrUpdateConcierges();
         $this->createBookings();
 
-        $this->info('Concierge accounts created and bookings generated successfully.');
+        $this->info('Concierge accounts updated and bookings generated successfully.');
     }
 
-    private function createConcierges()
+    private function createOrUpdateConcierges()
     {
         $concierges = [
             ['first_name' => 'Andrew', 'email' => 'andrewconcierge@primavip.co'],
@@ -33,40 +33,37 @@ class CreateConciergesAndBookings extends Command
         ];
 
         foreach ($concierges as $conciergeData) {
-            $existingUser = User::query()->where('email', $conciergeData['email'])->first();
+            $user = User::firstOrCreate(
+                ['email' => $conciergeData['email']],
+                [
+                    'first_name' => $conciergeData['first_name'],
+                    'last_name' => 'Concierge',
+                    'password' => Hash::make('password'),
+                    'partner_referral_id' => Partner::query()->inRandomOrder()->first()->id,
+                    'email_verified_at' => now(),
+                ]
+            );
 
-            if ($existingUser) {
-                $this->info("Concierge account already exists for {$conciergeData['first_name']} Concierge");
-
-                continue;
-            }
-
-            $user = User::create([
-                'first_name' => $conciergeData['first_name'],
-                'last_name' => 'Concierge',
-                'email' => $conciergeData['email'],
-                'password' => Hash::make('password'),
-                'partner_referral_id' => Partner::query()->inRandomOrder()->first()->id,
-            ]);
-
-            Concierge::create([
-                'user_id' => $user->id,
-                'hotel_name' => "{$conciergeData['first_name']}'s Hotel",
-            ]);
+            $concierge = Concierge::firstOrCreate(
+                ['user_id' => $user->id],
+                ['hotel_name' => "{$conciergeData['first_name']}'s Hotel"]
+            );
 
             $user->assignRole('concierge');
 
-            $this->info("Concierge account created for {$conciergeData['first_name']} Concierge");
+            $this->info("Concierge account created/updated for {$conciergeData['first_name']} Concierge");
         }
     }
 
     private function createBookings()
     {
-        $concierges = Concierge::with('user')->whereIn('user_id', User::query()->whereIn('email', [
-            'andrewconcierge@primavip.co',
-            'alexconcierge@primavip.co',
-            'kevinconcierge@primavip.co',
-        ])->pluck('id'))->get();
+        $concierges = Concierge::with('user')->whereHas('user', function ($query) {
+            $query->whereIn('email', [
+                'andrewconcierge@primavip.co',
+                'alexconcierge@primavip.co',
+                'kevinconcierge@primavip.co',
+            ]);
+        })->get();
 
         $generateDemoBookings = new GenerateDemoBookings;
 
