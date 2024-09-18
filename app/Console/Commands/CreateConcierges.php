@@ -23,24 +23,18 @@ class CreateConcierges extends Command
         ];
 
         foreach ($concierges as $conciergeData) {
-            $user = User::firstOrCreate(
-                ['email' => $conciergeData['email']],
-                [
-                    'first_name' => $conciergeData['first_name'],
-                    'last_name' => 'Concierge',
-                    'password' => Hash::make('password'),
-                    'partner_referral_id' => Partner::query()->inRandomOrder()->first()->id,
-                    'email_verified_at' => now(),
-                ]
-            );
+            $user = User::query()->firstOrCreate(['email' => $conciergeData['email']], [
+                'first_name' => $conciergeData['first_name'],
+                'last_name' => 'Concierge',
+                'password' => Hash::make('password'),
+                'partner_referral_id' => Partner::query()->inRandomOrder()->first()->id,
+                'email_verified_at' => now(),
+            ]);
 
-            $concierge = Concierge::firstOrCreate(
-                ['user_id' => $user->id],
-                [
-                    'hotel_name' => "{$conciergeData['first_name']}'s Hotel",
-                    'secured_at' => now(),
-                ]
-            );
+            $concierge = Concierge::query()->firstOrCreate(['user_id' => $user->id], [
+                'hotel_name' => "{$conciergeData['first_name']}'s Hotel",
+                'secured_at' => now(),
+            ]);
 
             // Update secured_at if it's null (for existing concierges)
             if ($concierge->secured_at === null) {
