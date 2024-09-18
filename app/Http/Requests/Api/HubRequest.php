@@ -11,10 +11,11 @@ class HubRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'date' => ['required', 'date', 'after_or_equal:today'],
-            'guest_count' => ['required', 'integer'],
+            'date' => ['required', 'date'],
+            'guest_count' => ['required', 'integer', 'min:1'],
             'reservation_time' => ['required', 'date_format:H:i:s'],
-            'venue_id' => ['required', 'integer'],
+            'timeslot_count' => ['sometimes', 'integer', 'min:1', 'max:10'], // Adjust max value as needed
+            'venue_id' => ['required', 'exists:venues,id'],
         ];
     }
 

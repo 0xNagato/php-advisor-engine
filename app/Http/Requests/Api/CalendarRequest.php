@@ -11,9 +11,10 @@ class CalendarRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'date' => ['required', 'date', 'after_or_equal:today'],
-            'guest_count' => ['required', 'integer', 'min:2'],
+            'date' => ['required', 'date'],
+            'guest_count' => ['required', 'integer', 'min:1'],
             'reservation_time' => ['required', 'date_format:H:i:s'],
+            'timeslot_count' => ['sometimes', 'integer', 'min:1', 'max:20'], // Add this line
         ];
     }
 
