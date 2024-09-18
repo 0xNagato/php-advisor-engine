@@ -34,9 +34,7 @@ class ReservationService
 
         $currentDate = Carbon::now($this->region->timezone);
 
-        if ($currentDate->isSameDay($requestedDate)) {
-            $this->reservationTime = $this->adjustTime($this->reservationTime, $this->region->timezone);
-        }
+        $this->reservationTime = $this->adjustTime($this->reservationTime, $this->region->timezone);
 
         return Venue::available()
             ->where('region', $this->region->id)
