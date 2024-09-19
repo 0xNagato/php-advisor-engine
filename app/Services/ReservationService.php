@@ -229,21 +229,19 @@ class ReservationService
 
     private function transformSchedules($schedules): array
     {
-        return $schedules->map(function ($schedule) {
-            return [
-                'id' => $schedule->id,
-                'schedule_template_id' => $schedule->schedule_template_id,
-                'is_bookable' => $schedule->is_available && $schedule->remaining_tables > 0,
-                'prime_time' => $schedule->prime_time,
-                'time' => [
-                    'value' => Carbon::parse($schedule->start_time)->format('g:i A'),
-                    'raw' => $schedule->start_time,
-                ],
-                'date' => Carbon::parse($schedule->booking_date)->format('Y-m-d'),
-                'fee' => '$'.number_format($schedule->effective_fee, 2),
-                'has_low_inventory' => $schedule->remaining_tables <= 5,
-            ];
-        })->values()->toArray();
+        return $schedules->map(fn ($schedule) => [
+            'id' => $schedule->id,
+            'schedule_template_id' => $schedule->schedule_template_id,
+            'is_bookable' => $schedule->is_available && $schedule->remaining_tables > 0,
+            'prime_time' => $schedule->prime_time,
+            'time' => [
+                'value' => Carbon::parse($schedule->start_time)->format('g:i A'),
+                'raw' => $schedule->start_time,
+            ],
+            'date' => Carbon::parse($schedule->booking_date)->format('Y-m-d'),
+            'fee' => '$'.number_format($schedule->effective_fee, 2),
+            'has_low_inventory' => $schedule->remaining_tables <= 5,
+        ])->values()->toArray();
     }
 
     private function calculateStartTime(string $adjustedTime): string
