@@ -32,11 +32,6 @@ class ReservationService
     public const int MINUTES_PAST = 90;
 
     /**
-     * The number of minutes to look into the future for available time slots.
-     */
-    public const int MINUTES_FUTURE = 120;
-
-    /**
      * The number of days in advance that reservations can be made.
      */
     public const int AVAILABILITY_DAYS = 3;
@@ -59,7 +54,6 @@ class ReservationService
     ) {
         // Set the user's region using the GetUserRegion action
         $this->region = GetUserRegion::run();
-        $this->timeSlotOffset = $timeSlotOffset;
     }
 
     /**
@@ -69,14 +63,16 @@ class ReservationService
      */
     public function getAvailableVenues(): Collection
     {
-        $requestedDate = Carbon::createFromFormat('Y-m-d', $this->date, $this->region->timezone);
         $currentDate = Carbon::now($this->region->timezone);
+
+        /** @var Carbon $requestedTime */
         $requestedTime = Carbon::createFromFormat('H:i:s', $this->reservationTime, $this->region->timezone);
 
         $adjustedTime = $this->adjustTime($requestedTime->format('H:i:s'), $this->region->timezone);
         $this->reservationTime = $adjustedTime;
 
-        $endTime = $this->calculateEndTime($adjustedTime, $this->region->timezone, $this->timeslotCount);
+        $startTime = $this->calculateStartTime($adjustedTime);
+        $endTime = $this->calculateEndTime($startTime, $this->region->timezone, $this->timeslotCount);
 
         $userTimezone = Auth::user()->timezone;
 
@@ -84,23 +80,26 @@ class ReservationService
             'requested_time' => $requestedTime->format('H:i:s'),
             'requested_time_user_timezone' => $requestedTime->setTimezone($userTimezone)->format('g:i A'),
             'adjusted_time' => $adjustedTime,
-            'adjusted_time_user_timezone' => Carbon::createFromFormat('H:i:s', $adjustedTime, $this->region->timezone)->setTimezone($userTimezone)->format('g:i A'),
+            'adjusted_time_user_timezone' => Carbon::createFromFormat('H:i:s', $adjustedTime, $this->region->timezone)?->setTimezone($userTimezone)->format('g:i A'),
+            'start_time' => $startTime,
+            'start_time_user_timezone' => Carbon::createFromFormat('H:i:s', $startTime, $this->region->timezone)?->setTimezone($userTimezone)->format('g:i A'),
             'end_time' => $endTime,
-            'end_time_user_timezone' => Carbon::createFromFormat('H:i:s', $endTime, $this->region->timezone)->setTimezone($userTimezone)->format('g:i A'),
+            'end_time_user_timezone' => Carbon::createFromFormat('H:i:s', $endTime, $this->region->timezone)?->setTimezone($userTimezone)->format('g:i A'),
             'requested_date' => $this->date,
             'current_date' => $currentDate->toDateString(),
             'timezone' => $userTimezone,
             'party_size' => $this->getGuestCount(),
             'region_id' => $this->region->id,
             'timeslot_count' => $this->timeslotCount,
+            'time_slot_offset' => $this->timeSlotOffset,
         ]);
 
         return Venue::available()
             ->where('region', $this->region->id)
-            ->with(['schedules' => function ($query) use ($endTime) {
+            ->with(['schedules' => function ($query) use ($startTime, $endTime) {
                 $query->where('booking_date', $this->date)
                     ->where('party_size', $this->getGuestCount())
-                    ->where('start_time', '>=', $this->reservationTime)
+                    ->where('start_time', '>=', $startTime)
                     ->where('start_time', '<=', $endTime);
             }])
             ->get();
@@ -113,10 +112,14 @@ class ReservationService
      * @param  string  $userTimezone  The user's timezone
      * @return string The adjusted (or original) reservation time
      */
-    public function adjustTime(string $reservation, $userTimezone): string
+    public function adjustTime(string $reservation, string $userTimezone): string
     {
+        /** @var Carbon $reservationTime */
         $reservationTime = Carbon::createFromFormat('H:i:s', $reservation, $this->region->timezone);
+
         $currentTime = Carbon::now($this->region->timezone);
+
+        /** @var Carbon $reservationDate */
         $reservationDate = Carbon::createFromFormat('Y-m-d', $this->date, $this->region->timezone);
 
         $adjustmentReason = 'No adjustment needed';
@@ -134,19 +137,17 @@ class ReservationService
                     ->format('H:i:s');
 
                 $timeAdjusted = Carbon::createFromFormat('H:i:s', $adjustedTime, $this->region->timezone)
-                    ->diffInMinutes($reservationTime, false);
+                    ?->diffInMinutes($reservationTime);
 
                 $adjustmentReason = 'Requested time is within '.self::MINUTES_PAST.' minutes of current time';
             }
         }
 
-        $userTimezone = Auth::user()->timezone;
-
         Log::info('Reservation time adjustment', [
             'requested_time' => $reservation,
-            'requested_time_user_timezone' => Carbon::createFromFormat('H:i:s', $reservation, $this->region->timezone)->setTimezone($userTimezone)->format('g:i A'),
+            'requested_time_user_timezone' => Carbon::createFromFormat('H:i:s', $reservation, $this->region->timezone)?->setTimezone($userTimezone)->format('g:i A'),
             'adjusted_time' => $adjustedTime,
-            'adjusted_time_user_timezone' => Carbon::createFromFormat('H:i:s', $adjustedTime, $this->region->timezone)->setTimezone($userTimezone)->format('g:i A'),
+            'adjusted_time_user_timezone' => Carbon::createFromFormat('H:i:s', $adjustedTime, $this->region->timezone)?->setTimezone($userTimezone)->format('g:i A'),
             'current_time' => $currentTime->format('H:i:s'),
             'current_time_user_timezone' => $currentTime->setTimezone($userTimezone)->format('g:i A'),
             'requested_date' => $this->date,
@@ -161,16 +162,16 @@ class ReservationService
     /**
      * Calculate the end time for the reservation window.
      *
-     * @param  string  $reservationTime  The start time of the reservation
-     * @param  string  $userTimezone  The user's timezone
+     * @param  string  $startTime  The start time of the reservation
+     * @param  string  $timezone  The user's timezone
      * @param  int  $timeslotCount  The number of timeslots to display
      * @return string The calculated end time
      */
-    public function calculateEndTime(string $reservationTime, string $userTimezone, int $timeslotCount): string
+    public function calculateEndTime(string $startTime, string $timezone, int $timeslotCount): string
     {
-        $endTime = Carbon::createFromFormat('H:i:s', $reservationTime, $userTimezone)
+        $endTime = Carbon::createFromFormat('H:i:s', $startTime, $timezone)
             ->addMinutes(30 * ($timeslotCount - 1));
-        $limitTime = Carbon::createFromTime(23, 59, 0, $userTimezone);
+        $limitTime = Carbon::createFromTime(23, 59, 0, $timezone);
 
         // Ensure the end time doesn't exceed midnight
         return $endTime->gt($limitTime) ? '23:59:59' : $endTime->format('H:i:s');
@@ -183,13 +184,16 @@ class ReservationService
      */
     public function getTimeslotHeaders(): array
     {
-        $headers = [];
-        $start = Carbon::createFromFormat('H:i:s', $this->reservationTime, $this->region->timezone);
-        $end = Carbon::createFromFormat('H:i:s', $this->calculateEndTime($this->reservationTime, $this->region->timezone, $this->timeslotCount), $this->region->timezone);
+        $requestedTime = Carbon::createFromFormat('H:i:s', $this->reservationTime, $this->region->timezone);
+        $adjustedTime = $this->adjustTime($this->reservationTime, $this->region->timezone);
 
-        // Generate headers in 30-minute intervals
-        for ($time = $start; $time->lte($end); $time->addMinutes(30)) {
-            $headers[$time->format('H:i:s')] = $time->format('g:i A');
+        // Apply the offset
+        $startTime = Carbon::createFromFormat('H:i:s', $adjustedTime, $this->region->timezone)
+            ->subMinutes(min($this->timeSlotOffset, $this->timeslotCount - 1) * 30);
+
+        $headers = [];
+        for ($i = 0; $i < $this->timeslotCount; $i++) {
+            $headers[] = $startTime->copy()->addMinutes($i * 30)->format('g:i A');
         }
 
         return $headers;
@@ -242,6 +246,17 @@ class ReservationService
         })->values()->toArray();
     }
 
+    private function calculateStartTime(string $adjustedTime): string
+    {
+        $carbon = Carbon::createFromFormat('H:i:s', $adjustedTime, $this->region->timezone);
+        $offsetMinutes = $this->timeSlotOffset * 30;
+
+        // Calculate how many slots we need to go back
+        $slotsBack = min($this->timeSlotOffset, $this->timeslotCount - 1);
+
+        return $carbon->subMinutes($slotsBack * 30)->format('H:i:s');
+    }
+
     /**
      * Get schedules for a specific venue and date.
      *
@@ -251,7 +266,7 @@ class ReservationService
     private function getSchedulesByDate(int $venueId): Collection
     {
         $reservationTime = $this->adjustTime($this->reservationTime, $this->region->timezone);
-        $startTime = $this->applyOffset($reservationTime);
+        $startTime = $this->calculateStartTime($reservationTime);
         $endTimeForQuery = $this->calculateEndTime($startTime, $this->region->timezone, $this->timeslotCount);
 
         return ScheduleWithBooking::query()
@@ -265,13 +280,6 @@ class ReservationService
             ->get();
     }
 
-    private function applyOffset(string $time): string
-    {
-        $carbon = Carbon::createFromFormat('H:i:s', $time, $this->region->timezone);
-
-        return $carbon->subMinutes($this->timeSlotOffset * 30)->format('H:i:s');
-    }
-
     /**
      * Get schedules for a specific venue for the upcoming week.
      *
@@ -281,7 +289,7 @@ class ReservationService
     private function getSchedulesThisWeek(int $venueId): Collection
     {
         $currentDate = Carbon::now($this->region->timezone);
-        $startTime = $this->applyOffset($this->reservationTime);
+        $startTime = $this->calculateStartTime($this->reservationTime);
 
         return ScheduleWithBooking::query()
             ->with('venue')
@@ -292,17 +300,5 @@ class ReservationService
             ->whereDate('booking_date', '<=', $currentDate->addDays(self::AVAILABILITY_DAYS))
             ->orderBy('booking_date')
             ->get();
-    }
-
-    /**
-     * Check if the requested date is today.
-     *
-     * @return bool True if the requested date is today, false otherwise
-     */
-    protected function isDateToday(): bool
-    {
-        $requestedDate = Carbon::createFromFormat('Y-m-d', $this->date, $this->region->timezone);
-
-        return $requestedDate->isToday();
     }
 }
