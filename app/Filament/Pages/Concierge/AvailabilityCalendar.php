@@ -95,6 +95,8 @@ class AvailabilityCalendar extends Page
                 date: $this->data['date'],
                 guestCount: $this->data['guest_count'],
                 reservationTime: $this->data['reservation_time'],
+                timeslotCount: $this->data['timeslot_count'] ?? 5,
+                timeSlotOffset: 2
             );
 
             $this->venues = $reservation->getAvailableVenues();
