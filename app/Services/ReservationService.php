@@ -48,15 +48,18 @@ class ReservationService
      * @param  int  $guestCount  The number of guests
      * @param  string  $reservationTime  The reservation time
      * @param  int  $timeslotCount  The number of timeslots to display
+     * @param  int  $timeSlotOffset  The offset for the time slot
      */
     public function __construct(
         public string|Carbon $date,
         public int $guestCount,
         public string $reservationTime,
-        public int $timeslotCount = 5
+        public int $timeslotCount = 5,
+        public int $timeSlotOffset = 0
     ) {
         // Set the user's region using the GetUserRegion action
         $this->region = GetUserRegion::run();
+        $this->timeSlotOffset = $timeSlotOffset;
     }
 
     /**
@@ -110,7 +113,7 @@ class ReservationService
      * @param  string  $userTimezone  The user's timezone
      * @return string The adjusted (or original) reservation time
      */
-    public function adjustTime($reservation, $userTimezone)
+    public function adjustTime(string $reservation, $userTimezone): string
     {
         $reservationTime = Carbon::createFromFormat('H:i:s', $reservation, $this->region->timezone);
         $currentTime = Carbon::now($this->region->timezone);
@@ -163,7 +166,7 @@ class ReservationService
      * @param  int  $timeslotCount  The number of timeslots to display
      * @return string The calculated end time
      */
-    public function calculateEndTime($reservationTime, $userTimezone, $timeslotCount): string
+    public function calculateEndTime(string $reservationTime, string $userTimezone, int $timeslotCount): string
     {
         $endTime = Carbon::createFromFormat('H:i:s', $reservationTime, $userTimezone)
             ->addMinutes(30 * ($timeslotCount - 1));
@@ -209,7 +212,7 @@ class ReservationService
      * @param  int  $venueId  The ID of the venue
      * @return array An array containing schedules by date and optionally schedules for this week
      */
-    public function getVenueSchedules($venueId): array
+    public function getVenueSchedules(int $venueId): array
     {
         $schedulesByDate = $this->getSchedulesByDate($venueId)->take($this->timeslotCount);
         $schedulesThisWeek = $this->getSchedulesThisWeek($venueId)->take($this->timeslotCount);
@@ -245,20 +248,28 @@ class ReservationService
      * @param  int  $venueId  The ID of the venue
      * @return Collection Collection of ScheduleWithBooking models
      */
-    private function getSchedulesByDate($venueId): Collection
+    private function getSchedulesByDate(int $venueId): Collection
     {
         $reservationTime = $this->adjustTime($this->reservationTime, $this->region->timezone);
-        $endTimeForQuery = $this->calculateEndTime($reservationTime, $this->region->timezone, $this->timeslotCount);
+        $startTime = $this->applyOffset($reservationTime);
+        $endTimeForQuery = $this->calculateEndTime($startTime, $this->region->timezone, $this->timeslotCount);
 
         return ScheduleWithBooking::query()
             ->with('venue')
             ->where('venue_id', $venueId)
             ->where('booking_date', $this->date)
             ->where('party_size', $this->getGuestCount())
-            ->where('start_time', '>=', $reservationTime)
+            ->where('start_time', '>=', $startTime)
             ->where('start_time', '<=', $endTimeForQuery)
             ->orderBy('start_time')
             ->get();
+    }
+
+    private function applyOffset(string $time): string
+    {
+        $carbon = Carbon::createFromFormat('H:i:s', $time, $this->region->timezone);
+
+        return $carbon->subMinutes($this->timeSlotOffset * 30)->format('H:i:s');
     }
 
     /**
@@ -267,14 +278,15 @@ class ReservationService
      * @param  int  $venueId  The ID of the venue
      * @return Collection Collection of ScheduleWithBooking models
      */
-    private function getSchedulesThisWeek($venueId): Collection
+    private function getSchedulesThisWeek(int $venueId): Collection
     {
         $currentDate = Carbon::now($this->region->timezone);
+        $startTime = $this->applyOffset($this->reservationTime);
 
         return ScheduleWithBooking::query()
             ->with('venue')
             ->where('venue_id', $venueId)
-            ->where('start_time', $this->reservationTime)
+            ->where('start_time', $startTime)
             ->where('party_size', $this->getGuestCount())
             ->whereDate('booking_date', '>', $currentDate)
             ->whereDate('booking_date', '<=', $currentDate->addDays(self::AVAILABILITY_DAYS))
