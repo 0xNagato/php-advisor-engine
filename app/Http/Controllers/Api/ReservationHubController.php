@@ -18,7 +18,7 @@ class ReservationHubController extends Controller
             guestCount: $validatedData['guest_count'],
             reservationTime: $validatedData['reservation_time'],
             timeslotCount: $validatedData['timeslot_count'] ?? 5,
-            timeSlotOffset: $validatedData['time_slot_offset'] ?? 0
+            timeSlotOffset: $validatedData['time_slot_offset'] ?? 1
         );
 
         return response()->json([
