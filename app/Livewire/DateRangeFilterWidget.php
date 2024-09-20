@@ -10,7 +10,7 @@ class DateRangeFilterWidget extends Widget
 {
     protected static string $view = 'livewire.date-range-filter-widget';
 
-    public string $range = 'last_30_days';
+    public string $range = 'past_30_days';
 
     public string $startDate = '';
 
@@ -21,7 +21,7 @@ class DateRangeFilterWidget extends Widget
         $this->range = $range;
 
         switch ($range) {
-            case 'last_30_days':
+            case 'past_30_days':
                 $this->startDate = now()->subDays(30)->toDateString();
                 $this->endDate = now()->toDateString();
                 break;
