@@ -5,6 +5,7 @@ namespace App\Filament\Pages;
 use App\Livewire\Admin\AdminRecentBookings;
 use App\Livewire\BookingsOverview;
 use App\Livewire\Concierge\ConciergeOverallLeaderboard;
+use App\Livewire\DateRangeFilterWidget;
 use App\Livewire\Partner\PartnerOverallLeaderboard;
 use App\Livewire\Venue\VenueOverallLeaderboard;
 use Carbon\Carbon;
@@ -17,6 +18,7 @@ use Filament\Pages\Dashboard;
 use Filament\Pages\Dashboard\Actions\FilterAction;
 use Filament\Pages\Dashboard\Concerns\HasFiltersAction;
 use Illuminate\Contracts\Support\Htmlable;
+use Livewire\Attributes\On;
 
 /**
  * @property Form $form
@@ -61,6 +63,10 @@ class AdminDashboard extends Dashboard
     protected function getHeaderWidgets(): array
     {
         return [
+            DateRangeFilterWidget::make([
+                'startDate' => $this->filters['startDate'],
+                'endDate' => $this->filters['endDate'],
+            ]),
             BookingsOverview::make([
                 'filters' => [
                     'startDate' => $this->filters['startDate'] ?? null,
@@ -117,5 +123,12 @@ class AdminDashboard extends Dashboard
                         ->native(false),
                 ]),
         ];
+    }
+
+    #[On('dateRangeUpdated')]
+    public function updateDateRange(string $startDate, string $endDate): void
+    {
+        $this->filters['startDate'] = $startDate;
+        $this->filters['endDate'] = $endDate;
     }
 }

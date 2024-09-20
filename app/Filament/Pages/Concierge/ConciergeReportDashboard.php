@@ -5,6 +5,7 @@ namespace App\Filament\Pages\Concierge;
 use App\Livewire\Concierge\ConciergeOverallLeaderboard;
 use App\Livewire\Concierge\ConciergeRecentBookings;
 use App\Livewire\ConciergeOverview;
+use App\Livewire\DateRangeFilterWidget;
 use Carbon\Carbon;
 use Filament\Forms\Components\Actions;
 use Filament\Forms\Components\Actions\Action;
@@ -14,6 +15,7 @@ use Filament\Pages\Dashboard;
 use Filament\Pages\Dashboard\Actions\FilterAction;
 use Filament\Pages\Dashboard\Concerns\HasFiltersAction;
 use Illuminate\Contracts\Support\Htmlable;
+use Livewire\Attributes\On;
 
 class ConciergeReportDashboard extends Dashboard
 {
@@ -62,6 +64,10 @@ class ConciergeReportDashboard extends Dashboard
     public function getHeaderWidgets(): array
     {
         return [
+            DateRangeFilterWidget::make([
+                'startDate' => $this->filters['startDate'],
+                'endDate' => $this->filters['endDate'],
+            ]),
             ConciergeOverview::make([
                 'concierge' => auth()->user()->concierge,
                 'startDate' => Carbon::parse($this->filters['startDate']),
@@ -109,5 +115,12 @@ class ConciergeReportDashboard extends Dashboard
                         ->native(false),
                 ]),
         ];
+    }
+
+    #[On('dateRangeUpdated')]
+    public function updateDateRange(string $startDate, string $endDate): void
+    {
+        $this->filters['startDate'] = $startDate;
+        $this->filters['endDate'] = $endDate;
     }
 }
