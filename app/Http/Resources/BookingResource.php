@@ -20,7 +20,7 @@ class BookingResource extends JsonResource
             'dayDisplay' => $this->additional['dayDisplay'],
             'status' => $this->booking->status,
             'venue' => $this->booking->venue->name,
-            'logo' => $this->booking->venue->logo_path,
+            'logo' => $this->booking->venue->logo,
             'total' => money($this->booking->total_with_tax_in_cents, $this->booking->currency)->format(),
             'subtotal' => money($this->booking->total_fee, $this->booking->currency)->format(),
             'tax_rate_term' => $this->booking->tax > 0 ? $this->additional['region']->tax_rate_term : null,
