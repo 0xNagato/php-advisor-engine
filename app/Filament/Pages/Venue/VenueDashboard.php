@@ -2,6 +2,7 @@
 
 namespace App\Filament\Pages\Venue;
 
+use App\Livewire\DateRangeFilterWidget;
 use App\Livewire\Venue\VenueRecentBookings;
 use App\Livewire\VenueOverview;
 use Carbon\Carbon;
@@ -13,6 +14,7 @@ use Filament\Pages\Dashboard;
 use Filament\Pages\Dashboard\Actions\FilterAction;
 use Filament\Pages\Dashboard\Concerns\HasFiltersAction;
 use Illuminate\Contracts\Support\Htmlable;
+use Livewire\Attributes\On;
 
 class VenueDashboard extends Dashboard
 {
@@ -86,6 +88,10 @@ class VenueDashboard extends Dashboard
     protected function getHeaderWidgets(): array
     {
         return [
+            DateRangeFilterWidget::make([
+                'startDate' => $this->filters['startDate'],
+                'endDate' => $this->filters['endDate'],
+            ]),
             VenueOverview::make([
                 'venue' => auth()->user()->venue,
                 'columnSpan' => 'full',
@@ -99,5 +105,12 @@ class VenueDashboard extends Dashboard
                 'endDate' => Carbon::parse($this->filters['endDate']),
             ]),
         ];
+    }
+
+    #[On('dateRangeUpdated')]
+    public function updateDateRange(string $startDate, string $endDate): void
+    {
+        $this->filters['startDate'] = $startDate;
+        $this->filters['endDate'] = $endDate;
     }
 }

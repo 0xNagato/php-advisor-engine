@@ -2,6 +2,7 @@
 
 namespace App\Filament\Pages\Partner;
 
+use App\Livewire\DateRangeFilterWidget;
 use App\Livewire\Partner\PartnerOverallLeaderboard;
 use App\Livewire\Partner\PartnerRecentBookings;
 use App\Livewire\Partner\TopConcierges;
@@ -16,6 +17,7 @@ use Filament\Pages\Dashboard;
 use Filament\Pages\Dashboard\Actions\FilterAction;
 use Filament\Pages\Dashboard\Concerns\HasFiltersAction;
 use Illuminate\Contracts\Support\Htmlable;
+use Livewire\Attributes\On;
 
 class PartnerReportDashboard extends Dashboard
 {
@@ -58,6 +60,10 @@ class PartnerReportDashboard extends Dashboard
     public function getHeaderWidgets(): array
     {
         return [
+            DateRangeFilterWidget::make([
+                'startDate' => $this->filters['startDate'],
+                'endDate' => $this->filters['endDate'],
+            ]),
             PartnerOverview::make([
                 'partner' => auth()->user()->partner,
                 'startDate' => Carbon::parse($this->filters['startDate']),
@@ -117,5 +123,12 @@ class PartnerReportDashboard extends Dashboard
                         ->native(false),
                 ]),
         ];
+    }
+
+    #[On('dateRangeUpdated')]
+    public function updateDateRange(string $startDate, string $endDate): void
+    {
+        $this->filters['startDate'] = $startDate;
+        $this->filters['endDate'] = $endDate;
     }
 }
