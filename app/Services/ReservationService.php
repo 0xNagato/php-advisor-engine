@@ -239,7 +239,7 @@ class ReservationService
                 'raw' => $schedule->start_time,
             ],
             'date' => Carbon::parse($schedule->booking_date)->format('Y-m-d'),
-            'fee' => '$'.number_format($schedule->effective_fee, 2),
+            'fee' => moneyWithoutCents($schedule->fee($this->guestCount), $this->region->currency),
             'has_low_inventory' => $schedule->remaining_tables <= 5,
         ])->values()->toArray();
     }
