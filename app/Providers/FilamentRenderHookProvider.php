@@ -57,14 +57,16 @@ class FilamentRenderHookProvider extends ServiceProvider
             static fn () => view('filament.admin.logo')
         );
 
-        FilamentView::registerRenderHook(
-            PanelsRenderHook::PAGE_END,
-            static fn () => new HtmlString('
+        if (! isPrimaApp()) {
+            FilamentView::registerRenderHook(
+                PanelsRenderHook::PAGE_END,
+                static fn () => new HtmlString('
                     <div class="mb-4 text-xs text-center">
                         &copy; 2024 PRIMA VIP. All rights reserved.
                     </div>
                 ')
-        );
+            );
+        }
 
         Filament::registerRenderHook(
             'panels::head.start',
