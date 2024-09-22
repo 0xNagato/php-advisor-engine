@@ -9,7 +9,6 @@ use App\Models\Venue;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Log;
 
 /**
  * Class ReservationService
@@ -76,23 +75,23 @@ class ReservationService
 
         $userTimezone = Auth::user()->timezone;
 
-        Log::info('Time range for available venues', [
-            'requested_time' => $requestedTime->format('H:i:s'),
-            'requested_time_user_timezone' => $requestedTime->setTimezone($userTimezone)->format('g:i A'),
-            'adjusted_time' => $adjustedTime,
-            'adjusted_time_user_timezone' => Carbon::createFromFormat('H:i:s', $adjustedTime, $this->region->timezone)?->setTimezone($userTimezone)->format('g:i A'),
-            'start_time' => $startTime,
-            'start_time_user_timezone' => Carbon::createFromFormat('H:i:s', $startTime, $this->region->timezone)?->setTimezone($userTimezone)->format('g:i A'),
-            'end_time' => $endTime,
-            'end_time_user_timezone' => Carbon::createFromFormat('H:i:s', $endTime, $this->region->timezone)?->setTimezone($userTimezone)->format('g:i A'),
-            'requested_date' => $this->date,
-            'current_date' => $currentDate->toDateString(),
-            'timezone' => $userTimezone,
-            'party_size' => $this->getGuestCount(),
-            'region_id' => $this->region->id,
-            'timeslot_count' => $this->timeslotCount,
-            'time_slot_offset' => $this->timeSlotOffset,
-        ]);
+        // Log::info('Time range for available venues', [
+        //     'requested_time' => $requestedTime->format('H:i:s'),
+        //     'requested_time_user_timezone' => $requestedTime->setTimezone($userTimezone)->format('g:i A'),
+        //     'adjusted_time' => $adjustedTime,
+        //     'adjusted_time_user_timezone' => Carbon::createFromFormat('H:i:s', $adjustedTime, $this->region->timezone)?->setTimezone($userTimezone)->format('g:i A'),
+        //     'start_time' => $startTime,
+        //     'start_time_user_timezone' => Carbon::createFromFormat('H:i:s', $startTime, $this->region->timezone)?->setTimezone($userTimezone)->format('g:i A'),
+        //     'end_time' => $endTime,
+        //     'end_time_user_timezone' => Carbon::createFromFormat('H:i:s', $endTime, $this->region->timezone)?->setTimezone($userTimezone)->format('g:i A'),
+        //     'requested_date' => $this->date,
+        //     'current_date' => $currentDate->toDateString(),
+        //     'timezone' => $userTimezone,
+        //     'party_size' => $this->getGuestCount(),
+        //     'region_id' => $this->region->id,
+        //     'timeslot_count' => $this->timeslotCount,
+        //     'time_slot_offset' => $this->timeSlotOffset,
+        // ]);
 
         return Venue::available()
             ->where('region', $this->region->id)
@@ -143,18 +142,18 @@ class ReservationService
             }
         }
 
-        Log::info('Reservation time adjustment', [
-            'requested_time' => $reservation,
-            'requested_time_user_timezone' => Carbon::createFromFormat('H:i:s', $reservation, $this->region->timezone)?->setTimezone($userTimezone)->format('g:i A'),
-            'adjusted_time' => $adjustedTime,
-            'adjusted_time_user_timezone' => Carbon::createFromFormat('H:i:s', $adjustedTime, $this->region->timezone)?->setTimezone($userTimezone)->format('g:i A'),
-            'current_time' => $currentTime->format('H:i:s'),
-            'current_time_user_timezone' => $currentTime->setTimezone($userTimezone)->format('g:i A'),
-            'requested_date' => $this->date,
-            'user_timezone' => $userTimezone,
-            'time_adjusted' => $timeAdjusted.' minutes',
-            'adjustment_reason' => $adjustmentReason,
-        ]);
+        // Log::info('Reservation time adjustment', [
+        //     'requested_time' => $reservation,
+        //     'requested_time_user_timezone' => Carbon::createFromFormat('H:i:s', $reservation, $this->region->timezone)?->setTimezone($userTimezone)->format('g:i A'),
+        //     'adjusted_time' => $adjustedTime,
+        //     'adjusted_time_user_timezone' => Carbon::createFromFormat('H:i:s', $adjustedTime, $this->region->timezone)?->setTimezone($userTimezone)->format('g:i A'),
+        //     'current_time' => $currentTime->format('H:i:s'),
+        //     'current_time_user_timezone' => $currentTime->setTimezone($userTimezone)->format('g:i A'),
+        //     'requested_date' => $this->date,
+        //     'user_timezone' => $userTimezone,
+        //     'time_adjusted' => $timeAdjusted.' minutes',
+        //     'adjustment_reason' => $adjustmentReason,
+        // ]);
 
         return $adjustedTime;
     }

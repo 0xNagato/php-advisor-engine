@@ -30,7 +30,7 @@ class InvoiceSmall extends Widget
 
         if (auth()->check()) {
             $timezone = auth()->user()->timezone;
-        } elseif (session()->has('timezone')) {
+        } elseif (session()?->has('timezone')) {
             $timezone = session('timezone');
         }
 

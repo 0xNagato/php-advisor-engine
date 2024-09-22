@@ -46,13 +46,13 @@ class DateRangeFilterWidget extends Widget
         $this->dispatch('dateRangeUpdated', startDate: $this->startDate, endDate: $this->endDate);
     }
 
-    #[Computed()]
+    #[Computed]
     public function getStartDate(): ?Carbon
     {
         return $this->startDate ? Carbon::parse($this->startDate) : null;
     }
 
-    #[Computed()]
+    #[Computed]
     public function getEndDate(): ?Carbon
     {
         return $this->endDate ? Carbon::parse($this->endDate) : null;
