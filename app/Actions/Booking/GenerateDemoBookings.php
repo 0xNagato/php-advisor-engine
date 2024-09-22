@@ -126,9 +126,7 @@ class GenerateDemoBookings
             // Find the region by id (assuming venue->region is the region's id)
             $region = $regions->firstWhere('id', $venue->region);
 
-            if (! $region) {
-                throw new Exception("No valid region found for venue {$venue->id}");
-            }
+            throw_unless($region, new Exception("No valid region found for venue {$venue->id}"));
 
             // Ensure guest count is between 2 and 8
             $guestCount = max(2, min(8, $schedule->party_size));
@@ -176,14 +174,12 @@ class GenerateDemoBookings
 
         $salesTaxService = new SalesTaxService;
         $regions = Region::all()->keyBy('id');
-        $venues = Venue::inRandomOrder()->take(5)->get();
+        $venues = Venue::query()->inRandomOrder()->take(5)->get();
 
         Log::info("Venues fetched: {$venues->count()}");
 
         $dateRange = collect(range(0, $endDate->diffInDays($startDate)))
-            ->map(function ($day) use ($startDate) {
-                return $startDate->copy()->addDays($day);
-            });
+            ->map(fn ($day) => $startDate->copy()->addDays($day));
 
         $createdBookings = 0;
 

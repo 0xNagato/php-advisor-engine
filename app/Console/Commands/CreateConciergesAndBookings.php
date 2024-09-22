@@ -8,6 +8,7 @@ use App\Models\Concierge;
 use App\Models\Partner;
 use App\Models\User;
 use Illuminate\Console\Command;
+use Illuminate\Contracts\Database\Query\Builder;
 use Illuminate\Support\Facades\Hash;
 
 class CreateConciergesAndBookings extends Command
@@ -33,24 +34,18 @@ class CreateConciergesAndBookings extends Command
         ];
 
         foreach ($concierges as $conciergeData) {
-            $user = User::firstOrCreate(
-                ['email' => $conciergeData['email']],
-                [
-                    'first_name' => $conciergeData['first_name'],
-                    'last_name' => 'Concierge',
-                    'password' => Hash::make('password'),
-                    'partner_referral_id' => Partner::query()->inRandomOrder()->first()->id,
-                    'email_verified_at' => now(),
-                ]
-            );
+            $user = User::query()->firstOrCreate(['email' => $conciergeData['email']], [
+                'first_name' => $conciergeData['first_name'],
+                'last_name' => 'Concierge',
+                'password' => Hash::make('password'),
+                'partner_referral_id' => Partner::query()->inRandomOrder()->first()->id,
+                'email_verified_at' => now(),
+            ]);
 
-            $concierge = Concierge::firstOrCreate(
-                ['user_id' => $user->id],
-                [
-                    'hotel_name' => "{$conciergeData['first_name']}'s Hotel",
-                    'secured_at' => now(),  // Add this line
-                ]
-            );
+            $concierge = Concierge::query()->firstOrCreate(['user_id' => $user->id], [
+                'hotel_name' => "{$conciergeData['first_name']}'s Hotel",
+                'secured_at' => now(),  // Add this line
+            ]);
 
             // Update secured_at if it's null (for existing concierges)
             if ($concierge->secured_at === null) {
@@ -65,7 +60,7 @@ class CreateConciergesAndBookings extends Command
 
     private function createBookings()
     {
-        $concierges = Concierge::with('user')->whereHas('user', function ($query) {
+        $concierges = Concierge::with('user')->whereHas('user', function (Builder $query) {
             $query->whereIn('email', [
                 'andrewconcierge@primavip.co',
                 'alexconcierge@primavip.co',
