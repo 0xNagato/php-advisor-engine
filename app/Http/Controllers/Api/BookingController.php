@@ -80,8 +80,11 @@ class BookingController extends Controller
     public function destroy($id): JsonResponse
     {
         $booking = Booking::query()->findOrFail($id);
-        $booking->update(['status' => 'cancelled']);
-        BookingCancelled::dispatch($booking);
+
+        if ($booking) {
+            $booking->update(['status' => 'cancelled']);
+            BookingCancelled::dispatch($booking);
+        }
 
         return response()->json([
             'message' => 'Booking Cancelled',
