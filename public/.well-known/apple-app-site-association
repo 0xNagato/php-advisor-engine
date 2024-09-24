@@ -4,10 +4,14 @@
     "details": [
       {
         "appID": "B9KA4PF37X.co.primavip.mobile",
-        "paths": [
-          "*"
-        ]
+        "paths": ["*"]
       }
+      // If you want to be more specific about which paths are handled by your app, you can adjust the "paths" array.
+    ]
+  },
+  "webcredentials": {
+    "apps": [
+      "B9KA4PF37X.co.primavip.mobile"
     ]
   }
 }
