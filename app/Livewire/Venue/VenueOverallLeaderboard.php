@@ -7,6 +7,7 @@ use App\Models\Venue;
 use App\Services\CurrencyConversionService;
 use Carbon\Carbon;
 use Filament\Widgets\Widget;
+use Illuminate\Contracts\Database\Query\Builder;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
@@ -56,7 +57,7 @@ class VenueOverallLeaderboard extends Widget
                     DB::raw('COUNT(DISTINCT earnings.booking_id) as booking_count'),
                 ])
                 ->join('venues', 'venues.user_id', '=', 'earnings.user_id')
-                ->join('bookings', function ($join) {
+                ->join('bookings', function (Builder $join) {
                     $join->on('earnings.booking_id', '=', 'bookings.id')
                         ->whereNotNull('bookings.confirmed_at')
                         ->whereBetween('bookings.booking_at', [$this->startDate, $this->endDate]);

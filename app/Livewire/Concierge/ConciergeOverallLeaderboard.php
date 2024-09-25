@@ -7,6 +7,7 @@ use App\Models\Earning;
 use App\Services\CurrencyConversionService;
 use Carbon\Carbon;
 use Filament\Widgets\Widget;
+use Illuminate\Contracts\Database\Query\Builder;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
@@ -47,7 +48,7 @@ class ConciergeOverallLeaderboard extends Widget
                 )
                 ->join('concierges', 'concierges.user_id', '=', 'earnings.user_id')
                 ->join('users', 'users.id', '=', 'earnings.user_id')
-                ->join('bookings', function ($join) {
+                ->join('bookings', function (Builder $join) {
                     $join->on('earnings.booking_id', '=', 'bookings.id')
                         ->whereNotNull('bookings.confirmed_at')
                         ->whereBetween('bookings.booking_at', [$this->startDate, $this->endDate]);

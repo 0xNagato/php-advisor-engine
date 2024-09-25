@@ -25,7 +25,7 @@ return new class extends Migration
     {
         $indexExists = DB::select("SHOW INDEX FROM {$table} WHERE Key_name = '{$indexName}'");
 
-        if (empty($indexExists)) {
+        if (blank($indexExists)) {
             Schema::table($table, function (Blueprint $table) use ($columns, $indexName) {
                 $table->index($columns, $indexName);
             });
@@ -36,7 +36,7 @@ return new class extends Migration
     {
         $indexExists = DB::select("SHOW INDEX FROM {$table} WHERE Key_name = '{$indexName}'");
 
-        if (! empty($indexExists)) {
+        if (filled($indexExists)) {
             Schema::table($table, function (Blueprint $table) use ($indexName) {
                 $table->dropIndex($indexName);
             });
