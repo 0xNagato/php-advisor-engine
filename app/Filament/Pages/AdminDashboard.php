@@ -29,7 +29,7 @@ class AdminDashboard extends Dashboard
 
     protected static string $routePath = 'admin';
 
-    protected static string $view = 'filament.pages.admin-dashboard';
+    protected static string $view = 'filament.pages.admin.admin-dashboard';
 
     public bool $isLoading = false;
 
