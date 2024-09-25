@@ -4,20 +4,20 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "fbaeb25c01a9fb950d9c30fa655f8edc",
+    "content-hash": "92d6f623c27aac0d54270c8403f4c4f3",
     "packages": [
         {
             "name": "akaunting/laravel-money",
-            "version": "5.2.1",
+            "version": "5.2.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/akaunting/laravel-money.git",
-                "reference": "6cc8abb912286c671de5993ffbcd3225588aeace"
+                "reference": "d99a9e8e576cac40668d0a5afaf7ea153590aff9"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/akaunting/laravel-money/zipball/6cc8abb912286c671de5993ffbcd3225588aeace",
-                "reference": "6cc8abb912286c671de5993ffbcd3225588aeace",
+                "url": "https://api.github.com/repos/akaunting/laravel-money/zipball/d99a9e8e576cac40668d0a5afaf7ea153590aff9",
+                "reference": "d99a9e8e576cac40668d0a5afaf7ea153590aff9",
                 "shasum": ""
             },
             "require": {
@@ -71,9 +71,9 @@
             ],
             "support": {
                 "issues": "https://github.com/akaunting/laravel-money/issues",
-                "source": "https://github.com/akaunting/laravel-money/tree/5.2.1"
+                "source": "https://github.com/akaunting/laravel-money/tree/5.2.2"
             },
-            "time": "2024-07-23T15:01:26+00:00"
+            "time": "2024-09-25T10:06:11+00:00"
         },
         {
             "name": "amphp/amp",
@@ -2880,7 +2880,7 @@
         },
         {
             "name": "filament/actions",
-            "version": "v3.2.113",
+            "version": "v3.2.114",
             "source": {
                 "type": "git",
                 "url": "https://github.com/filamentphp/actions.git",
@@ -2933,16 +2933,16 @@
         },
         {
             "name": "filament/filament",
-            "version": "v3.2.113",
+            "version": "v3.2.114",
             "source": {
                 "type": "git",
                 "url": "https://github.com/filamentphp/panels.git",
-                "reference": "cea015f11b3d1b41bbf826e6f724e444e5fda3cb"
+                "reference": "8d28c9756a341349a5d7a0694a66be7cc2c986c3"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/filamentphp/panels/zipball/cea015f11b3d1b41bbf826e6f724e444e5fda3cb",
-                "reference": "cea015f11b3d1b41bbf826e6f724e444e5fda3cb",
+                "url": "https://api.github.com/repos/filamentphp/panels/zipball/8d28c9756a341349a5d7a0694a66be7cc2c986c3",
+                "reference": "8d28c9756a341349a5d7a0694a66be7cc2c986c3",
                 "shasum": ""
             },
             "require": {
@@ -2994,11 +2994,11 @@
                 "issues": "https://github.com/filamentphp/filament/issues",
                 "source": "https://github.com/filamentphp/filament"
             },
-            "time": "2024-09-17T08:30:28+00:00"
+            "time": "2024-09-23T14:09:56+00:00"
         },
         {
             "name": "filament/forms",
-            "version": "v3.2.113",
+            "version": "v3.2.114",
             "source": {
                 "type": "git",
                 "url": "https://github.com/filamentphp/forms.git",
@@ -3054,7 +3054,7 @@
         },
         {
             "name": "filament/infolists",
-            "version": "v3.2.113",
+            "version": "v3.2.114",
             "source": {
                 "type": "git",
                 "url": "https://github.com/filamentphp/infolists.git",
@@ -3105,7 +3105,7 @@
         },
         {
             "name": "filament/notifications",
-            "version": "v3.2.113",
+            "version": "v3.2.114",
             "source": {
                 "type": "git",
                 "url": "https://github.com/filamentphp/notifications.git",
@@ -3157,16 +3157,16 @@
         },
         {
             "name": "filament/support",
-            "version": "v3.2.113",
+            "version": "v3.2.114",
             "source": {
                 "type": "git",
                 "url": "https://github.com/filamentphp/support.git",
-                "reference": "d2825e1c116e50d440bb3e7ac56ebcb8d1ddf184"
+                "reference": "2183eb1149ef9ab742256155adf2afedda322e6d"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/filamentphp/support/zipball/d2825e1c116e50d440bb3e7ac56ebcb8d1ddf184",
-                "reference": "d2825e1c116e50d440bb3e7ac56ebcb8d1ddf184",
+                "url": "https://api.github.com/repos/filamentphp/support/zipball/2183eb1149ef9ab742256155adf2afedda322e6d",
+                "reference": "2183eb1149ef9ab742256155adf2afedda322e6d",
                 "shasum": ""
             },
             "require": {
@@ -3177,7 +3177,7 @@
                 "illuminate/support": "^10.45|^11.0",
                 "illuminate/view": "^10.45|^11.0",
                 "kirschbaum-development/eloquent-power-joins": "^3.0",
-                "livewire/livewire": "^3.4.10",
+                "livewire/livewire": "^3.4.10 <= 3.5.6",
                 "php": "^8.1",
                 "ryangjchandler/blade-capture-directive": "^0.2|^0.3|^1.0",
                 "spatie/color": "^1.5",
@@ -3212,11 +3212,11 @@
                 "issues": "https://github.com/filamentphp/filament/issues",
                 "source": "https://github.com/filamentphp/filament"
             },
-            "time": "2024-09-17T08:30:37+00:00"
+            "time": "2024-09-23T14:10:13+00:00"
         },
         {
             "name": "filament/tables",
-            "version": "v3.2.113",
+            "version": "v3.2.114",
             "source": {
                 "type": "git",
                 "url": "https://github.com/filamentphp/tables.git",
@@ -3268,16 +3268,16 @@
         },
         {
             "name": "filament/widgets",
-            "version": "v3.2.113",
+            "version": "v3.2.114",
             "source": {
                 "type": "git",
                 "url": "https://github.com/filamentphp/widgets.git",
-                "reference": "d168a97f0861b7964437652e64fa5af83212d1f4"
+                "reference": "06b70c4f260c91da03bdc51d1275543776ef7385"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/filamentphp/widgets/zipball/d168a97f0861b7964437652e64fa5af83212d1f4",
-                "reference": "d168a97f0861b7964437652e64fa5af83212d1f4",
+                "url": "https://api.github.com/repos/filamentphp/widgets/zipball/06b70c4f260c91da03bdc51d1275543776ef7385",
+                "reference": "06b70c4f260c91da03bdc51d1275543776ef7385",
                 "shasum": ""
             },
             "require": {
@@ -3308,7 +3308,7 @@
                 "issues": "https://github.com/filamentphp/filament/issues",
                 "source": "https://github.com/filamentphp/filament"
             },
-            "time": "2024-09-17T08:30:51+00:00"
+            "time": "2024-09-23T14:10:16+00:00"
         },
         {
             "name": "fruitcake/php-cors",
@@ -6481,16 +6481,16 @@
         },
         {
             "name": "livewire/livewire",
-            "version": "v3.5.8",
+            "version": "v3.5.6",
             "source": {
                 "type": "git",
                 "url": "https://github.com/livewire/livewire.git",
-                "reference": "ce1ce71b39a3492b98f7d2f2a4583f1b163fe6ae"
+                "reference": "597a2808d8d3001cc3ed5ce89a6ebab00f83b80f"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/livewire/livewire/zipball/ce1ce71b39a3492b98f7d2f2a4583f1b163fe6ae",
-                "reference": "ce1ce71b39a3492b98f7d2f2a4583f1b163fe6ae",
+                "url": "https://api.github.com/repos/livewire/livewire/zipball/597a2808d8d3001cc3ed5ce89a6ebab00f83b80f",
+                "reference": "597a2808d8d3001cc3ed5ce89a6ebab00f83b80f",
                 "shasum": ""
             },
             "require": {
@@ -6545,7 +6545,7 @@
             "description": "A front-end framework for Laravel.",
             "support": {
                 "issues": "https://github.com/livewire/livewire/issues",
-                "source": "https://github.com/livewire/livewire/tree/v3.5.8"
+                "source": "https://github.com/livewire/livewire/tree/v3.5.6"
             },
             "funding": [
                 {
@@ -6553,7 +6553,7 @@
                     "type": "github"
                 }
             ],
-            "time": "2024-09-20T19:41:19+00:00"
+            "time": "2024-08-19T11:52:18+00:00"
         },
         {
             "name": "livewire/volt",
@@ -15437,26 +15437,26 @@
         },
         {
             "name": "filp/whoops",
-            "version": "2.15.4",
+            "version": "2.16.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/filp/whoops.git",
-                "reference": "a139776fa3f5985a50b509f2a02ff0f709d2a546"
+                "reference": "befcdc0e5dce67252aa6322d82424be928214fa2"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/filp/whoops/zipball/a139776fa3f5985a50b509f2a02ff0f709d2a546",
-                "reference": "a139776fa3f5985a50b509f2a02ff0f709d2a546",
+                "url": "https://api.github.com/repos/filp/whoops/zipball/befcdc0e5dce67252aa6322d82424be928214fa2",
+                "reference": "befcdc0e5dce67252aa6322d82424be928214fa2",
                 "shasum": ""
             },
             "require": {
-                "php": "^5.5.9 || ^7.0 || ^8.0",
+                "php": "^7.1 || ^8.0",
                 "psr/log": "^1.0.1 || ^2.0 || ^3.0"
             },
             "require-dev": {
-                "mockery/mockery": "^0.9 || ^1.0",
-                "phpunit/phpunit": "^4.8.36 || ^5.7.27 || ^6.5.14 || ^7.5.20 || ^8.5.8 || ^9.3.3",
-                "symfony/var-dumper": "^2.6 || ^3.0 || ^4.0 || ^5.0"
+                "mockery/mockery": "^1.0",
+                "phpunit/phpunit": "^7.5.20 || ^8.5.8 || ^9.3.3",
+                "symfony/var-dumper": "^4.0 || ^5.0"
             },
             "suggest": {
                 "symfony/var-dumper": "Pretty print complex values better with var-dumper available",
@@ -15496,7 +15496,7 @@
             ],
             "support": {
                 "issues": "https://github.com/filp/whoops/issues",
-                "source": "https://github.com/filp/whoops/tree/2.15.4"
+                "source": "https://github.com/filp/whoops/tree/2.16.0"
             },
             "funding": [
                 {
@@ -15504,7 +15504,7 @@
                     "type": "github"
                 }
             ],
-            "time": "2023-11-03T12:00:00+00:00"
+            "time": "2024-09-25T12:00:00+00:00"
         },
         {
             "name": "flavorly/laravel-actions-ide-helper",
