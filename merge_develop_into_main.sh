@@ -6,6 +6,12 @@ git checkout develop
 # Pull the latest changes
 git pull origin develop
 
+# Merge main into develop to bring in any changes
+git merge main
+
+# Push the changes to develop
+git push origin develop
+
 # Switch to the main branch
 git checkout main
 
