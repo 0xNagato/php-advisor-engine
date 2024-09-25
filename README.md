@@ -11,24 +11,27 @@ PRIMA (Platform for Restaurant Intermediation and Management Application) is an 
 ## Table of Contents
 
 - [PRIMA Platform](#prima-platform)
-    - [Overview](#overview)
-    - [Table of Contents](#table-of-contents)
-    - [Problem Statement](#problem-statement)
-    - [Our Solution](#our-solution)
-    - [Key Features](#key-features)
-    - [How It Works](#how-it-works)
-    - [Benefits](#benefits)
-    - [Technology Stack](#technology-stack)
-    - [Architecture](#architecture)
-        - [Action Pattern and Code Reuse](#action-pattern-and-code-reuse)
-    - [Core Components](#core-components)
-    - [Venue Management](#venue-management)
-        - [Key Features of Venue Management](#key-features-of-venue-management)
-    - [Referral System](#referral-system)
-        - [Partner Referrals](#partner-referrals)
-        - [Concierge Referrals](#concierge-referrals)
-        - [Referral Calculation Process](#referral-calculation-process)
-    - [Getting Started](#getting-started)
+  - [Overview](#overview)
+  - [Table of Contents](#table-of-contents)
+  - [Problem Statement](#problem-statement)
+  - [Our Solution](#our-solution)
+  - [Key Features](#key-features)
+  - [How It Works](#how-it-works)
+  - [Benefits](#benefits)
+  - [Technology Stack](#technology-stack)
+  - [Architecture](#architecture)
+    - [Action Pattern and Code Reuse](#action-pattern-and-code-reuse)
+  - [Core Components](#core-components)
+  - [Venue Management](#venue-management)
+    - [Key Features of Venue Management](#key-features-of-venue-management)
+  - [Referral System](#referral-system)
+    - [Partner Referrals](#partner-referrals)
+    - [Concierge Referrals](#concierge-referrals)
+    - [Referral Calculation Process](#referral-calculation-process)
+  - [Getting Started](#getting-started)
+    - [Prerequisites](#prerequisites)
+    - [Installation Steps](#installation-steps)
+    - [Additional Setup](#additional-setup)
 
 ## Problem Statement
 
@@ -74,17 +77,17 @@ PRIMA revolutionizes restaurant reservation management by:
 ## Benefits
 
 - **For Restaurants**:
-    - Maximize revenue from prime-time slots
-    - Increase bookings during non-prime hours
-    - Reduce no-shows and last-minute cancellations
+  - Maximize revenue from prime-time slots
+  - Increase bookings during non-prime hours
+  - Reduce no-shows and last-minute cancellations
 
 - **For Concierges**:
-    - Earn extra income by facilitating reservations
-    - Access to exclusive prime-time slots at popular restaurants
+  - Earn extra income by facilitating reservations
+  - Access to exclusive prime-time slots at popular restaurants
 
 - **For Diners**:
-    - Enjoy favorite restaurants at preferred times
-    - Reliable reservation system through trusted concierges
+  - Enjoy favorite restaurants at preferred times
+  - Reliable reservation system through trusted concierges
 
 ## Technology Stack
 
@@ -221,6 +224,7 @@ Ensure you have the following installed on your development machine:
 ### Installation Steps
 
 1. **Clone the Repository**:
+
     ```bash
     git clone https://github.com/andruu/concierge
     cd concierge
@@ -228,60 +232,78 @@ Ensure you have the following installed on your development machine:
 
 2. **Install PHP Dependencies**:
    Use Composer to install the necessary PHP packages:
+
     ```bash
     composer install
     ```
 
 3. **Install Front-End Dependencies**:
    Install the required Node.js packages using npm:
+
     ```bash
     npm install
     ```
 
 4. **Set Up Environment Variables**:
    Create a `.env` file by copying the example file:
+
     ```bash
     cp .env.example .env
     ```
+
    Then, update the `.env` file with your local environment settings, such as database credentials.
 
 5. **Generate Application Key**:
    Laravel requires an application key, which can be generated with:
+
     ```bash
     php artisan key:generate
     ```
 
 6. **Run Database Migrations**:
    Set up your database structure by running the migrations:
+
     ```bash
     php artisan migrate
     ```
 
 7. **Seed the Database** *(optional but recommended)*:
    Seed your database with initial data:
+
     ```bash
     php artisan db:seed
     ```
 
-8. **Compile Front-End Assets**:
+8. **Cache Blade Icons**:
+   Cache the Blade icons for faster loading:
+
+    ```bash
+    php artisan icons:cache
+    ```
+
+9. **Compile Front-End Assets**:
    Compile your front-end assets using Laravel Mix:
+
     ```bash
     npm run dev
     ```
 
-9. **Serve the Application**:
+10. **Serve the Application**:
    Start the Laravel development server:
+
     ```bash
     php artisan serve
     ```
+
    The application should now be accessible at `http://localhost:8000`.
 
-10. **Access the Admin Panel**:
+11. **Access the Admin Panel**:
     Once the application is running, you can access the admin panel by navigating to `http://localhost:8000/admin`.
 
 ### Additional Setup
 
 - **Horizon**: If you are using Laravel Horizon for managing queues, ensure it's set up correctly:
+
     ```bash
     php artisan horizon:watch
     ```

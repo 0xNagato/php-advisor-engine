@@ -29,6 +29,10 @@ class AdminDashboard extends Dashboard
 
     protected static string $routePath = 'admin';
 
+    protected static string $view = 'filament.pages.admin-dashboard';
+
+    public bool $isLoading = false;
+
     public static function canAccess(): bool
     {
         return auth()->user()?->hasRole('super_admin');
@@ -48,7 +52,7 @@ class AdminDashboard extends Dashboard
     public function getSubheading(): string|Htmlable|null
     {
         if (! isset($this->filters['startDate'], $this->filters['endDate'])) {
-            return null; // or return a default value like 'N/A' or an empty string
+            return null;
         }
 
         $startDate = Carbon::parse($this->filters['startDate']);
@@ -128,7 +132,9 @@ class AdminDashboard extends Dashboard
     #[On('dateRangeUpdated')]
     public function updateDateRange(string $startDate, string $endDate): void
     {
+        $this->isLoading = true;
         $this->filters['startDate'] = $startDate;
         $this->filters['endDate'] = $endDate;
+        $this->isLoading = false;
     }
 }
