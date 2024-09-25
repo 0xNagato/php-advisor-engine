@@ -11,7 +11,7 @@ class InvoiceSmall extends Widget
 {
     protected static string $view = 'livewire.invoice-small';
 
-    protected static bool $isLazy = false;
+    protected static ?string $pollingInterval = null;
 
     public Booking $booking;
 

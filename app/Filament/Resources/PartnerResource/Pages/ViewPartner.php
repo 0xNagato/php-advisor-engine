@@ -32,6 +32,8 @@ class ViewPartner extends ViewRecord
 
     protected static string $resource = PartnerResource::class;
 
+    protected static string $view = 'filament.pages.partner.partner-dashboard';
+
     public function mount(int|string $record): void
     {
         $this->filters['startDate'] ??= now()->subDays(30)->startOfDay()->format('Y-m-d');

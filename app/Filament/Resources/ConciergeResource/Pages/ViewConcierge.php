@@ -28,6 +28,8 @@ class ViewConcierge extends ViewRecord
 {
     use HasFiltersAction;
 
+    protected static string $view = 'filament.pages.concierge.concierge-dashboard';
+
     protected static string $resource = ConciergeResource::class;
 
     public function mount(int|string $record): void

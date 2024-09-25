@@ -15,6 +15,8 @@ class PartnerOverallLeaderboard extends Widget
 {
     protected static string $view = 'livewire.partner-overall-leaderboard';
 
+    protected static ?string $pollingInterval = null;
+
     #[Reactive]
     public ?Carbon $startDate = null;
 

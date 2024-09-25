@@ -18,6 +18,8 @@ class ManageContacts extends Widget implements HasForms
 {
     use InteractsWithForms;
 
+    protected static ?string $pollingInterval = null;
+
     protected static string $view = 'livewire.venue.manage-contacts';
 
     public Venue $venue;

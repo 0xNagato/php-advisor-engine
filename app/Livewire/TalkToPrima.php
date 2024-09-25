@@ -19,6 +19,8 @@ class TalkToPrima extends Widget implements HasForms
 {
     use InteractsWithForms;
 
+    protected static ?string $pollingInterval = null;
+
     protected static string $view = 'livewire.talk-to-prima';
 
     public ?array $data = null;

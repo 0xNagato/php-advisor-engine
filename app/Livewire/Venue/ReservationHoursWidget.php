@@ -17,7 +17,7 @@ class ReservationHoursWidget extends Widget
 
     protected static string $view = 'livewire.venue.open-hours-widget';
 
-    protected static bool $isLazy = false;
+    protected static ?string $pollingInterval = null;
 
     public array $startTimes = [];
 

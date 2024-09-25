@@ -26,6 +26,8 @@ class SMSBookingForm extends Widget implements HasForms
 
     protected static string $view = 'livewire.booking.s-m-s-booking-form';
 
+    protected static ?string $pollingInterval = null;
+
     public ?array $data = [];
 
     public bool $SMSSent = false;

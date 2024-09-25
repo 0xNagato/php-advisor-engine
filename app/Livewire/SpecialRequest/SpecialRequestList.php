@@ -11,6 +11,8 @@ class SpecialRequestList extends Widget
 {
     protected static string $view = 'livewire.special-request.special-request-list';
 
+    protected static ?string $pollingInterval = null;
+
     /**
      * @var Collection<int, SpecialRequest>
      */

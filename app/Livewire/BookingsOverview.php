@@ -15,6 +15,8 @@ class BookingsOverview extends BaseWidget
 {
     use InteractsWithPageFilters;
 
+    protected static ?string $pollingInterval = null;
+
     protected function getStats(): array
     {
         $startDate = $this->filters['startDate'] ?? now()->subDays(30)->startOfDay();

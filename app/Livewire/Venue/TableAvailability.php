@@ -10,7 +10,7 @@ class TableAvailability extends Widget
 {
     protected static string $view = 'livewire.venue.table-availability';
 
-    protected static bool $isLazy = false;
+    protected static ?string $pollingInterval = null;
 
     public $schedules = [];
 

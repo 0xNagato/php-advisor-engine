@@ -15,6 +15,8 @@ class VenueOverallLeaderboard extends Widget
 {
     protected static string $view = 'livewire.venue.venue-overall-leaderboard';
 
+    protected static ?string $pollingInterval = null;
+
     #[Reactive]
     public ?Carbon $startDate = null;
 
@@ -27,7 +29,7 @@ class VenueOverallLeaderboard extends Widget
 
     public ?Venue $venue = null;
 
-    public function mount(?Venue $venue = null)
+    public function mount(?Venue $venue = null): void
     {
         $this->venue = $venue;
         if ($venue) {
@@ -68,7 +70,7 @@ class VenueOverallLeaderboard extends Widget
             ->limit($this->limit)
             ->get();
 
-        $venueTotals = $earnings->map(function ($earning, $index) use ($currencyService) {
+        return $earnings->map(function ($earning, $index) use ($currencyService) {
             $totalUSD = $currencyService->convertToUSD([$earning->currency => $earning->total_earned]);
 
             return [
@@ -84,8 +86,6 @@ class VenueOverallLeaderboard extends Widget
                 'region' => $earning->region,
             ];
         });
-
-        return $venueTotals;
     }
 
     public function getRegions(): Collection
@@ -98,7 +98,7 @@ class VenueOverallLeaderboard extends Widget
             ]);
     }
 
-    public function updatedSelectedRegion()
+    public function updatedSelectedRegion(): void
     {
         $this->dispatch('leaderboardUpdated');
     }

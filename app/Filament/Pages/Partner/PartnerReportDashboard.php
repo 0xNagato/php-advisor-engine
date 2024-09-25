@@ -25,6 +25,8 @@ class PartnerReportDashboard extends Dashboard
 
     protected static ?string $title = 'My Earnings';
 
+    protected static string $view = 'filament.pages.partner.partner-dashboard';
+
     protected static string $routePath = 'partner/report';
 
     protected static ?string $navigationIcon = 'heroicon-o-currency-dollar';

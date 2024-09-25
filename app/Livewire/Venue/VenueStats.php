@@ -12,7 +12,7 @@ class VenueStats extends Widget
 {
     protected static string $view = 'livewire.venue.venue-stats';
 
-    protected static bool $isLazy = false;
+    protected static ?string $pollingInterval = null;
 
     public ?Venue $venue = null;
 

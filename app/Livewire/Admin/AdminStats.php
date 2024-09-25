@@ -12,7 +12,7 @@ class AdminStats extends Widget
 
     protected static string $view = 'livewire.admin.admin-stats';
 
-    protected static bool $isLazy = false;
+    protected static ?string $pollingInterval = null;
 
     public array $stats;
 

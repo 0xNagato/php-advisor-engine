@@ -23,6 +23,8 @@ class ConciergeUserMenu extends Widget implements HasForms
 
     protected static string $view = 'livewire.concierge-user-menu';
 
+    protected static ?string $pollingInterval = null;
+
     public ?array $data = [];
 
     public function mount(): void

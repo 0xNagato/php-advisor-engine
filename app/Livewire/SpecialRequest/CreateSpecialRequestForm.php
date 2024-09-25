@@ -33,6 +33,8 @@ class CreateSpecialRequestForm extends Widget implements HasForms
     use InteractsWithForms;
     use ManagesBookingForms;
 
+    protected static ?string $pollingInterval = null;
+
     protected static string $view = 'livewire.special-request.create-special-request-form';
 
     public string $currency;

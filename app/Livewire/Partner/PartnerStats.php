@@ -10,7 +10,7 @@ class PartnerStats extends Widget
 {
     protected static string $view = 'livewire.partner.partner-stats';
 
-    protected static bool $isLazy = false;
+    protected static ?string $pollingInterval = null;
 
     public ?Partner $partner = null;
 

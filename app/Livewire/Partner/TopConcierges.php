@@ -16,6 +16,8 @@ class TopConcierges extends Widget
 {
     protected static string $view = 'livewire.partner.top-concierges';
 
+    protected static ?string $pollingInterval = null;
+
     #[Reactive]
     public ?Carbon $startDate = null;
 

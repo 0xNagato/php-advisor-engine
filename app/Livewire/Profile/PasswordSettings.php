@@ -17,7 +17,7 @@ class PasswordSettings extends Widget implements HasForms
 
     protected static string $view = 'filament.widgets.password-settings';
 
-    protected static bool $isLazy = false;
+    protected static ?string $pollingInterval = null;
 
     public ?array $data = [];
 

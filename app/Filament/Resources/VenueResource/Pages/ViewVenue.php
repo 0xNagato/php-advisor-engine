@@ -30,6 +30,8 @@ class ViewVenue extends ViewRecord
 
     protected static string $resource = VenueResource::class;
 
+    protected static string $view = 'filament.pages.venue.venue-dashboard';
+
     public function mount(int|string $record): void
     {
         $this->filters['startDate'] ??= now()->subDays(30)->format('Y-m-d');

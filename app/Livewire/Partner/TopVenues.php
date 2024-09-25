@@ -16,6 +16,8 @@ class TopVenues extends Widget
 {
     protected static string $view = 'livewire.partner.top-venues';
 
+    protected static ?string $pollingInterval = null;
+
     #[Reactive]
     public ?Carbon $startDate = null;
 

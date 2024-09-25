@@ -14,7 +14,7 @@ class ConciergeReferralStats extends Widget
 
     protected static string $view = 'livewire.concierge-referral-stats';
 
-    protected static bool $isLazy = false;
+    protected static ?string $pollingInterval = null;
 
     public Concierge $concierge;
 

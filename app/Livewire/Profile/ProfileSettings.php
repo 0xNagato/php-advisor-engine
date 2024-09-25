@@ -27,7 +27,7 @@ class ProfileSettings extends Widget implements HasForms
 
     protected static string $view = 'filament.widgets.profile-settings';
 
-    protected static bool $isLazy = false;
+    protected static ?string $pollingInterval = null;
 
     public ?array $data = [];
 

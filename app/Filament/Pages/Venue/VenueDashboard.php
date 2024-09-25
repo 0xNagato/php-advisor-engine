@@ -22,6 +22,8 @@ class VenueDashboard extends Dashboard
 
     protected static ?string $navigationIcon = 'heroicon-o-currency-dollar';
 
+    protected static string $view = 'filament.pages.venue.venue-dashboard';
+
     protected static ?string $title = 'Earnings Snapshot';
 
     protected static string $routePath = 'venue';
