@@ -24,13 +24,13 @@ observers:
 logs:
   info: true
   warning: true
-  emergency: false
+  emergency: true
   alert: true
   debug: true
   error: true
   critical: true
   notice: true
   vendor: false
-  deprecated_message: true
+  deprecated_message: false
 slow_queries:
   threshold_in_ms: 500

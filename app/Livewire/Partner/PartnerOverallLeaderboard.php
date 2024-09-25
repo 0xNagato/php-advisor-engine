@@ -8,6 +8,7 @@ use App\Services\CurrencyConversionService;
 use Carbon\Carbon;
 use Filament\Widgets\Widget;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Livewire\Attributes\Reactive;
 
@@ -27,44 +28,50 @@ class PartnerOverallLeaderboard extends Widget
 
     public function getLeaderboardData(): Collection
     {
-        $currencyService = app(CurrencyConversionService::class);
+        $cacheKey = "partner_leaderboard_{$this->startDate}_{$this->endDate}";
 
-        $earnings = Earning::query()
-            ->join('bookings', 'earnings.booking_id', '=', 'bookings.id')
-            ->join('users', 'users.id', '=', 'earnings.user_id')
-            ->join('partners', 'partners.user_id', '=', 'earnings.user_id')
-            ->whereNotNull('bookings.confirmed_at')
-            ->whereBetween('bookings.booking_at', [$this->startDate, $this->endDate])
-            ->whereIn('earnings.type', ['partner_concierge', 'partner_venue'])
-            ->groupBy('earnings.user_id', 'partners.id', 'earnings.currency')
-            ->select(
-                'earnings.user_id',
-                'partners.id as partner_id',
-                DB::raw('SUM(earnings.amount) as total_earned'),
-                DB::raw("CONCAT(users.first_name, ' ', users.last_name) as user_name"),
-                'earnings.currency',
-                DB::raw('COUNT(DISTINCT bookings.id) as booking_count')
-            )
-            ->get();
+        return Cache::remember($cacheKey, now()->addMinutes(5), function () {
+            $currencyService = app(CurrencyConversionService::class);
 
-        $partnerTotals = $earnings->groupBy('user_id')->map(function ($partnerEarnings) use ($currencyService) {
-            $totalUSD = $partnerEarnings->sum(fn ($earning) => $currencyService->convertToUSD([$earning->currency => $earning->total_earned]));
+            $earnings = Earning::query()
+                ->select(
+                    'earnings.user_id',
+                    'partners.id as partner_id',
+                    DB::raw('SUM(earnings.amount) as total_earned'),
+                    DB::raw("CONCAT(users.first_name, ' ', users.last_name) as user_name"),
+                    'earnings.currency',
+                    DB::raw('COUNT(DISTINCT earnings.booking_id) as booking_count')
+                )
+                ->join('partners', 'partners.user_id', '=', 'earnings.user_id')
+                ->join('users', 'users.id', '=', 'earnings.user_id')
+                ->join('bookings', function ($join) {
+                    $join->on('earnings.booking_id', '=', 'bookings.id')
+                        ->whereNotNull('bookings.confirmed_at')
+                        ->whereBetween('bookings.booking_at', [$this->startDate, $this->endDate]);
+                })
+                ->whereIn('earnings.type', ['partner_concierge', 'partner_venue'])
+                ->groupBy('earnings.user_id', 'partners.id', 'earnings.currency')
+                ->get();
 
-            return [
-                'user_id' => $partnerEarnings->first()->user_id,
-                'partner_id' => $partnerEarnings->first()->partner_id,
-                'user_name' => $partnerEarnings->first()->user_name,
-                'total_usd' => $totalUSD,
-                'booking_count' => $partnerEarnings->sum('booking_count'),
-                'earnings_breakdown' => $partnerEarnings->map(fn ($earning) => [
-                    'amount' => $earning->total_earned,
-                    'currency' => $earning->currency,
-                    'usd_equivalent' => $currencyService->convertToUSD([$earning->currency => $earning->total_earned]),
-                ])->toArray(),
-            ];
-        })->sortByDesc('total_usd')->take($this->limit)->values();
+            $partnerTotals = $earnings->groupBy('user_id')->map(function ($partnerEarnings) use ($currencyService) {
+                $totalUSD = $partnerEarnings->sum(fn ($earning) => $currencyService->convertToUSD([$earning->currency => $earning->total_earned]));
 
-        return collect($partnerTotals);
+                return [
+                    'user_id' => $partnerEarnings->first()->user_id,
+                    'partner_id' => $partnerEarnings->first()->partner_id,
+                    'user_name' => $partnerEarnings->first()->user_name,
+                    'total_usd' => $totalUSD,
+                    'booking_count' => $partnerEarnings->sum('booking_count'),
+                    'earnings_breakdown' => $partnerEarnings->map(fn ($earning) => [
+                        'amount' => $earning->total_earned,
+                        'currency' => $earning->currency,
+                        'usd_equivalent' => $currencyService->convertToUSD([$earning->currency => $earning->total_earned]),
+                    ])->toArray(),
+                ];
+            })->sortByDesc('total_usd')->take($this->limit)->values();
+
+            return collect($partnerTotals);
+        });
     }
 
     public function viewPartner($partnerId): void

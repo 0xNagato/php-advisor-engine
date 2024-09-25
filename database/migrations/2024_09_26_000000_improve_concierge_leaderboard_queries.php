@@ -1,0 +1,45 @@
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    public function up(): void
+    {
+        $this->createIndexIfNotExists('earnings', ['type', 'user_id', 'booking_id', 'amount', 'currency'], 'idx_earnings_type_user_booking_amount_currency');
+        $this->createIndexIfNotExists('bookings', ['confirmed_at', 'booking_at', 'id'], 'idx_bookings_confirmed_booking_at_id');
+        $this->createIndexIfNotExists('concierges', ['user_id', 'id'], 'idx_concierges_user_id_id');
+    }
+
+    public function down(): void
+    {
+        $this->dropIndexIfExists('earnings', 'idx_earnings_type_user_booking_amount_currency');
+        $this->dropIndexIfExists('bookings', 'idx_bookings_confirmed_booking_at_id');
+        $this->dropIndexIfExists('concierges', 'idx_concierges_user_id_id');
+    }
+
+    private function createIndexIfNotExists(string $table, array $columns, string $indexName): void
+    {
+        $indexExists = DB::select("SHOW INDEX FROM {$table} WHERE Key_name = '{$indexName}'");
+
+        if (empty($indexExists)) {
+            Schema::table($table, function (Blueprint $table) use ($columns, $indexName) {
+                $table->index($columns, $indexName);
+            });
+        }
+    }
+
+    private function dropIndexIfExists(string $table, string $indexName): void
+    {
+        $indexExists = DB::select("SHOW INDEX FROM {$table} WHERE Key_name = '{$indexName}'");
+
+        if (! empty($indexExists)) {
+            Schema::table($table, function (Blueprint $table) use ($indexName) {
+                $table->dropIndex($indexName);
+            });
+        }
+    }
+};

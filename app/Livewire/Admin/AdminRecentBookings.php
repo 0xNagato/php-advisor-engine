@@ -30,8 +30,18 @@ class AdminRecentBookings extends BaseWidget
         $startDate = $this->filters['startDate'] ?? now()->subDays(30);
         $endDate = $this->filters['endDate'] ?? now();
 
-        $query = Booking::confirmed()
-            ->whereBetween('created_at', [$startDate, $endDate])->orderByDesc('created_at')
+        $query = Booking::query()
+            ->select([
+                'bookings.id',
+                'bookings.booking_at',
+                'bookings.total_fee',
+                'venues.name as venue_name',
+            ])
+            ->join('schedule_templates', 'bookings.schedule_template_id', '=', 'schedule_templates.id')
+            ->join('venues', 'schedule_templates.venue_id', '=', 'venues.id')
+            ->whereNotNull('bookings.confirmed_at')
+            ->whereBetween('bookings.created_at', [$startDate, $endDate])
+            ->orderByDesc('bookings.created_at')
             ->limit(10);
 
         return $table
@@ -43,7 +53,7 @@ class AdminRecentBookings extends BaseWidget
             ->emptyStateIcon('heroicon-o-currency-dollar')
             ->emptyStateHeading('Earnings will show here when bookings begin!')
             ->columns([
-                TextColumn::make('schedule.venue.name')
+                TextColumn::make('venue_name')
                     ->label('Venue')
                     ->searchable(),
                 TextColumn::make('booking_at')
@@ -52,7 +62,6 @@ class AdminRecentBookings extends BaseWidget
                 TextColumn::make('total_fee')
                     ->label('Fee')
                     ->money('USD', divideBy: 100),
-
             ]);
     }
 }

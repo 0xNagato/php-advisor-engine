@@ -8,6 +8,7 @@ use App\Services\CurrencyConversionService;
 use Carbon\Carbon;
 use Filament\Widgets\Widget;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Livewire\Attributes\Reactive;
 
@@ -39,52 +40,55 @@ class VenueOverallLeaderboard extends Widget
 
     public function getLeaderboardData(): Collection
     {
-        $currencyService = app(CurrencyConversionService::class);
+        $cacheKey = "venue_leaderboard_{$this->startDate}_{$this->endDate}_{$this->selectedRegion}";
 
-        $startDate = $this->startDate ?? now()->subDays(30);
-        $endDate = $this->endDate ?? now();
+        return Cache::remember($cacheKey, now()->addMinutes(5), function () {
+            $currencyService = app(CurrencyConversionService::class);
 
-        $query = Earning::query()
-            ->select([
-                'earnings.user_id',
-                'venues.id as venue_id',
-                DB::raw('SUM(CASE WHEN earnings.type = "venue" THEN earnings.amount ELSE 0 END) as total_earned'),
-                'venues.name as venue_name',
-                'venues.region',
-                'earnings.currency',
-                DB::raw('COUNT(DISTINCT bookings.id) as booking_count'),
-            ])
-            ->whereNotNull('bookings.confirmed_at')
-            ->join('bookings', 'earnings.booking_id', '=', 'bookings.id')
-            ->join('users', 'users.id', '=', 'earnings.user_id')
-            ->join('venues', 'venues.user_id', '=', 'earnings.user_id')
-            ->whereBetween('bookings.booking_at', [$startDate, $endDate]);
+            $query = Earning::query()
+                ->select([
+                    'earnings.user_id',
+                    'venues.id as venue_id',
+                    DB::raw('SUM(CASE WHEN earnings.type = "venue" THEN earnings.amount ELSE 0 END) as total_earned'),
+                    'venues.name as venue_name',
+                    'venues.region',
+                    'earnings.currency',
+                    DB::raw('COUNT(DISTINCT earnings.booking_id) as booking_count'),
+                ])
+                ->join('venues', 'venues.user_id', '=', 'earnings.user_id')
+                ->join('bookings', function ($join) {
+                    $join->on('earnings.booking_id', '=', 'bookings.id')
+                        ->whereNotNull('bookings.confirmed_at')
+                        ->whereBetween('bookings.booking_at', [$this->startDate, $this->endDate]);
+                })
+                ->where('earnings.type', 'venue');
 
-        if ($this->selectedRegion) {
-            $query->where('venues.region', $this->selectedRegion);
-        }
+            if ($this->selectedRegion) {
+                $query->where('venues.region', $this->selectedRegion);
+            }
 
-        $earnings = $query
-            ->groupBy('earnings.user_id', 'venues.id', 'venues.region', 'earnings.currency')
-            ->orderByDesc('total_earned')
-            ->limit($this->limit)
-            ->get();
+            $earnings = $query
+                ->groupBy('earnings.user_id', 'venues.id', 'venues.region', 'earnings.currency')
+                ->orderByDesc('total_earned')
+                ->limit($this->limit)
+                ->get();
 
-        return $earnings->map(function ($earning, $index) use ($currencyService) {
-            $totalUSD = $currencyService->convertToUSD([$earning->currency => $earning->total_earned]);
+            return $earnings->map(function ($earning, $index) use ($currencyService) {
+                $totalUSD = $currencyService->convertToUSD([$earning->currency => $earning->total_earned]);
 
-            return [
-                'rank' => $index + 1,
-                'user_id' => $earning->user_id,
-                'venue_id' => $earning->venue_id,
-                'venue_name' => $earning->venue_name,
-                'booking_count' => $earning->booking_count,
-                'total_earned' => $earning->total_earned,
-                'currency' => $earning->currency,
-                'currency_symbol' => $this->getCurrencySymbol($earning->currency),
-                'total_usd' => $totalUSD,
-                'region' => $earning->region,
-            ];
+                return [
+                    'rank' => $index + 1,
+                    'user_id' => $earning->user_id,
+                    'venue_id' => $earning->venue_id,
+                    'venue_name' => $earning->venue_name,
+                    'booking_count' => $earning->booking_count,
+                    'total_earned' => $earning->total_earned,
+                    'currency' => $earning->currency,
+                    'currency_symbol' => $this->getCurrencySymbol($earning->currency),
+                    'total_usd' => $totalUSD,
+                    'region' => $earning->region,
+                ];
+            });
         });
     }
 
