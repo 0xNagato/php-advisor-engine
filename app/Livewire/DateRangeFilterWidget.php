@@ -20,11 +20,6 @@ class DateRangeFilterWidget extends Widget
 
     public string $endDate = '';
 
-    public function mount()
-    {
-        $this->setDateRange($this->range);
-    }
-
     public function setDateRange(string $range): void
     {
         $this->range = $range;

@@ -1,13 +1,9 @@
 <x-filament-widgets::widget>
     <div x-data="{
-        activeRange: @entangle('range'),
-        setRange(range) {
-            this.activeRange = range;
-            $wire.setDateRange(range);
-        }
+        activeRange: @entangle('range')
     }" class="flex space-x-2">
         @foreach (['past_30_days', 'past_week', 'month', 'quarter', 'year'] as $rangeOption)
-            <button @click="setRange('{{ $rangeOption }}')"
+            <button wire:click="setDateRange('{{ $rangeOption }}')" x-on:click="activeRange = '{{ $rangeOption }}'"
                 :class="{
                     'bg-primary-600 text-white': activeRange === '{{ $rangeOption }}',
                     'bg-gray-200 text-gray-700 hover:bg-primary-600 hover:text-white': activeRange !== '{{ $rangeOption }}'
