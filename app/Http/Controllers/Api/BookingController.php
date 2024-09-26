@@ -99,13 +99,6 @@ class BookingController extends Controller
 
         $time = $booking->format('g:i a');
 
-        logger()->info('BookingController Day Display Debug', [
-            'booking_date' => $bookingDate->toDateTimeString(),
-            'today' => $today->toDateTimeString(),
-            'tomorrow' => $tomorrow->toDateTimeString(),
-            'timezone' => $timezone,
-        ]);
-
         if ($bookingDate->equalTo($today)) {
             return 'Today at '.$time;
         }
