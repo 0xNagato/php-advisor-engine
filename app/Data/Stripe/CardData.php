@@ -16,7 +16,7 @@ class CardData extends Data implements Wireable
         public ?string $last4,
         #[MapInputName('checks')]
         public ChecksData $checks,
-        public ?string $wallet,
+        public string|array|null $wallet,
         public ?string $country,
         public ?string $funding,
         public null $mandate,
@@ -37,5 +37,9 @@ class CardData extends Data implements Wireable
         public ExtendedAuthorizationData $extendedAuthorization,
         #[MapInputName('incremental_authorization')]
         public IncrementalAuthorizationData $incrementalAuthorization
-    ) {}
+    ) {
+        if (is_array($this->wallet)) {
+            $this->wallet = json_encode($this->wallet);
+        }
+    }
 }

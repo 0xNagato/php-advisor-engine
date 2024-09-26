@@ -94,7 +94,7 @@ class BookingController extends Controller
     public function dayDisplay($timezone, $booking): string
     {
         $bookingDate = $booking->setTimezone($timezone)->startOfDay();
-        $today = now($timezone)->startOfDay();
+        $today = today();
         $tomorrow = $today->copy()->addDay();
 
         $time = $booking->format('g:i a');
