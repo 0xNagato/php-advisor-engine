@@ -34,18 +34,18 @@ class InvoiceSmall extends Widget
             $timezone = session('timezone');
         }
 
-        $bookingDate = $this->booking->booking_at->startOfDay();
-        $today = today();
-        $tomorrow = now($timezone)->addDay()->startOfDay();
+        $bookingDate = $this->booking->booking_at->setTimezone($timezone)->startOfDay();
+        $today = now($timezone)->startOfDay();
+        $tomorrow = $today->copy()->addDay();
 
-        if ($bookingDate->format('Y-m-d') === $today->format('Y-m-d')) {
+        if ($bookingDate->equalTo($today)) {
             return 'Today';
         }
 
-        if ($bookingDate->format('Y-m-d') === $tomorrow->format('Y-m-d')) {
+        if ($bookingDate->equalTo($tomorrow)) {
             return 'Tomorrow';
         }
 
-        return $this->booking->booking_at->format('D, M j');
+        return $bookingDate->format('D, M j');
     }
 }

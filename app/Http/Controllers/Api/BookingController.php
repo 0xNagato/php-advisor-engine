@@ -93,16 +93,24 @@ class BookingController extends Controller
 
     public function dayDisplay($timezone, $booking): string
     {
-        $time = $booking->format('g:i a');
-        $bookingDate = $booking->startOfDay();
-        $today = today();
-        $tomorrow = now($timezone)->addDay()->startOfDay();
+        $bookingDate = $booking->setTimezone($timezone)->startOfDay();
+        $today = now($timezone)->startOfDay();
+        $tomorrow = $today->copy()->addDay();
 
-        if ($bookingDate->format('Y-m-d') === $today->format('Y-m-d')) {
+        $time = $booking->format('g:i a');
+
+        logger()->info('BookingController Day Display Debug', [
+            'booking_date' => $bookingDate->toDateTimeString(),
+            'today' => $today->toDateTimeString(),
+            'tomorrow' => $tomorrow->toDateTimeString(),
+            'timezone' => $timezone,
+        ]);
+
+        if ($bookingDate->equalTo($today)) {
             return 'Today at '.$time;
         }
 
-        if ($bookingDate->format('Y-m-d') === $tomorrow->format('Y-m-d')) {
+        if ($bookingDate->equalTo($tomorrow)) {
             return 'Tomorrow at '.$time;
         }
 
