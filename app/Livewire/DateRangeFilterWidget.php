@@ -20,6 +20,11 @@ class DateRangeFilterWidget extends Widget
 
     public string $endDate = '';
 
+    public function mount()
+    {
+        $this->setDateRange($this->range);
+    }
+
     public function setDateRange(string $range): void
     {
         $this->range = $range;
@@ -30,7 +35,6 @@ class DateRangeFilterWidget extends Widget
                 $this->endDate = now()->toDateString();
                 break;
             case 'past_week':
-                // Changed to past 7 days
                 $this->startDate = now()->subDays(6)->toDateString();
                 $this->endDate = now()->toDateString();
                 break;
