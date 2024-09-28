@@ -4,8 +4,8 @@ namespace App\Livewire;
 
 use App\Enums\BookingStatus;
 use App\Models\Booking;
-use App\Models\Region;
 use App\Services\CurrencyConversionService;
+use Carbon\Carbon;
 use Filament\Widgets\Concerns\InteractsWithPageFilters;
 use Filament\Widgets\StatsOverviewWidget as BaseWidget;
 use Filament\Widgets\StatsOverviewWidget\Stat;
@@ -19,11 +19,11 @@ class BookingsOverview extends BaseWidget
 
     protected function getStats(): array
     {
-        $startDate = $this->filters['startDate'] ?? now()->subDays(30)->startOfDay();
-        $endDate = $this->filters['endDate'] ?? now()->endOfDay();
+        $startDate = Carbon::parse($this->filters['startDate'] ?? now()->subDays(30))->startOfDay();
+        $endDate = Carbon::parse($this->filters['endDate'] ?? now())->endOfDay();
 
         $bookings = Booking::query()
-            ->whereBetween('booking_at', [$startDate, $endDate])
+            ->whereBetween('confirmed_at', [$startDate, $endDate])
             ->where('status', BookingStatus::CONFIRMED)
             ->select(
                 DB::raw('COUNT(*) as count'),
@@ -58,45 +58,67 @@ class BookingsOverview extends BaseWidget
     protected function getChartData($startDate, $endDate): array
     {
         $dailyData = Booking::query()
-            ->whereBetween('booking_at', [$startDate, $endDate])
+            ->whereBetween('confirmed_at', [$startDate, $endDate])
             ->where('status', BookingStatus::CONFIRMED)
-            ->select(
-                DB::raw('DATE(booking_at) as date'),
-                DB::raw('COUNT(*) as count'),
-                DB::raw('SUM(total_fee) as total_amount'),
-                DB::raw('SUM(platform_earnings) as platform_earnings')
-            )
-            ->groupBy('date')
+            ->selectRaw('DATE(confirmed_at) as date, COUNT(*) as bookings, SUM(total_fee) as total_amount, SUM(platform_earnings) as platform_earnings, currency')
+            ->groupBy('date', 'currency')
             ->orderBy('date')
             ->get();
 
         $currencyService = app(CurrencyConversionService::class);
 
+        $chartData = $dailyData->groupBy('date')->map(function ($dayData) use ($currencyService) {
+            $bookings = $dayData->sum('bookings');
+            $amounts = $currencyService->convertToUSD($dayData->pluck('total_amount', 'currency')->toArray());
+            $earnings = $currencyService->convertToUSD($dayData->pluck('platform_earnings', 'currency')->toArray());
+
+            return [
+                'bookings' => $bookings,
+                'amounts' => $amounts,
+                'earnings' => $earnings,
+            ];
+        });
+
         return [
-            'bookings' => $dailyData->pluck('count')->toArray(),
-            'amounts' => $dailyData->map(fn ($day) => $currencyService->convertToUSD([$day->total_amount]))->toArray(),
-            'earnings' => $dailyData->map(fn ($day) => $currencyService->convertToUSD([$day->platform_earnings]))->toArray(),
+            'bookings' => $chartData->pluck('bookings')->toArray(),
+            'amounts' => $chartData->pluck('amounts')->toArray(),
+            'earnings' => $chartData->pluck('earnings')->toArray(),
         ];
     }
 
-    protected function createStat(string $label, float $value, ?string $currency = null, array $breakdown = []): Stat
+    protected function createStat(string $label, float $value, ?string $currency = null, ?array $currencyBreakdown = null): Stat
     {
-        $formattedValue = $currency ? $this->formatCurrency($value, $currency) : number_format($value);
-        $description = $this->createBreakdownDescription($breakdown);
+        $currencySymbol = $this->getCurrencySymbol($currency);
+        $formattedValue = $currency
+            ? $currencySymbol.number_format($value, 2)
+            : number_format($value);
 
-        return Stat::make($label, $formattedValue)
-            ->description($description);
+        $stat = Stat::make($label, $formattedValue);
+
+        if ($currencyBreakdown) {
+            $breakdownDescription = collect($currencyBreakdown)
+                ->map(function ($amount, $currency) {
+                    $symbol = $this->getCurrencySymbol($currency);
+
+                    return $symbol.number_format($amount / 100, 2);
+                })
+                ->implode(', ');
+
+            $stat->description($breakdownDescription);
+        }
+
+        return $stat;
     }
 
-    protected function createBreakdownDescription(array $breakdown): string
+    protected function getCurrencySymbol(?string $currency): string
     {
-        return collect($breakdown)->map(fn ($amount, $currency) => $this->formatCurrency($amount / 100, $currency))->implode(', ');
-    }
-
-    protected function formatCurrency(float $amount, string $currency): string
-    {
-        $region = Region::query()->where('currency', $currency)->first();
-
-        return $region?->currency_symbol.number_format($amount, 2);
+        return match ($currency) {
+            'USD' => '$',
+            'EUR' => '€',
+            'GBP' => '£',
+            'JPY' => '¥',
+            // Add more currencies as needed
+            default => $currency ?? '',
+        };
     }
 }

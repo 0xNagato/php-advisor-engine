@@ -15,15 +15,15 @@ class VenueOverview extends BaseWidget
     public ?Venue $venue = null;
 
     #[Reactive]
-    public ?Carbon $startDate = null;
+    public ?string $startDate = null;
 
     #[Reactive]
-    public ?Carbon $endDate = null;
+    public ?string $endDate = null;
 
     protected function getStats(): array
     {
-        $startDate = $this->startDate ?? now()->subDays(30)->startOfDay();
-        $endDate = $this->endDate ?? now()->endOfDay();
+        $startDate = Carbon::parse($this->startDate ?? now()->subDays(30))->startOfDay();
+        $endDate = Carbon::parse($this->endDate ?? now())->endOfDay();
 
         $earnings = $this->getEarnings($startDate, $endDate);
         $prevEarnings = $this->getEarnings($startDate->copy()->subDays($startDate->diffInDays($endDate)), $startDate);
@@ -35,29 +35,37 @@ class VenueOverview extends BaseWidget
             $this->createStat('Bookings', $earnings['number_of_bookings'], null, $prevEarnings['number_of_bookings'])
                 ->chart($chartData['bookings'])
                 ->color('success'),
-            $this->createStat('PRIME Earnings', $earnings['venue_earnings'] / 100, $currencySymbol, $prevEarnings['venue_earnings'] / 100)
+            $this->createStat('Earnings', $earnings['total_earnings'], $currencySymbol, $prevEarnings['total_earnings'])
                 ->chart($chartData['earnings'])
                 ->color('success'),
-            $this->createStat('Marketing Investment', $earnings['venue_bounty'] / 100, $currencySymbol, $prevEarnings['venue_bounty'] / 100)
-                ->chart($chartData['bounty'])
-                ->color('warning'),
+            $this->createStat('Avg. Earning per Booking', $earnings['avg_earning_per_booking'], $currencySymbol, $prevEarnings['avg_earning_per_booking'])
+                ->chart($chartData['avg_earning_per_booking'])
+                ->color('info'),
         ];
     }
 
     protected function getEarnings($startDate, $endDate): array
     {
-        return Earning::query()
+        $earnings = Earning::query()
             ->whereNotNull('bookings.confirmed_at')
             ->join('bookings', 'earnings.booking_id', '=', 'bookings.id')
             ->where('earnings.user_id', $this->venue->user_id)
-            ->whereBetween('bookings.booking_at', [$startDate, $endDate])
-            ->selectRaw('
-                COUNT(DISTINCT bookings.id) as number_of_bookings,
-                SUM(CASE WHEN earnings.type = "venue" THEN earnings.amount ELSE 0 END) as venue_earnings,
-                ABS(SUM(CASE WHEN earnings.type = "venue_paid" THEN earnings.amount ELSE 0 END)) as venue_bounty
-            ')
-            ->first()
-            ?->toArray();
+            ->whereBetween('bookings.confirmed_at', [$startDate, $endDate])
+            ->where('earnings.type', 'venue')
+            ->select(
+                DB::raw('COUNT(DISTINCT bookings.id) as number_of_bookings'),
+                DB::raw('SUM(earnings.amount) as total_earnings')
+            )
+            ->first();
+
+        $numberOfBookings = $earnings->number_of_bookings ?? 0;
+        $totalEarnings = $earnings->total_earnings ?? 0;
+
+        return [
+            'number_of_bookings' => $numberOfBookings,
+            'total_earnings' => $totalEarnings / 100, // Convert cents to dollars
+            'avg_earning_per_booking' => $numberOfBookings > 0 ? ($totalEarnings / $numberOfBookings) / 100 : 0,
+        ];
     }
 
     protected function getChartData($startDate, $endDate): array
@@ -66,27 +74,33 @@ class VenueOverview extends BaseWidget
             ->whereNotNull('bookings.confirmed_at')
             ->join('bookings', 'earnings.booking_id', '=', 'bookings.id')
             ->where('earnings.user_id', $this->venue->user_id)
-            ->whereBetween('bookings.booking_at', [$startDate, $endDate])
-            ->select(
-                DB::raw('DATE(bookings.booking_at) as date'),
-                DB::raw('COUNT(DISTINCT bookings.id) as bookings'),
-                DB::raw('SUM(CASE WHEN earnings.type = "venue" THEN earnings.amount ELSE 0 END) as earnings'),
-                DB::raw('ABS(SUM(CASE WHEN earnings.type = "venue_paid" THEN earnings.amount ELSE 0 END)) as bounty')
-            )
+            ->whereBetween('bookings.confirmed_at', [$startDate, $endDate])
+            ->where('earnings.type', 'venue')
+            ->selectRaw('DATE(bookings.confirmed_at) as date, COUNT(DISTINCT bookings.id) as bookings, SUM(earnings.amount) as total_earnings')
             ->groupBy('date')
             ->orderBy('date')
             ->get();
 
+        $chartData = $dailyData->map(function ($item) {
+            return [
+                'bookings' => $item->bookings,
+                'earnings' => $item->total_earnings / 100, // Convert cents to dollars
+                'avg_earning_per_booking' => $item->bookings > 0 ? ($item->total_earnings / $item->bookings) / 100 : 0,
+            ];
+        });
+
         return [
-            'bookings' => $dailyData->pluck('bookings')->toArray(),
-            'earnings' => $dailyData->pluck('earnings')->map(fn ($amount) => $amount / 100)->toArray(),
-            'bounty' => $dailyData->pluck('bounty')->map(fn ($amount) => $amount / 100)->toArray(),
+            'bookings' => $chartData->pluck('bookings')->toArray(),
+            'earnings' => $chartData->pluck('earnings')->toArray(),
+            'avg_earning_per_booking' => $chartData->pluck('avg_earning_per_booking')->toArray(),
         ];
     }
 
     protected function createStat(string $label, float $value, ?string $currencySymbol = null, float $previousValue = 0): Stat
     {
-        $formattedValue = $currencySymbol ? $currencySymbol.number_format($value, 2) : number_format($value);
+        $formattedValue = $currencySymbol
+            ? $currencySymbol.number_format($value, 2)
+            : number_format($value);
 
         $stat = Stat::make($label, $formattedValue);
 

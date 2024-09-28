@@ -16,15 +16,15 @@ class ConciergeOverview extends BaseWidget
     public ?Concierge $concierge = null;
 
     #[Reactive]
-    public ?Carbon $startDate = null;
+    public ?string $startDate = null;
 
     #[Reactive]
-    public ?Carbon $endDate = null;
+    public ?string $endDate = null;
 
     protected function getStats(): array
     {
-        $startDate = $this->startDate ?? now()->subDays(30);
-        $endDate = $this->endDate ?? now();
+        $startDate = Carbon::parse($this->startDate ?? now()->subDays(30))->startOfDay();
+        $endDate = Carbon::parse($this->endDate ?? now())->endOfDay();
 
         $earnings = $this->getEarnings($startDate, $endDate);
         $prevEarnings = $this->getEarnings($startDate->copy()->subDays($startDate->diffInDays($endDate)), $startDate);
@@ -59,7 +59,7 @@ class ConciergeOverview extends BaseWidget
             ->whereNotNull('bookings.confirmed_at')
             ->join('bookings', 'earnings.booking_id', '=', 'bookings.id')
             ->where('earnings.user_id', $this->concierge->user_id)
-            ->whereBetween('bookings.booking_at', [$startDate, $endDate])
+            ->whereBetween('bookings.confirmed_at', [$startDate, $endDate])
             ->whereIn('earnings.type', ['concierge', 'concierge_referral_1', 'concierge_referral_2'])
             ->select(
                 DB::raw('COUNT(DISTINCT CASE WHEN earnings.type = "concierge" THEN bookings.id END) as number_of_direct_bookings'),
@@ -83,7 +83,7 @@ class ConciergeOverview extends BaseWidget
             ->whereNotNull('bookings.confirmed_at')
             ->join('bookings', 'earnings.booking_id', '=', 'bookings.id')
             ->where('earnings.user_id', $this->concierge->user_id)
-            ->whereBetween('bookings.booking_at', [$startDate, $endDate])
+            ->whereBetween('bookings.confirmed_at', [$startDate, $endDate])
             ->where('earnings.type', 'concierge') // Only consider direct bookings
             ->selectRaw('earnings.currency, AVG(earnings.amount) as average_earning, COUNT(*) as booking_count')
             ->groupBy('earnings.currency')
@@ -112,9 +112,9 @@ class ConciergeOverview extends BaseWidget
             ->whereNotNull('bookings.confirmed_at')
             ->join('bookings', 'earnings.booking_id', '=', 'bookings.id')
             ->where('earnings.user_id', $this->concierge->user_id)
-            ->whereBetween('bookings.booking_at', [$startDate, $endDate])
+            ->whereBetween('bookings.confirmed_at', [$startDate, $endDate])
             ->whereIn('earnings.type', ['concierge', 'concierge_referral_1', 'concierge_referral_2'])
-            ->selectRaw('DATE(bookings.booking_at) as date, earnings.currency, earnings.type, COUNT(*) as bookings, SUM(earnings.amount) as total_earnings, AVG(earnings.amount) as avg_earning')
+            ->selectRaw('DATE(bookings.confirmed_at) as date, earnings.currency, earnings.type, COUNT(*) as bookings, SUM(earnings.amount) as total_earnings, AVG(earnings.amount) as avg_earning')
             ->groupBy('date', 'earnings.currency', 'earnings.type')
             ->orderBy('date')
             ->get();

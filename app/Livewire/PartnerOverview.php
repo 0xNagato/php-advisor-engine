@@ -15,23 +15,26 @@ class PartnerOverview extends BaseWidget
     public ?Partner $partner = null;
 
     #[Reactive]
-    public ?Carbon $startDate = null;
+    public ?string $startDate = null;
 
     #[Reactive]
-    public ?Carbon $endDate = null;
+    public ?string $endDate = null;
 
     protected function getStats(): array
     {
-        $earnings = $this->getEarnings($this->startDate, $this->endDate);
-        $prevEarnings = $this->getEarnings($this->startDate->copy()->subDays($this->startDate->diffInDays($this->endDate)), $this->startDate);
-        $chartData = $this->getChartData($this->startDate, $this->endDate);
+        $startDate = ($this->startDate ? Carbon::parse($this->startDate) : now()->subDays(30))->startOfDay();
+        $endDate = ($this->endDate ? Carbon::parse($this->endDate) : now())->endOfDay();
+
+        $earnings = $this->getEarnings($startDate, $endDate);
+        $prevEarnings = $this->getEarnings($startDate->copy()->subDays($startDate->diffInDays($endDate)), $startDate);
+        $chartData = $this->getChartData($startDate, $endDate);
 
         $currencyService = app(CurrencyConversionService::class);
         $totalEarningsUSD = $currencyService->convertToUSD($earnings['earnings']);
         $prevTotalEarningsUSD = $currencyService->convertToUSD($prevEarnings['earnings']);
 
-        $avgBookingValue = $this->getAverageBookingValue($this->startDate, $this->endDate);
-        $prevAvgBookingValue = $this->getAverageBookingValue($this->startDate->copy()->subDays($this->startDate->diffInDays($this->endDate)), $this->startDate);
+        $avgBookingValue = $this->getAverageBookingValue($startDate, $endDate);
+        $prevAvgBookingValue = $this->getAverageBookingValue($startDate->copy()->subDays($startDate->diffInDays($endDate)), $startDate);
 
         return [
             $this->createStat('Bookings', $earnings['number_of_bookings'], null, $prevEarnings['number_of_bookings'])
@@ -52,7 +55,7 @@ class PartnerOverview extends BaseWidget
             ->whereNotNull('bookings.confirmed_at')
             ->join('bookings', 'earnings.booking_id', '=', 'bookings.id')
             ->where('earnings.user_id', $this->partner->user_id)
-            ->whereBetween('bookings.booking_at', [$startDate, $endDate])
+            ->whereBetween('bookings.confirmed_at', [$startDate, $endDate])
             ->whereIn('earnings.type', ['partner_concierge', 'partner_venue']);
 
         $numberOfBookings = $partnerEarningsQuery->distinct('bookings.id')->count('bookings.id');
@@ -74,7 +77,7 @@ class PartnerOverview extends BaseWidget
             ->whereNotNull('bookings.confirmed_at')
             ->join('bookings', 'earnings.booking_id', '=', 'bookings.id')
             ->where('earnings.user_id', $this->partner->user_id)
-            ->whereBetween('bookings.booking_at', [$startDate, $endDate])
+            ->whereBetween('bookings.confirmed_at', [$startDate, $endDate])
             ->whereIn('earnings.type', ['partner_concierge', 'partner_venue'])
             ->selectRaw('earnings.currency, AVG(earnings.amount) as average_earning, COUNT(DISTINCT bookings.id) as booking_count')
             ->groupBy('earnings.currency')
@@ -103,9 +106,9 @@ class PartnerOverview extends BaseWidget
             ->whereNotNull('bookings.confirmed_at')
             ->join('bookings', 'earnings.booking_id', '=', 'bookings.id')
             ->where('earnings.user_id', $this->partner->user_id)
-            ->whereBetween('bookings.booking_at', [$startDate, $endDate])
+            ->whereBetween('bookings.confirmed_at', [$startDate, $endDate])
             ->whereIn('earnings.type', ['partner_concierge', 'partner_venue'])
-            ->selectRaw('DATE(bookings.booking_at) as date, earnings.currency, COUNT(DISTINCT bookings.id) as bookings, SUM(earnings.amount) as total_earnings, AVG(earnings.amount) as avg_earning')
+            ->selectRaw('DATE(bookings.confirmed_at) as date, earnings.currency, COUNT(DISTINCT bookings.id) as bookings, SUM(earnings.amount) as total_earnings, AVG(earnings.amount) as avg_earning')
             ->groupBy('date', 'earnings.currency')
             ->orderBy('date')
             ->get();
