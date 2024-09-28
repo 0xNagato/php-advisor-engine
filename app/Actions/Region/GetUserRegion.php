@@ -15,7 +15,14 @@ class GetUserRegion
         $userRegion = request()->user()?->region;
         $defaultRegion = config('app.default_region');
 
-        $regionId = $sessionRegion ?? $userRegion ?? $defaultRegion;
+        $regionId = $sessionRegion ?? ($userRegion ?: $defaultRegion);
+
+        logger()?->info('GetUserRegion: Determining region', [
+            'sessionRegion' => $sessionRegion,
+            'userRegion' => $userRegion,
+            'defaultRegion' => $defaultRegion,
+            'regionId' => $regionId,
+        ]);
 
         return Region::query()->where('id', $regionId)->firstOrFail();
     }
