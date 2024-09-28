@@ -10,32 +10,34 @@ use App\Models\User;
 use Illuminate\Console\Command;
 use Illuminate\Contracts\Database\Query\Builder;
 use Illuminate\Support\Facades\Hash;
+use Throwable;
 
 class CreateConciergesAndBookings extends Command
 {
-    protected $signature = 'demo:create-concierges-and-bookings';
+    protected $signature = 'demo:create-concierges-and-bookings {names? : Comma-separated list of concierge names}';
 
-    protected $description = 'Create or update concierge accounts for Andrew, Alex, and Kevin, and generate 20 bookings each for the past 10 days';
+    protected $description = 'Create or update concierge accounts for given names and generate 20 bookings each for the past 10 days';
 
-    public function handle()
+    /**
+     * @throws Throwable
+     */
+    public function handle(): void
     {
-        $this->createOrUpdateConcierges();
-        $this->createBookings();
+        $names = $this->argument('names') ? explode(',', $this->argument('names')) : ['Andrew', 'Alex', 'Kevin'];
+        $this->createOrUpdateConcierges($names);
+        $this->createBookings($names);
 
         $this->info('Concierge accounts updated and bookings generated successfully.');
     }
 
-    private function createOrUpdateConcierges()
+    private function createOrUpdateConcierges(array $names): void
     {
-        $concierges = [
-            ['first_name' => 'Andrew', 'email' => 'andrewconcierge@primavip.co'],
-            ['first_name' => 'Alex', 'email' => 'alexconcierge@primavip.co'],
-            ['first_name' => 'Kevin', 'email' => 'kevinconcierge@primavip.co'],
-        ];
+        foreach ($names as $name) {
+            $name = trim($name);
+            $email = strtolower($name).'concierge@primavip.co';
 
-        foreach ($concierges as $conciergeData) {
-            $user = User::query()->firstOrCreate(['email' => $conciergeData['email']], [
-                'first_name' => $conciergeData['first_name'],
+            $user = User::query()->firstOrCreate(['email' => $email], [
+                'first_name' => $name,
                 'last_name' => 'Concierge',
                 'password' => Hash::make('password'),
                 'partner_referral_id' => Partner::query()->inRandomOrder()->first()->id,
@@ -43,8 +45,8 @@ class CreateConciergesAndBookings extends Command
             ]);
 
             $concierge = Concierge::query()->firstOrCreate(['user_id' => $user->id], [
-                'hotel_name' => "{$conciergeData['first_name']}'s Hotel",
-                'secured_at' => now(),  // Add this line
+                'hotel_name' => "$name's Hotel",
+                'secured_at' => now(),
             ]);
 
             // Update secured_at if it's null (for existing concierges)
@@ -54,18 +56,17 @@ class CreateConciergesAndBookings extends Command
 
             $user->assignRole('concierge');
 
-            $this->info("Concierge account created/updated for {$conciergeData['first_name']} Concierge");
+            $this->info("Concierge account created/updated for $name Concierge");
         }
     }
 
-    private function createBookings()
+    /**
+     * @throws Throwable
+     */
+    private function createBookings(array $names): void
     {
-        $concierges = Concierge::with('user')->whereHas('user', function (Builder $query) {
-            $query->whereIn('email', [
-                'andrewconcierge@primavip.co',
-                'alexconcierge@primavip.co',
-                'kevinconcierge@primavip.co',
-            ]);
+        $concierges = Concierge::with('user')->whereHas('user', function (Builder $query) use ($names) {
+            $query->whereIn('email', array_map(fn ($name) => strtolower(trim($name)).'concierge@primavip.co', $names));
         })->get();
 
         $this->info('Found '.$concierges->count().' concierges');
@@ -82,7 +83,7 @@ class CreateConciergesAndBookings extends Command
                 ->whereBetween('booking_at', [$startDate, $endDate])
                 ->count();
 
-            $this->info("Existing bookings count: {$existingBookingsCount}");
+            $this->info("Existing bookings count: $existingBookingsCount");
 
             if ($existingBookingsCount >= 20) {
                 $this->info("20 bookings already exist for {$concierge->user->first_name} Concierge");
@@ -91,7 +92,7 @@ class CreateConciergesAndBookings extends Command
             }
 
             $bookingsToCreate = 20 - $existingBookingsCount;
-            $this->info("Attempting to create {$bookingsToCreate} bookings");
+            $this->info("Attempting to create $bookingsToCreate bookings");
 
             $generateDemoBookings->generateBookingsForConcierge($concierge, $startDate, $endDate, $bookingsToCreate);
 
@@ -99,7 +100,7 @@ class CreateConciergesAndBookings extends Command
                 ->whereBetween('booking_at', [$startDate, $endDate])
                 ->count();
 
-            $this->info("New bookings count: {$newBookingsCount}");
+            $this->info("New bookings count: $newBookingsCount");
             $this->info('Total bookings created: '.($newBookingsCount - $existingBookingsCount));
         }
     }
