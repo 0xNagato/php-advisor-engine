@@ -14,12 +14,6 @@ class BookingResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
-        // log the total with tax in cents
-        logger()->info('BookingResource: Total with tax in cents', [
-            'subtotal' => $this->booking->total_fee,
-            'total' => $this->booking->total_with_tax_in_cents,
-        ]);
-
         return [
             'id' => $this->booking->id,
             'guest_count' => $this->booking->guest_count,
