@@ -41,9 +41,12 @@ class VenueOverallLeaderboard extends Widget
 
     public function getLeaderboardData(): Collection
     {
-        $cacheKey = "venue_leaderboard_{$this->startDate}_{$this->endDate}_{$this->selectedRegion}";
+        $tempStartDate = $this->startDate ? Carbon::parse($this->startDate)->startOfDay() : now()->subDays(30)->startOfDay();
+        $tempEndDate = $this->endDate ? Carbon::parse($this->endDate)->endOfDay() : now()->endOfDay();
 
-        return Cache::remember($cacheKey, now()->addMinutes(5), function () {
+        $cacheKey = "venue_leaderboard_{$tempStartDate->toDateTimeString()}_{$tempEndDate->toDateTimeString()}_{$this->selectedRegion}";
+
+        return Cache::remember($cacheKey, now()->addMinutes(5), function () use ($tempStartDate, $tempEndDate) {
             $currencyService = app(CurrencyConversionService::class);
 
             $query = Earning::query()
@@ -57,10 +60,10 @@ class VenueOverallLeaderboard extends Widget
                     DB::raw('COUNT(DISTINCT earnings.booking_id) as booking_count'),
                 ])
                 ->join('venues', 'venues.user_id', '=', 'earnings.user_id')
-                ->join('bookings', function (Builder $join) {
+                ->join('bookings', function (Builder $join) use ($tempStartDate, $tempEndDate) {
                     $join->on('earnings.booking_id', '=', 'bookings.id')
                         ->whereNotNull('bookings.confirmed_at')
-                        ->whereBetween('bookings.booking_at', [$this->startDate, $this->endDate]);
+                        ->whereBetween('bookings.confirmed_at', [$tempStartDate, $tempEndDate]);
                 })
                 ->where('earnings.type', 'venue');
 

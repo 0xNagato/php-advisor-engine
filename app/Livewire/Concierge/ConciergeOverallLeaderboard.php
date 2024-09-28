@@ -29,9 +29,12 @@ class ConciergeOverallLeaderboard extends Widget
 
     public function getLeaderboardData(): Collection
     {
-        $cacheKey = "concierge_leaderboard_{$this->startDate}_{$this->endDate}";
+        $tempStartDate = $this->startDate ? Carbon::parse($this->startDate)->startOfDay() : now()->subDays(30)->startOfDay();
+        $tempEndDate = $this->endDate ? Carbon::parse($this->endDate)->endOfDay() : now()->endOfDay();
 
-        return Cache::remember($cacheKey, now()->addMinutes(5), function () {
+        $cacheKey = "concierge_leaderboard_{$tempStartDate->toDateTimeString()}_{$tempEndDate->toDateTimeString()}";
+
+        return Cache::remember($cacheKey, now()->addMinutes(5), function () use ($tempStartDate, $tempEndDate) {
             $currencyService = app(CurrencyConversionService::class);
 
             $conciergeEarningTypes = ['concierge', 'concierge_referral_1', 'concierge_referral_2'];
@@ -48,10 +51,10 @@ class ConciergeOverallLeaderboard extends Widget
                 )
                 ->join('concierges', 'concierges.user_id', '=', 'earnings.user_id')
                 ->join('users', 'users.id', '=', 'earnings.user_id')
-                ->join('bookings', function (Builder $join) {
+                ->join('bookings', function (Builder $join) use ($tempStartDate, $tempEndDate) {
                     $join->on('earnings.booking_id', '=', 'bookings.id')
                         ->whereNotNull('bookings.confirmed_at')
-                        ->whereBetween('bookings.booking_at', [$this->startDate, $this->endDate]);
+                        ->whereBetween('bookings.confirmed_at', [$tempStartDate, $tempEndDate]);
                 })
                 ->whereIn('earnings.type', $conciergeEarningTypes)
                 ->groupBy('earnings.user_id', 'concierges.id', 'earnings.currency')

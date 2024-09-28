@@ -29,9 +29,12 @@ class PartnerOverallLeaderboard extends Widget
 
     public function getLeaderboardData(): Collection
     {
-        $cacheKey = "partner_leaderboard_{$this->startDate}_{$this->endDate}";
+        $tempStartDate = $this->startDate ? Carbon::parse($this->startDate)->startOfDay() : now()->subDays(30)->startOfDay();
+        $tempEndDate = $this->endDate ? Carbon::parse($this->endDate)->endOfDay() : now()->endOfDay();
 
-        return Cache::remember($cacheKey, now()->addMinutes(5), function () {
+        $cacheKey = "partner_leaderboard_{$tempStartDate->toDateTimeString()}_{$tempEndDate->toDateTimeString()}";
+
+        return Cache::remember($cacheKey, now()->addMinutes(5), function () use ($tempStartDate, $tempEndDate) {
             $currencyService = app(CurrencyConversionService::class);
 
             $earnings = Earning::query()
@@ -45,10 +48,10 @@ class PartnerOverallLeaderboard extends Widget
                 )
                 ->join('partners', 'partners.user_id', '=', 'earnings.user_id')
                 ->join('users', 'users.id', '=', 'earnings.user_id')
-                ->join('bookings', function (Builder $join) {
+                ->join('bookings', function (Builder $join) use ($tempStartDate, $tempEndDate) {
                     $join->on('earnings.booking_id', '=', 'bookings.id')
                         ->whereNotNull('bookings.confirmed_at')
-                        ->whereBetween('bookings.booking_at', [$this->startDate, $this->endDate]);
+                        ->whereBetween('bookings.confirmed_at', [$tempStartDate, $tempEndDate]);
                 })
                 ->whereIn('earnings.type', ['partner_concierge', 'partner_venue'])
                 ->groupBy('earnings.user_id', 'partners.id', 'earnings.currency')
