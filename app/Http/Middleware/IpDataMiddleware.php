@@ -41,7 +41,7 @@ class IpDataMiddleware
             $request->session()->put('region', $region->id);
 
             if (auth()->check()) {
-                auth()->user()->update(['region' => $region]);
+                auth()->user()->update(['region' => $region->id]);
             }
         }
 
