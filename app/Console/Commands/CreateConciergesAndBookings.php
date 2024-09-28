@@ -33,7 +33,7 @@ class CreateConciergesAndBookings extends Command
     private function createOrUpdateConcierges(array $names): void
     {
         foreach ($names as $name) {
-            $name = trim($name);
+            $name = trim((string) $name);
             $email = strtolower($name).'concierge@primavip.co';
 
             $user = User::query()->firstOrCreate(['email' => $email], [

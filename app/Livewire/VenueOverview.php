@@ -81,13 +81,11 @@ class VenueOverview extends BaseWidget
             ->orderBy('date')
             ->get();
 
-        $chartData = $dailyData->map(function ($item) {
-            return [
-                'bookings' => $item->bookings,
-                'earnings' => $item->total_earnings / 100, // Convert cents to dollars
-                'avg_earning_per_booking' => $item->bookings > 0 ? ($item->total_earnings / $item->bookings) / 100 : 0,
-            ];
-        });
+        $chartData = $dailyData->map(fn ($item) => [
+            'bookings' => $item->bookings,
+            'earnings' => $item->total_earnings / 100, // Convert cents to dollars
+            'avg_earning_per_booking' => $item->bookings > 0 ? ($item->total_earnings / $item->bookings) / 100 : 0,
+        ]);
 
         return [
             'bookings' => $chartData->pluck('bookings')->toArray(),
