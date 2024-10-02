@@ -47,4 +47,8 @@ Route::get('/venues/contact-bookings', VenueContactRecentBookings::class)->name(
 
 Route::post('/exception-form', ExceptionFormController::class)->name('exception.form');
 
+Route::get('/privacy', function () {
+    return view('privacy');
+});
+
 require __DIR__.'/auth.php';
