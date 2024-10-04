@@ -112,7 +112,7 @@ class MiamiVenueSeeder extends Seeder
                         $startTime = Carbon::createFromFormat('H:i:s', $schedule->start_time);
                         $isAvailable = $openTime && $closeTime &&
                                        $startTime->format('H:i') >= $openTime->format('H:i') &&
-                                       $startTime->format('H:i') < $closeTime->format('H:i');
+                                       $startTime->format('H:i') <= $closeTime->format('H:i');
 
                         $schedule->update([
                             'is_available' => $isAvailable,
