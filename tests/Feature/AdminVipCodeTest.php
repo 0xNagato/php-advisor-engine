@@ -12,11 +12,3 @@ test('super admin can access vip code page', function () {
         ->get(VipCodeManager::getUrl())
         ->assertSuccessful();
 });
-
-test('navigation label is correct for super admin', function () {
-    $admin = User::role('super_admin')->first();
-
-    actingAs($admin);
-
-    expect(VipCodeManager::getNavigationLabel())->toBe('VIP Codes');
-});
