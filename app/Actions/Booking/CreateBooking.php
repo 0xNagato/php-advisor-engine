@@ -25,8 +25,6 @@ class CreateBooking
     public const int MAX_DAYS_IN_ADVANCE = 30;
 
     /**
-     * @return array {booking: Booking, bookingUrl: string, qrCode: string}
-     *
      * @throws Exception
      * @throws Throwable
      */
@@ -44,7 +42,7 @@ class CreateBooking
          */
         $bookingAt = Carbon::createFromFormat(
             'Y-m-d H:i:s',
-            $data['date'].' '.$scheduleTemplate->start_time,
+            $data['date'].' '.$scheduleTemplate?->start_time,
             $timezone
         );
         $currentDate = Carbon::now($timezone);
@@ -58,14 +56,14 @@ class CreateBooking
             : Auth::user()->concierge->id;
 
         $booking = Booking::query()->create([
-            'schedule_template_id' => $scheduleTemplate->id,
+            'schedule_template_id' => $scheduleTemplate?->id,
             'guest_count' => $data['guest_count'],
             'concierge_id' => $conciergeId,
             'status' => BookingStatus::PENDING,
             'booking_at' => $bookingAt,
             'currency' => $currency,
-            'is_prime' => $scheduleTemplate->prime_time,
-            'vip_code_id' => session('vip_code_id') ?? null,
+            'is_prime' => $scheduleTemplate?->prime_time,
+            'vip_code_id' => session('vip_code_id'),
         ]);
 
         $taxData = app(SalesTaxService::class)->calculateTax(

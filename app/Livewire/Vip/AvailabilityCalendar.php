@@ -13,7 +13,7 @@ use Filament\Forms\Form;
 use Filament\Notifications\Notification;
 use Filament\Pages\Page;
 use Illuminate\Database\Eloquent\Collection;
-use Livewire\Attributes\On;
+use Illuminate\Support\Facades\Auth;
 
 /**
  * @property Form $form
@@ -39,11 +39,14 @@ class AvailabilityCalendar extends Page
 
     public array $timeslotHeaders = [];
 
+    public ?Region $region = null;
+
     public function mount(): void
     {
-        $region = Region::query()->find(session('region', 'miami'));
-        $this->timezone = $region->timezone;
-        $this->currency = $region->currency;
+        $region_id = Auth::guard('vip_code')->user()->concierge->user->region ?? config('app.default_region');
+        $this->region = Region::query()->find($region_id);
+        $this->timezone = $this->region->timezone;
+        $this->currency = $this->region->currency;
         $this->form->fill();
     }
 
@@ -66,27 +69,15 @@ class AvailabilityCalendar extends Page
         $this->loadVenues();
     }
 
-    #[On('region-changed')]
-    public function regionChanged(): void
-    {
-        $region = Region::query()->find(session('region', 'miami'));
-
-        $this->timezone = $region->timezone;
-        $this->currency = $region->currency;
-
-        $this->venues = null;
-        $this->form->fill();
-    }
-
     public function createBooking(int $scheduleTemplateId, ?string $date = null): void
     {
         $this->loadVenues();
-        $region = Region::query()->find(session('region', 'miami'));
+
         $data = $this->form->getState();
         $data['date'] = $date ?? $data['date'];
 
         try {
-            $result = CreateBooking::run($scheduleTemplateId, $data, $region->timezone, $region->currency, true);
+            $result = CreateBooking::run($scheduleTemplateId, $data, $this->region->timezone, $this->region->currency, true);
             $vipUrl = ShortURL::destinationUrl(
                 route('booking.checkout', [
                     'booking' => $result->booking->uuid,

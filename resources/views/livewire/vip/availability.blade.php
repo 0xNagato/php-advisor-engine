@@ -5,7 +5,8 @@
 
     $stickyHeaderTopPosition = 'top-0';
 @endphp
-<x-layouts.simple-wrapper wrapper-class="" header-class="" content-class="max-w-3xl">
+
+<x-layouts.simple-wrapper content-class="max-w-3xl">
     <div class="w-full">
         {{ $this->form }}
     </div>
