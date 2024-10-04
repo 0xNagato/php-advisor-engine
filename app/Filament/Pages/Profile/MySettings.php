@@ -18,7 +18,7 @@ class MySettings extends Page
 
     protected static bool $shouldRegisterNavigation = false;
 
-    protected static ?string $title = 'My Profile';
+    protected static ?string $title = 'Account Details';
 
     public function getHeaderWidgets(): array
     {

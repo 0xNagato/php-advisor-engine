@@ -74,6 +74,7 @@ class AdminPanelProvider extends PanelProvider
             ])
             ->userMenuItems([
                 'profile' => MenuItem::make()
+                    ->label('Account Details')
                     ->url('/platform/my-settings'),
                 'change-password' => MenuItem::make()
                     ->label('Change Password')

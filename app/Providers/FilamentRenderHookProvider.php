@@ -59,11 +59,11 @@ class FilamentRenderHookProvider extends ServiceProvider
 
         if (! isPrimaApp()) {
             FilamentView::registerRenderHook(
-                PanelsRenderHook::BODY_END,
+                PanelsRenderHook::PAGE_END,
                 static fn () => new HtmlString('
-                    <div style="position: fixed; bottom: 0; left: 0; right: 0; margin-bottom: .5rem; font-size: 0.75rem; text-align: center;">
+                    <footer style="margin-top: auto; padding: .5rem 0; font-size: 0.75rem; text-align: center;">
                         &copy; '.date('Y').' PRIMA VIP. All rights reserved.
-                    </div>
+                    </footer>
                 ')
             );
         }
