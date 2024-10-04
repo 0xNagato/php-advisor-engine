@@ -2,35 +2,38 @@
 
 namespace Database\Seeders;
 
-use Exception;
-use Illuminate\Contracts\Database\Query\Builder;
-
-// ini_set('max_execution_time', 0);
-ini_set('memory_limit', '5G');
-
 use App\Enums\VenueStatus;
 use App\Models\Partner;
 use App\Models\Referral;
 use App\Models\User;
 use App\Models\Venue;
 use Carbon\Carbon;
+use Exception;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
+use Throwable;
+
+// ini_set('max_execution_time', 0);
+ini_set('memory_limit', '5G');
 
 class MiamiVenueSeeder extends Seeder
 {
+    /**
+     * @throws Throwable
+     */
     public function run(): void
     {
-        $csvFile = fopen(base_path('database/seeders/miami.csv'), 'r');
+        $csvFile = fopen(base_path('database/seeders/miami.csv'), 'rb');
 
         // Skip the header row
         fgetcsv($csvFile);
 
         DB::disableQueryLog();
 
-        while (($data = fgetcsv($csvFile, 2000, ',')) !== false) {
+        while (($data = fgetcsv($csvFile, 2000)) !== false) {
             try {
                 DB::beginTransaction();
 
@@ -71,7 +74,7 @@ class MiamiVenueSeeder extends Seeder
                 Log::info("Venue created: $venueName");
             } catch (Exception $e) {
                 DB::rollBack();
-                Log::error("Error creating venue: $venueName. Error: ".$e->getMessage());
+                Log::error("Error creating venue: $data[0]. Error: ".$e->getMessage());
             }
         }
 
@@ -107,12 +110,12 @@ class MiamiVenueSeeder extends Seeder
 
             $venue->scheduleTemplates()
                 ->where('day_of_week', $dayOfWeek)
-                ->chunk(200, function (Builder $schedules) use ($openTime, $closeTime) {
+                ->chunk(200, function (Collection $schedules) use ($openTime, $closeTime) {
                     foreach ($schedules as $schedule) {
                         $startTime = Carbon::createFromFormat('H:i:s', $schedule->start_time);
                         $isAvailable = $openTime && $closeTime &&
-                                       $startTime->format('H:i') >= $openTime->format('H:i') &&
-                                       $startTime->format('H:i') <= $closeTime->format('H:i');
+                                       $startTime?->format('H:i') >= $openTime->format('H:i') &&
+                                       $startTime?->format('H:i') <= $closeTime->format('H:i');
 
                         $schedule->update([
                             'is_available' => $isAvailable,

@@ -56,10 +56,8 @@ class VipCodesTable extends TableWidget
                 TextColumn::make('code')
                     ->label('Code')
                     ->copyable()
-                    ->copyMessage('Code copied')
-                    ->copyableState(function (VipCode $vipCode) {
-                        return $vipCode->link;
-                    })
+                    ->copyMessage('VIP Link copied to clipboard')
+                    ->copyableState(fn (VipCode $vipCode) => $vipCode->link)
                     ->copyMessageDuration(1500)
                     ->icon('heroicon-m-clipboard-document-check')
                     ->iconColor('primary')

@@ -1266,16 +1266,16 @@
         },
         {
             "name": "aws/aws-sdk-php",
-            "version": "3.322.10",
+            "version": "3.323.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/aws/aws-sdk-php.git",
-                "reference": "0adb58bc7989068b489d320970951163847b520b"
+                "reference": "058611bd22a81c873b1399892672861848e1d466"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/aws/aws-sdk-php/zipball/0adb58bc7989068b489d320970951163847b520b",
-                "reference": "0adb58bc7989068b489d320970951163847b520b",
+                "url": "https://api.github.com/repos/aws/aws-sdk-php/zipball/058611bd22a81c873b1399892672861848e1d466",
+                "reference": "058611bd22a81c873b1399892672861848e1d466",
                 "shasum": ""
             },
             "require": {
@@ -1358,9 +1358,9 @@
             "support": {
                 "forum": "https://forums.aws.amazon.com/forum.jspa?forumID=80",
                 "issues": "https://github.com/aws/aws-sdk-php/issues",
-                "source": "https://github.com/aws/aws-sdk-php/tree/3.322.10"
+                "source": "https://github.com/aws/aws-sdk-php/tree/3.323.0"
             },
-            "time": "2024-10-02T18:14:16+00:00"
+            "time": "2024-10-03T18:06:26+00:00"
         },
         {
             "name": "bezhansalleh/filament-shield",
@@ -7576,16 +7576,16 @@
         },
         {
             "name": "opcodesio/log-viewer",
-            "version": "v3.11.1",
+            "version": "v3.11.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/opcodesio/log-viewer.git",
-                "reference": "608cde8a5fbac1e9959c060b780ef3ed26598aae"
+                "reference": "993492fd9482771e928d47d45b323825ca7bebc0"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/opcodesio/log-viewer/zipball/608cde8a5fbac1e9959c060b780ef3ed26598aae",
-                "reference": "608cde8a5fbac1e9959c060b780ef3ed26598aae",
+                "url": "https://api.github.com/repos/opcodesio/log-viewer/zipball/993492fd9482771e928d47d45b323825ca7bebc0",
+                "reference": "993492fd9482771e928d47d45b323825ca7bebc0",
                 "shasum": ""
             },
             "require": {
@@ -7648,7 +7648,7 @@
             ],
             "support": {
                 "issues": "https://github.com/opcodesio/log-viewer/issues",
-                "source": "https://github.com/opcodesio/log-viewer/tree/v3.11.1"
+                "source": "https://github.com/opcodesio/log-viewer/tree/v3.11.2"
             },
             "funding": [
                 {
@@ -7660,7 +7660,7 @@
                     "type": "github"
                 }
             ],
-            "time": "2024-08-23T07:25:44+00:00"
+            "time": "2024-10-04T04:01:15+00:00"
         },
         {
             "name": "opcodesio/mail-parser",
@@ -14856,16 +14856,16 @@
         },
         {
             "name": "composer/class-map-generator",
-            "version": "1.3.4",
+            "version": "1.4.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/composer/class-map-generator.git",
-                "reference": "b1b3fd0b4eaf3ddf3ee230bc340bf3fff454a1a3"
+                "reference": "98bbf6780e56e0fd2404fe4b82eb665a0f93b783"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/composer/class-map-generator/zipball/b1b3fd0b4eaf3ddf3ee230bc340bf3fff454a1a3",
-                "reference": "b1b3fd0b4eaf3ddf3ee230bc340bf3fff454a1a3",
+                "url": "https://api.github.com/repos/composer/class-map-generator/zipball/98bbf6780e56e0fd2404fe4b82eb665a0f93b783",
+                "reference": "98bbf6780e56e0fd2404fe4b82eb665a0f93b783",
                 "shasum": ""
             },
             "require": {
@@ -14878,8 +14878,8 @@
                 "phpstan/phpstan-deprecation-rules": "^1",
                 "phpstan/phpstan-phpunit": "^1",
                 "phpstan/phpstan-strict-rules": "^1.1",
-                "symfony/filesystem": "^5.4 || ^6",
-                "symfony/phpunit-bridge": "^5"
+                "phpunit/phpunit": "^8",
+                "symfony/filesystem": "^5.4 || ^6"
             },
             "type": "library",
             "extra": {
@@ -14909,7 +14909,7 @@
             ],
             "support": {
                 "issues": "https://github.com/composer/class-map-generator/issues",
-                "source": "https://github.com/composer/class-map-generator/tree/1.3.4"
+                "source": "https://github.com/composer/class-map-generator/tree/1.4.0"
             },
             "funding": [
                 {
@@ -14925,7 +14925,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2024-06-12T14:13:04+00:00"
+            "time": "2024-10-03T18:14:00+00:00"
         },
         {
             "name": "composer/pcre",
@@ -18588,12 +18588,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/Roave/SecurityAdvisories.git",
-                "reference": "0abc1abb96987c7110ea5ee01f279e8f51718cf6"
+                "reference": "5aa91c2f219db1bd35df0db7a24e45083b853276"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/Roave/SecurityAdvisories/zipball/0abc1abb96987c7110ea5ee01f279e8f51718cf6",
-                "reference": "0abc1abb96987c7110ea5ee01f279e8f51718cf6",
+                "url": "https://api.github.com/repos/Roave/SecurityAdvisories/zipball/5aa91c2f219db1bd35df0db7a24e45083b853276",
+                "reference": "5aa91c2f219db1bd35df0db7a24e45083b853276",
                 "shasum": ""
             },
             "conflict": {
@@ -18731,9 +18731,9 @@
                 "dolibarr/dolibarr": "<19.0.2",
                 "dompdf/dompdf": "<2.0.4",
                 "doublethreedigital/guest-entries": "<3.1.2",
-                "drupal/core": ">=6,<6.38|>=7,<7.96|>=8,<=11.0.4",
-                "drupal/core-recommended": ">=8,<=11.0.4",
-                "drupal/drupal": ">=5,<5.11|>=6,<6.38|>=7,<7.80|>=8,<=11.0.4",
+                "drupal/core": ">=6,<6.38|>=7,<7.96|>=8,<10.3.6|>=11,<11.0.5",
+                "drupal/core-recommended": ">=8,<10.3.6|>=11,<11.0.5",
+                "drupal/drupal": ">=5,<5.11|>=6,<6.38|>=7,<7.80|>=8,<10.3.6|>=11,<11.0.5",
                 "duncanmcclean/guest-entries": "<3.1.2",
                 "dweeves/magmi": "<=0.7.24",
                 "ec-cube/ec-cube": "<2.4.4|>=2.11,<=2.17.1|>=3,<=3.0.18.0-patch4|>=4,<=4.1.2",
@@ -19177,7 +19177,7 @@
                 "subhh/libconnect": "<7.0.8|>=8,<8.1",
                 "sukohi/surpass": "<1",
                 "sulu/form-bundle": ">=2,<2.5.3",
-                "sulu/sulu": "<1.6.44|>=2,<2.4.17|>=2.5,<2.5.13",
+                "sulu/sulu": "<1.6.44|>=2,<2.6.5",
                 "sumocoders/framework-user-bundle": "<1.4",
                 "superbig/craft-audit": "<3.0.2",
                 "swag/paypal": "<5.4.4",
@@ -19408,7 +19408,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2024-10-02T23:04:46+00:00"
+            "time": "2024-10-03T19:05:02+00:00"
         },
         {
             "name": "sebastian/cli-parser",

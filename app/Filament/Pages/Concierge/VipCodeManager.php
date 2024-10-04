@@ -38,7 +38,7 @@ class VipCodeManager extends Page
             return ! session('simpleMode');
         }
 
-        return auth()->user()->hasRole(['super_admin', 'concierge']);
+        return auth()->user()->hasRole(['concierge']);
     }
 
     public function mount(): void
@@ -101,16 +101,6 @@ class VipCodeManager extends Page
                         'min' => 'The VIP Code field must be at least :min characters.',
                         'max' => 'The VIP Code field must be at least :max characters.',
                     ]),
-                /*->suffixAction(
-                        Action::make('copy')
-                            ->icon('heroicon-s-clipboard-document-check')
-                            ->action(function ($livewire, $state) {
-                                $livewire->js(
-                                    'window.navigator.clipboard.writeText("'.$state.'");
-                                    $tooltip("'.__('Copied to clipboard').'", { timeout: 1500 });'
-                                );
-                            })
-                    ),*/
                 Select::make('conciergeId')
                     ->label('Concierge')
                     ->required()

@@ -60,7 +60,8 @@ class ConciergeUserMenu extends Widget implements HasForms
                 })
                 ->default(session('region', ''))
                 ->selectablePlaceholder(false)
-                ->searchable(),
+                ->searchable()
+                ->visible(fn () => count(config('app.active_regions', [])) > 1),
         ])
             ->statePath('data')
             ->extraAttributes(['class' => 'inline-form']);
