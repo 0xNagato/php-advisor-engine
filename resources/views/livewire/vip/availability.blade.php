@@ -1,14 +1,19 @@
+<!--suppress CssUnusedSymbol -->
 @php
     use App\Enums\VenueStatus;
     use Carbon\Carbon;
 
-    $stickyHeaderTopPosition = isPrimaApp() ? 'top-0' : 'top-16';
+    $stickyHeaderTopPosition = 'top-0';
 @endphp
-<x-layouts.simple-wrapper padding="p-4" maxWidth="max-w-full">
-    {{ $this->form }}
+<x-layouts.simple-wrapper wrapper-class="" header-class="" content-class="max-w-3xl">
+    <div class="w-full">
+        {{ $this->form }}
+    </div>
 
     @if (filled($venues))
-        @include('partials.availability-table')
+        <div class="w-full mt-6">
+            @include('partials.availability-table')
+        </div>
     @endif
 
     <style>
