@@ -13,6 +13,11 @@ class DateRangeFilterWidget extends Widget
 
     protected static ?string $pollingInterval = null;
 
+    /**
+     * This needs to be set to false so it doesn't load the widget background
+     */
+    protected static bool $isLazy = false;
+
     #[Url('range')]
     public string $range = 'past_30_days';
 

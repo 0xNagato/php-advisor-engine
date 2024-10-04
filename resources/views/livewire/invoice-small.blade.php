@@ -1,13 +1,15 @@
 <x-filament-widgets::widget>
     <div class="flex items-center w-full gap-4 p-3 bg-white shadow bg-opacity-90 rounded-xl">
-        @if ($booking->schedule->venue->logo)
-            <img src="{{ $booking->venue->logo }}" alt="{{ $booking->schedule->venue->name }}"
-                class="object-cover max-h-[48px] max-w-[64px]">
-        @else
-            <span class="text-sm line-clamp-2">
-                {{ $booking->schedule->venue->name }}
-            </span>
-        @endif
+        <div class="flex items-center justify-center w-16 h-12">
+            @if ($booking->schedule->venue->logo)
+                <img src="{{ $booking->venue->logo }}" alt="{{ $booking->schedule->venue->name }}"
+                    class="object-contain max-h-[48px] max-w-[64px]">
+            @else
+                <span class="text-sm font-semibold text-center line-clamp-2">
+                    {{ $booking->schedule->venue->name }}
+                </span>
+            @endif
+        </div>
 
         <div class="flex flex-col flex-grow gap-1">
             <div class="font-semibold">{{ $booking->schedule->venue->name }}</div>
