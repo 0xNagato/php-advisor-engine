@@ -6,7 +6,6 @@ use App\Data\NotificationPreferencesData;
 use App\Models\User;
 use Closure;
 use Filament\Forms\Components\Fieldset;
-use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Forms\Concerns\InteractsWithForms;

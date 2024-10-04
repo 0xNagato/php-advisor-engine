@@ -92,8 +92,9 @@ class DatabaseSeeder extends Seeder
         $this->call([
             ShieldSeeder::class,
             ConciergeSeeder::class,
-            VenueSeeder::class,
-            BookingSeeder::class,
+            MiamiVenueSeeder::class,
+            // VenueSeeder::class,
+            // BookingSeeder::class,
         ]);
 
         Artisan::call('shield:generate --all');
