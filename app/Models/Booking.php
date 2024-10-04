@@ -62,6 +62,7 @@ class Booking extends Model
         'tax_amount_in_cents',
         'total_fee',
         'total_with_tax_in_cents',
+        'vip_code_id',
     ];
 
     protected $appends = ['guest_name', 'local_formatted_guest_phone'];
@@ -181,6 +182,14 @@ class Booking extends Model
     public function partnerVenue(): BelongsTo
     {
         return $this->belongsTo(Partner::class, 'partner_venue_id');
+    }
+
+    /**
+     * @return BelongsTo<VipCode, \App\Models\Booking>
+     */
+    public function vipCode(): BelongsTo
+    {
+        return $this->belongsTo(VipCode::class);
     }
 
     protected function guestName(): Attribute

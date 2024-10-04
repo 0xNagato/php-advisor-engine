@@ -2,17 +2,13 @@
 
 namespace App\Filament\Pages\Concierge;
 
+use App\Filament\DateRangeFilterAction;
 use App\Livewire\Concierge\ConciergeOverallLeaderboard;
 use App\Livewire\Concierge\ConciergeRecentBookings;
 use App\Livewire\ConciergeOverview;
 use App\Livewire\DateRangeFilterWidget;
 use Carbon\Carbon;
-use Filament\Forms\Components\Actions;
-use Filament\Forms\Components\Actions\Action;
-use Filament\Forms\Components\DatePicker;
-use Filament\Forms\Set;
 use Filament\Pages\Dashboard;
-use Filament\Pages\Dashboard\Actions\FilterAction;
 use Filament\Pages\Dashboard\Concerns\HasFiltersAction;
 use Illuminate\Contracts\Support\Htmlable;
 use Livewire\Attributes\On;
@@ -75,6 +71,12 @@ class ConciergeReportDashboard extends Dashboard
                 'startDate' => Carbon::parse($this->filters['startDate']),
                 'endDate' => Carbon::parse($this->filters['endDate']),
             ]),
+            ConciergeOverview::make([
+                'concierge' => auth()->user()->concierge,
+                'startDate' => Carbon::parse($this->filters['startDate']),
+                'endDate' => Carbon::parse($this->filters['endDate']),
+                'isVip' => true,
+            ]),
             ConciergeRecentBookings::make([
                 'concierge' => auth()->user()->concierge,
                 'columnSpan' => '1',
@@ -91,31 +93,7 @@ class ConciergeReportDashboard extends Dashboard
     protected function getHeaderActions(): array
     {
         return [
-            FilterAction::make()
-                ->label('Date Range')
-                ->iconButton()
-                ->icon('heroicon-o-calendar')
-                ->color('primary')
-                ->form([
-                    Actions::make([
-                        Action::make('last30Days')
-                            ->label('Last 30 Days')
-                            ->action(function (Set $set) {
-                                $set('startDate', now()->subDays(30)->format('Y-m-d'));
-                                $set('endDate', now()->format('Y-m-d'));
-                            }),
-                        Action::make('monthToDate')
-                            ->label('Month to Date')
-                            ->action(function (Set $set) {
-                                $set('startDate', now()->startOfMonth()->format('Y-m-d'));
-                                $set('endDate', now()->format('Y-m-d'));
-                            }),
-                    ]),
-                    DatePicker::make('startDate')
-                        ->native(false),
-                    DatePicker::make('endDate')
-                        ->native(false),
-                ]),
+            DateRangeFilterAction::make(),
         ];
     }
 

@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\VenueResource\Pages;
 
+use App\Filament\DateRangeFilterAction;
 use App\Filament\Resources\VenueResource;
 use App\Livewire\Venue\VenueOverallLeaderboard;
 use App\Livewire\Venue\VenueRecentBookings;
@@ -9,11 +10,6 @@ use App\Livewire\VenueOverview;
 use App\Models\Venue;
 use Carbon\Carbon;
 use Filament\Actions\EditAction;
-use Filament\Forms\Components\Actions;
-use Filament\Forms\Components\Actions\Action;
-use Filament\Forms\Components\DatePicker;
-use Filament\Forms\Set;
-use Filament\Pages\Dashboard\Actions\FilterAction;
 use Filament\Pages\Dashboard\Concerns\HasFiltersAction;
 use Filament\Resources\Pages\ViewRecord;
 use Illuminate\Contracts\Support\Htmlable;
@@ -71,31 +67,7 @@ class ViewVenue extends ViewRecord
             EditAction::make()
                 ->icon('heroicon-m-pencil-square')
                 ->iconButton(),
-            FilterAction::make()
-                ->label('Date Range')
-                ->iconButton()
-                ->icon('heroicon-o-calendar')
-                ->color('primary')
-                ->form([
-                    Actions::make([
-                        Action::make('last30Days')
-                            ->label('Last 30 Days')
-                            ->action(function (Set $set) {
-                                $set('startDate', now()->subDays(30)->format('Y-m-d'));
-                                $set('endDate', now()->format('Y-m-d'));
-                            }),
-                        Action::make('monthToDate')
-                            ->label('Month to Date')
-                            ->action(function (Set $set) {
-                                $set('startDate', now()->startOfMonth()->format('Y-m-d'));
-                                $set('endDate', now()->format('Y-m-d'));
-                            }),
-                    ]),
-                    DatePicker::make('startDate')
-                        ->native(false),
-                    DatePicker::make('endDate')
-                        ->native(false),
-                ]),
+            DateRangeFilterAction::make(),
         ];
     }
 

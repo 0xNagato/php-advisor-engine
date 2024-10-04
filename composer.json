@@ -76,6 +76,7 @@
     "nunomaduro/phpinsights": "^2.11",
     "pestphp/pest": "^2.0",
     "pestphp/pest-plugin-laravel": "^2.0",
+    "pestphp/pest-plugin-livewire": "^2.1",
     "projektgopher/whisky": "^0.7.0",
     "roave/security-advisories": "dev-latest",
     "spatie/laravel-horizon-watcher": "^1.1",
@@ -111,7 +112,11 @@
     ],
     "post-create-project-cmd": [
       "@php artisan key:generate --ansi"
-    ]
+    ],
+    "phpcs": "phpcs --standard=phpcs.xml --extensions=php --ignore=vendor --colors",
+    "rector": "rector process --dry-run --ansi",
+    "pint-test": "./vendor/bin/pint --test",
+    "pint": "./vendor/bin/pint --dirty"
   },
   "extra": {
     "laravel": {

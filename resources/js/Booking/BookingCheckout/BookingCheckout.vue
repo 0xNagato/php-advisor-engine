@@ -43,6 +43,7 @@ interface MingleData {
     phone: string;
     notes: string;
   };
+  is_vip?: boolean;
 }
 
 interface Props {
@@ -244,13 +245,15 @@ const emailInvoice = async () => {
           class="flex w-1/2 items-center justify-center rounded bg-indigo-600 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-700"
           @click="emailInvoice"
         >
-          <Mail class="mr-2 size-4" /> Email Invoice
+          <Mail class="mr-2 size-4" />
+          Email Invoice
         </button>
         <a
           :href="downloadInvoiceUrl"
           class="flex w-1/2 items-center justify-center rounded bg-indigo-600 px-4 py-2 text-center text-sm font-semibold text-white hover:bg-indigo-700"
         >
-          <Download class="mr-2 size-4" /> Download PDF
+          <Download class="mr-2 size-4" />
+          Download PDF
         </a>
       </div>
     </template>
@@ -343,6 +346,13 @@ const emailInvoice = async () => {
         >
           {{ isLoading ? 'Processing...' : 'Complete Reservation' }}
         </button>
+        <a
+          v-if="mingleData.is_vip"
+          href="/vip/booking"
+          class="mt-4 block w-full rounded bg-gray-700 px-4 py-2 text-center font-semibold text-white hover:bg-gray-800"
+        >
+          Return to Availability Calendar
+        </a>
       </form>
       <div v-if="errorMessage" class="mt-4 text-red-500">
         {{ errorMessage }}

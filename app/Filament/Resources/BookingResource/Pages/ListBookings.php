@@ -40,7 +40,10 @@ class ListBookings extends ListRecords
             ->columns([
                 TextColumn::make('id')
                     ->label('Booking')
-                    ->formatStateUsing(fn (Booking $record) => view('partials.booking-info-column', ['record' => $record])),
+                    ->formatStateUsing(fn (Booking $record) => view(
+                        'partials.booking-info-column',
+                        ['record' => $record]
+                    )),
                 TextColumn::make('total_fee')
                     ->money(fn ($record) => $record->currency, divideBy: 100)
                     ->alignRight(),
@@ -50,13 +53,17 @@ class ListBookings extends ListRecords
             ->filters([
                 Filter::make('unconfirmed')
                     ->query(fn (Builder $query) => $query->whereNull('venue_confirmed_at')),
+                Filter::make('vip_code_id')
+                    ->label('VIP')
+                    ->query(fn (Builder $query): Builder => $query->whereNotNull('vip_code_id')),
             ])
             ->actions([
                 Action::make('resendNotification')
-                    ->hidden(fn (Booking $record) => ! auth()->user()->hasRole('super_admin'))
+                    ->hidden(fn () => ! auth()->user()->hasRole('super_admin'))
                     ->label('Resend Notification')
                     ->requiresConfirmation()
-                    ->icon(fn (Booking $record) => is_null($record->venue_confirmed_at) ? 'ri-refresh-line' : 'heroicon-o-check-circle')
+                    ->icon(fn (Booking $record
+                    ) => is_null($record->venue_confirmed_at) ? 'ri-refresh-line' : 'heroicon-o-check-circle')
                     ->iconButton()
                     ->color(fn (Booking $record) => is_null($record->venue_confirmed_at) ? 'indigo' : 'success')
                     ->requiresConfirmation()

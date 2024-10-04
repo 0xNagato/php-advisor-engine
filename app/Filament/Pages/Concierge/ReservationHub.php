@@ -81,6 +81,11 @@ class ReservationHub extends Page
         return auth()->user()?->hasRole('concierge');
     }
 
+    public static function shouldRegisterNavigation(): bool
+    {
+        return auth()->user()?->hasRole('concierge');
+    }
+
     public function mount(): void
     {
         $region = Region::query()->find(session('region', 'miami'));
@@ -156,7 +161,8 @@ class ReservationHub extends Page
             $requestedDate = Carbon::createFromFormat('Y-m-d', $this->data['date'], $userTimezone);
             $currentDate = Carbon::now($userTimezone);
 
-            if ($this->isSameDayReservation($key, $requestedDate, $currentDate) && $this->isPastReservationTime($userTimezone)) {
+            if ($this->isSameDayReservation($key, $requestedDate,
+                $currentDate) && $this->isPastReservationTime($userTimezone)) {
                 $this->resetSchedules();
 
                 return;
@@ -197,7 +203,8 @@ class ReservationHub extends Page
 
     protected function isPastReservationTime($userTimezone): bool
     {
-        $reservationTime = Carbon::createFromFormat('H:i:s', $this->form->getState()['reservation_time'], $userTimezone);
+        $reservationTime = Carbon::createFromFormat('H:i:s', $this->form->getState()['reservation_time'],
+            $userTimezone);
         $currentTime = Carbon::now($userTimezone);
 
         return $reservationTime?->lt($currentTime);
@@ -205,7 +212,8 @@ class ReservationHub extends Page
 
     protected function adjustReservationTime($userTimezone): string
     {
-        $reservationTime = Carbon::createFromFormat('H:i:s', $this->form->getState()['reservation_time'], $userTimezone);
+        $reservationTime = Carbon::createFromFormat('H:i:s', $this->form->getState()['reservation_time'],
+            $userTimezone);
         $currentTime = Carbon::now($userTimezone);
 
         if ($reservationTime?->copy()->subMinutes(self::MINUTES_PAST)->gt($currentTime)) {
@@ -217,7 +225,8 @@ class ReservationHub extends Page
 
     protected function calculateEndTimeForQuery($reservationTime, $userTimezone): string
     {
-        $endTime = Carbon::createFromFormat('H:i:s', $reservationTime, $userTimezone)?->addMinutes(self::MINUTES_FUTURE);
+        $endTime = Carbon::createFromFormat('H:i:s', $reservationTime,
+            $userTimezone)?->addMinutes(self::MINUTES_FUTURE);
         $limitTime = Carbon::createFromTime(23, 59, 0, $userTimezone);
 
         return $endTime->gt($limitTime) ? '23:59:59' : $endTime->format('H:i:s');
@@ -241,8 +250,12 @@ class ReservationHub extends Page
             ->get();
     }
 
-    protected function getSchedulesThisWeek(Carbon $requestedDate, Carbon $currentDate, $venueId, $guestCount): Collection
-    {
+    protected function getSchedulesThisWeek(
+        Carbon $requestedDate,
+        Carbon $currentDate,
+        $venueId,
+        $guestCount
+    ): Collection {
         if ($requestedDate->isSameDay($currentDate)) {
             return ScheduleWithBooking::with('venue')
                 ->where('venue_id', $venueId)

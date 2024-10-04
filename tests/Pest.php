@@ -1,6 +1,12 @@
 <?php
 
+use App\Models\Concierge;
+use App\Models\Partner;
+use App\Models\User;
+use App\Models\Venue;
+use Database\Seeders\PartnerSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Spatie\Permission\Models\Role;
 use Tests\TestCase;
 
 /*
@@ -14,7 +20,48 @@ use Tests\TestCase;
 |
 */
 
-uses(TestCase::class, RefreshDatabase::class)->in('Feature');
+uses(TestCase::class, RefreshDatabase::class)
+    ->beforeEach(function () {
+        Role::create(['name' => 'super_admin']);
+        Role::create(['name' => 'concierge']);
+        Role::create(['name' => 'venue']);
+        Role::create(['name' => 'partner']);
+        $this->seed(PartnerSeeder::class);
+
+        User::factory([
+            'first_name' => 'Andrew',
+            'last_name' => 'Weir',
+            'email' => 'andru.weir@gmail.com',
+            'phone' => '+16473823326',
+            'password' => bcrypt('password'),
+        ])->create()
+            ->assignRole('super_admin');
+        User::factory([
+            'first_name' => 'Demo',
+            'last_name' => 'Venue',
+            'email' => 'venue@primavip.co',
+            'password' => bcrypt('demo2024'),
+            'partner_referral_id' => Partner::query()->inRandomOrder()->first()->id,
+        ])
+            ->has(Venue::factory([
+                'name' => 'Demo Venue',
+            ]))
+            ->create()
+            ->assignRole('venue');
+        User::factory([
+            'first_name' => 'Demo',
+            'last_name' => 'Concierge',
+            'email' => 'concierge@primavip.co',
+            'password' => bcrypt('demo2024'),
+            'partner_referral_id' => Partner::query()->inRandomOrder()->first()->id,
+        ])
+            ->has(Concierge::factory([
+                'hotel_name' => 'Demo Hotel',
+            ]))
+            ->create()
+            ->assignRole('concierge');
+    })
+    ->in('Feature', 'Unit');
 
 /*
 |--------------------------------------------------------------------------
@@ -27,10 +74,6 @@ uses(TestCase::class, RefreshDatabase::class)->in('Feature');
 |
 */
 
-expect()->extend('toBeOne', function () {
-    return $this->toBe(1);
-});
-
 /*
 |--------------------------------------------------------------------------
 | Functions
@@ -41,8 +84,3 @@ expect()->extend('toBeOne', function () {
 | global functions to help you to reduce the number of lines of code in your test files.
 |
 */
-
-function something()
-{
-    // ..
-}

@@ -120,4 +120,14 @@ class Concierge extends Model
             'id' // Local key on the users table...
         );
     }
+
+    /**
+     * Description
+     *
+     * @return HasMany<VIPCode>
+     */
+    public function vipCodes(): HasMany
+    {
+        return $this->hasMany(VIPCode::class);
+    }
 }

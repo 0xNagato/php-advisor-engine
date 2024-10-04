@@ -41,25 +41,9 @@ class AvailabilityCalendar extends Page
     public function mount(): void
     {
         $region = Region::query()->find(session('region', 'miami'));
-        $this->timezone = $region->timezone;
-        $this->currency = $region->currency;
+        $this->timezone = $region?->timezone;
+        $this->currency = $region?->currency;
         $this->form->fill();
-
-        // This is used for testing the design so you don't need to fill out the form every time
-        // $this->form->fill([
-        //     'date' => now(auth()->user()->timezone)->format('Y-m-d'),
-        //     'radio_date' => now(auth()->user()->timezone)->format('Y-m-d'),
-        //     'select_date' => now(auth()->user()->timezone)->format('Y-m-d'),
-        //     'guest_count' => 2,
-        //     'reservation_time' => now(auth()->user()->timezone)->format('H:i:s'),
-        // ]);
-        //
-        // $this->venues = Venue::available()->with(['schedules' => function ($query) {
-        //     $query->where('booking_date', now(auth()->user()->timezone)->format('Y-m-d'))
-        //         ->where('party_size', 2)
-        //         ->where('start_time', '>=', now(auth()->user()->timezone)->format('H:i:s'))
-        //         ->where('start_time', '<=', now(auth()->user()->timezone)->addMinutes(150)->format('H:i:s'));
-        // }])->get();
     }
 
     public static function canAccess(): bool
@@ -109,8 +93,8 @@ class AvailabilityCalendar extends Page
     {
         $region = Region::query()->find(session('region', 'miami'));
 
-        $this->timezone = $region->timezone;
-        $this->currency = $region->currency;
+        $this->timezone = $region?->timezone;
+        $this->currency = $region?->currency;
 
         $this->venues = null;
         $this->form->fill();

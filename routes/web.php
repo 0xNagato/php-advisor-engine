@@ -4,6 +4,7 @@ use App\Http\Controllers\Booking\BookingCheckoutController;
 use App\Http\Controllers\DemoAuthController;
 use App\Http\Controllers\DownloadInvoiceController;
 use App\Http\Controllers\ExceptionFormController;
+use App\Http\Controllers\Vip\LogoutController;
 use App\Livewire\Booking\CreateBooking;
 use App\Livewire\Booking\CustomerInvoice;
 use App\Livewire\Concierge\ConciergeInvitation;
@@ -11,6 +12,8 @@ use App\Livewire\Venue\VenueBookingConfirmation;
 use App\Livewire\Venue\VenueContactLogin;
 use App\Livewire\Venue\VenueContactRecentBookings;
 use App\Livewire\Venue\VenueSpecialRequestConfirmation;
+use App\Livewire\Vip\AvailabilityCalendar;
+use App\Livewire\Vip\Login;
 
 Route::get('/', static function () {
     return view('web.index');
@@ -43,9 +46,18 @@ Route::get('/demo/auth/{user_id}', [DemoAuthController::class, 'auth'])->name('d
 Route::get('/demo/redirect', [DemoAuthController::class, 'redirect'])->name('demo.redirect');
 
 Route::get('/platform/login/venue', VenueContactLogin::class)->name('venue.login');
-Route::get('/venues/contact-bookings', VenueContactRecentBookings::class)->name('venue.contact.bookings')->middleware('signed');
+Route::get('/venues/contact-bookings', VenueContactRecentBookings::class)
+    ->name('venue.contact.bookings')->middleware('signed');
 
 Route::post('/exception-form', ExceptionFormController::class)->name('exception.form');
+
+Route::group(['prefix' => 'vip', 'as' => 'vip.'], function () {
+    Route::get('login/{code?}', Login::class)->name('login');
+    Route::group(['middleware' => 'vip'], function () {
+        Route::get('booking', AvailabilityCalendar::class)->name('booking');
+        Route::get('logout', LogoutController::class)->name('logout');
+    });
+});
 
 Route::get('/privacy', function () {
     return view('privacy');

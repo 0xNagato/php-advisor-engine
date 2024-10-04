@@ -25,7 +25,7 @@ class BookingResource extends Resource
             return ! session('simpleMode');
         }
 
-        return auth()->user()->hasRole(['concierge', 'super_admin', 'partner']);
+        return auth()->user()->hasRole(['super_admin', 'partner', 'concierge']);
     }
 
     public static function form(Form $form): Form
@@ -109,12 +109,8 @@ class BookingResource extends Resource
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
-            ->filters([
-
-            ])
-            ->actions([
-
-            ]);
+            ->filters([])
+            ->actions([]);
     }
 
     public static function getPages(): array

@@ -121,16 +121,15 @@
     let countdownDiv = document.getElementById('countdown');
     let count = 300; // 5 minutes in seconds
 
-    setInterval(() => {
+    let countDownInterval = setInterval(() => {
         count--;
         let minutes = Math.floor(count / 60);
         let seconds = count % 60;
         countdownDiv.innerHTML = `${ minutes }:${ seconds.toString().padStart(2, '0') }`;
         if (count === 0) {
-            clearInterval();
+            clearInterval(countDownInterval);
         }
     }, 1000);
-
 
     const stripe = Stripe('{{ config('services.stripe.key') }}');
 
@@ -141,7 +140,6 @@
     });
 
     card.mount('#card-element');
-
 
     const form = document.getElementById('form');
 

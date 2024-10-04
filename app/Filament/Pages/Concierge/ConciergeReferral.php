@@ -91,7 +91,9 @@ class ConciergeReferral extends Page
                                 Actions::make([
                                     Action::make('sendText')
                                         ->label('Send SMS')
-                                        ->disabled(fn (Get $get) => blank($get('phone')) || $get('first_name') === '' || $get('last_name') === '')
+                                        ->disabled(fn (Get $get
+                                        ) => blank($get('phone')) || $get('first_name') === '' ||
+                                            $get('last_name') === '')
                                         ->action(function () {
                                             $this->sendInviteViaText();
                                         }),
@@ -126,7 +128,9 @@ class ConciergeReferral extends Page
                                 Actions::make([
                                     Action::make('sendEmail')
                                         ->label('Send Email')
-                                        ->disabled(fn (Get $get) => blank($get('email')) || $get('first_name') === '' || $get('last_name') === '')
+                                        ->disabled(fn (Get $get
+                                        ) => blank($get('email')) || $get('first_name') === ''
+                                            || $get('last_name') === '')
                                         ->action(function () {
                                             $this->sendInviteViaEmail();
                                         }),

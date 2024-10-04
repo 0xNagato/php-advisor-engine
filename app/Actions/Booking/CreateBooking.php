@@ -30,12 +30,23 @@ class CreateBooking
      * @throws Exception
      * @throws Throwable
      */
-    public function handle(int $scheduleTemplateId, array $data, string $timezone, string $currency): CreateBookingReturnData
-    {
+    public function handle(
+        int $scheduleTemplateId,
+        array $data,
+        string $timezone,
+        string $currency,
+        bool $isVip = false
+    ): CreateBookingReturnData {
         $scheduleTemplate = ScheduleTemplate::query()->findOrFail($scheduleTemplateId);
 
-        /** @var Carbon $bookingAt */
-        $bookingAt = Carbon::createFromFormat('Y-m-d H:i:s', $data['date'].' '.$scheduleTemplate->start_time, $timezone);
+        /**
+         * @var Carbon $bookingAt
+         */
+        $bookingAt = Carbon::createFromFormat(
+            'Y-m-d H:i:s',
+            $data['date'].' '.$scheduleTemplate->start_time,
+            $timezone
+        );
         $currentDate = Carbon::now($timezone);
 
         throw_if(
@@ -43,14 +54,18 @@ class CreateBooking
             new RuntimeException('Booking cannot be created more than '.self::MAX_DAYS_IN_ADVANCE.' days in advance.')
         );
 
+        $conciergeId = $isVip ? Auth::guard('vip_code')->user()->concierge_id
+            : Auth::user()->concierge->id;
+
         $booking = Booking::query()->create([
             'schedule_template_id' => $scheduleTemplate->id,
             'guest_count' => $data['guest_count'],
-            'concierge_id' => Auth::user()->concierge->id,
+            'concierge_id' => $conciergeId,
             'status' => BookingStatus::PENDING,
             'booking_at' => $bookingAt,
             'currency' => $currency,
             'is_prime' => $scheduleTemplate->prime_time,
+            'vip_code_id' => session('vip_code_id') ?? null,
         ]);
 
         $taxData = app(SalesTaxService::class)->calculateTax(

@@ -2,6 +2,7 @@
 
 namespace App\Filament\Pages;
 
+use App\Filament\DateRangeFilterAction;
 use App\Livewire\Admin\AdminRecentBookings;
 use App\Livewire\BookingsOverview;
 use App\Livewire\Concierge\ConciergeOverallLeaderboard;
@@ -9,13 +10,8 @@ use App\Livewire\DateRangeFilterWidget;
 use App\Livewire\Partner\PartnerOverallLeaderboard;
 use App\Livewire\Venue\VenueOverallLeaderboard;
 use Carbon\Carbon;
-use Filament\Forms\Components\Actions;
-use Filament\Forms\Components\Actions\Action;
-use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Form;
-use Filament\Forms\Set;
 use Filament\Pages\Dashboard;
-use Filament\Pages\Dashboard\Actions\FilterAction;
 use Filament\Pages\Dashboard\Concerns\HasFiltersAction;
 use Illuminate\Contracts\Support\Htmlable;
 use Livewire\Attributes\On;
@@ -101,31 +97,7 @@ class AdminDashboard extends Dashboard
     protected function getHeaderActions(): array
     {
         return [
-            FilterAction::make()
-                ->label('Date Range')
-                ->iconButton()
-                ->icon('heroicon-o-calendar')
-                ->color('primary')
-                ->form([
-                    Actions::make([
-                        Action::make('last30Days')
-                            ->label('Last 30 Days')
-                            ->action(function (Set $set) {
-                                $set('startDate', now()->subDays(30)->format('Y-m-d'));
-                                $set('endDate', now()->format('Y-m-d'));
-                            }),
-                        Action::make('monthToDate')
-                            ->label('Month to Date')
-                            ->action(function (Set $set) {
-                                $set('startDate', now()->startOfMonth()->format('Y-m-d'));
-                                $set('endDate', now()->format('Y-m-d'));
-                            }),
-                    ]),
-                    DatePicker::make('startDate')
-                        ->native(false),
-                    DatePicker::make('endDate')
-                        ->native(false),
-                ]),
+            DateRangeFilterAction::make(),
         ];
     }
 

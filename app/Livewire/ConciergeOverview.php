@@ -8,6 +8,7 @@ use App\Services\CurrencyConversionService;
 use Carbon\Carbon;
 use Filament\Widgets\StatsOverviewWidget as BaseWidget;
 use Filament\Widgets\StatsOverviewWidget\Stat;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\DB;
 use Livewire\Attributes\Reactive;
 
@@ -20,6 +21,8 @@ class ConciergeOverview extends BaseWidget
 
     #[Reactive]
     public ?string $endDate = null;
+
+    public bool $isVip = false;
 
     protected function getStats(): array
     {
@@ -35,19 +38,37 @@ class ConciergeOverview extends BaseWidget
         $prevTotalEarningsUSD = $currencyService->convertToUSD($prevEarnings['earnings']);
 
         $avgBookingValue = $this->getAverageBookingValue($startDate, $endDate);
-        $prevAvgBookingValue = $this->getAverageBookingValue($startDate->copy()->subDays($startDate->diffInDays($endDate)), $startDate);
+        $prevAvgBookingValue = $this->getAverageBookingValue(
+            $startDate->copy()->subDays($startDate->diffInDays($endDate)),
+            $startDate
+        );
 
         return [
-            $this->createStat('Direct Bookings', $earnings['number_of_direct_bookings'], null, $prevEarnings['number_of_direct_bookings'])
+            $this->createStat(
+                $this->getLabel('Direct Bookings'),
+                $earnings['number_of_direct_bookings'],
+                null,
+                $prevEarnings['number_of_direct_bookings']
+            )
                 ->chart($chartData['direct_bookings'])
                 ->color('success'),
-            $this->createStat('Referral Bookings', $earnings['number_of_referral_bookings'], null, $prevEarnings['number_of_referral_bookings'])
+            $this->createStat(
+                $this->getLabel('Referral Bookings'),
+                $earnings['number_of_referral_bookings'],
+                null,
+                $prevEarnings['number_of_referral_bookings']
+            )
                 ->chart($chartData['referral_bookings'])
                 ->color('info'),
             $this->createEarningsStat($totalEarningsUSD, $prevTotalEarningsUSD, $earnings['earnings'])
                 ->chart($chartData['earnings'])
                 ->color('success'),
-            $this->createStat('Avg. Earning per Direct Booking', $avgBookingValue, 'USD', $prevAvgBookingValue)
+            $this->createStat(
+                $this->getLabel('Avg. Earning per Direct Booking'),
+                $avgBookingValue,
+                'USD',
+                $prevAvgBookingValue
+            )
                 ->chart($chartData['avg_booking_value'])
                 ->color('info'),
         ];
@@ -57,13 +78,18 @@ class ConciergeOverview extends BaseWidget
     {
         $earnings = Earning::query()
             ->whereNotNull('bookings.confirmed_at')
+            ->when($this->isVip, function (Builder $query) {
+                $query->whereNotNull('vip_code_id');
+            })
             ->join('bookings', 'earnings.booking_id', '=', 'bookings.id')
             ->where('earnings.user_id', $this->concierge->user_id)
             ->whereBetween('bookings.confirmed_at', [$startDate, $endDate])
             ->whereIn('earnings.type', ['concierge', 'concierge_referral_1', 'concierge_referral_2'])
             ->select(
-                DB::raw('COUNT(DISTINCT CASE WHEN earnings.type = "concierge" THEN bookings.id END) as number_of_direct_bookings'),
-                DB::raw('COUNT(DISTINCT CASE WHEN earnings.type IN ("concierge_referral_1", "concierge_referral_2") THEN bookings.id END) as number_of_referral_bookings'),
+                DB::raw('COUNT(DISTINCT CASE WHEN earnings.type = "concierge" THEN bookings.id END)
+                as number_of_direct_bookings'),
+                DB::raw('COUNT(DISTINCT CASE WHEN earnings.type IN
+                ("concierge_referral_1", "concierge_referral_2") THEN bookings.id END) as number_of_referral_bookings'),
                 DB::raw('SUM(earnings.amount) as total_earnings'),
                 'earnings.currency'
             )
@@ -81,6 +107,9 @@ class ConciergeOverview extends BaseWidget
     {
         $result = Earning::query()
             ->whereNotNull('bookings.confirmed_at')
+            ->when($this->isVip, function (Builder $query) {
+                $query->whereNotNull('vip_code_id');
+            })
             ->join('bookings', 'earnings.booking_id', '=', 'bookings.id')
             ->where('earnings.user_id', $this->concierge->user_id)
             ->whereBetween('bookings.confirmed_at', [$startDate, $endDate])
@@ -110,6 +139,9 @@ class ConciergeOverview extends BaseWidget
     {
         $dailyData = Earning::query()
             ->whereNotNull('bookings.confirmed_at')
+            ->when($this->isVip, function (Builder $query) {
+                $query->whereNotNull('vip_code_id');
+            })
             ->join('bookings', 'earnings.booking_id', '=', 'bookings.id')
             ->where('earnings.user_id', $this->concierge->user_id)
             ->whereBetween('bookings.confirmed_at', [$startDate, $endDate])
@@ -123,8 +155,14 @@ class ConciergeOverview extends BaseWidget
 
         $chartData = $dailyData->groupBy('date')->map(function ($dayData) use ($currencyService) {
             $directBookings = $dayData->where('type', 'concierge')->sum('bookings');
-            $referralBookings = $dayData->whereIn('type', ['concierge_referral_1', 'concierge_referral_2'])->sum('bookings');
-            $totalEarningsUSD = $currencyService->convertToUSD($dayData->pluck('total_earnings', 'currency')->toArray());
+            $referralBookings = $dayData->whereIn(
+                'type',
+                ['concierge_referral_1', 'concierge_referral_2']
+            )->sum('bookings');
+            $totalEarningsUSD = $currencyService->convertToUSD($dayData->pluck(
+                'total_earnings',
+                'currency'
+            )->toArray());
 
             $avgDirectEarningUSD = 0;
             $directBookingsData = $dayData->where('type', 'concierge');
@@ -180,9 +218,12 @@ class ConciergeOverview extends BaseWidget
         };
     }
 
-    protected function createEarningsStat(float $totalEarningsUSD, float $prevTotalEarningsUSD, array $currencyBreakdown): Stat
-    {
-        $stat = Stat::make('Earnings', '$'.number_format($totalEarningsUSD, 2));
+    protected function createEarningsStat(
+        float $totalEarningsUSD,
+        float $prevTotalEarningsUSD,
+        array $currencyBreakdown
+    ): Stat {
+        $stat = Stat::make($this->getLabel('Earnings'), '$'.number_format($totalEarningsUSD, 2));
 
         $breakdownDescription = collect($currencyBreakdown)
             ->map(function ($amount, $currency) {
@@ -200,5 +241,14 @@ class ConciergeOverview extends BaseWidget
         }
 
         return $stat;
+    }
+
+    public function getLabel(string $label): string
+    {
+        if ($this->isVip) {
+            return 'VIP '.$label;
+        }
+
+        return $label;
     }
 }

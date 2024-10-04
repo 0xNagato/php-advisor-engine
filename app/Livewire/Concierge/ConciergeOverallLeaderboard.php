@@ -61,7 +61,8 @@ class ConciergeOverallLeaderboard extends Widget
                 ->get();
 
             $conciergeTotals = $earnings->groupBy('user_id')->map(function ($conciergeEarnings) use ($currencyService) {
-                $totalUSD = $conciergeEarnings->sum(fn ($earning) => $currencyService->convertToUSD([$earning->currency => $earning->total_earned]));
+                $totalUSD = $conciergeEarnings->sum(fn ($earning
+                ) => $currencyService->convertToUSD([$earning->currency => $earning->total_earned]));
 
                 return [
                     'user_id' => $conciergeEarnings->first()->user_id,

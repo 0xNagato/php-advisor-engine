@@ -4,6 +4,7 @@ namespace App\Livewire\Concierge;
 
 use App\Models\Booking;
 use App\Models\Concierge;
+use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Filament\Widgets\Concerns\InteractsWithPageFilters;
@@ -56,6 +57,12 @@ class ConciergeRecentBookings extends BaseWidget
             ->emptyStateIcon('heroicon-o-currency-dollar')
             ->emptyStateHeading('Earnings will show here when bookings begin!')
             ->columns([
+                IconColumn::make('vip_code_id')
+                    ->icon(fn (?int $state): string => blank($state) ? 'heroicon-o-no-symbol' :
+                        'heroicon-o-check-circle'
+                    )
+                    ->color('success')
+                    ->label('Vip'),
                 TextColumn::make('schedule.venue.name')
                     ->label('Venue')
                     ->searchable(),
