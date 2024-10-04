@@ -5,7 +5,7 @@
 
 /**
  * A helper file for Laravel, to provide autocomplete information to your IDE
- * Generated for Laravel 11.25.0.
+ * Generated for Laravel 11.26.0.
  *
  * This file should not be included in your code, only analyzed by your IDE!
  *
@@ -6623,8 +6623,9 @@ namespace Illuminate\Support\Facades {
                     /**
          * Set the table prefix and return the grammar.
          *
-         * @param \Illuminate\Database\Grammar $grammar
-         * @return \Illuminate\Database\Grammar 
+         * @template TGrammar of \Illuminate\Database\Grammar
+         * @param \Illuminate\Database\TGrammar $grammar
+         * @return \Illuminate\Database\TGrammar 
          * @static 
          */        public static function withTablePrefix($grammar)
         {            //Method inherited from \Illuminate\Database\Connection         
@@ -6646,7 +6647,7 @@ namespace Illuminate\Support\Facades {
          * Get the connection resolver for the given driver.
          *
          * @param string $driver
-         * @return mixed 
+         * @return \Closure|null 
          * @static 
          */        public static function getResolver($driver)
         {            //Method inherited from \Illuminate\Database\Connection         
@@ -10754,7 +10755,7 @@ namespace Illuminate\Support\Facades {
                     /**
          * Register a named limiter configuration.
          *
-         * @param string $name
+         * @param \BackedEnum|\UnitEnum|string $name
          * @param \Closure $callback
          * @return \Illuminate\Cache\RateLimiter 
          * @static 
@@ -10766,7 +10767,7 @@ namespace Illuminate\Support\Facades {
                     /**
          * Get the given named rate limiter.
          *
-         * @param string $name
+         * @param \BackedEnum|\UnitEnum|string $name
          * @return \Closure|null 
          * @static 
          */        public static function limiter($name)
@@ -21924,577 +21925,6 @@ namespace Torann\GeoIP\Facades {
             }
     }
 
-namespace Illuminate\Support {
-            /**
-     * 
-     *
-     * @template TKey of array-key
-     * @template-covariant TValue
-     * @implements \ArrayAccess<TKey, TValue>
-     * @implements \Illuminate\Support\Enumerable<TKey, TValue>
-     */        class Collection {
-                    /**
-         * 
-         *
-         * @see \Barryvdh\Debugbar\ServiceProvider::register()
-         * @static 
-         */        public static function debug()
-        {
-                        return \Illuminate\Support\Collection::debug();
-        }
-                    /**
-         * 
-         *
-         * @see \LaraDumps\LaraDumps\LaraDumpsServiceProvider::registerMacros()
-         * @param string $label
-         * @static 
-         */        public static function ds($label = '')
-        {
-                        return \Illuminate\Support\Collection::ds($label);
-        }
-            }
-            /**
-     * 
-     *
-     */        class Str {
-                    /**
-         * 
-         *
-         * @see \Filament\Support\SupportServiceProvider::packageBooted()
-         * @param string $html
-         * @return string 
-         * @static 
-         */        public static function sanitizeHtml($html)
-        {
-                        return \Illuminate\Support\Str::sanitizeHtml($html);
-        }
-                    /**
-         * 
-         *
-         * @see \Filament\Support\SupportServiceProvider::packageBooted()
-         * @param string $value
-         * @return string 
-         * @static 
-         */        public static function ucwords($value)
-        {
-                        return \Illuminate\Support\Str::ucwords($value);
-        }
-            }
-            /**
-     * 
-     *
-     */        class Stringable {
-                    /**
-         * 
-         *
-         * @see \LaraDumps\LaraDumps\LaraDumpsServiceProvider::registerMacros()
-         * @param string $label
-         * @static 
-         */        public static function ds($label = '')
-        {
-                        return \Illuminate\Support\Stringable::ds($label);
-        }
-                    /**
-         * 
-         *
-         * @see \Filament\Support\SupportServiceProvider::packageBooted()
-         * @return \Illuminate\Support\Stringable 
-         * @static 
-         */        public static function sanitizeHtml()
-        {
-                        return \Illuminate\Support\Stringable::sanitizeHtml();
-        }
-                    /**
-         * 
-         *
-         * @see \Filament\Support\SupportServiceProvider::packageBooted()
-         * @return \Illuminate\Support\Stringable 
-         * @static 
-         */        public static function ucwords()
-        {
-                        return \Illuminate\Support\Stringable::ucwords();
-        }
-            }
-    }
-
-namespace Illuminate\Http {
-            /**
-     * 
-     *
-     */        class Request {
-                    /**
-         * 
-         *
-         * @see \Illuminate\Foundation\Providers\FoundationServiceProvider::registerRequestValidation()
-         * @param array $rules
-         * @param mixed $params
-         * @static 
-         */        public static function validate($rules, ...$params)
-        {
-                        return \Illuminate\Http\Request::validate($rules, ...$params);
-        }
-                    /**
-         * 
-         *
-         * @see \Illuminate\Foundation\Providers\FoundationServiceProvider::registerRequestValidation()
-         * @param string $errorBag
-         * @param array $rules
-         * @param mixed $params
-         * @static 
-         */        public static function validateWithBag($errorBag, $rules, ...$params)
-        {
-                        return \Illuminate\Http\Request::validateWithBag($errorBag, $rules, ...$params);
-        }
-                    /**
-         * 
-         *
-         * @see \Illuminate\Foundation\Providers\FoundationServiceProvider::registerRequestSignatureValidation()
-         * @param mixed $absolute
-         * @static 
-         */        public static function hasValidSignature($absolute = true)
-        {
-                        return \Illuminate\Http\Request::hasValidSignature($absolute);
-        }
-                    /**
-         * 
-         *
-         * @see \Illuminate\Foundation\Providers\FoundationServiceProvider::registerRequestSignatureValidation()
-         * @static 
-         */        public static function hasValidRelativeSignature()
-        {
-                        return \Illuminate\Http\Request::hasValidRelativeSignature();
-        }
-                    /**
-         * 
-         *
-         * @see \Illuminate\Foundation\Providers\FoundationServiceProvider::registerRequestSignatureValidation()
-         * @param mixed $ignoreQuery
-         * @param mixed $absolute
-         * @static 
-         */        public static function hasValidSignatureWhileIgnoring($ignoreQuery = [], $absolute = true)
-        {
-                        return \Illuminate\Http\Request::hasValidSignatureWhileIgnoring($ignoreQuery, $absolute);
-        }
-                    /**
-         * 
-         *
-         * @see \Illuminate\Foundation\Providers\FoundationServiceProvider::registerRequestSignatureValidation()
-         * @param mixed $ignoreQuery
-         * @static 
-         */        public static function hasValidRelativeSignatureWhileIgnoring($ignoreQuery = [])
-        {
-                        return \Illuminate\Http\Request::hasValidRelativeSignatureWhileIgnoring($ignoreQuery);
-        }
-            }
-    }
-
-namespace Illuminate\Routing {
-            /**
-     * 
-     *
-     * @mixin \Illuminate\Routing\RouteRegistrar
-     */        class Router {
-                    /**
-         * 
-         *
-         * @see \Lab404\Impersonate\ImpersonateServiceProvider::registerRoutesMacro()
-         * @static 
-         */        public static function impersonate()
-        {
-                        return \Illuminate\Routing\Router::impersonate();
-        }
-            }
-            /**
-     * 
-     *
-     */        class Route {
-                    /**
-         * 
-         *
-         * @see \Livewire\Features\SupportLazyLoading\SupportLazyLoading::registerRouteMacro()
-         * @param mixed $enabled
-         * @static 
-         */        public static function lazy($enabled = true)
-        {
-                        return \Illuminate\Routing\Route::lazy($enabled);
-        }
-                    /**
-         * 
-         *
-         * @see \Spatie\Permission\PermissionServiceProvider::registerMacroHelpers()
-         * @param mixed $roles
-         * @static 
-         */        public static function role($roles = [])
-        {
-                        return \Illuminate\Routing\Route::role($roles);
-        }
-                    /**
-         * 
-         *
-         * @see \Spatie\Permission\PermissionServiceProvider::registerMacroHelpers()
-         * @param mixed $permissions
-         * @static 
-         */        public static function permission($permissions = [])
-        {
-                        return \Illuminate\Routing\Route::permission($permissions);
-        }
-            }
-    }
-
-namespace Illuminate\Database\Query {
-            /**
-     * 
-     *
-     */        class Builder {
-                    /**
-         * 
-         *
-         * @see \Kirschbaum\PowerJoins\Mixins\QueryBuilderExtraMethods::getGroupBy()
-         * @static 
-         */        public static function getGroupBy()
-        {
-                        return \Illuminate\Database\Query\Builder::getGroupBy();
-        }
-                    /**
-         * 
-         *
-         * @see \Kirschbaum\PowerJoins\Mixins\QueryBuilderExtraMethods::getSelect()
-         * @static 
-         */        public static function getSelect()
-        {
-                        return \Illuminate\Database\Query\Builder::getSelect();
-        }
-                    /**
-         * 
-         *
-         * @see \LaraDumps\LaraDumps\LaraDumpsServiceProvider::registerMacros()
-         * @static 
-         */        public static function ds()
-        {
-                        return \Illuminate\Database\Query\Builder::ds();
-        }
-            }
-    }
-
-namespace Illuminate\Database\Eloquent\Relations {
-            /**
-     * 
-     *
-     * @template TRelatedModel of \Illuminate\Database\Eloquent\Model
-     * @template TDeclaringModel of \Illuminate\Database\Eloquent\Model
-     * @template TResult
-     * @mixin \Illuminate\Database\Eloquent\Builder<TRelatedModel>
-     */        class Relation {
-                    /**
-         * 
-         *
-         * @see \Kirschbaum\PowerJoins\Mixins\RelationshipsExtraMethods::performJoinForEloquentPowerJoins()
-         * @param mixed $builder
-         * @param mixed $joinType
-         * @param mixed $callback
-         * @param mixed $alias
-         * @param bool $disableExtraConditions
-         * @param string|null $morphable
-         * @static 
-         */        public static function performJoinForEloquentPowerJoins($builder, $joinType = 'leftJoin', $callback = null, $alias = null, $disableExtraConditions = false, $morphable = null)
-        {
-                        return \Illuminate\Database\Eloquent\Relations\Relation::performJoinForEloquentPowerJoins($builder, $joinType, $callback, $alias, $disableExtraConditions, $morphable);
-        }
-                    /**
-         * 
-         *
-         * @see \Kirschbaum\PowerJoins\Mixins\RelationshipsExtraMethods::performJoinForEloquentPowerJoinsForBelongsTo()
-         * @param mixed $query
-         * @param mixed $joinType
-         * @param mixed $callback
-         * @param mixed $alias
-         * @param bool $disableExtraConditions
-         * @static 
-         */        public static function performJoinForEloquentPowerJoinsForBelongsTo($query, $joinType, $callback = null, $alias = null, $disableExtraConditions = false)
-        {
-                        return \Illuminate\Database\Eloquent\Relations\Relation::performJoinForEloquentPowerJoinsForBelongsTo($query, $joinType, $callback, $alias, $disableExtraConditions);
-        }
-                    /**
-         * 
-         *
-         * @see \Kirschbaum\PowerJoins\Mixins\RelationshipsExtraMethods::performJoinForEloquentPowerJoinsForBelongsToMany()
-         * @param mixed $builder
-         * @param mixed $joinType
-         * @param mixed $callback
-         * @param mixed $alias
-         * @param bool $disableExtraConditions
-         * @static 
-         */        public static function performJoinForEloquentPowerJoinsForBelongsToMany($builder, $joinType, $callback = null, $alias = null, $disableExtraConditions = false)
-        {
-                        return \Illuminate\Database\Eloquent\Relations\Relation::performJoinForEloquentPowerJoinsForBelongsToMany($builder, $joinType, $callback, $alias, $disableExtraConditions);
-        }
-                    /**
-         * 
-         *
-         * @see \Kirschbaum\PowerJoins\Mixins\RelationshipsExtraMethods::performJoinForEloquentPowerJoinsForMorphToMany()
-         * @param mixed $builder
-         * @param mixed $joinType
-         * @param mixed $callback
-         * @param mixed $alias
-         * @param bool $disableExtraConditions
-         * @static 
-         */        public static function performJoinForEloquentPowerJoinsForMorphToMany($builder, $joinType, $callback = null, $alias = null, $disableExtraConditions = false)
-        {
-                        return \Illuminate\Database\Eloquent\Relations\Relation::performJoinForEloquentPowerJoinsForMorphToMany($builder, $joinType, $callback, $alias, $disableExtraConditions);
-        }
-                    /**
-         * 
-         *
-         * @see \Kirschbaum\PowerJoins\Mixins\RelationshipsExtraMethods::performJoinForEloquentPowerJoinsForMorph()
-         * @param mixed $builder
-         * @param mixed $joinType
-         * @param mixed $callback
-         * @param mixed $alias
-         * @param bool $disableExtraConditions
-         * @static 
-         */        public static function performJoinForEloquentPowerJoinsForMorph($builder, $joinType, $callback = null, $alias = null, $disableExtraConditions = false)
-        {
-                        return \Illuminate\Database\Eloquent\Relations\Relation::performJoinForEloquentPowerJoinsForMorph($builder, $joinType, $callback, $alias, $disableExtraConditions);
-        }
-                    /**
-         * 
-         *
-         * @see \Kirschbaum\PowerJoins\Mixins\RelationshipsExtraMethods::performJoinForEloquentPowerJoinsForMorphTo()
-         * @param mixed $builder
-         * @param mixed $joinType
-         * @param mixed $callback
-         * @param mixed $alias
-         * @param bool $disableExtraConditions
-         * @param string|null $morphable
-         * @static 
-         */        public static function performJoinForEloquentPowerJoinsForMorphTo($builder, $joinType, $callback = null, $alias = null, $disableExtraConditions = false, $morphable = null)
-        {
-                        return \Illuminate\Database\Eloquent\Relations\Relation::performJoinForEloquentPowerJoinsForMorphTo($builder, $joinType, $callback, $alias, $disableExtraConditions, $morphable);
-        }
-                    /**
-         * 
-         *
-         * @see \Kirschbaum\PowerJoins\Mixins\RelationshipsExtraMethods::performJoinForEloquentPowerJoinsForHasMany()
-         * @param mixed $builder
-         * @param mixed $joinType
-         * @param mixed $callback
-         * @param mixed $alias
-         * @param bool $disableExtraConditions
-         * @static 
-         */        public static function performJoinForEloquentPowerJoinsForHasMany($builder, $joinType, $callback = null, $alias = null, $disableExtraConditions = false)
-        {
-                        return \Illuminate\Database\Eloquent\Relations\Relation::performJoinForEloquentPowerJoinsForHasMany($builder, $joinType, $callback, $alias, $disableExtraConditions);
-        }
-                    /**
-         * 
-         *
-         * @see \Kirschbaum\PowerJoins\Mixins\RelationshipsExtraMethods::performJoinForEloquentPowerJoinsForHasManyThrough()
-         * @param mixed $builder
-         * @param mixed $joinType
-         * @param mixed $callback
-         * @param mixed $alias
-         * @param bool $disableExtraConditions
-         * @static 
-         */        public static function performJoinForEloquentPowerJoinsForHasManyThrough($builder, $joinType, $callback = null, $alias = null, $disableExtraConditions = false)
-        {
-                        return \Illuminate\Database\Eloquent\Relations\Relation::performJoinForEloquentPowerJoinsForHasManyThrough($builder, $joinType, $callback, $alias, $disableExtraConditions);
-        }
-                    /**
-         * 
-         *
-         * @see \Kirschbaum\PowerJoins\Mixins\RelationshipsExtraMethods::performHavingForEloquentPowerJoins()
-         * @param mixed $builder
-         * @param mixed $operator
-         * @param mixed $count
-         * @param string|null $morphable
-         * @static 
-         */        public static function performHavingForEloquentPowerJoins($builder, $operator, $count, $morphable = null)
-        {
-                        return \Illuminate\Database\Eloquent\Relations\Relation::performHavingForEloquentPowerJoins($builder, $operator, $count, $morphable);
-        }
-                    /**
-         * 
-         *
-         * @param \Illuminate\Database\Eloquent\Model|array $model
-         * @see \Kirschbaum\PowerJoins\Mixins\RelationshipsExtraMethods::usesSoftDeletes()
-         * @static 
-         */        public static function usesSoftDeletes($model)
-        {
-                        return \Illuminate\Database\Eloquent\Relations\Relation::usesSoftDeletes($model);
-        }
-                    /**
-         * 
-         *
-         * @see \Kirschbaum\PowerJoins\Mixins\RelationshipsExtraMethods::getThroughParent()
-         * @static 
-         */        public static function getThroughParent()
-        {
-                        return \Illuminate\Database\Eloquent\Relations\Relation::getThroughParent();
-        }
-                    /**
-         * 
-         *
-         * @see \Kirschbaum\PowerJoins\Mixins\RelationshipsExtraMethods::getFarParent()
-         * @static 
-         */        public static function getFarParent()
-        {
-                        return \Illuminate\Database\Eloquent\Relations\Relation::getFarParent();
-        }
-                    /**
-         * 
-         *
-         * @see \Kirschbaum\PowerJoins\Mixins\RelationshipsExtraMethods::applyExtraConditions()
-         * @param \Kirschbaum\PowerJoins\PowerJoinClause $join
-         * @static 
-         */        public static function applyExtraConditions($join)
-        {
-                        return \Illuminate\Database\Eloquent\Relations\Relation::applyExtraConditions($join);
-        }
-                    /**
-         * 
-         *
-         * @see \Kirschbaum\PowerJoins\Mixins\RelationshipsExtraMethods::applyBasicCondition()
-         * @param mixed $join
-         * @param mixed $condition
-         * @static 
-         */        public static function applyBasicCondition($join, $condition)
-        {
-                        return \Illuminate\Database\Eloquent\Relations\Relation::applyBasicCondition($join, $condition);
-        }
-                    /**
-         * 
-         *
-         * @see \Kirschbaum\PowerJoins\Mixins\RelationshipsExtraMethods::applyNullCondition()
-         * @param mixed $join
-         * @param mixed $condition
-         * @static 
-         */        public static function applyNullCondition($join, $condition)
-        {
-                        return \Illuminate\Database\Eloquent\Relations\Relation::applyNullCondition($join, $condition);
-        }
-                    /**
-         * 
-         *
-         * @see \Kirschbaum\PowerJoins\Mixins\RelationshipsExtraMethods::applyNotNullCondition()
-         * @param mixed $join
-         * @param mixed $condition
-         * @static 
-         */        public static function applyNotNullCondition($join, $condition)
-        {
-                        return \Illuminate\Database\Eloquent\Relations\Relation::applyNotNullCondition($join, $condition);
-        }
-                    /**
-         * 
-         *
-         * @see \Kirschbaum\PowerJoins\Mixins\RelationshipsExtraMethods::applyNestedCondition()
-         * @param mixed $join
-         * @param mixed $condition
-         * @static 
-         */        public static function applyNestedCondition($join, $condition)
-        {
-                        return \Illuminate\Database\Eloquent\Relations\Relation::applyNestedCondition($join, $condition);
-        }
-                    /**
-         * 
-         *
-         * @see \Kirschbaum\PowerJoins\Mixins\RelationshipsExtraMethods::shouldNotApplyExtraCondition()
-         * @param mixed $condition
-         * @static 
-         */        public static function shouldNotApplyExtraCondition($condition)
-        {
-                        return \Illuminate\Database\Eloquent\Relations\Relation::shouldNotApplyExtraCondition($condition);
-        }
-                    /**
-         * 
-         *
-         * @see \Kirschbaum\PowerJoins\Mixins\RelationshipsExtraMethods::getPowerJoinExistenceCompareKey()
-         * @static 
-         */        public static function getPowerJoinExistenceCompareKey()
-        {
-                        return \Illuminate\Database\Eloquent\Relations\Relation::getPowerJoinExistenceCompareKey();
-        }
-            }
-    }
-
-namespace Illuminate\Testing {
-            /**
-     * 
-     *
-     * @template TResponse of \Symfony\Component\HttpFoundation\Response
-     * @mixin \Illuminate\Http\Response
-     */        class TestResponse {
-                    /**
-         * 
-         *
-         * @see \LaraDumps\LaraDumps\LaraDumpsServiceProvider::registerMacros()
-         * @static 
-         */        public static function ds()
-        {
-                        return \Illuminate\Testing\TestResponse::ds();
-        }
-                    /**
-         * 
-         *
-         * @see \Livewire\Volt\VoltServiceProvider::registerTestingMacros()
-         * @param mixed $component
-         * @static 
-         */        public static function assertSeeVolt($component)
-        {
-                        return \Illuminate\Testing\TestResponse::assertSeeVolt($component);
-        }
-                    /**
-         * 
-         *
-         * @see \Livewire\Volt\VoltServiceProvider::registerTestingMacros()
-         * @param mixed $component
-         * @static 
-         */        public static function assertDontSeeVolt($component)
-        {
-                        return \Illuminate\Testing\TestResponse::assertDontSeeVolt($component);
-        }
-            }
-    }
-
-namespace Illuminate\Validation {
-            /**
-     * 
-     *
-     */        class Rule {
-                    /**
-         * 
-         *
-         * @see \Propaganistas\LaravelPhone\PhoneServiceProvider::registerValidator()
-         * @static 
-         */        public static function phone()
-        {
-                        return \Illuminate\Validation\Rule::phone();
-        }
-            }
-    }
-
-namespace Illuminate\Console\Scheduling {
-            /**
-     * 
-     *
-     */        class Event {
-                    /**
-         * 
-         *
-         * @see \Sentry\Laravel\Features\ConsoleSchedulingIntegration::register()
-         * @param string|null $monitorSlug
-         * @param int|null $checkInMargin
-         * @param int|null $maxRuntime
-         * @param bool $updateMonitorConfig
-         * @param int|null $failureIssueThreshold
-         * @param int|null $recoveryThreshold
-         * @static 
-         */        public static function sentryMonitor($monitorSlug = null, $checkInMargin = null, $maxRuntime = null, $updateMonitorConfig = true, $failureIssueThreshold = null, $recoveryThreshold = null)
-        {
-                        return \Illuminate\Console\Scheduling\Event::sentryMonitor($monitorSlug, $checkInMargin, $maxRuntime, $updateMonitorConfig, $failureIssueThreshold, $recoveryThreshold);
-        }
-            }
-    }
-
 namespace Livewire\Features\SupportTesting {
             /**
      * 
@@ -24901,6 +24331,577 @@ namespace Livewire\Features\SupportTesting {
             }
     }
 
+namespace Illuminate\Support {
+            /**
+     * 
+     *
+     * @template TKey of array-key
+     * @template-covariant TValue
+     * @implements \ArrayAccess<TKey, TValue>
+     * @implements \Illuminate\Support\Enumerable<TKey, TValue>
+     */        class Collection {
+                    /**
+         * 
+         *
+         * @see \Barryvdh\Debugbar\ServiceProvider::register()
+         * @static 
+         */        public static function debug()
+        {
+                        return \Illuminate\Support\Collection::debug();
+        }
+                    /**
+         * 
+         *
+         * @see \LaraDumps\LaraDumps\LaraDumpsServiceProvider::registerMacros()
+         * @param string $label
+         * @static 
+         */        public static function ds($label = '')
+        {
+                        return \Illuminate\Support\Collection::ds($label);
+        }
+            }
+            /**
+     * 
+     *
+     */        class Str {
+                    /**
+         * 
+         *
+         * @see \Filament\Support\SupportServiceProvider::packageBooted()
+         * @param string $html
+         * @return string 
+         * @static 
+         */        public static function sanitizeHtml($html)
+        {
+                        return \Illuminate\Support\Str::sanitizeHtml($html);
+        }
+                    /**
+         * 
+         *
+         * @see \Filament\Support\SupportServiceProvider::packageBooted()
+         * @param string $value
+         * @return string 
+         * @static 
+         */        public static function ucwords($value)
+        {
+                        return \Illuminate\Support\Str::ucwords($value);
+        }
+            }
+            /**
+     * 
+     *
+     */        class Stringable {
+                    /**
+         * 
+         *
+         * @see \LaraDumps\LaraDumps\LaraDumpsServiceProvider::registerMacros()
+         * @param string $label
+         * @static 
+         */        public static function ds($label = '')
+        {
+                        return \Illuminate\Support\Stringable::ds($label);
+        }
+                    /**
+         * 
+         *
+         * @see \Filament\Support\SupportServiceProvider::packageBooted()
+         * @return \Illuminate\Support\Stringable 
+         * @static 
+         */        public static function sanitizeHtml()
+        {
+                        return \Illuminate\Support\Stringable::sanitizeHtml();
+        }
+                    /**
+         * 
+         *
+         * @see \Filament\Support\SupportServiceProvider::packageBooted()
+         * @return \Illuminate\Support\Stringable 
+         * @static 
+         */        public static function ucwords()
+        {
+                        return \Illuminate\Support\Stringable::ucwords();
+        }
+            }
+    }
+
+namespace Illuminate\Http {
+            /**
+     * 
+     *
+     */        class Request {
+                    /**
+         * 
+         *
+         * @see \Illuminate\Foundation\Providers\FoundationServiceProvider::registerRequestValidation()
+         * @param array $rules
+         * @param mixed $params
+         * @static 
+         */        public static function validate($rules, ...$params)
+        {
+                        return \Illuminate\Http\Request::validate($rules, ...$params);
+        }
+                    /**
+         * 
+         *
+         * @see \Illuminate\Foundation\Providers\FoundationServiceProvider::registerRequestValidation()
+         * @param string $errorBag
+         * @param array $rules
+         * @param mixed $params
+         * @static 
+         */        public static function validateWithBag($errorBag, $rules, ...$params)
+        {
+                        return \Illuminate\Http\Request::validateWithBag($errorBag, $rules, ...$params);
+        }
+                    /**
+         * 
+         *
+         * @see \Illuminate\Foundation\Providers\FoundationServiceProvider::registerRequestSignatureValidation()
+         * @param mixed $absolute
+         * @static 
+         */        public static function hasValidSignature($absolute = true)
+        {
+                        return \Illuminate\Http\Request::hasValidSignature($absolute);
+        }
+                    /**
+         * 
+         *
+         * @see \Illuminate\Foundation\Providers\FoundationServiceProvider::registerRequestSignatureValidation()
+         * @static 
+         */        public static function hasValidRelativeSignature()
+        {
+                        return \Illuminate\Http\Request::hasValidRelativeSignature();
+        }
+                    /**
+         * 
+         *
+         * @see \Illuminate\Foundation\Providers\FoundationServiceProvider::registerRequestSignatureValidation()
+         * @param mixed $ignoreQuery
+         * @param mixed $absolute
+         * @static 
+         */        public static function hasValidSignatureWhileIgnoring($ignoreQuery = [], $absolute = true)
+        {
+                        return \Illuminate\Http\Request::hasValidSignatureWhileIgnoring($ignoreQuery, $absolute);
+        }
+                    /**
+         * 
+         *
+         * @see \Illuminate\Foundation\Providers\FoundationServiceProvider::registerRequestSignatureValidation()
+         * @param mixed $ignoreQuery
+         * @static 
+         */        public static function hasValidRelativeSignatureWhileIgnoring($ignoreQuery = [])
+        {
+                        return \Illuminate\Http\Request::hasValidRelativeSignatureWhileIgnoring($ignoreQuery);
+        }
+            }
+    }
+
+namespace Illuminate\Routing {
+            /**
+     * 
+     *
+     * @mixin \Illuminate\Routing\RouteRegistrar
+     */        class Router {
+                    /**
+         * 
+         *
+         * @see \Lab404\Impersonate\ImpersonateServiceProvider::registerRoutesMacro()
+         * @static 
+         */        public static function impersonate()
+        {
+                        return \Illuminate\Routing\Router::impersonate();
+        }
+            }
+            /**
+     * 
+     *
+     */        class Route {
+                    /**
+         * 
+         *
+         * @see \Livewire\Features\SupportLazyLoading\SupportLazyLoading::registerRouteMacro()
+         * @param mixed $enabled
+         * @static 
+         */        public static function lazy($enabled = true)
+        {
+                        return \Illuminate\Routing\Route::lazy($enabled);
+        }
+                    /**
+         * 
+         *
+         * @see \Spatie\Permission\PermissionServiceProvider::registerMacroHelpers()
+         * @param mixed $roles
+         * @static 
+         */        public static function role($roles = [])
+        {
+                        return \Illuminate\Routing\Route::role($roles);
+        }
+                    /**
+         * 
+         *
+         * @see \Spatie\Permission\PermissionServiceProvider::registerMacroHelpers()
+         * @param mixed $permissions
+         * @static 
+         */        public static function permission($permissions = [])
+        {
+                        return \Illuminate\Routing\Route::permission($permissions);
+        }
+            }
+    }
+
+namespace Illuminate\Database\Query {
+            /**
+     * 
+     *
+     */        class Builder {
+                    /**
+         * 
+         *
+         * @see \Kirschbaum\PowerJoins\Mixins\QueryBuilderExtraMethods::getGroupBy()
+         * @static 
+         */        public static function getGroupBy()
+        {
+                        return \Illuminate\Database\Query\Builder::getGroupBy();
+        }
+                    /**
+         * 
+         *
+         * @see \Kirschbaum\PowerJoins\Mixins\QueryBuilderExtraMethods::getSelect()
+         * @static 
+         */        public static function getSelect()
+        {
+                        return \Illuminate\Database\Query\Builder::getSelect();
+        }
+                    /**
+         * 
+         *
+         * @see \LaraDumps\LaraDumps\LaraDumpsServiceProvider::registerMacros()
+         * @static 
+         */        public static function ds()
+        {
+                        return \Illuminate\Database\Query\Builder::ds();
+        }
+            }
+    }
+
+namespace Illuminate\Database\Eloquent\Relations {
+            /**
+     * 
+     *
+     * @template TRelatedModel of \Illuminate\Database\Eloquent\Model
+     * @template TDeclaringModel of \Illuminate\Database\Eloquent\Model
+     * @template TResult
+     * @mixin \Illuminate\Database\Eloquent\Builder<TRelatedModel>
+     */        class Relation {
+                    /**
+         * 
+         *
+         * @see \Kirschbaum\PowerJoins\Mixins\RelationshipsExtraMethods::performJoinForEloquentPowerJoins()
+         * @param mixed $builder
+         * @param mixed $joinType
+         * @param mixed $callback
+         * @param mixed $alias
+         * @param bool $disableExtraConditions
+         * @param string|null $morphable
+         * @static 
+         */        public static function performJoinForEloquentPowerJoins($builder, $joinType = 'leftJoin', $callback = null, $alias = null, $disableExtraConditions = false, $morphable = null)
+        {
+                        return \Illuminate\Database\Eloquent\Relations\Relation::performJoinForEloquentPowerJoins($builder, $joinType, $callback, $alias, $disableExtraConditions, $morphable);
+        }
+                    /**
+         * 
+         *
+         * @see \Kirschbaum\PowerJoins\Mixins\RelationshipsExtraMethods::performJoinForEloquentPowerJoinsForBelongsTo()
+         * @param mixed $query
+         * @param mixed $joinType
+         * @param mixed $callback
+         * @param mixed $alias
+         * @param bool $disableExtraConditions
+         * @static 
+         */        public static function performJoinForEloquentPowerJoinsForBelongsTo($query, $joinType, $callback = null, $alias = null, $disableExtraConditions = false)
+        {
+                        return \Illuminate\Database\Eloquent\Relations\Relation::performJoinForEloquentPowerJoinsForBelongsTo($query, $joinType, $callback, $alias, $disableExtraConditions);
+        }
+                    /**
+         * 
+         *
+         * @see \Kirschbaum\PowerJoins\Mixins\RelationshipsExtraMethods::performJoinForEloquentPowerJoinsForBelongsToMany()
+         * @param mixed $builder
+         * @param mixed $joinType
+         * @param mixed $callback
+         * @param mixed $alias
+         * @param bool $disableExtraConditions
+         * @static 
+         */        public static function performJoinForEloquentPowerJoinsForBelongsToMany($builder, $joinType, $callback = null, $alias = null, $disableExtraConditions = false)
+        {
+                        return \Illuminate\Database\Eloquent\Relations\Relation::performJoinForEloquentPowerJoinsForBelongsToMany($builder, $joinType, $callback, $alias, $disableExtraConditions);
+        }
+                    /**
+         * 
+         *
+         * @see \Kirschbaum\PowerJoins\Mixins\RelationshipsExtraMethods::performJoinForEloquentPowerJoinsForMorphToMany()
+         * @param mixed $builder
+         * @param mixed $joinType
+         * @param mixed $callback
+         * @param mixed $alias
+         * @param bool $disableExtraConditions
+         * @static 
+         */        public static function performJoinForEloquentPowerJoinsForMorphToMany($builder, $joinType, $callback = null, $alias = null, $disableExtraConditions = false)
+        {
+                        return \Illuminate\Database\Eloquent\Relations\Relation::performJoinForEloquentPowerJoinsForMorphToMany($builder, $joinType, $callback, $alias, $disableExtraConditions);
+        }
+                    /**
+         * 
+         *
+         * @see \Kirschbaum\PowerJoins\Mixins\RelationshipsExtraMethods::performJoinForEloquentPowerJoinsForMorph()
+         * @param mixed $builder
+         * @param mixed $joinType
+         * @param mixed $callback
+         * @param mixed $alias
+         * @param bool $disableExtraConditions
+         * @static 
+         */        public static function performJoinForEloquentPowerJoinsForMorph($builder, $joinType, $callback = null, $alias = null, $disableExtraConditions = false)
+        {
+                        return \Illuminate\Database\Eloquent\Relations\Relation::performJoinForEloquentPowerJoinsForMorph($builder, $joinType, $callback, $alias, $disableExtraConditions);
+        }
+                    /**
+         * 
+         *
+         * @see \Kirschbaum\PowerJoins\Mixins\RelationshipsExtraMethods::performJoinForEloquentPowerJoinsForMorphTo()
+         * @param mixed $builder
+         * @param mixed $joinType
+         * @param mixed $callback
+         * @param mixed $alias
+         * @param bool $disableExtraConditions
+         * @param string|null $morphable
+         * @static 
+         */        public static function performJoinForEloquentPowerJoinsForMorphTo($builder, $joinType, $callback = null, $alias = null, $disableExtraConditions = false, $morphable = null)
+        {
+                        return \Illuminate\Database\Eloquent\Relations\Relation::performJoinForEloquentPowerJoinsForMorphTo($builder, $joinType, $callback, $alias, $disableExtraConditions, $morphable);
+        }
+                    /**
+         * 
+         *
+         * @see \Kirschbaum\PowerJoins\Mixins\RelationshipsExtraMethods::performJoinForEloquentPowerJoinsForHasMany()
+         * @param mixed $builder
+         * @param mixed $joinType
+         * @param mixed $callback
+         * @param mixed $alias
+         * @param bool $disableExtraConditions
+         * @static 
+         */        public static function performJoinForEloquentPowerJoinsForHasMany($builder, $joinType, $callback = null, $alias = null, $disableExtraConditions = false)
+        {
+                        return \Illuminate\Database\Eloquent\Relations\Relation::performJoinForEloquentPowerJoinsForHasMany($builder, $joinType, $callback, $alias, $disableExtraConditions);
+        }
+                    /**
+         * 
+         *
+         * @see \Kirschbaum\PowerJoins\Mixins\RelationshipsExtraMethods::performJoinForEloquentPowerJoinsForHasManyThrough()
+         * @param mixed $builder
+         * @param mixed $joinType
+         * @param mixed $callback
+         * @param mixed $alias
+         * @param bool $disableExtraConditions
+         * @static 
+         */        public static function performJoinForEloquentPowerJoinsForHasManyThrough($builder, $joinType, $callback = null, $alias = null, $disableExtraConditions = false)
+        {
+                        return \Illuminate\Database\Eloquent\Relations\Relation::performJoinForEloquentPowerJoinsForHasManyThrough($builder, $joinType, $callback, $alias, $disableExtraConditions);
+        }
+                    /**
+         * 
+         *
+         * @see \Kirschbaum\PowerJoins\Mixins\RelationshipsExtraMethods::performHavingForEloquentPowerJoins()
+         * @param mixed $builder
+         * @param mixed $operator
+         * @param mixed $count
+         * @param string|null $morphable
+         * @static 
+         */        public static function performHavingForEloquentPowerJoins($builder, $operator, $count, $morphable = null)
+        {
+                        return \Illuminate\Database\Eloquent\Relations\Relation::performHavingForEloquentPowerJoins($builder, $operator, $count, $morphable);
+        }
+                    /**
+         * 
+         *
+         * @param \Illuminate\Database\Eloquent\Model|array $model
+         * @see \Kirschbaum\PowerJoins\Mixins\RelationshipsExtraMethods::usesSoftDeletes()
+         * @static 
+         */        public static function usesSoftDeletes($model)
+        {
+                        return \Illuminate\Database\Eloquent\Relations\Relation::usesSoftDeletes($model);
+        }
+                    /**
+         * 
+         *
+         * @see \Kirschbaum\PowerJoins\Mixins\RelationshipsExtraMethods::getThroughParent()
+         * @static 
+         */        public static function getThroughParent()
+        {
+                        return \Illuminate\Database\Eloquent\Relations\Relation::getThroughParent();
+        }
+                    /**
+         * 
+         *
+         * @see \Kirschbaum\PowerJoins\Mixins\RelationshipsExtraMethods::getFarParent()
+         * @static 
+         */        public static function getFarParent()
+        {
+                        return \Illuminate\Database\Eloquent\Relations\Relation::getFarParent();
+        }
+                    /**
+         * 
+         *
+         * @see \Kirschbaum\PowerJoins\Mixins\RelationshipsExtraMethods::applyExtraConditions()
+         * @param \Kirschbaum\PowerJoins\PowerJoinClause $join
+         * @static 
+         */        public static function applyExtraConditions($join)
+        {
+                        return \Illuminate\Database\Eloquent\Relations\Relation::applyExtraConditions($join);
+        }
+                    /**
+         * 
+         *
+         * @see \Kirschbaum\PowerJoins\Mixins\RelationshipsExtraMethods::applyBasicCondition()
+         * @param mixed $join
+         * @param mixed $condition
+         * @static 
+         */        public static function applyBasicCondition($join, $condition)
+        {
+                        return \Illuminate\Database\Eloquent\Relations\Relation::applyBasicCondition($join, $condition);
+        }
+                    /**
+         * 
+         *
+         * @see \Kirschbaum\PowerJoins\Mixins\RelationshipsExtraMethods::applyNullCondition()
+         * @param mixed $join
+         * @param mixed $condition
+         * @static 
+         */        public static function applyNullCondition($join, $condition)
+        {
+                        return \Illuminate\Database\Eloquent\Relations\Relation::applyNullCondition($join, $condition);
+        }
+                    /**
+         * 
+         *
+         * @see \Kirschbaum\PowerJoins\Mixins\RelationshipsExtraMethods::applyNotNullCondition()
+         * @param mixed $join
+         * @param mixed $condition
+         * @static 
+         */        public static function applyNotNullCondition($join, $condition)
+        {
+                        return \Illuminate\Database\Eloquent\Relations\Relation::applyNotNullCondition($join, $condition);
+        }
+                    /**
+         * 
+         *
+         * @see \Kirschbaum\PowerJoins\Mixins\RelationshipsExtraMethods::applyNestedCondition()
+         * @param mixed $join
+         * @param mixed $condition
+         * @static 
+         */        public static function applyNestedCondition($join, $condition)
+        {
+                        return \Illuminate\Database\Eloquent\Relations\Relation::applyNestedCondition($join, $condition);
+        }
+                    /**
+         * 
+         *
+         * @see \Kirschbaum\PowerJoins\Mixins\RelationshipsExtraMethods::shouldNotApplyExtraCondition()
+         * @param mixed $condition
+         * @static 
+         */        public static function shouldNotApplyExtraCondition($condition)
+        {
+                        return \Illuminate\Database\Eloquent\Relations\Relation::shouldNotApplyExtraCondition($condition);
+        }
+                    /**
+         * 
+         *
+         * @see \Kirschbaum\PowerJoins\Mixins\RelationshipsExtraMethods::getPowerJoinExistenceCompareKey()
+         * @static 
+         */        public static function getPowerJoinExistenceCompareKey()
+        {
+                        return \Illuminate\Database\Eloquent\Relations\Relation::getPowerJoinExistenceCompareKey();
+        }
+            }
+    }
+
+namespace Illuminate\Testing {
+            /**
+     * 
+     *
+     * @template TResponse of \Symfony\Component\HttpFoundation\Response
+     * @mixin \Illuminate\Http\Response
+     */        class TestResponse {
+                    /**
+         * 
+         *
+         * @see \LaraDumps\LaraDumps\LaraDumpsServiceProvider::registerMacros()
+         * @static 
+         */        public static function ds()
+        {
+                        return \Illuminate\Testing\TestResponse::ds();
+        }
+                    /**
+         * 
+         *
+         * @see \Livewire\Volt\VoltServiceProvider::registerTestingMacros()
+         * @param mixed $component
+         * @static 
+         */        public static function assertSeeVolt($component)
+        {
+                        return \Illuminate\Testing\TestResponse::assertSeeVolt($component);
+        }
+                    /**
+         * 
+         *
+         * @see \Livewire\Volt\VoltServiceProvider::registerTestingMacros()
+         * @param mixed $component
+         * @static 
+         */        public static function assertDontSeeVolt($component)
+        {
+                        return \Illuminate\Testing\TestResponse::assertDontSeeVolt($component);
+        }
+            }
+    }
+
+namespace Illuminate\Validation {
+            /**
+     * 
+     *
+     */        class Rule {
+                    /**
+         * 
+         *
+         * @see \Propaganistas\LaravelPhone\PhoneServiceProvider::registerValidator()
+         * @static 
+         */        public static function phone()
+        {
+                        return \Illuminate\Validation\Rule::phone();
+        }
+            }
+    }
+
+namespace Illuminate\Console\Scheduling {
+            /**
+     * 
+     *
+     */        class Event {
+                    /**
+         * 
+         *
+         * @see \Sentry\Laravel\Features\ConsoleSchedulingIntegration::register()
+         * @param string|null $monitorSlug
+         * @param int|null $checkInMargin
+         * @param int|null $maxRuntime
+         * @param bool $updateMonitorConfig
+         * @param int|null $failureIssueThreshold
+         * @param int|null $recoveryThreshold
+         * @static 
+         */        public static function sentryMonitor($monitorSlug = null, $checkInMargin = null, $maxRuntime = null, $updateMonitorConfig = true, $failureIssueThreshold = null, $recoveryThreshold = null)
+        {
+                        return \Illuminate\Console\Scheduling\Event::sentryMonitor($monitorSlug, $checkInMargin, $maxRuntime, $updateMonitorConfig, $failureIssueThreshold, $recoveryThreshold);
+        }
+            }
+    }
+
 namespace Illuminate\View {
             /**
      * 
@@ -26348,7 +26349,7 @@ namespace  {
                                 return $instance->whereBelongsTo($related, $relationshipName, $boolean);
             }
                             /**
-             * Add an "BelongsTo" relationship with an "or where" clause to the query.
+             * Add a "BelongsTo" relationship with an "or where" clause to the query.
              *
              * @param \Illuminate\Database\Eloquent\Model $related
              * @param string|null $relationshipName

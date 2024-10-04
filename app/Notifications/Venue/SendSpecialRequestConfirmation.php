@@ -84,6 +84,6 @@ class SendSpecialRequestConfirmation extends Notification
         $customerName = $this->specialRequest->customer_name;
         $partySize = $this->specialRequest->party_size;
 
-        return "PRIMA Special Request from $customerName: $bookingDate at $this->bookingTime, $partySize guests, Min. Spend $minimumSpend. Click here to view the request: $this->confirmationUrl";
+        return "*PRIMA* Special Request from $customerName: $bookingDate at $this->bookingTime, $partySize guests, Min. Spend $minimumSpend. Click $this->confirmationUrl to view this request.";
     }
 }

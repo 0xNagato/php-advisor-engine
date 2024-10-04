@@ -37,12 +37,11 @@ class VenueContactBookingConfirmed extends Notification implements ShouldQueue
     public function toSMS(Booking $notifiable): SmsData
     {
         $bookingDate = Carbon::toNotificationFormat($notifiable->booking_at);
-
         $bookingTime = $notifiable->booking_at->format('g:ia');
 
         return new SmsData(
             phone: $this->contact->contact_phone,
-            text: "PRIMA Reservation - $bookingDate at $bookingTime, $notifiable->guest_name, $notifiable->guest_count guests, $notifiable->guest_phone. Confirm the reservation by clicking here $this->confirmationUrl."
+            text: "*PRIMA* Booking: $bookingDate @ $bookingTime, $notifiable->guest_name, $notifiable->guest_count guests, $notifiable->guest_phone. Click $this->confirmationUrl to confirm."
         );
     }
 }

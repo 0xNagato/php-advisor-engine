@@ -47,16 +47,17 @@ class NotifyConciergeReferral extends Notification
 
     public function toSms($notifiable): SMSData
     {
-        $text = str("Hi {first_name}! You've been invited to join PRIMA VIP by {referrer}. Please click {url} to set up your account now and welcome to the team!  We look forward to working with you!")
-            ->swap([
-                '{first_name}' => $notifiable->first_name,
-                '{referrer}' => $this->referrer->name,
-                '{url}' => $this->shortURL,
-            ])->toString();
+        $text = "Hi {first_name}! You've been invited to join PRIMA by {referrer}. Please click {url} to create your account today. Welcome aboard!";
 
         return new SmsData(
             phone: $notifiable->phone,
-            text: $text,
+            text: str($text)
+                ->swap([
+                    '{first_name}' => $notifiable->first_name,
+                    '{referrer}' => $this->referrer->name,
+                    '{url}' => $this->shortURL,
+                ])
+                ->toString()
         );
     }
 
