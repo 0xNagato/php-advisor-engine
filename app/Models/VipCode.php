@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use App\Enums\BookingStatus;
+use App\Services\CurrencyConversionService;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -10,7 +12,7 @@ use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 
 /**
- * @property string code
+ * @mixin IdeHelperVipCode
  */
 class VipCode extends Authenticatable
 {
@@ -58,7 +60,7 @@ class VipCode extends Authenticatable
      */
     public function bookings(): HasMany
     {
-        return $this->hasMany(Booking::class);
+        return $this->hasMany(Booking::class)->where('status', BookingStatus::CONFIRMED);
     }
 
     /**
@@ -66,6 +68,44 @@ class VipCode extends Authenticatable
      */
     public function earnings(): HasManyThrough
     {
-        return $this->hasManyThrough(Earning::class, Booking::class);
+        return $this->hasManyThrough(Earning::class, Booking::class)
+            ->whereHas('booking', function ($query) {
+                $query->where('status', BookingStatus::CONFIRMED);
+            })
+            ->whereIn('earnings.type', ['concierge', 'concierge_bounty']);
+    }
+
+    public function totalEarningsGroupedByCurrency(): Attribute
+    {
+        return Attribute::make(
+            get: function () {
+                return $this->earnings()
+                    ->selectRaw('SUM(earnings.amount) as total, earnings.currency')
+                    ->groupBy('earnings.currency', 'bookings.vip_code_id') // Add vip_code_id to the group by clause
+                    ->get()
+                    ->mapWithKeys(fn ($item) => [$item->currency => $item->total]);
+            }
+        );
+    }
+
+    public function totalEarningsInUSD(): Attribute
+    {
+        return Attribute::make(
+            get: function () {
+                $currencyService = app(CurrencyConversionService::class);
+                $earnings = $this->totalEarningsGroupedByCurrency;
+
+                return $currencyService->convertToUSD($earnings->toArray());
+            }
+        );
+    }
+
+    public function confirmedBookingsCount(): Attribute
+    {
+        return Attribute::make(
+            get: function () {
+                return $this->bookings()->count();
+            }
+        );
     }
 }

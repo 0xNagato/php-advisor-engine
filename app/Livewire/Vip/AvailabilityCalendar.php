@@ -43,10 +43,6 @@ class AvailabilityCalendar extends Page
 
     public function mount(): void
     {
-        logger()?->info('AvailabilityCalendar mounted', [
-            'user' => Auth::guard('vip_code')->user(),
-        ]);
-
         $region_id = Auth::guard('vip_code')->user()->concierge->user->region ?? config('app.default_region');
 
         $this->region = Region::query()->find($region_id);

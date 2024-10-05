@@ -95,7 +95,6 @@ namespace App\Models{
  * @property string|null $city
  * @property string|null $invoice_path
  * @property string|null $notes
- * @property int $is_vip_booking
  * @property int|null $vip_code_id
  * @property-read \App\Models\Concierge $concierge
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Earning> $earnings
@@ -109,6 +108,7 @@ namespace App\Models{
  * @property-read mixed $prime_time
  * @property-read \App\Models\ScheduleWithBooking|null $schedule
  * @property-read \App\Models\Venue|null $venue
+ * @property-read \App\Models\VipCode|null $vipCode
  * @method static \Illuminate\Database\Eloquent\Builder|Booking confirmed()
  * @method static \Illuminate\Database\Eloquent\Builder|Booking confirmedOrNoShow()
  * @method static \Database\Factories\BookingFactory factory($count = null, $state = [])
@@ -134,7 +134,6 @@ namespace App\Models{
  * @method static \Illuminate\Database\Eloquent\Builder|Booking whereId($value)
  * @method static \Illuminate\Database\Eloquent\Builder|Booking whereInvoicePath($value)
  * @method static \Illuminate\Database\Eloquent\Builder|Booking whereIsPrime($value)
- * @method static \Illuminate\Database\Eloquent\Builder|Booking whereIsVipBooking($value)
  * @method static \Illuminate\Database\Eloquent\Builder|Booking whereNoShow($value)
  * @method static \Illuminate\Database\Eloquent\Builder|Booking whereNotes($value)
  * @method static \Illuminate\Database\Eloquent\Builder|Booking wherePartnerConciergeFee($value)
@@ -184,6 +183,8 @@ namespace App\Models{
  * @property-read mixed $sales
  * @property-read mixed $sales_this_month
  * @property-read \App\Models\User $user
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\VipCode> $vipCodes
+ * @property-read int|null $vip_codes_count
  * @method static \Database\Factories\ConciergeFactory factory($count = null, $state = [])
  * @method static \Illuminate\Database\Eloquent\Builder|Concierge newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder|Concierge newQuery()
@@ -955,5 +956,42 @@ namespace App\Models{
  */
 	#[\AllowDynamicProperties]
 	class IdeHelperVenueTimeSlot {}
+}
+
+namespace App\Models{
+/**
+ * 
+ *
+ * @property int $id
+ * @property string $code
+ * @property int $concierge_id
+ * @property bool $is_active
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property string|null $deleted_at
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Booking> $bookings
+ * @property-read int|null $bookings_count
+ * @property-read \App\Models\Concierge $concierge
+ * @property-read mixed $confirmed_bookings_count
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Earning> $earnings
+ * @property-read int|null $earnings_count
+ * @property-read mixed $link
+ * @property-read mixed $total_earnings_grouped_by_currency
+ * @property-read mixed $total_earnings_in_u_s_d
+ * @method static \Database\Factories\VipCodeFactory factory($count = null, $state = [])
+ * @method static \Illuminate\Database\Eloquent\Builder|VipCode newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|VipCode newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|VipCode query()
+ * @method static \Illuminate\Database\Eloquent\Builder|VipCode whereCode($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|VipCode whereConciergeId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|VipCode whereCreatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|VipCode whereDeletedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|VipCode whereId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|VipCode whereIsActive($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|VipCode whereUpdatedAt($value)
+ * @mixin \Eloquent
+ */
+	#[\AllowDynamicProperties]
+	class IdeHelperVipCode {}
 }
 
