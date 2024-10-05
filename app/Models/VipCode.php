@@ -98,11 +98,4 @@ class VipCode extends Authenticatable
             }
         );
     }
-
-    public function confirmedBookingsCount(): Attribute
-    {
-        return Attribute::make(
-            get: fn () => $this->bookings()->count()
-        );
-    }
 }
