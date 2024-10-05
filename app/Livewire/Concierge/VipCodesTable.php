@@ -63,9 +63,7 @@ class VipCodesTable extends TableWidget
                 TextColumn::make('total_earnings_in_u_s_d')
                     ->label('Earned')
                     ->alignRight()
-                    ->formatStateUsing(function (VipCode $vipCode): string {
-                        return money($vipCode->total_earnings_in_u_s_d * 100, 'USD');
-                    }),
+                    ->formatStateUsing(fn (VipCode $vipCode): string => money($vipCode->total_earnings_in_u_s_d * 100, 'USD')),
                 ToggleColumn::make('is_active')->label('Active'),
             ])
             ->defaultSortOptionLabel('Created')

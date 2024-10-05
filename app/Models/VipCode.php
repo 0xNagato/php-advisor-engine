@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Enums\BookingStatus;
 use App\Services\CurrencyConversionService;
+use Illuminate\Contracts\Database\Query\Builder;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -69,7 +70,7 @@ class VipCode extends Authenticatable
     public function earnings(): HasManyThrough
     {
         return $this->hasManyThrough(Earning::class, Booking::class)
-            ->whereHas('booking', function ($query) {
+            ->whereHas('booking', function (Builder $query) {
                 $query->where('status', BookingStatus::CONFIRMED);
             })
             ->whereIn('earnings.type', ['concierge', 'concierge_bounty']);
@@ -78,13 +79,11 @@ class VipCode extends Authenticatable
     public function totalEarningsGroupedByCurrency(): Attribute
     {
         return Attribute::make(
-            get: function () {
-                return $this->earnings()
-                    ->selectRaw('SUM(earnings.amount) as total, earnings.currency')
-                    ->groupBy('earnings.currency', 'bookings.vip_code_id') // Add vip_code_id to the group by clause
-                    ->get()
-                    ->mapWithKeys(fn ($item) => [$item->currency => $item->total]);
-            }
+            get: fn () => $this->earnings()
+                ->selectRaw('SUM(earnings.amount) as total, earnings.currency')
+                ->groupBy('earnings.currency', 'bookings.vip_code_id') // Add vip_code_id to the group by clause
+                ->get()
+                ->mapWithKeys(fn ($item) => [$item->currency => $item->total])
         );
     }
 
@@ -103,9 +102,7 @@ class VipCode extends Authenticatable
     public function confirmedBookingsCount(): Attribute
     {
         return Attribute::make(
-            get: function () {
-                return $this->bookings()->count();
-            }
+            get: fn () => $this->bookings()->count()
         );
     }
 }
