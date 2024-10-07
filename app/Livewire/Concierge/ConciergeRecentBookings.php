@@ -57,12 +57,6 @@ class ConciergeRecentBookings extends BaseWidget
             ->emptyStateIcon('heroicon-o-currency-dollar')
             ->emptyStateHeading('Earnings will show here when bookings begin!')
             ->columns([
-                IconColumn::make('vip_code_id')
-                    ->icon(fn (?int $state): string => blank($state) ? 'heroicon-o-no-symbol' :
-                        'heroicon-o-check-circle'
-                    )
-                    ->color('success')
-                    ->label('Vip'),
                 TextColumn::make('schedule.venue.name')
                     ->label('Venue')
                     ->searchable(),
@@ -77,6 +71,12 @@ class ConciergeRecentBookings extends BaseWidget
 
                         return money($total, $booking->currency);
                     }),
+                IconColumn::make('vip_code_id')
+                    ->icon(fn (?int $state): string => blank($state) ? 'heroicon-o-no-symbol' :
+                        'heroicon-o-check-circle'
+                    )
+                    ->color('success')
+                    ->label('VIP'),
             ]);
     }
 }
