@@ -20,7 +20,7 @@ ini_set('memory_limit', '5G');
 
 class MiamiVenueSeeder extends Seeder
 {
-    private bool $useHousePartner;
+    private readonly bool $useHousePartner;
 
     private ?Partner $housePartner;
 

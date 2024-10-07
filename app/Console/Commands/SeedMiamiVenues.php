@@ -41,10 +41,9 @@ class SeedMiamiVenues extends Command
         $this->useHousePartner = $this->option('use-house-partner');
 
         if ($this->useHousePartner) {
-            $housePartnerUser = User::where('email', 'house.partner@primavip.co')->first();
-            $this->housePartner = $housePartnerUser?->partner;
+            $this->housePartner = $this->getOrCreateHousePartner();
             if (! $this->housePartner) {
-                $this->error('House partner not found. Aborting.');
+                $this->error('Failed to create or retrieve house partner. Aborting.');
 
                 return 1;
             }
@@ -97,7 +96,7 @@ class SeedMiamiVenues extends Command
             $email = 'venue@'.Str::slug($venueName).'-miami.com';
 
             /** @var User $user */
-            $user = User::create([
+            $user = User::query()->create([
                 'first_name' => 'Venue',
                 'last_name' => $venueName,
                 'partner_referral_id' => $partner?->id,
@@ -106,7 +105,7 @@ class SeedMiamiVenues extends Command
                 'password' => bcrypt(Str::random()),
             ]);
 
-            $venue = Venue::create([
+            $venue = Venue::query()->create([
                 'name' => $venueName,
                 'contact_phone' => '+16473823326',
                 'primary_contact_name' => 'Andrew Weir',
@@ -124,7 +123,7 @@ class SeedMiamiVenues extends Command
 
             $user->assignRole('venue');
 
-            Referral::create([
+            Referral::query()->create([
                 'referrer_id' => $partner?->user->id,
                 'user_id' => $user->id,
                 'email' => $email,
@@ -150,6 +149,45 @@ class SeedMiamiVenues extends Command
         }
 
         return Partner::query()->inRandomOrder()->first();
+    }
+
+    /**
+     * @throws Throwable
+     */
+    private function getOrCreateHousePartner(): ?Partner
+    {
+        $housePartnerUser = User::query()->where('email', 'house.partner@primavip.co')->first();
+
+        if (! $housePartnerUser) {
+            DB::beginTransaction();
+            try {
+                $housePartnerUser = User::query()->create([
+                    'first_name' => 'House',
+                    'last_name' => 'Partner',
+                    'email' => 'house.partner@primavip.co',
+                    'password' => bcrypt('secure_password_here'),
+                ]);
+
+                $housePartner = Partner::query()->create([
+                    'user_id' => $housePartnerUser->id,
+                    'percentage' => 20,
+                ]);
+
+                $housePartnerUser->assignRole('partner');
+
+                DB::commit();
+                $this->info('House partner created successfully.');
+
+                return $housePartner;
+            } catch (Throwable $e) {
+                DB::rollBack();
+                $this->error('Failed to create house partner: '.$e->getMessage());
+
+                return null;
+            }
+        }
+
+        return $housePartnerUser->partner;
     }
 
     private function formatOpeningHours(array $data): array

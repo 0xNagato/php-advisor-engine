@@ -90,7 +90,7 @@ class DatabaseSeeder extends Seeder
         $housePartnerUser->assignRole('partner');
 
         $this->call([
-            // PartnerSeeder::class,
+            PartnerSeeder::class,
         ]);
 
         User::factory([
@@ -121,10 +121,10 @@ class DatabaseSeeder extends Seeder
 
         $this->call([
             ShieldSeeder::class,
-            // ConciergeSeeder::class,
-            // MiamiVenueSeeder::class,
+            ConciergeSeeder::class,
+            MiamiVenueSeeder::class,
             // VenueSeeder::class,
-            // BookingSeeder::class,
+            BookingSeeder::class,
         ]);
 
         Artisan::call('shield:generate --all');
