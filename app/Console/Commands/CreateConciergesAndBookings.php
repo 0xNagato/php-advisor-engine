@@ -42,17 +42,12 @@ class CreateConciergesAndBookings extends Command
                 'password' => Hash::make('password'),
                 'partner_referral_id' => Partner::query()->inRandomOrder()->first()->id,
                 'email_verified_at' => now(),
+                'secured_at' => now(),
             ]);
 
             $concierge = Concierge::query()->firstOrCreate(['user_id' => $user->id], [
                 'hotel_name' => "$name's Hotel",
-                'secured_at' => now(),
             ]);
-
-            // Update secured_at if it's null (for existing concierges)
-            if ($concierge->secured_at === null) {
-                $concierge->update(['secured_at' => now()]);
-            }
 
             $user->assignRole('concierge');
 

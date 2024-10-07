@@ -119,6 +119,8 @@ class DatabaseSeeder extends Seeder
             ->create()
             ->assignRole('concierge');
 
+        $this->createOrUpdateConcierges();
+
         $this->call([
             ShieldSeeder::class,
             ConciergeSeeder::class,
@@ -128,5 +130,39 @@ class DatabaseSeeder extends Seeder
         ]);
 
         Artisan::call('shield:generate --all');
+    }
+
+    private function createOrUpdateConcierges(): void
+    {
+        $names = [
+            'Andrew',
+            'Alex',
+            'Kevin',
+            'Steve',
+            'Brad',
+            'Sara',
+            'Tom',
+            'Guy',
+        ];
+
+        foreach ($names as $name) {
+            $name = trim((string) $name);
+            $email = strtolower($name).'concierge@primavip.co';
+
+            $user = User::query()->firstOrCreate(['email' => $email], [
+                'first_name' => $name,
+                'last_name' => 'Concierge',
+                'password' => bcrypt('password'),
+                'partner_referral_id' => Partner::query()->inRandomOrder()->first()->id,
+                'email_verified_at' => now(),
+                'secured_at' => now(),
+            ]);
+
+            Concierge::query()->firstOrCreate(['user_id' => $user->id], [
+                'hotel_name' => "$name's Hotel",
+            ]);
+
+            $user->assignRole('concierge');
+        }
     }
 }
