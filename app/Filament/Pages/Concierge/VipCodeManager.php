@@ -28,7 +28,7 @@ class VipCodeManager extends Page
 
     protected static string $view = 'filament.pages.concierge.vip-code';
 
-    protected static ?int $navigationSort = 3;
+    protected static ?int $navigationSort = 0;
 
     public ?array $data = [];
 
@@ -50,16 +50,12 @@ class VipCodeManager extends Page
 
     public function getTitle(): Htmlable|string
     {
-        $prefix = auth()->user()->hasRole('concierge') ? 'My ' : '';
-
-        return $prefix.'VIP Codes';
+        return 'VIP Codes';
     }
 
     public static function getNavigationLabel(): string
     {
-        $prefix = auth()->user()->hasRole('concierge') ? 'My ' : '';
-
-        return $prefix.'VIP Codes';
+        return 'VIP Codes';
     }
 
     public function getHeaderWidgets(): array

@@ -2,8 +2,8 @@
 
 namespace App\Services;
 
-use App\Data\Vendor\LoadReservationHoursData;
-use App\Data\Vendor\SaveReservationHoursData;
+use App\Data\Venue\LoadReservationHoursData;
+use App\Data\Venue\SaveReservationHoursData;
 use App\Models\Venue;
 
 class ReservationHoursService

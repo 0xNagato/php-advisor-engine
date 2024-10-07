@@ -18,7 +18,7 @@ test('navigation label is correct for concierge', function () {
 
     actingAs($user);
 
-    expect(VipCodeManager::getNavigationLabel())->toBe('My VIP Codes');
+    expect(VipCodeManager::getNavigationLabel())->toBe('VIP Codes');
 });
 
 test('vip code form is displayed correctly', function () {
@@ -27,7 +27,7 @@ test('vip code form is displayed correctly', function () {
     actingAs($user)
         ->get(VipCodeManager::getUrl())
         ->assertSuccessful()
-        ->assertSee('My VIP Codes')
+        ->assertSee('VIP Codes')
         ->assertSee('Create VIP Code');
 });
 

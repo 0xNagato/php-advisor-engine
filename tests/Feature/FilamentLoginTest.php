@@ -24,7 +24,7 @@ test('user can access platform vip code page', function () {
 
     actingAs($user)->get('/platform/vip-code-manager')
         ->assertStatus(200)
-        ->assertSee('My VIP Codes')
+        ->assertSee('VIP Codes')
         ->assertSee('VIP Code')
         ->assertSeeHtml('<button')
         ->assertSee('Create VIP Code');

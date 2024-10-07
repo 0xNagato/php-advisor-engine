@@ -2,7 +2,7 @@
 
 namespace App\Livewire\Venue;
 
-use App\Data\Vendor\SaveReservationHoursData;
+use App\Data\Venue\SaveReservationHoursData;
 use App\Models\Venue;
 use App\Services\ReservationHoursService;
 use Carbon\Carbon;
