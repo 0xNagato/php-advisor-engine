@@ -16,16 +16,30 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use Throwable;
 
-// ini_set('max_execution_time', 0);
 ini_set('memory_limit', '5G');
 
 class MiamiVenueSeeder extends Seeder
 {
+    private bool $useHousePartner;
+
+    private ?Partner $housePartner;
+
+    public function __construct()
+    {
+        $this->useHousePartner = true;
+        $this->housePartner = null;
+    }
+
     /**
      * @throws Throwable
      */
     public function run(): void
     {
+        if ($this->useHousePartner) {
+            $housePartnerUser = User::query()->where('email', 'house.partner@primavip.co')->first();
+            $this->housePartner = $housePartnerUser->partner ?? null;
+        }
+
         $csvFile = fopen(base_path('database/seeders/miami.csv'), 'rb');
 
         // Skip the header row
@@ -40,7 +54,7 @@ class MiamiVenueSeeder extends Seeder
                 $venueName = $data[0];
                 $openingHours = $this->formatOpeningHours($data);
 
-                $partner = Partner::query()->inRandomOrder()->first();
+                $partner = $this->getPartner();
                 $email = 'venue@'.Str::slug($venueName).'-miami.com';
 
                 $user = User::factory([
@@ -79,6 +93,15 @@ class MiamiVenueSeeder extends Seeder
         }
 
         fclose($csvFile);
+    }
+
+    private function getPartner(): ?Partner
+    {
+        if ($this->useHousePartner) {
+            return $this->housePartner;
+        }
+
+        return Partner::query()->inRandomOrder()->first();
     }
 
     private function formatOpeningHours(array $data): array

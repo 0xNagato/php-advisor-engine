@@ -2,8 +2,8 @@
 
 namespace App\Policies;
 
-use App\Models\Concierge;
 use App\Models\User;
+use App\Models\Concierge;
 use Illuminate\Auth\Access\HandlesAuthorization;
 
 class ConciergePolicy

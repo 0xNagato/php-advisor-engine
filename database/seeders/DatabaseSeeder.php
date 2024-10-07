@@ -59,8 +59,38 @@ class DatabaseSeeder extends Seeder
         Role::create(['name' => 'venue']);
         Role::create(['name' => 'partner']);
 
+        // Create House Concierge
+        $houseConciergeUser = User::factory([
+            'first_name' => 'House',
+            'last_name' => 'Concierge',
+            'email' => 'house.concierge@primavip.co',
+            'password' => bcrypt('secure_password_here'),
+        ])->create();
+
+        Concierge::query()->create([
+            'user_id' => $houseConciergeUser->id,
+            'hotel_name' => 'Prima VIP House',
+        ]);
+
+        $houseConciergeUser->assignRole('concierge');
+
+        // Create House Partner
+        $housePartnerUser = User::factory([
+            'first_name' => 'House',
+            'last_name' => 'Partner',
+            'email' => 'house.partner@primavip.co',
+            'password' => bcrypt('secure_password_here'),
+        ])->create();
+
+        Partner::query()->create([
+            'user_id' => $housePartnerUser->id,
+            'percentage' => 20,
+        ]);
+
+        $housePartnerUser->assignRole('partner');
+
         $this->call([
-            PartnerSeeder::class,
+            // PartnerSeeder::class,
         ]);
 
         User::factory([
@@ -91,8 +121,8 @@ class DatabaseSeeder extends Seeder
 
         $this->call([
             ShieldSeeder::class,
-            ConciergeSeeder::class,
-            MiamiVenueSeeder::class,
+            // ConciergeSeeder::class,
+            // MiamiVenueSeeder::class,
             // VenueSeeder::class,
             // BookingSeeder::class,
         ]);
