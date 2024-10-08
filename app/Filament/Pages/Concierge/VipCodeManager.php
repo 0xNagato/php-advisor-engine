@@ -4,12 +4,9 @@ namespace App\Filament\Pages\Concierge;
 
 use App\Filament\DateRangeFilterAction;
 use App\Livewire\DateRangeFilterWidget;
-use App\Models\Concierge;
 use App\Models\VipCode;
 use Carbon\Carbon;
-use Filament\Forms\Components\Actions;
 use Filament\Forms\Components\Actions\Action;
-use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Form;
 use Filament\Pages\Dashboard\Concerns\HasFiltersAction;
@@ -89,28 +86,25 @@ class VipCodeManager extends Page
             ->schema([
                 TextInput::make('code')
                     ->label('VIP Code')
-                    ->required()->minLength(4)->maxLength(12)
+                    ->hiddenLabel()
+                    ->placeholder('Create VIP Code')
+                    ->required()
+                    ->minLength(4)
+                    ->maxLength(12)
                     ->unique(table: VipCode::class)
+                    ->suffixAction(Action::make('createCode')
+                        ->iconButton()
+                        ->icon('heroicon-o-plus-circle')
+                        ->color('success')
+                        ->action(function () {
+                            $this->saveVipCode();
+                        }))
                     ->validationMessages([
                         'required' => 'The VIP Code field is required.',
                         'unique' => 'The VIP Code has already been taken.',
                         'min' => 'The VIP Code field must be at least :min characters.',
                         'max' => 'The VIP Code field must be at least :max characters.',
                     ]),
-                Select::make('conciergeId')
-                    ->label('Concierge')
-                    ->required()
-                    ->options(Concierge::all()->pluck('hotel_name', 'id'))
-                    ->searchable()->required()->columnSpan(2)
-                    ->visible(fn (): bool => auth()->user()->hasRole('super_admin')),
-                Actions::make([
-                    Action::make('createCode')
-                        ->label('Create VIP Code')
-                        ->color('success')
-                        ->action(function () {
-                            $this->saveVipCode();
-                        }),
-                ])->columnSpanFull()->fullWidth(),
             ])
             ->extraAttributes(['class' => 'inline-form'])
             ->statePath('data');
@@ -130,6 +124,7 @@ class VipCodeManager extends Page
             'code' => $data['code'],
             'concierge_id' => auth()->user()->concierge?->id ?? $data['conciergeId'],
         ]);
+        $this->data['code'] = '';
     }
 
     #[On('dateRangeUpdated')]

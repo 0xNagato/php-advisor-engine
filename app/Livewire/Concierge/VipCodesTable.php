@@ -43,6 +43,7 @@ class VipCodesTable extends TableWidget
 
         return $table
             ->query($query)
+            ->paginated(false)
             ->columns([
                 TextColumn::make('concierge.user.name')
                     ->label('User')->visible(fn () => auth()->user()->hasRole('super_admin')),
@@ -54,17 +55,18 @@ class VipCodesTable extends TableWidget
                     ->copyMessageDuration(1500)
                     ->icon('heroicon-m-clipboard-document-check')
                     ->iconColor('primary')
-                    ->iconPosition(IconPosition::After)
-                    ->sortable(),
+                    ->iconPosition(IconPosition::After),
                 TextColumn::make('bookings_count')
                     ->label('Bookings')
                     ->alignCenter()
-                    ->sortable(),
+                    ->size('xs'),
                 TextColumn::make('total_earnings_in_u_s_d')
                     ->label('Earned')
+                    ->size('xs')
                     ->alignRight()
                     ->formatStateUsing(fn (VipCode $vipCode): string => money($vipCode->total_earnings_in_u_s_d * 100, 'USD')),
-                ToggleColumn::make('is_active')->label('Active'),
+                ToggleColumn::make('is_active')
+                    ->label('Active'),
             ])
             ->defaultSortOptionLabel('Created')
             ->defaultSort('created_at', 'desc');

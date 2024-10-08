@@ -73,7 +73,6 @@ class EarningsPotential extends Page
 
     public function conciergePayout(Venue $venue, bool $isPrime): int
     {
-        /** @var Concierge $concierge */
         $concierge = Concierge::query()->where('user_id', auth()->id())->first();
         if (! $concierge) {
             return 0;

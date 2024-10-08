@@ -1,6 +1,5 @@
 <x-filament-panels::page>
+    <livewire:concierge.vip-codes-table key="{{ now() }}" :table-filters="$filters"/>
+
     {{ $this->form }}
-
-    <livewire:concierge.vip-codes-table key="{{ now() }}" :table-filters="$filters" />
-
 </x-filament-panels::page>

@@ -1,14 +1,25 @@
+@php
+    $isDemo = Request::getHost() === 'demo.primavip.co';
+@endphp
+
 <x-filament-panels::page>
     <x-filament::section>
         <x-slot name="heading">
-            Welcome to PRIMA!
+            @if ($isDemo)
+                Welcome to the PRIMA Demo!
+            @else
+                Welcome to PRIMA!
+            @endif
         </x-slot>
 
         <x-slot name="headerEnd">
-            <div class="text-xs text-gray-500">
-                {{ auth()->user()->created_at->format('M j h:ia') }}
-            </div>
+            @if (!$isDemo)
+                <div class="text-xs text-gray-500">
+                    {{ auth()->user()->created_at->format('M j h:ia') }}
+                </div>
+            @endif
         </x-slot>
+
         @nonmobileapp
             <div class="flex flex-col items-center p-3 mb-4 -m-2 text-sm border-2 border-indigo-600 rounded-lg bg-gray-50">
                 <div class="flex items-center mb-3">
@@ -26,16 +37,27 @@
         @endnonmobileapp
 
         <div class="flex flex-col gap-4">
-            <p>
-                We are excited to have you as a part of our team when PRIMA fully launches. Venues are being
-                onboarded now and we expect to be fully functioning in the coming weeks.
-            </p>
-            @nonmobileapp
+            @if ($isDemo)
                 <p>
-                    So that you may fully experience the potential of PRIMA, we have created a demo concierge account
-                    for you to explore.
+                    Please browse this account to see what earnings, bookings, the availability calendar and other
+                    features of the site look like!
                 </p>
-                @unless (Request::getHost() === 'demo.primavip.co')
+                <p>
+                    You can generate just as much revenue in your account if you use PRIMA regularly.
+                </p>
+                <p>
+                    We look forward to working with you!
+                </p>
+            @else
+                <p>
+                    We are excited to have you as a part of our team when PRIMA fully launches. Venues are being
+                    onboarded now and we expect to be fully functioning in the coming weeks.
+                </p>
+                @nonmobileapp
+                    <p>
+                        So that you may fully experience the potential of PRIMA, we have created a demo concierge account
+                        for you to explore.
+                    </p>
                     <p>
                         Please click the link below and you will be taken to our demo site where you can
                         try out the Reservation Hub as well as other features of PRIMA.
@@ -44,18 +66,18 @@
                         href="https://demo.primavip.co/login?email=concierge@primavip.co&password=demo2024" target="_blank">
                         Access Demo Account
                     </x-filament::button>
-                @endunless
-            @endnonmobileapp
+                @endnonmobileapp
 
-            <div>
-                <p>Welcome aboard!</p>
-                <p>We look forward to working with you.</p>
-            </div>
+                <div>
+                    <p>Welcome aboard!</p>
+                    <p>We look forward to working with you.</p>
+                </div>
+            @endif
         </div>
     </x-filament::section>
+
     @if ($messages->isNotEmpty())
         <div class="flex flex-col gap-0 -mt-4 bg-white divide-y rounded-lg shadow-lg">
-
             @foreach ($this->messages as $message)
                 <div class="p-4">
                     <a href="{{ route('filament.admin.resources.messages.view', ['record' => $message->id]) }}">
