@@ -28,7 +28,7 @@ class BookingPercentages
      * The percentage of the booking fee that the venue pays for non-prime bookings.
      * This is negative because it represents an outgoing payment from the venue.
      */
-    public const int NON_PRIME_Venue_PERCENTAGE = -100 - self::NON_PRIME_PROCESSING_FEE_PERCENTAGE;
+    public const int NON_PRIME_VENUE_PERCENTAGE = -100 - self::NON_PRIME_PROCESSING_FEE_PERCENTAGE;
 
     /**
      * The percentage of the remainder that goes to the first-level referral for prime bookings.

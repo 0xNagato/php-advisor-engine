@@ -246,6 +246,10 @@ class ConciergeOverview extends BaseWidget
     public function getLabel(string $label): string
     {
         if ($this->isVip) {
+            if ($label === 'Earnings') {
+                return 'VIP Link Earnings';
+            }
+
             return 'VIP '.$label;
         }
 

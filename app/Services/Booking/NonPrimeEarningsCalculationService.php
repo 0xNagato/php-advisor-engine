@@ -35,7 +35,7 @@ readonly class NonPrimeEarningsCalculationService
             $booking,
             'venue_paid',
             $venue_earnings * 100,
-            BookingPercentages::NON_PRIME_Venue_PERCENTAGE,
+            BookingPercentages::NON_PRIME_VENUE_PERCENTAGE,
             'concierge_bounty'
         );
 
