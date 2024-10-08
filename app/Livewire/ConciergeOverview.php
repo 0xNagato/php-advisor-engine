@@ -26,8 +26,8 @@ class ConciergeOverview extends BaseWidget
 
     protected function getStats(): array
     {
-        $startDate = Carbon::parse($this->startDate ?? now()->subDays(30))->startOfDay();
-        $endDate = Carbon::parse($this->endDate ?? now())->endOfDay();
+        $startDate = $this->startDate ? Carbon::parse($this->startDate)->startOfDay() : now()->subDays(30)->startOfDay();
+        $endDate = $this->endDate ? Carbon::parse($this->endDate)->endOfDay() : now()->endOfDay();
 
         $earnings = $this->getEarnings($startDate, $endDate);
         $prevEarnings = $this->getEarnings($startDate->copy()->subDays($startDate->diffInDays($endDate)), $startDate);
@@ -74,7 +74,7 @@ class ConciergeOverview extends BaseWidget
         ];
     }
 
-    protected function getEarnings($startDate, $endDate): array
+    protected function getEarnings(Carbon $startDate, Carbon $endDate): array
     {
         $earnings = Earning::query()
             ->whereNotNull('bookings.confirmed_at')
@@ -103,7 +103,7 @@ class ConciergeOverview extends BaseWidget
         ];
     }
 
-    protected function getAverageBookingValue($startDate, $endDate): float
+    protected function getAverageBookingValue(Carbon $startDate, Carbon $endDate): float
     {
         $result = Earning::query()
             ->whereNotNull('bookings.confirmed_at')
@@ -135,7 +135,7 @@ class ConciergeOverview extends BaseWidget
         return $totalBookings > 0 ? $totalUSD / $totalBookings : 0;
     }
 
-    protected function getChartData($startDate, $endDate): array
+    protected function getChartData(Carbon $startDate, Carbon $endDate): array
     {
         $dailyData = Earning::query()
             ->whereNotNull('bookings.confirmed_at')
