@@ -136,8 +136,8 @@ class EarningsPotential extends Page
     {
         $region = Region::query()->find(session('region', 'miami'));
 
-        $this->timezone = $region?->timezone ?? config('app.timezone');
-        $this->currency = $region?->currency ?? '';
+        $this->timezone = $region?->timezone;
+        $this->currency = $region?->currency;
 
         $this->venues = null;
         $this->form->fill();
