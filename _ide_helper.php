@@ -24602,10 +24602,11 @@ namespace Illuminate\Database\Eloquent\Relations {
          * @param mixed $alias
          * @param bool $disableExtraConditions
          * @param string|null $morphable
+         * @param bool $hasCheck
          * @static 
-         */        public static function performJoinForEloquentPowerJoins($builder, $joinType = 'leftJoin', $callback = null, $alias = null, $disableExtraConditions = false, $morphable = null)
+         */        public static function performJoinForEloquentPowerJoins($builder, $joinType = 'leftJoin', $callback = null, $alias = null, $disableExtraConditions = false, $morphable = null, $hasCheck = false)
         {
-                        return \Illuminate\Database\Eloquent\Relations\Relation::performJoinForEloquentPowerJoins($builder, $joinType, $callback, $alias, $disableExtraConditions, $morphable);
+                        return \Illuminate\Database\Eloquent\Relations\Relation::performJoinForEloquentPowerJoins($builder, $joinType, $callback, $alias, $disableExtraConditions, $morphable, $hasCheck);
         }
                     /**
          * 
@@ -24687,10 +24688,11 @@ namespace Illuminate\Database\Eloquent\Relations {
          * @param mixed $callback
          * @param mixed $alias
          * @param bool $disableExtraConditions
+         * @param bool $hasCheck
          * @static 
-         */        public static function performJoinForEloquentPowerJoinsForHasMany($builder, $joinType, $callback = null, $alias = null, $disableExtraConditions = false)
+         */        public static function performJoinForEloquentPowerJoinsForHasMany($builder, $joinType, $callback = null, $alias = null, $disableExtraConditions = false, $hasCheck = false)
         {
-                        return \Illuminate\Database\Eloquent\Relations\Relation::performJoinForEloquentPowerJoinsForHasMany($builder, $joinType, $callback, $alias, $disableExtraConditions);
+                        return \Illuminate\Database\Eloquent\Relations\Relation::performJoinForEloquentPowerJoinsForHasMany($builder, $joinType, $callback, $alias, $disableExtraConditions, $hasCheck);
         }
                     /**
          * 
@@ -24722,8 +24724,8 @@ namespace Illuminate\Database\Eloquent\Relations {
                     /**
          * 
          *
-         * @param \Illuminate\Database\Eloquent\Model|array $model
          * @see \Kirschbaum\PowerJoins\Mixins\RelationshipsExtraMethods::usesSoftDeletes()
+         * @param mixed $model
          * @static 
          */        public static function usesSoftDeletes($model)
         {
@@ -26502,8 +26504,8 @@ namespace  {
              *
              * @see \Kirschbaum\PowerJoins\Mixins\JoinRelationship::newPowerJoinClause()
              * @param \Illuminate\Database\Query\Builder $parentQuery
-             * @param mixed $type
-             * @param mixed $table
+             * @param string $type
+             * @param string $table
              * @param \Illuminate\Database\Eloquent\Model|null $model
              * @static 
              */            public static function newPowerJoinClause($parentQuery, $type, $table, $model = null)
@@ -26514,10 +26516,10 @@ namespace  {
              * 
              *
              * @see \Kirschbaum\PowerJoins\Mixins\JoinRelationship::joinRelationship()
-             * @param mixed $relationName
-             * @param mixed $callback
-             * @param mixed $joinType
-             * @param mixed $useAlias
+             * @param string $relationName
+             * @param \Closure|array|string|null $callback
+             * @param string $joinType
+             * @param bool $useAlias
              * @param bool $disableExtraConditions
              * @param string|null $morphable
              * @static 
@@ -26529,126 +26531,135 @@ namespace  {
              * 
              *
              * @see \Kirschbaum\PowerJoins\Mixins\JoinRelationship::joinRelationshipUsingAlias()
-             * @param mixed $relationName
-             * @param mixed $callback
+             * @param string $relationName
+             * @param \Closure|array|string|null $callback
              * @param bool $disableExtraConditions
+             * @param string|null $morphable
              * @static 
-             */            public static function joinRelationshipUsingAlias($relationName, $callback = null, $disableExtraConditions = false)
+             */            public static function joinRelationshipUsingAlias($relationName, $callback = null, $disableExtraConditions = false, $morphable = null)
             {
-                                return \Illuminate\Database\Eloquent\Builder::joinRelationshipUsingAlias($relationName, $callback, $disableExtraConditions);
+                                return \Illuminate\Database\Eloquent\Builder::joinRelationshipUsingAlias($relationName, $callback, $disableExtraConditions, $morphable);
             }
                             /**
              * 
              *
              * @see \Kirschbaum\PowerJoins\Mixins\JoinRelationship::leftJoinRelationshipUsingAlias()
-             * @param mixed $relationName
-             * @param mixed $callback
+             * @param string $relationName
+             * @param \Closure|array|string|null $callback
              * @param bool $disableExtraConditions
+             * @param string|null $morphable
              * @static 
-             */            public static function leftJoinRelationshipUsingAlias($relationName, $callback = null, $disableExtraConditions = false)
+             */            public static function leftJoinRelationshipUsingAlias($relationName, $callback = null, $disableExtraConditions = false, $morphable = null)
             {
-                                return \Illuminate\Database\Eloquent\Builder::leftJoinRelationshipUsingAlias($relationName, $callback, $disableExtraConditions);
+                                return \Illuminate\Database\Eloquent\Builder::leftJoinRelationshipUsingAlias($relationName, $callback, $disableExtraConditions, $morphable);
             }
                             /**
              * 
              *
              * @see \Kirschbaum\PowerJoins\Mixins\JoinRelationship::rightJoinRelationshipUsingAlias()
-             * @param mixed $relationName
-             * @param mixed $callback
+             * @param string $relationName
+             * @param \Closure|array|string|null $callback
              * @param bool $disableExtraConditions
+             * @param string|null $morphable
              * @static 
-             */            public static function rightJoinRelationshipUsingAlias($relationName, $callback = null, $disableExtraConditions = false)
+             */            public static function rightJoinRelationshipUsingAlias($relationName, $callback = null, $disableExtraConditions = false, $morphable = null)
             {
-                                return \Illuminate\Database\Eloquent\Builder::rightJoinRelationshipUsingAlias($relationName, $callback, $disableExtraConditions);
+                                return \Illuminate\Database\Eloquent\Builder::rightJoinRelationshipUsingAlias($relationName, $callback, $disableExtraConditions, $morphable);
             }
                             /**
              * 
              *
              * @see \Kirschbaum\PowerJoins\Mixins\JoinRelationship::joinRelation()
-             * @param mixed $relationName
-             * @param mixed $callback
-             * @param mixed $joinType
-             * @param mixed $useAlias
+             * @param string $relationName
+             * @param \Closure|array|string|null $callback
+             * @param string $joinType
+             * @param bool $useAlias
              * @param bool $disableExtraConditions
+             * @param string|null $morphable
              * @static 
-             */            public static function joinRelation($relationName, $callback = null, $joinType = 'join', $useAlias = false, $disableExtraConditions = false)
+             */            public static function joinRelation($relationName, $callback = null, $joinType = 'join', $useAlias = false, $disableExtraConditions = false, $morphable = null)
             {
-                                return \Illuminate\Database\Eloquent\Builder::joinRelation($relationName, $callback, $joinType, $useAlias, $disableExtraConditions);
+                                return \Illuminate\Database\Eloquent\Builder::joinRelation($relationName, $callback, $joinType, $useAlias, $disableExtraConditions, $morphable);
             }
                             /**
              * 
              *
              * @see \Kirschbaum\PowerJoins\Mixins\JoinRelationship::leftJoinRelationship()
-             * @param mixed $relation
-             * @param mixed $callback
-             * @param mixed $useAlias
+             * @param string $relationName
+             * @param \Closure|array|string|null $callback
+             * @param bool $useAlias
              * @param bool $disableExtraConditions
+             * @param string|null $morphable
              * @static 
-             */            public static function leftJoinRelationship($relation, $callback = null, $useAlias = false, $disableExtraConditions = false)
+             */            public static function leftJoinRelationship($relationName, $callback = null, $useAlias = false, $disableExtraConditions = false, $morphable = null)
             {
-                                return \Illuminate\Database\Eloquent\Builder::leftJoinRelationship($relation, $callback, $useAlias, $disableExtraConditions);
+                                return \Illuminate\Database\Eloquent\Builder::leftJoinRelationship($relationName, $callback, $useAlias, $disableExtraConditions, $morphable);
             }
                             /**
              * 
              *
              * @see \Kirschbaum\PowerJoins\Mixins\JoinRelationship::leftJoinRelation()
-             * @param mixed $relation
-             * @param mixed $callback
-             * @param mixed $useAlias
+             * @param string $relation
+             * @param \Closure|array|string|null $callback
+             * @param bool $useAlias
              * @param bool $disableExtraConditions
+             * @param string|null $morphable
              * @static 
-             */            public static function leftJoinRelation($relation, $callback = null, $useAlias = false, $disableExtraConditions = false)
+             */            public static function leftJoinRelation($relation, $callback = null, $useAlias = false, $disableExtraConditions = false, $morphable = null)
             {
-                                return \Illuminate\Database\Eloquent\Builder::leftJoinRelation($relation, $callback, $useAlias, $disableExtraConditions);
+                                return \Illuminate\Database\Eloquent\Builder::leftJoinRelation($relation, $callback, $useAlias, $disableExtraConditions, $morphable);
             }
                             /**
              * 
              *
              * @see \Kirschbaum\PowerJoins\Mixins\JoinRelationship::rightJoinRelationship()
-             * @param mixed $relation
-             * @param mixed $callback
-             * @param mixed $useAlias
+             * @param string $relation
+             * @param \Closure|array|string|null $callback
+             * @param bool $useAlias
              * @param bool $disableExtraConditions
+             * @param string|null $morphable
              * @static 
-             */            public static function rightJoinRelationship($relation, $callback = null, $useAlias = false, $disableExtraConditions = false)
+             */            public static function rightJoinRelationship($relation, $callback = null, $useAlias = false, $disableExtraConditions = false, $morphable = null)
             {
-                                return \Illuminate\Database\Eloquent\Builder::rightJoinRelationship($relation, $callback, $useAlias, $disableExtraConditions);
+                                return \Illuminate\Database\Eloquent\Builder::rightJoinRelationship($relation, $callback, $useAlias, $disableExtraConditions, $morphable);
             }
                             /**
              * 
              *
              * @see \Kirschbaum\PowerJoins\Mixins\JoinRelationship::rightJoinRelation()
-             * @param mixed $relation
-             * @param mixed $callback
-             * @param mixed $useAlias
+             * @param string $relation
+             * @param \Closure|array|string|null $callback
+             * @param bool $useAlias
              * @param bool $disableExtraConditions
+             * @param string|null $morphable
              * @static 
-             */            public static function rightJoinRelation($relation, $callback = null, $useAlias = false, $disableExtraConditions = false)
+             */            public static function rightJoinRelation($relation, $callback = null, $useAlias = false, $disableExtraConditions = false, $morphable = null)
             {
-                                return \Illuminate\Database\Eloquent\Builder::rightJoinRelation($relation, $callback, $useAlias, $disableExtraConditions);
+                                return \Illuminate\Database\Eloquent\Builder::rightJoinRelation($relation, $callback, $useAlias, $disableExtraConditions, $morphable);
             }
                             /**
              * 
              *
              * @see \Kirschbaum\PowerJoins\Mixins\JoinRelationship::joinNestedRelationship()
              * @param string $relationships
-             * @param mixed $callback
-             * @param mixed $joinType
-             * @param mixed $useAlias
+             * @param \Closure|array|string|null $callback
+             * @param string $joinType
+             * @param bool $useAlias
              * @param bool $disableExtraConditions
+             * @param string|null $morphable
              * @static 
-             */            public static function joinNestedRelationship($relationships, $callback = null, $joinType = 'join', $useAlias = false, $disableExtraConditions = false)
+             */            public static function joinNestedRelationship($relationships, $callback = null, $joinType = 'join', $useAlias = false, $disableExtraConditions = false, $morphable = null)
             {
-                                return \Illuminate\Database\Eloquent\Builder::joinNestedRelationship($relationships, $callback, $joinType, $useAlias, $disableExtraConditions);
+                                return \Illuminate\Database\Eloquent\Builder::joinNestedRelationship($relationships, $callback, $joinType, $useAlias, $disableExtraConditions, $morphable);
             }
                             /**
              * 
              *
              * @see \Kirschbaum\PowerJoins\Mixins\JoinRelationship::orderByPowerJoins()
-             * @param mixed $sort
-             * @param mixed $direction
-             * @param mixed $aggregation
-             * @param mixed $joinType
+             * @param array|string $sort
+             * @param string $direction
+             * @param string|null $aggregation
+             * @param string $joinType
              * @param mixed $aliases
              * @static 
              */            public static function orderByPowerJoins($sort, $direction = 'asc', $aggregation = null, $joinType = 'join', $aliases = null)
@@ -26659,8 +26670,8 @@ namespace  {
              * 
              *
              * @see \Kirschbaum\PowerJoins\Mixins\JoinRelationship::orderByLeftPowerJoins()
-             * @param mixed $sort
-             * @param mixed $direction
+             * @param array|string $sort
+             * @param string $direction
              * @static 
              */            public static function orderByLeftPowerJoins($sort, $direction = 'asc')
             {
@@ -26670,8 +26681,8 @@ namespace  {
              * 
              *
              * @see \Kirschbaum\PowerJoins\Mixins\JoinRelationship::orderByPowerJoinsCount()
-             * @param mixed $sort
-             * @param mixed $direction
+             * @param array|string $sort
+             * @param string $direction
              * @static 
              */            public static function orderByPowerJoinsCount($sort, $direction = 'asc')
             {
@@ -26681,8 +26692,8 @@ namespace  {
              * 
              *
              * @see \Kirschbaum\PowerJoins\Mixins\JoinRelationship::orderByLeftPowerJoinsCount()
-             * @param mixed $sort
-             * @param mixed $direction
+             * @param array|string $sort
+             * @param string $direction
              * @static 
              */            public static function orderByLeftPowerJoinsCount($sort, $direction = 'asc')
             {
@@ -26692,8 +26703,8 @@ namespace  {
              * 
              *
              * @see \Kirschbaum\PowerJoins\Mixins\JoinRelationship::orderByPowerJoinsSum()
-             * @param mixed $sort
-             * @param mixed $direction
+             * @param array|string $sort
+             * @param string $direction
              * @static 
              */            public static function orderByPowerJoinsSum($sort, $direction = 'asc')
             {
@@ -26703,8 +26714,8 @@ namespace  {
              * 
              *
              * @see \Kirschbaum\PowerJoins\Mixins\JoinRelationship::orderByLeftPowerJoinsSum()
-             * @param mixed $sort
-             * @param mixed $direction
+             * @param array|string $sort
+             * @param string $direction
              * @static 
              */            public static function orderByLeftPowerJoinsSum($sort, $direction = 'asc')
             {
@@ -26714,8 +26725,8 @@ namespace  {
              * 
              *
              * @see \Kirschbaum\PowerJoins\Mixins\JoinRelationship::orderByPowerJoinsAvg()
-             * @param mixed $sort
-             * @param mixed $direction
+             * @param array|string $sort
+             * @param string $direction
              * @static 
              */            public static function orderByPowerJoinsAvg($sort, $direction = 'asc')
             {
@@ -26725,8 +26736,8 @@ namespace  {
              * 
              *
              * @see \Kirschbaum\PowerJoins\Mixins\JoinRelationship::orderByLeftPowerJoinsAvg()
-             * @param mixed $sort
-             * @param mixed $direction
+             * @param array|string $sort
+             * @param string $direction
              * @static 
              */            public static function orderByLeftPowerJoinsAvg($sort, $direction = 'asc')
             {
@@ -26736,8 +26747,8 @@ namespace  {
              * 
              *
              * @see \Kirschbaum\PowerJoins\Mixins\JoinRelationship::orderByPowerJoinsMin()
-             * @param mixed $sort
-             * @param mixed $direction
+             * @param array|string $sort
+             * @param string $direction
              * @static 
              */            public static function orderByPowerJoinsMin($sort, $direction = 'asc')
             {
@@ -26747,8 +26758,8 @@ namespace  {
              * 
              *
              * @see \Kirschbaum\PowerJoins\Mixins\JoinRelationship::orderByLeftPowerJoinsMin()
-             * @param mixed $sort
-             * @param mixed $direction
+             * @param array|string $sort
+             * @param string $direction
              * @static 
              */            public static function orderByLeftPowerJoinsMin($sort, $direction = 'asc')
             {
@@ -26758,8 +26769,8 @@ namespace  {
              * 
              *
              * @see \Kirschbaum\PowerJoins\Mixins\JoinRelationship::orderByPowerJoinsMax()
-             * @param mixed $sort
-             * @param mixed $direction
+             * @param array|string $sort
+             * @param string $direction
              * @static 
              */            public static function orderByPowerJoinsMax($sort, $direction = 'asc')
             {
@@ -26769,8 +26780,8 @@ namespace  {
              * 
              *
              * @see \Kirschbaum\PowerJoins\Mixins\JoinRelationship::orderByLeftPowerJoinsMax()
-             * @param mixed $sort
-             * @param mixed $direction
+             * @param array|string $sort
+             * @param string $direction
              * @static 
              */            public static function orderByLeftPowerJoinsMax($sort, $direction = 'asc')
             {
@@ -26780,11 +26791,11 @@ namespace  {
              * 
              *
              * @see \Kirschbaum\PowerJoins\Mixins\JoinRelationship::powerJoinHas()
-             * @param mixed $relation
-             * @param mixed $operator
-             * @param mixed $count
+             * @param string $relation
+             * @param string $operator
+             * @param int $count
              * @param mixed $boolean
-             * @param \Closure|array|null $callback
+             * @param \Closure|array|string|null $callback
              * @param string|null $morphable
              * @return static 
              * @static 
@@ -26796,11 +26807,11 @@ namespace  {
              * 
              *
              * @see \Kirschbaum\PowerJoins\Mixins\JoinRelationship::hasNestedUsingJoins()
-             * @param mixed $relations
-             * @param mixed $operator
-             * @param mixed $count
-             * @param mixed $boolean
-             * @param \Closure|array|null $callback
+             * @param string $relations
+             * @param string $operator
+             * @param int $count
+             * @param string $boolean
+             * @param \Closure|array|string|null $callback
              * @return static 
              * @static 
              */            public static function hasNestedUsingJoins($relations, $operator = '>=', $count = 1, $boolean = 'and', $callback = null)
