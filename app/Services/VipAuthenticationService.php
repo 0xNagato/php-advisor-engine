@@ -21,13 +21,4 @@ class VipAuthenticationService
     {
         Auth::guard('vip_code')->login($vipCode);
     }
-
-    public function setSessionData(VipCode $vipCode): void
-    {
-        session([
-            'vip_code_id' => $vipCode->id,
-            'vip_code' => $vipCode->code,
-            'concierge_id' => $vipCode->concierge_id,
-        ]);
-    }
 }

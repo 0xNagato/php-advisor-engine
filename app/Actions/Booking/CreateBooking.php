@@ -54,6 +54,7 @@ class CreateBooking
 
         $conciergeId = $isVip ? Auth::guard('vip_code')->user()->concierge_id
             : Auth::user()->concierge->id;
+        $vipCodeId = Auth::guard('vip_code')->user()?->id;
 
         $booking = Booking::query()->create([
             'schedule_template_id' => $scheduleTemplate?->id,
@@ -63,7 +64,7 @@ class CreateBooking
             'booking_at' => $bookingAt,
             'currency' => $currency,
             'is_prime' => $scheduleTemplate?->prime_time,
-            'vip_code_id' => session('vip_code_id'),
+            'vip_code_id' => $vipCodeId,
         ]);
 
         $taxData = app(SalesTaxService::class)->calculateTax(
@@ -95,6 +96,13 @@ class CreateBooking
                     'r' => 'sms',
                 ])
             )->make();
+
+            $vipUrl = ShortURL::destinationUrl(
+                route('booking.checkout', [
+                    'booking' => $booking->uuid,
+                    'r' => 'vip',
+                ])
+            )->make();
         } catch (Exception $e) {
             Sentry::captureException($e);
 
@@ -107,6 +115,7 @@ class CreateBooking
         return CreateBookingReturnData::from([
             'booking' => $booking,
             'bookingUrl' => $shortUrl->default_short_url,
+            'bookingVipUrl' => $vipUrl->default_short_url,
             'qrCode' => (new QRCode)->render($shortUrlQr->default_short_url),
         ]);
     }

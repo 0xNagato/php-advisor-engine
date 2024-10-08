@@ -68,7 +68,6 @@ class Login extends Component implements HasForms
     private function handleSuccessfulAuthentication($vipCode): void
     {
         $this->authService->login($vipCode);
-        $this->authService->setSessionData($vipCode);
         $this->redirectRoute('vip.booking');
     }
 
