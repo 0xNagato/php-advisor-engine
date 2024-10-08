@@ -16,9 +16,6 @@ use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
-/**
- * @mixin IdeHelperBooking
- */
 class Booking extends Model
 {
     use FormatsPhoneNumber;
@@ -185,7 +182,7 @@ class Booking extends Model
     }
 
     /**
-     * @return BelongsTo<VipCode, \App\Models\Booking>
+     * @return BelongsTo<VipCode, Booking>
      */
     public function vipCode(): BelongsTo
     {

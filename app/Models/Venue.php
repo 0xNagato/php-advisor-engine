@@ -20,11 +20,6 @@ use RuntimeException;
 use Spatie\LaravelData\DataCollection;
 use Throwable;
 
-/**
- * Class Venue
- *
- * @mixin IdeHelperVenue
- */
 class Venue extends Model
 {
     use HasFactory;

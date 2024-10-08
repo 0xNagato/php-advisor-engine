@@ -5,9 +5,6 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-/**
- * @mixin IdeHelperSmsResponse
- */
 class SmsResponse extends Model
 {
     protected $fillable = [
@@ -17,7 +14,7 @@ class SmsResponse extends Model
     ];
 
     /**
-     * @return BelongsTo<Booking, \App\Models\SmsResponse>
+     * @return BelongsTo<Booking, SmsResponse>
      */
     public function booking(): BelongsTo
     {

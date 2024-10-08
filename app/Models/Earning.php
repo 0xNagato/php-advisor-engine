@@ -6,9 +6,6 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-/**
- * @mixin IdeHelperEarning
- */
 class Earning extends Model
 {
     protected $fillable = [
@@ -24,7 +21,7 @@ class Earning extends Model
     ];
 
     /**
-     * @return BelongsTo<User, \App\Models\Earning>
+     * @return BelongsTo<User, Earning>
      */
     public function user(): BelongsTo
     {
@@ -32,7 +29,7 @@ class Earning extends Model
     }
 
     /**
-     * @return BelongsTo<Booking, \App\Models\Earning>
+     * @return BelongsTo<Booking, Earning>
      */
     public function booking(): BelongsTo
     {
@@ -40,7 +37,7 @@ class Earning extends Model
     }
 
     /**
-     * @return BelongsTo<Payment, \App\Models\Earning>
+     * @return BelongsTo<Payment, Earning>
      */
     public function payment(): BelongsTo
     {

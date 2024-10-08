@@ -6,9 +6,6 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-/**
- * @mixin IdeHelperMessage
- */
 class Message extends Model
 {
     use HasFactory;
@@ -25,7 +22,7 @@ class Message extends Model
     ];
 
     /**
-     * @return BelongsTo<Announcement, \App\Models\Message>
+     * @return BelongsTo<Announcement, Message>
      */
     public function announcement(): BelongsTo
     {
@@ -33,7 +30,7 @@ class Message extends Model
     }
 
     /**
-     * @return BelongsTo<User, \App\Models\Message>
+     * @return BelongsTo<User, Message>
      */
     public function recipient(): BelongsTo
     {

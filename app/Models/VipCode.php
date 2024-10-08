@@ -12,9 +12,6 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 
-/**
- * @mixin IdeHelperVipCode
- */
 class VipCode extends Authenticatable
 {
     use HasFactory;

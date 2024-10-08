@@ -7,9 +7,6 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
-/**
- * @mixin IdeHelperAnnouncement
- */
 class Announcement extends Model
 {
     use HasFactory;
@@ -32,7 +29,7 @@ class Announcement extends Model
     ];
 
     /**
-     * @return BelongsTo<User, \App\Models\Announcement>
+     * @return BelongsTo<User, Announcement>
      */
     public function sender(): BelongsTo
     {

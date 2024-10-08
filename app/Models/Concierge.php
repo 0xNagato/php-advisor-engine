@@ -11,9 +11,6 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 use Illuminate\Database\Eloquent\Relations\HasOneThrough;
 
-/**
- * @mixin IdeHelperConcierge
- */
 class Concierge extends Model
 {
     use HasFactory;
