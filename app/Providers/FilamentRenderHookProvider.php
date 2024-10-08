@@ -94,7 +94,25 @@ class FilamentRenderHookProvider extends ServiceProvider
         Filament::registerRenderHook(
             'panels::head.start',
             static fn (): string => '
-            <meta name="apple-itunes-app" content="app-id=6504947227, affiliate-data=, app-argument=https://apps.apple.com/us/app/prima-vip/id6504947227?platform=iphone">
+            <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/smartbanner.js/1.14.6/smartbanner.min.css">
+            <script src="https://cdnjs.cloudflare.com/ajax/libs/smartbanner.js/1.14.6/smartbanner.min.js"></script>
+            
+            <!-- Start SmartBanner configuration -->
+            <meta name="smartbanner:title" content="<strong>PRIMA</strong>">
+            <meta name="smartbanner:author" content="VIP Experience Concierge">
+            <meta name="smartbanner:price" content="Free">
+            <meta name="smartbanner:price-suffix-apple" content=" - On the App Store">
+            <meta name="smartbanner:price-suffix-google" content=" - In Google Play">
+            <meta name="smartbanner:icon-apple" content="https://is1-ssl.mzstatic.com/image/thumb/Purple221/v4/2f/36/1f/2f361f98-4d81-10ab-66d6-66d207e66c6a/AppIcon-0-0-1x_U007epad-0-85-220.png/230x0w.webp">
+            <meta name="smartbanner:icon-google" content="https://url/to/google-play-icon.png">
+            <meta name="smartbanner:button" content="View">
+            <meta name="smartbanner:button-url-apple" content="https://apps.apple.com/us/app/prima-vip/id6504947227?platform=iphone">
+            <meta name="smartbanner:button-url-google" content="https://android/application-url">
+            <meta name="smartbanner:enabled-platforms" content="ios">
+            <meta name="smartbanner:close-label" content="Close">
+            <!-- End SmartBanner configuration -->
+            
+            
             <link rel="preconnect" href="https://fonts.googleapis.com">
             <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
             <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet">',

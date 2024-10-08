@@ -207,4 +207,6 @@ return [
     'dev_ip_address' => env('DEV_IP_ADDRESS'),
     'native_key' => env('APP_NATIVE_KEY'),
     'platform_url' => env('PLATFORM_URL', '/platform'),
+    'apple_app_store_url' => env('APPLE_APP_STORE_URL', 'https://apps.apple.com/us/app/prima-vip/id6504947227'),
+    'google_play_store_url' => env('GOOGLE_PLAY_STORE_URL'),
 ];
