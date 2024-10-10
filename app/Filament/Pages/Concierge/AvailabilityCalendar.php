@@ -48,7 +48,7 @@ class AvailabilityCalendar extends Page
 
     public static function canAccess(): bool
     {
-        return auth()->user()->hasRole('concierge');
+        return auth()->user()->hasRole(['concierge', 'partner']);
     }
 
     public function form(Form $form): Form

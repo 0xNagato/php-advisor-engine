@@ -209,4 +209,7 @@ return [
     'platform_url' => env('PLATFORM_URL', '/platform'),
     'apple_app_store_url' => env('APPLE_APP_STORE_URL', 'https://apps.apple.com/us/app/prima-vip/id6504947227'),
     'google_play_store_url' => env('GOOGLE_PLAY_STORE_URL'),
+    'house' => [
+        'concierge_id' => env('HOUSE_CONCIERGE_ID', 1),
+    ],
 ];

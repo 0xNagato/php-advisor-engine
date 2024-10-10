@@ -52,8 +52,7 @@ class CreateBooking
             new RuntimeException('Booking cannot be created more than '.self::MAX_DAYS_IN_ADVANCE.' days in advance.')
         );
 
-        $conciergeId = $isVip ? Auth::guard('vip_code')->user()->concierge_id
-            : Auth::user()->concierge->id;
+        $conciergeId = $this->getConciergeId($isVip);
         $vipCodeId = Auth::guard('vip_code')->user()?->id;
 
         $booking = Booking::query()->create([
@@ -118,5 +117,18 @@ class CreateBooking
             'bookingVipUrl' => $vipUrl->default_short_url,
             'qrCode' => (new QRCode)->render($shortUrlQr->default_short_url),
         ]);
+    }
+
+    private function getConciergeId($isVip)
+    {
+        $conciergeId = Auth::user()->concierge?->id;
+        if ($isVip) {
+            $conciergeId = Auth::guard('vip_code')->user()->concierge_id;
+        }
+        if (auth()->user()->hasRole('partner')) {
+            $conciergeId = config('app.house.concierge_id');
+        }
+
+        return $conciergeId;
     }
 }
