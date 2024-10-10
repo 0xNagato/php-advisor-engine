@@ -72,7 +72,7 @@
                                     </p>
                                 @endif
                             @else
-                                <p class="text-base text-nowrap">N/A</p>
+                                <p class="text-sm text-nowrap">CLOSED</p>
                             @endif
                         </button>
                     </td>
