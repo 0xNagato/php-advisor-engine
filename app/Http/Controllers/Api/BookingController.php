@@ -18,6 +18,7 @@ use App\Services\BookingService;
 use Exception;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Response;
+use Stripe\Exception\ApiErrorException;
 
 class BookingController extends Controller
 {
@@ -56,6 +57,9 @@ class BookingController extends Controller
         ]);
     }
 
+    /**
+     * @throws ApiErrorException
+     */
     public function update(BookingUpdateRequest $request, Booking $booking): JsonResponse
     {
         $validatedData = $request->validated();
@@ -117,6 +121,9 @@ class BookingController extends Controller
         return $bookingDate->format('D, M j').' at '.$time;
     }
 
+    /**
+     * @throws ApiErrorException
+     */
     private function handleNonPrimeBooking(Booking $booking, array $validatedData): JsonResponse
     {
         app(BookingService::class)->processBooking($booking, $validatedData);

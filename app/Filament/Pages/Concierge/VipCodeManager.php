@@ -6,12 +6,15 @@ use App\Filament\DateRangeFilterAction;
 use App\Livewire\DateRangeFilterWidget;
 use App\Models\VipCode;
 use Carbon\Carbon;
+use Filament\Forms\Components\Actions;
 use Filament\Forms\Components\Actions\Action;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Form;
 use Filament\Pages\Dashboard\Concerns\HasFiltersAction;
 use Filament\Pages\Page;
+use Filament\Support\Colors\Color;
 use Illuminate\Contracts\Support\Htmlable;
+use Illuminate\Support\Str;
 use Livewire\Attributes\On;
 
 /**
@@ -40,9 +43,34 @@ class VipCodeManager extends Page
 
     public function mount(): void
     {
+        $this->initializeFilters();
+        $this->form->fill();
+        $this->ensureVipCodeExists();
+    }
+
+    private function initializeFilters(): void
+    {
         $this->filters['startDate'] ??= now()->subDays(30)->format('Y-m-d');
         $this->filters['endDate'] ??= now()->format('Y-m-d');
-        $this->form->fill();
+    }
+
+    private function ensureVipCodeExists(): void
+    {
+        $conciergeId = auth()->user()->concierge?->id;
+
+        // Check if a VIP code already exists for the concierge
+        $existingCode = VipCode::query()->where('concierge_id', $conciergeId)->first();
+
+        if (! $existingCode) {
+            // Generate a random 6-character string
+            $randomCode = strtoupper(Str::random(6));
+
+            // Create a new VIP code with the random string
+            VipCode::query()->create([
+                'code' => $randomCode,
+                'concierge_id' => $conciergeId,
+            ]);
+        }
     }
 
     public function getTitle(): Htmlable|string
@@ -87,26 +115,32 @@ class VipCodeManager extends Page
                 TextInput::make('code')
                     ->label('VIP Code')
                     ->hiddenLabel()
-                    ->placeholder('Create VIP Code')
+                    ->placeholder('VIP Code')
                     ->required()
                     ->minLength(4)
                     ->maxLength(12)
                     ->unique(table: VipCode::class)
-                    ->suffixAction(Action::make('createCode')
-                        ->iconButton()
-                        ->icon('heroicon-o-plus-circle')
-                        ->color('success')
-                        ->action(function () {
-                            $this->saveVipCode();
-                        }))
                     ->validationMessages([
                         'required' => 'The VIP Code field is required.',
                         'unique' => 'The VIP Code has already been taken.',
                         'min' => 'The VIP Code field must be at least :min characters.',
                         'max' => 'The VIP Code field must be at least :max characters.',
                     ]),
+                Actions::make([
+                    Action::make('createCode')
+                        ->label('Create Vanity Link')
+                        ->button()
+                        ->color(Color::Green)
+                        ->action(function () {
+                            $this->saveVipCode();
+                        }),
+                ])
+                    ->fullWidth(),
             ])
             ->extraAttributes(['class' => 'inline-form'])
+            ->columns([
+                'default' => 2,
+            ])
             ->statePath('data');
     }
 
