@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Actions\Booking\CreateBooking;
 use App\Actions\Region\GetUserRegion;
+use App\Data\Booking\CreateBookingReturnData;
 use App\Enums\BookingStatus;
 use App\Events\BookingCancelled;
 use App\Http\Controllers\Controller;
@@ -11,7 +12,9 @@ use App\Http\Requests\Api\BookingCreateRequest;
 use App\Http\Requests\Api\BookingUpdateRequest;
 use App\Http\Resources\BookingResource;
 use App\Models\Booking;
+use App\Models\Region;
 use App\Notifications\Booking\ConfirmReservation;
+use App\Services\BookingService;
 use Exception;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Response;
@@ -22,9 +25,11 @@ class BookingController extends Controller
     {
         $validatedData = $request->validated();
 
+        /** @var Region $region */
         $region = GetUserRegion::run();
 
         try {
+            /** @var CreateBookingReturnData $booking */
             $booking = CreateBooking::run(
                 $validatedData['schedule_template_id'],
                 $validatedData,
@@ -41,7 +46,6 @@ class BookingController extends Controller
 
         $bookingResource = BookingResource::make($booking);
 
-        // Add additional data to the resource response
         $bookingResource = $bookingResource->additional([
             'region' => $region,
             'dayDisplay' => $dayDisplay,
@@ -60,6 +64,10 @@ class BookingController extends Controller
             return response()->json([
                 'message' => 'Booking already confirmed or cancelled',
             ], 404);
+        }
+
+        if (! $booking->is_prime) {
+            return $this->handleNonPrimeBooking($booking, $validatedData);
         }
 
         $booking->update([
@@ -107,5 +115,16 @@ class BookingController extends Controller
         }
 
         return $bookingDate->format('D, M j').' at '.$time;
+    }
+
+    private function handleNonPrimeBooking(Booking $booking, array $validatedData): JsonResponse
+    {
+        app(BookingService::class)->processBooking($booking, $validatedData);
+
+        $booking->update(['concierge_referral_type' => 'app']);
+
+        return response()->json([
+            'message' => 'Booking created successfully',
+        ]);
     }
 }
