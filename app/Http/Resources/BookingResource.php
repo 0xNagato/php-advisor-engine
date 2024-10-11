@@ -35,6 +35,7 @@ class BookingResource extends JsonResource
             'bookingUrl' => $this->bookingUrl,
             'qrCode' => $this->qrCode,
             'is_prime' => $this->booking->is_prime,
+            'booking_at' => $this->booking->booking_at,
         ];
     }
 }
