@@ -115,7 +115,7 @@ class VipCodeManager extends Page
                 TextInput::make('code')
                     ->label('VIP Code')
                     ->hiddenLabel()
-                    ->placeholder('VIP Code')
+                    ->placeholder('Enter VIP Code')
                     ->required()
                     ->minLength(4)
                     ->maxLength(12)

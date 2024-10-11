@@ -81,8 +81,7 @@
     "roave/security-advisories": "dev-latest",
     "spatie/laravel-horizon-watcher": "^1.1",
     "spatie/laravel-ignition": "^2.0",
-    "squizlabs/php_codesniffer": "^3.9",
-    "wire-elements/wire-spy": "^0.0.4"
+    "squizlabs/php_codesniffer": "^3.9"
   },
   "autoload": {
     "psr-4": {

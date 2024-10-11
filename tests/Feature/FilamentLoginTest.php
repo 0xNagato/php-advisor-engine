@@ -27,7 +27,7 @@ test('user can access platform vip code page', function () {
         ->assertSee('VIP Codes')
         ->assertSee('VIP Code')
         ->assertSeeHtml('<button')
-        ->assertSee('Create VIP Code');
+        ->assertSee('Enter VIP Code');
 });
 
 test('user cannot access admin panel when not authenticated', function () {

@@ -28,7 +28,7 @@ test('vip code form is displayed correctly', function () {
         ->get(VipCodeManager::getUrl())
         ->assertSuccessful()
         ->assertSee('VIP Codes')
-        ->assertSee('Create VIP Code');
+        ->assertSee('Enter VIP Code');
 });
 
 /*test('vip code can be generated', function () {
