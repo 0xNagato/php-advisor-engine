@@ -37,6 +37,6 @@ class ExceptionFormController extends Controller
                 ->subject('Data from Exception Form: '.$data['exceptionMessage']);
         });
 
-        return redirect('/');
+        return redirect('/platform');
     }
 }
