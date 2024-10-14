@@ -2,8 +2,11 @@
 
 namespace App\Filament\Resources\PartnerResource\Pages;
 
+use App\Filament\Resources\ConciergeResource\Pages\ViewConcierge;
 use App\Filament\Resources\PartnerResource;
+use App\Filament\Resources\VenueResource\Pages\ViewVenue;
 use App\Models\Partner;
+use App\Models\Referral;
 use App\Traits\ImpersonatesOther;
 use Filament\Actions\CreateAction;
 use Filament\Forms\Components\DatePicker;
@@ -12,6 +15,7 @@ use Filament\Pages\Dashboard\Concerns\HasFiltersAction;
 use Filament\Resources\Pages\ListRecords;
 use Filament\Tables\Actions\Action;
 use Filament\Tables\Actions\EditAction;
+use Filament\Tables\Actions\ViewAction;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Illuminate\Contracts\Database\Query\Builder;
@@ -26,6 +30,8 @@ class ListPartners extends ListRecords
     protected static string $resource = PartnerResource::class;
 
     protected static string $view = 'filament.pages.partner.partner-list';
+
+    const bool USE_SLIDE_OVER = false;
 
     public function getHeading(): Htmlable|string
     {
@@ -46,19 +52,7 @@ class ListPartners extends ListRecords
 
     public function table(Table $table): Table
     {
-        $startDate = $this->filters['startDate'] ?? now()->subDays(30);
-        $endDate = $this->filters['endDate'] ?? now();
-
-        $query = Partner::query()
-            ->select('partners.id', 'users.id as user_id', DB::raw("CONCAT(users.first_name, ' ', users.last_name) as user_name"), DB::raw('COALESCE(SUM(amount), 0) as total_earned'), DB::raw('COALESCE(COUNT(case when earnings.type in ("partner_concierge", "partner_venue") then 1 else null end), 0) as bookings'))
-            ->join('users', 'users.id', '=', 'partners.user_id')
-            ->leftJoin('earnings', function (Builder $join) use ($startDate, $endDate) {
-                $join->on('earnings.user_id', '=', 'users.id')
-                    ->whereBetween('earnings.created_at', [$startDate, $endDate]);
-            })
-            ->groupBy('partners.id', 'users.id')
-            ->orderBy('total_earned', 'desc')
-            ->limit(10);
+        $query = $this->getPartnersQuery();
 
         return $table
             ->recordUrl(fn (Partner $record) => ViewPartner::getUrl(['record' => $record]))
@@ -66,21 +60,18 @@ class ListPartners extends ListRecords
             ->paginated([5, 10, 25])
             ->columns([
                 TextColumn::make('user.name')
-                    ->numeric()
-                    ->searchable(['first_name', 'last_name'])
-                    ->sortable(),
+                    ->size('xs')
+                    ->searchable(['first_name', 'last_name']),
                 TextColumn::make('total_earned')
                     ->label('Earned')
-                    ->alignRight()
+                    ->size('xs')
+                    ->grow(false)
                     ->money('USD', divideBy: 100),
-                TextColumn::make('bookings')
-                    ->label('Bookings')
-                    ->alignRight()
+                TextColumn::make('bookings')->label('Bookings')
+                    ->visibleFrom('sm')
+                    ->grow(false)
+                    ->size('xs')
                     ->numeric(),
-                TextColumn::make('created_at')
-                    ->dateTime()
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->actions([
                 Action::make('impersonate')
@@ -88,8 +79,45 @@ class ListPartners extends ListRecords
                     ->icon('impersonate-icon')
                     ->action(fn (Partner $record) => $this->impersonate($record->user))
                     ->hidden(fn () => isPrimaApp()),
-                EditAction::make()
-                    ->iconButton(),
+                Action::make('viewConcierge')
+                    ->iconButton()
+                    ->icon('tabler-maximize')
+                    ->modalHeading(fn (Partner $partner) => $partner->user->name)
+                    ->registerModalActions([
+                        EditAction::make('edit')
+                            ->size('sm'),
+                        ViewAction::make('view')
+                            ->size('sm'),
+                    ])
+                    ->modalContent(function (Partner $partner) {
+                        $referrals = $partner->referrals()->latest()->take(10)->with([
+                            'user.concierge', 'user.venue',
+                        ])->get()
+                            ->map(function (Referral $referral) {
+                                $referral->viewRoute = match ($referral->type) {
+                                    'concierge' => ViewConcierge::getUrl(['record' => $referral->user->concierge]),
+                                    'venue' => ViewVenue::getUrl(['record' => $referral->user->venue]),
+                                    default => null
+                                };
+
+                                return $referral;
+                            });
+
+                        return view('partials.partner-table-modal-view', [
+                            'secured_at' => $partner->user->secured_at,
+                            'percentage' => $partner->percentage,
+                            'bookings_count' => number_format($partner->bookings),
+                            'total_earned' => $partner->total_earned,
+                            'referrals' => $referrals,
+                        ]);
+                    })
+                    ->modalContentFooter(fn (Action $action) => view(
+                        'partials.concierge-mobile-footer',
+                        ['action' => $action]
+                    ))
+                    ->modalSubmitAction(false)
+                    ->modalCancelAction(false)
+                    ->slideOver(self::USE_SLIDE_OVER),
             ]);
     }
 
@@ -111,5 +139,25 @@ class ListPartners extends ListRecords
                 ]),
             CreateAction::make()->iconButton()->icon('heroicon-s-plus-circle'),
         ];
+    }
+
+    protected function getPartnersQuery(): \Illuminate\Database\Eloquent\Builder
+    {
+        $startDate = $this->filters['startDate'] ?? now()->subDays(30);
+        $endDate = $this->filters['endDate'] ?? now();
+
+        return Partner::query()
+            ->select('partners.id', 'partners.percentage', 'users.id as user_id',
+                DB::raw("CONCAT(users.first_name, ' ', users.last_name) as user_name"),
+                DB::raw('COALESCE(SUM(amount), 0) as total_earned'),
+                DB::raw('COALESCE(COUNT(case when earnings.type in ("partner_concierge", "partner_venue") then 1 else null end), 0) as bookings'))
+            ->join('users', 'users.id', '=', 'partners.user_id')
+            ->leftJoin('earnings', function (Builder $join) use ($startDate, $endDate) {
+                $join->on('earnings.user_id', '=', 'users.id')
+                    ->whereBetween('earnings.created_at', [$startDate, $endDate]);
+            })
+            ->groupBy('partners.id', 'users.id')
+            ->orderBy('total_earned', 'desc')
+            ->limit(10);
     }
 }

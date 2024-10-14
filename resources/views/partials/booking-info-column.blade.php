@@ -32,15 +32,4 @@
             </div>
         @endforeach
     @endif
-
-    <div class="flex items-center gap-1">
-        <div class="font-semibold">is Vip?</div>
-        <div>
-            @if ($record->vip_code_id)
-                <x-heroicon-s-check-circle class="h-4 w-4 -mt-0.5 text-green-600"/>
-            @else
-                <x-heroicon-s-no-symbol class="h-4 w-4 -mt-0.5 text-danger-600"/>
-            @endif
-        </div>
-    </div>
 </div>
