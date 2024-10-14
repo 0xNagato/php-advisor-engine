@@ -97,10 +97,12 @@ class ViewBooking extends ViewRecord
             ->modalIcon('heroicon-o-exclamation-triangle')
             ->modalIconColor('danger')
             ->modalHeading('Delete Booking')
+            ->extraAttributes(['class' => 'w-full'])
             ->modalDescription(function () {
                 return new HtmlString(
-                    'Are you sure you want to delete this booking? This action cannot be undone.<br><br>'.
+                    'Are you certain you want to delete this booking? This action is irreversible.<br><br>'.
                     "<div class='text-sm'>".
+                    "<p class='p-1 mb-2 text-xs font-semibold text-red-600 bg-red-100 border border-red-300 rounded-md'>This action will be logged and cannot be undone.</p>".
                     "<p class='text-lg font-semibold'>{$this->record->guest_name}</p>".
                     "<p><strong>Venue:</strong> {$this->record->venue->name}</p>".
                     "<p><strong>Guest Count:</strong> {$this->record->guest_count}</p>".
@@ -111,13 +113,7 @@ class ViewBooking extends ViewRecord
             })
             ->modalSubmitActionLabel('Delete')
             ->modalCancelActionLabel('Cancel')
-            ->action(fn () => $this->deleteBooking())
-            ->extraAttributes(['class' => 'w-full'])
-            ->visible(function () {
-                $isSuperAdmin = auth()->user()->hasRole('super_admin');
-                $isLessThan24HoursOld = $this->record->created_at->gt(Carbon::now()->subHours(24));
-                return $isSuperAdmin && $isLessThan24HoursOld;
-            });
+            ->action(fn () => $this->deleteBooking());
     }
 
     private function deleteBooking(): void
