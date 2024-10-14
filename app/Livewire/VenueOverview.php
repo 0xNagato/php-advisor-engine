@@ -4,6 +4,7 @@ namespace App\Livewire;
 
 use App\Models\Earning;
 use App\Models\Venue;
+use App\Services\CurrencyConversionService;
 use Carbon\Carbon;
 use Filament\Widgets\StatsOverviewWidget as BaseWidget;
 use Filament\Widgets\StatsOverviewWidget\Stat;
@@ -29,68 +30,111 @@ class VenueOverview extends BaseWidget
         $prevEarnings = $this->getEarnings($startDate->copy()->subDays($startDate->diffInDays($endDate)), $startDate);
         $chartData = $this->getChartData($startDate, $endDate);
 
+        $currencyService = app(CurrencyConversionService::class);
+        $venueEarningsUSD = $currencyService->convertToUSD($earnings['venue_earnings']);
+        $venuePaidUSD = $currencyService->convertToUSD($earnings['venue_paid']);
+        $totalEarningsUSD = $venueEarningsUSD - abs($venuePaidUSD);
+
+        $prevVenueEarningsUSD = $currencyService->convertToUSD($prevEarnings['venue_earnings']);
+        $prevVenuePaidUSD = $currencyService->convertToUSD($prevEarnings['venue_paid']);
+        $prevTotalEarningsUSD = $prevVenueEarningsUSD - abs($prevVenuePaidUSD);
+
         $currencySymbol = $this->venue->inRegion->currency_symbol;
 
         return [
-            $this->createStat('Bookings', $earnings['number_of_bookings'], null, $prevEarnings['number_of_bookings'])
-                ->chart($chartData['bookings'])
+            $this->createStat('Total Bookings', $earnings['total_bookings'], null, $prevEarnings['total_bookings'])
+                ->chart($chartData['total_bookings'])
                 ->color('success'),
-            $this->createStat('Earnings', $earnings['total_earnings'], $currencySymbol, $prevEarnings['total_earnings'])
-                ->chart($chartData['earnings'])
+            $this->createStat('Prime Bookings', $earnings['prime_bookings'], null, $prevEarnings['prime_bookings'])
+                ->chart($chartData['prime_bookings'])
+                ->color('primary'),
+            $this->createStat('Incentivised Bookings', $earnings['incentivised_bookings'], null, $prevEarnings['incentivised_bookings'])
+                ->chart($chartData['incentivised_bookings'])
+                ->color('warning'),
+            $this->createStat('Total Earnings', $totalEarningsUSD, $currencySymbol, $prevTotalEarningsUSD)
+                ->chart($chartData['total_earnings'])
                 ->color('success'),
-            $this->createStat('Avg. Earning per Booking', $earnings['avg_earning_per_booking'], $currencySymbol, $prevEarnings['avg_earning_per_booking'])
-                ->chart($chartData['avg_earning_per_booking'])
-                ->color('info'),
+            $this->createStat('Prime Earnings', $venueEarningsUSD, $currencySymbol, $prevVenueEarningsUSD)
+                ->chart($chartData['prime_earnings'])
+                ->color('primary'),
+            $this->createStat('Incentivised Cost', $venuePaidUSD, $currencySymbol, $prevVenuePaidUSD)
+                ->chart($chartData['incentivised_cost'])
+                ->color('warning'),
         ];
     }
 
-    protected function getEarnings($startDate, $endDate): array
+    protected function getEarnings(Carbon $startDate, Carbon $endDate): array
     {
         $earnings = Earning::query()
             ->whereNotNull('bookings.confirmed_at')
             ->join('bookings', 'earnings.booking_id', '=', 'bookings.id')
-            ->where('earnings.user_id', $this->venue->user_id)
+            ->join('schedule_templates', 'bookings.schedule_template_id', '=', 'schedule_templates.id')
+            ->where('schedule_templates.venue_id', $this->venue->id)
             ->whereBetween('bookings.confirmed_at', [$startDate, $endDate])
-            ->whereIn('earnings.type', ['venue', 'venue_paid'])
             ->select(
-                DB::raw('COUNT(DISTINCT bookings.id) as number_of_bookings'),
-                DB::raw('SUM(earnings.amount) as total_earnings')
+                DB::raw('COUNT(DISTINCT CASE WHEN bookings.is_prime = 1 THEN bookings.id END) as prime_bookings'),
+                DB::raw('COUNT(DISTINCT CASE WHEN bookings.is_prime = 0 THEN bookings.id END) as incentivised_bookings'),
+                DB::raw('SUM(CASE WHEN earnings.type = "venue" THEN earnings.amount ELSE 0 END) as venue_earnings'),
+                DB::raw('SUM(CASE WHEN earnings.type = "venue_paid" THEN earnings.amount ELSE 0 END) as venue_paid'),
+                'earnings.currency'
             )
-            ->first();
-
-        $numberOfBookings = $earnings->number_of_bookings ?? 0;
-        $totalEarnings = $earnings->total_earnings ?? 0;
+            ->groupBy('earnings.currency')
+            ->get();
 
         return [
-            'number_of_bookings' => $numberOfBookings,
-            'total_earnings' => $totalEarnings / 100, // Convert cents to dollars
-            'avg_earning_per_booking' => $numberOfBookings > 0 ? ($totalEarnings / $numberOfBookings) / 100 : 0,
+            'total_bookings' => $earnings->sum('prime_bookings') + $earnings->sum('incentivised_bookings'),
+            'prime_bookings' => $earnings->sum('prime_bookings'),
+            'incentivised_bookings' => $earnings->sum('incentivised_bookings'),
+            'venue_earnings' => $earnings->pluck('venue_earnings', 'currency')->toArray(),
+            'venue_paid' => $earnings->pluck('venue_paid', 'currency')->toArray(),
         ];
     }
 
-    protected function getChartData($startDate, $endDate): array
+    protected function getChartData(Carbon $startDate, Carbon $endDate): array
     {
         $dailyData = Earning::query()
             ->whereNotNull('bookings.confirmed_at')
             ->join('bookings', 'earnings.booking_id', '=', 'bookings.id')
-            ->where('earnings.user_id', $this->venue->user_id)
+            ->join('schedule_templates', 'bookings.schedule_template_id', '=', 'schedule_templates.id')
+            ->where('schedule_templates.venue_id', $this->venue->id)
             ->whereBetween('bookings.confirmed_at', [$startDate, $endDate])
-            ->where('earnings.type', 'venue')
-            ->selectRaw('DATE(bookings.confirmed_at) as date, COUNT(DISTINCT bookings.id) as bookings, SUM(earnings.amount) as total_earnings')
-            ->groupBy('date')
+            ->selectRaw('
+                DATE(bookings.confirmed_at) as date,
+                earnings.currency,
+                COUNT(DISTINCT CASE WHEN bookings.is_prime = 1 THEN bookings.id END) as prime_bookings,
+                COUNT(DISTINCT CASE WHEN bookings.is_prime = 0 THEN bookings.id END) as incentivised_bookings,
+                SUM(CASE WHEN earnings.type = "venue" THEN earnings.amount ELSE 0 END) as prime_earnings,
+                SUM(CASE WHEN earnings.type = "venue_paid" THEN earnings.amount ELSE 0 END) as incentivised_cost
+            ')
+            ->groupBy('date', 'earnings.currency')
             ->orderBy('date')
             ->get();
 
-        $chartData = $dailyData->map(fn ($item) => [
-            'bookings' => $item->bookings,
-            'earnings' => $item->total_earnings / 100, // Convert cents to dollars
-            'avg_earning_per_booking' => $item->bookings > 0 ? ($item->total_earnings / $item->bookings) / 100 : 0,
-        ]);
+        $currencyService = app(CurrencyConversionService::class);
+
+        $chartData = $dailyData->groupBy('date')->map(function ($dayData) use ($currencyService) {
+            $primeBookings = $dayData->sum('prime_bookings');
+            $incentivisedBookings = $dayData->sum('incentivised_bookings');
+            $primeEarningsUSD = $currencyService->convertToUSD($dayData->pluck('prime_earnings', 'currency')->toArray());
+            $incentivisedCostUSD = $currencyService->convertToUSD($dayData->pluck('incentivised_cost', 'currency')->toArray());
+
+            return [
+                'total_bookings' => $primeBookings + $incentivisedBookings,
+                'prime_bookings' => $primeBookings,
+                'incentivised_bookings' => $incentivisedBookings,
+                'total_earnings' => $primeEarningsUSD,
+                'prime_earnings' => $primeEarningsUSD,
+                'incentivised_cost' => $incentivisedCostUSD,
+            ];
+        });
 
         return [
-            'bookings' => $chartData->pluck('bookings')->toArray(),
-            'earnings' => $chartData->pluck('earnings')->toArray(),
-            'avg_earning_per_booking' => $chartData->pluck('avg_earning_per_booking')->toArray(),
+            'total_bookings' => $chartData->pluck('total_bookings')->toArray(),
+            'prime_bookings' => $chartData->pluck('prime_bookings')->toArray(),
+            'incentivised_bookings' => $chartData->pluck('incentivised_bookings')->toArray(),
+            'total_earnings' => $chartData->pluck('total_earnings')->toArray(),
+            'prime_earnings' => $chartData->pluck('prime_earnings')->toArray(),
+            'incentivised_cost' => $chartData->pluck('incentivised_cost')->toArray(),
         ];
     }
 

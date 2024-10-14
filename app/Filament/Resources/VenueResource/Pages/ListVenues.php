@@ -51,7 +51,7 @@ class ListVenues extends ListRecords
                     ->formatStateUsing(function (Venue $record) {
                         $currencyService = app(CurrencyConversionService::class);
                         $earnings = $record->earnings()
-                            ->where('type', 'venue')
+                            ->whereIn('type', ['venue', 'venue_paid'])
                             ->confirmed()->get(['amount', 'currency']);
 
                         $earningsArray = $earnings->groupBy('currency')
