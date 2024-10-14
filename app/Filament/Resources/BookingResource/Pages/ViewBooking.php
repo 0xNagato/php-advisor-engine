@@ -1,6 +1,8 @@
 <?php
 
-/** @noinspection PhpDynamicFieldDeclarationInspection */
+/** @noinspection PhpDynamicFieldDeclarationInspection
+ * @noinspection UnknownInspectionInspection
+ */
 
 namespace App\Filament\Resources\BookingResource\Pages;
 
@@ -10,12 +12,12 @@ use App\Models\Booking;
 use App\Models\Region;
 use App\Notifications\Booking\GuestBookingConfirmed;
 use App\Traits\FormatsPhoneNumber;
+use Carbon\Carbon;
 use Filament\Actions\Action;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\ViewRecord;
-use Illuminate\Support\HtmlString;
-use Carbon\Carbon;
 use Illuminate\Support\Facades\URL;
+use Illuminate\Support\HtmlString;
 
 /**
  * @property Booking $record
@@ -80,7 +82,7 @@ class ViewBooking extends ViewRecord
 
                 return new HtmlString(
                     'Are you sure you want to resend the invoice?<br>'.
-                    "<span class='block mt-2 text-lg font-bold'>{$formattedNumber}</span>"
+                    "<span class='block mt-2 text-lg font-bold'>$formattedNumber</span>"
                 );
             })
             ->extraAttributes(['class' => 'w-full'])
@@ -98,19 +100,17 @@ class ViewBooking extends ViewRecord
             ->modalIconColor('danger')
             ->modalHeading('Delete Booking')
             ->extraAttributes(['class' => 'w-full'])
-            ->modalDescription(function () {
-                return new HtmlString(
-                    'Are you certain you want to delete this booking? This action is irreversible.<br><br>'.
-                    "<div class='text-sm'>".
-                    "<p class='p-1 mb-2 text-xs font-semibold text-red-600 bg-red-100 border border-red-300 rounded-md'>This action will be logged and cannot be undone.</p>".
-                    "<p class='text-lg font-semibold'>{$this->record->guest_name}</p>".
-                    "<p><strong>Venue:</strong> {$this->record->venue->name}</p>".
-                    "<p><strong>Guest Count:</strong> {$this->record->guest_count}</p>".
-                    "<p><strong>Fee:</strong> ".money($this->record->total_fee, $this->record->currency)."</p>".
-                    "<p><strong>Booking Time:</strong> {$this->record->booking_at->format('M d, Y h:i A')}</p>".
-                    "</div>"
-                );
-            })
+            ->modalDescription(fn () => new HtmlString(
+                'Are you certain you want to delete this booking? This action is irreversible.<br><br>'.
+                "<div class='text-sm'>".
+                "<p class='p-1 mb-2 text-xs font-semibold text-red-600 bg-red-100 border border-red-300 rounded-md'>This action will be logged and cannot be undone.</p>".
+                "<p class='text-lg font-semibold'>{$this->record->guest_name}</p>".
+                "<p><strong>Venue:</strong> {$this->record->venue->name}</p>".
+                "<p><strong>Guest Count:</strong> {$this->record->guest_count}</p>".
+                '<p><strong>Fee:</strong> '.money($this->record->total_fee, $this->record->currency).'</p>'.
+                "<p><strong>Booking Time:</strong> {$this->record->booking_at->format('M d, Y h:i A')}</p>".
+                '</div>'
+            ))
             ->modalSubmitActionLabel('Delete')
             ->modalCancelActionLabel('Cancel')
             ->action(fn () => $this->deleteBooking());
@@ -118,12 +118,13 @@ class ViewBooking extends ViewRecord
 
     private function deleteBooking(): void
     {
-        if (!auth()->user()->hasRole('super_admin')) {
+        if (! auth()->user()->hasRole('super_admin')) {
             Notification::make()
                 ->danger()
                 ->title('Unauthorized')
                 ->body('You do not have permission to delete bookings.')
                 ->send();
+
             return;
         }
 
@@ -133,6 +134,7 @@ class ViewBooking extends ViewRecord
                 ->title('Cannot Delete')
                 ->body('Bookings older than 24 hours cannot be deleted.')
                 ->send();
+
             return;
         }
 
@@ -149,7 +151,7 @@ class ViewBooking extends ViewRecord
             $this->redirect($this->originalPreviousUrl);
         } else {
             // If no valid previous URL, redirect to the bookings index
-            $this->redirect(BookingResource::getUrl('index'));
+            $this->redirect(BookingResource::getUrl());
         }
     }
 }

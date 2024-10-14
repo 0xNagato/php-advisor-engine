@@ -7,6 +7,7 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Filament\Widgets\Concerns\InteractsWithPageFilters;
 use Filament\Widgets\TableWidget as BaseWidget;
+use Illuminate\Support\HtmlString;
 
 class AdminRecentBookings extends BaseWidget
 {
@@ -35,6 +36,8 @@ class AdminRecentBookings extends BaseWidget
                 'bookings.id',
                 'bookings.booking_at',
                 'bookings.total_fee',
+                'bookings.currency',
+                'bookings.is_prime',
                 'venues.name as venue_name',
             ])
             ->join('schedule_templates', 'bookings.schedule_template_id', '=', 'schedule_templates.id')
@@ -64,7 +67,15 @@ class AdminRecentBookings extends BaseWidget
                 TextColumn::make('total_fee')
                     ->label('Fee')
                     ->size('xs')
-                    ->money('USD', divideBy: 100),
+                    ->formatStateUsing(function (Booking $booking) {
+                        if (! $booking->is_prime) {
+                            return new HtmlString('<span class="text-xs italic text-gray-500">Non-Prime</span>');
+                        }
+
+                        return $booking->total_fee > 0
+                            ? money($booking->total_fee, $booking->currency)
+                            : '-';
+                    }),
             ]);
     }
 }

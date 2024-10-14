@@ -12,6 +12,7 @@ use Filament\Tables\Table;
 use Filament\Widgets\Concerns\InteractsWithPageFilters;
 use Filament\Widgets\TableWidget as BaseWidget;
 use Illuminate\Contracts\Support\Htmlable;
+use Illuminate\Support\HtmlString;
 
 class VenueRecentBookings extends BaseWidget
 {
@@ -72,12 +73,25 @@ class VenueRecentBookings extends BaseWidget
                 TextColumn::make('concierge.user.name')
                     ->size('xs')
                     ->label('Booked By'),
+                TextColumn::make('total_fee')
+                    ->label('Total Fee')
+                    ->size('xs')
+                    ->visible(fn () => auth()->user()?->hasRole('super_admin'))
+                    ->formatStateUsing(function (Booking $booking) {
+                        if (! $booking->is_prime) {
+                            return new HtmlString('<span class="text-xs italic text-gray-500">Non-Prime</span>');
+                        }
+
+                        return money($booking->total_fee, $booking->currency);
+                    }),
                 TextColumn::make('venue_earnings')
                     ->alignRight()
                     ->size('xs')
-                    ->visible(fn () => auth()->user()->hasRole('venue'))
                     ->label('Earned')
                     ->formatStateUsing(function (Booking $booking) {
+                        if (! $booking->is_prime) {
+                            return new HtmlString('<span class="text-xs italic text-gray-500">Non-Prime</span>');
+                        }
                         $total = $booking->earnings->sum('amount');
 
                         return money($total, $booking->currency);

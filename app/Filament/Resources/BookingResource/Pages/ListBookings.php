@@ -5,7 +5,6 @@ namespace App\Filament\Resources\BookingResource\Pages;
 use App\Enums\BookingStatus;
 use App\Filament\Resources\BookingResource;
 use App\Models\Booking;
-use App\Services\VenueContactBookingConfirmationService;
 use Filament\Resources\Pages\ListRecords;
 use Filament\Tables\Actions\Action;
 use Filament\Tables\Columns\TextColumn;
@@ -45,11 +44,11 @@ class ListBookings extends ListRecords
                         ['record' => $record]
                     )),
                 TextColumn::make('total_fee')
+                    ->size('xs')
                     ->money(fn ($record) => $record->currency, divideBy: 100)
                     ->alignRight(),
-
             ])
-            ->paginated([5, 10])
+            ->paginated([10, 25, 50, 100])
             ->filters([
                 Filter::make('unconfirmed')
                     ->query(fn (Builder $query) => $query->whereNull('venue_confirmed_at')),
@@ -68,7 +67,7 @@ class ListBookings extends ListRecords
                     ->color(fn (Booking $record) => is_null($record->venue_confirmed_at) ? 'indigo' : 'success')
                     ->requiresConfirmation()
                     ->action(function (Booking $record) {
-                        app(VenueContactBookingConfirmationService::class)->sendConfirmation($record);
+                        // app(VenueContactBookingConfirmationService::class)->sendConfirmation($record);
                         $record->update(['resent_venue_confirmation_at' => now()]);
                     }),
             ]);
