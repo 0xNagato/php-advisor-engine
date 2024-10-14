@@ -8,6 +8,7 @@ use App\Models\Concierge;
 use App\Models\Region;
 use App\Models\ScheduleWithBooking;
 use App\Models\Venue;
+use App\Services\Booking\BookingCalculationService;
 use App\Services\SalesTaxService;
 use Carbon\Carbon;
 use Exception;
@@ -128,12 +129,10 @@ class GenerateDemoBookings
         try {
             $bookingDate = Carbon::parse($schedule->booking_date)->setTimeFromTimeString($schedule->start_time);
 
-            // Find the region by id (assuming venue->region is the region's id)
             $region = $regions->firstWhere('id', $venue->region);
 
             throw_unless($region, new Exception("No valid region found for venue $venue->id"));
 
-            // Ensure guest count is between 2 and 8
             $guestCount = max(2, min(8, $schedule->party_size));
 
             $booking = Booking::query()->create([
@@ -145,7 +144,7 @@ class GenerateDemoBookings
                 'created_at' => $bookingDate,
                 'updated_at' => $bookingDate,
                 'currency' => $region->currency,
-                'is_prime' => true,
+                'is_prime' => $schedule->prime_time, // Use the actual prime_time value from the schedule
                 'uuid' => Str::uuid(),
                 'guest_first_name' => $this->fakeNames[array_rand($this->fakeNames)],
                 'guest_last_name' => $this->fakeNames[array_rand($this->fakeNames)],

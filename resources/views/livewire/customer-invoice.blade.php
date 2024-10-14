@@ -149,10 +149,13 @@
                                     {{ money($booking->total_fee, $booking->currency) }}
                                 </span>
                             </div>
-                            <div class="mt-1 text-xs text-gray-500">
-                                {{ money($booking->venue->booking_fee * 100, $booking->currency) }} for 2,
-                                {{ money($booking->venue->increment_fee * 100, $booking->currency) }}/additional guest
-                            </div>
+                            @if ($booking->is_prime)
+                                <div class="mt-1 text-xs text-gray-500">
+                                    {{ money($booking->venue->booking_fee * 100, $booking->currency) }} for 2,
+                                    {{ money($booking->venue->increment_fee * 100, $booking->currency) }}/additional
+                                    guest
+                                </div>
+                            @endif
                         </div>
                     </li>
                     @if ($booking->tax > 0)
@@ -230,14 +233,17 @@
                                             {{ $earning->user->name }}
                                         @endif
                                     </div>
-                                    <div title="{{ \Illuminate\Support\Str::title($earning->type) }}">
+                                    <div
+                                        title="{{ \Illuminate\Support\Str::title(str_replace('_', ' ', $earning->type)) }}">
                                         @php
                                             $type = match ($earning->type) {
                                                 'concierge_referral_1' => 'Con. Ref. 1',
                                                 'concierge_referral_2' => 'Con. Ref. 2',
                                                 'partner_concierge' => 'Partner Con.',
                                                 'partner_venue' => 'Partner Venue',
-                                                default => \Illuminate\Support\Str::title($earning->type),
+                                                default => \Illuminate\Support\Str::title(
+                                                    str_replace('_', ' ', $earning->type),
+                                                ),
                                             };
                                         @endphp
                                         {{ $type }}
