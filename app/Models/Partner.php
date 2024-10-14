@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 
 class Partner extends Model
 {
@@ -38,6 +39,21 @@ class Partner extends Model
     public function venueBookings(): HasMany
     {
         return $this->hasMany(Booking::class, 'partner_venue_id');
+    }
+
+    /**
+     * @return HasManyThrough<Referral>
+     */
+    public function referrals(): HasManyThrough
+    {
+        return $this->hasManyThrough(
+            Referral::class,
+            User::class,
+            'id',
+            'referrer_id',
+            'user_id',
+            'id'
+        );
     }
 
     public function scopeWithAllBookings($query)
