@@ -50,27 +50,45 @@
                 </p>
             @else
                 <p>
-                    We are excited to have you as a part of our team when PRIMA fully launches. Venues are being
-                    onboarded now and we expect to be fully functioning in the coming weeks.
+                    Hi {{ auth()->user()->first_name }},
                 </p>
-                @nonmobileapp
-                    <p>
-                        So that you may fully experience the potential of PRIMA, we have created a demo concierge account
-                        for you to explore.
-                    </p>
-                    <p>
-                        Please click the link below and you will be taken to our demo site where you can
-                        try out the Reservation Hub as well as other features of PRIMA.
-                    </p>
-                    <x-filament::button tag="a"
-                        href="https://demo.primavip.co/login?email=concierge@primavip.co&password=demo2024" target="_blank">
-                        Access Demo Account
-                    </x-filament::button>
-                @endnonmobileapp
-
+                <p>
+                    Welcome to PRIMA!
+                </p>
+                <p>
+                    PRIMA is currently LIVE. We are onboarding restaurants, and reservations will begin to be sold in
+                    the coming weeks as the Miami season ramps up.
+                </p>
+                <p>
+                    @nonmobileapp
+                        Please browse the
+                        <a class="font-semibold text-indigo-600 underline"
+                            href="{{ route('filament.admin.pages.availability-calendar') }}">
+                            availability calendar
+                        </a> and
+                        <a class="font-semibold text-indigo-600 underline"
+                            href="{{ route('filament.admin.pages.concierge.reservation-hub') }}">
+                            reservation hub
+                        </a> to see
+                        available venues.
+                    @endnonmobileapp
+                    @mobileapp
+                        Please browse the availability calendar and reservation hub to see available venues.
+                    @endmobileapp
+                    If there is a
+                    restaurant that you'd like to see on the platform, please
+                    <a href="#" x-data=""
+                        x-on:click.prevent="$dispatch('open-modal', { id: 'contact-us-modal' })"
+                        class="font-semibold text-indigo-600 underline hover:text-indigo-800">
+                        contact us</a>.
+                </p>
+                <p>
+                    Begin building your team and refer others to PRIMA today. Those that start first will earn most. We
+                    are excited to have you on our team!
+                </p>
                 <div>
                     <p>Welcome aboard!</p>
-                    <p>We look forward to working with you.</p>
+                    <p>Team PRIMA</p>
                 </div>
             @endif
         </div>
@@ -110,4 +128,20 @@
             @endforeach
         </div>
     @endif
+
+    <x-filament::modal id="contact-us-modal" width="md">
+        <x-slot name="heading">
+            Contact Us
+        </x-slot>
+
+        <form wire:submit="submitContactForm">
+            {{ $this->form }}
+
+            <div class="flex justify-end mt-4">
+                <x-filament::button type="submit">
+                    Send Message
+                </x-filament::button>
+            </div>
+        </form>
+    </x-filament::modal>
 </x-filament-panels::page>
