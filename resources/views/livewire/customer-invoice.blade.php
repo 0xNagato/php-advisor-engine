@@ -215,9 +215,10 @@
                                         @php
                                             $earning->user->load('venue', 'concierge', 'partner');
                                             $url = match ($earning->type) {
-                                                'venue' => VenueResource::getUrl('view', [
+                                                'venue_paid', 'venue' => VenueResource::getUrl('view', [
                                                     'record' => $earning->user->venue->id,
                                                 ]),
+                                                'concierge_bounty',
                                                 'concierge_referral_1',
                                                 'concierge_referral_2',
                                                 'concierge'
