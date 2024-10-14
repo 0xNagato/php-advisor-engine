@@ -36,9 +36,11 @@
         class="bg-white rounded-xl shadow sm:max-w-3xl lg:mx-auto invoice-container flex flex-col @if ($download) min-h-[10in] @endif">
         <div class="relative overflow-hidden bg-indigo-800 min-h-32 rounded-t-xl">
             @if (!isset($customerInvoice) && !$download)
-                <button class="p-4 font-semibold text-white" onclick="window.history.back();">
-                    &#x276E;&nbsp Back
-                </button>
+                <div class="flex justify-between">
+                    <button class="p-4 font-semibold text-white" onclick="window.history.back();">
+                        &#x276E;&nbsp Back
+                    </button>
+                </div>
             @endif
             <!-- SVG Background Element -->
             <figure class="absolute inset-x-0 bottom-0 -mb-px ">
@@ -157,9 +159,12 @@
                             </div>
                             @if ($booking->is_prime)
                                 <div class="mt-1 text-xs text-gray-500">
-                                    {{ money($booking->venue->booking_fee * 100, $booking->currency) }} for 2,
-                                    {{ money($booking->venue->increment_fee * 100, $booking->currency) }}/additional
-                                    guest
+                                    {{ money($booking->venue->booking_fee * 100, $booking->currency) }} for 2 guests
+                                    @if ($booking->guest_count > 2)
+                                        +
+                                        {{ money($booking->venue->increment_fee * 100, $booking->currency) }}/additional
+                                        guest
+                                    @endif
                                 </div>
                             @endif
                         </div>
@@ -190,9 +195,6 @@
                     <div class="mt-4 font-semibold text-center">
                         Fees paid are for reservation only. Not applicable towards venue bill.
                     </div>
-                @endif
-                @if (auth()->check() && auth()->user()->hasRole('super_admin'))
-                    <x-filament::actions :actions="$this->resendInvoiceAction" class="w-full" />
                 @endif
             </div>
 
@@ -279,7 +281,9 @@
                     </div>
                 </div>
             @endif
-
+            @if (auth()->check() && auth()->user()->hasRole('super_admin'))
+                <x-filament::actions :actions="[$this->resendInvoiceAction, $this->deleteBookingAction]" class="w-full mt-4" />
+            @endif
         </div>
         <!-- End Body -->
     </div>
