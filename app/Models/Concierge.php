@@ -111,10 +111,10 @@ class Concierge extends Model
         return $this->hasManyThrough(
             Referral::class,
             User::class,
-            'id', // Foreign key on the users table...
-            'referrer_id', // Foreign key on the referrals table...
-            'user_id', // Local key on the concierges table...
-            'id' // Local key on the users table...
+            'id', // Foreign key on the user's table...
+            'referrer_id', // Foreign key on the referral table...
+            'user_id', // Local key on the concierge table...
+            'id' // Local key on the user's table...
         );
     }
 
@@ -126,5 +126,20 @@ class Concierge extends Model
     public function vipCodes(): HasMany
     {
         return $this->hasMany(VIPCode::class);
+    }
+
+    /**
+     * @return HasManyThrough<Earning>
+     */
+    public function earnings(): HasManyThrough
+    {
+        return $this->hasManyThrough(
+            Earning::class,
+            User::class,
+            'id', // Foreign key on the user's table
+            'user_id', // Foreign key on the earning's table
+            'user_id', // Local key on the concierge's table
+            'id'// Local key on the user's table...
+        );
     }
 }

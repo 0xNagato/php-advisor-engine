@@ -6,6 +6,7 @@ use App\Filament\Resources\ConciergeResource;
 use App\Models\Concierge;
 use App\Services\CurrencyConversionService;
 use App\Traits\ImpersonatesOther;
+use Carbon\Carbon;
 use Filament\Resources\Pages\ListRecords;
 use Filament\Tables\Actions\Action;
 use Filament\Tables\Actions\EditAction;
@@ -29,7 +30,7 @@ class ListConcierges extends ListRecords
             ->recordUrl(fn (Concierge $record) => ViewConcierge::getUrl(['record' => $record]))
             ->query(
                 Concierge::query()
-                    ->with(['user.referrer'])
+                    ->with(['user.referrer', 'user.authentications'])
                     ->withCount('bookings')
                     ->join('users', 'concierges.user_id', '=', 'users.id')
                     ->orderByDesc('users.secured_at')
@@ -47,7 +48,7 @@ class ListConcierges extends ListRecords
                     ->size('xs')
                     ->formatStateUsing(function (Concierge $record) {
                         $currencyService = app(CurrencyConversionService::class);
-                        $earnings = $record->user->earnings()->confirmed()->get(['amount', 'currency']);
+                        $earnings = $record->earnings()->confirmed()->get(['amount', 'currency']);
 
                         $earningsArray = $earnings->groupBy('currency')
                             ->map(fn ($currencyGroup) => $currencyGroup->sum('amount') * 100)->toArray();
@@ -61,6 +62,20 @@ class ListConcierges extends ListRecords
                     ->grow(false)
                     ->size('xs')
                     ->numeric(),
+                TextColumn::make('user.authentications.login_at')
+                    ->label('Last Login')
+                    ->visibleFrom('sm')
+                    ->grow(false)
+                    ->size('xs')
+                    ->formatStateUsing(function (Concierge $record) {
+                        $lastLogin = $record->user->authentications()->orderByDesc('login_at')->first();
+                        if ($lastLogin && $lastLogin->login_at) {
+                            return Carbon::parse($lastLogin->login_at, auth()->user()->timezone)->diffForHumans();
+                        }
+
+                        return 'Never';
+                    })
+                    ->default('Never'),
             ])
             ->actions([
                 Action::make('impersonate')
@@ -100,6 +115,7 @@ class ListConcierges extends ListRecords
                             'bookings_count' => number_format($concierge->bookings_count),
                             'earningsInUSD' => $earningsInUSD,
                             'recentBookings' => $recentBookings,
+                            'last_login' => $concierge->user->authentications()->latest('login_at')->first()->login_at ?? null,
                         ]);
                     })
                     ->modalContentFooter(fn (Action $action) => view(

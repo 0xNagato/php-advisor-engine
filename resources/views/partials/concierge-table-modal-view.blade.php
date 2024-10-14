@@ -11,6 +11,8 @@
             <dd>{{ money($earningsInUSD, 'USD') }}</dd>
             <dt class="font-semibold">Bookings:</dt>
             <dd>{{ $bookings_count }}</dd>
+            <dt class="font-semibold">Last Login:</dt>
+            <dd>{{ $last_login ? \Carbon\Carbon::parse($last_login)->diffForHumans() : 'Never' }}</dd>
         </dl>
     </div>
 

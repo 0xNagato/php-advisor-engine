@@ -11,6 +11,8 @@
             <dd>{{ money($total_earned, 'USD') }}</dd>
             <dt class="font-semibold">Bookings:</dt>
             <dd>{{ $bookings_count }}</dd>
+            <dt class="font-semibold">Last Login:</dt>
+            <dd>{{ $last_login ? \Carbon\Carbon::parse($last_login)->diffForHumans() : 'Never' }}</dd>
         </dl>
     </div>
 
@@ -28,7 +30,7 @@
                                 {{ $referral->user->name }}
                             </div>
                             <div class="text-xs text-gray-600">
-                                {{ $referral->type  }}
+                                {{ $referral->type }}
                             </div>
                         </div>
                     </div>
@@ -39,26 +41,26 @@
             <div class="hidden overflow-x-auto sm:block">
                 <table class="min-w-full divide-y divide-gray-200">
                     <thead class="bg-gray-50">
-                    <tr>
-                        <th class="px-3 py-2 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">
-                            Name
-                        </th>
-                        <th class="px-3 py-2 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">
-                            Type
-                        </th>
-                    </tr>
+                        <tr>
+                            <th class="px-3 py-2 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">
+                                Name
+                            </th>
+                            <th class="px-3 py-2 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">
+                                Type
+                            </th>
+                        </tr>
                     </thead>
                     <tbody class="bg-white divide-y divide-gray-200">
-                    @foreach ($referrals as $referral)
-                        <tr class="cursor-pointer hover:bg-gray-100"
-                            onclick="window.location='{{ $referral->viewRoute }}'">
-                            <td class="px-3 py-2 text-sm whitespace-nowrap">{{ $referral->user->name }}
-                            </td>
-                            <td class="px-3 py-2 text-sm whitespace-nowrap">
-                                {{ $referral->type }}
-                            </td>
-                        </tr>
-                    @endforeach
+                        @foreach ($referrals as $referral)
+                            <tr class="cursor-pointer hover:bg-gray-100"
+                                onclick="window.location='{{ $referral->viewRoute }}'">
+                                <td class="px-3 py-2 text-sm whitespace-nowrap">{{ $referral->user->name }}
+                                </td>
+                                <td class="px-3 py-2 text-sm whitespace-nowrap">
+                                    {{ $referral->type }}
+                                </td>
+                            </tr>
+                        @endforeach
                     </tbody>
                 </table>
             </div>

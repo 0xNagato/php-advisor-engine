@@ -8,6 +8,7 @@ use App\Filament\Resources\VenueResource\Pages\ViewVenue;
 use App\Models\Partner;
 use App\Models\Referral;
 use App\Traits\ImpersonatesOther;
+use Carbon\Carbon;
 use Filament\Actions\CreateAction;
 use Filament\Forms\Components\DatePicker;
 use Filament\Pages\Dashboard\Actions\FilterAction;
@@ -72,6 +73,20 @@ class ListPartners extends ListRecords
                     ->grow(false)
                     ->size('xs')
                     ->numeric(),
+                TextColumn::make('user.authentications.login_at')
+                    ->label('Last Login')
+                    ->visibleFrom('sm')
+                    ->grow(false)
+                    ->size('xs')
+                    ->formatStateUsing(function (Partner $record) {
+                        $lastLogin = $record->user->authentications()->orderByDesc('login_at')->first();
+                        if ($lastLogin && $lastLogin->login_at) {
+                            return Carbon::parse($lastLogin->login_at, auth()->user()->timezone)->diffForHumans();
+                        }
+
+                        return 'Never';
+                    })
+                    ->default('Never'),
             ])
             ->actions([
                 Action::make('impersonate')
@@ -109,6 +124,7 @@ class ListPartners extends ListRecords
                             'bookings_count' => number_format($partner->bookings),
                             'total_earned' => $partner->total_earned,
                             'referrals' => $referrals,
+                            'last_login' => $partner->user->authentications()->latest('login_at')->first()->login_at ?? null,
                         ]);
                     })
                     ->modalContentFooter(fn (Action $action) => view(
