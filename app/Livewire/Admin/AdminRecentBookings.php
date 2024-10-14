@@ -55,12 +55,15 @@ class AdminRecentBookings extends BaseWidget
             ->columns([
                 TextColumn::make('venue_name')
                     ->label('Venue')
+                    ->size('xs')
                     ->searchable(),
                 TextColumn::make('booking_at')
                     ->label('Date')
+                    ->size('xs')
                     ->dateTime('D, M j'),
                 TextColumn::make('total_fee')
                     ->label('Fee')
+                    ->size('xs')
                     ->money('USD', divideBy: 100),
             ]);
     }

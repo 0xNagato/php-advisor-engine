@@ -250,7 +250,7 @@
                                     @if (!$booking->prime_time)
                                         <label class="flex items-center w-full mb-2 text-xs">
                                             <input type="checkbox" name="real_customer_confirmation"
-                                                class="text-indigo-600 form-checkbox rounded">
+                                                class="text-indigo-600 rounded form-checkbox">
                                             <span class="ml-2 text-xs text-gray-700">I am booking this reservation for a
                                                 real customer</span>
                                         </label>

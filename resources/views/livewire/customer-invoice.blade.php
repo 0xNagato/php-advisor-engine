@@ -88,25 +88,31 @@
                 <div>
                     <span class="block text-xs text-gray-500 uppercase">Payment Method:</span>
                     <div class="flex items-center gap-x-2">
-                        @if ($booking->stripe_charge && $booking->stripe_charge->paymentMethodDetails->card)
-                            @if ($booking->stripe_charge->paymentMethodDetails->card->brand === 'visa')
-                                <x-fab-cc-visa class="w-6 h-6" />
-                            @elseif ($booking->stripe_charge->paymentMethodDetails->card->brand === 'mastercard')
-                                <x-fab-cc-mastercard class="w-6 h-6" />
-                            @elseif ($booking->stripe_charge->paymentMethodDetails->card->brand === 'amex')
-                                <x-fab-cc-amex class="w-6 h-6" />
+                        @if ($booking->prime_time)
+                            @if ($booking->stripe_charge && $booking->stripe_charge->paymentMethodDetails->card)
+                                @if ($booking->stripe_charge->paymentMethodDetails->card->brand === 'visa')
+                                    <x-fab-cc-visa class="w-6 h-6" />
+                                @elseif ($booking->stripe_charge->paymentMethodDetails->card->brand === 'mastercard')
+                                    <x-fab-cc-mastercard class="w-6 h-6" />
+                                @elseif ($booking->stripe_charge->paymentMethodDetails->card->brand === 'amex')
+                                    <x-fab-cc-amex class="w-6 h-6" />
+                                @endif
+                                <span class="block text-xs font-medium text-gray-800 sm:text-sm dark:text-gray-200">
+                                    ••••{{ $booking->stripe_charge->paymentMethodDetails->card->last4 }}
+                                </span>
+                            @elseif ($booking->stripe_charge)
+                                <x-fab-stripe class="w-6 h-6" />
+                                <span class="block text-xs font-medium text-gray-800 sm:text-sm dark:text-gray-200">
+                                    Stripe
+                                </span>
+                            @else
+                                <span class="block text-xs font-medium text-gray-800 sm:text-sm dark:text-gray-200">
+                                    Credit Card
+                                </span>
                             @endif
-                            <span class="block text-xs font-medium text-gray-800 sm:text-sm dark:text-gray-200">
-                                ••••{{ $booking->stripe_charge->paymentMethodDetails->card->last4 }}
-                            </span>
-                        @elseif ($booking->stripe_charge)
-                            <x-fab-stripe class="w-6 h-6" />
-                            <span class="block text-xs font-medium text-gray-800 sm:text-sm dark:text-gray-200">
-                                Stripe
-                            </span>
                         @else
                             <span class="block text-xs font-medium text-gray-800 sm:text-sm dark:text-gray-200">
-                                Unknown
+                                Non-Prime
                             </span>
                         @endif
                     </div>
