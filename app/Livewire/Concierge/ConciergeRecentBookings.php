@@ -71,12 +71,6 @@ class ConciergeRecentBookings extends BaseWidget
 
                         return money($total, $booking->currency);
                     }),
-                IconColumn::make('vip_code_id')
-                    ->icon(fn (?int $state): string => blank($state) ? 'heroicon-o-no-symbol' :
-                        'heroicon-o-check-circle'
-                    )
-                    ->color('success')
-                    ->label('VIP'),
             ]);
     }
 }

@@ -82,8 +82,6 @@
                             <br />
                             {{ $booking->guest_email }}
                         @endif
-                        <br/>
-                        VIP: {{ $booking->vip_code_id ? 'Yes' : 'No' }}
                     </div>
                 </div>
 
