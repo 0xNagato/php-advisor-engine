@@ -175,7 +175,6 @@
                                         e.preventDefault();
                                         $wire.$set('isLoading', true);
                             
-                            
                                         @if($booking->prime_time)
                                         const { token, error } = await stripe.createToken(card);
                             
@@ -194,7 +193,11 @@
                                             email: document.querySelector('input[name=email]').value,
                                             notes: document.querySelector('textarea[name=notes]').value,
                                             token: token?.id ?? ''
-                                        }
+                                        };
+                            
+                                        @if(!$booking->prime_time)
+                                        formData.real_customer_confirmation = document.querySelector('input[name=real_customer_confirmation]').checked;
+                                        @endif
                             
                                         $wire.$call('completeBooking', formData);
                                     })
@@ -209,13 +212,13 @@
                                     <div class="flex items-center w-full gap-2">
                                         <label class="w-full">
                                             <input name="first_name" type="text"
-                                                class="w-full rounded-lg border border-gray-400 text-sm h-[40px]"
+                                                class="w-full rounded-lg border border-gray-300 text-sm h-[40px] focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
                                                 placeholder="First Name" required>
                                         </label>
 
                                         <label class="w-full">
                                             <input name="last_name" type="text"
-                                                class="w-full rounded-lg border border-gray-400 text-sm h-[40px]"
+                                                class="w-full rounded-lg border border-gray-300 text-sm h-[40px] focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
                                                 placeholder="Last Name" required>
                                         </label>
 
@@ -223,18 +226,19 @@
 
                                     <label class="w-full">
                                         <input name="phone" type="text"
-                                            class="w-full rounded-lg border border-gray-400 text-sm h-[40px]"
+                                            class="w-full rounded-lg border border-gray-300 text-sm h-[40px] focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
                                             placeholder="Cell Phone Number" required>
                                     </label>
 
                                     <label class="w-full">
                                         <input name="email" type="email"
-                                            class="w-full rounded-lg border border-gray-400 text-sm h-[40px]"
+                                            class="w-full rounded-lg border border-gray-300 text-sm h-[40px] focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
                                             placeholder="Email Address (optional)">
                                     </label>
 
                                     <label class="w-full">
-                                        <textarea name="notes" class="w-full text-sm border border-gray-400 rounded-lg"
+                                        <textarea name="notes"
+                                            class="w-full text-sm border border-gray-300 rounded-lg focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
                                             placeholder="Notes/Special Requests (optional)"></textarea>
                                     </label>
 
@@ -242,6 +246,15 @@
                                         class="-mt-1.5 w-full rounded-lg border border-gray-400 text-sm bg-white px-2 py-3 h-[40px] {{ !$booking->prime_time ? 'hidden' : '' }}">
                                         <!-- A Stripe Element will be inserted here. -->
                                     </div>
+
+                                    @if (!$booking->prime_time)
+                                        <label class="flex items-center w-full mb-2 text-xs">
+                                            <input type="checkbox" name="real_customer_confirmation"
+                                                class="text-indigo-600 form-checkbox rounded">
+                                            <span class="ml-2 text-xs text-gray-700">I am booking this reservation for a
+                                                real customer</span>
+                                        </label>
+                                    @endif
 
                                     <x-filament::button class="w-full" type="submit" size="xl">
                                         Complete Reservation

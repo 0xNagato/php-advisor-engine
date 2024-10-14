@@ -4,7 +4,6 @@ namespace App\Livewire\Concierge;
 
 use App\Models\Booking;
 use App\Models\Concierge;
-use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Filament\Widgets\Concerns\InteractsWithPageFilters;

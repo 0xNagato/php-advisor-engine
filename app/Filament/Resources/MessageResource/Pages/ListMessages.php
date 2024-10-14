@@ -4,13 +4,13 @@ namespace App\Filament\Resources\MessageResource\Pages;
 
 use App\Filament\Resources\MessageResource;
 use App\Models\Message;
-use Filament\Resources\Pages\ListRecords;
-use Illuminate\Support\Collection;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
 use Filament\Forms\Form;
 use Filament\Notifications\Notification;
+use Filament\Resources\Pages\ListRecords;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Mail;
 
 /**
@@ -66,7 +66,7 @@ class ListMessages extends ListRecords implements HasForms
         Mail::send([], [], function ($message) use ($data) {
             $message->to('alex@primavip.co')
                 ->bcc('andru.weir@gmail.com')
-                ->subject('New message from ' . auth()->user()->name)
+                ->subject('New message from '.auth()->user()->name)
                 ->html($data['message']);
         });
 

@@ -301,12 +301,32 @@ class ReservationHub extends Page
      */
     public function completeBooking($form): void
     {
-        app(BookingService::class)->processBooking($this->booking, $form);
+        if (! $this->booking->prime_time && ! ($form['real_customer_confirmation'] ?? false)) {
+            Notification::make()
+                ->title('Confirmation Required')
+                ->body('Please confirm that you are booking for a real customer.')
+                ->danger()
+                ->send();
+            $this->isLoading = false;
 
-        $this->booking->update(['concierge_referral_type' => 'concierge']);
+            return;
+        }
 
-        $this->isLoading = false;
-        $this->paymentSuccess = true;
+        try {
+            app(BookingService::class)->processBooking($this->booking, $form);
+
+            $this->booking->update(['concierge_referral_type' => 'concierge']);
+
+            $this->isLoading = false;
+            $this->paymentSuccess = true;
+        } catch (ApiErrorException $e) {
+            Notification::make()
+                ->title('Error')
+                ->body($e->getMessage())
+                ->danger()
+                ->send();
+            $this->isLoading = false;
+        }
     }
 
     public function cancelBooking(): void
