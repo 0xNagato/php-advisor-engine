@@ -71,12 +71,15 @@ class PartnerRecentBookings extends BaseWidget
             ->columns([
                 TextColumn::make('schedule.venue.name')
                     ->label('Venue')
+                    ->size('xs')
                     ->searchable(),
                 TextColumn::make('booking_at')
                     ->label('Date')
+                    ->size('xs')
                     ->dateTime('D, M j'),
                 TextColumn::make('earnings.amount')
                     ->alignRight()
+                    ->size('xs')
                     ->label('Earned')
                     ->formatStateUsing(function (Booking $booking) {
                         $total = $booking->earnings->where('user_id', $this->partner->user_id)->sum('amount');
@@ -85,6 +88,7 @@ class PartnerRecentBookings extends BaseWidget
                     }),
                 TextColumn::make('partner_type')
                     ->visibleFrom('sm')
+                    ->size('xs')
                     ->label('Partner Type')
                     ->getStateUsing(function (Booking $booking) {
                         $types = [];

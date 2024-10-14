@@ -58,12 +58,15 @@ class ConciergeRecentBookings extends BaseWidget
             ->columns([
                 TextColumn::make('schedule.venue.name')
                     ->label('Venue')
+                    ->size('xs')
                     ->searchable(),
                 TextColumn::make('booking_at')
                     ->label('Date')
+                    ->size('xs')
                     ->dateTime('D, M j'),
                 TextColumn::make('earnings.amount')
                     ->alignRight()
+                    ->size('xs')
                     ->label('Earned')
                     ->formatStateUsing(function (Booking $booking) {
                         $total = $booking->earnings->sum('amount');

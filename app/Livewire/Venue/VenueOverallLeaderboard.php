@@ -113,7 +113,7 @@ class VenueOverallLeaderboard extends Widget
 
     public function showRegionFilter(): bool
     {
-        return auth()->user()->hasRole('super_admin');
+        return auth()->user()->hasRole('super_admin') && count(config('app.active_regions')) > 1;
     }
 
     public function viewVenue($venueId): void

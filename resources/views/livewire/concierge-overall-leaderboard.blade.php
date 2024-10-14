@@ -46,11 +46,11 @@
                             <tr class="{{ auth()->user()->hasRole('super_admin') ? 'hover:bg-gray-50 cursor-pointer' : '' }}"
                                 @if (auth()->user()->hasRole('super_admin')) wire:click="viewConcierge({{ $concierge['concierge_id'] }})" @endif>
                                 <td
-                                    class="whitespace-nowrap px-3 text-sm font-medium py-[1.13rem] text-gray-950 first-of-type:ps-4 last-of-type:pe-4 sm:first-of-type:ps-6 sm:last-of-type:pe-6">
+                                    class="whitespace-nowrap px-3 text-xs font-medium py-[1rem] text-gray-950 first-of-type:ps-4 last-of-type:pe-4 sm:first-of-type:ps-6 sm:last-of-type:pe-6">
                                     {{ $index + 1 }}
                                 </td>
                                 <td
-                                    class="whitespace-nowrap px-3 text-sm py-[1.13rem] text-gray-950 first-of-type:ps-4 last-of-type:pe-4 sm:first-of-type:ps-6 sm:last-of-type:pe-6">
+                                    class="whitespace-nowrap px-3 text-xs py-[1rem] text-gray-950 first-of-type:ps-4 last-of-type:pe-4 sm:first-of-type:ps-6 sm:last-of-type:pe-6">
                                     @if (auth()->user()->concierge && auth()->user()->concierge->user_id === $concierge['user_id'])
                                         You
                                     @elseif(auth()->user()->hasRole('super_admin'))
@@ -69,16 +69,15 @@
                                     @endif
                                 </td>
                                 <td
-                                    class="hidden sm:table-cell whitespace-nowrap px-3 text-sm py-[1.13rem] text-gray-950 first-of-type:ps-4 last-of-type:pe-4 sm:first-of-type:ps-6 sm:last-of-type:pe-6">
+                                    class="hidden sm:table-cell whitespace-nowrap px-3 text-xs py-[1rem] text-gray-950 first-of-type:ps-4 last-of-type:pe-4 sm:first-of-type:ps-6 sm:last-of-type:pe-6">
                                     {{ number_format($concierge['direct_booking_count']) }}
                                 </td>
                                 <td
-                                    class="hidden sm:table-cell whitespace-nowrap px-3 text-sm py-[1.13rem] text-gray-950 first-of-type:ps-4 last-of-type:pe-4 sm:first-of-type:ps-6 sm:last-of-type:pe-6">
+                                    class="hidden sm:table-cell whitespace-nowrap px-3 text-xs py-[1rem] text-gray-950 first-of-type:ps-4 last-of-type:pe-4 sm:first-of-type:ps-6 sm:last-of-type:pe-6">
                                     {{ number_format($concierge['referral_booking_count']) }}
                                 </td>
-
                                 <td
-                                    class="whitespace-nowrap px-3 text-sm py-[1.13rem] text-gray-950 first-of-type:ps-4 last-of-type:pe-4 sm:first-of-type:ps-6 sm:last-of-type:pe-6">
+                                    class="whitespace-nowrap px-3 text-xs py-[1rem] text-gray-950 first-of-type:ps-4 last-of-type:pe-4 sm:first-of-type:ps-6 sm:last-of-type:pe-6">
                                     ${{ number_format($concierge['total_usd'], 2) }}
                                 </td>
                             </tr>

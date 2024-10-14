@@ -55,11 +55,11 @@
                             <tr class="{{ auth()->user()->hasRole('super_admin') ? 'hover:bg-gray-50 cursor-pointer' : '' }}"
                                 @if (auth()->user()->hasRole('super_admin')) wire:click="viewVenue({{ $venue['venue_id'] }})" @endif>
                                 <td
-                                    class="whitespace-nowrap px-3 text-sm font-medium py-[1.13rem] text-gray-950 first-of-type:ps-4 last-of-type:pe-4 sm:first-of-type:ps-6 sm:last-of-type:pe-6">
+                                    class="whitespace-nowrap px-3 text-xs font-medium py-[1rem] text-gray-950 first-of-type:ps-4 last-of-type:pe-4 sm:first-of-type:ps-6 sm:last-of-type:pe-6">
                                     {{ $venue['rank'] }}
                                 </td>
                                 <td
-                                    class="whitespace-nowrap px-3 text-sm py-[1.13rem] text-gray-950 first-of-type:ps-4 last-of-type:pe-4 sm:first-of-type:ps-6 sm:last-of-type:pe-6">
+                                    class="whitespace-nowrap px-3 text-xs py-[1rem] text-gray-950 first-of-type:ps-4 last-of-type:pe-4 sm:first-of-type:ps-6 sm:last-of-type:pe-6">
                                     @if (auth()->user()->venue && auth()->user()->venue->id === $venue['venue_id'])
                                         Your Venue
                                     @elseif(auth()->user()->hasRole('super_admin'))
@@ -69,11 +69,11 @@
                                     @endif
                                 </td>
                                 <td
-                                    class="hidden sm:table-cell whitespace-nowrap px-3 text-sm py-[1.13rem] text-gray-950 first-of-type:ps-4 last-of-type:pe-4 sm:first-of-type:ps-6 sm:last-of-type:pe-6">
+                                    class="hidden sm:table-cell whitespace-nowrap px-3 text-xs py-[1rem] text-gray-950 first-of-type:ps-4 last-of-type:pe-4 sm:first-of-type:ps-6 sm:last-of-type:pe-6">
                                     {{ number_format($venue['booking_count']) }}
                                 </td>
                                 <td
-                                    class="whitespace-nowrap px-3 text-sm py-[1.13rem] text-gray-950 first-of-type:ps-4 last-of-type:pe-4 sm:first-of-type:ps-6 sm:last-of-type:pe-6">
+                                    class="whitespace-nowrap px-3 text-xs py-[1rem] text-gray-950 first-of-type:ps-4 last-of-type:pe-4 sm:first-of-type:ps-6 sm:last-of-type:pe-6">
                                     {{ $venue['currency_symbol'] }}{{ number_format($venue['total_earned'] / 100, 2) }}
                                 </td>
                             </tr>

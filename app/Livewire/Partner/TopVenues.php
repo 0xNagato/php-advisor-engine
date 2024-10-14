@@ -39,6 +39,7 @@ class TopVenues extends Widget
             ->where('earnings.type', 'partner_venue')
             ->where('earnings.user_id', $this->partner->user_id)
             ->groupBy('venues.id', 'venues.name', 'earnings.currency')
+            ->limit(10)
             ->select(
                 'venues.id as venue_id',
                 'venues.name as venue_name',

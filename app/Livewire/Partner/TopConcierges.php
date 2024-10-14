@@ -39,6 +39,7 @@ class TopConcierges extends Widget
             ->where('earnings.type', 'partner_concierge')
             ->where('earnings.user_id', $this->partner->user_id)
             ->groupBy('concierges.id', 'users.first_name', 'users.last_name', 'earnings.currency')
+            ->limit(10)
             ->select(
                 'concierges.id as concierge_id',
                 DB::raw("CONCAT(users.first_name, ' ', users.last_name) as concierge_name"),

@@ -63,14 +63,18 @@ class VenueRecentBookings extends BaseWidget
                 TextColumn::make('guest_name')
                     ->label('Guest')
                     ->formatStateUsing(fn (Booking $booking) => "$booking->guest_name ($booking->guest_count)")
+                    ->size('xs')
                     ->searchable(),
                 TextColumn::make('booking_at')
                     ->label('Date')
+                    ->size('xs')
                     ->dateTime('D, M j g:ia'),
                 TextColumn::make('concierge.user.name')
+                    ->size('xs')
                     ->label('Booked By'),
                 TextColumn::make('venue_earnings')
                     ->alignRight()
+                    ->size('xs')
                     ->visible(fn () => auth()->user()->hasRole('venue'))
                     ->label('Earned')
                     ->formatStateUsing(function (Booking $booking) {
