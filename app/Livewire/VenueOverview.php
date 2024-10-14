@@ -51,7 +51,7 @@ class VenueOverview extends BaseWidget
             ->join('bookings', 'earnings.booking_id', '=', 'bookings.id')
             ->where('earnings.user_id', $this->venue->user_id)
             ->whereBetween('bookings.confirmed_at', [$startDate, $endDate])
-            ->where('earnings.type', 'venue')
+            ->whereIn('earnings.type', ['venue', 'venue_paid'])
             ->select(
                 DB::raw('COUNT(DISTINCT bookings.id) as number_of_bookings'),
                 DB::raw('SUM(earnings.amount) as total_earnings')

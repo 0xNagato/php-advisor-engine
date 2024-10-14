@@ -63,6 +63,18 @@ class Venue extends Model
         'status',
     ];
 
+    protected function casts(): array
+    {
+        return [
+            'open_days' => 'array',
+            'contacts' => DataCollection::class.':'.VenueContactData::class,
+            'non_prime_time' => 'array',
+            'business_hours' => 'array',
+            'party_sizes' => 'array',
+            'status' => VenueStatus::class,
+        ];
+    }
+
     protected static function boot(): void
     {
         parent::boot();
@@ -130,6 +142,21 @@ class Venue extends Model
         $this->scheduleTemplates()->insert($schedulesData);
     }
 
+    public function scopeAvailable(Builder $query): Builder
+    {
+        return $query->whereHas('user', function (Builder $query) {
+            $query->whereNotNull('secured_at');
+        })->whereIn('status', ['active', 'pending']);
+    }
+
+    protected function logo(): Attribute
+    {
+        return Attribute::make(get: fn () => $this->logo_path
+            ? Storage::disk('do')->url($this->logo_path)
+            : 'https://ui-avatars.com/api/?background=312596&color=fff&name='.urlencode($this->name)
+        );
+    }
+
     /**
      * @return HasMany<ScheduleTemplate>
      */
@@ -144,14 +171,6 @@ class Venue extends Model
     public function timeSlots(): HasManyThrough
     {
         return $this->hasManyThrough(VenueTimeSlot::class, ScheduleTemplate::class);
-    }
-
-    protected function logo(): Attribute
-    {
-        return Attribute::make(get: fn () => $this->logo_path
-            ? Storage::disk('do')->url($this->logo_path)
-            : 'https://ui-avatars.com/api/?background=312596&color=fff&name='.urlencode($this->name)
-        );
     }
 
     /**
@@ -182,13 +201,6 @@ class Venue extends Model
         return $this->belongsTo(Region::class, 'region', 'id');
     }
 
-    public function scopeAvailable(Builder $query): Builder
-    {
-        return $query->whereHas('user', function (Builder $query) {
-            $query->whereNotNull('secured_at');
-        })->whereIn('status', ['active', 'pending']);
-    }
-
     /**
      * @return HasMany<SpecialPricingVenue>
      */
@@ -203,6 +215,32 @@ class Venue extends Model
     public function partnerReferral(): HasOneThrough
     {
         return $this->hasOneThrough(Partner::class, User::class, 'id', 'id', 'user_id', 'partner_referral_id');
+    }
+
+    /**
+     * @return HasManyThrough<Earning>
+     */
+    public function earnings(): HasManyThrough
+    {
+        return $this->hasManyThrough(
+            Earning::class,
+            User::class,
+            'id', // Foreign key on the user's table
+            'user_id', // Foreign key on the earning's table
+            'user_id', // Local key on the venue's table
+            'id'// Local key on the user's table...
+        );
+    }
+
+    /**
+     * @return HasManyThrough<Booking>
+     */
+    public function bookings(): HasManyThrough
+    {
+        return $this->hasManyThrough(
+            Booking::class, // The final model you want to access (Booking)
+            ScheduleTemplate::class // The intermediate model (ScheduleTemplate)
+        );
     }
 
     /**
@@ -242,25 +280,14 @@ class Venue extends Model
         return $schedule;
     }
 
-    protected function casts(): array
-    {
-        return [
-            'open_days' => 'array',
-            'contacts' => DataCollection::class.':'.VenueContactData::class,
-            'non_prime_time' => 'array',
-            'business_hours' => 'array',
-            'party_sizes' => 'array',
-            'status' => VenueStatus::class,
-        ];
-    }
-
     /**
      * @throws Throwable
      */
     public function updateReferringPartner(int $newPartnerId): void
     {
         $partner = Partner::query()->find($newPartnerId);
-        throw_if(! $partner || ! $partner->user, new RuntimeException('Invalid partner ID or associated user not found.'));
+        throw_if(! $partner || ! $partner->user,
+            new RuntimeException('Invalid partner ID or associated user not found.'));
 
         $newUserId = $partner->user_id;
 

@@ -13,6 +13,22 @@
             <dd>{{ $bookings_count }}</dd>
             <dt class="font-semibold">Last Login:</dt>
             <dd>{{ $last_login ? \Carbon\Carbon::parse($last_login)->diffForHumans() : 'Never' }}</dd>
+
+            <dt class="font-semibold">Venue Contacts:</dt>
+            <dd></dd>
+            @if ($contacts)
+                @foreach ($contacts->where('use_for_reservations', true) as $contact)
+                    <dt class="ml-1 font-semibold">{{ $contact->contact_name }}:</dt>
+                    <dd class="ml-2">
+                        <a class="text-indigo-600 underline" href="tel:{{ $contact->contact_phone }}">
+                            {{ formatInternationalPhoneNumber($contact->contact_phone) }}
+                        </a>
+                    </dd>
+                @endforeach
+            @else
+                <dd>No contacts available</dd>
+            @endif
+
         </dl>
     </div>
 
@@ -23,12 +39,11 @@
             <!-- Mobile view (column structure) -->
             <div class="grid grid-cols-2 gap-2 sm:hidden">
                 @foreach ($recentBookings as $booking)
-                    <div
-                        onclick="window.location='{{ route('filament.admin.resources.bookings.view', $booking) }}'"
+                    <div onclick="window.location='{{ route('filament.admin.resources.bookings.view', $booking) }}'"
                         class="flex flex-col justify-between h-full p-2 space-y-1 bg-white border border-gray-200 rounded-lg shadow">
                         <div>
                             <div class="text-xs font-semibold">
-                                {{ $booking->schedule->venue->name }}
+                                {{ $booking->concierge->user->name }}
                             </div>
                             <div class="text-xs text-gray-600">
                                 {{ $booking->booking_at->format('D, M j g:ia') }}
@@ -50,7 +65,7 @@
                                 Id
                             </th>
                             <th class="px-3 py-2 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">
-                                Venue
+                                Concierge
                             </th>
                             <th class="px-3 py-2 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">
                                 Date
@@ -65,7 +80,7 @@
                             <tr class="cursor-pointer hover:bg-gray-100"
                                 onclick="window.location='{{ route('filament.admin.resources.bookings.view', $booking) }}'">
                                 <td class="px-3 py-2 text-sm whitespace-nowrap">{{ $booking->id }}</td>
-                                <td class="px-3 py-2 text-sm whitespace-nowrap">{{ $booking->schedule->venue->name }}
+                                <td class="px-3 py-2 text-sm whitespace-nowrap">{{ $booking->concierge->user->name }}
                                 </td>
                                 <td class="px-3 py-2 text-sm whitespace-nowrap">
                                     {{ $booking->booking_at->format('D, M j g:ia') }}</td>

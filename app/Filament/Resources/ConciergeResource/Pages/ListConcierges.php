@@ -119,7 +119,7 @@ class ListConcierges extends ListRecords
                         ]);
                     })
                     ->modalContentFooter(fn (Action $action) => view(
-                        'partials.concierge-mobile-footer',
+                        'partials.modal-actions-footer',
                         ['action' => $action]
                     ))
                     ->modalSubmitAction(false)
