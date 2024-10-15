@@ -2,7 +2,6 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -27,22 +26,6 @@ class Partner extends Model
     }
 
     /**
-     * @return HasMany<Booking>
-     */
-    public function conciergeBookings(): HasMany
-    {
-        return $this->hasMany(Booking::class, 'partner_concierge_id');
-    }
-
-    /**
-     * @return HasMany<Booking>
-     */
-    public function venueBookings(): HasMany
-    {
-        return $this->hasMany(Booking::class, 'partner_venue_id');
-    }
-
-    /**
      * @return HasManyThrough<Referral>
      */
     public function referrals(): HasManyThrough
@@ -57,24 +40,13 @@ class Partner extends Model
         );
     }
 
-    public function scopeWithAllBookings(Builder $query): Builder
-    {
-        return $query->with(['conciergeBookings', 'venueBookings']);
-    }
-
     /**
-     * @return HasManyThrough<Booking>
+     * @return HasMany<Booking>
      */
-    public function bookings(): HasManyThrough
+    public function bookings(): HasMany
     {
-        return $this->hasManyThrough(
-            Booking::class,
-            User::class,
-            'id',
-            'partner_concierge_id',
-            'user_id',
-            'id'
-        )->orWhere('bookings.partner_venue_id', $this->id);
+        return $this->hasMany(Booking::class, 'partner_concierge_id')
+            ->orWhere('partner_venue_id', $this->id);
     }
 
     /**
@@ -85,10 +57,10 @@ class Partner extends Model
         return $this->hasManyThrough(
             Earning::class,
             Booking::class,
-            'partner_concierge_id',
-            'booking_id',
-            'id',
-            'id'
+            'partner_concierge_id', // local key on bookings table
+            'booking_id', // local key on earnings table
+            'id', // local key on partners table
+            'id' // local key on bookings table
         )->orWhere('bookings.partner_venue_id', $this->id)
             ->whereIn('earnings.type', ['partner_concierge', 'partner_venue']);
     }
