@@ -136,7 +136,7 @@ class ListVenues extends ListRecords
                     ->modalCancelAction(false)
                     ->slideOver(self::USE_SLIDE_OVER),
             ])
-            ->paginated([5, 10, 25])
+            ->paginated([10, 25, 50, 100])
             ->filters([
                 SelectFilter::make('region')
                     ->options(Region::query()->pluck('name', 'id')),
