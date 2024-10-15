@@ -34,15 +34,6 @@ class ListPartners extends ListRecords
 
     const bool USE_SLIDE_OVER = false;
 
-    public function getHeading(): Htmlable|string
-    {
-        if (auth()->user()->hasRole('super_admin')) {
-            return 'Partners';
-        }
-
-        return 'My Earnings';
-    }
-
     public function table(Table $table): Table
     {
         $query = $this->getPartnersQuery();
@@ -137,16 +128,20 @@ class ListPartners extends ListRecords
     protected function getPartnersQuery(): \Illuminate\Database\Eloquent\Builder
     {
         return Partner::query()
-            ->select('partners.id', 'partners.percentage', 'users.id as user_id',
+            ->select(
+                'partners.id',
+                'partners.percentage',
+                'users.id as user_id',
                 DB::raw("CONCAT(users.first_name, ' ', users.last_name) as user_name"),
-                DB::raw('COALESCE(SUM(amount), 0) as total_earned'),
-                DB::raw('COALESCE(COUNT(case when earnings.type in ("partner_concierge", "partner_venue") then 1 else null end), 0) as bookings'))
+                DB::raw('COALESCE(SUM(earnings.amount), 0) as total_earned'),
+                DB::raw('COALESCE(COUNT(DISTINCT bookings.id), 0) as bookings')
+            )
             ->join('users', 'users.id', '=', 'partners.user_id')
-            ->leftJoin('earnings', function (Builder $join) {
-                $join->on('earnings.user_id', '=', 'users.id');
-            })
+            ->leftJoin('earnings', 'earnings.user_id', '=', 'users.id')
+            ->leftJoin('bookings', 'earnings.booking_id', '=', 'bookings.id')
+            ->whereNotNull('bookings.confirmed_at')
+            ->whereIn('earnings.type', ['partner_concierge', 'partner_venue'])
             ->groupBy('partners.id', 'users.id')
-            ->orderBy('total_earned', 'desc')
-            ->limit(10);
+            ->orderBy('total_earned', 'desc');
     }
 }
