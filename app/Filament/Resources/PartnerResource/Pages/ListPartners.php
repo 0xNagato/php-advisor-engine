@@ -58,7 +58,7 @@ class ListPartners extends ListRecords
         return $table
             ->recordUrl(fn (Partner $record) => ViewPartner::getUrl(['record' => $record]))
             ->query($query)
-            ->paginated([5, 10, 25])
+            ->paginated([10, 25, 50, 100])
             ->columns([
                 TextColumn::make('user.name')
                     ->size('xs')
