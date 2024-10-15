@@ -15,6 +15,7 @@ use Filament\Tables\Actions\ViewAction;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
+use App\Enums\BookingStatus;
 
 class ListVenues extends ListRecords
 {
@@ -33,7 +34,9 @@ class ListVenues extends ListRecords
             ->query(
                 Venue::query()
                     ->with(['partnerReferral.user', 'user.authentications'])
-                    ->withCount('bookings')
+                    ->withCount(['bookings' => function ($query) {
+                        $query->where('status', BookingStatus::CONFIRMED);
+                    }])
                     ->join('users', 'venues.user_id', '=', 'users.id')
                     ->orderByDesc('users.secured_at')
             )

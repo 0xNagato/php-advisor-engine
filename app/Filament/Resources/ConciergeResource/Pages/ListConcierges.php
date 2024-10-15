@@ -13,6 +13,8 @@ use Filament\Tables\Actions\EditAction;
 use Filament\Tables\Actions\ViewAction;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
+use App\Models\Booking;
+use App\Enums\BookingStatus;
 
 class ListConcierges extends ListRecords
 {
@@ -31,7 +33,9 @@ class ListConcierges extends ListRecords
             ->query(
                 Concierge::query()
                     ->with(['user.referrer', 'user.authentications'])
-                    ->withCount('bookings')
+                    ->withCount(['bookings' => function ($query) {
+                        $query->where('status', BookingStatus::CONFIRMED);
+                    }])
                     ->join('users', 'concierges.user_id', '=', 'users.id')
                     ->orderByDesc('users.secured_at')
             )
