@@ -26,7 +26,7 @@ use Illuminate\Support\Facades\DB;
 
 class ListPartners extends ListRecords
 {
-    use HasFiltersAction, ImpersonatesOther;
+    use ImpersonatesOther;
 
     protected static string $resource = PartnerResource::class;
 
@@ -41,14 +41,6 @@ class ListPartners extends ListRecords
         }
 
         return 'My Earnings';
-    }
-
-    public function mount(): void
-    {
-        $this->filters = [
-            'startDate' => $this->filters['startDate'] ?? now()->subDays(30),
-            'endDate' => $this->filters['endDate'] ?? now(),
-        ];
     }
 
     public function table(Table $table): Table
@@ -142,35 +134,16 @@ class ListPartners extends ListRecords
         return (string) $record->getKey();
     }
 
-    protected function getHeaderActions(): array
-    {
-        return [
-            FilterAction::make()
-                ->label('Date Range')
-                ->iconButton()
-                ->icon('heroicon-o-calendar')
-                ->form([
-                    DatePicker::make('startDate'),
-                    DatePicker::make('endDate'),
-                ]),
-            CreateAction::make()->iconButton()->icon('heroicon-s-plus-circle'),
-        ];
-    }
-
     protected function getPartnersQuery(): \Illuminate\Database\Eloquent\Builder
     {
-        $startDate = $this->filters['startDate'] ?? now()->subDays(30);
-        $endDate = $this->filters['endDate'] ?? now();
-
         return Partner::query()
             ->select('partners.id', 'partners.percentage', 'users.id as user_id',
                 DB::raw("CONCAT(users.first_name, ' ', users.last_name) as user_name"),
                 DB::raw('COALESCE(SUM(amount), 0) as total_earned'),
                 DB::raw('COALESCE(COUNT(case when earnings.type in ("partner_concierge", "partner_venue") then 1 else null end), 0) as bookings'))
             ->join('users', 'users.id', '=', 'partners.user_id')
-            ->leftJoin('earnings', function (Builder $join) use ($startDate, $endDate) {
-                $join->on('earnings.user_id', '=', 'users.id')
-                    ->whereBetween('earnings.created_at', [$startDate, $endDate]);
+            ->leftJoin('earnings', function (Builder $join) {
+                $join->on('earnings.user_id', '=', 'users.id');
             })
             ->groupBy('partners.id', 'users.id')
             ->orderBy('total_earned', 'desc')
