@@ -9,18 +9,13 @@ use App\Models\Partner;
 use App\Models\Referral;
 use App\Traits\ImpersonatesOther;
 use Carbon\Carbon;
-use Filament\Actions\CreateAction;
-use Filament\Forms\Components\DatePicker;
-use Filament\Pages\Dashboard\Actions\FilterAction;
-use Filament\Pages\Dashboard\Concerns\HasFiltersAction;
 use Filament\Resources\Pages\ListRecords;
 use Filament\Tables\Actions\Action;
 use Filament\Tables\Actions\EditAction;
 use Filament\Tables\Actions\ViewAction;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
-use Illuminate\Contracts\Database\Query\Builder;
-use Illuminate\Contracts\Support\Htmlable;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
 
@@ -125,7 +120,7 @@ class ListPartners extends ListRecords
         return (string) $record->getKey();
     }
 
-    protected function getPartnersQuery(): \Illuminate\Database\Eloquent\Builder
+    protected function getPartnersQuery(): Builder
     {
         return Partner::query()
             ->select(

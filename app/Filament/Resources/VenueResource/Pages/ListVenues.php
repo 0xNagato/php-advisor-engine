@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\VenueResource\Pages;
 
+use App\Enums\BookingStatus;
 use App\Filament\Resources\VenueResource;
 use App\Models\Region;
 use App\Models\Venue;
@@ -15,7 +16,6 @@ use Filament\Tables\Actions\ViewAction;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
-use App\Enums\BookingStatus;
 
 class ListVenues extends ListRecords
 {

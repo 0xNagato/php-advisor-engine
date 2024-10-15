@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\ConciergeResource\Pages;
 
+use App\Enums\BookingStatus;
 use App\Filament\Resources\ConciergeResource;
 use App\Models\Concierge;
 use App\Services\CurrencyConversionService;
@@ -13,8 +14,6 @@ use Filament\Tables\Actions\EditAction;
 use Filament\Tables\Actions\ViewAction;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
-use App\Models\Booking;
-use App\Enums\BookingStatus;
 
 class ListConcierges extends ListRecords
 {

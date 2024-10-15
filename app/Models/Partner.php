@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -56,8 +57,39 @@ class Partner extends Model
         );
     }
 
-    public function scopeWithAllBookings($query)
+    public function scopeWithAllBookings(Builder $query): Builder
     {
         return $query->with(['conciergeBookings', 'venueBookings']);
+    }
+
+    /**
+     * @return HasManyThrough<Booking>
+     */
+    public function bookings(): HasManyThrough
+    {
+        return $this->hasManyThrough(
+            Booking::class,
+            User::class,
+            'id',
+            'partner_concierge_id',
+            'user_id',
+            'id'
+        )->orWhere('bookings.partner_venue_id', $this->id);
+    }
+
+    /**
+     * @return HasManyThrough<Earning>
+     */
+    public function earnings(): HasManyThrough
+    {
+        return $this->hasManyThrough(
+            Earning::class,
+            Booking::class,
+            'partner_concierge_id',
+            'booking_id',
+            'id',
+            'id'
+        )->orWhere('bookings.partner_venue_id', $this->id)
+            ->whereIn('earnings.type', ['partner_concierge', 'partner_venue']);
     }
 }
