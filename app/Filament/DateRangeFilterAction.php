@@ -31,6 +31,12 @@ class DateRangeFilterAction extends FilterAction
                             $set('startDate', now()->startOfMonth()->format('Y-m-d'));
                             $set('endDate', now()->format('Y-m-d'));
                         }),
+                    Action::make('yearToDate')
+                        ->label('Year to Date')
+                        ->action(function (Set $set) {
+                            $set('startDate', now()->startOfYear()->format('Y-m-d'));
+                            $set('endDate', now()->format('Y-m-d'));
+                        }),
                 ]),
                 DatePicker::make('startDate')
                     ->native(false),
