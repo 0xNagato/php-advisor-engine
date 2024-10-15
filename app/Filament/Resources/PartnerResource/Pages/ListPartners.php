@@ -17,7 +17,6 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Facades\DB;
 
 class ListPartners extends ListRecords
 {
@@ -31,26 +30,29 @@ class ListPartners extends ListRecords
 
     public function table(Table $table): Table
     {
-        $query = $this->getPartnersQuery();
-
         return $table
             ->recordUrl(fn (Partner $record) => ViewPartner::getUrl(['record' => $record]))
-            ->query($query)
+            ->query($this->getPartnersQuery())
             ->paginated([10, 25, 50, 100])
             ->columns([
                 TextColumn::make('user.name')
+                    ->label('Name')
                     ->size('xs')
-                    ->searchable(['first_name', 'last_name']),
+                    ->searchable(['user.first_name', 'user.last_name']),
+
                 TextColumn::make('total_earned')
                     ->label('Earned')
                     ->size('xs')
                     ->grow(false)
                     ->money('USD', divideBy: 100),
-                TextColumn::make('bookings')->label('Bookings')
+
+                TextColumn::make('bookings_count')
+                    ->label('Bookings')
                     ->visibleFrom('sm')
                     ->grow(false)
                     ->size('xs')
                     ->numeric(),
+
                 TextColumn::make('user.authentications.login_at')
                     ->label('Last Login')
                     ->visibleFrom('sm')
@@ -72,7 +74,8 @@ class ListPartners extends ListRecords
                     ->icon('impersonate-icon')
                     ->action(fn (Partner $record) => $this->impersonate($record->user))
                     ->hidden(fn () => isPrimaApp()),
-                Action::make('viewConcierge')
+
+                Action::make('viewPartner')
                     ->iconButton()
                     ->icon('tabler-maximize')
                     ->modalHeading(fn (Partner $partner) => $partner->user->name)
@@ -83,14 +86,16 @@ class ListPartners extends ListRecords
                             ->size('sm'),
                     ])
                     ->modalContent(function (Partner $partner) {
-                        $referrals = $partner->referrals()->latest()->take(10)->with([
-                            'user.concierge', 'user.venue',
-                        ])->get()
+                        $referrals = $partner->referrals()
+                            ->latest()
+                            ->take(10)
+                            ->with(['user.concierge', 'user.venue'])
+                            ->get()
                             ->map(function (Referral $referral) {
                                 $referral->viewRoute = match ($referral->type) {
-                                    'concierge' => ViewConcierge::getUrl(['record' => $referral->user->concierge]),
-                                    'venue' => ViewVenue::getUrl(['record' => $referral->user->venue]),
-                                    default => null
+                                    'concierge' => $referral->user->concierge ? ViewConcierge::getUrl(['record' => $referral->user->concierge]) : null,
+                                    'venue' => $referral->user->venue ? ViewVenue::getUrl(['record' => $referral->user->venue]) : null,
+                                    default => null,
                                 };
 
                                 return $referral;
@@ -99,10 +104,10 @@ class ListPartners extends ListRecords
                         return view('partials.partner-table-modal-view', [
                             'secured_at' => $partner->user->secured_at,
                             'percentage' => $partner->percentage,
-                            'bookings_count' => number_format($partner->bookings),
-                            'total_earned' => $partner->total_earned,
+                            'bookings_count' => number_format($partner->bookings()->count()),
+                            'total_earned' => $partner->getTotalEarnings(),
                             'referrals' => $referrals,
-                            'last_login' => $partner->user->authentications()->latest('login_at')->first()->login_at ?? null,
+                            'last_login' => optional($partner->user->authentications()->latest('login_at')->first())->login_at,
                         ]);
                     })
                     ->modalContentFooter(fn (Action $action) => view(
@@ -123,20 +128,32 @@ class ListPartners extends ListRecords
     protected function getPartnersQuery(): Builder
     {
         return Partner::query()
-            ->select(
-                'partners.id',
-                'partners.percentage',
-                'users.id as user_id',
-                DB::raw("CONCAT(users.first_name, ' ', users.last_name) as user_name"),
-                DB::raw('COALESCE(SUM(earnings.amount), 0) as total_earned'),
-                DB::raw('COALESCE(COUNT(DISTINCT bookings.id), 0) as bookings')
-            )
-            ->join('users', 'users.id', '=', 'partners.user_id')
-            ->leftJoin('earnings', 'earnings.user_id', '=', 'users.id')
-            ->leftJoin('bookings', 'earnings.booking_id', '=', 'bookings.id')
-            ->whereNotNull('bookings.confirmed_at')
-            ->whereIn('earnings.type', ['partner_concierge', 'partner_venue'])
-            ->groupBy('partners.id', 'users.id')
-            ->orderBy('total_earned', 'desc');
+            ->with(['user', 'user.authentications' => function ($query) {
+                $query->latest('login_at')->limit(1);
+            }])
+            ->select('partners.*')
+            ->addSelect([
+                'bookings_count' => function ($query) {
+                    $query->selectRaw('COUNT(*)')
+                        ->from('bookings')
+                        ->whereNotNull('confirmed_at')
+                        ->where(function ($q) {
+                            $q->whereColumn('bookings.partner_concierge_id', 'partners.id')
+                                ->orWhereColumn('bookings.partner_venue_id', 'partners.id');
+                        });
+                },
+                'total_earned' => function ($query) {
+                    $query->selectRaw('COALESCE(SUM(earnings.amount), 0)')
+                        ->from('earnings')
+                        ->join('bookings', 'earnings.booking_id', '=', 'bookings.id')
+                        ->whereIn('earnings.type', ['partner_concierge', 'partner_venue'])
+                        ->whereNotNull('bookings.confirmed_at')
+                        ->where(function ($q) {
+                            $q->whereColumn('bookings.partner_concierge_id', 'partners.id')
+                                ->orWhereColumn('bookings.partner_venue_id', 'partners.id');
+                        });
+                },
+            ])
+            ->orderByDesc('total_earned');
     }
 }

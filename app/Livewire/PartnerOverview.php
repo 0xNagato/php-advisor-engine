@@ -52,11 +52,14 @@ class PartnerOverview extends BaseWidget
     protected function getEarnings($startDate, $endDate): array
     {
         $partnerEarningsQuery = Earning::query()
-            ->whereNotNull('bookings.confirmed_at')
             ->join('bookings', 'earnings.booking_id', '=', 'bookings.id')
-            ->where('earnings.user_id', $this->partner->user_id)
+            ->whereIn('earnings.type', ['partner_concierge', 'partner_venue'])
+            ->whereNotNull('bookings.confirmed_at')
             ->whereBetween('bookings.confirmed_at', [$startDate, $endDate])
-            ->whereIn('earnings.type', ['partner_concierge', 'partner_venue']);
+            ->where(function ($q) {
+                $q->where('bookings.partner_concierge_id', $this->partner->id)
+                    ->orWhere('bookings.partner_venue_id', $this->partner->id);
+            });
 
         $numberOfBookings = $partnerEarningsQuery->distinct('bookings.id')->count('bookings.id');
 
@@ -74,21 +77,24 @@ class PartnerOverview extends BaseWidget
     protected function getAverageBookingValue($startDate, $endDate): float
     {
         $result = Earning::query()
-            ->whereNotNull('bookings.confirmed_at')
             ->join('bookings', 'earnings.booking_id', '=', 'bookings.id')
-            ->where('earnings.user_id', $this->partner->user_id)
-            ->whereBetween('bookings.confirmed_at', [$startDate, $endDate])
             ->whereIn('earnings.type', ['partner_concierge', 'partner_venue'])
+            ->whereNotNull('bookings.confirmed_at')
+            ->whereBetween('bookings.confirmed_at', [$startDate, $endDate])
+            ->where(function ($q) {
+                $q->where('bookings.partner_concierge_id', $this->partner->id)
+                    ->orWhere('bookings.partner_venue_id', $this->partner->id);
+            })
             ->selectRaw('earnings.currency, AVG(earnings.amount) as average_earning, COUNT(DISTINCT bookings.id) as booking_count')
             ->groupBy('earnings.currency')
             ->get();
 
         if ($result->isEmpty()) {
-            return 0;
+            return 0.0;
         }
 
         $currencyService = app(CurrencyConversionService::class);
-        $totalUSD = 0;
+        $totalUSD = 0.0;
         $totalBookings = 0;
 
         foreach ($result as $item) {
@@ -97,17 +103,20 @@ class PartnerOverview extends BaseWidget
             $totalBookings += $item->booking_count;
         }
 
-        return $totalBookings > 0 ? $totalUSD / $totalBookings : 0;
+        return $totalBookings > 0 ? $totalUSD / $totalBookings : 0.0;
     }
 
     protected function getChartData($startDate, $endDate): array
     {
         $dailyData = Earning::query()
-            ->whereNotNull('bookings.confirmed_at')
             ->join('bookings', 'earnings.booking_id', '=', 'bookings.id')
-            ->where('earnings.user_id', $this->partner->user_id)
-            ->whereBetween('bookings.confirmed_at', [$startDate, $endDate])
             ->whereIn('earnings.type', ['partner_concierge', 'partner_venue'])
+            ->whereNotNull('bookings.confirmed_at')
+            ->whereBetween('bookings.confirmed_at', [$startDate, $endDate])
+            ->where(function ($q) {
+                $q->where('bookings.partner_concierge_id', $this->partner->id)
+                    ->orWhere('bookings.partner_venue_id', $this->partner->id);
+            })
             ->selectRaw('DATE(bookings.confirmed_at) as date, earnings.currency, COUNT(DISTINCT bookings.id) as bookings, SUM(earnings.amount) as total_earnings, AVG(earnings.amount) as avg_earning')
             ->groupBy('date', 'earnings.currency')
             ->orderBy('date')
@@ -119,11 +128,12 @@ class PartnerOverview extends BaseWidget
             $totalBookings = $dayData->sum('bookings');
             $totalEarningsUSD = $currencyService->convertToUSD($dayData->pluck('total_earnings', 'currency')->toArray());
 
-            $avgEarningUSD = 0;
+            $avgEarningUSD = 0.0;
             foreach ($dayData as $item) {
-                $avgEarningUSD += $currencyService->convertToUSD([$item->currency => $item->avg_earning]) * $item->bookings;
+                $usdAmount = $currencyService->convertToUSD([$item->currency => $item->avg_earning]);
+                $avgEarningUSD += $usdAmount * $item->bookings;
             }
-            $avgEarningUSD = $totalBookings > 0 ? $avgEarningUSD / $totalBookings : 0;
+            $avgEarningUSD = $totalBookings > 0 ? $avgEarningUSD / $totalBookings : 0.0;
 
             return [
                 'bookings' => $totalBookings,
