@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use App\Filament\Resources\ConciergeResource\Pages\ViewConcierge;
+use App\Filament\Resources\VenueResource\Pages\ViewVenue;
 use App\Traits\FormatsPhoneNumber;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
@@ -28,6 +30,13 @@ class Referral extends Model
         'last_name',
         'notified_at',
     ];
+
+    protected function casts(): array
+    {
+        return [
+            'secured_at' => 'datetime',
+        ];
+    }
 
     /**
      * @return BelongsTo<User, Referral>
@@ -68,5 +77,14 @@ class Referral extends Model
     protected function localFormattedPhone(): Attribute
     {
         return Attribute::make(get: fn () => $this->getLocalFormattedPhoneNumber($this->phone));
+    }
+
+    protected function viewRoute(): Attribute
+    {
+        return Attribute::make(get: fn () => match ($this->type) {
+            'concierge' => $this->user->concierge ? ViewConcierge::getUrl(['record' => $this->user->concierge]) : null,
+            'venue' => $this->user->venue ? ViewVenue::getUrl(['record' => $this->user->venue]) : null,
+            default => null,
+        });
     }
 }

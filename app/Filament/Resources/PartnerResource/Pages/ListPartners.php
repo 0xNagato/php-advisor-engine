@@ -2,11 +2,8 @@
 
 namespace App\Filament\Resources\PartnerResource\Pages;
 
-use App\Filament\Resources\ConciergeResource\Pages\ViewConcierge;
 use App\Filament\Resources\PartnerResource;
-use App\Filament\Resources\VenueResource\Pages\ViewVenue;
 use App\Models\Partner;
-use App\Models\Referral;
 use App\Traits\ImpersonatesOther;
 use Carbon\Carbon;
 use Filament\Resources\Pages\ListRecords;
@@ -85,31 +82,14 @@ class ListPartners extends ListRecords
                         ViewAction::make('view')
                             ->size('sm'),
                     ])
-                    ->modalContent(function (Partner $partner) {
-                        $referrals = $partner->referrals()
-                            ->latest()
-                            ->take(10)
-                            ->with(['user.concierge', 'user.venue'])
-                            ->get()
-                            ->map(function (Referral $referral) {
-                                $referral->viewRoute = match ($referral->type) {
-                                    'concierge' => $referral->user->concierge ? ViewConcierge::getUrl(['record' => $referral->user->concierge]) : null,
-                                    'venue' => $referral->user->venue ? ViewVenue::getUrl(['record' => $referral->user->venue]) : null,
-                                    default => null,
-                                };
-
-                                return $referral;
-                            });
-
-                        return view('partials.partner-table-modal-view', [
-                            'secured_at' => $partner->user->secured_at,
-                            'percentage' => $partner->percentage,
-                            'bookings_count' => number_format($partner->bookings()->count()),
-                            'total_earned' => $partner->getTotalEarnings(),
-                            'referrals' => $referrals,
-                            'last_login' => optional($partner->user->authentications()->latest('login_at')->first())->login_at,
-                        ]);
-                    })
+                    ->modalContent(fn (Partner $partner) => view('partials.partner-table-modal-view', [
+                        'partner' => $partner,
+                        'secured_at' => $partner->user->secured_at,
+                        'percentage' => $partner->percentage,
+                        'bookings_count' => number_format($partner->bookings()->count()),
+                        'total_earned' => $partner->getTotalEarnings(),
+                        'last_login' => optional($partner->user->authentications()->latest('login_at')->first())->login_at,
+                    ]))
                     ->modalContentFooter(fn (Action $action) => view(
                         'partials.modal-actions-footer',
                         ['action' => $action]

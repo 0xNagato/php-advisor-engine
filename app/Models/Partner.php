@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\EarningType;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -71,7 +72,7 @@ class Partner extends Model
                 $query->where('bookings.partner_concierge_id', $this->id)
                     ->orWhere('bookings.partner_venue_id', $this->id);
             })
-            ->whereIn('earnings.type', ['partner_concierge', 'partner_venue'])
+            ->whereIn('earnings.type', [EarningType::PARTNER_CONCIERGE, EarningType::PARTNER_VENUE])
             ->whereNotNull('bookings.confirmed_at');
 
         if ($startDate instanceof Carbon) {

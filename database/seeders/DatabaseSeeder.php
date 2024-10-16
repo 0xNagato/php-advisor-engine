@@ -5,8 +5,10 @@ namespace Database\Seeders;
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use App\Models\Concierge;
 use App\Models\Partner;
+use App\Models\Referral;
 use App\Models\User;
 use App\Models\Venue;
+use Illuminate\Contracts\Database\Query\Builder;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Artisan;
 use Spatie\Permission\Models\Role;
@@ -119,20 +121,18 @@ class DatabaseSeeder extends Seeder
             ->create()
             ->assignRole('concierge');
 
-        $this->createOrUpdateConcierges();
+        $this->createConcierges();
 
         $this->call([
             ShieldSeeder::class,
             ConciergeSeeder::class,
             MiamiVenueSeeder::class,
-            // VenueSeeder::class,
-            BookingSeeder::class,
         ]);
 
         Artisan::call('shield:generate --all');
     }
 
-    private function createOrUpdateConcierges(): void
+    private function createConcierges(): void
     {
         $names = [
             'Andrew',
@@ -145,15 +145,19 @@ class DatabaseSeeder extends Seeder
             'Guy',
         ];
 
+        $housePartner = Partner::query()->whereHas('user', function (Builder $query) {
+            $query->where('email', 'house.partner@primavip.co');
+        })->first();
+
         foreach ($names as $name) {
-            $name = trim((string) $name);
+            $name = trim($name);
             $email = strtolower($name).'concierge@primavip.co';
 
             $user = User::query()->firstOrCreate(['email' => $email], [
                 'first_name' => $name,
                 'last_name' => 'Concierge',
                 'password' => bcrypt('password'),
-                'partner_referral_id' => Partner::query()->inRandomOrder()->first()->id,
+                'partner_referral_id' => $housePartner->id,  // Set house partner as referrer
                 'email_verified_at' => now(),
                 'secured_at' => now(),
             ]);
@@ -163,6 +167,21 @@ class DatabaseSeeder extends Seeder
             ]);
 
             $user->assignRole('concierge');
+
+            // Create or update referral record
+            Referral::query()->updateOrCreate([
+                'referrer_id' => $housePartner->user_id,
+                'user_id' => $user->id,
+            ], [
+                'email' => $user->email,
+                'secured_at' => now(),
+                'type' => 'concierge',
+                'referrer_type' => 'partner',
+                'first_name' => $user->first_name,
+                'last_name' => $user->last_name,
+            ]);
         }
+
+        $this->command->info('All concierges have been created/updated with the house partner as their referrer.');
     }
 }

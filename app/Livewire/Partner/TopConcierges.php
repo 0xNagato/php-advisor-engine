@@ -8,6 +8,7 @@ use App\Models\Partner;
 use App\Services\CurrencyConversionService;
 use Carbon\Carbon;
 use Filament\Widgets\Widget;
+use Illuminate\Contracts\Database\Query\Builder;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Livewire\Attributes\Reactive;
@@ -30,12 +31,15 @@ class TopConcierges extends Widget
     {
         $currencyService = app(CurrencyConversionService::class);
 
+        $startDate = $this->startDate ? $this->startDate->copy()->startOfDay() : null;
+        $endDate = $this->endDate ? $this->endDate->copy()->endOfDay() : null;
+
         $earnings = Earning::query()
             ->join('bookings', 'earnings.booking_id', '=', 'bookings.id')
             ->join('concierges', 'concierges.id', '=', 'bookings.concierge_id')
             ->join('users', 'users.id', '=', 'concierges.user_id')
             ->whereNotNull('bookings.confirmed_at')
-            ->whereBetween('bookings.booking_at', [$this->startDate, $this->endDate])
+            ->when($startDate && $endDate, fn (Builder $query) => $query->whereBetween('bookings.booking_at', [$startDate, $endDate]))
             ->where('earnings.type', 'partner_concierge')
             ->where('earnings.user_id', $this->partner->user_id)
             ->groupBy('concierges.id', 'users.first_name', 'users.last_name', 'earnings.currency')

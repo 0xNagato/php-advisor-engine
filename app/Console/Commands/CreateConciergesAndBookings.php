@@ -45,7 +45,7 @@ class CreateConciergesAndBookings extends Command
                 'secured_at' => now(),
             ]);
 
-            $concierge = Concierge::query()->firstOrCreate(['user_id' => $user->id], [
+            Concierge::query()->firstOrCreate(['user_id' => $user->id], [
                 'hotel_name' => "$name's Hotel",
             ]);
 
