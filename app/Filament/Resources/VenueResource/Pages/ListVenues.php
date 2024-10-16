@@ -6,7 +6,6 @@ use App\Enums\BookingStatus;
 use App\Filament\Resources\VenueResource;
 use App\Models\Region;
 use App\Models\Venue;
-use App\Services\CurrencyConversionService;
 use App\Traits\ImpersonatesOther;
 use Carbon\Carbon;
 use Filament\Resources\Pages\ListRecords;
@@ -51,19 +50,7 @@ class ListVenues extends ListRecords
                 TextColumn::make('id')->label('Earned')
                     ->grow(false)
                     ->size('xs')
-                    ->formatStateUsing(function (Venue $record) {
-                        $currencyService = app(CurrencyConversionService::class);
-                        $earnings = $record->earnings()
-                            ->whereIn('type', ['venue', 'venue_paid'])
-                            ->confirmed()->get(['amount', 'currency']);
-
-                        $earningsArray = $earnings->groupBy('currency')
-                            ->map(fn ($currencyGroup) => $currencyGroup->sum('amount') * 100)->toArray();
-
-                        $earningsInUSD = $currencyService->convertToUSD($earningsArray);
-
-                        return money($earningsInUSD, 'USD');
-                    }),
+                    ->formatStateUsing(fn (Venue $venue) => $venue->formattedTotalEarningsInUSD),
                 TextColumn::make('bookings_count')->label('Bookings')
                     ->visibleFrom('sm')
                     ->grow(false)
@@ -108,21 +95,13 @@ class ListVenues extends ListRecords
                             ->orderByDesc('created_at')
                             ->get();
 
-                        $currencyService = app(CurrencyConversionService::class);
-                        $earnings = $venue->earnings()->confirmed()->get(['amount', 'currency']);
-
-                        $earningsArray = $earnings->groupBy('currency')
-                            ->map(fn ($currencyGroup) => $currencyGroup->sum('amount') * 100)->toArray();
-
-                        $earningsInUSD = $currencyService->convertToUSD($earningsArray);
-
                         $lastLogging = $venue->user->authentications()->latest('login_at')->first()->login_at ?? null;
 
                         return view('partials.venue-table-modal-view', [
                             'secured_at' => $venue->user->secured_at,
                             'referrer_name' => $venue->user->referrer?->name ?? '-',
                             'bookings_count' => number_format($venue->bookings_count),
-                            'earningsInUSD' => $earningsInUSD,
+                            'earningsInUSD' => $venue->formattedTotalEarningsInUSD,
                             'recentBookings' => $recentBookings,
                             'last_login' => $lastLogging,
                             'contacts' => $venue->contacts,

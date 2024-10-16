@@ -5,7 +5,6 @@ namespace App\Filament\Resources\ConciergeResource\Pages;
 use App\Enums\BookingStatus;
 use App\Filament\Resources\ConciergeResource;
 use App\Models\Concierge;
-use App\Services\CurrencyConversionService;
 use App\Traits\ImpersonatesOther;
 use Carbon\Carbon;
 use Filament\Resources\Pages\ListRecords;
@@ -49,17 +48,7 @@ class ListConcierges extends ListRecords
                 TextColumn::make('id')->label('Earned')
                     ->grow(false)
                     ->size('xs')
-                    ->formatStateUsing(function (Concierge $record) {
-                        $currencyService = app(CurrencyConversionService::class);
-                        $earnings = $record->earnings()->confirmed()->get(['amount', 'currency']);
-
-                        $earningsArray = $earnings->groupBy('currency')
-                            ->map(fn ($currencyGroup) => $currencyGroup->sum('amount') * 100)->toArray();
-
-                        $earningsInUSD = $currencyService->convertToUSD($earningsArray);
-
-                        return money($earningsInUSD, 'USD');
-                    }),
+                    ->formatStateUsing(fn (Concierge $concierge) => $concierge->formattedTotalEarningsInUSD),
                 TextColumn::make('bookings_count')->label('Bookings')
                     ->visibleFrom('sm')
                     ->grow(false)
@@ -104,21 +93,15 @@ class ListConcierges extends ListRecords
                             ->orderByDesc('confirmed_at')
                             ->get();
 
-                        $currencyService = app(CurrencyConversionService::class);
-                        $earnings = $concierge->user->earnings()->confirmed()->get(['amount', 'currency']);
-
-                        $earningsArray = $earnings->groupBy('currency')
-                            ->map(fn ($currencyGroup) => $currencyGroup->sum('amount') * 100)->toArray();
-
-                        $earningsInUSD = $currencyService->convertToUSD($earningsArray);
+                        $lastLogin = $concierge->user->authentications()->latest('login_at')->first()->login_at ?? null;
 
                         return view('partials.concierge-table-modal-view', [
                             'secured_at' => $concierge->user->secured_at,
                             'referrer_name' => $concierge->user->referrer?->name ?? '-',
                             'bookings_count' => number_format($concierge->bookings_count),
-                            'earningsInUSD' => $earningsInUSD,
+                            'earningsInUSD' => $concierge->formattedTotalEarningsInUSD,
                             'recentBookings' => $recentBookings,
-                            'last_login' => $concierge->user->authentications()->latest('login_at')->first()->login_at ?? null,
+                            'last_login' => $lastLogin,
                         ]);
                     })
                     ->modalContentFooter(fn (Action $action) => view(

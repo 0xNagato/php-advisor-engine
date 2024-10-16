@@ -8,7 +8,7 @@
             <dt class="font-semibold">Referred By:</dt>
             <dd>{{ $referrer_name }}</dd>
             <dt class="font-semibold">Earned:</dt>
-            <dd>{{ money($earningsInUSD, 'USD') }}</dd>
+            <dd>{{ $earningsInUSD }}</dd>
             <dt class="font-semibold">Bookings:</dt>
             <dd>{{ $bookings_count }}</dd>
             <dt class="font-semibold">Last Login:</dt>

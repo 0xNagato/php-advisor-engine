@@ -20,6 +20,11 @@ class Earning extends Model
         'confirmed_at',
     ];
 
+    public function scopeConfirmed(Builder $query): Builder
+    {
+        return $query->whereNotNull('confirmed_at');
+    }
+
     /**
      * @return BelongsTo<User, Earning>
      */
@@ -42,10 +47,5 @@ class Earning extends Model
     public function payment(): BelongsTo
     {
         return $this->belongsTo(Payment::class);
-    }
-
-    public function scopeConfirmed(Builder $query): Builder
-    {
-        return $query->whereNotNull('confirmed_at');
     }
 }

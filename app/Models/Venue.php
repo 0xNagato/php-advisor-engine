@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Data\VenueContactData;
 use App\Enums\BookingStatus;
 use App\Enums\VenueStatus;
+use App\Models\Traits\HasEarnings;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\Attribute;
@@ -23,7 +24,7 @@ use Throwable;
 
 class Venue extends Model
 {
-    use HasFactory;
+    use HasEarnings, HasFactory;
 
     public const int DEFAULT_TABLES = 10;
 
@@ -216,21 +217,6 @@ class Venue extends Model
     public function partnerReferral(): HasOneThrough
     {
         return $this->hasOneThrough(Partner::class, User::class, 'id', 'id', 'user_id', 'partner_referral_id');
-    }
-
-    /**
-     * @return HasManyThrough<Earning>
-     */
-    public function earnings(): HasManyThrough
-    {
-        return $this->hasManyThrough(
-            Earning::class,
-            User::class,
-            'id', // Foreign key on the user's table
-            'user_id', // Foreign key on the earning's table
-            'user_id', // Local key on the venue's table
-            'id'// Local key on the user's table...
-        );
     }
 
     /**

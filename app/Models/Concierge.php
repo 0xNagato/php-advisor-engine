@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Enums\BookingStatus;
+use App\Models\Traits\HasEarnings;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -13,7 +14,7 @@ use Illuminate\Database\Eloquent\Relations\HasOneThrough;
 
 class Concierge extends Model
 {
-    use HasFactory;
+    use HasEarnings, HasFactory;
 
     /**
      * The attributes that are mass assignable.
@@ -126,20 +127,5 @@ class Concierge extends Model
     public function vipCodes(): HasMany
     {
         return $this->hasMany(VIPCode::class);
-    }
-
-    /**
-     * @return HasManyThrough<Earning>
-     */
-    public function earnings(): HasManyThrough
-    {
-        return $this->hasManyThrough(
-            Earning::class,
-            User::class,
-            'id', // Foreign key on the user's table
-            'user_id', // Foreign key on the earning's table
-            'user_id', // Local key on the concierge's table
-            'id'// Local key on the user's table...
-        );
     }
 }

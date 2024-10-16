@@ -6,6 +6,7 @@ use App\Models\User;
 use App\Models\Venue;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Str;
 
 class VenueFactory extends Factory
 {
@@ -13,8 +14,11 @@ class VenueFactory extends Factory
 
     public function definition(): array
     {
+        $name = fake()->company();
+
         return [
-            'name' => fake()->company(),
+            'name' => $name,
+            'slug' => Str::slug($name),
             'primary_contact_name' => fake()->name(),
             'contact_phone' => '+16473823326',
             'payout_venue' => 60,

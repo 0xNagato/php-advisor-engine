@@ -3,19 +3,17 @@
 /** @noinspection NullPointerExceptionInspection */
 /** @noinspection UnknownInspectionInspection */
 /** @noinspection PhpUnhandledExceptionInspection */
+
 /** @noinspection PhpPossiblePolymorphicInvocationInspection */
 
 use App\Models\Booking;
 use App\Models\Concierge;
-use App\Models\Earning;
 use App\Models\Partner;
-use App\Models\ScheduleTemplate;
 use App\Models\Venue;
 use App\Services\Booking\BookingCalculationService;
 use App\Services\Booking\EarningCreationService;
 use App\Services\Booking\NonPrimeEarningsCalculationService;
 use App\Services\Booking\PrimeEarningsCalculationService;
-use Illuminate\Support\Str;
 
 beforeEach(function () {
     $earningCreationService = new EarningCreationService;
@@ -166,35 +164,3 @@ test('non prime booking with custom fee', function () {
             ->and($freshBooking->platform_earnings)->toBe(600);
     });
 });
-
-function createNonPrimeBooking(Venue $venue, Concierge $concierge, int $guestCount = 2): Booking
-{
-    return Booking::factory()->create([
-        'uuid' => Str::uuid(),
-        'is_prime' => false,
-        'guest_count' => $guestCount,
-        'concierge_id' => $concierge->id,
-        'schedule_template_id' => ScheduleTemplate::factory()->create(['venue_id' => $venue->id])->id,
-        'total_fee' => $venue->non_prime_fee_per_head * $guestCount * 100,
-    ]);
-}
-
-function createBooking(Venue $venue, Concierge $concierge): Booking
-{
-    return Booking::factory()->create([
-        'uuid' => Str::uuid(),
-        'is_prime' => true,
-        'total_fee' => 20000,
-        'concierge_id' => $concierge->id,
-        'schedule_template_id' => ScheduleTemplate::factory()->create(['venue_id' => $venue->id])->id,
-    ]);
-}
-
-function assertEarningExists(Booking $booking, string $type, int $amount): void
-{
-    expect(Earning::where([
-        'booking_id' => $booking->id,
-        'type' => $type,
-        'amount' => $amount,
-    ])->exists())->toBeTrue();
-}
