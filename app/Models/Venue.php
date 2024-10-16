@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Data\VenueContactData;
+use App\Enums\BookingStatus;
 use App\Enums\VenueStatus;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
@@ -240,7 +241,7 @@ class Venue extends Model
         return $this->hasManyThrough(
             Booking::class, // The final model you want to access (Booking)
             ScheduleTemplate::class // The intermediate model (ScheduleTemplate)
-        );
+        )->where('status', BookingStatus::CONFIRMED);
     }
 
     /**

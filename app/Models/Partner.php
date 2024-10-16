@@ -52,7 +52,6 @@ class Partner extends Model
             ->whereNotNull('confirmed_at');
     }
 
-
     /**
      * Get the total earnings for the partner, optionally filtered by a date range.
      */

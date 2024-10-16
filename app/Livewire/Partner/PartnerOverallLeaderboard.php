@@ -7,6 +7,7 @@ use App\Models\Partner;
 use App\Services\CurrencyConversionService;
 use Carbon\Carbon;
 use Filament\Widgets\Widget;
+use Illuminate\Contracts\Database\Query\Builder;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
@@ -38,20 +39,21 @@ class PartnerOverallLeaderboard extends Widget
 
             $earnings = Partner::query()
                 ->join('users', 'users.id', '=', 'partners.user_id')
-                ->join('bookings', function ($join) use ($tempStartDate, $tempEndDate) {
+                ->join('bookings', function (Builder $join) use ($tempStartDate, $tempEndDate) {
                     $join->on(function ($join) {
                         $join->whereColumn('bookings.partner_concierge_id', 'partners.id')
                             ->orWhereColumn('bookings.partner_venue_id', 'partners.id');
                     })
-                    ->whereNotNull('bookings.confirmed_at')
-                    ->whereBetween('bookings.confirmed_at', [$tempStartDate, $tempEndDate]);
+                        ->whereNotNull('bookings.confirmed_at')
+                        ->whereBetween('bookings.confirmed_at', [$tempStartDate, $tempEndDate]);
                 })
-                ->join('earnings', function ($join) {
+                ->join('earnings', function (Builder $join) {
                     $join->on('earnings.booking_id', '=', 'bookings.id')
                         ->whereIn('earnings.type', ['partner_concierge', 'partner_venue']);
                 })
                 ->select(
                     'partners.id as partner_id',
+                    'partners.user_id',
                     DB::raw("CONCAT(users.first_name, ' ', users.last_name) as user_name"),
                     'earnings.currency',
                     DB::raw('SUM(earnings.amount) as total_earned'),
@@ -61,22 +63,19 @@ class PartnerOverallLeaderboard extends Widget
                 ->get();
 
             $partnerTotals = $earnings->groupBy('partner_id')->map(function ($partnerEarnings) use ($currencyService) {
-                $totalUSD = $partnerEarnings->sum(function ($earning) use ($currencyService) {
-                    return $currencyService->convertToUSD([$earning->currency => $earning->total_earned]);
-                });
+                $totalUSD = $partnerEarnings->sum(fn ($earning) => $currencyService->convertToUSD([$earning->currency => $earning->total_earned]));
 
                 return [
                     'partner_id' => $partnerEarnings->first()->partner_id,
+                    'user_id' => $partnerEarnings->first()->user_id,
                     'user_name' => $partnerEarnings->first()->user_name,
                     'total_usd' => $totalUSD,
                     'booking_count' => $partnerEarnings->sum('booking_count'),
-                    'earnings_breakdown' => $partnerEarnings->map(function ($earning) use ($currencyService) {
-                        return [
-                            'amount' => $earning->total_earned,
-                            'currency' => $earning->currency,
-                            'usd_equivalent' => $currencyService->convertToUSD([$earning->currency => $earning->total_earned]),
-                        ];
-                    })->toArray(),
+                    'earnings_breakdown' => $partnerEarnings->map(fn ($earning) => [
+                        'amount' => $earning->total_earned,
+                        'currency' => $earning->currency,
+                        'usd_equivalent' => $currencyService->convertToUSD([$earning->currency => $earning->total_earned]),
+                    ])->toArray(),
                 ];
             })->sortByDesc('total_usd')->take($this->limit)->values();
 
