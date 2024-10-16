@@ -11,7 +11,7 @@ class CurrencyConversionService
 
     private const string CACHE_KEY = 'exchange_rates';
 
-    private const int CACHE_DURATION = 3600;
+    private const int CACHE_DURATION = 3600 * 12;
 
     private array $exchangeRates;
 

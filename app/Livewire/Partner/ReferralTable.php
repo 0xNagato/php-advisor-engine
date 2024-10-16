@@ -4,8 +4,10 @@ namespace App\Livewire\Partner;
 
 use App\Models\Partner;
 use App\Models\Referral;
+use Exception;
 use Filament\Support\Enums\Alignment;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Filament\Widgets\Concerns\InteractsWithPageFilters;
 use Filament\Widgets\TableWidget as BaseWidget;
@@ -25,6 +27,9 @@ class ReferralTable extends BaseWidget
         return $this->columnSpan ?? 'full';
     }
 
+    /**
+     * @throws Exception
+     */
     public function table(Table $table): Table
     {
         return $table
@@ -52,6 +57,23 @@ class ReferralTable extends BaseWidget
                     ->date()
                     ->timezone(auth()->user()->timezone)
                     ->alignment(Alignment::End),
-            ]);
+            ])
+            ->filters([
+                SelectFilter::make('type')
+                    ->options([
+                        'concierge' => 'Concierge',
+                        'venue' => 'Venue',
+                    ])
+                    ->label('Referral Type')
+                    ->placeholder('Select Type')
+                    ->indicateUsing(function (array $data): ?string {
+                        if (! $data['value']) {
+                            return null;
+                        }
+
+                        return 'Type: '.$data['value'];
+                    }),
+            ])
+            ->paginated([10, 25, 50, 100]);
     }
 }
