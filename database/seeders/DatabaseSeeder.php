@@ -3,6 +3,7 @@
 namespace Database\Seeders;
 
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
+use App\Actions\Concierge\EnsureVipCodeExists;
 use App\Models\Concierge;
 use App\Models\Partner;
 use App\Models\Referral;
@@ -130,6 +131,7 @@ class DatabaseSeeder extends Seeder
         ]);
 
         Artisan::call('shield:generate --all');
+        Artisan::call('venues:set-prime-time');
     }
 
     private function createConcierges(): void
@@ -162,9 +164,11 @@ class DatabaseSeeder extends Seeder
                 'secured_at' => now(),
             ]);
 
-            Concierge::query()->firstOrCreate(['user_id' => $user->id], [
+            $concierge = Concierge::query()->firstOrCreate(['user_id' => $user->id], [
                 'hotel_name' => "$name's Hotel",
             ]);
+
+            EnsureVipCodeExists::run($concierge);
 
             $user->assignRole('concierge');
 

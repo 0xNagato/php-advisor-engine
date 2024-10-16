@@ -9,7 +9,6 @@ use Filament\Tables\Table;
 use Filament\Widgets\Concerns\InteractsWithPageFilters;
 use Filament\Widgets\TableWidget as BaseWidget;
 use Illuminate\Contracts\Support\Htmlable;
-use Illuminate\Support\HtmlString;
 
 class ConciergeRecentBookings extends BaseWidget
 {
@@ -70,9 +69,6 @@ class ConciergeRecentBookings extends BaseWidget
                     ->size('xs')
                     ->label('Earned')
                     ->formatStateUsing(function (Booking $booking) {
-                        if (! $booking->is_prime) {
-                            return new HtmlString('<span class="text-xs italic text-gray-500">Non-Prime</span>');
-                        }
                         $total = $booking->earnings->sum('amount');
 
                         return $total > 0

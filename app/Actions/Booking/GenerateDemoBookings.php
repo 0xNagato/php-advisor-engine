@@ -8,6 +8,7 @@ use App\Models\Concierge;
 use App\Models\Region;
 use App\Models\ScheduleWithBooking;
 use App\Models\Venue;
+use App\Models\VipCode;
 use App\Services\SalesTaxService;
 use Carbon\Carbon;
 use Exception;
@@ -166,6 +167,9 @@ class GenerateDemoBookings
 
         $guestCount = max(2, min(8, $schedule->party_size));
 
+        $isVipBooking = random_int(1, 3) === 1; // 1/3 chance of being a VIP booking
+        $vipCode = $isVipBooking ? $this->getRandomVipCode($concierge) : null;
+
         $booking = Booking::query()->create([
             'schedule_template_id' => $schedule->schedule_template_id,
             'concierge_id' => $concierge->id,
@@ -180,6 +184,7 @@ class GenerateDemoBookings
             'guest_last_name' => $this->fakeNames[array_rand($this->fakeNames)],
             'guest_email' => $this->fakeEmails[array_rand($this->fakeEmails)],
             'guest_phone' => $this->fakePhones[array_rand($this->fakePhones)],
+            'vip_code_id' => $vipCode?->id,
         ]);
 
         $taxData = $salesTaxService->calculateTax($region->id, $booking->total_fee, noTax: config('app.no_tax'));
@@ -237,5 +242,10 @@ class GenerateDemoBookings
                 }
             }
         }
+    }
+
+    protected function getRandomVipCode(Concierge $concierge): ?VipCode
+    {
+        return $concierge->vipCodes()->inRandomOrder()->first();
     }
 }

@@ -6,6 +6,7 @@ use App\Filament\DateRangeFilterAction;
 use App\Filament\Resources\PartnerResource;
 use App\Livewire\Partner\PartnerOverallLeaderboard;
 use App\Livewire\Partner\PartnerRecentBookings;
+use App\Livewire\Partner\ReferralTable;
 use App\Livewire\Partner\TopConcierges;
 use App\Livewire\Partner\TopVenues;
 use App\Livewire\PartnerOverview;
@@ -89,6 +90,10 @@ class ViewPartner extends ViewRecord
                 'columnSpan' => '1',
                 'startDate' => Carbon::parse($this->filters['startDate']),
                 'endDate' => Carbon::parse($this->filters['endDate']),
+            ]),
+            ReferralTable::make([
+                'columnSpan' => 'full',
+                'partner' => $this->record,
             ]),
         ];
     }

@@ -89,9 +89,6 @@ class VenueRecentBookings extends BaseWidget
                     ->size('xs')
                     ->label('Earned')
                     ->formatStateUsing(function (Booking $booking) {
-                        if (! $booking->is_prime) {
-                            return new HtmlString('<span class="text-xs italic text-gray-500">Non-Prime</span>');
-                        }
                         $total = $booking->earnings->sum('amount');
 
                         return money($total, $booking->currency);

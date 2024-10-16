@@ -22,7 +22,5 @@
     </div>
 
     <!-- Recent Referrals -->
-    <div>
-        <livewire:partner.referral-table :partner="$partner" />
-    </div>
+    <livewire:partner.referral-table :partner="$partner" />
 </div>

@@ -7,13 +7,23 @@ use App\Models\Referral;
 use Filament\Support\Enums\Alignment;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
+use Filament\Widgets\Concerns\InteractsWithPageFilters;
 use Filament\Widgets\TableWidget as BaseWidget;
 
 class ReferralTable extends BaseWidget
 {
+    use InteractsWithPageFilters;
+
     public ?Partner $partner = null;
 
     protected static ?string $heading = 'Referrals';
+
+    public int|string|array $columnSpan;
+
+    public function getColumnSpan(): int|string|array
+    {
+        return $this->columnSpan ?? 'full';
+    }
 
     public function table(Table $table): Table
     {
@@ -29,6 +39,7 @@ class ReferralTable extends BaseWidget
             ->columns([
                 TextColumn::make('user.name')
                     ->label('User')
+                    ->searchable(['first_name', 'last_name'])
                     ->formatStateUsing(fn (Referral $record): string => view('components.two-line-cell', [
                         'primary' => $record->user->name,
                         'secondary' => ucfirst($record->type),
@@ -36,7 +47,7 @@ class ReferralTable extends BaseWidget
                     ->html()
                     ->size('sm'),
                 TextColumn::make('secured_at')
-                    ->label('Date')
+                    ->label('Date Joined')
                     ->size('xs')
                     ->date()
                     ->timezone(auth()->user()->timezone)

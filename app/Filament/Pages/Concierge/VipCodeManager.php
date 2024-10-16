@@ -2,6 +2,7 @@
 
 namespace App\Filament\Pages\Concierge;
 
+use App\Actions\Concierge\EnsureVipCodeExists;
 use App\Filament\DateRangeFilterAction;
 use App\Livewire\DateRangeFilterWidget;
 use App\Models\VipCode;
@@ -14,7 +15,6 @@ use Filament\Pages\Dashboard\Concerns\HasFiltersAction;
 use Filament\Pages\Page;
 use Filament\Support\Colors\Color;
 use Illuminate\Contracts\Support\Htmlable;
-use Illuminate\Support\Str;
 use Livewire\Attributes\On;
 
 /**
@@ -45,32 +45,13 @@ class VipCodeManager extends Page
     {
         $this->initializeFilters();
         $this->form->fill();
-        $this->ensureVipCodeExists();
+        EnsureVipCodeExists::run(auth()->user()->concierge);
     }
 
     private function initializeFilters(): void
     {
         $this->filters['startDate'] ??= now()->subDays(30)->format('Y-m-d');
         $this->filters['endDate'] ??= now()->format('Y-m-d');
-    }
-
-    private function ensureVipCodeExists(): void
-    {
-        $conciergeId = auth()->user()->concierge?->id;
-
-        // Check if a VIP code already exists for the concierge
-        $existingCode = VipCode::query()->where('concierge_id', $conciergeId)->first();
-
-        if (! $existingCode) {
-            // Generate a random 6-character string
-            $randomCode = strtoupper(Str::random(6));
-
-            // Create a new VIP code with the random string
-            VipCode::query()->create([
-                'code' => $randomCode,
-                'concierge_id' => $conciergeId,
-            ]);
-        }
     }
 
     public function getTitle(): Htmlable|string
