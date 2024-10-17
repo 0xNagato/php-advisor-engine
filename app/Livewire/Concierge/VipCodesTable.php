@@ -49,10 +49,12 @@ class VipCodesTable extends TableWidget
             ->paginated(false)
             ->columns([
                 TextColumn::make('concierge.user.name')
+                    ->size('xs')
                     ->label('User')->visible(fn () => auth()->user()->hasRole('super_admin')),
                 TextColumn::make('code')
                     ->label('Code')
                     ->copyable()
+                    ->size('xs')
                     ->copyMessage('VIP Link copied to clipboard')
                     ->copyableState(fn (VipCode $vipCode) => $vipCode->link)
                     ->copyMessageDuration(1500)
@@ -61,6 +63,7 @@ class VipCodesTable extends TableWidget
                     ->iconPosition(IconPosition::After),
                 TextColumn::make('bookings_count')
                     ->label('Bookings')
+                    ->visibleFrom('sm')
                     ->alignCenter()
                     ->size('xs'),
                 TextColumn::make('total_earnings_in_u_s_d')
