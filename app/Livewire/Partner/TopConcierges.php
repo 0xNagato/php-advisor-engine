@@ -39,7 +39,7 @@ class TopConcierges extends Widget
             ->join('concierges', 'concierges.id', '=', 'bookings.concierge_id')
             ->join('users', 'users.id', '=', 'concierges.user_id')
             ->whereNotNull('bookings.confirmed_at')
-            ->when($startDate && $endDate, fn (Builder $query) => $query->whereBetween('bookings.booking_at', [$startDate, $endDate]))
+            ->when($startDate && $endDate, fn (Builder $query) => $query->whereBetween('bookings.confirmed_at', [$startDate, $endDate]))
             ->where('earnings.type', 'partner_concierge')
             ->where('earnings.user_id', $this->partner->user_id)
             ->groupBy('concierges.id', 'users.first_name', 'users.last_name', 'earnings.currency')
