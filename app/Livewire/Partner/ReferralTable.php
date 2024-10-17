@@ -64,15 +64,7 @@ class ReferralTable extends BaseWidget
                         'concierge' => 'Concierge',
                         'venue' => 'Venue',
                     ])
-                    ->label('Referral Type')
-                    ->placeholder('Select Type')
-                    ->indicateUsing(function (array $data): ?string {
-                        if (! $data['value']) {
-                            return null;
-                        }
-
-                        return 'Type: '.$data['value'];
-                    }),
+                    ->label('Referral Type'),
             ])
             ->paginated([10, 25, 50, 100]);
     }

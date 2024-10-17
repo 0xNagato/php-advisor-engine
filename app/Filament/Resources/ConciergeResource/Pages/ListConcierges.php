@@ -30,7 +30,7 @@ class ListConcierges extends ListRecords
             ->recordUrl(fn (Concierge $record) => ViewConcierge::getUrl(['record' => $record]))
             ->query(
                 Concierge::query()
-                    ->with(['user.referrer', 'user.authentications'])
+                    ->with(['user.referrer.referral', 'user.authentications', 'user.referral.referrer.partner', 'user.referral.referrer.concierge'])
                     ->withCount(['bookings' => function ($query) {
                         $query->where('status', BookingStatus::CONFIRMED);
                     }])
@@ -42,13 +42,14 @@ class ListConcierges extends ListRecords
                     ->size('xs')
                     ->searchable(['first_name', 'last_name']),
                 TextColumn::make('user.referrer.name')
+                    ->url(fn (Concierge $concierge) => $concierge->user->referral?->referrer_route)
                     ->grow(false)
                     ->size('xs')
                     ->visibleFrom('sm'),
                 TextColumn::make('id')->label('Earned')
                     ->grow(false)
                     ->size('xs')
-                    ->formatStateUsing(fn (Concierge $concierge) => $concierge->formattedTotalEarningsInUSD),
+                    ->formatStateUsing(fn (Concierge $concierge) => $concierge->formatted_total_earnings_in_u_s_d),
                 TextColumn::make('bookings_count')->label('Bookings')
                     ->visibleFrom('sm')
                     ->grow(false)
@@ -98,8 +99,9 @@ class ListConcierges extends ListRecords
                         return view('partials.concierge-table-modal-view', [
                             'secured_at' => $concierge->user->secured_at,
                             'referrer_name' => $concierge->user->referrer?->name ?? '-',
+                            'referral_url' => $concierge->user->referral?->referrer_route ?? null,
                             'bookings_count' => number_format($concierge->bookings_count),
-                            'earningsInUSD' => $concierge->formattedTotalEarningsInUSD,
+                            'earningsInUSD' => $concierge->formatted_total_earnings_in_u_s_d,
                             'recentBookings' => $recentBookings,
                             'last_login' => $lastLogin,
                         ]);

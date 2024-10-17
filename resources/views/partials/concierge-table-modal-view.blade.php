@@ -1,4 +1,4 @@
-@php use App\Filament\Resources\BookingResource\Pages\ViewBooking; @endphp
+@php use App\Filament\Resources\BookingResource\Pages\ViewBooking;use Carbon\Carbon; @endphp
 <div class="p-0 space-y-4">
     <!-- Current Information -->
     <div>
@@ -6,13 +6,21 @@
             <dt class="font-semibold">Date Joined:</dt>
             <dd>{{ $secured_at ? $secured_at->format('D M j, Y') : 'N/A' }}</dd>
             <dt class="font-semibold">Referred By:</dt>
-            <dd>{{ $referrer_name }}</dd>
+            <dd>
+                @if ($referral_url)
+                    <a href="{{ $referral_url }}" class="text-indigo-600 underline font-semibold">
+                        {{ $referrer_name }}
+                    </a>
+                @else
+                    {{ $referrer_name }}
+                @endif
+            </dd>
             <dt class="font-semibold">Earned:</dt>
             <dd>{{ $earningsInUSD }}</dd>
             <dt class="font-semibold">Bookings:</dt>
             <dd>{{ $bookings_count }}</dd>
             <dt class="font-semibold">Last Login:</dt>
-            <dd>{{ $last_login ? \Carbon\Carbon::parse($last_login)->diffForHumans() : 'Never' }}</dd>
+            <dd>{{ $last_login ? Carbon::parse($last_login)->diffForHumans() : 'Never' }}</dd>
         </dl>
     </div>
 
@@ -24,8 +32,8 @@
             <div class="grid grid-cols-2 gap-2 sm:hidden">
                 @foreach ($recentBookings as $booking)
                     <div
-                        onclick="window.location='{{ route('filament.admin.resources.bookings.view', $booking) }}'"
-                        class="flex flex-col justify-between h-full p-2 space-y-1 bg-white border border-gray-200 rounded-lg shadow">
+                            onclick="window.location='{{ route('filament.admin.resources.bookings.view', $booking) }}'"
+                            class="flex flex-col justify-between h-full p-2 space-y-1 bg-white border border-gray-200 rounded-lg shadow">
                         <div>
                             <div class="text-xs font-semibold">
                                 {{ $booking->schedule->venue->name }}
@@ -45,34 +53,34 @@
             <div class="hidden overflow-x-auto sm:block">
                 <table class="min-w-full divide-y divide-gray-200">
                     <thead class="bg-gray-50">
-                        <tr>
-                            <th class="px-3 py-2 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">
-                                Id
-                            </th>
-                            <th class="px-3 py-2 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">
-                                Venue
-                            </th>
-                            <th class="px-3 py-2 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">
-                                Date
-                            </th>
-                            <th class="px-3 py-2 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">
-                                Fee
-                            </th>
-                        </tr>
+                    <tr>
+                        <th class="px-3 py-2 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">
+                            Id
+                        </th>
+                        <th class="px-3 py-2 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">
+                            Venue
+                        </th>
+                        <th class="px-3 py-2 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">
+                            Date
+                        </th>
+                        <th class="px-3 py-2 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">
+                            Fee
+                        </th>
+                    </tr>
                     </thead>
                     <tbody class="bg-white divide-y divide-gray-200">
-                        @foreach ($recentBookings as $booking)
-                            <tr class="cursor-pointer hover:bg-gray-100"
-                                onclick="window.location='{{ route('filament.admin.resources.bookings.view', $booking) }}'">
-                                <td class="px-3 py-2 text-sm whitespace-nowrap">{{ $booking->id }}</td>
-                                <td class="px-3 py-2 text-sm whitespace-nowrap">{{ $booking->schedule->venue->name }}
-                                </td>
-                                <td class="px-3 py-2 text-sm whitespace-nowrap">
-                                    {{ $booking->booking_at->format('D, M j g:ia') }}</td>
-                                <td class="px-3 py-2 text-sm whitespace-nowrap">
-                                    {{ money($booking->total_fee, $booking->currency) }}</td>
-                            </tr>
-                        @endforeach
+                    @foreach ($recentBookings as $booking)
+                        <tr class="cursor-pointer hover:bg-gray-100"
+                            onclick="window.location='{{ route('filament.admin.resources.bookings.view', $booking) }}'">
+                            <td class="px-3 py-2 text-sm whitespace-nowrap">{{ $booking->id }}</td>
+                            <td class="px-3 py-2 text-sm whitespace-nowrap">{{ $booking->schedule->venue->name }}
+                            </td>
+                            <td class="px-3 py-2 text-sm whitespace-nowrap">
+                                {{ $booking->booking_at->format('D, M j g:ia') }}</td>
+                            <td class="px-3 py-2 text-sm whitespace-nowrap">
+                                {{ money($booking->total_fee, $booking->currency) }}</td>
+                        </tr>
+                    @endforeach
                     </tbody>
                 </table>
             </div>

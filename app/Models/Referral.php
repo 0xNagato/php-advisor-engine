@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Filament\Resources\ConciergeResource\Pages\ViewConcierge;
+use App\Filament\Resources\PartnerResource\Pages\ViewPartner;
 use App\Filament\Resources\VenueResource\Pages\ViewVenue;
 use App\Traits\FormatsPhoneNumber;
 use Illuminate\Database\Eloquent\Casts\Attribute;
@@ -84,6 +85,15 @@ class Referral extends Model
         return Attribute::make(get: fn () => match ($this->type) {
             'concierge' => $this->user->concierge ? ViewConcierge::getUrl(['record' => $this->user->concierge]) : null,
             'venue' => $this->user->venue ? ViewVenue::getUrl(['record' => $this->user->venue]) : null,
+            default => null,
+        });
+    }
+
+    protected function referrerRoute(): Attribute
+    {
+        return Attribute::make(get: fn () => match ($this->referrer_type) {
+            'concierge' => $this->referrer->concierge ? ViewConcierge::getUrl(['record' => $this->referrer->concierge]) : null,
+            'partner' => $this->referrer->partner ? ViewPartner::getUrl(['record' => $this->referrer->partner]) : null,
             default => null,
         });
     }
