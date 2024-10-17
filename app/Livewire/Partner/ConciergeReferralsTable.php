@@ -11,6 +11,7 @@ use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Filament\Widgets\TableWidget as BaseWidget;
+use Illuminate\Support\HtmlString;
 
 class ConciergeReferralsTable extends BaseWidget
 {
@@ -49,14 +50,31 @@ class ConciergeReferralsTable extends BaseWidget
                 TextColumn::make('label')
                     ->label('Referral')
                     ->formatStateUsing(fn (Referral $record) => view('partials.concierge-referral-info-column', ['record' => $record])),
-                IconColumn::make('has_secured')
-                    ->label('Active')
-                    ->alignCenter()
-                    ->icon(fn (string $state): string => blank($state) ? 'heroicon-o-x-circle' : 'heroicon-o-check-circle')
-                    ->color(fn (string $state): string => blank($state) ? 'danger' : 'success'),
             ])
             ->paginated([5, 10, 25])
             ->actions([
+                Action::make('activeStatus')
+                    ->icon(fn (Referral $record): string => $record->has_secured ? 'heroicon-o-check-circle' : 'heroicon-o-x-circle')
+                    ->color(fn (Referral $record): string => $record->has_secured ? 'success' : 'danger')
+                    ->requiresConfirmation()
+                    ->modalHeading('Delete Referral')
+                    ->modalContent(fn (Referral $record): HtmlString => new HtmlString(
+                        "<div class='text-center'>
+                            <p class='mb-2 text-xl font-bold'>{$record->name}</p>
+                            <p class='text-sm text-gray-600'>{$record->phone}</p>
+                            <p class='text-sm text-gray-600'>{$record->email}</p>
+                        </div>"
+                    ))
+                    ->modalIcon('heroicon-o-trash')
+                    ->action(function (Referral $record) {
+                        if (!$record->has_secured) {
+                            $this->deleteReferral($record);
+                        }
+                    })
+                    ->disabled(fn (Referral $record) => $record->has_secured)
+                    ->hiddenLabel()
+                    ->tooltip(fn (Referral $record): string => $record->has_secured ? 'Active' : 'Delete')
+                    ->size('lg'),
                 Action::make('resendInvitation')
                     ->icon('ri-refresh-line')
                     ->iconButton()
