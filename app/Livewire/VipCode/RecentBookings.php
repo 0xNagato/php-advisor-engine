@@ -2,6 +2,7 @@
 
 namespace App\Livewire\VipCode;
 
+use App\Filament\Resources\BookingResource\Pages\ViewBooking;
 use App\Models\Booking;
 use App\Models\VipCode;
 use Filament\Support\Enums\Alignment;
@@ -36,7 +37,7 @@ class RecentBookings extends BaseWidget
                     ->where('vip_code_id', $this->vipCode->id)
                     ->orderByDesc('confirmed_at')
             )
-            ->recordUrl(fn (Booking $booking): ?string => $booking->view_route ?? '#')
+            ->recordUrl(fn (Booking $booking): string => ViewBooking::getUrl(['record' => $booking]))
             ->openRecordUrlInNewTab()
             ->columns([
                 TextColumn::make('guest_name')
