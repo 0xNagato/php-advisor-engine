@@ -85,7 +85,7 @@ class DatabaseSeeder extends Seeder
             'password' => bcrypt('secure_password_here'),
         ])->create();
 
-        Partner::query()->create([
+        $housePartner = Partner::query()->create([
             'user_id' => $housePartnerUser->id,
             'percentage' => 20,
         ]);
@@ -96,12 +96,12 @@ class DatabaseSeeder extends Seeder
             PartnerSeeder::class,
         ]);
 
-        User::factory([
+        $demoVenueUser = User::factory([
             'first_name' => 'Demo',
             'last_name' => 'Venue',
             'email' => 'venue@primavip.co',
             'password' => bcrypt('demo2024'),
-            'partner_referral_id' => Partner::query()->inRandomOrder()->first()->id,
+            'partner_referral_id' => $housePartner->id,
         ])
             ->has(Venue::factory([
                 'name' => 'Demo Venue',
@@ -109,18 +109,22 @@ class DatabaseSeeder extends Seeder
             ->create()
             ->assignRole('venue');
 
-        User::factory([
+        $demoConciergeUser = User::factory([
             'first_name' => 'Demo',
             'last_name' => 'Concierge',
             'email' => 'concierge@primavip.co',
             'password' => bcrypt('demo2024'),
-            'partner_referral_id' => Partner::query()->inRandomOrder()->first()->id,
+            'partner_referral_id' => $housePartner->id,
         ])
             ->has(Concierge::factory([
                 'hotel_name' => 'Demo Hotel',
             ]))
             ->create()
             ->assignRole('concierge');
+
+        // Add referral entries for demo venue and concierge
+        $this->createReferralForDemo($demoVenueUser, 'venue', $housePartner);
+        $this->createReferralForDemo($demoConciergeUser, 'concierge', $housePartner);
 
         $this->createConcierges();
 
@@ -132,6 +136,9 @@ class DatabaseSeeder extends Seeder
 
         Artisan::call('shield:generate --all');
         Artisan::call('venues:set-prime-time');
+        Artisan::call('cache:clear');
+
+        exec('vendor/bin/rector process && vendor/bin/pint');
     }
 
     private function createConcierges(): void
@@ -187,5 +194,19 @@ class DatabaseSeeder extends Seeder
         }
 
         $this->command->info('All concierges have been created/updated with the house partner as their referrer.');
+    }
+
+    private function createReferralForDemo(User $user, string $type, Partner $referrer): void
+    {
+        Referral::query()->create([
+            'referrer_id' => $referrer->user_id,
+            'user_id' => $user->id,
+            'email' => $user->email,
+            'secured_at' => now(),
+            'type' => $type,
+            'referrer_type' => 'partner',
+            'first_name' => $user->first_name,
+            'last_name' => $user->last_name,
+        ]);
     }
 }

@@ -114,7 +114,7 @@ class ListPartners extends ListRecords
             ->select('partners.*')
             ->addSelect([
                 'bookings_count' => function ($query) {
-                    $query->selectRaw('COUNT(*)')
+                    $query->selectRaw('COUNT(DISTINCT bookings.id)')
                         ->from('bookings')
                         ->whereNotNull('confirmed_at')
                         ->where(function ($q) {
@@ -123,7 +123,12 @@ class ListPartners extends ListRecords
                         });
                 },
                 'total_earned' => function ($query) {
-                    $query->selectRaw('COALESCE(SUM(earnings.amount), 0)')
+                    $query->selectRaw('COALESCE(SUM(
+                        CASE
+                            WHEN bookings.partner_concierge_id = partners.id AND bookings.partner_venue_id = partners.id THEN earnings.amount
+                            ELSE earnings.amount / 2
+                        END
+                    ), 0)')
                         ->from('earnings')
                         ->join('bookings', 'earnings.booking_id', '=', 'bookings.id')
                         ->whereIn('earnings.type', ['partner_concierge', 'partner_venue'])

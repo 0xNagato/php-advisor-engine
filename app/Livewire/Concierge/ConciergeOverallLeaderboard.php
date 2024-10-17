@@ -7,7 +7,6 @@ use App\Models\Earning;
 use App\Services\CurrencyConversionService;
 use Carbon\Carbon;
 use Filament\Widgets\Widget;
-use Illuminate\Contracts\Database\Query\Builder;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
@@ -27,6 +26,8 @@ class ConciergeOverallLeaderboard extends Widget
 
     public int $limit = 10;
 
+    public function mount(): void {}
+
     public function getLeaderboardData(): Collection
     {
         $tempStartDate = $this->startDate ? Carbon::parse($this->startDate)->startOfDay() : now()->subDays(30)->startOfDay();
@@ -34,7 +35,7 @@ class ConciergeOverallLeaderboard extends Widget
 
         $cacheKey = "concierge_leaderboard_{$tempStartDate->toDateTimeString()}_{$tempEndDate->toDateTimeString()}";
 
-        return Cache::remember($cacheKey, now()->addMinutes(5), function () use ($tempStartDate, $tempEndDate) {
+        return Cache::remember($cacheKey, now()->addMinutes(config('app.widget_cache_timeout_minutes')), function () use ($tempStartDate, $tempEndDate) {
             $currencyService = app(CurrencyConversionService::class);
 
             $conciergeEarningTypes = ['concierge', 'concierge_referral_1', 'concierge_referral_2'];
@@ -51,11 +52,9 @@ class ConciergeOverallLeaderboard extends Widget
                 )
                 ->join('concierges', 'concierges.user_id', '=', 'earnings.user_id')
                 ->join('users', 'users.id', '=', 'earnings.user_id')
-                ->join('bookings', function (Builder $join) use ($tempStartDate, $tempEndDate) {
-                    $join->on('earnings.booking_id', '=', 'bookings.id')
-                        ->whereNotNull('bookings.confirmed_at')
-                        ->whereBetween('bookings.confirmed_at', [$tempStartDate, $tempEndDate]);
-                })
+                ->join('bookings', 'earnings.booking_id', '=', 'bookings.id')
+                ->whereNotNull('bookings.confirmed_at')
+                ->whereBetween('bookings.confirmed_at', [$tempStartDate, $tempEndDate])
                 ->whereIn('earnings.type', $conciergeEarningTypes)
                 ->groupBy('earnings.user_id', 'concierges.id', 'earnings.currency')
                 ->get();

@@ -212,4 +212,5 @@ return [
     'house' => [
         'concierge_id' => env('HOUSE_CONCIERGE_ID', 1),
     ],
+    'widget_cache_timeout_minutes' => env('WIDGET_CACHE_TIMEOUT_MINUTES', 5),
 ];

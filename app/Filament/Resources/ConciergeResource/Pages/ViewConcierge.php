@@ -4,15 +4,18 @@ namespace App\Filament\Resources\ConciergeResource\Pages;
 
 use App\Filament\DateRangeFilterAction;
 use App\Filament\Resources\ConciergeResource;
+use App\Filament\Resources\PartnerResource;
 use App\Livewire\Concierge\ConciergeOverallLeaderboard;
 use App\Livewire\Concierge\ConciergeRecentBookings;
 use App\Livewire\ConciergeOverview;
 use App\Models\Concierge;
+use App\Models\User;
 use Carbon\Carbon;
 use Filament\Actions\EditAction;
 use Filament\Pages\Dashboard\Concerns\HasFiltersAction;
 use Filament\Resources\Pages\ViewRecord;
 use Illuminate\Contracts\Support\Htmlable;
+use Illuminate\Support\HtmlString;
 use STS\FilamentImpersonate\Pages\Actions\Impersonate;
 
 /**
@@ -43,17 +46,43 @@ class ViewConcierge extends ViewRecord
 
     public function getSubheading(): string|Htmlable|null
     {
-        if (! isset($this->filters['startDate'], $this->filters['endDate'])) {
-            return null; // or return a default value like 'N/A' or an empty string
+        $subheading = '';
+
+        if (isset($this->filters['startDate'], $this->filters['endDate'])) {
+            $startDate = Carbon::parse($this->filters['startDate']);
+            $endDate = Carbon::parse($this->filters['endDate']);
+
+            $formattedStartDate = $startDate->format('M j');
+            $formattedEndDate = $endDate->format('M j');
+
+            $subheading .= "$formattedStartDate - $formattedEndDate";
         }
 
-        $startDate = Carbon::parse($this->filters['startDate']);
-        $endDate = Carbon::parse($this->filters['endDate']);
+        $concierge = $this->getRecord();
+        $referrer = $concierge->user->referral->referrer ?? null;
 
-        $formattedStartDate = $startDate->format('M j');
-        $formattedEndDate = $endDate->format('M j');
+        if ($referrer) {
+            $referrerName = $referrer->name;
+            $referrerType = $referrer->main_role;
+            $referrerUrl = $this->getReferrerUrl($referrer);
 
-        return $formattedStartDate.' - '.$formattedEndDate;
+            $subheading .= "<div class='mt-1 text-xs'>Referral: <a href='$referrerUrl' class='text-primary-600 hover:underline'>$referrerName</a> ($referrerType)</div>";
+        }
+
+        return new HtmlString("<div class='flex flex-col'>$subheading</div>");
+    }
+
+    private function getReferrerUrl(User $referrer): string
+    {
+        if ($referrer->hasRole('partner')) {
+            return PartnerResource::getUrl('view', ['record' => $referrer->partner->id]);
+        }
+
+        if ($referrer->hasRole('concierge')) {
+            return ConciergeResource::getUrl('view', ['record' => $referrer->concierge->id]);
+        }
+
+        return '#';
     }
 
     protected function getHeaderActions(): array

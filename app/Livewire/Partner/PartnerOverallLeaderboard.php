@@ -34,7 +34,7 @@ class PartnerOverallLeaderboard extends Widget
 
         $cacheKey = "partner_leaderboard_{$tempStartDate->toDateString()}_{$tempEndDate->toDateString()}";
 
-        return Cache::remember($cacheKey, now()->addMinutes(5), function () use ($tempStartDate, $tempEndDate) {
+        return Cache::remember($cacheKey, now()->addMinutes(config('app.widget_cache_timeout_minutes')), function () use ($tempStartDate, $tempEndDate) {
             $currencyService = app(CurrencyConversionService::class);
 
             $earnings = Partner::query()

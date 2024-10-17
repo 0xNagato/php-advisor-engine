@@ -13,6 +13,7 @@ use Filament\Tables\Actions\EditAction;
 use Filament\Tables\Actions\ViewAction;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
+use Illuminate\Support\HtmlString;
 
 class ListConcierges extends ListRecords
 {
@@ -45,6 +46,11 @@ class ListConcierges extends ListRecords
                     ->url(fn (Concierge $concierge) => $concierge->user->referral?->referrer_route)
                     ->grow(false)
                     ->size('xs')
+                    ->default(fn (Concierge $concierge) => new HtmlString(<<<'HTML'
+                        <div class='text-xs italic text-gray-600'>
+                            PRIMA CREATED
+                        </div>
+                    HTML))
                     ->visibleFrom('sm'),
                 TextColumn::make('id')->label('Earned')
                     ->grow(false)

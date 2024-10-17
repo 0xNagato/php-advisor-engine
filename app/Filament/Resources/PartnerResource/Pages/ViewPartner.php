@@ -41,7 +41,13 @@ class ViewPartner extends ViewRecord
 
     public function getHeading(): string|Htmlable
     {
-        return $this->record->user->name;
+        $heading = $this->record->user->name;
+
+        if (auth()->user()->hasRole('super_admin')) {
+            $heading .= " ({$this->record->user->id})";
+        }
+
+        return $heading;
     }
 
     public function getSubheading(): string|Htmlable|null

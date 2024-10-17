@@ -66,23 +66,29 @@ class Partner extends Model
             $endDate = Carbon::parse($endDate);
         }
 
-        $query = Earning::query()
-            ->join('bookings', 'earnings.booking_id', '=', 'bookings.id')
+        $query = Booking::query()
             ->where(function (Builder $query): void {
-                $query->where('bookings.partner_concierge_id', $this->id)
-                    ->orWhere('bookings.partner_venue_id', $this->id);
+                $query->where('partner_concierge_id', $this->id)
+                    ->orWhere('partner_venue_id', $this->id);
             })
-            ->whereIn('earnings.type', [EarningType::PARTNER_CONCIERGE, EarningType::PARTNER_VENUE])
-            ->whereNotNull('bookings.confirmed_at');
+            ->whereNotNull('confirmed_at');
 
         if ($startDate instanceof Carbon) {
-            $query->where('bookings.confirmed_at', '>=', $startDate->startOfDay());
+            $query->where('confirmed_at', '>=', $startDate->startOfDay());
         }
 
         if ($endDate instanceof Carbon) {
-            $query->where('bookings.confirmed_at', '<=', $endDate->endOfDay());
+            $query->where('confirmed_at', '<=', $endDate->endOfDay());
         }
 
-        return $query->sum('earnings.amount');
+        return $query->withSum(['earnings' => function ($query) {
+            $query->whereIn('type', [EarningType::PARTNER_CONCIERGE, EarningType::PARTNER_VENUE]);
+        }], 'amount')
+            ->get()
+            ->sum(fn ($booking) =>
+                // If partner is both concierge and venue, count full amount, otherwise half
+                ($booking->partner_concierge_id == $this->id && $booking->partner_venue_id == $this->id)
+                ? $booking->earnings_sum_amount
+                : $booking->earnings_sum_amount / 2);
     }
 }

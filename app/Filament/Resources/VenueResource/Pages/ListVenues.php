@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\VenueResource\Pages;
 
 use App\Enums\BookingStatus;
+use App\Filament\Resources\PartnerResource\Pages\ViewPartner;
 use App\Filament\Resources\VenueResource;
 use App\Models\Region;
 use App\Models\Venue;
@@ -32,7 +33,7 @@ class ListVenues extends ListRecords
             ->recordUrl(fn (Venue $record) => ViewVenue::getUrl(['record' => $record]))
             ->query(
                 Venue::query()
-                    ->with(['partnerReferral.user', 'user.authentications'])
+                    ->with(['partnerReferral.user.partner', 'user.authentications'])
                     ->withCount(['bookings' => function ($query) {
                         $query->where('status', BookingStatus::CONFIRMED);
                     }])
@@ -44,13 +45,14 @@ class ListVenues extends ListRecords
                     ->size('xs')
                     ->searchable(),
                 TextColumn::make('partnerReferral.user.name')->label('Partner')
+                    ->url(fn (Venue $record) => ViewPartner::getUrl(['record' => $record->partnerReferral->user->partner]))
                     ->grow(false)
                     ->size('xs')
                     ->visibleFrom('sm'),
                 TextColumn::make('id')->label('Earned')
                     ->grow(false)
                     ->size('xs')
-                    ->formatStateUsing(fn (Venue $venue) => $venue->formattedTotalEarningsInUSD),
+                    ->formatStateUsing(fn (Venue $venue) => $venue->formatted_total_earnings_in_u_s_d),
                 TextColumn::make('bookings_count')->label('Bookings')
                     ->visibleFrom('sm')
                     ->grow(false)

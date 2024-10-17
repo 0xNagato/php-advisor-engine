@@ -85,7 +85,6 @@ class MiamiVenueSeeder extends Seeder
                 $this->updateScheduleTemplates($venue, $openingHours);
 
                 DB::commit();
-                Log::info("Venue created: $venueName");
             } catch (Exception $e) {
                 DB::rollBack();
                 Log::error("Error creating venue: $data[0]. Error: ".$e->getMessage());

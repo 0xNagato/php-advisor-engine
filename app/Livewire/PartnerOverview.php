@@ -20,6 +20,8 @@ class PartnerOverview extends BaseWidget
     #[Reactive]
     public ?string $endDate = null;
 
+    protected static ?string $pollingInterval = null;
+
     protected function getStats(): array
     {
         $startDate = ($this->startDate ? Carbon::parse($this->startDate) : now()->subDays(30))->startOfDay();
@@ -51,6 +53,7 @@ class PartnerOverview extends BaseWidget
 
     protected function getEarnings($startDate, $endDate): array
     {
+
         $partnerEarningsQuery = Earning::query()
             ->join('bookings', 'earnings.booking_id', '=', 'bookings.id')
             ->whereIn('earnings.type', ['partner_concierge', 'partner_venue'])
@@ -64,13 +67,17 @@ class PartnerOverview extends BaseWidget
         $numberOfBookings = $partnerEarningsQuery->distinct('bookings.id')->count('bookings.id');
 
         $partnerEarnings = $partnerEarningsQuery
-            ->selectRaw('earnings.currency, SUM(earnings.amount) as total_earnings')
-            ->groupBy('earnings.currency')
+            ->selectRaw('bookings.id as booking_id, earnings.currency, earnings.amount')
             ->get();
+
+        $groupedEarnings = $partnerEarnings->groupBy('booking_id')->map(fn ($group) => [
+            'currency' => $group->first()->currency,
+            'amount' => $group->max('amount'), // Take the larger amount if there are two entries
+        ])->groupBy('currency')->map(fn ($group) => $group->sum('amount'));
 
         return [
             'number_of_bookings' => $numberOfBookings,
-            'earnings' => $partnerEarnings->pluck('total_earnings', 'currency')->toArray(),
+            'earnings' => $groupedEarnings->toArray(),
         ];
     }
 
