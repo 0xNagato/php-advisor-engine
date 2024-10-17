@@ -154,6 +154,7 @@ class User extends Authenticatable implements FilamentUser, HasAvatar
         return true;
     }
 
+    /** @noinspection PhpPossiblePolymorphicInvocationInspection */
     public function getFilamentAvatarUrl(): ?string
     {
         return $this->profile_photo_path
@@ -177,6 +178,7 @@ class User extends Authenticatable implements FilamentUser, HasAvatar
         return Attribute::make(get: fn () => $this->getFilamentAvatarUrl());
     }
 
+    /** @noinspection PhpPossiblePolymorphicInvocationInspection */
     protected function mainRole(): Attribute
     {
         return Attribute::make(get: function () {
