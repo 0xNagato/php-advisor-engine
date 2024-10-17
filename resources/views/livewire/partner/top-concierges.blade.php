@@ -35,8 +35,8 @@
                     </thead>
                     <tbody class="divide-y divide-gray-200">
                         @foreach ($topConcierges as $concierge)
-                            <tr class="cursor-pointer hover:bg-gray-50"
-                                wire:click="viewConcierge({{ $concierge['concierge_id'] }})">
+                            <tr class="{{ auth()->user()->hasRole('super_admin') ? 'cursor-pointer hover:bg-gray-50' : '' }}"
+                                @if (auth()->user()->hasRole('super_admin')) wire:click="viewConcierge({{ $concierge['concierge_id'] }})" @endif>
                                 <td
                                     class="whitespace-nowrap px-3 text-xs py-[1rem] text-gray-950 first-of-type:ps-4 last-of-type:pe-4 sm:first-of-type:ps-6 sm:last-of-type:pe-6">
                                     {{ $concierge['concierge_name'] }}
