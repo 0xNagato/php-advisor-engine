@@ -38,6 +38,8 @@ class ReferralTable extends BaseWidget
                     ->with(['user.concierge', 'user.venue'])
                     ->orderByDesc('secured_at')
                     ->where('referrer_id', $this->partner->user->id)
+                    ->whereNotNull('secured_at')
+                    ->whereHas('user')
             )
             ->recordUrl(fn (Referral $referral): ?string => $referral->view_route ?? '#')
             ->openRecordUrlInNewTab()
