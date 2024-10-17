@@ -7,7 +7,6 @@ use App\Models\Referral;
 use App\Notifications\Concierge\NotifyConciergeReferral;
 use Filament\Notifications\Notification;
 use Filament\Tables\Actions\Action;
-use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Filament\Widgets\TableWidget as BaseWidget;
@@ -60,14 +59,14 @@ class ConciergeReferralsTable extends BaseWidget
                     ->modalHeading('Delete Referral')
                     ->modalContent(fn (Referral $record): HtmlString => new HtmlString(
                         "<div class='text-center'>
-                            <p class='mb-2 text-xl font-bold'>{$record->name}</p>
-                            <p class='text-sm text-gray-600'>{$record->phone}</p>
-                            <p class='text-sm text-gray-600'>{$record->email}</p>
+                            <p class='mb-2 text-xl font-bold'>$record->name</p>
+                            <p class='text-sm text-gray-600'>$record->phone</p>
+                            <p class='text-sm text-gray-600'>$record->email</p>
                         </div>"
                     ))
                     ->modalIcon('heroicon-o-trash')
                     ->action(function (Referral $record) {
-                        if (!$record->has_secured) {
+                        if (! $record->has_secured) {
                             $this->deleteReferral($record);
                         }
                     })
@@ -94,5 +93,26 @@ class ConciergeReferralsTable extends BaseWidget
                             ->send();
                     }),
             ]);
+    }
+
+    public function deleteReferral(Referral $referral): void
+    {
+        if ($referral->has_secured) {
+            Notification::make()
+                ->title('Cannot delete secured referral')
+                ->danger()
+                ->send();
+
+            return;
+        }
+
+        $referral->delete();
+
+        Notification::make()
+            ->title('Referral deleted successfully')
+            ->success()
+            ->send();
+
+        $this->dispatch('concierge-referred');
     }
 }
