@@ -9,6 +9,7 @@ use Carbon\Carbon;
 use Filament\Widgets\StatsOverviewWidget as BaseWidget;
 use Filament\Widgets\StatsOverviewWidget\Stat;
 use Livewire\Attributes\Reactive;
+use Illuminate\Support\Facades\DB;
 
 class PartnerOverview extends BaseWidget
 {
@@ -53,8 +54,7 @@ class PartnerOverview extends BaseWidget
 
     protected function getEarnings($startDate, $endDate): array
     {
-
-        $partnerEarningsQuery = Earning::query()
+        $partnerEarnings = Earning::query()
             ->join('bookings', 'earnings.booking_id', '=', 'bookings.id')
             ->whereIn('earnings.type', ['partner_concierge', 'partner_venue'])
             ->whereNotNull('bookings.confirmed_at')
@@ -62,18 +62,21 @@ class PartnerOverview extends BaseWidget
             ->where(function ($q) {
                 $q->where('bookings.partner_concierge_id', $this->partner->id)
                     ->orWhere('bookings.partner_venue_id', $this->partner->id);
-            });
-
-        $numberOfBookings = $partnerEarningsQuery->distinct('bookings.id')->count('bookings.id');
-
-        $partnerEarnings = $partnerEarningsQuery
-            ->selectRaw('bookings.id as booking_id, earnings.currency, earnings.amount')
+            })
+            ->select(
+                'bookings.id as booking_id',
+                'earnings.currency',
+                DB::raw('SUM(CASE
+                    WHEN bookings.partner_concierge_id = '.$this->partner->id.' AND bookings.partner_venue_id = '.$this->partner->id.' THEN earnings.amount
+                    ELSE earnings.amount / 2
+                END) as total_amount')
+            )
+            ->groupBy('bookings.id', 'earnings.currency')
             ->get();
 
-        $groupedEarnings = $partnerEarnings->groupBy('booking_id')->map(fn ($group) => [
-            'currency' => $group->first()->currency,
-            'amount' => $group->max('amount'), // Take the larger amount if there are two entries
-        ])->groupBy('currency')->map(fn ($group) => $group->sum('amount'));
+        $numberOfBookings = $partnerEarnings->count();
+        $groupedEarnings = $partnerEarnings->groupBy('currency')
+            ->map(fn ($group) => $group->sum('total_amount'));
 
         return [
             'number_of_bookings' => $numberOfBookings,
