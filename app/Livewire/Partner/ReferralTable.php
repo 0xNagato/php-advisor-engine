@@ -39,7 +39,7 @@ class ReferralTable extends BaseWidget
                     ->orderByDesc('secured_at')
                     ->where('referrer_id', $this->partner->user->id)
             )
-            ->recordUrl(fn (Referral $referral): string => $referral->view_route)
+            ->recordUrl(fn (Referral $referral): ?string => $referral->view_route ?? '#')
             ->openRecordUrlInNewTab()
             ->columns([
                 TextColumn::make('user.name')
