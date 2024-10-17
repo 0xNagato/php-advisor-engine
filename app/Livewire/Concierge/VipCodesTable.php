@@ -4,6 +4,7 @@ namespace App\Livewire\Concierge;
 
 use App\Models\VipCode;
 use Filament\Support\Enums\IconPosition;
+use Filament\Tables\Actions\Action;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Columns\ToggleColumn;
 use Filament\Tables\Concerns\HasFilters;
@@ -22,6 +23,8 @@ class VipCodesTable extends TableWidget
     public int|string|array $columnSpan;
 
     protected $listeners = ['concierge-referred' => '$refresh'];
+
+    const bool USE_SLIDE_OVER = false;
 
     public function getColumnSpan(): int|string|array
     {
@@ -64,10 +67,26 @@ class VipCodesTable extends TableWidget
                     ->label('Earned')
                     ->size('xs')
                     ->alignRight()
-                    ->formatStateUsing(fn (VipCode $vipCode): string => money($vipCode->total_earnings_in_u_s_d * 100, 'USD')),
+                    ->formatStateUsing(fn (VipCode $vipCode): string => money($vipCode->total_earnings_in_u_s_d * 100,
+                        'USD')),
                 ToggleColumn::make('is_active')
                     ->label('Active'),
             ])
+            ->actions([
+                Action::make('viewVipBookings')
+                    ->iconButton()
+                    ->icon('tabler-maximize')
+                    ->modalHeading('VIP Bookings')
+                    ->modalContent(fn (VipCode $vipCode) => view('partials.recent-bookings-modal-view',
+                        compact('vipCode')
+                    ))
+                    ->modalSubmitAction(false)
+                    ->modalCancelAction(false)
+                    ->slideOver(self::USE_SLIDE_OVER)
+                    ->size('xs'),
+            ])
+            ->recordUrl(null)
+            ->recordAction(fn (): string => 'viewVipBookings')
             ->defaultSortOptionLabel('Created')
             ->defaultSort('created_at', 'desc');
     }
