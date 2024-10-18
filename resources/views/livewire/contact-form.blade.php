@@ -1,4 +1,4 @@
-<x-filament::modal id="contact-us-modal" wire:model="isOpen">
+<x-filament::modal id="contact-us-modal">
     <x-slot name="heading">
         Contact Us
     </x-slot>
