@@ -122,6 +122,22 @@ namespace App\Actions\Reservations;
 class GetReservationTimeOptions
 {
 }
+namespace App\Actions;
+
+/**
+ * @method static \Lorisleiva\Actions\Decorators\JobDecorator|\Lorisleiva\Actions\Decorators\UniqueJobDecorator makeJob(array $data, mixed $user)
+ * @method static \Lorisleiva\Actions\Decorators\UniqueJobDecorator makeUniqueJob(array $data, mixed $user)
+ * @method static \Illuminate\Foundation\Bus\PendingDispatch dispatch(array $data, mixed $user)
+ * @method static \Illuminate\Foundation\Bus\PendingDispatch|\Illuminate\Support\Fluent dispatchIf(bool $boolean, array $data, mixed $user)
+ * @method static \Illuminate\Foundation\Bus\PendingDispatch|\Illuminate\Support\Fluent dispatchUnless(bool $boolean, array $data, mixed $user)
+ * @method static dispatchSync(array $data, mixed $user)
+ * @method static dispatchNow(array $data, mixed $user)
+ * @method static dispatchAfterResponse(array $data, mixed $user)
+ * @method static mixed run(array $data, mixed $user)
+ */
+class SendContactFormEmail
+{
+}
 namespace App\Actions\SpecialRequest;
 
 /**

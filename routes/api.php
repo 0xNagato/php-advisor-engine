@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Api\AvailabilityCalendarController;
 use App\Http\Controllers\Api\BookingController;
+use App\Http\Controllers\Api\ContactFormController;
 use App\Http\Controllers\Api\RegionController;
 use App\Http\Controllers\Api\ReservationHubController;
 use App\Http\Controllers\Api\TimeslotController;
@@ -23,4 +24,5 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/bookings', [BookingController::class, 'store']);
     Route::put('/bookings/{booking}', [BookingController::class, 'update']);
     Route::delete('/bookings/{booking}', [BookingController::class, 'destroy']);
+    Route::post('/contact', [ContactFormController::class, 'submit']);
 });

@@ -2,6 +2,7 @@
 
 namespace App\Livewire;
 
+use App\Actions\SendContactFormEmail;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
@@ -9,7 +10,6 @@ use Filament\Forms\Form;
 use Filament\Notifications\Notification;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Foundation\Application;
-use Illuminate\Support\Facades\Mail;
 use Illuminate\View\View;
 use Livewire\Component;
 
@@ -48,19 +48,7 @@ class ContactForm extends Component implements HasForms
         $data = $this->form->getState();
         $user = auth()->user();
 
-        $formattedMessage = "Name: $user->name\n";
-        $formattedMessage .= "Email: $user->email\n";
-        $formattedMessage .= "Phone: $user->phone\n";
-        $formattedMessage .= "Role: $user->main_role\n\n";
-        $formattedMessage .= "Message:\n{$data['message']}";
-
-        Mail::send([], [], function ($message) use ($formattedMessage, $user) {
-            $message->to('alex@primavip.co')
-                ->bcc('andru.weir@gmail.com')
-                ->replyTo($user->email)
-                ->subject('New message from '.$user->name)
-                ->html(nl2br($formattedMessage));
-        });
+        SendContactFormEmail::run($data, $user);
 
         Notification::make()
             ->title('Message sent')
