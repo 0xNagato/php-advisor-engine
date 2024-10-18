@@ -57,6 +57,11 @@ class FilamentRenderHookProvider extends ServiceProvider
             static fn () => view('filament.admin.logo')
         );
 
+        FilamentView::registerRenderHook(
+            PanelsRenderHook::USER_MENU_BEFORE,
+            static fn () => view('filament.admin.contact-button')
+        );
+
         if (! isPrimaApp()) {
             FilamentView::registerRenderHook(
                 PanelsRenderHook::PAGE_END,
@@ -96,7 +101,7 @@ class FilamentRenderHookProvider extends ServiceProvider
             static fn (): string => '
             <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/smartbanner.js/1.14.6/smartbanner.min.css">
             <script src="https://cdnjs.cloudflare.com/ajax/libs/smartbanner.js/1.14.6/smartbanner.min.js"></script>
-            
+
             <!-- Start SmartBanner configuration -->
             <meta name="smartbanner:title" content="<strong>PRIMA</strong>">
             <meta name="smartbanner:author" content="VIP Experience Concierge">
@@ -111,8 +116,8 @@ class FilamentRenderHookProvider extends ServiceProvider
             <meta name="smartbanner:enabled-platforms" content="ios">
             <meta name="smartbanner:close-label" content="Close">
             <!-- End SmartBanner configuration -->
-            
-            
+
+
             <link rel="preconnect" href="https://fonts.googleapis.com">
             <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
             <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet">',
