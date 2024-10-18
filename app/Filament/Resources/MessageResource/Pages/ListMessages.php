@@ -62,12 +62,21 @@ class ListMessages extends ListRecords implements HasForms
     public function submitContactForm(): void
     {
         $data = $this->contactData;
+        $user = auth()->user();
 
-        Mail::send([], [], function ($message) use ($data) {
+        // Create a formatted message with user details
+        $formattedMessage = "Name: {$user->name}\n";
+        $formattedMessage .= "Email: {$user->email}\n";
+        $formattedMessage .= "Role: {$user->main_role}\n";
+        $formattedMessage .= "Phone: {$user->phone}\n\n";
+        $formattedMessage .= "Message:\n{$data['message']}";
+
+        Mail::send([], [], function ($message) use ($formattedMessage, $user) {
             $message->to('alex@primavip.co')
                 ->bcc('andru.weir@gmail.com')
-                ->subject('New message from '.auth()->user()->name)
-                ->html($data['message']);
+                ->replyTo($user->email)
+                ->subject('New message from '.$user->name)
+                ->html(nl2br($formattedMessage));
         });
 
         Notification::make()
