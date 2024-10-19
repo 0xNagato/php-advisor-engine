@@ -1,4 +1,4 @@
-<x-filament::modal id="contact-us-modal">
+<x-filament::modal id="contact-us-modal" width="2xl">
     <x-slot name="heading">
         Contact Us
     </x-slot>
@@ -7,7 +7,7 @@
         {{ $this->form }}
 
         <div class="flex justify-end mt-4">
-            <x-filament::button type="submit">
+            <x-filament::button type="submit" class="w-full">
                 Send Message
             </x-filament::button>
         </div>

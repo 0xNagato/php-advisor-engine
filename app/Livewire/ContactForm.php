@@ -10,6 +10,7 @@ use Filament\Forms\Form;
 use Filament\Notifications\Notification;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Foundation\Application;
+use Illuminate\Support\HtmlString;
 use Illuminate\View\View;
 use Livewire\Component;
 
@@ -37,7 +38,7 @@ class ContactForm extends Component implements HasForms
                     ->hiddenLabel()
                     ->placeholder('How can we help you?')
                     ->label('Your Message')
-                    ->helperText('Please provide as much detail as possible.')
+                    ->helperText(new HtmlString('<div class="text-xs">Please provide as much detail as possible.</div>'))
                     ->rows(5),
             ])
             ->statePath('data');
