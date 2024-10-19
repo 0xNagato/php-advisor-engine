@@ -70,8 +70,9 @@ class VipCodesTable extends TableWidget
                     ->label('Earned')
                     ->size('xs')
                     ->alignRight()
-                    ->formatStateUsing(fn (VipCode $vipCode): string => money($vipCode->total_earnings_in_u_s_d * 100,
-                        'USD')),
+                    ->formatStateUsing(
+                        fn (VipCode $vipCode): string => money($vipCode->total_earnings_in_u_s_d * 100, 'USD')
+                    ),
                 ToggleColumn::make('is_active')
                     ->label('Active'),
             ])
@@ -80,9 +81,7 @@ class VipCodesTable extends TableWidget
                     ->iconButton()
                     ->icon('tabler-maximize')
                     ->modalHeading('VIP Bookings')
-                    ->modalContent(fn (VipCode $vipCode) => view('partials.recent-bookings-modal-view',
-                        compact('vipCode')
-                    ))
+                    ->modalContent(fn (VipCode $vipCode) => view('partials.vip-code-modal-view', [$vipCode]))
                     ->modalSubmitAction(false)
                     ->modalCancelAction(false)
                     ->slideOver(self::USE_SLIDE_OVER)

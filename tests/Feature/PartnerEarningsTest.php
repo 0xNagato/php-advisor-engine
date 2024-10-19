@@ -137,7 +137,7 @@ test('partner with not referred has not earning', function () {
     });
 });
 
-test('partner earnings with 100% percentage (edge case)', function () {
+test('partner earnings when partner refers both venue and concierge with 100% percentage, got cap to 20%', function () {
     Booking::withoutEvents(function () {
         $partner = Partner::factory()->create(['percentage' => 100]);
 
@@ -149,12 +149,62 @@ test('partner earnings with 100% percentage (edge case)', function () {
         $this->service->calculateEarnings($booking);
 
         $this->assertDatabaseCount('earnings', 4);
-        assertEarningExists($booking, 'venue', 12000);
-        assertEarningExists($booking, 'concierge', 2000);
-        assertEarningExists($booking, 'partner_venue', 6000);
-        assertEarningExists($booking, 'partner_concierge', 6000);
+        $earningsAmount =
+            getAllEarningsAmount($booking->total_fee, $this->venue, $this->concierge, $partner, $partner);
 
-        expect($booking->fresh()->platform_earnings)->toBe(-6000);
+        assertEarningExists($booking, 'venue', $earningsAmount['venueEarning']);
+        assertEarningExists($booking, 'concierge', $earningsAmount['conciergeEarning']);
+        assertEarningExists($booking, 'partner_venue', $earningsAmount['partnerVenueEarning']);
+        assertEarningExists($booking, 'partner_concierge', $earningsAmount['partnerConciergeEarning']);
+
+        expect($booking->fresh()->platform_earnings)->toBe($earningsAmount['platFormEarnings']);
+    });
+});
+
+test('partner earnings when partner refers concierge with 100% percentage, got cap to 20%', function () {
+    Booking::withoutEvents(function () {
+        $partner = Partner::factory()->create(['percentage' => 100]);
+
+        $this->concierge->user->update(['partner_referral_id' => $partner->id]);
+
+        $booking = createBooking($this->venue, $this->concierge);
+
+        $this->service->calculateEarnings($booking);
+
+        $this->assertDatabaseCount('earnings', 3);
+        $earningsAmount =
+            getAllEarningsAmount($booking->total_fee, $this->venue, $this->concierge, $partner);
+
+        assertEarningExists($booking, 'venue', $earningsAmount['venueEarning']);
+        assertEarningExists($booking, 'concierge', $earningsAmount['conciergeEarning']);
+        assertEarningDoNotExists($booking, 'partner_venue', $earningsAmount['partnerVenueEarning']);
+        assertEarningExists($booking, 'partner_concierge', $earningsAmount['partnerConciergeEarning']);
+
+        expect($booking->fresh()->platform_earnings)->toBe($earningsAmount['platFormEarnings']);
+    });
+});
+
+test('partner earnings when partner refers venue with 100% percentage, got cap to 20%', function () {
+    Booking::withoutEvents(function () {
+        $partner = Partner::factory()->create(['percentage' => 100]);
+
+        $this->venue->user->update(['partner_referral_id' => $partner->id]);
+
+        $booking = createBooking($this->venue, $this->concierge);
+
+        $this->service->calculateEarnings($booking);
+
+        $this->assertDatabaseCount('earnings', 3);
+
+        $earningsAmount =
+            getAllEarningsAmount($booking->total_fee, $this->venue, $this->concierge, null, $partner);
+
+        assertEarningExists($booking, 'venue', $earningsAmount['venueEarning']);
+        assertEarningExists($booking, 'concierge', $earningsAmount['conciergeEarning']);
+        assertEarningExists($booking, 'partner_venue', $earningsAmount['partnerVenueEarning']);
+        assertEarningDoNotExists($booking, 'partner_concierge', $earningsAmount['partnerConciergeEarning']);
+
+        expect($booking->fresh()->platform_earnings)->toBe($earningsAmount['platFormEarnings']);
     });
 });
 
@@ -176,5 +226,120 @@ test('partner earnings with different booking amount', function () {
         assertEarningExists($booking, 'partner_concierge', (50000 - 30000 - 5000) * ($partner->percentage / 100));
 
         expect($booking->fresh()->platform_earnings)->toBe(13500);
+    });
+});
+
+test('partner earnings are capped at 20% when partner refers both venue and concierge in a prime booking', function () {
+    Booking::withoutEvents(function () {
+        // Create a partner with a high percentage to test the cap
+        $partner = Partner::factory()->create(['percentage' => 30]);
+
+        $this->venue->user->update(['partner_referral_id' => $partner->id]);
+        $this->concierge->user->update(['partner_referral_id' => $partner->id]);
+
+        $booking = createBooking($this->venue, $this->concierge);
+
+        $this->service->calculateEarnings($booking);
+
+        $this->assertDatabaseCount('earnings', 4);
+
+        $earningsAmount =
+            getAllEarningsAmount($booking->total_fee, $this->venue, $this->concierge, $partner, $partner);
+
+        $partnerExpectedEarnings = (int) $earningsAmount['partnerConciergeEarning'] + $earningsAmount['partnerVenueEarning'];
+
+        assertEarningExists($booking, 'partner_concierge', $earningsAmount['partnerConciergeEarning']);
+        assertEarningExists($booking, 'partner_venue', $earningsAmount['partnerVenueEarning']);
+
+        $partnerEarningsByType = (int) Earning::where('booking_id', $booking->id)
+            ->whereIn('type', ['partner_venue', 'partner_concierge'])
+            ->sum('amount');
+        $partnerEarningsByUserId = (int) Earning::where('user_id', $partner->user_id)
+            ->whereIn('type', ['partner_venue', 'partner_concierge'])
+            ->sum('amount');
+
+        // Assert that total partner earnings are equal to 20% of the booking fee
+        expect($partnerEarningsByType)->toBe($partnerEarningsByUserId)
+            ->and($partnerEarningsByType)->toBe((int) $partnerExpectedEarnings)
+            ->and($partnerEarningsByUserId)->toBe((int) $partnerExpectedEarnings)
+            ->and($partnerExpectedEarnings)->toBeLessThanOrEqual($booking->total_fee * 0.20)
+            ->and($partnerEarningsByType)->toBeLessThanOrEqual($booking->total_fee * 0.20)
+            ->and($partnerEarningsByUserId)->toBeLessThanOrEqual($booking->total_fee * 0.20);
+    });
+});
+
+test('partner earnings are capped at 20% when partner refers concierge in a prime booking', function () {
+    Booking::withoutEvents(function () {
+        // Create a partner with a high percentage to test the cap
+        $partner = Partner::factory()->create(['percentage' => 30]);
+
+        $this->concierge->user->update(['partner_referral_id' => $partner->id]);
+
+        $booking = createBooking($this->venue, $this->concierge);
+
+        $this->service->calculateEarnings($booking);
+
+        $this->assertDatabaseCount('earnings', 3);
+
+        $earningsAmount =
+            getAllEarningsAmount($booking->total_fee, $this->venue, $this->concierge, $partner);
+
+        $partnerExpectedEarnings = (int) $earningsAmount['partnerConciergeEarning'] + $earningsAmount['partnerVenueEarning'];
+
+        assertEarningExists($booking, 'partner_concierge', $earningsAmount['partnerConciergeEarning']);
+        assertEarningDoNotExists($booking, 'partner_venue', $earningsAmount['partnerVenueEarning']);
+
+        $partnerEarningsByType = (int) Earning::where('booking_id', $booking->id)
+            ->whereIn('type', ['partner_venue', 'partner_concierge'])
+            ->sum('amount');
+        $partnerEarningsByUserId = (int) Earning::where('user_id', $partner->user_id)
+            ->whereIn('type', ['partner_venue', 'partner_concierge'])
+            ->sum('amount');
+
+        // Assert that total partner earnings are equal to 20% of the booking fee
+        expect($partnerEarningsByType)->toBe($partnerEarningsByUserId)
+            ->and($partnerEarningsByType)->toBe((int) $partnerExpectedEarnings)
+            ->and($partnerEarningsByUserId)->toBe((int) $partnerExpectedEarnings)
+            ->and($partnerExpectedEarnings)->toBeLessThanOrEqual($booking->total_fee * 0.20)
+            ->and($partnerEarningsByType)->toBeLessThanOrEqual($booking->total_fee * 0.20)
+            ->and($partnerEarningsByUserId)->toBeLessThanOrEqual($booking->total_fee * 0.20);
+    });
+});
+
+test('partner earnings are capped at 20% when partner refers venue in a prime booking', function () {
+    Booking::withoutEvents(function () {
+        // Create a partner with a high percentage to test the cap
+        $partner = Partner::factory()->create(['percentage' => 30]);
+
+        $this->venue->user->update(['partner_referral_id' => $partner->id]);
+
+        $booking = createBooking($this->venue, $this->concierge);
+
+        $this->service->calculateEarnings($booking);
+
+        $this->assertDatabaseCount('earnings', 3);
+
+        $earningsAmount =
+            getAllEarningsAmount($booking->total_fee, $this->venue, $this->concierge, null, $partner);
+
+        $partnerExpectedEarnings = (int) $earningsAmount['partnerConciergeEarning'] + $earningsAmount['partnerVenueEarning'];
+
+        assertEarningDoNotExists($booking, 'partner_concierge', $earningsAmount['partnerConciergeEarning']);
+        assertEarningExists($booking, 'partner_venue', $earningsAmount['partnerVenueEarning']);
+
+        $partnerEarningsByType = (int) Earning::where('booking_id', $booking->id)
+            ->whereIn('type', ['partner_venue', 'partner_concierge'])
+            ->sum('amount');
+        $partnerEarningsByUserId = (int) Earning::where('user_id', $partner->user_id)
+            ->whereIn('type', ['partner_venue', 'partner_concierge'])
+            ->sum('amount');
+
+        // Assert that total partner earnings are equal to 20% of the booking fee
+        expect($partnerEarningsByType)->toBe($partnerEarningsByUserId)
+            ->and($partnerEarningsByType)->toBe((int) $partnerExpectedEarnings)
+            ->and($partnerEarningsByUserId)->toBe((int) $partnerExpectedEarnings)
+            ->and($partnerExpectedEarnings)->toBeLessThanOrEqual($booking->total_fee * 0.20)
+            ->and($partnerEarningsByType)->toBeLessThanOrEqual($booking->total_fee * 0.20)
+            ->and($partnerEarningsByUserId)->toBeLessThanOrEqual($booking->total_fee * 0.20);
     });
 });

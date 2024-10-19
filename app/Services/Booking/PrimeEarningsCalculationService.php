@@ -3,11 +3,15 @@
 namespace App\Services\Booking;
 
 use App\Constants\BookingPercentages;
+use App\Enums\EarningType;
 use App\Models\Booking;
+use App\Models\Earning;
 use App\Models\Partner;
 
 readonly class PrimeEarningsCalculationService
 {
+    private const float MAX_PARTNER_EARNINGS_PERCENTAGE = 0.20;
+
     public function __construct(
         private EarningCreationService $earningCreationService
     ) {}
@@ -17,8 +21,20 @@ readonly class PrimeEarningsCalculationService
         $venue_earnings = $this->calculateVenueEarnings($booking);
         $concierge_earnings = $this->calculateConciergeEarnings($booking);
 
-        $this->earningCreationService->createEarning($booking, 'venue', $venue_earnings, $booking->venue->payout_venue, 'total_fee');
-        $this->earningCreationService->createEarning($booking, 'concierge', $concierge_earnings, $booking->concierge->payout_percentage, 'total_fee');
+        $this->earningCreationService->createEarning(
+            booking: $booking,
+            type: EarningType::VENUE->value,
+            amount: $venue_earnings,
+            percentage: $booking->venue->payout_venue,
+            percentageOf: 'total_fee'
+        );
+        $this->earningCreationService->createEarning(
+            booking: $booking,
+            type: EarningType::CONCIERGE->value,
+            amount: $concierge_earnings,
+            percentage: $booking->concierge->payout_percentage,
+            percentageOf: 'total_fee'
+        );
 
         $remainder = $booking->total_fee - $venue_earnings - $concierge_earnings;
 
@@ -47,13 +63,25 @@ readonly class PrimeEarningsCalculationService
 
         if ($booking->concierge->referringConcierge) {
             $amount = $remainder * (BookingPercentages::PRIME_REFERRAL_LEVEL_1_PERCENTAGE / 100);
-            $this->earningCreationService->createEarning($booking, 'concierge_referral_1', $amount, BookingPercentages::PRIME_REFERRAL_LEVEL_1_PERCENTAGE, 'platform');
+            $this->earningCreationService->createEarning(
+                booking: $booking,
+                type: EarningType::CONCIERGE_REFERRAL_1->value,
+                amount: $amount,
+                percentage: BookingPercentages::PRIME_REFERRAL_LEVEL_1_PERCENTAGE,
+                percentageOf: 'platform'
+            );
             $totalReferralEarnings += $amount;
         }
 
         if ($booking->concierge->referringConcierge?->referringConcierge) {
             $amount = $remainder * (BookingPercentages::PRIME_REFERRAL_LEVEL_2_PERCENTAGE / 100);
-            $this->earningCreationService->createEarning($booking, 'concierge_referral_2', $amount, BookingPercentages::PRIME_REFERRAL_LEVEL_2_PERCENTAGE, 'platform');
+            $this->earningCreationService->createEarning(
+                booking: $booking,
+                type: EarningType::CONCIERGE_REFERRAL_2->value,
+                amount: $amount,
+                percentage: BookingPercentages::PRIME_REFERRAL_LEVEL_2_PERCENTAGE,
+                percentageOf: 'platform'
+            );
             $totalReferralEarnings += $amount;
         }
 
@@ -62,28 +90,78 @@ readonly class PrimeEarningsCalculationService
 
     private function calculateAndCreatePartnerEarnings(Booking $booking, float $remainder): float
     {
-        $totalPartnerEarnings = 0;
+        $maxPartnerEarnings = self::MAX_PARTNER_EARNINGS_PERCENTAGE * $remainder;
 
-        if ($booking->concierge->user->partner_referral_id) {
-            /** @var Partner $partner */
-            $partner = Partner::query()->find($booking->concierge->user->partner_referral_id);
-            $amount = $remainder * ($partner->percentage / 100);
-            $this->earningCreationService->createEarning($booking, 'partner_concierge', $amount, $partner->percentage, 'remainder');
-            $totalPartnerEarnings += $amount;
-            $booking->partner_concierge_id = $partner->id;
-            $booking->partner_concierge_fee = $amount;
-        }
+        $conciergePartnerEarnings = $this->calculatePartnerEarnings(
+            booking: $booking,
+            remainder: $remainder,
+            type: EarningType::PARTNER_CONCIERGE
+        );
+        $venuePartnerEarnings = $this->calculatePartnerEarnings($booking, $remainder, EarningType::PARTNER_VENUE);
 
-        if ($booking->venue->user->partner_referral_id) {
-            /** @var Partner $partner */
-            $partner = Partner::query()->find($booking->venue->user->partner_referral_id);
-            $amount = $remainder * ($partner->percentage / 100);
-            $this->earningCreationService->createEarning($booking, 'partner_venue', $amount, $partner->percentage, 'remainder');
-            $totalPartnerEarnings += $amount;
-            $booking->partner_venue_id = $partner->id;
-            $booking->partner_venue_fee = $amount;
+        $totalPartnerEarnings = $conciergePartnerEarnings + $venuePartnerEarnings;
+
+        if ($this->isSamePartnerForConciergeAndVenue($booking) && $totalPartnerEarnings > $maxPartnerEarnings) {
+            $this->adjustPartnerEarnings($booking, $totalPartnerEarnings, $maxPartnerEarnings);
+            $totalPartnerEarnings = $maxPartnerEarnings;
         }
 
         return $totalPartnerEarnings;
+    }
+
+    private function calculatePartnerEarnings(Booking $booking, float $remainder, EarningType $type): float
+    {
+        $user = $type === EarningType::PARTNER_CONCIERGE ? $booking->concierge->user : $booking->venue->user;
+
+        if (! $user->partner_referral_id) {
+            return 0;
+        }
+
+        $partner = Partner::query()->find($user->partner_referral_id);
+
+        // Calculate the maximum allowed amount (20% of the booking's total fee)
+        $maxAllowedAmount = $remainder * 0.20;
+
+        // Calculate the amount based on the partner's percentage
+        $calculatedAmount = $remainder * ($partner->percentage / 100);
+
+        // Cap the amount at the maximum allowed
+        $amount = min($calculatedAmount, $maxAllowedAmount);
+
+        $this->earningCreationService->createEarning(
+            $booking,
+            $type->value,
+            $amount,
+            $partner->percentage,
+            'remainder'
+        );
+
+        $booking->{$type->value.'_id'} = $partner->id;
+        $booking->{$type->value.'_fee'} = $amount;
+
+        return $amount;
+    }
+
+    private function isSamePartnerForConciergeAndVenue(Booking $booking): bool
+    {
+        return $booking->concierge->user->partner_referral_id
+            && $booking->venue->user->partner_referral_id
+            && $booking->concierge->user->partner_referral_id === $booking->venue->user->partner_referral_id;
+    }
+
+    private function adjustPartnerEarnings(
+        Booking $booking,
+        float $totalPartnerEarnings,
+        float $maxPartnerEarnings
+    ): void {
+        $adjustmentFactor = $maxPartnerEarnings / $totalPartnerEarnings;
+        $booking->partner_concierge_fee *= $adjustmentFactor;
+        $booking->partner_venue_fee *= $adjustmentFactor;
+        Earning::where('booking_id', $booking->id)
+            ->where('type', EarningType::PARTNER_CONCIERGE)
+            ->update(['amount' => $booking->partner_concierge_fee]);
+        Earning::where('booking_id', $booking->id)
+            ->where('type', EarningType::PARTNER_VENUE)
+            ->update(['amount' => $booking->partner_venue_fee]);
     }
 }
