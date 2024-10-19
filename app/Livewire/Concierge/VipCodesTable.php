@@ -81,7 +81,7 @@ class VipCodesTable extends TableWidget
                     ->iconButton()
                     ->icon('tabler-maximize')
                     ->modalHeading('VIP Bookings')
-                    ->modalContent(fn (VipCode $vipCode) => view('partials.vip-code-modal-view', [$vipCode]))
+                    ->modalContent(fn (VipCode $vipCode) => view('partials.vip-code-modal-view', ['vipCode' => $vipCode]))
                     ->modalSubmitAction(false)
                     ->modalCancelAction(false)
                     ->slideOver(self::USE_SLIDE_OVER)
