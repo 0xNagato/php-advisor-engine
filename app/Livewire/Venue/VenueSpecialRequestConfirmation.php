@@ -234,7 +234,7 @@ class VenueSpecialRequestConfirmation extends Page
     }
 
     #[Computed]
-    public function commissionRequestedPercentage(): float
+    public function commissionRequestedPercentage(): string
     {
         return $this->requestChangesFormData['commission_requested_percentage'];
     }

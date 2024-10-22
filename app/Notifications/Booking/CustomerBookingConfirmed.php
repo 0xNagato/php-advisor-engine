@@ -1,16 +1,20 @@
 <?php
 
+/** @noinspection PhpUnused */
+/** @noinspection PhpUnusedParameterInspection */
+
 namespace App\Notifications\Booking;
 
 use App\Data\SmsData;
-use App\Data\VenueContactData;
 use App\Models\Booking;
+use App\NotificationsChannels\SmsNotificationChannel;
+use AshAllenDesign\ShortURL\Exceptions\ShortURLException;
 use Carbon\Carbon;
 use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Notification;
+use ShortURL;
 
-class VenueContactBookingConfirmed extends Notification implements ShouldQueue
+class CustomerBookingConfirmed extends Notification
 {
     use Queueable;
 
@@ -18,8 +22,6 @@ class VenueContactBookingConfirmed extends Notification implements ShouldQueue
      * Create a new notification instance.
      */
     public function __construct(
-        public VenueContactData $contact,
-        public string $confirmationUrl,
     ) {
         //
     }
@@ -31,21 +33,28 @@ class VenueContactBookingConfirmed extends Notification implements ShouldQueue
      */
     public function via(object $notifiable): array
     {
-        return $this->contact->toChannel();
+        return [
+            SmsNotificationChannel::class,
+        ];
     }
 
+    /**
+     * @throws ShortURLException
+     */
     public function toSMS(Booking $notifiable): SmsData
     {
+        $templateKey = $notifiable->is_prime ? 'customer_booking_confirmed_prime' : 'customer_booking_confirmed_non_prime';
+
         return new SmsData(
-            phone: $this->contact->contact_phone,
-            templateKey: 'venue_contact_booking_confirmed',
+            phone: $notifiable->guest_phone,
+            templateKey: $templateKey,
             templateData: [
+                'venue_name' => $notifiable->venue->name,
                 'booking_date' => Carbon::toNotificationFormat($notifiable->booking_at),
                 'booking_time' => $notifiable->booking_at->format('g:ia'),
-                'guest_name' => $notifiable->guest_name,
                 'guest_count' => $notifiable->guest_count,
-                'guest_phone' => $notifiable->guest_phone,
-                'confirmation_url' => $this->confirmationUrl,
+                'invoice_url' => ShortURL::destinationUrl(route('customer.invoice', $notifiable->uuid))->make()->default_short_url,
+                'concierge_name' => $notifiable->concierge->user->name,
             ]
         );
     }

@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use App\Actions\Booking\SendConfirmationToVenueContacts;
 use App\Models\Booking;
 use AshAllenDesign\ShortURL\Exceptions\ShortURLException;
 use Illuminate\Console\Command;
@@ -33,7 +34,7 @@ class SendVenueBookingReminder extends Command
             ->whereNull('resent_venue_confirmation_at')
             ->where('confirmed_at', '<=', now()->subMinutes(30))
             ->each(function ($booking) {
-                // app(VenueContactBookingConfirmationService::class)->sendConfirmation($booking);
+                SendConfirmationToVenueContacts::run($booking);
                 $booking->update(['resent_venue_confirmation_at' => now()]);
             });
     }

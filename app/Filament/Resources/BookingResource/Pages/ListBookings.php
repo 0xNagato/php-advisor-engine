@@ -2,9 +2,11 @@
 
 namespace App\Filament\Resources\BookingResource\Pages;
 
+use App\Actions\Booking\SendConfirmationToVenueContacts;
 use App\Enums\BookingStatus;
 use App\Filament\Resources\BookingResource;
 use App\Models\Booking;
+use Exception;
 use Filament\Resources\Pages\ListRecords;
 use Filament\Tables\Actions\Action;
 use Filament\Tables\Columns\TextColumn;
@@ -16,6 +18,9 @@ class ListBookings extends ListRecords
 {
     protected static string $resource = BookingResource::class;
 
+    /**
+     * @throws Exception
+     */
     public function table(Table $table): Table
     {
         return $table
@@ -67,7 +72,7 @@ class ListBookings extends ListRecords
                     ->color(fn (Booking $record) => is_null($record->venue_confirmed_at) ? 'indigo' : 'success')
                     ->requiresConfirmation()
                     ->action(function (Booking $record) {
-                        // app(VenueContactBookingConfirmationService::class)->sendConfirmation($record);
+                        SendConfirmationToVenueContacts::run($record);
                         $record->update(['resent_venue_confirmation_at' => now()]);
                     }),
             ]);

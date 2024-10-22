@@ -5,7 +5,7 @@ namespace App\Actions\Booking;
 use App\Enums\BookingStatus;
 use App\Events\BookingPaid;
 use App\Models\Booking;
-use App\Notifications\Booking\GuestBookingConfirmed;
+use App\Notifications\Booking\CustomerBookingConfirmed;
 use App\Traits\FormatsPhoneNumber;
 use Exception;
 use Lorisleiva\Actions\Concerns\AsAction;
@@ -42,7 +42,7 @@ class CompleteBooking
                 'notes' => $formData['notes'] ?? null,
             ]);
 
-            $booking->notify(new GuestBookingConfirmed);
+            $booking->notify(new CustomerBookingConfirmed);
             SendConfirmationToVenueContacts::run($booking);
 
             BookingPaid::dispatch($booking);

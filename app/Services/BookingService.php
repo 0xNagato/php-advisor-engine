@@ -7,7 +7,7 @@ use App\Enums\BookingStatus;
 use App\Events\BookingPaid;
 use App\Models\Booking;
 use App\Models\Region;
-use App\Notifications\Booking\GuestBookingConfirmed;
+use App\Notifications\Booking\CustomerBookingConfirmed;
 use App\Traits\FormatsPhoneNumber;
 use Stripe\Charge;
 use Stripe\Customer;
@@ -26,7 +26,7 @@ class BookingService
         $stripeCharge = $this->handleStripeCharge($booking, $form);
         $this->updateBooking($booking, $form, $stripeCharge);
 
-        $booking->notify(new GuestBookingConfirmed);
+        $booking->notify(new CustomerBookingConfirmed);
         SendConfirmationToVenueContacts::run($booking);
 
         BookingPaid::dispatch($booking);

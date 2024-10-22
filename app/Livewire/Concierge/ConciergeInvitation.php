@@ -156,6 +156,7 @@ class ConciergeInvitation extends SimplePage
 
         $data = $this->form->getState();
 
+        /** @var User $referrer */
         $referrer = User::query()->findOrFail($this->referral->referrer_id);
         $role = strtolower($referrer->main_role);
 

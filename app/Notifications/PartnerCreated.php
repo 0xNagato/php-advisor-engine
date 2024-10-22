@@ -2,16 +2,16 @@
 
 namespace App\Notifications;
 
+use App\Data\SmsData;
 use App\Models\User;
+use App\NotificationsChannels\SmsNotificationChannel;
+use AshAllenDesign\ShortURL\Exceptions\ShortURLException;
 use AshAllenDesign\ShortURL\Facades\ShortURL;
 use Filament\Facades\Filament;
 use Illuminate\Bus\Queueable;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 use Illuminate\Support\Facades\Password;
-use NotificationChannels\Twilio\TwilioChannel;
-use NotificationChannels\Twilio\TwilioMessage;
-use NotificationChannels\Twilio\TwilioSmsMessage;
 
 class PartnerCreated extends Notification
 {
@@ -21,12 +21,17 @@ class PartnerCreated extends Notification
 
     /**
      * Create a new notification instance.
+     *
+     * @throws ShortURLException
      */
     public function __construct(public User $user)
     {
         $this->passwordResetUrl = $this->passwordResetUrl();
     }
 
+    /**
+     * @throws ShortURLException
+     */
     protected function passwordResetUrl(): string
     {
         $token = Password::createToken($this->user);
@@ -42,7 +47,7 @@ class PartnerCreated extends Notification
      */
     public function via(object $notifiable): array
     {
-        return ['mail', TwilioChannel::class];
+        return ['mail', SmsNotificationChannel::class];
     }
 
     /**
@@ -56,10 +61,15 @@ class PartnerCreated extends Notification
             ->markdown('mail.partner-welcome-mail', ['passwordResetUrl' => $this->passwordResetUrl]);
     }
 
-    public function toTwilio(object $notifiable): TwilioSmsMessage|TwilioMessage
+    public function toSms(object $notifiable): SmsData
     {
-        return (new TwilioSmsMessage)
-            ->content("Welcome to PRIMA! Your account has been created. Please click {$this->passwordResetUrl} to login and update your payment info and begin making reservations. Thank you for joining us!");
+        return new SmsData(
+            phone: $notifiable->phone,
+            templateKey: 'partner_created',
+            templateData: [
+                'login_url' => $this->passwordResetUrl,
+            ]
+        );
     }
 
     /**

@@ -32,7 +32,11 @@ class VenueSpecialRequestRejected extends Notification
     {
         return new SmsData(
             phone: $notifiable->phone,
-            text: "Special request has been rejected from $this->venue. Click here for more details $this->link."
+            templateKey: 'concierge_special_request_rejected',
+            templateData: [
+                'venue' => $this->venue,
+                'link' => $this->link,
+            ]
         );
     }
 

@@ -8,7 +8,7 @@ use App\NotificationsChannels\SmsNotificationChannel;
 use Illuminate\Bus\Queueable;
 use Illuminate\Notifications\Notification;
 
-class ConfirmReservation extends Notification
+class SendCustomerBookingPaymentForm extends Notification
 {
     use Queueable;
 
@@ -35,11 +35,13 @@ class ConfirmReservation extends Notification
 
     public function toSms(Booking $notifiable): SmsData
     {
-        $message = "Your reservation at {$notifiable->venue->name} is pending. Please click $this->url to secure your booking within the next 5 minutes.";
-
         return new SmsData(
             phone: $notifiable->guest_phone,
-            text: $message,
+            templateKey: 'customer_booking_payment_form',
+            templateData: [
+                'venue_name' => $notifiable->venue->name,
+                'payment_url' => $this->url,
+            ]
         );
     }
 }

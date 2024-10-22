@@ -4,6 +4,7 @@ namespace App\Livewire\SpecialRequest;
 
 use App\Actions\SpecialRequest\CreateSpecialRequest;
 use App\Data\SpecialRequest\CreateSpecialRequestData;
+use App\Filament\Pages\Concierge\SpecialRequests;
 use App\Models\Region;
 use App\Models\ScheduleTemplate;
 use App\Models\Venue;
@@ -43,7 +44,7 @@ class CreateSpecialRequestForm extends Widget implements HasForms
 
     public function mount(): void
     {
-        $region = Region::query()->find(session('region', 'miami'));
+        $region = Region::query()->find(session('region', 'miami'))?->first();
         $this->timezone = $region->timezone;
         $this->currency = $region->currency;
 
@@ -199,5 +200,7 @@ class CreateSpecialRequestForm extends Widget implements HasForms
             ->title('Special Request Submitted to the Venue')
             ->success()
             ->send();
+
+        $this->redirect(SpecialRequests::getUrl());
     }
 }

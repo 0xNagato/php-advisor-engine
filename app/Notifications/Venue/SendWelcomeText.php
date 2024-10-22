@@ -5,11 +5,9 @@ namespace App\Notifications\Venue;
 use App\Data\SmsData;
 use App\Models\User;
 use App\NotificationsChannels\SmsNotificationChannel;
-use AshAllenDesign\ShortURL\Facades\ShortURL;
-use Filament\Facades\Filament;
+use AshAllenDesign\ShortURL\Exceptions\ShortURLException;
 use Illuminate\Bus\Queueable;
 use Illuminate\Notifications\Notification;
-use Illuminate\Support\Facades\Password;
 
 class SendWelcomeText extends Notification
 {
@@ -33,16 +31,15 @@ class SendWelcomeText extends Notification
         ];
     }
 
+    /**
+     * @throws ShortURLException
+     */
     public function toSms(User $notifiable): SMSData
     {
-        $token = Password::createToken($notifiable);
-        $url = Filament::getResetPasswordUrl($token, $notifiable);
-
-        $secureUrl = ShortURL::destinationUrl($url)->make()->default_short_url;
-
         return new SmsData(
             phone: $notifiable->phone,
-            text: '❤️ Thank you for joining PRIMA! Our concierge team is currently being onboarded and will start generating reservations soon! We will notify you via text as soon as we are ready to launch! With gratitude, Team PRIMA.'
+            templateKey: 'venue_welcome',
+            templateData: []
         );
     }
 }

@@ -10,7 +10,7 @@ use App\Enums\BookingStatus;
 use App\Filament\Resources\BookingResource;
 use App\Models\Booking;
 use App\Models\Region;
-use App\Notifications\Booking\GuestBookingConfirmed;
+use App\Notifications\Booking\CustomerBookingConfirmed;
 use App\Traits\FormatsPhoneNumber;
 use Carbon\Carbon;
 use Filament\Actions\Action;
@@ -62,7 +62,7 @@ class ViewBooking extends ViewRecord
 
     public function resendInvoice(): void
     {
-        $this->booking->notify(new GuestBookingConfirmed);
+        $this->booking->notify(new CustomerBookingConfirmed);
 
         Notification::make()
             ->title('Customer Invoice Resent')

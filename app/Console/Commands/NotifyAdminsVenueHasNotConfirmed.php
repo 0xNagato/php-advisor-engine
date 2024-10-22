@@ -2,18 +2,18 @@
 
 namespace App\Console\Commands;
 
+use App\Actions\Booking\NotifyAdminsOfUnconfirmedBooking;
 use App\Models\Booking;
-use App\Services\VenueBookingLateConfirmationService;
 use Illuminate\Console\Command;
 
-class SendVenueLateConfirmationNotification extends Command
+class NotifyAdminsVenueHasNotConfirmed extends Command
 {
     /**
      * The name and signature of the console command.
      *
      * @var string
      */
-    protected $signature = 'app:send-venue-late-confirmation-notification';
+    protected $signature = 'app:notify-admins-venue-has-not-confirmed';
 
     /**
      * The console command description.
@@ -31,7 +31,7 @@ class SendVenueLateConfirmationNotification extends Command
             ->whereNull('resent_venue_confirmation_at')
             ->where('confirmed_at', '<=', now()->subMinutes(15))
             ->each(function ($booking) {
-                app(VenueBookingLateConfirmationService::class)->sendNotification($booking);
+                NotifyAdminsOfUnconfirmedBooking::run($booking);
             });
     }
 }

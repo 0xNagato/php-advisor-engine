@@ -42,7 +42,11 @@ class VenueSpecialRequestChangeRequest extends Notification
     {
         return new SmsData(
             phone: $notifiable->phone,
-            text: "Special request changes have been requested from $this->venue. Click here for more details $this->link."
+            templateKey: 'concierge_special_request_change_request',
+            templateData: [
+                'venue' => $this->venue,
+                'link' => $this->link,
+            ]
         );
     }
 

@@ -28,28 +28,36 @@ class SendSpecialRequestConfirmation extends Notification
 
     /**
      * Create a new notification instance.
+     *
+     * @throws ShortURLException
      */
     public function __construct(
         public SpecialRequest $specialRequest
     ) {
-        // Generate the confirmation URL
         $this->confirmationUrl = $this->generateConfirmationUrl($specialRequest->uuid);
-
-        // Format the booking date
         $this->bookingDate = Carbon::toNotificationFormat(Carbon::parse($specialRequest->booking_date));
-
-        // Format the booking time
         $this->bookingTime = Carbon::parse($specialRequest->booking_time)->format('g:ia');
-
-        // Create the message to be sent
-        $this->message = $this->createMessage();
     }
 
     public function toSms(VenueContactData $notifiable): SmsData
     {
+        $bookingDate = ucfirst($this->bookingDate);
+        $currency = $this->specialRequest->venue->inRegion->currency;
+        $minimumSpend = moneyWithoutCents($this->specialRequest->minimum_spend * 100, $currency);
+        $customerName = $this->specialRequest->customer_name;
+        $partySize = $this->specialRequest->party_size;
+
         return new SmsData(
             phone: $notifiable->contact_phone,
-            text: $this->message,
+            templateKey: 'venue_special_request_confirmation',
+            templateData: [
+                'customer_name' => $customerName,
+                'booking_date' => $bookingDate,
+                'booking_time' => $this->bookingTime,
+                'party_size' => $partySize,
+                'minimum_spend' => $minimumSpend,
+                'confirmation_url' => $this->confirmationUrl,
+            ]
         );
     }
 
@@ -71,19 +79,5 @@ class SendSpecialRequestConfirmation extends Notification
         $url = URL::signedRoute('venues.confirm-special-request', ['token' => $uuid], now()->addDays(self::SECURE_LINK_LIFE_IN_DAYS));
 
         return ShortURL::destinationUrl($url)->make()->default_short_url;
-    }
-
-    /**
-     * Create the message to be sent to contacts.
-     */
-    private function createMessage(): string
-    {
-        $bookingDate = ucfirst($this->bookingDate);
-        $currency = $this->specialRequest->venue->inRegion->currency;
-        $minimumSpend = moneyWithoutCents($this->specialRequest->minimum_spend * 100, $currency);
-        $customerName = $this->specialRequest->customer_name;
-        $partySize = $this->specialRequest->party_size;
-
-        return "*PRIMA* Special Request from $customerName: $bookingDate at $this->bookingTime, $partySize guests, Min. Spend $minimumSpend. Click $this->confirmationUrl to view this request.";
     }
 }

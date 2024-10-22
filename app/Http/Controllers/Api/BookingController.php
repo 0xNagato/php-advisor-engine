@@ -13,7 +13,7 @@ use App\Http\Requests\Api\BookingUpdateRequest;
 use App\Http\Resources\BookingResource;
 use App\Models\Booking;
 use App\Models\Region;
-use App\Notifications\Booking\ConfirmReservation;
+use App\Notifications\Booking\SendCustomerBookingPaymentForm;
 use App\Services\BookingService;
 use Exception;
 use Illuminate\Http\JsonResponse;
@@ -82,7 +82,7 @@ class BookingController extends Controller
             'notes' => $validatedData['notes'],
         ]);
 
-        $booking->notify(new ConfirmReservation(url: $validatedData['bookingUrl']));
+        $booking->notify(new SendCustomerBookingPaymentForm(url: $validatedData['bookingUrl']));
 
         return response()->json([
             'message' => 'SMS Message Sent Successfully',

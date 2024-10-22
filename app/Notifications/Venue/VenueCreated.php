@@ -3,6 +3,7 @@
 namespace App\Notifications\Venue;
 
 use App\Models\User;
+use AshAllenDesign\ShortURL\Exceptions\ShortURLException;
 use AshAllenDesign\ShortURL\Facades\ShortURL;
 use Filament\Facades\Filament;
 use Illuminate\Bus\Queueable;
@@ -18,12 +19,17 @@ class VenueCreated extends Notification
 
     /**
      * Create a new notification instance.
+     *
+     * @throws ShortURLException
      */
     public function __construct(public User $user)
     {
         $this->passwordResetUrl = $this->passwordResetUrl();
     }
 
+    /**
+     * @throws ShortURLException
+     */
     protected function passwordResetUrl(): string
     {
         $token = Password::createToken($this->user);

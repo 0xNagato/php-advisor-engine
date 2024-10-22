@@ -55,7 +55,10 @@ class ConciergeCreated extends Notification
     {
         return new SmsData(
             phone: $this->user->phone,
-            text: "Welcome to PRIMA! Your account has been created. Please click $this->passwordResetUrl to login and update your payment info and begin making reservations. Thank you for joining us!"
+            templateKey: 'concierge_created',
+            templateData: [
+                'login_url' => $this->passwordResetUrl,
+            ]
         );
     }
 

@@ -42,7 +42,10 @@ class VenueContactLoginSMS extends Notification
     {
         return new SmsData(
             phone: $notifiable->contact_phone,
-            text: 'Click the link to login: '.$this->shortURL
+            templateKey: 'venue_contact_login',
+            templateData: [
+                'login_url' => $this->shortURL,
+            ]
         );
     }
 }

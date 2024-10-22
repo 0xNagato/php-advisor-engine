@@ -55,6 +55,20 @@ class GenerateDemoBookings
  * @method static dispatchAfterResponse(\App\Models\Booking $booking)
  * @method static void run(\App\Models\Booking $booking)
  */
+class NotifyAdminsOfUnconfirmedBooking
+{
+}
+/**
+ * @method static \Lorisleiva\Actions\Decorators\JobDecorator|\Lorisleiva\Actions\Decorators\UniqueJobDecorator makeJob(\App\Models\Booking $booking)
+ * @method static \Lorisleiva\Actions\Decorators\UniqueJobDecorator makeUniqueJob(\App\Models\Booking $booking)
+ * @method static \Illuminate\Foundation\Bus\PendingDispatch dispatch(\App\Models\Booking $booking)
+ * @method static \Illuminate\Foundation\Bus\PendingDispatch|\Illuminate\Support\Fluent dispatchIf(bool $boolean, \App\Models\Booking $booking)
+ * @method static \Illuminate\Foundation\Bus\PendingDispatch|\Illuminate\Support\Fluent dispatchUnless(bool $boolean, \App\Models\Booking $booking)
+ * @method static dispatchSync(\App\Models\Booking $booking)
+ * @method static dispatchNow(\App\Models\Booking $booking)
+ * @method static dispatchAfterResponse(\App\Models\Booking $booking)
+ * @method static void run(\App\Models\Booking $booking)
+ */
 class SendConfirmationToVenueContacts
 {
 }

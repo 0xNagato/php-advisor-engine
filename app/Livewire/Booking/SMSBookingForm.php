@@ -5,7 +5,7 @@
 namespace App\Livewire\Booking;
 
 use App\Models\Booking;
-use App\Notifications\Booking\ConfirmReservation;
+use App\Notifications\Booking\SendCustomerBookingPaymentForm;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Concerns\InteractsWithForms;
@@ -100,7 +100,7 @@ class SMSBookingForm extends Widget implements HasForms
             'notes' => $data['notes'],
         ]);
 
-        $this->booking->notify(new ConfirmReservation(url: $this->bookingUrl));
+        $this->booking->notify(new SendCustomerBookingPaymentForm(url: $this->bookingUrl));
 
         $this->SMSSent = true;
         $this->dispatch('sms-sent');

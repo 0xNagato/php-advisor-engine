@@ -30,6 +30,7 @@ class Referral extends Model
         'first_name',
         'last_name',
         'notified_at',
+        'reminded_at',
     ];
 
     protected function casts(): array

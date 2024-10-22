@@ -22,8 +22,9 @@ class Kernel extends ConsoleKernel
          * Send reminders for bookings that are due.
          */
         if (config('app.url') === self::PRODUCTION_URL) {
-            $schedule->command('app:send-venue-booking-reminder')->everyFiveMinutes();
-            $schedule->command('app:send-venue-late-confirmation-notification')->everyFiveMinutes();
+            $schedule->command('app:send-venue-booking-reminder')->everyFifteenMinutes();
+            $schedule->command('app:notify-admins-venue-has-not-confirmed')->everyFifteenMinutes();
+            $schedule->command('app:send-concierge-invitation-reminders')->dailyAt('12:00')->timezone('America/New_York');
         }
 
         /**

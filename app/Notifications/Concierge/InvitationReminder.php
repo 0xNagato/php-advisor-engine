@@ -4,30 +4,26 @@ namespace App\Notifications\Concierge;
 
 use App\Data\SmsData;
 use App\Models\Referral;
-use App\Models\User;
 use App\NotificationsChannels\SmsNotificationChannel;
 use AshAllenDesign\ShortURL\Exceptions\ShortURLException;
 use AshAllenDesign\ShortURL\Facades\ShortURL;
 use Illuminate\Bus\Queueable;
-use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 use Illuminate\Support\Facades\URL;
 
-class NotifyConciergeReferral extends Notification
+class InvitationReminder extends Notification
 {
     use Queueable;
 
     protected string $shortURL;
 
-    protected User $referrer;
-
     /**
+     * Create a new notification instance.
+     *
      * @throws ShortURLException
      */
-    public function __construct(public Referral $referral, public string $channel = 'sms')
+    public function __construct(public Referral $referral)
     {
-        $this->referrer = $this->referral->referrer;
-
         $url = URL::temporarySignedRoute('concierge.invitation', now()->addDays(15), [
             'referral' => $this->referral,
         ]);
@@ -42,30 +38,19 @@ class NotifyConciergeReferral extends Notification
      */
     public function via(object $notifiable): array
     {
-        return $this->channel === 'sms' ? [SmsNotificationChannel::class] : ['mail'];
+        return [SmsNotificationChannel::class];
     }
 
-    public function toSms(Referral $notifiable): SMSData
+    public function toSms(Referral $notifiable): SmsData
     {
         return new SmsData(
             phone: $notifiable->phone,
-            templateKey: 'concierge_referral',
+            templateKey: 'concierge_reminder',
             templateData: [
-                'first_name' => $notifiable->first_name,
-                'referrer' => $this->referrer->name,
+                'first_name' => $this->referral->first_name,
+                'referrer' => $this->referral->referrer->name,
                 'url' => $this->shortURL,
             ]
         );
-    }
-
-    /**
-     * Get the mail representation of the notification.
-     */
-    public function toMail(object $notifiable): MailMessage
-    {
-        return (new MailMessage)
-            ->from('welcome@primavip.co', 'PRIMA')
-            ->subject('Welcome to PRIMA!')
-            ->markdown('mail.concierge-referral-mail', ['passwordResetUrl' => $this->shortURL, 'referrer' => $this->referrer->name]);
     }
 }
