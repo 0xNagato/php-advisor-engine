@@ -227,4 +227,21 @@ return [
 
     'bookings_enabled' => env('BOOKINGS_ENABLED', true),
     'bookings_disabled_message' => env('BOOKINGS_DISABLED_MESSAGE', 'Bookings are currently disabled while we are onboarding venues and concierges. We expect to be live by mid-November.'),
+
+    /*
+    |--------------------------------------------------------------------------
+    | App Login Customization
+    |--------------------------------------------------------------------------
+    |
+    | These settings allow for dynamic customization of the app login screen.
+    | You can set the background image URL and text color through environment
+    | variables or use the default values provided.
+    |
+    */
+
+    'login' => [
+        'background_image' => env('LOGIN_BACKGROUND_IMAGE'),
+        'text_color' => env('LOGIN_TEXT_COLOR'),
+    ],
+
 ];

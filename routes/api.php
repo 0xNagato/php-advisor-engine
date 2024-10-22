@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Api\AppConfigController;
 use App\Http\Controllers\Api\AvailabilityCalendarController;
 use App\Http\Controllers\Api\BookingController;
 use App\Http\Controllers\Api\ContactFormController;
@@ -26,3 +27,5 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::delete('/bookings/{booking}', [BookingController::class, 'destroy']);
     Route::post('/contact', [ContactFormController::class, 'submit']);
 });
+
+Route::get('/app-config', AppConfigController::class)->name('app-config');

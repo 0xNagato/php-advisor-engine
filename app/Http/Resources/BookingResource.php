@@ -22,6 +22,8 @@ class BookingResource extends JsonResource
     public function toArray(Request $request): array
     {
         return [
+            'bookings_enabled' => config('app.bookings_enabled'),
+            'bookings_disabled_message' => config('app.bookings_disabled_message'),
             'id' => $this->booking->id,
             'guest_count' => $this->booking->guest_count,
             'dayDisplay' => $this->additional['dayDisplay'],
