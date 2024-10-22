@@ -10,8 +10,7 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Filament\Widgets\Concerns\InteractsWithPageFilters;
 use Filament\Widgets\TableWidget as BaseWidget;
-use Illuminate\Support\Collection;
-use Illuminate\Support\Facades\Cache;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\DB;
 use Livewire\Attributes\Reactive;
 
@@ -31,66 +30,43 @@ class AdminTopReferrersTable extends BaseWidget
     #[Reactive]
     public ?Carbon $endDate = null;
 
-    public function getTableData(): Collection
+    protected function getTableQuery(): Builder
     {
-        $tempStartDate = $this->startDate ?? now()->subDays(30)->startOfDay();
-        $tempEndDate = $this->endDate ?? now()->endOfDay();
+        return User::query()
+            ->select([
+                'users.*',
+                DB::raw('COUNT(DISTINCT referrals.id) as total_referrals'),
+                DB::raw('COUNT(DISTINCT CASE WHEN referrals.secured_at IS NOT NULL THEN referrals.id END) as secured_referrals'),
+                DB::raw('CASE
+                    WHEN COUNT(DISTINCT referrals.id) > 0
+                    THEN (COUNT(DISTINCT CASE WHEN referrals.secured_at IS NOT NULL THEN referrals.id END) * 100.0 / COUNT(DISTINCT referrals.id))
+                    ELSE 0
+                END as conversion_rate'),
+            ])
+            ->with(['roles', 'concierge', 'partner', 'venue'])
+            ->leftJoin('referrals', 'referrals.referrer_id', '=', 'users.id')
+            ->whereBetween('referrals.created_at', [
+                $this->startDate ?? now()->subDays(30)->startOfDay(),
+                $this->endDate ?? now()->endOfDay(),
+            ])
+            ->groupBy('users.id')
+            ->having('total_referrals', '>', 0);
+    }
 
-        $cacheKey = "admin_top_referrers_{$tempStartDate->toDateTimeString()}_{$tempEndDate->toDateTimeString()}";
+    protected function getDefaultTableSortColumn(): ?string
+    {
+        return 'total_referrals';
+    }
 
-        return Cache::remember($cacheKey, now()->addMinutes(5), function () use ($tempStartDate, $tempEndDate) {
-            return User::query()
-                ->with(['roles', 'concierge', 'partner', 'venue']) // Add eager loading here
-                ->select([
-                    'users.*',  // Select all user columns
-                    DB::raw('COUNT(DISTINCT referrals.id) as total_referrals'),
-                    DB::raw('COUNT(DISTINCT CASE WHEN referrals.secured_at IS NOT NULL THEN referrals.id END) as secured_referrals'),
-                    DB::raw('COALESCE(SUM(earnings.amount), 0) as total_earnings'),
-                ])
-                ->leftJoin('referrals', 'referrals.referrer_id', '=', 'users.id')
-                ->leftJoin('earnings', function ($join) {
-                    $join->on('earnings.user_id', '=', 'users.id')
-                        ->where('earnings.type', 'LIKE', '%referral%');
-                })
-                ->whereBetween('referrals.created_at', [$tempStartDate, $tempEndDate])
-                ->groupBy('users.id')
-                ->having('total_referrals', '>', 0)
-                ->orderByDesc('total_referrals')
-                ->limit(25)
-                ->get()
-                ->map(function ($user) {
-                    $user->conversion_rate = $user->total_referrals > 0
-                        ? ($user->secured_referrals / $user->total_referrals) * 100
-                        : 0;
-
-                    return $user;
-                });
-        });
+    protected function getDefaultTableSortDirection(): ?string
+    {
+        return 'desc';
     }
 
     public function table(Table $table): Table
     {
         return $table
-            ->query(User::query()
-                ->select([
-                    'users.*',  // Select all user columns instead of just specific ones
-                    DB::raw('COUNT(DISTINCT referrals.id) as total_referrals'),
-                    DB::raw('COUNT(DISTINCT CASE WHEN referrals.secured_at IS NOT NULL THEN referrals.id END) as secured_referrals'),
-                    DB::raw('CASE
-                        WHEN COUNT(DISTINCT referrals.id) > 0
-                        THEN (COUNT(DISTINCT CASE WHEN referrals.secured_at IS NOT NULL THEN referrals.id END) * 100.0 / COUNT(DISTINCT referrals.id))
-                        ELSE 0
-                    END as conversion_rate'),
-                ])
-                ->with(['roles', 'concierge', 'partner', 'venue']) // Eager load all needed relationships
-                ->leftJoin('referrals', 'referrals.referrer_id', '=', 'users.id')
-                ->whereBetween('referrals.created_at', [
-                    $this->startDate ?? now()->subDays(30)->startOfDay(),
-                    $this->endDate ?? now()->endOfDay(),
-                ])
-                ->groupBy('users.id')  // Group by all selected columns
-                ->having('total_referrals', '>', 0)
-            )
+            ->query($this->getTableQuery())
             ->columns([
                 TextColumn::make('name')
                     ->size('xs')
@@ -118,6 +94,6 @@ class AdminTopReferrersTable extends BaseWidget
                     ->formatStateUsing(fn ($state) => number_format($state, 1).'%')
                     ->sortable(),
             ])
-            ->defaultSort('total_referrals', 'desc');
+            ->defaultSort($this->getDefaultTableSortColumn(), $this->getDefaultTableSortDirection());
     }
 }
