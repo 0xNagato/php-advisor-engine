@@ -26,7 +26,7 @@ class SendDailySummaryEmail extends Command
     {
         $yesterday = Carbon::yesterday();
         $startDate = $yesterday->startOfDay();
-        $endDate = Carbon::now()->endOfDay();
+        $endDate = $yesterday->endOfDay();
 
         $bookings = $this->getBookingsData($startDate, $endDate);
         $totalBookings = $bookings->sum('count');
