@@ -84,6 +84,12 @@ class SMSBookingForm extends Widget implements HasForms
 
     public function handleSubmit(): void
     {
+        if (! config('app.bookings_enabled')) {
+            $this->dispatch('open-modal', id: 'bookings-disabled-modal');
+
+            return;
+        }
+
         $data = $this->form->getState();
 
         $this->booking->update([

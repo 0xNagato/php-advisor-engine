@@ -301,6 +301,13 @@ class ReservationHub extends Page
      */
     public function completeBooking($form): void
     {
+        if (! config('app.bookings_enabled')) {
+            $this->dispatch('open-modal', id: 'bookings-disabled-modal');
+            $this->isLoading = false;
+
+            return;
+        }
+
         if (! $this->booking->prime_time && ! ($form['real_customer_confirmation'] ?? false)) {
             Notification::make()
                 ->title('Confirmation Required')

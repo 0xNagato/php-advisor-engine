@@ -213,4 +213,18 @@ return [
         'concierge_id' => env('HOUSE_CONCIERGE_ID', 1),
     ],
     'widget_cache_timeout_minutes' => env('WIDGET_CACHE_TIMEOUT_MINUTES', 5),
+
+    /*
+    |--------------------------------------------------------------------------
+    | Booking Status
+    |--------------------------------------------------------------------------
+    |
+    | This value determines whether bookings are globally enabled or disabled.
+    | When set to false, all booking attempts will be prevented and a custom
+    | message will be displayed.
+    |
+    */
+
+    'bookings_enabled' => env('BOOKINGS_ENABLED', true),
+    'bookings_disabled_message' => env('BOOKINGS_DISABLED_MESSAGE', 'Bookings are currently disabled while we are onboarding venues and concierges. We expect to be live by mid-November.'),
 ];

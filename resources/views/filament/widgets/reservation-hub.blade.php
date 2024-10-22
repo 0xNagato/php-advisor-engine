@@ -319,4 +319,6 @@
             </div>
         @endif
     </div>
+
+    @include('partials.bookings-disabled-modal')
 </x-filament-panels::page>
