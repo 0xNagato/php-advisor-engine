@@ -11,14 +11,24 @@ Here's a summary of yesterday's activities:
 - Platform Earnings: ${{ number_format($summary['platform_earnings'], 2) }} USD
 
 ## Currency Breakdown:
-@foreach($summary['currency_breakdown'] as $currency => $amount)
+@foreach ($summary['currency_breakdown'] as $currency => $amount)
 - {{ $currency }}: {{ number_format($amount / 100, 2) }}
 @endforeach
 
-## New Concierges:
-@foreach($summary['new_concierges_list'] as $concierge)
-- [{{ $concierge['name'] }}]({{ $concierge['profile_url'] }}) ({{ $concierge['email'] }})
+## Top Referrers (Invitations):
+@foreach ($summary['top_referrers_invitations'] as $referrer)
+- {{ $referrer['name'] }}: {{ $referrer['count'] }} invitations
 @endforeach
 
-From dru with <3.
+## Top Referrers (Secured Accounts):
+@foreach ($summary['top_referrers_secured'] as $referrer)
+- {{ $referrer['name'] }}: {{ $referrer['count'] }} secured accounts
+@endforeach
+
+## New Concierges:
+@foreach ($summary['new_concierges_list'] as $concierge)
+- [{{ $concierge['name'] }}]({{ $concierge['profile_url'] }})
+@endforeach
+
+Thank you for your attention to this daily summary.
 @endcomponent

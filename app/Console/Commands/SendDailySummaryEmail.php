@@ -26,7 +26,7 @@ class SendDailySummaryEmail extends Command
     {
         $yesterday = Carbon::yesterday();
         $startDate = $yesterday->startOfDay();
-        $endDate = $yesterday->endOfDay();
+        $endDate = Carbon::now()->endOfDay();
 
         $bookings = $this->getBookingsData($startDate, $endDate);
         $totalBookings = $bookings->sum('count');
@@ -43,6 +43,38 @@ class SendDailySummaryEmail extends Command
             ->whereBetween('secured_at', [$startDate, $endDate])
             ->count();
 
+        $topReferrersInvitations = User::withCount(['referrals' => function ($query) use ($startDate, $endDate) {
+            $query->where('type', 'concierge')
+                ->whereBetween('created_at', [$startDate, $endDate]);
+        }])
+            ->orderByDesc('referrals_count')
+            ->limit(5)
+            ->get()
+            ->map(function ($user) {
+                return [
+                    'name' => $user->name,
+                    'email' => $user->email,
+                    'count' => $user->referrals_count,
+                ];
+            });
+
+        $topReferrersSecured = User::withCount(['referrals' => function ($query) use ($startDate, $endDate) {
+            $query->where('type', 'concierge')
+                ->whereHas('user', function ($subQuery) use ($startDate, $endDate) {
+                    $subQuery->whereBetween('secured_at', [$startDate, $endDate]);
+                });
+        }])
+            ->orderByDesc('referrals_count')
+            ->limit(5)
+            ->get()
+            ->map(function ($user) {
+                return [
+                    'name' => $user->name,
+                    'email' => $user->email,
+                    'count' => $user->referrals_count,
+                ];
+            });
+
         $newConcierges = Concierge::with('user')
             ->whereHas('user', function ($query) use ($startDate, $endDate) {
                 $query->whereBetween('created_at', [$startDate, $endDate]);
@@ -53,6 +85,7 @@ class SendDailySummaryEmail extends Command
                     'name' => $concierge->user->name,
                     'email' => $concierge->user->email,
                     'profile_url' => ViewConcierge::getUrl(['record' => $concierge]),
+                    'secured' => ! is_null($concierge->user->secured_at),
                 ];
             });
 
@@ -63,6 +96,8 @@ class SendDailySummaryEmail extends Command
             'new_concierges_invited' => $newConciergesInvited,
             'new_concierges_secured' => $newConciergesSecured,
             'new_concierges_list' => $newConcierges,
+            'top_referrers_invitations' => $topReferrersInvitations,
+            'top_referrers_secured' => $topReferrersSecured,
             'total_amount' => $totalAmountUSD,
             'platform_earnings' => $platformEarningsUSD,
             'currency_breakdown' => $bookings->pluck('total_amount', 'currency')->toArray(),
