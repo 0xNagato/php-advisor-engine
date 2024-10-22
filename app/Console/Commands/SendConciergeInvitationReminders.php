@@ -35,16 +35,27 @@ class SendConciergeInvitationReminders extends Command
             ->where('type', 'concierge')
             ->whereNull('secured_at')
             ->whereNull('reminded_at')
-            ->whereNotNull('phone')
             ->where('created_at', '<=', now()->subHours(48))
             ->get();
 
+        $smsCount = 0;
+        $emailCount = 0;
+
         foreach ($referrals as $referral) {
             $referral->notify(new InvitationReminder($referral));
+
+            if ($referral->phone) {
+                $smsCount++;
+            }
+            if ($referral->email) {
+                $emailCount++;
+            }
+
             $referral->update(['reminded_at' => now()]);
         }
 
-        $this->info("Sent {$referrals->count()} concierge reminders.");
-        logger()->info("Sent {$referrals->count()} concierge reminders.");
+        $totalCount = $smsCount + $emailCount;
+        $this->info("Sent {$totalCount} concierge reminders ({$smsCount} SMS, {$emailCount} emails).");
+        logger()->info("Sent {$totalCount} concierge reminders ({$smsCount} SMS, {$emailCount} emails).");
     }
 }
