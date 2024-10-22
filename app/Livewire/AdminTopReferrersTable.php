@@ -96,7 +96,6 @@ class AdminTopReferrersTable extends BaseWidget
                     ->size('xs')
                     ->label('Referrer')
                     ->formatStateUsing(fn (User $record) => $record->first_name.' '.$record->last_name)
-                    ->sortable()
                     ->url(function (User $record): string {
                         if ($record->concierge) {
                             return ConciergeResource::getUrl('view', ['record' => $record->concierge]);
