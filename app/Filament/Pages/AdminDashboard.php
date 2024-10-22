@@ -93,7 +93,8 @@ class AdminDashboard extends Dashboard
                 'endDate' => Carbon::parse($this->filters['endDate']),
             ]),
             AdminTopReferrersTable::make([
-                'columnSpan' => '1',
+                'startDate' => Carbon::parse($this->filters['startDate']),
+                'endDate' => Carbon::parse($this->filters['endDate']),
             ]),
         ];
     }
