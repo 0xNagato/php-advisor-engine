@@ -35,7 +35,7 @@ class ListPartners extends ListRecords
                 TextColumn::make('user.name')
                     ->label('Name')
                     ->size('xs')
-                    ->searchable(['user.first_name', 'user.last_name']),
+                    ->searchable(['users.first_name', 'users.last_name']),
 
                 TextColumn::make('total_earned')
                     ->label('Earned')
