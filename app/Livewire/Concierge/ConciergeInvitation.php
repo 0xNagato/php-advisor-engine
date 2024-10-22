@@ -38,6 +38,8 @@ class ConciergeInvitation extends SimplePage
 
     public ?array $data = [];
 
+    public ?string $invitationUsedMessage = null;
+
     public function getTitle(): string|Htmlable
     {
         return 'Create Your Account';
@@ -45,6 +47,10 @@ class ConciergeInvitation extends SimplePage
 
     public function getHeading(): string|Htmlable
     {
+        if ($this->invitationUsedMessage) {
+            return '';
+        }
+
         return 'Create Your Account';
     }
 
@@ -56,6 +62,13 @@ class ConciergeInvitation extends SimplePage
     public function mount(Referral $referral): void
     {
         $this->referral = $referral;
+
+        if ($referral->secured_at || $referral->user_id) {
+            $this->invitationUsedMessage = 'This invitation has already been claimed.';
+
+            return;
+        }
+
         $this->form->fill([
             'first_name' => $referral->first_name,
             'last_name' => $referral->last_name,
@@ -154,6 +167,14 @@ class ConciergeInvitation extends SimplePage
             return;
         }
 
+        if ($this->invitationUsedMessage) {
+            Notification::make()
+                ->title($this->invitationUsedMessage)
+                ->danger()
+                ->send();
+            $this->redirect(config('app.platform_url'));
+        }
+
         $data = $this->form->getState();
 
         /** @var User $referrer */
@@ -182,6 +203,15 @@ class ConciergeInvitation extends SimplePage
             'secured_at' => now(),
         ]);
 
+        // Delete other referrals with the same email or phone
+        Referral::query()
+            ->where('id', '!=', $this->referral->id)
+            ->where(function ($query) use ($data) {
+                $query->where('email', $data['email'])
+                    ->orWhere('phone', $data['phone']);
+            })
+            ->delete();
+
         $user->assignRole('concierge');
 
         $user->concierge()->create([
@@ -192,7 +222,7 @@ class ConciergeInvitation extends SimplePage
 
         Auth::login($user);
 
-        $this->redirect('/');
+        $this->redirect(config('app.platform_url'));
     }
 
     public function getFormActions(): array
