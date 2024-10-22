@@ -31,9 +31,11 @@ class SendConciergeInvitationReminders extends Command
     public function handle(): void
     {
         $referrals = Referral::query()
+            ->with('referrer')
             ->where('type', 'concierge')
             ->whereNull('secured_at')
             ->whereNull('reminded_at')
+            ->whereNotNull('phone')
             ->where('created_at', '<=', now()->subHours(48))
             ->get();
 
