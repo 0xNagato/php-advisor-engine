@@ -21,6 +21,8 @@ Route::get('/', static function () {
 
 Route::redirect('/login', '/platform/login');
 
+Route::redirect('/platform/app/login', config('app.platform_url'));
+
 Route::get('/invoice/download/{uuid}', DownloadInvoiceController::class)
     ->name('customer.invoice.download');
 
