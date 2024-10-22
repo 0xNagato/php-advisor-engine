@@ -3,6 +3,7 @@
 namespace App\Console\Commands;
 
 use App\Enums\BookingStatus;
+use App\Filament\Resources\ConciergeResource\Pages\ViewConcierge;
 use App\Mail\DailySummaryEmail;
 use App\Models\Booking;
 use App\Models\Concierge;
@@ -51,7 +52,7 @@ class SendDailySummaryEmail extends Command
                 return [
                     'name' => $concierge->user->name,
                     'email' => $concierge->user->email,
-                    'profile_url' => route('filament.resources.concierges.view', $concierge->id),
+                    'profile_url' => ViewConcierge::getUrl(['record' => $concierge]),
                 ];
             });
 
