@@ -35,7 +35,6 @@ class SendConciergeInvitationReminders extends Command
             ->whereNull('secured_at')
             ->whereNull('reminded_at')
             ->where('created_at', '<=', now()->subHours(48))
-            ->where('created_at', '>', now()->subHours(72))
             ->get();
 
         foreach ($referrals as $referral) {
