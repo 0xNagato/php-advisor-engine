@@ -6,6 +6,7 @@ use App\Filament\Resources\PartnerResource;
 use App\Models\Partner;
 use App\Traits\ImpersonatesOther;
 use Carbon\Carbon;
+use Filament\Actions\CreateAction;
 use Filament\Resources\Pages\ListRecords;
 use Filament\Tables\Actions\Action;
 use Filament\Tables\Actions\EditAction;
@@ -24,6 +25,15 @@ class ListPartners extends ListRecords
     protected static string $view = 'filament.pages.partner.partner-list';
 
     const bool USE_SLIDE_OVER = false;
+
+    protected function getHeaderActions(): array
+    {
+        return [
+            CreateAction::make()
+                ->icon('heroicon-o-plus-circle')
+                ->label('Create Partner'),
+        ];
+    }
 
     public function table(Table $table): Table
     {
