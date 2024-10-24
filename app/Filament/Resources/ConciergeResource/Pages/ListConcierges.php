@@ -56,13 +56,15 @@ class ListConcierges extends ListRecords
                     ->visibleFrom('sm')
                     ->grow(false)
                     ->size('xs')->alignCenter()
-                    ->numeric()->sortable(),
+                    ->numeric()
+                    ->sortable(),
                 TextColumn::make('concierges_count')->label('Referrals')
                     ->visibleFrom('sm')
                     ->grow(false)
                     ->badge()->color('primary')
                     ->size('xs')->alignCenter()
-                    ->numeric()->sortable()
+                    ->numeric()
+                    ->sortable()
                     ->action(Action::make('viewReferrals')
                         ->iconButton()
                         ->icon('heroicon-o-receipt-refund')
@@ -83,7 +85,8 @@ class ListConcierges extends ListRecords
                         ->modalCancelAction(false)
                         ->slideOver(self::USE_SLIDE_OVER)),
                 TextColumn::make('user.authentications.login_at')
-                    ->label('Last Login')->sortable()
+                    ->label('Last Login')
+                    ->sortable()
                     ->visibleFrom('sm')
                     ->grow(false)
                     ->size('xs')
@@ -96,6 +99,17 @@ class ListConcierges extends ListRecords
                         return 'Never';
                     })
                     ->default('Never'),
+                TextColumn::make('user.secured_at')
+                    ->label('Date Joined')
+                    ->size('xs')
+                    ->formatStateUsing(function ($state) {
+                        $date = Carbon::parse($state);
+
+                        return $date->isCurrentYear() ? $date->format('M j, g:ia') : $date->format('M j, Y g:ia');
+                    })
+
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->actions([
                 Action::make('impersonate')
