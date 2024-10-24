@@ -25,6 +25,8 @@ class ListVenues extends ListRecords
 
     protected static string $view = 'filament.pages.venue.list-venues';
 
+    public ?string $tableSortColumn = 'user.secured_at';
+
     const bool USE_SLIDE_OVER = false;
 
     public function table(Table $table): Table
@@ -72,6 +74,16 @@ class ListVenues extends ListRecords
                         return 'Never';
                     })
                     ->default('Never'),
+                TextColumn::make('user.secured_at')
+                    ->label('Date Joined')
+                    ->size('xs')
+                    ->formatStateUsing(function ($state) {
+                        $date = Carbon::parse($state);
+
+                        return $date->isCurrentYear() ? $date->format('M j, g:ia') : $date->format('M j, Y g:ia');
+                    })
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->actions([
                 Action::make('impersonate')
