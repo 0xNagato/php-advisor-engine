@@ -5,6 +5,7 @@ namespace App\Filament\Resources\ConciergeResource\Pages;
 use App\Enums\BookingStatus;
 use App\Filament\Resources\ConciergeResource;
 use App\Models\Concierge;
+use App\Models\User;
 use App\Traits\ImpersonatesOther;
 use Carbon\Carbon;
 use Filament\Resources\Pages\ListRecords;
@@ -13,6 +14,7 @@ use Filament\Tables\Actions\EditAction;
 use Filament\Tables\Actions\ViewAction;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\HtmlString;
 
 class ListConcierges extends ListRecords
@@ -29,20 +31,13 @@ class ListConcierges extends ListRecords
     {
         return $table
             ->recordUrl(fn (Concierge $record) => ViewConcierge::getUrl(['record' => $record]))
-            ->query(
-                Concierge::query()
-                    ->with(['user.referrer.referral', 'user.authentications', 'user.referral.referrer.partner', 'user.referral.referrer.concierge'])
-                    ->withCount(['bookings' => function ($query) {
-                        $query->where('status', BookingStatus::CONFIRMED);
-                    }])
-                    ->join('users', 'concierges.user_id', '=', 'users.id')
-                    ->orderByDesc('users.secured_at')
-            )
+            ->query($this->getConciergesQuery())
             ->columns([
                 TextColumn::make('user.name')
-                    ->size('xs')
+                    ->size('xs')->sortable(['last_name'])
                     ->searchable(['first_name', 'last_name']),
                 TextColumn::make('user.referrer.name')
+                    ->sortable(['referrer_first_name'])
                     ->url(fn (Concierge $concierge) => $concierge->user->referral?->referrer_route)
                     ->grow(false)
                     ->size('xs')
@@ -50,7 +45,8 @@ class ListConcierges extends ListRecords
                         <div class='text-xs italic text-gray-600'>
                             PRIMA CREATED
                         </div>
-                    HTML))
+                    HTML
+                    ))
                     ->visibleFrom('sm'),
                 TextColumn::make('id')->label('Earned')
                     ->grow(false)
@@ -59,10 +55,35 @@ class ListConcierges extends ListRecords
                 TextColumn::make('bookings_count')->label('Bookings')
                     ->visibleFrom('sm')
                     ->grow(false)
-                    ->size('xs')
-                    ->numeric(),
+                    ->size('xs')->alignCenter()
+                    ->numeric()->sortable(),
+                TextColumn::make('concierges_count')->label('Referrals')
+                    ->visibleFrom('sm')
+                    ->grow(false)
+                    ->badge()->color('primary')
+                    ->size('xs')->alignCenter()
+                    ->numeric()->sortable()
+                    ->action(Action::make('viewReferrals')
+                        ->iconButton()
+                        ->icon('heroicon-o-receipt-refund')
+                        ->modalHeading(fn (Concierge $concierge) => $concierge->user->name)
+                        ->modalContent(function (Concierge $concierge) {
+                            $referralsBookings = $concierge->concierges->map(fn ($concierge
+                            ) => $concierge->bookings()->confirmed()->count())->sum();
+
+                            return view('partials.concierge-referrals-table-modal-view', [
+                                'concierge' => $concierge,
+                                'bookings_count' => number_format($concierge->bookings_count),
+                                'earningsInUSD' => $concierge->formatted_total_earnings_in_u_s_d,
+                                'referralsBookings' => $referralsBookings,
+                                'referralsEarnings' => $concierge->formatted_referral_earnings_in_u_s_d,
+                            ]);
+                        })
+                        ->modalSubmitAction(false)
+                        ->modalCancelAction(false)
+                        ->slideOver(self::USE_SLIDE_OVER)),
                 TextColumn::make('user.authentications.login_at')
-                    ->label('Last Login')
+                    ->label('Last Login')->sortable()
                     ->visibleFrom('sm')
                     ->grow(false)
                     ->size('xs')
@@ -101,13 +122,19 @@ class ListConcierges extends ListRecords
                             ->get();
 
                         $lastLogin = $concierge->user->authentications()->latest('login_at')->first()->login_at ?? null;
+                        $avgEarnPerBooking = $concierge->total_earnings_in_u_s_d / $concierge->bookings_count;
+                        $referralsBookings = $concierge->concierges->map(fn ($concierge
+                        ) => $concierge->bookings()->confirmed()->count())->sum();
 
                         return view('partials.concierge-table-modal-view', [
+                            'concierge' => $concierge,
                             'secured_at' => $concierge->user->secured_at,
                             'referrer_name' => $concierge->user->referrer?->name ?? '-',
                             'referral_url' => $concierge->user->referral?->referrer_route ?? null,
                             'bookings_count' => number_format($concierge->bookings_count),
+                            'referralsBookings' => $referralsBookings,
                             'earningsInUSD' => $concierge->formatted_total_earnings_in_u_s_d,
+                            'avgEarnPerBookingInUSD' => money($avgEarnPerBooking, 'USD'),
                             'recentBookings' => $recentBookings,
                             'last_login' => $lastLogin,
                         ]);
@@ -119,6 +146,27 @@ class ListConcierges extends ListRecords
                     ->modalSubmitAction(false)
                     ->modalCancelAction(false)
                     ->slideOver(self::USE_SLIDE_OVER),
+            ]);
+    }
+
+    protected function getConciergesQuery(): Builder
+    {
+        return Concierge::query()
+            ->addSelect([
+                'referrer_first_name' => User::query()->select('users.first_name')
+                    ->join('referrals', 'users.id', '=', 'referrals.referrer_id')
+                    ->whereColumn('referrals.user_id', 'concierges.user_id')
+                    ->limit(1),
+            ])
+            ->with([
+                'user.authentications',
+                'user.referral.referrer.partner',
+                'user.referral.referrer.concierge',
+            ])
+            ->withCount([
+                'bookings' => function ($query) {
+                    $query->where('status', BookingStatus::CONFIRMED);
+                }, 'referrals', 'concierges',
             ]);
     }
 }

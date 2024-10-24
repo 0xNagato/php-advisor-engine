@@ -3,7 +3,9 @@
 namespace App\Models;
 
 use App\Enums\BookingStatus;
+use App\Enums\EarningType;
 use App\Models\Traits\HasEarnings;
+use App\Services\CurrencyConversionService;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -60,12 +62,6 @@ class Concierge extends Model
         return Attribute::make(get: fn () => $this->bookings()->where('status', BookingStatus::CONFIRMED)->count());
     }
 
-    public function bookings(): HasMany
-    {
-        return $this->hasMany(Booking::class, 'concierge_id')
-            ->where('status', BookingStatus::CONFIRMED);
-    }
-
     /**
      * Get the amount confirmed bookings.
      */
@@ -75,6 +71,42 @@ class Concierge extends Model
             ->where('status', BookingStatus::CONFIRMED)
             ->whereMonth('created_at', now()->month)
             ->count());
+    }
+
+    public function referralEarningsByCurrency(): Attribute
+    {
+        return Attribute::make(get: function () {
+            $earnings = $this->earnings()->confirmed()
+                ->whereIn('type', [
+                    EarningType::CONCIERGE_REFERRAL_1,
+                    EarningType::CONCIERGE_REFERRAL_2,
+                ])
+                ->get(['amount', 'currency']);
+
+            return $earnings->groupBy('currency')
+                ->map(fn ($currencyGroup) => $currencyGroup->sum('amount') * 100)
+                ->toArray();
+        });
+    }
+
+    public function referralEarningsInUSD(): Attribute
+    {
+        return Attribute::make(get: function () {
+            $currencyService = app(CurrencyConversionService::class);
+
+            return $currencyService->convertToUSD($this->referralEarningsByCurrency);
+        });
+    }
+
+    public function formattedReferralEarningsInUSD(): Attribute
+    {
+        return Attribute::make(get: fn () => money($this->referralEarningsInUSD, 'USD'));
+    }
+
+    public function bookings(): HasMany
+    {
+        return $this->hasMany(Booking::class, 'concierge_id')
+            ->where('status', BookingStatus::CONFIRMED);
     }
 
     /**

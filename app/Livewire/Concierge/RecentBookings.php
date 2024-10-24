@@ -1,10 +1,10 @@
 <?php
 
-namespace App\Livewire\VipCode;
+namespace App\Livewire\Concierge;
 
 use App\Filament\Resources\BookingResource\Pages\ViewBooking;
 use App\Models\Booking;
-use App\Models\VipCode;
+use App\Models\Concierge;
 use Filament\Support\Enums\Alignment;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
@@ -16,7 +16,7 @@ class RecentBookings extends BaseWidget
 {
     use InteractsWithPageFilters;
 
-    public ?VipCode $vipCode = null;
+    public ?Concierge $concierge = null;
 
     protected static ?string $heading = 'Recent Bookings';
 
@@ -33,8 +33,7 @@ class RecentBookings extends BaseWidget
             ->query(
                 Booking::with('schedule.venue')
                     ->confirmed()
-                    ->limit(10)
-                    ->where('vip_code_id', $this->vipCode->id)
+                    ->where('concierge_id', $this->concierge->id)
                     ->orderByDesc('confirmed_at')
             )
             ->recordUrl(fn (Booking $booking): string => ViewBooking::getUrl(['record' => $booking]))
@@ -42,6 +41,7 @@ class RecentBookings extends BaseWidget
             ->columns([
                 TextColumn::make('schedule.venue.name')
                     ->searchable()
+                    ->label('Venue')
                     ->formatStateUsing(fn (Booking $booking): string => view('components.two-line-cell', [
                         'primary' => $booking->schedule->venue->name,
                         'secondary' => $booking->booking_at->format('M d, Y g:i A'),
