@@ -26,6 +26,8 @@ class ListPartners extends ListRecords
 
     public ?string $tableSortColumn = 'user.secured_at';
 
+    public ?string $tableSortDirection = 'desc';
+
     const bool USE_SLIDE_OVER = false;
 
     protected function getHeaderActions(): array

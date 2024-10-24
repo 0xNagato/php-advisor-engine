@@ -29,6 +29,8 @@ class ListConcierges extends ListRecords
 
     public ?string $tableSortColumn = 'user.secured_at';
 
+    public ?string $tableSortDirection = 'desc';
+
     public function table(Table $table): Table
     {
         return $table
