@@ -42,25 +42,20 @@ class ListReferrals extends BaseWidget
             ->recordUrl(fn ($record) => ViewConcierge::getUrl(['record' => $record]))
             ->openRecordUrlInNewTab()
             ->columns([
-                IconColumn::make('user.referral.referrer_id')
+                IconColumn::make('user.concierge_referral_id')
                     ->label('Level')
                     ->color(fn ($state) => $state ? match ($state) {
-                        $this->concierge->user_id => 'gold',
+                        $this->concierge->id => 'gold',
                         default => 'silver',
                     } : 'gray')
                     ->icon(fn ($state) => $state ? match ($state) {
-                        $this->concierge->user_id => 'tabler-square-rounded-number-1-filled',
+                        $this->concierge->id => 'tabler-square-rounded-number-1-filled',
                         default => 'tabler-square-rounded-number-2-filled',
                     } : 'tabler-square-rounded-minus-filled')
                     ->default(null),
                 TextColumn::make('user.name')
                     ->label('User')
                     ->searchable(['first_name', 'last_name'])
-                    ->formatStateUsing(fn (Concierge $concierge): string => view('components.two-line-cell', [
-                        'primary' => $concierge->user->name,
-                        'secondary' => $concierge->user->referral?->type ? ucfirst($concierge->user->referral->type) : 'N/A',
-                    ])->render())
-                    ->html()
                     ->size('sm'),
                 TextColumn::make('id')->label('Earned')
                     ->grow(false)
@@ -96,7 +91,7 @@ class ListReferrals extends BaseWidget
                     ->grow(false)
                     ->size('xs')->alignCenter()
                     ->numeric()->sortable(),
-                TextColumn::make('user.referral.secured_at')
+                TextColumn::make('user.secured_at')
                     ->label('Date Joined')
                     ->size('xs')
                     ->date()
