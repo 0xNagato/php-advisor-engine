@@ -27,6 +27,8 @@ class ListConcierges extends ListRecords
 
     const bool USE_SLIDE_OVER = false;
 
+    public ?string $tableSortColumn = 'user.secured_at';
+
     public function table(Table $table): Table
     {
         return $table
