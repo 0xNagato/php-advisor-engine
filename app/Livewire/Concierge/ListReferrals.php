@@ -44,14 +44,15 @@ class ListReferrals extends BaseWidget
             ->columns([
                 IconColumn::make('user.referral.referrer_id')
                     ->label('Level')
-                    ->color(fn (int $state) => match ($state) {
+                    ->color(fn ($state) => $state ? match ($state) {
                         $this->concierge->user_id => 'gold',
                         default => 'silver',
-                    })
-                    ->icon(fn (int $state) => match ($state) {
+                    } : 'gray')
+                    ->icon(fn ($state) => $state ? match ($state) {
                         $this->concierge->user_id => 'tabler-square-rounded-number-1-filled',
                         default => 'tabler-square-rounded-number-2-filled',
-                    }),
+                    } : 'tabler-square-rounded-minus-filled')
+                    ->default(null),
                 TextColumn::make('user.name')
                     ->label('User')
                     ->searchable(['first_name', 'last_name'])
@@ -65,21 +66,30 @@ class ListReferrals extends BaseWidget
                     ->grow(false)
                     ->size('xs')
                     ->formatStateUsing(function (Concierge $concierge) {
-                        $type = $this->concierge->user_id === $concierge->user->referral->referrer_id ?
-                            EarningType::CONCIERGE_REFERRAL_1 : EarningType::CONCIERGE_REFERRAL_2;
-                        $earnings = Earning::confirmed()
-                            ->whereHas('booking', function ($query) use ($concierge) {
-                                $query->where('concierge_id', $concierge->id);
-                            })
-                            ->where('type', $type)
-                            ->get(['amount', 'currency'])
-                            ->groupBy('currency')
-                            ->map(fn ($currencyGroup) => $currencyGroup->sum('amount') * 100)
-                            ->toArray();
-                        $currencyService = app(CurrencyConversionService::class);
-                        $earned = $currencyService->convertToUSD($earnings);
+                        try {
+                            if (! $concierge->user?->referral?->referrer_id) {
+                                return money(0, 'USD');
+                            }
 
-                        return money($earned, 'USD');
+                            $type = $this->concierge->user_id === $concierge->user->referral->referrer_id ?
+                                EarningType::CONCIERGE_REFERRAL_1 : EarningType::CONCIERGE_REFERRAL_2;
+                            $earnings = Earning::confirmed()
+                                ->whereHas('booking', function ($query) use ($concierge) {
+                                    $query->where('concierge_id', $concierge->id);
+                                })
+                                ->where('type', $type)
+                                ->get(['amount', 'currency'])
+                                ->groupBy('currency')
+                                ->map(fn ($currencyGroup) => $currencyGroup->sum('amount') * 100)
+                                ->toArray();
+                            $currencyService = app(CurrencyConversionService::class);
+
+                            return money($currencyService->convertToUSD($earnings), 'USD');
+                        } catch (Exception $e) {
+                            logger()->error($e);
+
+                            return money(0, 'USD');
+                        }
                     }),
                 TextColumn::make('bookings_count')->label('Bookings')
                     ->visibleFrom('sm')
