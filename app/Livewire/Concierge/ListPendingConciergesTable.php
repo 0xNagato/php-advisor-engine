@@ -25,10 +25,16 @@ class ListPendingConciergesTable extends BaseWidget
             ->columns([
                 TextColumn::make('id')
                     ->label('User')
+                    ->size('xs')
                     ->formatStateUsing(fn (Referral $record) => view('partials.pending-concierge-info-column', ['record' => $record])),
                 TextColumn::make('created_at')
                     ->label('Invited')
-                    ->dateTime('D, M j, Y g:ia', auth()->user()->timezone),
+                    ->size('xs')
+                    ->formatStateUsing(function ($state) {
+                        $date = Carbon::parse($state);
+
+                        return $date->isCurrentYear() ? $date->format('M j, g:ia') : $date->format('M j, Y g:ia');
+                    }),
             ])->actions([
                 Action::make('resendInvitation')
                     ->icon('ri-refresh-line')
