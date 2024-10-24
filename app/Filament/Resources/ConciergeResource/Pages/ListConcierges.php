@@ -109,9 +109,10 @@ class ListConcierges extends ListRecords
                     ->formatStateUsing(function ($state) {
                         $date = Carbon::parse($state);
 
-                        return $date->isCurrentYear() ? $date->format('M j, g:ia') : $date->format('M j, Y g:ia');
+                        return $date->isCurrentYear()
+                            ? $date->timezone(auth()->user()->timezone)->format('M j, g:ia')
+                            : $date->timezone(auth()->user()->timezone)->format('M j, Y g:ia');
                     })
-
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
