@@ -43,9 +43,14 @@ class VipCodeManager extends Page
 
     public function mount(): void
     {
-        $this->initializeFilters();
-        $this->form->fill();
-        EnsureVipCodeExists::run(auth()->user()->concierge);
+        if (! auth()->user()->hasRole(['concierge'])) {
+            $this->redirect(config('app.platform_url'));
+        } else {
+            $this->initializeFilters();
+            $this->form->fill();
+
+            EnsureVipCodeExists::run(auth()->user()->concierge);
+        }
     }
 
     private function initializeFilters(): void
