@@ -108,6 +108,10 @@ class AdminPanelProvider extends PanelProvider
             ->viteTheme('resources/css/filament/admin/theme.css')
             ->databaseNotifications();
 
+        if (isPrimaApp()) {
+            $panel->sidebarFullyCollapsibleOnDesktop();
+        }
+
         return $panel;
     }
 }
