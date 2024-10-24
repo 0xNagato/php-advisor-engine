@@ -57,7 +57,7 @@ class ListReferrals extends BaseWidget
                     ->searchable(['first_name', 'last_name'])
                     ->formatStateUsing(fn (Concierge $concierge): string => view('components.two-line-cell', [
                         'primary' => $concierge->user->name,
-                        'secondary' => ucfirst($concierge->user->referral->type),
+                        'secondary' => $concierge->user->referral?->type ? ucfirst($concierge->user->referral->type) : 'N/A',
                     ])->render())
                     ->html()
                     ->size('sm'),
