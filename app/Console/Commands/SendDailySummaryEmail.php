@@ -13,6 +13,7 @@ use App\Models\Venue;
 use App\Services\CurrencyConversionService;
 use Carbon\Carbon;
 use Illuminate\Console\Command;
+use Illuminate\Contracts\Database\Query\Builder;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
 
@@ -35,7 +36,7 @@ class SendDailySummaryEmail extends Command
         $totalAmountUSD = $currencyService->convertToUSD($bookings->pluck('total_amount', 'currency')->toArray());
         $platformEarningsUSD = $currencyService->convertToUSD($bookings->pluck('platform_earnings', 'currency')->toArray());
 
-        $newConciergesInvited = Referral::where('type', 'concierge')
+        $newConciergesInvited = Referral::query()->where('type', 'concierge')
             ->whereBetween('created_at', [$startDate, $endDate])
             ->count();
 
@@ -43,22 +44,20 @@ class SendDailySummaryEmail extends Command
             ->whereBetween('secured_at', [$startDate, $endDate])
             ->count();
 
-        $topReferrersInvitations = User::withCount(['referrals' => function ($query) use ($startDate, $endDate) {
+        $topReferrersInvitations = User::query()->withCount(['referrals' => function ($query) use ($startDate, $endDate) {
             $query->where('type', 'concierge')
                 ->whereBetween('created_at', [$startDate, $endDate]);
         }])
             ->orderByDesc('referrals_count')
             ->limit(5)
             ->get()
-            ->map(function ($user) {
-                return [
-                    'name' => $user->name,
-                    'email' => $user->email,
-                    'count' => $user->referrals_count,
-                ];
-            });
+            ->map(fn ($user) => [
+                'name' => $user->name,
+                'email' => $user->email,
+                'count' => $user->referrals_count,
+            ]);
 
-        $topReferrersSecured = User::withCount(['referrals' => function ($query) use ($startDate, $endDate) {
+        $topReferrersSecured = User::query()->withCount(['referrals' => function ($query) use ($startDate, $endDate) {
             $query->where('type', 'concierge')
                 ->whereHas('user', function ($subQuery) use ($startDate, $endDate) {
                     $subQuery->whereBetween('secured_at', [$startDate, $endDate]);
@@ -67,32 +66,28 @@ class SendDailySummaryEmail extends Command
             ->orderByDesc('referrals_count')
             ->limit(5)
             ->get()
-            ->map(function ($user) {
-                return [
-                    'name' => $user->name,
-                    'email' => $user->email,
-                    'count' => $user->referrals_count,
-                ];
-            });
+            ->map(fn ($user) => [
+                'name' => $user->name,
+                'email' => $user->email,
+                'count' => $user->referrals_count,
+            ]);
 
         $newConcierges = Concierge::with('user')
-            ->whereHas('user', function ($query) use ($startDate, $endDate) {
+            ->whereHas('user', function (Builder $query) use ($startDate, $endDate) {
                 $query->whereBetween('created_at', [$startDate, $endDate]);
             })
             ->get()
-            ->map(function ($concierge) {
-                return [
-                    'name' => $concierge->user->name,
-                    'email' => $concierge->user->email,
-                    'profile_url' => ViewConcierge::getUrl(['record' => $concierge]),
-                    'secured' => ! is_null($concierge->user->secured_at),
-                ];
-            });
+            ->map(fn ($concierge) => [
+                'name' => $concierge->user->name,
+                'email' => $concierge->user->email,
+                'profile_url' => ViewConcierge::getUrl(['record' => $concierge]),
+                'secured' => ! is_null($concierge->user->secured_at),
+            ]);
 
         $summary = [
             'date' => $yesterday->toDateString(),
             'new_bookings' => $totalBookings,
-            'new_venues' => Venue::whereDate('created_at', $yesterday)->count(),
+            'new_venues' => Venue::query()->whereDate('created_at', $yesterday)->count(),
             'new_concierges_invited' => $newConciergesInvited,
             'new_concierges_secured' => $newConciergesSecured,
             'new_concierges_list' => $newConcierges,

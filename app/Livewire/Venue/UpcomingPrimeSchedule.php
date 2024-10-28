@@ -11,6 +11,7 @@ use Filament\Notifications\Notification;
 use Ijpatricio\Mingle\Concerns\InteractsWithMingles;
 use Ijpatricio\Mingle\Contracts\HasMingles;
 use Illuminate\Support\Collection;
+use Livewire\Attributes\On;
 use Livewire\Component;
 
 class UpcomingPrimeSchedule extends Component implements HasMingles
@@ -49,6 +50,12 @@ class UpcomingPrimeSchedule extends Component implements HasMingles
             'daysToDisplay' => self::DAYS_TO_DISPLAY,
             'detailedSchedule' => $this->venue->getDetailedSchedule(),
         ];
+    }
+
+    #[On('weekly-schedule-updated')]
+    public function weeklyScheduleUpdated(): void
+    {
+        $this->dispatch('upcoming-schedule-updated');
     }
 
     public function boot(): void
@@ -238,5 +245,12 @@ class UpcomingPrimeSchedule extends Component implements HasMingles
             ->title('Error saving prime schedule.')
             ->danger()
             ->send();
+    }
+
+    public function refresh(): array
+    {
+        $this->boot();
+
+        return $this->mingleData();
     }
 }

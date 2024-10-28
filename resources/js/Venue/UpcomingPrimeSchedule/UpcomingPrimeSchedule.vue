@@ -28,15 +28,30 @@ const { wire, mingleData } = defineProps<{
     save: (
       selectedTimeSlots: Record<string, boolean[]>,
     ) => Promise<{ message: string }>;
+    on: (event: string, callback: () => void) => void;
+    refresh: () => Promise<MingleData>;
   };
   mingleData: MingleData;
 }>();
 
-console.log(mingleData);
+wire.on('upcoming-schedule-updated', async () => {
+  isSaving.value = false;
+
+  try {
+    const response = await wire.refresh();
+
+    selectedTimeSlots.value = response.selectedTimeSlots;
+    detailedSchedule.value = response.detailedSchedule;
+
+    console.log('Schedule updated successfully');
+  } catch (error) {
+    console.error('Error refreshing schedule:', error);
+  }
+});
 
 const isSaving = ref(false);
 const selectedTimeSlots = ref(mingleData.selectedTimeSlots);
-const detailedSchedule = mingleData.detailedSchedule;
+const detailedSchedule = ref(mingleData.detailedSchedule);
 const today = dayjs().startOf('day');
 const currentDate = ref(today);
 const maxDate = ref(today.add(mingleData.daysToDisplay - 1, 'day'));
@@ -51,7 +66,7 @@ const days = computed(() => getDaysInWeek(currentDate.value));
 
 const times = computed(() => {
   const allTimes = new Set<string>();
-  Object.values(detailedSchedule).forEach((daySchedule) => {
+  Object.values(detailedSchedule.value).forEach((daySchedule) => {
     if (Array.isArray(daySchedule)) {
       daySchedule.forEach((slot) => {
         allTimes.add(slot.start_time);
@@ -94,7 +109,7 @@ const isTimeSlotAvailable = (day: dayjs.Dayjs, time: string): boolean => {
     return false;
   }
   const dayOfWeek = day.format('dddd').toLowerCase();
-  const daySchedule = detailedSchedule[dayOfWeek];
+  const daySchedule = detailedSchedule.value[dayOfWeek];
 
   if (daySchedule === 'closed') {
     return false;
