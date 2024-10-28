@@ -25,7 +25,9 @@ interface MingleData {
 
 const { wire, mingleData } = defineProps<{
   wire: {
-    save: (selectedTimeSlots: Record<string, boolean[]>) => Promise<{ message: string }>;
+    save: (
+      selectedTimeSlots: Record<string, boolean[]>,
+    ) => Promise<{ message: string }>;
   };
   mingleData: MingleData;
 }>();
@@ -40,16 +42,18 @@ const currentDate = ref(today);
 const maxDate = ref(today.add(mingleData.daysToDisplay - 1, 'day'));
 
 const getDaysInWeek = (startDate: dayjs.Dayjs): dayjs.Dayjs[] => {
-  return Array(7).fill(null).map((_, i) => startDate.add(i, 'day'));
+  return Array(7)
+    .fill(null)
+    .map((_, i) => startDate.add(i, 'day'));
 };
 
 const days = computed(() => getDaysInWeek(currentDate.value));
 
 const times = computed(() => {
   const allTimes = new Set<string>();
-  Object.values(detailedSchedule).forEach(daySchedule => {
+  Object.values(detailedSchedule).forEach((daySchedule) => {
     if (Array.isArray(daySchedule)) {
-      daySchedule.forEach(slot => {
+      daySchedule.forEach((slot) => {
         allTimes.add(slot.start_time);
       });
     }
@@ -61,7 +65,7 @@ const times = computed(() => {
 const formatDate = (date: dayjs.Dayjs): { day: string; date: string } => {
   return {
     day: date.format('ddd').toUpperCase(),
-    date: date.format('D')
+    date: date.format('D'),
   };
 };
 
@@ -78,7 +82,10 @@ const navigateWeek = (direction: 'prev' | 'next') => {
     (direction === 'next' && canNavigateForward.value) ||
     (direction === 'prev' && canNavigateBack.value)
   ) {
-    currentDate.value = currentDate.value.add(direction === 'next' ? 7 : -7, 'day');
+    currentDate.value = currentDate.value.add(
+      direction === 'next' ? 7 : -7,
+      'day',
+    );
   }
 };
 
@@ -93,8 +100,9 @@ const isTimeSlotAvailable = (day: dayjs.Dayjs, time: string): boolean => {
     return false;
   }
 
-  return daySchedule.some(slot =>
-    time >= slot.start_time && time < slot.end_time && slot.is_available
+  return daySchedule.some(
+    (slot) =>
+      time >= slot.start_time && time < slot.end_time && slot.is_available,
   );
 };
 
@@ -115,11 +123,14 @@ const toggleTimeSlot = (day: dayjs.Dayjs, timeIndex: number) => {
   const dateKey = day.format('YYYY-MM-DD');
 
   if (!selectedTimeSlots.value[dateKey]) {
-    selectedTimeSlots.value[dateKey] = new Array(times.value.length).fill(false);
+    selectedTimeSlots.value[dateKey] = new Array(times.value.length).fill(
+      false,
+    );
   }
 
   if (isTimeSlotAvailable(day, times.value[timeIndex])) {
-    selectedTimeSlots.value[dateKey][timeIndex] = !selectedTimeSlots.value[dateKey][timeIndex];
+    selectedTimeSlots.value[dateKey][timeIndex] =
+      !selectedTimeSlots.value[dateKey][timeIndex];
   }
 };
 
@@ -141,10 +152,7 @@ const saveReservationHours = async () => {
 <template>
   <div class="mx-auto">
     <div class="mb-4 flex items-center justify-between">
-      <div
-        class="inline-flex rounded-md shadow-sm"
-        role="group"
-      >
+      <div class="inline-flex rounded-md shadow-sm" role="group">
         <button
           :disabled="!canNavigateBack"
           class="rounded-l-lg border border-gray-200 bg-white p-2 text-sm font-medium text-gray-900 hover:bg-gray-100 hover:text-indigo-700 focus:z-10 focus:text-indigo-700 focus:ring-2 focus:ring-indigo-700 disabled:opacity-50 disabled:hover:bg-white disabled:hover:text-gray-900"
@@ -165,19 +173,15 @@ const saveReservationHours = async () => {
         :disabled="isSaving"
         @click="saveReservationHours"
       >
-        <LoaderCircle
-          v-if="isSaving"
-          class="mr-2 size-4 animate-spin"
-        />
-        <Save
-          v-else
-          class="mr-2 size-4"
-        />
+        <LoaderCircle v-if="isSaving" class="mr-2 size-4 animate-spin" />
+        <Save v-else class="mr-2 size-4" />
         Save
       </button>
     </div>
     <div class="-mx-4 overflow-hidden rounded-lg shadow-lg sm:mx-auto">
-      <div class="grid grid-cols-[80px_repeat(7,_minmax(0,_1fr))] items-center bg-white">
+      <div
+        class="grid grid-cols-[80px_repeat(7,_minmax(0,_1fr))] items-center bg-white"
+      >
         <div class="p-2 text-center text-xs font-medium uppercase sm:text-sm">
           {{ currentDate.format('MMM') }}
         </div>
@@ -194,11 +198,10 @@ const saveReservationHours = async () => {
           </div>
         </div>
       </div>
-      <div class="grid grid-cols-[80px_repeat(7,_minmax(0,_1fr))] divide-x divide-y divide-white">
-        <template
-          v-for="(time, timeIndex) in times"
-          :key="time"
-        >
+      <div
+        class="grid grid-cols-[80px_repeat(7,_minmax(0,_1fr))] divide-x divide-y divide-white"
+      >
+        <template v-for="(time, timeIndex) in times" :key="time">
           <div class="bg-white py-4 text-center text-xs sm:text-sm">
             {{ formatTime(time, 'h:mm A') }}
           </div>
@@ -211,7 +214,7 @@ const saveReservationHours = async () => {
                 ? isTimeSlotSelected(day, timeIndex)
                   ? 'cursor-pointer bg-indigo-50'
                   : 'cursor-pointer bg-white'
-                : 'cursor-not-allowed bg-gray-50'
+                : 'cursor-not-allowed bg-gray-50',
             ]"
             @click="toggleTimeSlot(day, timeIndex)"
           >
@@ -221,12 +224,10 @@ const saveReservationHours = async () => {
                 type="checkbox"
                 class="size-4 rounded text-indigo-600 sm:size-5"
                 @click.stop
-              >
+              />
             </template>
             <template v-else>
-              <span class="text-xs text-gray-400 sm:text-sm">
-                N/A
-              </span>
+              <span class="text-xs text-gray-400 sm:text-sm"> N/A </span>
             </template>
           </div>
         </template>

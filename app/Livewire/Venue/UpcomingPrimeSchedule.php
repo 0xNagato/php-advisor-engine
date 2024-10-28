@@ -98,7 +98,7 @@ class UpcomingPrimeSchedule extends Component implements HasMingles
                 $slots[] = [
                     'start' => $timeSlotStart,
                     'end' => $timeSlotEnd,
-                    'is_checked' => ! $override || $override->prime_time,
+                    'is_checked' => $override ? $override->prime_time : ($scheduleTemplate->prime_time ?? false),
                     'override_id' => $override?->id,
                     'schedule_template_id' => $scheduleTemplate?->id,
                 ];
