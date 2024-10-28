@@ -4,50 +4,50 @@ import { LoaderCircle, Save, ArrowLeft, ArrowRight } from 'lucide-vue-next';
 import formatTime from '@/utils/formatTime';
 
 interface TimeSlot {
-    start: string;
-    end: string;
-    [key: number]: number;
+  start: string;
+  end: string;
+  [key: number]: number;
 }
 
 interface WeeklySchedule {
-    [key: string]: TimeSlot[] | 'closed';
+  [key: string]: TimeSlot[] | 'closed';
 }
 
 interface BusinessHours {
-    [key: string]: {
-        start: string;
-        end: string;
-    };
+  [key: string]: {
+    start: string;
+    end: string;
+  };
 }
 
 interface MingleData {
-    weeklySchedule: WeeklySchedule;
-    openDays: Record<string, 'open' | 'closed'>;
-    currentDay: string;
-    partySizes: number[];
-    businessHours: BusinessHours;
-    maxAvailableTables: number;
+  weeklySchedule: WeeklySchedule;
+  openDays: Record<string, 'open' | 'closed'>;
+  currentDay: string;
+  partySizes: number[];
+  businessHours: BusinessHours;
+  maxAvailableTables: number;
 }
 
 interface Props {
-    wire: {
-        saveAvailability: (
-            updatedSchedule: WeeklySchedule,
-        ) => Promise<{ success: boolean; message: string }>;
-    };
-    mingleData: MingleData;
+  wire: {
+    saveAvailability: (
+      updatedSchedule: WeeklySchedule,
+    ) => Promise<{ success: boolean; message: string }>;
+  };
+  mingleData: MingleData;
 }
 
 const { wire, mingleData } = defineProps<Props>();
 
 const daysOfWeek = [
-    'Monday',
-    'Tuesday',
-    'Wednesday',
-    'Thursday',
-    'Friday',
-    'Saturday',
-    'Sunday',
+  'Monday',
+  'Tuesday',
+  'Wednesday',
+  'Thursday',
+  'Friday',
+  'Saturday',
+  'Sunday',
 ] as const;
 type DayOfWeek = (typeof daysOfWeek)[number];
 
@@ -55,75 +55,79 @@ const isSaving = ref(false);
 const weeklySchedule = ref<WeeklySchedule>(mingleData.weeklySchedule);
 const currentDay = ref<DayOfWeek>('Monday');
 const partySizes = Object.fromEntries(
-    Object.entries(mingleData.partySizes).filter(
-        ([key]) => key !== 'Special Request',
-    ),
+  Object.entries(mingleData.partySizes).filter(
+    ([key]) => key !== 'Special Request',
+  ),
 );
 const maxAvailableTables = mingleData.maxAvailableTables;
 
 const currentDaySchedule = computed(() => {
-    const daySchedule = weeklySchedule.value[currentDay.value.toLowerCase()];
-    if (Array.isArray(daySchedule)) {
-        return daySchedule.sort((a, b) => a.start.localeCompare(b.start));
-    }
-    return daySchedule;
+  const daySchedule = weeklySchedule.value[currentDay.value.toLowerCase()];
+  if (Array.isArray(daySchedule)) {
+    return daySchedule.sort((a, b) => a.start.localeCompare(b.start));
+  }
+  return daySchedule;
 });
 
 const updateAvailability = (
-    timeIndex: number,
-    partySize: number,
-    value: string,
+  timeIndex: number,
+  partySize: number,
+  value: string,
 ) => {
-    const daySchedule = weeklySchedule.value[currentDay.value.toLowerCase()];
-    if (Array.isArray(daySchedule)) {
-        const numValue = parseInt(value, 10);
-        daySchedule[timeIndex][partySize] = Math.min(numValue, maxAvailableTables);
-    }
+  const daySchedule = weeklySchedule.value[currentDay.value.toLowerCase()];
+  if (Array.isArray(daySchedule)) {
+    const numValue = parseInt(value, 10);
+    daySchedule[timeIndex][partySize] = Math.min(numValue, maxAvailableTables);
+  }
 };
 
 const saveAvailability = async () => {
-    if (isSaving.value) return;
+  if (isSaving.value) return;
 
-    try {
-        isSaving.value = true;
-        const result = await wire.saveAvailability(weeklySchedule.value);
-        console.log(result.message);
-    } catch (error) {
-        console.error('Error saving table availability:', error);
-    } finally {
-        isSaving.value = false;
-    }
+  try {
+    isSaving.value = true;
+    const result = await wire.saveAvailability(weeklySchedule.value);
+    console.log(result.message);
+  } catch (error) {
+    console.error('Error saving table availability:', error);
+  } finally {
+    isSaving.value = false;
+  }
 };
 
 onMounted(() => {
-    const day = new URLSearchParams(window.location.search).get('day') as DayOfWeek;
+  const day = new URLSearchParams(window.location.search).get(
+    'day',
+  ) as DayOfWeek;
 
-    if (day) {
-        currentDay.value = day;
-    }
+  if (day) {
+    currentDay.value = day;
+  }
 });
 
 function changeDay(day: DayOfWeek) {
-    const url = new URL(window.location.href);
-    currentDay.value = day;
-    url.searchParams.set('day', day);
-    window.history.pushState(null, '', url.toString());
+  const url = new URL(window.location.href);
+  currentDay.value = day;
+  url.searchParams.set('day', day);
+  window.history.pushState(null, '', url.toString());
 }
 
 function selectText(event: FocusEvent) {
-    const input = event.target as HTMLInputElement;
-    input.select();
+  const input = event.target as HTMLInputElement;
+  input.select();
 }
 
 const canNavigateBack = computed(() => currentDay.value !== daysOfWeek[0]);
-const canNavigateForward = computed(() => currentDay.value !== daysOfWeek[daysOfWeek.length - 1]);
+const canNavigateForward = computed(
+  () => currentDay.value !== daysOfWeek[daysOfWeek.length - 1],
+);
 
 function navigateDay(direction: 'prev' | 'next') {
-    const currentIndex = daysOfWeek.indexOf(currentDay.value);
-    const newIndex = direction === 'prev' ? currentIndex - 1 : currentIndex + 1;
-    if (newIndex >= 0 && newIndex < daysOfWeek.length) {
-        changeDay(daysOfWeek[newIndex]);
-    }
+  const currentIndex = daysOfWeek.indexOf(currentDay.value);
+  const newIndex = direction === 'prev' ? currentIndex - 1 : currentIndex + 1;
+  if (newIndex >= 0 && newIndex < daysOfWeek.length) {
+    changeDay(daysOfWeek[newIndex]);
+  }
 }
 
 const isExceedingLimit = (value: number) => value > maxAvailableTables;
@@ -132,10 +136,7 @@ const isExceedingLimit = (value: number) => value > maxAvailableTables;
 <template>
   <div class="mx-auto">
     <div class="mb-4 flex items-center justify-between gap-4">
-      <div
-        class="inline-flex grow rounded-md shadow-sm"
-        role="group"
-      >
+      <div class="inline-flex grow rounded-md shadow-sm" role="group">
         <button
           :disabled="!canNavigateBack"
           class="rounded-l-lg border border-gray-200 bg-white p-2 text-sm font-medium text-gray-900 hover:bg-gray-100 hover:text-indigo-700 focus:z-10 focus:text-indigo-700 focus:ring-2 focus:ring-indigo-700 disabled:opacity-50 disabled:hover:bg-white disabled:hover:text-gray-900"
@@ -146,13 +147,11 @@ const isExceedingLimit = (value: number) => value > maxAvailableTables;
         <select
           :value="currentDay"
           class="grow border-y border-gray-200 bg-white px-3 py-2 text-sm font-medium text-gray-900 hover:bg-gray-100 hover:text-indigo-700 focus:z-10 focus:text-indigo-700 focus:ring-2 focus:ring-indigo-700"
-          @change="changeDay(($event.target as HTMLSelectElement).value as DayOfWeek)"
+          @change="
+            changeDay(($event.target as HTMLSelectElement).value as DayOfWeek)
+          "
         >
-          <option
-            v-for="day in daysOfWeek"
-            :key="day"
-            :value="day"
-          >
+          <option v-for="day in daysOfWeek" :key="day" :value="day">
             {{ day }}
           </option>
         </select>
@@ -169,14 +168,8 @@ const isExceedingLimit = (value: number) => value > maxAvailableTables;
         :disabled="isSaving"
         @click="saveAvailability"
       >
-        <LoaderCircle
-          v-if="isSaving"
-          class="mr-2 size-4 animate-spin"
-        />
-        <Save
-          v-else
-          class="mr-2 size-4"
-        />
+        <LoaderCircle v-if="isSaving" class="mr-2 size-4 animate-spin" />
+        <Save v-else class="mr-2 size-4" />
         Save
       </button>
     </div>
@@ -189,11 +182,10 @@ const isExceedingLimit = (value: number) => value > maxAvailableTables;
         Closed
       </div>
 
-      <div
-        v-else-if="Array.isArray(currentDaySchedule)"
-        class="grid"
-      >
-        <div class="grid grid-cols-[100px_repeat(4,_minmax(0,_1fr))] items-center divide-x divide-y divide-white ">
+      <div v-else-if="Array.isArray(currentDaySchedule)" class="grid">
+        <div
+          class="grid grid-cols-[100px_repeat(4,_minmax(0,_1fr))] items-center divide-x divide-y divide-white"
+        >
           <div class="p-2 text-center text-xs font-medium uppercase sm:text-sm">
             Table Size
           </div>
@@ -202,7 +194,11 @@ const isExceedingLimit = (value: number) => value > maxAvailableTables;
             :key="size"
             class="p-2 text-center font-medium uppercase"
           >
-            {{ size }}
+            <span
+              class="inline-flex size-8 items-center justify-center rounded-full border-2 border-gray-300"
+            >
+              {{ size }}
+            </span>
           </div>
         </div>
 
@@ -224,14 +220,21 @@ const isExceedingLimit = (value: number) => value > maxAvailableTables;
               :value="slot[size]"
               :class="[
                 'w-full rounded border-gray-300 text-center',
-                { 'border-red-500': isExceedingLimit(slot[size]) }
+                { 'border-red-500': isExceedingLimit(slot[size]) },
               ]"
               min="0"
               :max="maxAvailableTables"
               @focus="selectText"
-              @input="(e) => updateAvailability(index, size, (e.target as HTMLInputElement).value)"
+              @input="
+                (e) =>
+                  updateAvailability(
+                    index,
+                    size,
+                    (e.target as HTMLInputElement).value,
+                  )
+              "
               @contextmenu.prevent
-            >
+            />
             <div
               v-if="isExceedingLimit(slot[size])"
               class="mt-1 text-xs text-red-500"

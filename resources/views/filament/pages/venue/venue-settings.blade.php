@@ -26,32 +26,43 @@
             url.searchParams.set('tab', this.tabSelected);
             window.history.pushState({}, '', url);
         }
-    }"
-         x-init="initializeTab();
-
+    }" x-init="initializeTab();
     window.addEventListener('popstate', initializeTab);
-
+    window.addEventListener('resize', () => {
+        $nextTick(() => tabRepositionMarker($refs.tabButtons.children[tabSelected - 1]));
+    });
     Livewire.on('navigate', () => {
         initializeTab();
-    });"
-         class="relative w-full"
-         @tab-changed.window="tabSelected = $event.detail.tab; tabRepositionMarker($refs.tabButtons.children[tabSelected - 1]);">
+    });" class="relative w-full"
+        @tab-changed.window="tabSelected = $event.detail.tab; tabRepositionMarker($refs.tabButtons.children[tabSelected - 1]);">
 
         <div x-ref="tabButtons"
-             class="relative inline-grid items-center justify-center w-full h-12 grid-cols-3 p-1 bg-gray-100 rounded-lg select-none">
+            class="relative z-10 flex items-center justify-center w-full h-12 p-1 bg-gray-100 rounded-lg select-none">
             <button :id="$id(tabId) + '-1'" @click="tabButtonClicked($el);" type="button"
-                    class="relative z-20 inline-flex items-center justify-center w-full h-10 px-3 text-sm font-medium transition-all rounded-md cursor-pointer whitespace-nowrap"
-                    :class="{'text-white bg-indigo-700': tabSelected == 1, 'text-gray-700 hover:text-indigo-600': tabSelected != 1}">
+                class="relative z-20 flex-1 inline-flex items-center justify-center h-10 px-3 text-sm font-medium transition-all rounded-md cursor-pointer whitespace-nowrap"
+                :class="{
+                    'text-white bg-indigo-700': tabSelected == 1,
+                    'text-gray-700 hover:text-indigo-600': tabSelected !=
+                        1
+                }">
                 Hours
             </button>
             <button :id="$id(tabId) + '-2'" @click="tabButtonClicked($el);" type="button"
-                    class="relative z-20 inline-flex items-center justify-center w-full h-10 px-3 text-sm font-medium transition-all rounded-md cursor-pointer whitespace-nowrap"
-                    :class="{'text-white bg-indigo-700': tabSelected == 2, 'text-gray-700 hover:text-indigo-600': tabSelected != 2}">
+                class="relative z-20 flex-1 inline-flex items-center justify-center h-10 px-3 text-sm font-medium transition-all rounded-md cursor-pointer whitespace-nowrap"
+                :class="{
+                    'text-white bg-indigo-700': tabSelected == 2,
+                    'text-gray-700 hover:text-indigo-600': tabSelected !=
+                        2
+                }">
                 Availability
             </button>
             <button :id="$id(tabId) + '-3'" @click="tabButtonClicked($el);" type="button"
-                    class="relative z-20 inline-flex items-center justify-center w-full h-10 px-3 text-sm font-medium transition-all rounded-md cursor-pointer whitespace-nowrap"
-                    :class="{'text-white bg-indigo-700': tabSelected == 3, 'text-gray-700 hover:text-indigo-600': tabSelected != 3}">
+                class="relative z-20 flex-1 inline-flex items-center justify-center h-10 px-3 text-sm font-medium transition-all rounded-md cursor-pointer whitespace-nowrap"
+                :class="{
+                    'text-white bg-indigo-700': tabSelected == 3,
+                    'text-gray-700 hover:text-indigo-600': tabSelected !=
+                        3
+                }">
                 Contacts
             </button>
             <div x-ref="tabMarker" class="absolute left-0 z-10 w-1/3 h-full duration-300 ease-out" x-cloak>
@@ -59,17 +70,17 @@
             </div>
         </div>
         <div class="relative w-full mt-4 content">
-            <div :id="$id(tabId + '-content-1')" x-bind:class="{'hidden': !tabContentActive(1)}" class="relative">
-                <livewire:venue.reservation-hours-widget/>
+            <div :id="$id(tabId + '-content-1')" x-bind:class="{ 'hidden': !tabContentActive(1) }" class="relative">
+                <livewire:venue.reservation-hours-widget />
             </div>
 
-            <div :id="$id(tabId + '-content-2')" x-bind:class="{'hidden': !tabContentActive(2)}"
-                 class="relative pt-0.5">
-                <livewire:venue.table-availability-schedule/>
+            <div :id="$id(tabId + '-content-2')" x-bind:class="{ 'hidden': !tabContentActive(2) }"
+                class="relative pt-0.5">
+                <livewire:venue.table-availability-schedule />
             </div>
 
-            <div :id="$id(tabId + '-content-3')" x-bind:class="{'hidden': !tabContentActive(3)}" class="relative">
-                <livewire:venue.manage-contacts :venue="$venue"/>
+            <div :id="$id(tabId + '-content-3')" x-bind:class="{ 'hidden': !tabContentActive(3) }" class="relative">
+                <livewire:venue.manage-contacts :venue="$venue" />
             </div>
         </div>
     </div>
