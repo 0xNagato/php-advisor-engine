@@ -141,7 +141,9 @@ class ListConcierges extends ListRecords
                             ->get();
 
                         $lastLogin = $concierge->user->authentications()->latest('login_at')->first()->login_at ?? null;
-                        $avgEarnPerBooking = $concierge->total_earnings_in_u_s_d / $concierge->bookings_count;
+                        $avgEarnPerBooking = $concierge->bookings_count > 0
+                            ? $concierge->total_earnings_in_u_s_d / $concierge->bookings_count
+                            : 0;
                         $referralsBookings = $concierge->concierges->map(fn ($concierge
                         ) => $concierge->bookings()->confirmed()->count())->sum();
 
