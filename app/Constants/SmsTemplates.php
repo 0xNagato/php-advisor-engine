@@ -6,10 +6,10 @@ class SmsTemplates
 {
     public const TEMPLATES = [
         'admin_venue_failed_to_confirm_booking' => 'PRIMA Reservation - Venue {venue_name} failed to confirm the reservation #{booking_id} scheduled for {booking_date}, at {booking_time}',
-        'concierge_created' => 'Welcome to PRIMA! Your account has been created. Please click {login_url} to login and update your payment info and begin making reservations. Thank you for joining us!',
-        'concierge_referral' => "Hi {first_name}! You've been invited to join PRIMA by {referrer}. Please click {url} to create your account today. Welcome aboard!",
+        'concierge_created' => 'Welcome to PRIMA! Click https://bit.ly/PRIMAVIP to learn about how PRIMA works! We look forward to working with you!',
+        'concierge_referral' => '{referrer} has invited you to join PRIMA, click {url} now to create your account. To learn about PRIMA click https://bit.ly/PRIMA4 - Welcome aboard!',
         'concierge_reminder' => 'Hi {first_name}, your PRIMA invite from {referrer} expires soon. Please click {url} to secure your account now. We look forward to working with you!',
-        'concierge_special_request_accepted' => 'Special request has been accepted from {venue}. Click here for more details {link}.',
+        'concierge_special_request_accepted' => 'Hi from PRIMA! Your special request has been accepted from {venue}. Click {link} for more details.',
         'concierge_special_request_change_request' => 'Special request changes have been requested from {venue}. Click here for more details {link}.',
         'concierge_special_request_rejected' => 'Special request has been rejected from {venue}. Click here for more details {link}.',
         'customer_booking_confirmed_non_prime' => 'Hello from PRIMA VIP! Your reservation at {venue_name} {booking_date} at {booking_time} has been booked by {concierge_name} and is now confirmed. Please arrive within 15 minutes of your reservation or your table may be released. Thank you for booking with us!',
