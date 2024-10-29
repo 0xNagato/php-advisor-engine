@@ -5,14 +5,24 @@ import dayjs from 'dayjs';
 import formatTime from '@/utils/formatTime';
 
 interface TimeSlot {
-  start_time: string;
-  end_time: string;
-  is_available: boolean;
-  prime_time: boolean;
+  start: string;
+  end: string;
+  schedule_prime: boolean;
+  is_override: boolean;
+  override_prime: boolean;
+  schedule_template_id: number | null;
+  is_available?: boolean;
 }
 
 interface DetailedSchedule {
-  [key: string]: 'closed' | TimeSlot[];
+  [key: string]:
+    | 'closed'
+    | {
+        start_time: string;
+        end_time: string;
+        is_available: boolean;
+        prime_time: boolean;
+      }[];
 }
 
 interface MingleData {
@@ -20,14 +30,21 @@ interface MingleData {
   earliestStartTime: string;
   latestEndTime: string;
   daysToDisplay: number;
+  timeSlots: Record<string, TimeSlot[]>;
   detailedSchedule: DetailedSchedule;
+}
+
+interface TimeSlotChanges {
+  [date: string]: {
+    [timeIndex: number]: boolean;
+  };
 }
 
 const { wire, mingleData } = defineProps<{
   wire: {
     save: (
       selectedTimeSlots: Record<string, boolean[]>,
-    ) => Promise<{ message: string }>;
+    ) => Promise<{ success?: boolean; message: string }>;
     on: (event: string, callback: () => void) => void;
     refresh: () => Promise<MingleData>;
   };
@@ -41,6 +58,10 @@ wire.on('upcoming-schedule-updated', async () => {
     const response = await wire.refresh();
 
     selectedTimeSlots.value = response.selectedTimeSlots;
+    originalTimeSlots.value = JSON.parse(
+      JSON.stringify(response.selectedTimeSlots),
+    );
+    timeSlots.value = response.timeSlots;
     detailedSchedule.value = response.detailedSchedule;
 
     console.log('Schedule updated successfully');
@@ -50,11 +71,17 @@ wire.on('upcoming-schedule-updated', async () => {
 });
 
 const isSaving = ref(false);
-const selectedTimeSlots = ref(mingleData.selectedTimeSlots);
+const selectedTimeSlots = ref<Record<string, boolean[]>>(
+  mingleData.selectedTimeSlots,
+);
 const detailedSchedule = ref(mingleData.detailedSchedule);
+const originalTimeSlots = ref(
+  JSON.parse(JSON.stringify(mingleData.selectedTimeSlots)),
+);
 const today = dayjs().startOf('day');
 const currentDate = ref(today);
 const maxDate = ref(today.add(mingleData.daysToDisplay - 1, 'day'));
+const timeSlots = ref<Record<string, TimeSlot[]>>(mingleData.timeSlots);
 
 const getDaysInWeek = (startDate: dayjs.Dayjs): dayjs.Dayjs[] => {
   return Array(7)
@@ -66,14 +93,11 @@ const days = computed(() => getDaysInWeek(currentDate.value));
 
 const times = computed(() => {
   const allTimes = new Set<string>();
-  Object.values(detailedSchedule.value).forEach((daySchedule) => {
-    if (Array.isArray(daySchedule)) {
-      daySchedule.forEach((slot) => {
-        allTimes.add(slot.start_time);
-      });
-    }
+  Object.values(timeSlots.value).forEach((daySlots) => {
+    daySlots.forEach((slot) => {
+      allTimes.add(slot.start);
+    });
   });
-
   return Array.from(allTimes).sort();
 });
 
@@ -108,45 +132,35 @@ const isTimeSlotAvailable = (day: dayjs.Dayjs, time: string): boolean => {
   if (day.isAfter(maxDate.value)) {
     return false;
   }
-  const dayOfWeek = day.format('dddd').toLowerCase();
-  const daySchedule = detailedSchedule.value[dayOfWeek];
-
-  if (daySchedule === 'closed') {
-    return false;
-  }
-
-  return daySchedule.some(
-    (slot) =>
-      time >= slot.start_time && time < slot.end_time && slot.is_available,
+  const dateString = day.format('YYYY-MM-DD');
+  const timeSlot = timeSlots.value[dateString]?.find(
+    (slot) => slot.start === time,
   );
+
+  return Boolean(timeSlot?.schedule_template_id);
 };
 
-const isTimeSlotSelected = (day: dayjs.Dayjs, timeIndex: number): boolean => {
-  if (day.isAfter(maxDate.value)) {
-    return false;
-  }
-  const dateKey = day.format('YYYY-MM-DD');
+const toggleTimeSlot = (date: dayjs.Dayjs, timeIndex: number) => {
+  const dateString = date.format('YYYY-MM-DD');
+  const slot = timeSlots.value[dateString]?.[timeIndex];
 
-  return selectedTimeSlots.value[dateKey]?.[timeIndex] ?? false;
-};
+  if (!slot) return;
 
-const toggleTimeSlot = (day: dayjs.Dayjs, timeIndex: number) => {
-  if (day.isAfter(maxDate.value)) {
-    return;
-  }
+  // Update selectedTimeSlots
+  selectedTimeSlots.value = {
+    ...selectedTimeSlots.value,
+    [dateString]: selectedTimeSlots.value[dateString].map((value, index) =>
+      index === timeIndex ? !value : value,
+    ),
+  };
 
-  const dateKey = day.format('YYYY-MM-DD');
-
-  if (!selectedTimeSlots.value[dateKey]) {
-    selectedTimeSlots.value[dateKey] = new Array(times.value.length).fill(
-      false,
-    );
-  }
-
-  if (isTimeSlotAvailable(day, times.value[timeIndex])) {
-    selectedTimeSlots.value[dateKey][timeIndex] =
-      !selectedTimeSlots.value[dateKey][timeIndex];
-  }
+  // Update timeSlots to reflect the change
+  timeSlots.value = {
+    ...timeSlots.value,
+    [dateString]: timeSlots.value[dateString].map((slot, index) =>
+      index === timeIndex ? { ...slot, is_override: !slot.is_override } : slot,
+    ),
+  };
 };
 
 const saveReservationHours = async () => {
@@ -154,13 +168,87 @@ const saveReservationHours = async () => {
 
   try {
     isSaving.value = true;
-    const result = await wire.save(selectedTimeSlots.value);
+
+    const changes = getTimeSlotChanges();
+    if (Object.keys(changes).length === 0) {
+      console.log('No changes to save');
+      return;
+    }
+
+    // Log the changes before formatting
+    console.log('Changes before formatting:', changes);
+
+    // Send the full state for changed days
+    const formattedChanges: Record<string, boolean[]> = {};
+    Object.keys(changes).forEach((date) => {
+      // Send the complete current state for the changed day
+      formattedChanges[date] = selectedTimeSlots.value[date];
+    });
+
+    // Log the formatted changes
+    console.log('Formatted changes:', formattedChanges);
+
+    const result = await wire.save(formattedChanges);
+    if (result.success) {
+      originalTimeSlots.value = JSON.parse(
+        JSON.stringify(selectedTimeSlots.value),
+      );
+    }
     console.log(result.message);
   } catch (error) {
     console.error('Error saving reservation hours:', error);
   } finally {
     isSaving.value = false;
   }
+};
+
+const getTimeSlotChanges = (): TimeSlotChanges => {
+  const changes: TimeSlotChanges = {};
+
+  Object.keys(selectedTimeSlots.value).forEach((date) => {
+    const currentSlots = selectedTimeSlots.value[date];
+    const originalSlots = originalTimeSlots.value[date] || [];
+
+    currentSlots.forEach((isSelected, timeIndex) => {
+      if (isSelected !== originalSlots[timeIndex]) {
+        if (!changes[date]) {
+          changes[date] = {};
+        }
+        changes[date][timeIndex] = isSelected;
+      }
+    });
+  });
+
+  console.log('Checking changes - Selected:', selectedTimeSlots.value);
+  console.log('Checking changes - Original:', originalTimeSlots.value);
+
+  return changes;
+};
+
+const hasChanges = computed(() => {
+  for (const date in selectedTimeSlots.value) {
+    const currentSlots = selectedTimeSlots.value[date];
+    const originalSlots = originalTimeSlots.value[date] || [];
+
+    for (let i = 0; i < currentSlots.length; i++) {
+      if (currentSlots[i] !== originalSlots[i]) {
+        return true;
+      }
+    }
+  }
+  return false;
+});
+
+const isSchedulePrime = (day: dayjs.Dayjs, timeIndex: number): boolean => {
+  const dateString = day.format('YYYY-MM-DD');
+  const slot = timeSlots.value[dateString]?.[timeIndex];
+  return slot?.schedule_prime ?? false;
+};
+
+const hasOverride = (day: dayjs.Dayjs, timeIndex: number): boolean => {
+  const dateString = day.format('YYYY-MM-DD');
+  const slot = timeSlots.value[dateString]?.[timeIndex];
+  return slot?.is_override ?? false;
 };
 </script>
 
@@ -185,7 +273,7 @@ const saveReservationHours = async () => {
       </div>
       <button
         class="flex items-center justify-center rounded-lg bg-indigo-600 px-3 py-1.5 text-sm font-semibold text-white disabled:opacity-50"
-        :disabled="isSaving"
+        :disabled="isSaving || !hasChanges"
         @click="saveReservationHours"
       >
         <LoaderCircle v-if="isSaving" class="mr-2 size-4 animate-spin" />
@@ -226,19 +314,25 @@ const saveReservationHours = async () => {
             :class="[
               'flex items-center justify-center p-4',
               isTimeSlotAvailable(day, time)
-                ? isTimeSlotSelected(day, timeIndex)
-                  ? 'cursor-pointer bg-indigo-50'
-                  : 'cursor-pointer bg-white'
+                ? {
+                    'cursor-pointer': true,
+                    'bg-green-200':
+                      isSchedulePrime(day, timeIndex) &&
+                      !hasOverride(day, timeIndex),
+                    'bg-indigo-50': hasOverride(day, timeIndex),
+                    'bg-white':
+                      !isSchedulePrime(day, timeIndex) &&
+                      !hasOverride(day, timeIndex),
+                  }
                 : 'cursor-not-allowed bg-gray-50',
             ]"
-            @click="toggleTimeSlot(day, timeIndex)"
           >
             <template v-if="isTimeSlotAvailable(day, time)">
               <input
-                v-model="selectedTimeSlots[day.format('YYYY-MM-DD')][timeIndex]"
                 type="checkbox"
                 class="size-4 rounded text-indigo-600 sm:size-5"
-                @click.stop
+                :checked="hasOverride(day, timeIndex)"
+                @change="toggleTimeSlot(day, timeIndex)"
               />
             </template>
             <template v-else>

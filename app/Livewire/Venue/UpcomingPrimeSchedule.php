@@ -105,8 +105,9 @@ class UpcomingPrimeSchedule extends Component implements HasMingles
                 $slots[] = [
                     'start' => $timeSlotStart,
                     'end' => $timeSlotEnd,
-                    'is_checked' => $override ? $override->prime_time : ($scheduleTemplate->prime_time ?? false),
-                    'override_id' => $override?->id,
+                    'schedule_prime' => $scheduleTemplate?->prime_time ?? false,
+                    'is_override' => $override !== null,
+                    'override_prime' => $override?->prime_time ?? false,
                     'schedule_template_id' => $scheduleTemplate?->id,
                 ];
 
@@ -124,7 +125,7 @@ class UpcomingPrimeSchedule extends Component implements HasMingles
 
             return [
                 $dateString => collect($this->timeSlots[$dateString])
-                    ->pluck('is_checked')
+                    ->pluck('is_override')
                     ->toArray(),
             ];
         })->toArray();
@@ -134,21 +135,34 @@ class UpcomingPrimeSchedule extends Component implements HasMingles
     {
         try {
             $this->selectedTimeSlots = $selectedTimeSlots;
-
             $scheduleTemplates = $this->getScheduleTemplates();
             $existingOverrides = $this->getExistingOverrides();
-            [$updates, $inserts] = $this->prepareUpdatesAndInserts($scheduleTemplates, $existingOverrides);
+            $changedDates = $this->getChangedDates();
+
+            [$updates, $inserts, $deletes] = $this->prepareUpdatesAndInserts(
+                $scheduleTemplates,
+                $existingOverrides,
+                $changedDates
+            );
+
             $this->performUpdates($updates);
             $this->performInserts($inserts);
+            $this->performDeletes($deletes);
 
             $this->sendSuccessNotification();
 
-            return ['success' => true, 'message' => 'Prime schedule saved successfully.'];
+            return [
+                'success' => true,
+                'message' => 'Prime schedule saved successfully.',
+            ];
         } catch (Exception $e) {
             report($e);
             $this->sendErrorNotification();
 
-            return ['success' => false, 'message' => 'Error saving prime schedule.'];
+            return [
+                'success' => false,
+                'message' => 'Error saving prime schedule.',
+            ];
         }
     }
 
@@ -179,42 +193,64 @@ class UpcomingPrimeSchedule extends Component implements HasMingles
             ->keyBy(fn ($item) => $item->schedule_template_id.'|'.$item->booking_date);
     }
 
-    private function prepareUpdatesAndInserts(Collection $scheduleTemplates, Collection $existingOverrides): array
-    {
+    private function prepareUpdatesAndInserts(
+        Collection $scheduleTemplates,
+        Collection $existingOverrides,
+        array $changedDates
+    ): array {
         $updates = [];
         $inserts = [];
+        $deletes = [];
 
-        foreach ($this->selectedTimeSlots as $date => $slots) {
+        foreach ($changedDates as $date) {
             $dayOfWeek = strtolower(Carbon::parse($date)->format('l'));
 
+            if (! isset($this->selectedTimeSlots[$date]) || ! isset($this->timeSlots[$date])) {
+                continue;
+            }
+
+            $slots = $this->selectedTimeSlots[$date];
+
             foreach ($slots as $index => $isChecked) {
+                if (! isset($this->timeSlots[$date][$index])) {
+                    continue;
+                }
+
                 $slot = $this->timeSlots[$date][$index];
+                if (! $slot['schedule_template_id']) {
+                    continue;
+                }
+
                 $timeKey = $slot['start'];
+                $scheduleTemplate = $scheduleTemplates[$dayOfWeek]
+                    ->where('start_time', $timeKey)
+                    ->first();
 
-                if (isset($scheduleTemplates[$dayOfWeek])) {
-                    $matchingTemplates = $scheduleTemplates[$dayOfWeek]->where('start_time', $timeKey);
-                    foreach ($matchingTemplates as $scheduleTemplate) {
-                        $overrideKey = $scheduleTemplate->id.'|'.$date;
-                        $override = $existingOverrides[$overrideKey] ?? null;
+                if ($scheduleTemplate) {
+                    $overrideKey = $scheduleTemplate->id.'|'.$date;
+                    $override = $existingOverrides[$overrideKey] ?? null;
 
-                        if ($override) {
+                    if ($override) {
+                        if (! $isChecked) {
+                            $deletes[] = $override->id;
+                        } else {
                             $updates[] = [
                                 'id' => $override->id,
                                 'prime_time' => $isChecked,
                             ];
-                        } elseif (! $isChecked) {
-                            $inserts[] = [
-                                'schedule_template_id' => $scheduleTemplate->id,
-                                'booking_date' => $date,
-                                'prime_time' => $isChecked,
-                            ];
                         }
+                    } elseif ($isChecked) {
+                        $inserts[] = [
+                            'schedule_template_id' => $scheduleTemplate->id,
+                            'booking_date' => $date,
+                            'prime_time' => $isChecked,
+                        ];
                     }
                 }
             }
         }
 
-        return [$updates, $inserts];
+        return [$updates, $inserts, $deletes];
     }
 
     private function performUpdates(array $updates): void
@@ -228,6 +264,13 @@ class UpcomingPrimeSchedule extends Component implements HasMingles
     {
         if (filled($inserts)) {
             VenueTimeSlot::query()->insert($inserts);
+        }
+    }
+
+    private function performDeletes(array $deletes): void
+    {
+        if (filled($deletes)) {
+            VenueTimeSlot::query()->whereIn('id', $deletes)->delete();
         }
     }
 
@@ -252,5 +295,26 @@ class UpcomingPrimeSchedule extends Component implements HasMingles
         $this->boot();
 
         return $this->mingleData();
+    }
+
+    private function getChangedDates(): array
+    {
+        $changedDates = [];
+
+        foreach ($this->selectedTimeSlots as $date => $slots) {
+            $originalSlots = $this->timeSlots[$date] ?? [];
+
+            for ($i = 0; $i < count($slots); $i++) {
+                $isChecked = $slots[$i];
+                $originalOverride = $originalSlots[$i]['is_override'] ?? false;
+
+                if ($isChecked !== $originalOverride) {
+                    $changedDates[] = $date;
+                    break;
+                }
+            }
+        }
+
+        return array_unique($changedDates);
     }
 }
