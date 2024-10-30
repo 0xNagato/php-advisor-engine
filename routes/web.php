@@ -14,6 +14,22 @@ use App\Livewire\Venue\VenueContactRecentBookings;
 use App\Livewire\Venue\VenueSpecialRequestConfirmation;
 use App\Livewire\Vip\AvailabilityCalendar;
 use App\Livewire\Vip\Login;
+use AshAllenDesign\ShortURL\Controllers\ShortURLController;
+
+/**
+ * Short URL handling for both domains:
+ * - Legacy: primavip.co/t/{code}
+ * - New: ezjmp.com/{code}
+ */
+Route::domain(config('short-url.domain'))->group(function () {
+    Route::get('/{shortURLKey}', ShortURLController::class)
+        ->middleware(config('short-url.middleware', []));
+});
+
+Route::domain(config('app.domain'))->group(function () {
+    Route::get('/t/{shortURLKey}', ShortURLController::class)
+        ->middleware(config('short-url.middleware', []));
+});
 
 Route::get('/', static function () {
     return view('web.index');

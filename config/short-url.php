@@ -16,7 +16,7 @@ return [
     | is registered for the short URL route.
     |
     */
-    'prefix' => '/t',
+    'prefix' => null,
 
     /*
     |--------------------------------------------------------------------------
@@ -68,7 +68,7 @@ return [
     | AshAllenDesign\ShortURL\Controllers\ShortURLController
     |
     */
-    'disable_default_route' => false,
+    'disable_default_route' => true,
 
     /*
     |--------------------------------------------------------------------------
@@ -80,7 +80,7 @@ return [
     | "app.url" config value, set this field to null.
     |
     */
-    'default_url' => null,
+    'default_url' => env('SHORT_URL_DOMAIN', 'https://ezjmp.com'),
 
     /*
     |--------------------------------------------------------------------------
@@ -128,7 +128,7 @@ return [
     |       used, a 4 character long key will be created.
     |
     */
-    'key_length' => 5,
+    'key_length' => 4,
 
     /*
     |--------------------------------------------------------------------------
