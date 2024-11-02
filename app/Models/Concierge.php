@@ -92,9 +92,7 @@ class Concierge extends Model
     public function referralEarningsInUSD(): Attribute
     {
         return Attribute::make(get: function () {
-            $currencyService = app(CurrencyConversionService::class);
-
-            return $currencyService->convertToUSD($this->referralEarningsByCurrency);
+            return app(CurrencyConversionService::class)->convertToUSD($this->referralEarningsByCurrency);
         });
     }
 
@@ -154,10 +152,10 @@ class Concierge extends Model
     /**
      * Description
      *
-     * @return HasMany<VIPCode>
+     * @return HasMany<VipCode>
      */
     public function vipCodes(): HasMany
     {
-        return $this->hasMany(VIPCode::class);
+        return $this->hasMany(VipCode::class);
     }
 }
