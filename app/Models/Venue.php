@@ -160,7 +160,7 @@ class Venue extends Model
     }
 
     /**
-     * @return HasMany<ScheduleTemplate>
+     * @return HasMany<ScheduleTemplate, $this>
      */
     public function scheduleTemplates(): HasMany
     {
@@ -168,7 +168,7 @@ class Venue extends Model
     }
 
     /**
-     * @return HasManyThrough<VenueTimeSlot>
+     * @return HasManyThrough<VenueTimeSlot, ScheduleTemplate, $this>
      */
     public function timeSlots(): HasManyThrough
     {
@@ -178,7 +178,7 @@ class Venue extends Model
     /**
      * Get the schedules for the venue.
      *
-     * @return HasMany<ScheduleWithBooking>
+     * @return HasMany<ScheduleWithBooking, $this>
      */
     public function schedules(): HasMany
     {
@@ -188,7 +188,7 @@ class Venue extends Model
     /**
      * Get the user that owns the venue.
      *
-     * @return BelongsTo<User, Venue>
+     * @return BelongsTo<User, $this>
      */
     public function user(): BelongsTo
     {
@@ -196,7 +196,7 @@ class Venue extends Model
     }
 
     /**
-     * @return BelongsTo<Region, Venue>
+     * @return BelongsTo<Region, $this>
      */
     public function inRegion(): BelongsTo
     {
@@ -204,7 +204,7 @@ class Venue extends Model
     }
 
     /**
-     * @return HasMany<SpecialPricingVenue>
+     * @return HasMany<SpecialPricingVenue, $this>
      */
     public function specialPricing(): HasMany
     {
@@ -212,7 +212,7 @@ class Venue extends Model
     }
 
     /**
-     * @return HasOneThrough<Partner>
+     * @return HasOneThrough<Partner, User, $this>
      */
     public function partnerReferral(): HasOneThrough
     {

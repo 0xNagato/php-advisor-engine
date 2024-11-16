@@ -14,7 +14,7 @@ class SmsResponse extends Model
     ];
 
     /**
-     * @return BelongsTo<Booking, SmsResponse>
+     * @return BelongsTo<Booking, $this>
      */
     public function booking(): BelongsTo
     {

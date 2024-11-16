@@ -26,7 +26,7 @@ class Earning extends Model
     }
 
     /**
-     * @return BelongsTo<User, Earning>
+     * @return BelongsTo<User, $this>
      */
     public function user(): BelongsTo
     {
@@ -34,7 +34,7 @@ class Earning extends Model
     }
 
     /**
-     * @return BelongsTo<Booking, Earning>
+     * @return BelongsTo<Booking, $this>
      */
     public function booking(): BelongsTo
     {
@@ -42,7 +42,7 @@ class Earning extends Model
     }
 
     /**
-     * @return BelongsTo<Payment, Earning>
+     * @return BelongsTo<Payment, $this>
      */
     public function payment(): BelongsTo
     {

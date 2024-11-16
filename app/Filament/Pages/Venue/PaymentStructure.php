@@ -37,7 +37,7 @@ class PaymentStructure extends Page
 
     public static function canAccess(array $parameters = []): bool
     {
-        return auth()->user()->hasRole('venue');
+        return auth()->user()->hasActiveRole('venue');
     }
 
     public function mount(): void

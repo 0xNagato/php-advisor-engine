@@ -7,6 +7,7 @@ use Filament\Support\Facades\FilamentView;
 use Filament\View\PanelsRenderHook;
 use Illuminate\Support\HtmlString;
 use Illuminate\Support\ServiceProvider;
+use Livewire\Livewire;
 
 class FilamentRenderHookProvider extends ServiceProvider
 {
@@ -55,6 +56,11 @@ class FilamentRenderHookProvider extends ServiceProvider
         FilamentView::registerRenderHook(
             PanelsRenderHook::USER_MENU_BEFORE,
             static fn () => view('filament.admin.logo')
+        );
+
+        FilamentView::registerRenderHook(
+            PanelsRenderHook::GLOBAL_SEARCH_BEFORE,
+            static fn () => Livewire::mount('role-switcher')
         );
 
         FilamentView::registerRenderHook(

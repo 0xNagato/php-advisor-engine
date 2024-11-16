@@ -117,6 +117,7 @@ body::before {
 
 [x-persist='topbar.end'] {
   margin: 0 !important;
+  padding-right: 1rem !important;
   @apply w-full flex items-center gap-x-4 !important;
 }
 

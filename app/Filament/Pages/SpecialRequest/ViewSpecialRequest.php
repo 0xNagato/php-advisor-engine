@@ -29,7 +29,7 @@ class ViewSpecialRequest extends Page
         /** @var User $user */
         $user = auth()->user();
 
-        return $user->hasRole('concierge') || $user->hasRole('venue');
+        return $user->hasActiveRole('concierge') || $user->hasActiveRole('venue');
     }
 
     public function mount(SpecialRequest $specialRequest): void

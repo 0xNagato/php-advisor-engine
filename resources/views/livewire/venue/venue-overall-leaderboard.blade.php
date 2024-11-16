@@ -52,8 +52,8 @@
                     </thead>
                     <tbody class="divide-y divide-gray-200">
                         @foreach ($leaderboardData as $venue)
-                            <tr class="{{ auth()->user()->hasRole('super_admin') ? 'hover:bg-gray-50 cursor-pointer' : '' }}"
-                                @if (auth()->user()->hasRole('super_admin')) wire:click="viewVenue({{ $venue['venue_id'] }})" @endif>
+                            <tr class="{{ auth()->user()->hasActiveRole('super_admin') ? 'hover:bg-gray-50 cursor-pointer' : '' }}"
+                                @if (auth()->user()->hasActiveRole('super_admin')) wire:click="viewVenue({{ $venue['venue_id'] }})" @endif>
                                 <td
                                     class="whitespace-nowrap px-3 text-xs font-medium py-[1rem] text-gray-950 first-of-type:ps-4 last-of-type:pe-4 sm:first-of-type:ps-6 sm:last-of-type:pe-6">
                                     {{ $venue['rank'] }}
@@ -62,7 +62,7 @@
                                     class="whitespace-nowrap px-3 text-xs py-[1rem] text-gray-950 first-of-type:ps-4 last-of-type:pe-4 sm:first-of-type:ps-6 sm:last-of-type:pe-6">
                                     @if (auth()->user()->venue && auth()->user()->venue->id === $venue['venue_id'])
                                         Your Venue
-                                    @elseif(auth()->user()->hasRole('super_admin'))
+                                    @elseif(auth()->user()->hasActiveRole('super_admin'))
                                         {{ $venue['venue_name'] }}
                                     @else
                                         {{ substr($venue['venue_name'], 0, 1) . str_repeat('*', strlen($venue['venue_name']) - 1) }}

@@ -32,7 +32,7 @@ class AdminDashboard extends Dashboard
 
     public static function canAccess(): bool
     {
-        return auth()->user()?->hasRole('super_admin');
+        return auth()->user()?->hasActiveRole('super_admin');
     }
 
     public function mount(): void

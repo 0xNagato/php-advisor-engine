@@ -105,8 +105,8 @@ class AdminPanelProvider extends PanelProvider
             ->favicon('/favicon.ico')
             ->darkMode(false)
             ->brandName('PRIMA')
-            ->viteTheme('resources/css/filament/admin/theme.css')
-            ->databaseNotifications();
+            ->viteTheme('resources/css/filament/admin/theme.css');
+        // ->databaseNotifications();
 
         if (isPrimaApp()) {
             $panel->sidebarFullyCollapsibleOnDesktop();

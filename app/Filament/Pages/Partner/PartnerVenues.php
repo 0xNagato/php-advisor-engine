@@ -21,7 +21,7 @@ class PartnerVenues extends Page
 
     public static function canAccess(): bool
     {
-        return auth()->user()?->hasRole('partner');
+        return auth()->user()?->hasActiveRole('partner');
     }
 
     protected function getHeaderWidgets(): array

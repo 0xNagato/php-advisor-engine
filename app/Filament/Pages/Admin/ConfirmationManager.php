@@ -13,7 +13,7 @@ class ConfirmationManager extends Page
 
     public static function canAccess(): bool
     {
-        return auth()->user()->hasRole('super_admin');
+        return auth()->user()->hasActiveRole('super_admin');
     }
 
     protected function getHeaderWidgets(): array

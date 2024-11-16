@@ -40,7 +40,7 @@ class VipCodesTable extends TableWidget
             ->withCount('bookings')
             ->whereBetween(DB::raw('DATE(created_at)'), [$startDate, $endDate]);
 
-        if (auth()->user()->hasRole('concierge')) {
+        if (auth()->user()->hasActiveRole('concierge')) {
             $query->where('concierge_id', auth()->user()->concierge->id);
         }
 
@@ -50,7 +50,7 @@ class VipCodesTable extends TableWidget
             ->columns([
                 TextColumn::make('concierge.user.name')
                     ->size('xs')
-                    ->label('User')->visible(fn () => auth()->user()->hasRole('super_admin')),
+                    ->label('User')->visible(fn () => auth()->user()->hasActiveRole('super_admin')),
                 TextColumn::make('code')
                     ->label('Code')
                     ->copyable()

@@ -23,7 +23,7 @@ class ScheduleTemplate extends Model
     ];
 
     /**
-     * @return BelongsTo<Venue, ScheduleTemplate>
+     * @return BelongsTo<Venue, $this>
      */
     public function venue(): BelongsTo
     {

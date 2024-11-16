@@ -78,12 +78,12 @@ class ReservationHub extends Page
 
     public static function canAccess(): bool
     {
-        return auth()->user()->hasRole(['concierge', 'partner']);
+        return auth()->user()->hasActiveRole(['concierge', 'partner']);
     }
 
     public static function shouldRegisterNavigation(): bool
     {
-        return auth()->user()->hasRole(['concierge', 'partner']);
+        return auth()->user()->hasActiveRole(['concierge', 'partner']);
     }
 
     public function mount(): void

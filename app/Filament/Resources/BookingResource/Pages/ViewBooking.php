@@ -47,7 +47,7 @@ class ViewBooking extends ViewRecord
 
         abort_if(! in_array($this->record->status, [BookingStatus::CONFIRMED, BookingStatus::NO_SHOW], true), 404);
 
-        if (auth()->user()->hasRole('super_admin') || auth()->user()->hasRole('partner') || auth()->user()->hasRole('concierge')) {
+        if (auth()->user()->hasActiveRole('super_admin') || auth()->user()->hasActiveRole('partner') || auth()->user()->hasActiveRole('concierge')) {
             $this->showConcierges = true;
         }
 
@@ -118,7 +118,7 @@ class ViewBooking extends ViewRecord
 
     private function deleteBooking(): void
     {
-        if (! auth()->user()->hasRole('super_admin')) {
+        if (! auth()->user()->hasActiveRole('super_admin')) {
             Notification::make()
                 ->danger()
                 ->title('Unauthorized')

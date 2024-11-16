@@ -59,12 +59,12 @@ class PaymentInformation extends Page
             return ! session('simpleMode');
         }
 
-        return auth()->user()->hasRole(['venue', 'concierge']);
+        return auth()->user()->hasActiveRole(['venue', 'concierge']);
     }
 
     public function mount(): void
     {
-        if (auth()->user()->hasRole('concierge')) {
+        if (auth()->user()->hasActiveRole('concierge')) {
             $this->payoutOptions = [
                 'Direct Deposit',
                 'PayPal',

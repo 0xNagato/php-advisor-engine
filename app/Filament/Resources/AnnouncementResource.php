@@ -29,7 +29,7 @@ class AnnouncementResource extends Resource
 
     public static function canAccess(): bool
     {
-        return auth()->user()->hasRole('super_admin');
+        return auth()->user()->hasActiveRole('super_admin');
     }
 
     public static function form(Form $form): Form

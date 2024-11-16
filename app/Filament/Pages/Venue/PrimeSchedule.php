@@ -16,11 +16,11 @@ class PrimeSchedule extends Page
 
     public static function canAccess(): bool
     {
-        return auth()->user()->hasRole('venue');
+        return auth()->user()->hasActiveRole('venue');
     }
 
     public function mount(): void
     {
-        abort_unless(auth()->user()->hasRole('venue'), 403);
+        abort_unless(auth()->user()->hasActiveRole('venue'), 403);
     }
 }

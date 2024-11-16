@@ -27,7 +27,7 @@ class AuthServiceProvider extends ServiceProvider
     public function boot(): void
     {
         $this->registerPolicies();
-        Gate::define('viewPulse', fn (User $user) => $user->hasRole('super_admin'));
+        Gate::define('viewPulse', fn (User $user) => $user->hasActiveRole('super_admin'));
         Auth::provider('vip_code', fn ($app, array $config) => new VipUserProvider);
     }
 }

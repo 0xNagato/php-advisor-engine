@@ -22,7 +22,7 @@ class VenueResource extends Resource
 
     public static function shouldRegisterNavigation(): bool
     {
-        return auth()->user()?->hasRole('super_admin');
+        return auth()->user()?->hasActiveRole('super_admin');
     }
 
     public static function getPages(): array

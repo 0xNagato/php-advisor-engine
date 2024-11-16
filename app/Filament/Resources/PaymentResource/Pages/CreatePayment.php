@@ -18,7 +18,7 @@ class CreatePayment extends CreateRecord
 
     public static function canAccess(array $parameters = []): bool
     {
-        return auth()->user()->hasRole('super_admin');
+        return auth()->user()->hasActiveRole('super_admin');
     }
 
     protected function beforeCreate(): void

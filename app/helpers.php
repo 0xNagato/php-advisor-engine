@@ -30,3 +30,10 @@ if (! function_exists('moneyWithoutCents')) {
         return preg_replace('/\.\d{2}$/', '', $formatted);
     }
 }
+
+if (! function_exists('formatRoleName')) {
+    function formatRoleName(string $name): string
+    {
+        return Str::title(str_replace('_', ' ', $name));
+    }
+}

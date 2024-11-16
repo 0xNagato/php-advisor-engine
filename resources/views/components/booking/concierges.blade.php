@@ -15,7 +15,7 @@
     @endphp
     @foreach ($concierges as $index => $concierge)
         @if ($concierge)
-            @if (Auth::user()->hasRole('concierge'))
+            @if (Auth::user()->hasActiveRole('concierge'))
                 {{ $concierge->user->name }}
             @else
                 <a href="{{ ViewConcierge::getUrl([$concierge->id]) }}">

@@ -38,12 +38,12 @@ class VipCodeManager extends Page
             return ! session('simpleMode');
         }
 
-        return auth()->user()->hasRole(['concierge']);
+        return auth()->user()->hasActiveRole(['concierge']);
     }
 
     public function mount(): void
     {
-        if (! auth()->user()->hasRole(['concierge'])) {
+        if (! auth()->user()->hasActiveRole(['concierge'])) {
             $this->redirect(config('app.platform_url'));
         } else {
             $this->initializeFilters();

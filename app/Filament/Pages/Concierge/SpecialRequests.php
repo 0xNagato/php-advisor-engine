@@ -22,7 +22,7 @@ class SpecialRequests extends Page
         /** @var User $user */
         $user = auth()->user();
 
-        return $user->hasRole('concierge');
+        return $user->hasActiveRole('concierge');
     }
 
     protected function getHeaderActions(): array

@@ -25,9 +25,9 @@ class SpecialRequestPolicy
      */
     public function view(User $user, SpecialRequest $specialRequest)
     {
-        if ($user->hasRole('concierge')) {
+        if ($user->hasActiveRole('concierge')) {
             return $specialRequest->concierge_id === $user->concierge->id;
-        } elseif ($user->hasRole('venue')) {
+        } elseif ($user->hasActiveRole('venue')) {
             return $specialRequest->venue_id === $user->venue->id;
         }
 

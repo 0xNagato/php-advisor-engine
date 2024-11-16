@@ -25,7 +25,7 @@ class ListPayments extends ListRecords
                     Payment::query()
                         ->where('status', PaymentStatus::PENDING)
                         ->when(
-                            ! auth()->user()->hasRole('super_admin'),
+                            ! auth()->user()->hasActiveRole('super_admin'),
                             fn (Builder $query) => $query->where('user_id', auth()->id())
                         )
                         ->count()

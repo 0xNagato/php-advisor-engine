@@ -27,7 +27,7 @@ class VenueTimeSlot extends Model
     ];
 
     /**
-     * @return BelongsTo<ScheduleTemplate, VenueTimeSlot>
+     * @return BelongsTo<ScheduleTemplate, $this>
      */
     public function scheduleTemplate(): BelongsTo
     {

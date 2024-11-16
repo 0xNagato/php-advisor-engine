@@ -29,11 +29,11 @@ class ListBookings extends ListRecords
                     ->with('venue')
                     ->orderByDesc('created_at')->where('status', BookingStatus::CONFIRMED);
 
-                if (auth()->user()->hasRole('concierge')) {
+                if (auth()->user()->hasActiveRole('concierge')) {
                     return $query->where('concierge_id', auth()->user()->concierge->id);
                 }
 
-                if (auth()->user()->hasRole('venue')) {
+                if (auth()->user()->hasActiveRole('venue')) {
                     return $query->whereHas('schedule.venue', function (Builder $query) {
                         $query->where('id', auth()->user()->venue->id);
                     });
@@ -63,7 +63,7 @@ class ListBookings extends ListRecords
             ])
             ->actions([
                 Action::make('resendNotification')
-                    ->hidden(fn () => ! auth()->user()->hasRole('super_admin'))
+                    ->hidden(fn () => ! auth()->user()->hasActiveRole('super_admin'))
                     ->label('Resend Notification')
                     ->requiresConfirmation()
                     ->icon(fn (Booking $record

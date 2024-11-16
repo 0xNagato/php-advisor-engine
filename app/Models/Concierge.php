@@ -29,7 +29,7 @@ class Concierge extends Model
     ];
 
     /**
-     * @return BelongsTo<User, Concierge>
+     * @return BelongsTo<User, $this>
      */
     public function user(): BelongsTo
     {
@@ -91,9 +91,7 @@ class Concierge extends Model
 
     public function referralEarningsInUSD(): Attribute
     {
-        return Attribute::make(get: function () {
-            return app(CurrencyConversionService::class)->convertToUSD($this->referralEarningsByCurrency);
-        });
+        return Attribute::make(get: fn () => app(CurrencyConversionService::class)->convertToUSD($this->referralEarningsByCurrency));
     }
 
     public function formattedReferralEarningsInUSD(): Attribute
@@ -108,7 +106,7 @@ class Concierge extends Model
     }
 
     /**
-     * @return HasOneThrough<Concierge>
+     * @return HasOneThrough<\App\Models\Concierge, User, $this>
      */
     public function referringConcierge(): HasOneThrough
     {
@@ -123,7 +121,7 @@ class Concierge extends Model
     }
 
     /**
-     * @return HasManyThrough<Concierge>
+     * @return HasManyThrough<\App\Models\Concierge, User, $this>
      */
     public function concierges(): HasManyThrough
     {
@@ -135,7 +133,7 @@ class Concierge extends Model
     }
 
     /**
-     * @return HasManyThrough<Referral>
+     * @return HasManyThrough<Referral, User, $this>
      */
     public function referrals(): HasManyThrough
     {
@@ -152,7 +150,7 @@ class Concierge extends Model
     /**
      * Description
      *
-     * @return HasMany<VipCode>
+     * @return HasMany<VipCode, $this>
      */
     public function vipCodes(): HasMany
     {

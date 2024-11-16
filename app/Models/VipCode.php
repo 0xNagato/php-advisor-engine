@@ -46,7 +46,7 @@ class VipCode extends Authenticatable
     }
 
     /**
-     * @return BelongsTo<Concierge, VipCode>
+     * @return BelongsTo<Concierge, $this>
      */
     public function concierge(): BelongsTo
     {

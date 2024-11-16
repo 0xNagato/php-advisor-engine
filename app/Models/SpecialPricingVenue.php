@@ -14,7 +14,7 @@ class SpecialPricingVenue extends Model
     ];
 
     /**
-     * @return BelongsTo<Venue, SpecialPricingVenue>
+     * @return BelongsTo<Venue, $this>
      */
     public function venue(): BelongsTo
     {

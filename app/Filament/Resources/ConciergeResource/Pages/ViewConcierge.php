@@ -74,11 +74,11 @@ class ViewConcierge extends ViewRecord
 
     private function getReferrerUrl(User $referrer): string
     {
-        if ($referrer->hasRole('partner')) {
+        if ($referrer->hasActiveRole('partner')) {
             return PartnerResource::getUrl('view', ['record' => $referrer->partner->id]);
         }
 
-        if ($referrer->hasRole('concierge')) {
+        if ($referrer->hasActiveRole('concierge')) {
             return ConciergeResource::getUrl('view', ['record' => $referrer->concierge->id]);
         }
 

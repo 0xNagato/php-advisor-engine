@@ -52,8 +52,8 @@ class ConciergeSeeder extends Seeder
             $user = User::factory([
                 'first_name' => 'Concierge',
                 'email' => $email,
-                'concierge_referral_id' => $partner->user->hasRole('concierge') ? $partner->id : null,
-                'partner_referral_id' => $partner->user->hasRole('partner') ? $partner->id : null,
+                'concierge_referral_id' => $partner->user->hasActiveRole('concierge') ? $partner->id : null,
+                'partner_referral_id' => $partner->user->hasActiveRole('partner') ? $partner->id : null,
             ])
                 ->has(Concierge::factory([
                     'hotel_name' => $hotelName,
@@ -66,7 +66,7 @@ class ConciergeSeeder extends Seeder
                 'email' => $email,
                 'secured_at' => now(),
                 'type' => 'concierge',
-                'referrer_type' => $partner->user->hasRole('concierge') ? 'concierge' : 'partner',
+                'referrer_type' => $partner->user->hasActiveRole('concierge') ? 'concierge' : 'partner',
             ]);
 
             $user->assignRole('concierge');

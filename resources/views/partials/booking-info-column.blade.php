@@ -23,7 +23,7 @@
         <div>{{ $record->booking_at->format('M j, Y g:ia') }}</div>
     </div>
 
-    @if (!$record->venue_confirmed_at && auth()->user()->hasRole('super_admin'))
+    @if (!$record->venue_confirmed_at && auth()->user()->hasActiveRole('super_admin'))
         <div class="mt-2 font-semibold">Venue Contacts:</div>
         @if ($record->venue && $record->venue->contacts)
             @foreach ($record->venue->contacts->where('use_for_reservations', true) as $contact)

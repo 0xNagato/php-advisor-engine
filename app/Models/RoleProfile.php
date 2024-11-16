@@ -2,19 +2,17 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Spatie\Permission\Models\Role;
 
-class PaymentItem extends Model
+class RoleProfile extends Model
 {
-    use HasFactory;
-
     protected $fillable = [
+        'name',
+        'is_active',
+        'role_id',
         'user_id',
-        'payment_id',
-        'currency',
-        'amount',
     ];
 
     /**
@@ -26,10 +24,17 @@ class PaymentItem extends Model
     }
 
     /**
-     * @return BelongsTo<Payment, $this>
+     * @return BelongsTo<Role, $this>
      */
-    public function payment(): BelongsTo
+    public function role(): BelongsTo
     {
-        return $this->belongsTo(Payment::class);
+        return $this->belongsTo(Role::class);
+    }
+
+    protected function casts(): array
+    {
+        return [
+            'is_active' => 'boolean',
+        ];
     }
 }

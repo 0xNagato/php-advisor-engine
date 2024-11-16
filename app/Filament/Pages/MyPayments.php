@@ -26,7 +26,7 @@ class MyPayments extends Page implements HasTable
             return ! session('simpleMode');
         }
 
-        return auth()->user()?->hasRole(['venue', 'partner', 'concierge']);
+        return auth()->user()?->hasActiveRole(['venue', 'partner', 'concierge']);
     }
 
     public function table(Table $table): Table

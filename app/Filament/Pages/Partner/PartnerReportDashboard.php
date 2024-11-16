@@ -33,7 +33,7 @@ class PartnerReportDashboard extends Dashboard
 
     public static function canAccess(): bool
     {
-        return auth()->user()?->hasRole('partner');
+        return auth()->user()?->hasActiveRole('partner');
     }
 
     public function mount(): void

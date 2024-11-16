@@ -35,7 +35,7 @@ class PaymentResource extends Resource
 
     public static function canAccess(): bool
     {
-        return auth()->user()->hasRole('super_admin');
+        return auth()->user()->hasActiveRole('super_admin');
     }
 
     public static function form(Form $form): Form
@@ -109,7 +109,7 @@ class PaymentResource extends Resource
                 TextColumn::make('title')
                     ->label('Type')
                     ->searchable()
-                    ->visible(fn () => auth()->user()->hasRole('super_admin')),
+                    ->visible(fn () => auth()->user()->hasActiveRole('super_admin')),
                 TextColumn::make('status')
                     ->label('Status')
                     ->badge(),
@@ -130,7 +130,7 @@ class PaymentResource extends Resource
                     ->color('success')
                     ->icon('heroicon-o-check-circle')
                     ->requiresConfirmation()
-                    ->visible(auth()->user()->hasRole('super_admin'))
+                    ->visible(auth()->user()->hasActiveRole('super_admin'))
                     ->action(fn (Payment $record) => $record->markAsPaid()),
                 ViewAction::make(),
             ]);

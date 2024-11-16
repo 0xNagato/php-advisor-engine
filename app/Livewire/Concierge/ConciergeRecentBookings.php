@@ -31,7 +31,7 @@ class ConciergeRecentBookings extends BaseWidget
 
     public function getTableHeading(): string|Htmlable|null
     {
-        return auth()->user()?->hasRole('super_admin') ? 'Concierge Recent Bookings' : 'Your Recent Bookings';
+        return auth()->user()?->hasActiveRole('super_admin') ? 'Concierge Recent Bookings' : 'Your Recent Bookings';
     }
 
     public function table(Table $table): Table

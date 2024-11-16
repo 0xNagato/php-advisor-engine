@@ -26,7 +26,7 @@ class PartnerRecentBookings extends BaseWidget
 
     public function getTableHeading(): string|Htmlable|null
     {
-        return auth()->user()?->hasRole('super_admin') ? 'Partner Recent Bookings' : 'Your Recent Bookings';
+        return auth()->user()?->hasActiveRole('super_admin') ? 'Partner Recent Bookings' : 'Your Recent Bookings';
     }
 
     public function getColumnSpan(): int|string|array

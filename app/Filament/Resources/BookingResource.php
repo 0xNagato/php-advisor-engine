@@ -25,7 +25,7 @@ class BookingResource extends Resource
             return ! session('simpleMode');
         }
 
-        return auth()->user()->hasRole(['super_admin', 'partner', 'concierge']);
+        return auth()->user()->hasActiveRole(['super_admin', 'partner', 'concierge']);
     }
 
     public static function form(Form $form): Form

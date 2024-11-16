@@ -21,7 +21,7 @@ class Partner extends Model
     ];
 
     /**
-     * @return BelongsTo<User, Partner>
+     * @return BelongsTo<User, $this>
      */
     public function user(): BelongsTo
     {
@@ -29,7 +29,7 @@ class Partner extends Model
     }
 
     /**
-     * @return HasManyThrough<Referral>
+     * @return HasManyThrough<Referral, User, $this>
      */
     public function referrals(): HasManyThrough
     {

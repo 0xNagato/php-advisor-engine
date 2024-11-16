@@ -109,7 +109,7 @@ class Booking extends Model
     }
 
     /**
-     * @return HasMany<Earning>
+     * @return HasMany<Earning, $this>
      */
     public function earnings(): HasMany
     {
@@ -143,7 +143,7 @@ class Booking extends Model
     }
 
     /**
-     * @return HasOneThrough<Venue>
+     * @return HasOneThrough<Venue, ScheduleTemplate, $this>
      */
     public function venue(): HasOneThrough
     {
@@ -158,7 +158,7 @@ class Booking extends Model
     }
 
     /**
-     * @return BelongsTo<Concierge, Booking>
+     * @return BelongsTo<Concierge, $this>
      */
     public function concierge(): BelongsTo
     {
@@ -166,7 +166,7 @@ class Booking extends Model
     }
 
     /**
-     * @return BelongsTo<Partner, Booking>
+     * @return BelongsTo<Partner, $this>
      */
     public function partnerConcierge(): BelongsTo
     {
@@ -174,7 +174,7 @@ class Booking extends Model
     }
 
     /**
-     * @return BelongsTo<Partner, Booking>
+     * @return BelongsTo<Partner, $this>
      */
     public function partnerVenue(): BelongsTo
     {
@@ -182,7 +182,7 @@ class Booking extends Model
     }
 
     /**
-     * @return BelongsTo<VipCode, Booking>
+     * @return BelongsTo<VipCode, $this>
      */
     public function vipCode(): BelongsTo
     {

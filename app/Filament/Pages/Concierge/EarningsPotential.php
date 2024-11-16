@@ -56,7 +56,7 @@ class EarningsPotential extends Page
             return ! session('simpleMode');
         }
 
-        return auth()->user()?->hasRole('concierge') ?? false;
+        return auth()->user()?->hasActiveRole('concierge') ?? false;
     }
 
     public function form(Form $form): Form

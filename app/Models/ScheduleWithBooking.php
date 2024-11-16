@@ -33,7 +33,7 @@ class ScheduleWithBooking extends Model
     public $timestamps = false;
 
     /**
-     * @return BelongsTo<Venue, ScheduleWithBooking>
+     * @return BelongsTo<Venue, $this>
      */
     public function venue(): BelongsTo
     {
@@ -58,7 +58,7 @@ class ScheduleWithBooking extends Model
     }
 
     /**
-     * @return HasMany<Booking>
+     * @return HasMany<Booking, $this>
      */
     public function bookings(): HasMany
     {

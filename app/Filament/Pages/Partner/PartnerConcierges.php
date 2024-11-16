@@ -34,7 +34,7 @@ class PartnerConcierges extends ConciergeReferral
 
     public static function canAccess(): bool
     {
-        return auth()->user()?->hasRole('partner');
+        return auth()->user()?->hasActiveRole('partner');
     }
 
     protected function getHeaderActions(): array

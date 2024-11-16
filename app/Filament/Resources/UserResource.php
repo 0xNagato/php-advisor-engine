@@ -2,10 +2,8 @@
 
 namespace App\Filament\Resources;
 
-use App\Filament\Resources\UserResource\Pages\CreateUser;
 use App\Filament\Resources\UserResource\Pages\EditUser;
 use App\Filament\Resources\UserResource\Pages\ListUsers;
-use App\Filament\Resources\UserResource\Pages\ViewUser;
 use App\Models\User;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
@@ -13,6 +11,7 @@ use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
+use Illuminate\Support\Str;
 use STS\FilamentImpersonate\Impersonate;
 
 class UserResource extends Resource
@@ -21,11 +20,11 @@ class UserResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-o-user';
 
-    protected static ?int $navigationSort = 1;
+    protected static ?int $navigationSort = 19;
 
     public static function shouldRegisterNavigation(): bool
     {
-        return false;
+        return auth()->user()->hasActiveRole('super_admin');
     }
 
     public static function form(Form $form): Form
@@ -33,9 +32,20 @@ class UserResource extends Resource
         return $form
             ->schema([
                 Select::make('roles')
-                    ->relationship('roles', 'name')
+                    ->multiple()
+                    ->relationship(
+                        'roles',
+                        'name',
+                        fn ($query) => $query->whereIn('name', [
+                            'super_admin',
+                            'partner',
+                            'concierge',
+                            'venue',
+                        ])
+                    )
                     ->preload()
-                    ->searchable(),
+                    ->searchable()
+                    ->columnSpanFull(),
                 TextInput::make('first_name')
                     ->required()
                     ->maxLength(255),
@@ -55,6 +65,11 @@ class UserResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
+            ->query(
+                static::getModel()::query()
+                    ->with(['roleProfiles.role'])
+            )
+            ->recordUrl(fn (User $record): string => EditUser::getUrl(['record' => $record]))
             ->columns([
                 TextColumn::make('name')
                     ->sortable()
@@ -63,17 +78,24 @@ class UserResource extends Resource
                     ->searchable()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
-                TextColumn::make('main_role')
-                    ->label('Role')
-                    ->color(fn (string $state): string => match ($state) {
-                        'Super Admin' => 'danger',
-                        'Concierge' => 'info',
-                        'Venue' => 'success',
-                        'Partner' => 'warning',
-                        default => '',
-                    })
-                    ->badge()
-                    ->searchable(),
+                TextColumn::make('roleProfiles')
+                    ->label('Roles')
+                    ->getStateUsing(fn (User $record) => $record->roleProfiles->map(function ($profile) {
+                        $color = match ($profile->role->name) {
+                            'super_admin' => 'red',
+                            'concierge' => 'blue',
+                            'venue' => 'green',
+                            'partner' => 'yellow',
+                            default => 'gray'
+                        };
+
+                        $name = Str::title(str_replace('_', ' ', $profile->role->name));
+                        $activeMarker = $profile->is_active ? ' ✓' : '';
+                        $opacity = $profile->is_active ? '' : 'opacity-50';
+
+                        return "<span class='inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-$color-100 text-$color-800 $opacity'>$name$activeMarker</span>";
+                    })->join(' '))
+                    ->html(),
                 TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()
@@ -83,13 +105,10 @@ class UserResource extends Resource
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
-            ->filters([
-
-            ])
+            ->filters([])
             ->actions([
-                // Tables\Actions\ViewAction::make(),
-                // Tables\Actions\EditAction::make(),
-                Impersonate::make(),
+                Impersonate::make()
+                    ->redirectTo(config('app.platform_url')),
             ]);
     }
 
@@ -97,8 +116,6 @@ class UserResource extends Resource
     {
         return [
             'index' => ListUsers::route('/'),
-            'create' => CreateUser::route('/create'),
-            'view' => ViewUser::route('/{record}'),
             'edit' => EditUser::route('/{record}/edit'),
         ];
     }

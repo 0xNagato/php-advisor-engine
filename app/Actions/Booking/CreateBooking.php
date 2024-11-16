@@ -125,7 +125,7 @@ class CreateBooking
         if ($isVip) {
             $conciergeId = Auth::guard('vip_code')->user()->concierge_id;
         }
-        if (auth()->user()->hasRole('partner')) {
+        if (auth()->user()->hasActiveRole('partner')) {
             $conciergeId = config('app.house.concierge_id');
         }
 

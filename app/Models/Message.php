@@ -22,7 +22,7 @@ class Message extends Model
     ];
 
     /**
-     * @return BelongsTo<Announcement, Message>
+     * @return BelongsTo<Announcement, $this>
      */
     public function announcement(): BelongsTo
     {
@@ -30,7 +30,7 @@ class Message extends Model
     }
 
     /**
-     * @return BelongsTo<User, Message>
+     * @return BelongsTo<User, $this>
      */
     public function recipient(): BelongsTo
     {

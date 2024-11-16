@@ -11,7 +11,7 @@ class TelescopeAuthorize
 {
     public function handle(Request $request, Closure $next)
     {
-        if (Auth::check() && Auth::user()?->hasRole('super_admin')) {
+        if (Auth::check() && Auth::user()?->hasActiveRole('super_admin')) {
             return $next($request);
         }
 

@@ -29,7 +29,7 @@ class VenueEarnings extends Page
 
     public static function canAccess(): bool
     {
-        return auth()->user()->hasRole('partner');
+        return auth()->user()->hasActiveRole('partner');
     }
 
     public function getHeading(): string|Htmlable

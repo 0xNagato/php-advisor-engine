@@ -33,7 +33,7 @@ class ConciergeReferralEarnings extends Page
             return ! session('simpleMode');
         }
 
-        return auth()->user()->hasRole('concierge');
+        return auth()->user()->hasActiveRole('concierge');
     }
 
     public function getHeading(): string|Htmlable

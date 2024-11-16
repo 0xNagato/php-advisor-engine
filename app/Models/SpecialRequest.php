@@ -63,7 +63,7 @@ class SpecialRequest extends Model
     }
 
     /**
-     * @return BelongsTo<Venue, SpecialRequest>
+     * @return BelongsTo<Venue, $this>
      */
     public function venue(): BelongsTo
     {
@@ -71,7 +71,7 @@ class SpecialRequest extends Model
     }
 
     /**
-     * @return BelongsTo<Concierge, SpecialRequest>
+     * @return BelongsTo<Concierge, $this>
      */
     public function concierge(): BelongsTo
     {
@@ -79,7 +79,7 @@ class SpecialRequest extends Model
     }
 
     /**
-     * @return BelongsTo<Booking, SpecialRequest>
+     * @return BelongsTo<Booking, $this>
      */
     public function booking(): BelongsTo
     {
@@ -87,7 +87,7 @@ class SpecialRequest extends Model
     }
 
     /**
-     * @return BelongsTo<ScheduleTemplate, SpecialRequest>
+     * @return BelongsTo<ScheduleTemplate, $this>
      */
     public function scheduleTemplate(): BelongsTo
     {

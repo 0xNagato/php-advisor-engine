@@ -13,7 +13,7 @@ class Device extends Model
     protected $fillable = ['key', 'verified'];
 
     /**
-     * @return BelongsTo<User, Device>
+     * @return BelongsTo<User, $this>
      */
     public function user(): BelongsTo
     {

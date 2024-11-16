@@ -25,7 +25,7 @@ class VenueBookings extends Page implements HasTable
 
     public static function canAccess(): bool
     {
-        return auth()->user()->hasRole('venue');
+        return auth()->user()->hasActiveRole('venue');
     }
 
     public function table(Table $table): Table

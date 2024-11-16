@@ -33,7 +33,7 @@ class ConfirmationManagerBookings extends BaseWidget
             ->actions([
                 ActionGroup::make([
                     Action::make('resendConfirmation')
-                        ->hidden(fn (Booking $record) => ! auth()->user()->hasRole('super_admin'))
+                        ->hidden(fn (Booking $record) => ! auth()->user()->hasActiveRole('super_admin'))
                         ->label('Resend Confirmation')
                         ->requiresConfirmation()
                         ->icon(fn (Booking $record) => is_null($record->venue_confirmed_at) ? 'ri-refresh-line' : 'heroicon-o-check-circle')

@@ -14,7 +14,7 @@ class UserCode extends Model
     protected $fillable = ['user_id', 'code'];
 
     /**
-     * @return BelongsTo<User, UserCode>
+     * @return BelongsTo<User, $this>
      */
     public function user(): BelongsTo
     {

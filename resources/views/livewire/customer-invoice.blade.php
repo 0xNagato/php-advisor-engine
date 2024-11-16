@@ -198,7 +198,7 @@
                 @endif
             </div>
 
-            @if (auth()->check() && auth()->user()->hasRole('super_admin'))
+            @if (auth()->check() && auth()->user()->hasActiveRole('super_admin'))
                 @php
                     $booking->load('earnings.user.venue', 'earnings.user.concierge', 'earnings.user.partner');
                     // Eager loading because resend customer invoice would break everytime
@@ -282,7 +282,7 @@
                     </div>
                 </div>
             @endif
-            @if (auth()->check() && auth()->user()->hasRole('super_admin'))
+            @if (auth()->check() && auth()->user()->hasActiveRole('super_admin'))
                 <x-filament::actions :actions="[$this->resendInvoiceAction, $this->deleteBookingAction]" class="w-full mt-4" />
             @endif
         </div>

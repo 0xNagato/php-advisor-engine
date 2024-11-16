@@ -4,8 +4,10 @@ use App\Http\Controllers\Api\AppConfigController;
 use App\Http\Controllers\Api\AvailabilityCalendarController;
 use App\Http\Controllers\Api\BookingController;
 use App\Http\Controllers\Api\ContactFormController;
+use App\Http\Controllers\Api\MeController;
 use App\Http\Controllers\Api\RegionController;
 use App\Http\Controllers\Api\ReservationHubController;
+use App\Http\Controllers\Api\RoleProfileController;
 use App\Http\Controllers\Api\TimeslotController;
 use App\Http\Controllers\Api\VenueController;
 use Illuminate\Http\Request;
@@ -26,6 +28,9 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::put('/bookings/{booking}', [BookingController::class, 'update']);
     Route::delete('/bookings/{booking}', [BookingController::class, 'destroy']);
     Route::post('/contact', [ContactFormController::class, 'submit']);
+    Route::get('/profiles', [RoleProfileController::class, 'index']);
+    Route::post('/profiles/{profile}/switch', [RoleProfileController::class, 'switch']);
+    Route::get('/me', MeController::class);
 });
 
 Route::get('/app-config', AppConfigController::class)->name('app-config');

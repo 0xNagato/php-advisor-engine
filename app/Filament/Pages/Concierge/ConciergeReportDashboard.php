@@ -35,7 +35,7 @@ class ConciergeReportDashboard extends Dashboard
             return ! session('simpleMode');
         }
 
-        return auth()->user()?->hasRole('concierge');
+        return auth()->user()?->hasActiveRole('concierge');
     }
 
     public function mount(): void

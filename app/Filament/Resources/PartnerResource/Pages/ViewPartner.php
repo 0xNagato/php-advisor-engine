@@ -43,7 +43,7 @@ class ViewPartner extends ViewRecord
     {
         $heading = $this->record->user->name;
 
-        if (auth()->user()->hasRole('super_admin')) {
+        if (auth()->user()->hasActiveRole('super_admin')) {
             $heading .= " ({$this->record->percentage}%)";
         }
 

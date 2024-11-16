@@ -19,7 +19,7 @@ class Payment extends Model
     ];
 
     /**
-     * @return HasMany<Earning>
+     * @return HasMany<Earning, $this>
      */
     public function earnings(): HasMany
     {
@@ -27,7 +27,7 @@ class Payment extends Model
     }
 
     /**
-     * @return HasMany<PaymentItem>
+     * @return HasMany<PaymentItem, $this>
      */
     public function items(): HasMany
     {

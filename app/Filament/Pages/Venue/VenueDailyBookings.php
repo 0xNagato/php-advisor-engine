@@ -33,7 +33,7 @@ class VenueDailyBookings extends Page implements HasTable
 
     public static function canAccess(): bool
     {
-        return auth()->user()->hasRole('venue');
+        return auth()->user()->hasActiveRole('venue');
     }
 
     public function getHeading(): string|Htmlable
@@ -78,7 +78,7 @@ class VenueDailyBookings extends Page implements HasTable
                     ReverseMarkAsNoShowAction::make('reverse no show'),
                 ])
                     ->tooltip('Actions')
-                    ->hidden(fn () => ! auth()->user()?->hasRole('venue')),
+                    ->hidden(fn () => ! auth()->user()?->hasActiveRole('venue')),
             ]);
     }
 }

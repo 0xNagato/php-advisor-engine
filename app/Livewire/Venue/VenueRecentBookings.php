@@ -35,7 +35,7 @@ class VenueRecentBookings extends BaseWidget
 
     public function getTableHeading(): string|Htmlable|null
     {
-        return auth()->user()?->hasRole('super_admin') ? 'Venue Recent Bookings' : 'Your Recent Bookings';
+        return auth()->user()?->hasActiveRole('super_admin') ? 'Venue Recent Bookings' : 'Your Recent Bookings';
     }
 
     public function table(Table $table): Table
@@ -76,7 +76,7 @@ class VenueRecentBookings extends BaseWidget
                 TextColumn::make('total_fee')
                     ->label('Total Fee')
                     ->size('xs')
-                    ->visible(fn () => auth()->user()?->hasRole('super_admin'))
+                    ->visible(fn () => auth()->user()?->hasActiveRole('super_admin'))
                     ->formatStateUsing(function (Booking $booking) {
                         if (! $booking->is_prime) {
                             return new HtmlString('<span class="text-xs italic text-gray-500">Non-Prime</span>');
@@ -101,7 +101,7 @@ class VenueRecentBookings extends BaseWidget
                     ReverseMarkAsNoShowAction::make('reverse no show'),
                 ])
                     ->tooltip('Actions')
-                    ->hidden(fn () => ! auth()->user()?->hasRole('venue')),
+                    ->hidden(fn () => ! auth()->user()?->hasActiveRole('venue')),
             ]);
     }
 }

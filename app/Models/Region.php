@@ -149,7 +149,7 @@ class Region extends Model
     }
 
     /**
-     * @return HasMany<Venue>
+     * @return HasMany<Venue, $this>
      */
     public function venues(): HasMany
     {

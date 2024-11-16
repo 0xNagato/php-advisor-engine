@@ -55,7 +55,8 @@ class VenueReferralsTable extends BaseWidget
             ])
             ->paginated([5, 10, 25])
             ->actions([
-                Impersonate::make(),
+                Impersonate::make()
+                    ->redirectTo(config('app.platform_url')),
                 Action::make('sendWelcome')
                     ->icon('fas-paper-plane')
                     ->iconButton()

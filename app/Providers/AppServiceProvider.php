@@ -82,6 +82,10 @@ class AppServiceProvider extends ServiceProvider
 
         Blade::directive('endnonmobileapp', static fn () => '<?php endif; ?>');
 
+        Blade::directive('hasActiveRole', fn ($roles) => "<?php if(auth()->user()?->hasActiveRole($roles)): ?>");
+
+        Blade::directive('endhasActiveRole', fn () => '<?php endif; ?>');
+
         $this->app->bind(EarningCreationService::class, fn () => new EarningCreationService);
 
         $this->app->bind(PrimeEarningsCalculationService::class, fn ($app) => new PrimeEarningsCalculationService(

@@ -41,7 +41,7 @@ class Referral extends Model
     }
 
     /**
-     * @return BelongsTo<User, Referral>
+     * @return BelongsTo<User, $this>
      */
     public function referrer(): BelongsTo
     {
@@ -49,7 +49,7 @@ class Referral extends Model
     }
 
     /**
-     * @return BelongsTo<User, Referral>
+     * @return BelongsTo<User, $this>
      */
     public function user(): BelongsTo
     {

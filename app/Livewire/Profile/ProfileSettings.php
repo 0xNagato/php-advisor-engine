@@ -63,7 +63,7 @@ class ProfileSettings extends Widget implements HasForms
             //     ->directory('profile-photos')
             //     ->optimize('webp')
             //     ->moveFiles()
-            //     ->hidden(fn () => auth()->user()->hasRole('venue')),
+            //     ->hidden(fn () => auth()->user()->hasActiveRole('venue')),
             TextInput::make('first_name')
                 ->required()
                 ->label('First Name'),

@@ -38,7 +38,7 @@ trait HasEarnings
     /**
      * Description: HasManyThrough Relation with Earning
      *
-     * @return HasManyThrough<Earning>
+     * @return HasManyThrough<Earning, User, $this>
      */
     public function earnings(): HasManyThrough
     {

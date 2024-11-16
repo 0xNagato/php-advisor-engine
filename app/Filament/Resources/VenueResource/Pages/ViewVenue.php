@@ -74,7 +74,7 @@ class ViewVenue extends ViewRecord
 
     private function getReferrerUrl(User $referrer): string
     {
-        if ($referrer->hasRole('partner')) {
+        if ($referrer->hasActiveRole('partner')) {
             return PartnerResource::getUrl('view', ['record' => $referrer->partner->id]);
         }
 
