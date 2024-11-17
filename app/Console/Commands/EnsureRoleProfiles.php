@@ -4,7 +4,7 @@ namespace App\Console\Commands;
 
 use App\Models\User;
 use Illuminate\Console\Command;
-use Illuminate\Contracts\Database\Query\Builder;
+use Illuminate\Database\Eloquent\Collection;
 
 class EnsureRoleProfiles extends Command
 {
@@ -18,7 +18,7 @@ class EnsureRoleProfiles extends Command
 
         User::query()
             ->with(['roles', 'roleProfiles'])
-            ->chunkById(100, function (Builder $users) {
+            ->chunkById(100, function (Collection $users) {
                 foreach ($users as $user) {
                     $this->processUser($user);
                 }
