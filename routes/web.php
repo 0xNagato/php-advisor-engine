@@ -12,9 +12,16 @@ use App\Livewire\Venue\VenueBookingConfirmation;
 use App\Livewire\Venue\VenueContactLogin;
 use App\Livewire\Venue\VenueContactRecentBookings;
 use App\Livewire\Venue\VenueSpecialRequestConfirmation;
+use App\Livewire\VenueOnboarding;
 use App\Livewire\Vip\AvailabilityCalendar;
 use App\Livewire\Vip\Login;
 use AshAllenDesign\ShortURL\Controllers\ShortURLController;
+
+Route::get('/privacy', function () {
+    return view('privacy');
+});
+
+Route::get('/onboarding', VenueOnboarding::class)->name('onboarding');
 
 /**
  * Short URL handling for both domains:
@@ -75,10 +82,6 @@ Route::group(['prefix' => 'vip', 'as' => 'vip.'], function () {
         Route::get('booking', AvailabilityCalendar::class)->name('booking');
         Route::get('logout', LogoutController::class)->name('logout');
     });
-});
-
-Route::get('/privacy', function () {
-    return view('privacy');
 });
 
 require __DIR__.'/auth.php';

@@ -25,7 +25,7 @@
         &copy; {{ date('Y') }} {{ config('app.name', 'PRIMA VIP') }}. All rights reserved.
     </div>
 
-    @if (isset($this) && !$this instanceof HasTable)
+    @if (isset($this) && !$this instanceof HasTable && $this instanceof \Filament\Pages\Page)
         <x-filament-actions::modals />
     @endif
 </div>

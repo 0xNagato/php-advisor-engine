@@ -33,7 +33,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1"/>
 
     <title>
-        {{ filled($title = strip_tags(($livewire ?? null)?->getTitle() ?? '')) ? "$title - " : null }}
+        {{ filled($title = strip_tags(($livewire ?? null)?->getTitle() ?? $title ?? '')) ? "$title - " : null }}
         {{ strip_tags(filament()->getBrandName()) }}
     </title>
 
