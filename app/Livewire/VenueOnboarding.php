@@ -74,9 +74,30 @@ class VenueOnboarding extends Component
     #[Validate('required|string')]
     public string $phone = '';
 
+    /** @var array<string> */
+    public array $timeSlots = [];
+
     public function mount(): void
     {
         $this->venue_names = array_fill(0, $this->venue_count, '');
+
+        // Generate time slots in 30-minute increments from 11 AM to 11 PM
+        $this->timeSlots = collect()
+            ->range(0, 48) // 24 slots (12 hours * 2 slots per hour)
+            ->map(function ($slot) {
+                $hour = 11 + floor($slot / 2); // Start at 11:00 AM
+                $minutes = ($slot % 2) * 30;
+
+                return sprintf('%02d:%02d:00', $hour, $minutes);
+            })
+            ->filter(function ($time) {
+                // Only keep times between 11 AM and 11 PM
+                $hour = (int) substr($time, 0, 2);
+
+                return $hour >= 11 && $hour < 23;
+            })
+            ->values()
+            ->toArray();
     }
 
     public function updatedVenueCount(): void
@@ -177,15 +198,21 @@ class VenueOnboarding extends Component
             ]),
             'venues' => $this->validate([
                 'venue_count' => 'required|integer|min:1',
-                'venue_names.*' => 'required|string|max:255',
+                'venue_names.*' => [
+                    'required',
+                    'string',
+                    'max:255',
+                ],
                 'has_logos' => 'required|boolean',
                 'logo_files.*' => 'nullable|image|max:2048',
+            ], [
+                'venue_names.*' => 'Please enter a name for Venue :position',
             ]),
             'agreement' => $this->validate([
                 'agreement_accepted' => 'required|accepted',
             ]),
             'prime-hours' => $this->validate([
-                'prime_hours' => 'required|array',
+                'prime_hours' => 'present|array',
             ]),
             'incentive' => $this->validate([
                 'use_non_prime_incentive' => 'required|boolean',

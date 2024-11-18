@@ -101,9 +101,11 @@
                                     PRIMA?</label>
                                 <select wire:model.live="venue_count"
                                     class="w-full border-gray-300 rounded-lg shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
-                                    @foreach (range(1, 10) as $count)
-                                        <option value="{{ $count }}">{{ $count }}
-                                            {{ Str::plural('Venue', $count) }}</option>
+                                    @foreach (range(1, 5) as $count)
+                                        <option value="{{ $count }}">
+                                            {{ $count }}
+                                            {{ Str::plural('Venue', $count) }}
+                                        </option>
                                     @endforeach
                                 </select>
                                 @error('venue_count')
@@ -191,37 +193,31 @@
                     @if ($step === 'prime-hours')
                         <div class="space-y-6">
                             <div>
-                                <h3 class="text-lg font-medium text-gray-900">Define Your Prime Hours</h3>
-                                <p class="mt-1 text-sm text-gray-500">
-                                    Select the times when your dining room is typically full and you don't accept
-                                    reservations
-                                </p>
-                            </div>
-
-                            @foreach (['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'] as $day)
-                                <div>
-                                    <label
-                                        class="block mb-2 text-sm font-medium text-gray-700">{{ $day }}</label>
-                                    <div class="grid grid-cols-6 gap-4">
-                                        @foreach (range(11, 23) as $hour)
-                                            @php
-                                                $time = \Carbon\Carbon::createFromTime($hour);
-                                                $hourDisplay = $time->format('g');
-                                                $ampm = $time->format('A');
-                                            @endphp
-                                            <label class="inline-flex flex-col items-center">
-                                                <input type="checkbox"
-                                                    wire:model="prime_hours.{{ strtolower($day) }}.{{ sprintf('%02d:00', $hour) }}"
-                                                    class="w-4 h-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500">
-                                                <div class="mt-1 text-xs text-gray-700">
-                                                    <span>{{ $hourDisplay }}</span>
-                                                    <span class="text-[10px]">{{ $ampm }}</span>
-                                                </div>
-                                            </label>
-                                        @endforeach
-                                    </div>
+                                <label class="block mb-2 text-sm text-gray-700">
+                                    Please select your prime hours
+                                </label>
+                                <div class="space-y-6">
+                                    @foreach (['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'] as $dayIndex => $dayName)
+                                        @php $day = strtolower($dayName); @endphp
+                                        <div>
+                                            <h3 class="mb-3 text-sm font-medium text-gray-700">{{ $dayName }}</h3>
+                                            <div class="grid grid-cols-3 gap-2 sm:grid-cols-4 md:grid-cols-6">
+                                                @foreach ($timeSlots as $time)
+                                                    <label class="relative flex items-center justify-center">
+                                                        <input type="checkbox"
+                                                            wire:model="prime_hours.{{ $day }}.{{ $time }}"
+                                                            class="sr-only peer" />
+                                                        <div
+                                                            class="w-full py-2 text-sm text-center bg-white border border-gray-200 rounded-lg cursor-pointer peer-checked:bg-indigo-50 peer-checked:border-indigo-600 peer-checked:text-indigo-600">
+                                                            {{ Carbon\Carbon::createFromFormat('H:i:s', $time)->format('g:i A') }}
+                                                        </div>
+                                                    </label>
+                                                @endforeach
+                                            </div>
+                                        </div>
+                                    @endforeach
                                 </div>
-                            @endforeach
+                            </div>
                         </div>
                     @endif
 
@@ -241,15 +237,15 @@
                                     class="w-4 h-4 mt-1 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500">
                                 <span class="text-sm">
                                     <span class="block font-medium text-gray-700">Enable Non-Prime Incentives</span>
-                                    <span class="text-gray-500">Offer incentives to customers booking during non-prime
-                                        hours</span>
+                                    <span class="text-gray-500">Offer per-diner incentives to encourage concierges to
+                                        book non-prime hour reservations</span>
                                 </span>
                             </label>
 
                             @if ($use_non_prime_incentive)
                                 <div>
-                                    <label class="block mb-2 text-sm font-medium text-gray-700">Amount to pay per
-                                        diner</label>
+                                    <label class="block mb-2 text-sm font-medium text-gray-700">Amount to pay per diner
+                                        (usually 10% of average per-diner check size)</label>
                                     <div class="relative rounded-lg shadow-sm">
                                         <div
                                             class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
