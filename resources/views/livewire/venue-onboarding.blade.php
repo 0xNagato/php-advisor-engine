@@ -283,7 +283,7 @@
                                 <span class="text-sm">
                                     <span class="block font-medium text-gray-700">Enable Non-Prime Incentives</span>
                                     <span class="text-gray-500">Offer per-diner incentives to encourage concierges to
-                                        book non-prime hour reservations</span>
+                                        book non-prime reservations</span>
                                 </span>
                             </label>
 
