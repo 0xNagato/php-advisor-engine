@@ -91,12 +91,12 @@
     <div class="mb-6 ml-4">
         @foreach ($venue_names as $index => $name)
             <p class="mb-2">{{ $index + 1 }}. {{ $name }}</p>
-            @if ($venue_use_non_prime_incentive[$index] ?? false)
+            {{-- @if ($venue_use_non_prime_incentive[$index] ?? false)
                 <p>
                     For {{ $name ?: 'Venue ' . ($index + 1) }}, PRIMA will charge a per-diner incentive fee of
                     ${{ number_format($venue_non_prime_per_diem[$index], 2) }} for non-prime reservations.
                 </p>
-            @endif
+            @endif --}}
         @endforeach
     </div>
 
