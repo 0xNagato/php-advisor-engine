@@ -20,6 +20,8 @@ class VenueOnboardingLocation extends Model
         'logo_path',
         'created_venue_id',
         'prime_hours',
+        'use_non_prime_incentive',
+        'non_prime_per_diem',
     ];
 
     /**

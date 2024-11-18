@@ -1,5 +1,5 @@
-<div class="prose prose-sm max-w-none">
-    <h1 class="text-2xl font-bold mb-6">RESTAURANT AGREEMENT</h1>
+<div class="prose-sm prose max-w-none">
+    <h1 class="mb-6 text-2xl font-bold">RESTAURANT AGREEMENT</h1>
 
     <p class="mb-4">
         This Restaurant Agreement (this "Agreement") is entered into by and among PRIMA VIP INC, a Delaware
@@ -12,9 +12,9 @@
         for the Restaurant on the Platform.
     </p>
 
-    <h2 class="text-xl font-semibold mb-3">1. Definitions</h2>
+    <h2 class="mb-3 text-xl font-semibold">1. Definitions</h2>
 
-    <div class="ml-4 mb-6">
+    <div class="mb-6 ml-4">
         <p class="mb-2">
             (a) "Gross Prime-Time Reservation Fee" means the Prime-Time Reservation Fee less any applicable
             credit card or payment processor fees and any refunds.
@@ -27,12 +27,11 @@
 
         <p class="mb-2">
             (c) "Non-Prime Time Reservation Fee" means the amount that PRIMA charges Restaurant for a
-            Non-Prime Time Reservation which shall be determined ahead of time by the Restaurant and shall be:
-            @if ($use_non_prime_incentive)
-                ${{ number_format($non_prime_per_diem, 2) }} per diner
-            @else
-                Not applicable as Restaurant has opted out of the non-prime incentive program
-            @endif
+            Non-Prime Time Reservation which shall be determined ahead of time by the Restaurant and shall be either:
+        <div class="ml-8">
+            (i) A dollar amount per diner; or<br>
+            (ii) [X]% of the bill (excluding gratuity)
+        </div>
         </p>
 
         <p class="mb-2">
@@ -40,7 +39,8 @@
         </p>
 
         <p class="mb-2">
-            (e) "Platform Fee" means a fee equal to ten percent (10%) of the applicable Non-Prime Incentive Plan.
+            (e) "Platform Fee" means a fee equal to seven percent (10%) of the applicable Non-Prime
+            Incentive Plan.
         </p>
 
         <p class="mb-2">
@@ -52,20 +52,20 @@
         </p>
     </div>
 
-    <h2 class="text-xl font-semibold mb-3">2. Commission</h2>
+    <h2 class="mb-3 text-xl font-semibold">2. Commission</h2>
     <p class="mb-4">
         Subject to Section 3 below, PRIMA shall pay Restaurant a monthly commission for Qualified
         Reservations (the "Commission") in the amount equal to:
     </p>
-    <ul class="list-disc ml-8 mb-6">
+    <ul class="mb-6 ml-8 list-disc">
         <li>60% of the Gross Prime-Time Reservation Fees for such calendar month; less</li>
         <li>the Non-Prime Time Incentive Fees for such calendar month; less</li>
         <li>the Platform Fees for such calendar month; less</li>
         <li>applicable credit card processing fees incurred by PRIMA.</li>
     </ul>
 
-    <h2 class="text-xl font-semibold mb-3">3. Commission Payment Terms</h2>
-    <div class="ml-4 mb-6">
+    <h2 class="mb-3 text-xl font-semibold">3. Commission Payment Terms</h2>
+    <div class="mb-6 ml-4">
         <p class="mb-4">
             (a) Gross Prime-Time Reservation Fees become payable to Restaurant only at such times and only
             to the extent that PRIMA actually receives payment from customer for a Qualified Reservation.
@@ -81,16 +81,22 @@
         </p>
     </div>
 
-    <h2 class="text-xl font-semibold mb-3">4. Covered Restaurants</h2>
+    <h2 class="mb-3 text-xl font-semibold">4. Covered Restaurants</h2>
     <p class="mb-4">
         The term 'Restaurant' in this Agreement refers collectively to the following restaurant(s)
         represented by the authorized signatory, up to a maximum of five (5) establishments. The
         undersigned represents and warrants that they have the authority to bind the restaurants listed below:
     </p>
 
-    <div class="ml-4 mb-6">
+    <div class="mb-6 ml-4">
         @foreach ($venue_names as $index => $name)
             <p class="mb-2">{{ $index + 1 }}. {{ $name }}</p>
+            @if ($venue_use_non_prime_incentive[$index] ?? false)
+                <p>
+                    For {{ $name ?: 'Venue ' . ($index + 1) }}, PRIMA will charge a per-diner incentive fee of
+                    ${{ number_format($venue_non_prime_per_diem[$index], 2) }} for non-prime reservations.
+                </p>
+            @endif
         @endforeach
     </div>
 

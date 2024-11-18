@@ -57,9 +57,11 @@ class VenueOnboarding extends Component
     /** @var array<int, array<string, array<string, bool>>> */
     public array $venue_prime_hours = [];
 
-    public bool $use_non_prime_incentive = false;
+    /** @var array<int, bool> */
+    public array $venue_use_non_prime_incentive = [];
 
-    public ?float $non_prime_per_diem = null;
+    /** @var array<int, ?float> */
+    public array $venue_non_prime_per_diem = [];
 
     public bool $send_agreement_copy = false;
 
@@ -77,6 +79,8 @@ class VenueOnboarding extends Component
 
     /** @var array<string> */
     public array $timeSlots = [];
+
+    public int $current_venue_index = 0;
 
     public function mount(): void
     {
@@ -97,20 +101,23 @@ class VenueOnboarding extends Component
             $this->step = $savedState['step'] ?? 'company';
         } else {
             $this->venue_names = array_fill(0, $this->venue_count, '');
+            $this->venue_prime_hours = array_fill(0, $this->venue_count, []);
+            $this->venue_use_non_prime_incentive = array_fill(0, $this->venue_count, false);
+            $this->venue_non_prime_per_diem = array_fill(0, $this->venue_count, null);
+            $this->logo_files = array_fill(0, $this->venue_count, null);
             $this->step = 'company';
         }
 
         // Generate time slots in 30-minute increments from 11 AM to 11 PM
         $this->timeSlots = collect()
-            ->range(0, 48) // 24 slots (12 hours * 2 slots per hour)
+            ->range(0, 48)
             ->map(function ($slot) {
-                $hour = 11 + floor($slot / 2); // Start at 11:00 AM
+                $hour = 11 + floor($slot / 2);
                 $minutes = ($slot % 2) * 30;
 
                 return sprintf('%02d:%02d:00', $hour, $minutes);
             })
             ->filter(function ($time) {
-                // Only keep times between 11 AM and 11 PM
                 $hour = (int) substr($time, 0, 2);
 
                 return $hour >= 11 && $hour < 23;
@@ -134,8 +141,8 @@ class VenueOnboarding extends Component
             'has_logos' => $this->has_logos,
             'agreement_accepted' => $this->agreement_accepted,
             'venue_prime_hours' => $this->venue_prime_hours,
-            'use_non_prime_incentive' => $this->use_non_prime_incentive,
-            'non_prime_per_diem' => $this->non_prime_per_diem,
+            'venue_use_non_prime_incentive' => $this->venue_use_non_prime_incentive,
+            'venue_non_prime_per_diem' => $this->venue_non_prime_per_diem,
             'send_agreement_copy' => $this->send_agreement_copy,
             'first_name' => $this->first_name,
             'last_name' => $this->last_name,
@@ -148,13 +155,14 @@ class VenueOnboarding extends Component
     {
         if ($this->venue_count > count($this->venue_names)) {
             $this->venue_names = array_pad($this->venue_names, $this->venue_count, '');
-            // Initialize prime hours for new venues
-            for ($i = count($this->venue_prime_hours); $i < $this->venue_count; $i++) {
-                $this->venue_prime_hours[$i] = [];
-            }
+            $this->venue_prime_hours = array_pad($this->venue_prime_hours, $this->venue_count, []);
+            $this->venue_use_non_prime_incentive = array_pad($this->venue_use_non_prime_incentive, $this->venue_count, false);
+            $this->venue_non_prime_per_diem = array_pad($this->venue_non_prime_per_diem, $this->venue_count, null);
         } else {
             $this->venue_names = array_slice($this->venue_names, 0, $this->venue_count);
             $this->venue_prime_hours = array_slice($this->venue_prime_hours, 0, $this->venue_count);
+            $this->venue_use_non_prime_incentive = array_slice($this->venue_use_non_prime_incentive, 0, $this->venue_count);
+            $this->venue_non_prime_per_diem = array_slice($this->venue_non_prime_per_diem, 0, $this->venue_count);
         }
 
         $this->logo_files = array_fill(0, $this->venue_count, null);
@@ -164,6 +172,14 @@ class VenueOnboarding extends Component
     {
         $this->validateStep();
 
+        if ($this->step === 'prime-hours' || $this->step === 'incentive') {
+            if ($this->current_venue_index < count($this->venue_names) - 1) {
+                $this->current_venue_index++;
+
+                return;
+            }
+        }
+
         $this->step = match ($this->step) {
             'company' => 'venues',
             'venues' => 'prime-hours',
@@ -172,11 +188,35 @@ class VenueOnboarding extends Component
             default => $this->step
         };
 
-        // Update session with new step after validation passes
+        $this->current_venue_index = 0;
+
         Session::put('venue_onboarding', array_merge(
             Session::get('venue_onboarding', []),
             ['step' => $this->step]
         ));
+    }
+
+    public function previousStep(): void
+    {
+        if (($this->step === 'prime-hours' || $this->step === 'incentive') && $this->current_venue_index > 0) {
+            $this->current_venue_index--;
+
+            return;
+        }
+
+        $steps = array_keys($this->steps);
+        $currentIndex = array_search($this->step, $steps);
+
+        if ($currentIndex > 0) {
+            $this->step = $steps[$currentIndex - 1];
+
+            // Set to last venue when going back to incentive or prime-hours step
+            if ($this->step === 'incentive' || $this->step === 'prime-hours') {
+                $this->current_venue_index = count($this->venue_names) - 1;
+            } else {
+                $this->current_venue_index = 0;
+            }
+        }
     }
 
     public function submit(): void
@@ -195,9 +235,6 @@ class VenueOnboarding extends Component
                 'has_logos' => $this->has_logos,
                 'logo_files' => null,
                 'agreement_accepted' => $this->agreement_accepted,
-                'venue_prime_hours' => $this->venue_prime_hours,
-                'use_non_prime_incentive' => $this->use_non_prime_incentive,
-                'non_prime_per_diem' => $this->non_prime_per_diem,
                 'send_agreement_copy' => $this->send_agreement_copy,
             ]);
 
@@ -210,6 +247,10 @@ class VenueOnboarding extends Component
                 $location = $onboarding->locations()->create([
                     'name' => $name,
                     'prime_hours' => $this->venue_prime_hours[$index] ?? [],
+                    'use_non_prime_incentive' => $this->venue_use_non_prime_incentive[$index] ?? false,
+                    'non_prime_per_diem' => $this->venue_use_non_prime_incentive[$index] ?
+                        $this->venue_non_prime_per_diem[$index] :
+                        null,
                 ]);
 
                 if ($this->has_logos && isset($this->logo_files[$index])) {
@@ -273,8 +314,8 @@ class VenueOnboarding extends Component
                 'venue_prime_hours' => 'present|array',
             ]),
             'incentive' => $this->validate([
-                'use_non_prime_incentive' => 'required|boolean',
-                'non_prime_per_diem' => 'nullable|numeric|min:0|required_if:use_non_prime_incentive,true',
+                'venue_use_non_prime_incentive' => 'required|array',
+                'venue_non_prime_per_diem' => 'nullable|array',
             ]),
             default => null,
         };
@@ -286,5 +327,12 @@ class VenueOnboarding extends Component
             ->layout('components.layouts.app', [
                 'title' => $this->submitted ? 'Onboarding Submitted' : 'Venue Onboarding',
             ]);
+    }
+
+    public function resetForm(): void
+    {
+        Session::forget('venue_onboarding');
+        $this->reset();
+        $this->mount();
     }
 }

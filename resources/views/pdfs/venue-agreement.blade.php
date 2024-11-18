@@ -77,26 +77,27 @@
         </p>
 
         <p>
-            (b) "Non-Prime Time Reservation" a Reservation for a time that is designated as a non-prime
-            time Reservation for Restaurant.
+            (b) "Non-Prime Time Reservation" a Reservation for a time that is designated as a
+            non-prime time Reservation for Restaurant.
         </p>
 
         <p>
-            (c) "Non-Prime Time Reservation Fee" means the amount that PRIMA charges Restaurant for a
-            Non-Prime Time Reservation which shall be determined ahead of time by the Restaurant and shall be:
-            @if ($use_non_prime_incentive)
-                ${{ number_format($non_prime_per_diem, 2) }} per diner
-            @else
-                Not applicable as Restaurant has opted out of the non-prime incentive program
-            @endif
+            (c) "Non-Prime Time Reservation Fee" means the amount that PRIMA charges Restaurant
+            for a Non-Prime Time Reservation which shall be determined ahead of time by the Restaurant and shall be
+            either:
         </p>
+        <ul style="list-style-type: none; margin: 4px 0 8px 40px;">
+            <li style="margin-bottom: 2px;">(i) A dollar amount per diner; or</li>
+            <li>(ii) [X]% of the bill (excluding gratuity)</li>
+        </ul>
 
         <p>
             (d) "Prime-Time Reservation Fee" means the amount PRIMA charges a customer for a Prime-Time Reservation.
         </p>
 
         <p>
-            (e) "Platform Fee" means a fee equal to ten percent (10%) of the applicable Non-Prime Incentive Plan.
+            (e) "Platform Fee" means a fee equal to seven percent (10%) of the applicable Non-Prime
+            Incentive Plan.
         </p>
 
         <p>
@@ -105,35 +106,6 @@
 
         <p>
             (g) "Qualified Reservation" means a Reservation at the Restaurant made by a customer on the Platform.
-        </p>
-    </div>
-
-    <h2>2. Commission</h2>
-    <p>
-        Subject to Section 3 below, PRIMA shall pay Restaurant a monthly commission for Qualified
-        Reservations (the "Commission") in the amount equal to:
-    </p>
-    <ul>
-        <li>60% of the Gross Prime-Time Reservation Fees for such calendar month; less</li>
-        <li>the Non-Prime Time Incentive Fees for such calendar month; less</li>
-        <li>the Platform Fees for such calendar month; less</li>
-        <li>applicable credit card processing fees incurred by PRIMA.</li>
-    </ul>
-
-    <h2>3. Commission Payment Terms</h2>
-    <div class="section">
-        <p>
-            (a) Gross Prime-Time Reservation Fees become payable to Restaurant only at such times and only
-            to the extent that PRIMA actually receives payment from customer for a Qualified Reservation.
-            In the event the calculation in Section 2 above becomes a negative number (e.g., the fees due
-            PRIMA exceed the fees due Restaurant), PRIMA requires Restaurant to pay the balance to PRIMA
-            within fifteen (15) days' of calendar month end.
-        </p>
-
-        <p>
-            (b) PRIMA will provide real-time access to a statement of total Commission payable to the
-            Restaurant for a calendar month. PRIMA shall remit one aggregate payment of the total
-            Commissions to Restaurant within fifteen (15) days after the end of the applicable calendar month.
         </p>
     </div>
 

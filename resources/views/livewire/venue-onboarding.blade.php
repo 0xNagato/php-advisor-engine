@@ -171,8 +171,8 @@
                                     'venue_names' => $venue_names,
                                     'first_name' => $first_name,
                                     'last_name' => $last_name,
-                                    'use_non_prime_incentive' => $use_non_prime_incentive,
-                                    'non_prime_per_diem' => $non_prime_per_diem,
+                                    'venue_use_non_prime_incentive' => $venue_use_non_prime_incentive,
+                                    'venue_non_prime_per_diem' => $venue_non_prime_per_diem,
                                 ])
                             </div>
 
@@ -203,121 +203,138 @@
 
                     {{-- Prime Hours Step --}}
                     @if ($step === 'prime-hours')
-                        <div x-data="{ activeVenue: 0 }">
-                            {{-- Venue Tabs --}}
-                            <div class="border-b border-gray-200">
-                                <nav class="flex -mb-px space-x-8" aria-label="Venues">
-                                    @foreach ($venue_names as $venueIndex => $venueName)
-                                        <button type="button" @click="activeVenue = {{ $venueIndex }}"
-                                            :class="{
-                                                'border-indigo-500 text-indigo-600': activeVenue ===
-                                                    {{ $venueIndex }},
-                                                'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300': activeVenue !==
-                                                    {{ $venueIndex }}
-                                            }"
-                                            class="py-4 text-sm font-medium border-b-2 whitespace-nowrap">
-                                            {{ $venueName ?: 'Venue ' . ($venueIndex + 1) }}
-                                        </button>
+                        <div>
+                            <div class="mb-6">
+                                <h3 class="text-lg font-medium text-gray-900">
+                                    {{ $venue_names[$current_venue_index] ?: 'Venue ' . ($current_venue_index + 1) }}
+                                    Prime Hours
+                                </h3>
+                                <p class="mt-2 text-sm text-gray-500">
+                                    Please specify which hours of the day this restaurant is usually fully booked.
+                                    During these times, customers will be given the option to purchase a reservation.
+                                </p>
+                                <div class="flex items-center gap-1 mt-4 text-sm text-gray-500">
+                                    @foreach ($venue_names as $index => $name)
+                                        <span @class([
+                                            'w-6 h-6 flex items-center justify-center rounded-full text-xs font-medium',
+                                            'bg-indigo-600 text-white' => $index === $current_venue_index,
+                                            'bg-gray-100 text-gray-600' => $index !== $current_venue_index,
+                                        ])>
+                                            {{ $index + 1 }}
+                                        </span>
+                                        @unless ($loop->last)
+                                            <div class="w-4 h-px bg-gray-200"></div>
+                                        @endunless
                                     @endforeach
-                                </nav>
+                                </div>
                             </div>
 
-                            {{-- Venue Content --}}
-                            @foreach ($venue_names as $venueIndex => $venueName)
-                                <div x-show="activeVenue === {{ $venueIndex }}"
-                                    x-transition:enter="transition ease-out duration-300"
-                                    x-transition:enter-start="opacity-0 transform translate-x-4"
-                                    x-transition:enter-end="opacity-100 transform translate-x-0" class="mt-6">
-                                    <div class="p-4 bg-white border border-gray-200 rounded-lg">
-                                        <h3 class="mb-4 text-lg font-medium text-gray-900">
-                                            {{ $venueName ?: 'Venue ' . ($venueIndex + 1) }} Prime Hours
-                                        </h3>
-                                        <p class="mb-4 text-sm text-gray-500">
-                                            For {{ $venueName ?: 'Venue ' . ($venueIndex + 1) }}, please specify which
-                                            hours of the day the restaurant is usually fully booked.
-                                            During these times, customers will be given the option to purchase a
-                                            reservation.
-                                        </p>
-                                        <div class="space-y-6">
-                                            @foreach (['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'] as $dayIndex => $dayName)
-                                                @php $day = strtolower($dayName); @endphp
-                                                <div>
-                                                    <h4 class="mb-3 text-sm font-medium text-gray-700">
-                                                        {{ $dayName }}</h4>
-                                                    <div class="grid grid-cols-3 gap-2 sm:grid-cols-4 md:grid-cols-6">
-                                                        @foreach ($timeSlots as $time)
-                                                            <label class="relative flex items-center justify-center">
-                                                                <input type="checkbox"
-                                                                    wire:model="venue_prime_hours.{{ $venueIndex }}.{{ $day }}.{{ $time }}"
-                                                                    class="sr-only peer" />
-                                                                <div
-                                                                    class="w-full py-2 text-sm text-center bg-white border border-gray-200 rounded-lg cursor-pointer peer-checked:bg-indigo-50 peer-checked:border-indigo-600 peer-checked:text-indigo-600">
-                                                                    {{ Carbon\Carbon::createFromFormat('H:i:s', $time)->format('g:i A') }}
-                                                                </div>
-                                                            </label>
-                                                        @endforeach
+                            <div class="space-y-6">
+                                @foreach (['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'] as $dayIndex => $dayName)
+                                    @php $day = strtolower($dayName); @endphp
+                                    <div>
+                                        <h4 class="mb-3 text-sm font-medium text-gray-700">{{ $dayName }}</h4>
+                                        <div class="grid grid-cols-3 gap-2 sm:grid-cols-4 md:grid-cols-6">
+                                            @foreach ($timeSlots as $time)
+                                                <label class="relative flex items-center justify-center">
+                                                    <input type="checkbox"
+                                                        wire:model="venue_prime_hours.{{ $current_venue_index }}.{{ $day }}.{{ $time }}"
+                                                        class="sr-only peer" />
+                                                    <div
+                                                        class="w-full py-2 text-sm text-center bg-white border border-gray-200 rounded-lg cursor-pointer peer-checked:bg-indigo-50 peer-checked:border-indigo-600 peer-checked:text-indigo-600">
+                                                        {{ Carbon\Carbon::createFromFormat('H:i:s', $time)->format('g:i A') }}
                                                     </div>
-                                                </div>
+                                                </label>
                                             @endforeach
                                         </div>
                                     </div>
-                                </div>
-                            @endforeach
+                                @endforeach
+                            </div>
                         </div>
                     @endif
 
                     {{-- Incentive Step --}}
                     @if ($step === 'incentive')
-                        <div class="space-y-6">
-                            <div>
+                        <div>
+                            <div class="mb-6">
                                 <h3 class="text-lg font-medium text-gray-900">Non-Prime Reservation Incentive Program
                                 </h3>
-                                <p class="mt-1 text-sm text-gray-500">
-                                    Would you like to use the non-prime reservation incentive program?
+                                <p class="mt-2 text-sm text-gray-500">
+                                    Configure the non-prime reservation incentive program for each venue.
                                 </p>
+                                <div class="flex items-center gap-1 mt-4 text-sm text-gray-500">
+                                    @foreach ($venue_names as $index => $name)
+                                        <span @class([
+                                            'w-6 h-6 flex items-center justify-center rounded-full text-xs font-medium',
+                                            'bg-indigo-600 text-white' => $index === $current_venue_index,
+                                            'bg-gray-100 text-gray-600' => $index !== $current_venue_index,
+                                        ])>
+                                            {{ $index + 1 }}
+                                        </span>
+                                        @unless ($loop->last)
+                                            <div class="w-4 h-px bg-gray-200"></div>
+                                        @endunless
+                                    @endforeach
+                                </div>
                             </div>
 
-                            <label class="flex items-start space-x-3">
-                                <input type="checkbox" wire:model.live="use_non_prime_incentive"
-                                    class="w-4 h-4 mt-1 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500">
-                                <span class="text-sm">
-                                    <span class="block font-medium text-gray-700">Enable Non-Prime Incentives</span>
-                                    <span class="text-gray-500">Offer per-diner incentives to encourage concierges to
-                                        book non-prime reservations</span>
-                                </span>
-                            </label>
-
-                            @if ($use_non_prime_incentive)
+                            <div class="space-y-6">
                                 <div>
-                                    <label class="block mb-2 text-sm font-medium text-gray-700">Amount to pay per diner
-                                        (usually 10% of average per-diner check size)</label>
-                                    <div class="relative rounded-lg shadow-sm">
-                                        <div
-                                            class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-                                            <span class="text-gray-500 sm:text-sm">$</span>
+                                    <h4 class="text-base font-medium text-gray-900">
+                                        {{ $venue_names[$current_venue_index] ?: 'Venue ' . ($current_venue_index + 1) }}
+                                    </h4>
+                                    <label class="flex items-start mt-4 space-x-3">
+                                        <input type="checkbox"
+                                            wire:model.live="venue_use_non_prime_incentive.{{ $current_venue_index }}"
+                                            class="w-4 h-4 mt-1 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500">
+                                        <span class="text-sm">
+                                            <span class="block font-medium text-gray-700">Enable Non-Prime
+                                                Incentives</span>
+                                            <span class="text-gray-500">Offer per-diner incentives to encourage
+                                                concierges to book non-prime reservations</span>
+                                        </span>
+                                    </label>
+
+                                    @if ($venue_use_non_prime_incentive[$current_venue_index] ?? false)
+                                        <div class="mt-4">
+                                            <label class="block mb-2 text-sm font-medium text-gray-700">
+                                                Amount to pay per diner (usually 10% of average per-diner check size)
+                                            </label>
+                                            <div class="relative rounded-lg shadow-sm">
+                                                <div
+                                                    class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                                                    <span class="text-gray-500 sm:text-sm">$</span>
+                                                </div>
+                                                <input type="number"
+                                                    wire:model="venue_non_prime_per_diem.{{ $current_venue_index }}"
+                                                    step="0.01" min="0"
+                                                    class="block w-full border-gray-300 rounded-lg pl-7 focus:border-indigo-500 focus:ring-indigo-500">
+                                            </div>
                                         </div>
-                                        <input type="number" wire:model="non_prime_per_diem" step="0.01"
-                                            min="0"
-                                            class="block w-full border-gray-300 rounded-lg pl-7 focus:border-indigo-500 focus:ring-indigo-500">
-                                    </div>
-                                    @error('non_prime_per_diem')
-                                        <span class="mt-1 text-xs text-red-600">{{ $message }}</span>
-                                    @enderror
+                                    @endif
                                 </div>
-                            @endif
+                            </div>
                         </div>
                     @endif
 
                     {{-- Navigation --}}
                     <div class="fixed inset-x-0 bottom-0 z-10 px-4 py-4 bg-white border-t sm:px-6">
                         <div class="flex justify-between max-w-xl mx-auto">
-                            @if ($step !== 'company')
-                                <button type="button"
-                                    wire:click="$set('step', '{{ array_search($step, array_keys($steps)) ? array_keys($steps)[array_search($step, array_keys($steps)) - 1] : $step }}')"
-                                    class="px-6 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50">
-                                    Back
-                                </button>
-                            @endif
+                            <div class="flex gap-2">
+                                @if ($step !== 'company')
+                                    <button type="button" wire:click="previousStep"
+                                        class="px-6 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50">
+                                        Back
+                                    </button>
+
+                                    @if (config('app.env') === 'local')
+                                        <button type="button" wire:click="resetForm"
+                                            class="px-6 py-2 text-sm font-medium text-red-700 bg-white border border-red-300 rounded-lg hover:bg-red-50">
+                                            Reset
+                                        </button>
+                                    @endif
+                                @endif
+                            </div>
 
                             <button type="submit"
                                 class="{{ $step === 'company' ? 'w-full' : 'ml-auto' }} bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg px-6 py-2 text-sm font-medium">
