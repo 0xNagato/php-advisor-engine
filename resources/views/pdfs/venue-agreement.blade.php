@@ -5,9 +5,9 @@
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     <style>
         body {
-            font-family: 'DejaVu Sans', sans-serif;
+            font-family: serif;
             line-height: 1.6;
-            color: #111827;
+            color: #000000;
         }
 
         h1 {
@@ -58,7 +58,7 @@
 <body>
     <h1>RESTAURANT AGREEMENT</h1>
 
-    <p>
+    <p style="font-weight: bold;">
         This Restaurant Agreement (this "Agreement") is entered into by and among PRIMA VIP INC, a Delaware
         corporation ("PRIMA"), and {{ $company_name }} ("Restaurant") or restaurant group.
     </p>

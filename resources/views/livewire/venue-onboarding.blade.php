@@ -128,12 +128,20 @@
                             </div>
 
                             <div>
-                                <label class="flex items-start space-x-3">
-                                    <input type="checkbox" wire:model.live="has_logos"
-                                        class="w-4 h-4 mt-1 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500">
-                                    <span class="text-sm text-gray-700">Do you have logos for these venues, or should
-                                        PRIMA handle sourcing them?</span>
-                                </label>
+                                <label class="block text-sm text-gray-700">Would you like to upload logos of your
+                                    restaurants?</label>
+                                <div class="mt-2 space-y-3">
+                                    <label class="flex items-center">
+                                        <input type="radio" wire:model.live="has_logos" value="1"
+                                            class="w-4 h-4 text-indigo-600 border-gray-300 focus:ring-indigo-500">
+                                        <span class="ml-3 text-sm text-gray-700">Yes, I will upload the logos</span>
+                                    </label>
+                                    <label class="flex items-center">
+                                        <input type="radio" wire:model.live="has_logos" value="0"
+                                            class="w-4 h-4 text-indigo-600 border-gray-300 focus:ring-indigo-500">
+                                        <span class="ml-3 text-sm text-gray-700">No, PRIMA can source the logos</span>
+                                    </label>
+                                </div>
 
                                 @if ($has_logos)
                                     <div class="mt-4 space-y-4">
@@ -195,33 +203,66 @@
 
                     {{-- Prime Hours Step --}}
                     @if ($step === 'prime-hours')
-                        <div class="space-y-6">
-                            <div>
-                                <label class="block mb-2 text-sm text-gray-700">
-                                    Please select your prime hours
-                                </label>
-                                <div class="space-y-6">
-                                    @foreach (['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'] as $dayIndex => $dayName)
-                                        @php $day = strtolower($dayName); @endphp
-                                        <div>
-                                            <h3 class="mb-3 text-sm font-medium text-gray-700">{{ $dayName }}</h3>
-                                            <div class="grid grid-cols-3 gap-2 sm:grid-cols-4 md:grid-cols-6">
-                                                @foreach ($timeSlots as $time)
-                                                    <label class="relative flex items-center justify-center">
-                                                        <input type="checkbox"
-                                                            wire:model="prime_hours.{{ $day }}.{{ $time }}"
-                                                            class="sr-only peer" />
-                                                        <div
-                                                            class="w-full py-2 text-sm text-center bg-white border border-gray-200 rounded-lg cursor-pointer peer-checked:bg-indigo-50 peer-checked:border-indigo-600 peer-checked:text-indigo-600">
-                                                            {{ Carbon\Carbon::createFromFormat('H:i:s', $time)->format('g:i A') }}
-                                                        </div>
-                                                    </label>
-                                                @endforeach
-                                            </div>
-                                        </div>
+                        <div x-data="{ activeVenue: 0 }">
+                            {{-- Venue Tabs --}}
+                            <div class="border-b border-gray-200">
+                                <nav class="flex -mb-px space-x-8" aria-label="Venues">
+                                    @foreach ($venue_names as $venueIndex => $venueName)
+                                        <button type="button" @click="activeVenue = {{ $venueIndex }}"
+                                            :class="{
+                                                'border-indigo-500 text-indigo-600': activeVenue ===
+                                                    {{ $venueIndex }},
+                                                'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300': activeVenue !==
+                                                    {{ $venueIndex }}
+                                            }"
+                                            class="py-4 text-sm font-medium border-b-2 whitespace-nowrap">
+                                            {{ $venueName ?: 'Venue ' . ($venueIndex + 1) }}
+                                        </button>
                                     @endforeach
-                                </div>
+                                </nav>
                             </div>
+
+                            {{-- Venue Content --}}
+                            @foreach ($venue_names as $venueIndex => $venueName)
+                                <div x-show="activeVenue === {{ $venueIndex }}"
+                                    x-transition:enter="transition ease-out duration-300"
+                                    x-transition:enter-start="opacity-0 transform translate-x-4"
+                                    x-transition:enter-end="opacity-100 transform translate-x-0" class="mt-6">
+                                    <div class="p-4 bg-white border border-gray-200 rounded-lg">
+                                        <h3 class="mb-4 text-lg font-medium text-gray-900">
+                                            {{ $venueName ?: 'Venue ' . ($venueIndex + 1) }} Prime Hours
+                                        </h3>
+                                        <p class="mb-4 text-sm text-gray-500">
+                                            For {{ $venueName ?: 'Venue ' . ($venueIndex + 1) }}, please specify which
+                                            hours of the day the restaurant is usually fully booked.
+                                            During these times, customers will be given the option to purchase a
+                                            reservation.
+                                        </p>
+                                        <div class="space-y-6">
+                                            @foreach (['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'] as $dayIndex => $dayName)
+                                                @php $day = strtolower($dayName); @endphp
+                                                <div>
+                                                    <h4 class="mb-3 text-sm font-medium text-gray-700">
+                                                        {{ $dayName }}</h4>
+                                                    <div class="grid grid-cols-3 gap-2 sm:grid-cols-4 md:grid-cols-6">
+                                                        @foreach ($timeSlots as $time)
+                                                            <label class="relative flex items-center justify-center">
+                                                                <input type="checkbox"
+                                                                    wire:model="venue_prime_hours.{{ $venueIndex }}.{{ $day }}.{{ $time }}"
+                                                                    class="sr-only peer" />
+                                                                <div
+                                                                    class="w-full py-2 text-sm text-center bg-white border border-gray-200 rounded-lg cursor-pointer peer-checked:bg-indigo-50 peer-checked:border-indigo-600 peer-checked:text-indigo-600">
+                                                                    {{ Carbon\Carbon::createFromFormat('H:i:s', $time)->format('g:i A') }}
+                                                                </div>
+                                                            </label>
+                                                        @endforeach
+                                                    </div>
+                                                </div>
+                                            @endforeach
+                                        </div>
+                                    </div>
+                                </div>
+                            @endforeach
                         </div>
                     @endif
 

@@ -13,6 +13,7 @@ use App\Traits\FormatsPhoneNumber;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Session;
 use Livewire\Attributes\Validate;
 use Livewire\Component;
 use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
@@ -53,8 +54,8 @@ class VenueOnboarding extends Component
 
     public bool $agreement_accepted = false;
 
-    /** @var array<string, array<string, bool>> */
-    public array $prime_hours = [];
+    /** @var array<int, array<string, array<string, bool>>> */
+    public array $venue_prime_hours = [];
 
     public bool $use_non_prime_incentive = false;
 
@@ -79,7 +80,25 @@ class VenueOnboarding extends Component
 
     public function mount(): void
     {
-        $this->venue_names = array_fill(0, $this->venue_count, '');
+        // Load saved state from session if it exists
+        if (Session::has('venue_onboarding')) {
+            $savedState = Session::get('venue_onboarding');
+            foreach ($savedState as $key => $value) {
+                if (property_exists($this, $key)) {
+                    if ($key === 'phone') {
+                        // Format phone number when loading from session
+                        $this->phone = $this->getInternationalFormattedPhoneNumber($value);
+                    } else {
+                        $this->$key = $value;
+                    }
+                }
+            }
+            // Explicitly set the step from session
+            $this->step = $savedState['step'] ?? 'company';
+        } else {
+            $this->venue_names = array_fill(0, $this->venue_count, '');
+            $this->step = 'company';
+        }
 
         // Generate time slots in 30-minute increments from 11 AM to 11 PM
         $this->timeSlots = collect()
@@ -100,12 +119,42 @@ class VenueOnboarding extends Component
             ->toArray();
     }
 
+    public function updated($property): void
+    {
+        if ($property === 'phone') {
+            $this->phone = $this->getInternationalFormattedPhoneNumber($this->phone);
+        }
+
+        // Save state to session whenever a property is updated
+        Session::put('venue_onboarding', [
+            'step' => $this->step,
+            'company_name' => $this->company_name,
+            'venue_count' => $this->venue_count,
+            'venue_names' => $this->venue_names,
+            'has_logos' => $this->has_logos,
+            'agreement_accepted' => $this->agreement_accepted,
+            'venue_prime_hours' => $this->venue_prime_hours,
+            'use_non_prime_incentive' => $this->use_non_prime_incentive,
+            'non_prime_per_diem' => $this->non_prime_per_diem,
+            'send_agreement_copy' => $this->send_agreement_copy,
+            'first_name' => $this->first_name,
+            'last_name' => $this->last_name,
+            'email' => $this->email,
+            'phone' => $this->phone, // Phone is already formatted at this point
+        ]);
+    }
+
     public function updatedVenueCount(): void
     {
         if ($this->venue_count > count($this->venue_names)) {
             $this->venue_names = array_pad($this->venue_names, $this->venue_count, '');
+            // Initialize prime hours for new venues
+            for ($i = count($this->venue_prime_hours); $i < $this->venue_count; $i++) {
+                $this->venue_prime_hours[$i] = [];
+            }
         } else {
             $this->venue_names = array_slice($this->venue_names, 0, $this->venue_count);
+            $this->venue_prime_hours = array_slice($this->venue_prime_hours, 0, $this->venue_count);
         }
 
         $this->logo_files = array_fill(0, $this->venue_count, null);
@@ -122,6 +171,12 @@ class VenueOnboarding extends Component
             'incentive' => 'agreement',
             default => $this->step
         };
+
+        // Update session with new step after validation passes
+        Session::put('venue_onboarding', array_merge(
+            Session::get('venue_onboarding', []),
+            ['step' => $this->step]
+        ));
     }
 
     public function submit(): void
@@ -140,7 +195,7 @@ class VenueOnboarding extends Component
                 'has_logos' => $this->has_logos,
                 'logo_files' => null,
                 'agreement_accepted' => $this->agreement_accepted,
-                'prime_hours' => $this->prime_hours,
+                'venue_prime_hours' => $this->venue_prime_hours,
                 'use_non_prime_incentive' => $this->use_non_prime_incentive,
                 'non_prime_per_diem' => $this->non_prime_per_diem,
                 'send_agreement_copy' => $this->send_agreement_copy,
@@ -154,6 +209,7 @@ class VenueOnboarding extends Component
             foreach ($this->venue_names as $index => $name) {
                 $location = $onboarding->locations()->create([
                     'name' => $name,
+                    'prime_hours' => $this->venue_prime_hours[$index] ?? [],
                 ]);
 
                 if ($this->has_logos && isset($this->logo_files[$index])) {
@@ -174,6 +230,8 @@ class VenueOnboarding extends Component
             });
         });
 
+        // Clear the session after successful submission
+        Session::forget('venue_onboarding');
         $this->submitted = true;
     }
 
@@ -212,7 +270,7 @@ class VenueOnboarding extends Component
                 'agreement_accepted' => 'required|accepted',
             ]),
             'prime-hours' => $this->validate([
-                'prime_hours' => 'present|array',
+                'venue_prime_hours' => 'present|array',
             ]),
             'incentive' => $this->validate([
                 'use_non_prime_incentive' => 'required|boolean',
@@ -228,10 +286,5 @@ class VenueOnboarding extends Component
             ->layout('components.layouts.app', [
                 'title' => $this->submitted ? 'Onboarding Submitted' : 'Venue Onboarding',
             ]);
-    }
-
-    public function updatedPhone($value): void
-    {
-        $this->phone = $this->getInternationalFormattedPhoneNumber($value);
     }
 }
