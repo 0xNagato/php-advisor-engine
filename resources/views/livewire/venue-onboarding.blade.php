@@ -34,7 +34,8 @@
                 @endforeach
             </div>
 
-            <form wire:submit.prevent="{{ $step === 'agreement' ? 'submit' : 'nextStep' }}">
+            <form wire:submit.prevent="{{ $step === 'agreement' ? 'submit' : 'nextStep' }}" x-data
+                x-on:submit="window.scrollTo({top: 0, behavior: 'smooth'})">
                 <div class="space-y-6">
                     {{-- Company Step --}}
                     @if ($step === 'company')
