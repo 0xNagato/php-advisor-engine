@@ -19,6 +19,11 @@ class VenueOnboardingLocation extends Model
         'name',
         'logo_path',
         'created_venue_id',
+        'prime_hours',
+    ];
+
+    protected $casts = [
+        'prime_hours' => 'array',
     ];
 
     /**

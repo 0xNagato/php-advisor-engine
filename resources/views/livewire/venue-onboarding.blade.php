@@ -309,20 +309,25 @@
                     @endif
 
                     {{-- Navigation --}}
-                    <div class="flex justify-between pt-6">
-                        @if ($step !== 'company')
-                            <button type="button"
-                                wire:click="$set('step', '{{ array_search($step, array_keys($steps)) ? array_keys($steps)[array_search($step, array_keys($steps)) - 1] : $step }}')"
-                                class="px-6 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50">
-                                Back
-                            </button>
-                        @endif
+                    <div class="fixed inset-x-0 bottom-0 z-10 px-4 py-4 bg-white border-t sm:px-6">
+                        <div class="flex justify-between max-w-xl mx-auto">
+                            @if ($step !== 'company')
+                                <button type="button"
+                                    wire:click="$set('step', '{{ array_search($step, array_keys($steps)) ? array_keys($steps)[array_search($step, array_keys($steps)) - 1] : $step }}')"
+                                    class="px-6 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50">
+                                    Back
+                                </button>
+                            @endif
 
-                        <button type="submit"
-                            class="{{ $step === 'company' ? 'w-full' : 'ml-auto' }} bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg px-6 py-2 text-sm font-medium">
-                            {{ $step === 'agreement' ? 'Submit' : 'Continue' }}
-                        </button>
+                            <button type="submit"
+                                class="{{ $step === 'company' ? 'w-full' : 'ml-auto' }} bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg px-6 py-2 text-sm font-medium">
+                                {{ $step === 'agreement' ? 'Submit' : 'Continue' }}
+                            </button>
+                        </div>
                     </div>
+
+                    {{-- Add padding at the bottom to prevent content from being hidden behind fixed buttons --}}
+                    <div class="pb-20"></div>
                 </div>
             </form>
         @endif

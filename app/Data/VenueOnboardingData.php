@@ -47,7 +47,8 @@ class VenueOnboardingData extends Data
         public bool $agreement_accepted,
 
         #[Required]
-        public array $prime_hours,
+        /** @var array<int, array<string, array<string, bool>>> */
+        public array $venue_prime_hours,
 
         #[Required]
         public bool $use_non_prime_incentive,
