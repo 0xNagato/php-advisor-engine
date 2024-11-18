@@ -22,10 +22,6 @@ class VenueOnboardingLocation extends Model
         'prime_hours',
     ];
 
-    protected $casts = [
-        'prime_hours' => 'array',
-    ];
-
     /**
      * @return BelongsTo<VenueOnboarding, $this>
      */
@@ -40,5 +36,12 @@ class VenueOnboardingLocation extends Model
     public function venue(): BelongsTo
     {
         return $this->belongsTo(Venue::class, 'created_venue_id');
+    }
+
+    protected function casts(): array
+    {
+        return [
+            'prime_hours' => 'array',
+        ];
     }
 }
