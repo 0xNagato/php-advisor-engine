@@ -12,6 +12,7 @@
     "akaunting/laravel-money": "^5.2",
     "andreiio/blade-remix-icon": "^3.2",
     "ashallendesign/short-url": "^8.0",
+    "barryvdh/laravel-dompdf": "^3.0",
     "bezhansalleh/filament-shield": "^3.1",
     "calebporzio/sushi": "^2.5",
     "chillerlan/php-qrcode": "^5.0",

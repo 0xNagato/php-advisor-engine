@@ -1,8 +1,11 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Notifications;
 
 use App\Models\VenueOnboarding;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
@@ -23,6 +26,17 @@ class VenueAgreementCopy extends Notification implements ShouldQueue
 
     public function toMail(object $notifiable): MailMessage
     {
+        $venue_names = $this->onboarding->locations->pluck('name')->toArray();
+
+        $pdf = PDF::loadView('pdfs.venue-agreement', [
+            'company_name' => $this->onboarding->company_name,
+            'venue_names' => $venue_names,
+            'first_name' => $this->onboarding->first_name,
+            'last_name' => $this->onboarding->last_name,
+            'use_non_prime_incentive' => $this->onboarding->use_non_prime_incentive,
+            'non_prime_per_diem' => $this->onboarding->non_prime_per_diem,
+        ]);
+
         return (new MailMessage)
             ->subject('Your PRIMA Venue Agreement')
             ->greeting("Hello {$this->onboarding->first_name},")
@@ -31,10 +45,12 @@ class VenueAgreementCopy extends Notification implements ShouldQueue
             ->line("Company Name: {$this->onboarding->company_name}")
             ->line("Signed By: {$this->onboarding->first_name} {$this->onboarding->last_name}")
             ->line('Date: '.$this->onboarding->created_at->format('F j, Y'))
-            ->line('The full agreement terms are included below:')
-            ->line('---')
-            // Add your agreement terms here
-            ->line('---')
-            ->line('If you have any questions, please don\'t hesitate to contact us.');
+            ->attachData(
+                $pdf->output(),
+                'prima-venue-agreement.pdf',
+                [
+                    'mime' => 'application/pdf',
+                ]
+            );
     }
 }

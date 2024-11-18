@@ -157,11 +157,15 @@
                     {{-- Agreement Step --}}
                     @if ($step === 'agreement')
                         <div class="space-y-4">
-                            <div class="p-4 overflow-y-auto border border-gray-200 rounded-lg bg-gray-50 max-h-96">
-                                <div class="prose-sm prose">
-                                    <h2>PRIMA Agreement</h2>
-                                    <p>Standard PRIMA Agreement Terms would go here...</p>
-                                </div>
+                            <div class="p-4 overflow-y-auto border border-gray-200 rounded-lg bg-gray-50 max-h-[60vh]">
+                                @include('partials.venue-agreement', [
+                                    'company_name' => $company_name,
+                                    'venue_names' => $venue_names,
+                                    'first_name' => $first_name,
+                                    'last_name' => $last_name,
+                                    'use_non_prime_incentive' => $use_non_prime_incentive,
+                                    'non_prime_per_diem' => $non_prime_per_diem,
+                                ])
                             </div>
 
                             <div class="space-y-3">
