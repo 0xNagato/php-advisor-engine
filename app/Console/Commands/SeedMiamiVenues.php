@@ -25,14 +25,10 @@ class SeedMiamiVenues extends Command
 
     private Partner $housePartner;
 
-    public function __construct()
-    {
-        parent::__construct();
-        $this->housePartner = $this->getOrCreateHousePartner();
-    }
-
     public function handle(): int
     {
+        $this->housePartner = $this->getOrCreateHousePartner();
+
         if (! $this->housePartner) {
             $this->error('Failed to create or retrieve house partner. Aborting.');
 
