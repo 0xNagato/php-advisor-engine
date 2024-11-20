@@ -39,7 +39,7 @@
         </p>
 
         <p class="mb-2">
-            (e) "Platform Fee" means a fee equal to seven percent (10%) of the applicable Non-Prime
+            (e) "Platform Fee" means a fee equal to ten percent (10%) of the applicable Non-Prime
             Incentive Plan.
         </p>
 
