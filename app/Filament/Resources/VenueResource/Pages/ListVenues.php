@@ -49,7 +49,9 @@ class ListVenues extends ListRecords
                     ->size('xs')
                     ->searchable(),
                 TextColumn::make('partnerReferral.user.name')->label('Partner')
-                    ->url(fn (Venue $record) => ViewPartner::getUrl(['record' => $record->partnerReferral->user->partner]))
+                    ->url(fn (Venue $record) => $record->partnerReferral?->user?->partner
+                        ? ViewPartner::getUrl(['record' => $record->partnerReferral->user->partner])
+                        : null)
                     ->grow(false)
                     ->size('xs')
                     ->visibleFrom('sm'),
@@ -68,7 +70,7 @@ class ListVenues extends ListRecords
                     ->grow(false)
                     ->size('xs')
                     ->formatStateUsing(function (Venue $record) {
-                        $lastLogin = $record->user->authentications()->orderByDesc('login_at')->first();
+                        $lastLogin = $record->user?->authentications()?->orderByDesc('login_at')->first();
                         if ($lastLogin && $lastLogin->login_at) {
                             return Carbon::parse($lastLogin->login_at, auth()->user()->timezone)->diffForHumans();
                         }
