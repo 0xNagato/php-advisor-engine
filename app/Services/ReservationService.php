@@ -70,7 +70,7 @@ class ReservationService
         $startTime = $this->calculateStartTime($adjustedTime);
         $endTime = $this->calculateEndTime($startTime, $this->region->timezone, $this->timeslotCount);
 
-        return Venue::available()
+        $venues = Venue::available()
             ->where('region', $this->region->id)
             ->withSchedulesForDate(
                 date: $this->date,
@@ -79,6 +79,18 @@ class ReservationService
                 endTime: $endTime
             )
             ->get();
+
+        return $venues->sortByDesc(function ($venue) {
+            $availableSlots = $venue->schedules->filter(function ($schedule) {
+                return $schedule->is_available && $schedule->remaining_tables > 0;
+            })->count();
+
+            return match ($venue->status->value) {
+                'active' => 1000000 + $availableSlots,
+                'pending' => $availableSlots,
+                default => 0,
+            };
+        })->values();
     }
 
     /**
