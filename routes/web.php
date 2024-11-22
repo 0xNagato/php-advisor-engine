@@ -23,6 +23,8 @@ Route::get('/privacy', function () {
 
 Route::get('/onboarding', VenueOnboarding::class)->name('onboarding');
 
+Route::redirect('/app', 'https://apps.apple.com/us/app/prima-vip/id6504947227');
+
 /**
  * Short URL handling for both domains:
  * - Legacy: primavip.co/t/{code}

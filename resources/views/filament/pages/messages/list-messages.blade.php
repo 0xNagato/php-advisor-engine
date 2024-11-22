@@ -56,44 +56,36 @@
                     Welcome to PRIMA!
                 </p>
                 <p>
-                    Thank you for joining our concierge team! Over the next several weeks, we are onboarding restaurants
-                    and concierges who will be utilizing our system to book reservations at top venues in Miami.
+                    PRIMA is currently LIVE in Miami, and you may begin booking reservations starting immediately.
                 </p>
-                <p
-                    class="px-4 py-2 text-sm font-semibold text-green-700 border-2 border-green-200 rounded-lg bg-green-50">
-                    We plan to begin selling reservations by mid-November as the Miami season heats up.
+                <p>
+                    Nearly 35 of the top restaurants in Miami have expressed interest in joining PRIMA, and some are
+                    ahead of others in the process of onboarding. We appreciate your patience.
                 </p>
                 <p>
                     @nonmobileapp
-                        Please browse the
+                        The entire list of restaurants can be seen in the
                         <a class="font-semibold text-indigo-600 underline"
                             href="{{ route('filament.admin.pages.availability-calendar') }}">
-                            availability calendar
-                        </a> and
-                        <a class="font-semibold text-indigo-600 underline"
-                            href="{{ route('filament.admin.pages.concierge.reservation-hub') }}">
-                            reservation hub
-                        </a> to see
-                        available venues.
+                            Availability Calendar
+                        </a>.
                     @endnonmobileapp
                     @mobileapp
-                        Please browse the availability calendar and reservation hub to see available venues.
+                        The entire list of restaurants can be seen in the Availability Calendar.
                     @endmobileapp
-                    If there is a
-                    restaurant that you'd like to see on the platform, please
-                    <a href="#" x-data=""
-                        x-on:click.prevent="$dispatch('open-modal', { id: 'contact-us-modal' })"
-                        class="font-semibold text-indigo-600 underline hover:text-indigo-800">
-                        contact us</a>.
                 </p>
                 <p>
-                    Begin building your team and refer others to PRIMA today. Those that start first will earn most. We
-                    are excited to have you on our team!
+                    We expect all restaurants to be finished onboarding within the next few weeks as we continue to
+                    bring on new restaurant partners through the US and Europe.
                 </p>
-                <div>
-                    <p>Welcome aboard!</p>
-                    <p>Team PRIMA</p>
-                </div>
+                <p>
+                    We welcome your feedback as PRIMA continues to grow and evolve, please do not hesitate to contact us
+                    at
+                    <a href="mailto:prima@primavip.co" class="font-semibold text-indigo-600 underline">
+                        prima@primavip.co
+                    </a>
+                    if you have any questions.
+                </p>
             @endif
         </div>
     </x-filament::section>
