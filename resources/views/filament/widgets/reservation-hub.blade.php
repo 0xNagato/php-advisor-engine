@@ -53,7 +53,7 @@
                                     @if ($schedule->is_bookable && $schedule->remaining_tables <= 5)
                                         <div
                                             class="bg-red-500 [text-shadow:_0_1px_0_rgb(0_0_0_/_40%)] mt-1 px-2 py-1 border border-red-900 text-white text-[12px] text-nowrap rounded">
-                                            Last Tables ({{ $schedule->remaining_tables }})
+                                            Last Tables
                                         </div>
                                     @endif
                                 </button>
@@ -96,7 +96,7 @@
                                     @if ($schedule->is_bookable && $schedule->remaining_tables <= 5)
                                         <div
                                             class="bg-red-500 [text-shadow:_0_1px_0_rgb(0_0_0_/_40%)] mt-1 px-2 py-1 border border-red-900 text-white text-[12px] text-nowrap rounded">
-                                            Last Tables ({{ $schedule->remaining_tables }})
+                                            Last Tables
                                         </div>
                                     @endif
                                 </div>
