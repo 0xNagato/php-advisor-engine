@@ -32,7 +32,7 @@
                         <td
                             class="p-1 pr-2 {{ $loop->first ? 'hidden sm:table-cell' : '' }} {{ $loop->last ? 'hidden sm:table-cell' : '' }}">
                             <button
-                                @if ($schedule->is_bookable && $venue->status === VenueStatus::ACTIVE) wire:click="createBooking({{ $schedule->id }}, '{{ $schedule->booking_date->format('Y-m-d') }}')" @endif
+                                @if ($schedule->is_bookable && $venue->status === VenueStatus::ACTIVE) wire:click="createBooking({{ $schedule->id }}, '{{ $schedule->booking_date->format('Y-m-d') }}')" @else x-on:click="$dispatch('open-modal', { id: 'pending-venue-{{ $venue->id }}' })" @endif
                                 @class([
                                     'text-sm font-semibold rounded p-1 w-full mx-1 flex flex-col gap-y-[1px] justify-center items-center h-12',
                                     'bg-green-600 text-white cursor-pointer hover:bg-green-500' =>
@@ -47,13 +47,14 @@
                                         $schedule->has_low_inventory &&
                                         $schedule->is_bookable &&
                                         $venue->status === VenueStatus::ACTIVE,
-                                    'bg-gray-200 text-gray-500 border-none' => !$schedule->is_bookable,
-                                    'bg-gray-200 text-gray-500 hover:bg-gray-200 cursor-not-allowed' =>
+                                    'bg-gray-200 text-gray-500 border-none cursor-not-allowed' =>
+                                        !$schedule->is_bookable && $venue->status !== VenueStatus::PENDING,
+                                    'bg-gray-200 text-gray-500 hover:bg-gray-200 cursor-pointer' =>
                                         $venue->status === VenueStatus::PENDING,
                                 ])>
                                 @if ($venue->status === VenueStatus::PENDING)
                                     <p>
-                                        <span class="text-xs font-semibold">Soon</span>
+                                        <span class="text-sm font-semibold uppercase">Soon</span>
                                     </p>
                                 @elseif ($schedule->is_bookable && $schedule->prime_time)
                                     <p class="text-base font-bold">
@@ -72,7 +73,13 @@
                                         </p>
                                     @endif
                                 @else
-                                    <p class="text-sm text-nowrap">CLOSED</p>
+                                    <p class="text-xs text-nowrap">
+                                        @if ($schedule->is_available && $schedule->remaining_tables === 0)
+                                            SOLD OUT
+                                        @else
+                                            CLOSED
+                                        @endif
+                                    </p>
                                 @endif
                             </button>
                         </td>
@@ -82,3 +89,30 @@
         </tbody>
     </table>
 </div>
+
+@foreach ($venues as $venue)
+    @if ($venue->status === VenueStatus::PENDING)
+        <x-filament::modal id="pending-venue-{{ $venue->id }}" width="md">
+            <x-slot name="heading">
+                {{ $venue->name }} Coming Soon
+            </x-slot>
+
+            <p class="mt-2">
+                Our team is currently working with {{ $venue->name }} to complete onboarding.
+                We anticipate {{ $venue->name }} to be available on PRIMA soon.
+            </p>
+
+            <p class="mt-4">
+                If you require an urgent reservation to this venue, please write to us at
+                <a href="mailto:prima@primavip.co" class="text-primary-600 hover:text-primary-500">prima@primavip.co</a>
+                and our team will assist.
+            </p>
+
+            <x-slot name="footerActions">
+                <x-filament::button x-on:click="$dispatch('close-modal', { id: 'pending-venue-{{ $venue->id }}' })">
+                    Close
+                </x-filament::button>
+            </x-slot>
+        </x-filament::modal>
+    @endif
+@endforeach

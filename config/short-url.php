@@ -16,7 +16,7 @@ return [
     | is registered for the short URL route.
     |
     */
-    'prefix' => null,
+    'prefix' => env('SHORT_URL_PREFIX', '/t'),
 
     /*
     |--------------------------------------------------------------------------
@@ -80,7 +80,7 @@ return [
     | "app.url" config value, set this field to null.
     |
     */
-    'default_url' => env('SHORT_URL_DOMAIN', 'https://ezjmp.com'),
+    'default_url' => env('SHORT_URL_DOMAIN', 'https://primavip.co'),
 
     /*
     |--------------------------------------------------------------------------

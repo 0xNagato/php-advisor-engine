@@ -178,25 +178,21 @@
                             </div>
 
                             <div class="space-y-3">
-                                <label class="flex items-start space-x-3">
+                                <label class="flex items-center space-x-4">
                                     <input type="checkbox" wire:model="agreement_accepted"
-                                        class="w-4 h-4 mt-1 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500">
-                                    <span class="text-sm">
-                                        <span class="block font-medium text-gray-700">I accept the terms of the
-                                            agreement</span>
-                                    </span>
+                                        class="w-6 h-6 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500">
+                                    <span class="text-sm font-medium text-gray-700">I accept the terms of the
+                                        agreement</span>
                                 </label>
                                 @error('agreement_accepted')
                                     <span class="block mt-1 text-xs text-red-600">{{ $message }}</span>
                                 @enderror
 
-                                <label class="flex items-start space-x-3">
+                                <label class="flex items-center space-x-4">
                                     <input type="checkbox" wire:model="send_agreement_copy"
-                                        class="w-4 h-4 mt-1 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500">
-                                    <span class="text-sm">
-                                        <span class="block font-medium text-gray-700">Send me a copy of this agreement
-                                            via email</span>
-                                    </span>
+                                        class="w-6 h-6 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500">
+                                    <span class="text-sm font-medium text-gray-700">Send me a copy of this agreement
+                                        via email</span>
                                 </label>
                             </div>
                         </div>
@@ -284,10 +280,10 @@
                                     <h4 class="text-base font-medium text-gray-900">
                                         {{ $venue_names[$current_venue_index] ?: 'Venue ' . ($current_venue_index + 1) }}
                                     </h4>
-                                    <label class="flex items-start mt-4 space-x-3">
+                                    <label class="flex items-start mt-4 space-x-4">
                                         <input type="checkbox"
                                             wire:model.live="venue_use_non_prime_incentive.{{ $current_venue_index }}"
-                                            class="w-4 h-4 mt-1 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500">
+                                            class="w-6 h-6 mt-0.5 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500">
                                         <span class="text-sm">
                                             <span class="block font-medium text-gray-700">Enable Non-Prime
                                                 Incentives</span>
