@@ -63,6 +63,7 @@ class Venue extends Model
         'non_prime_fee_per_head',
         'non_prime_type',
         'status',
+        'cutoff_time',
     ];
 
     protected function casts(): array

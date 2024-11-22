@@ -15,7 +15,7 @@ class FixVenuePrimeTimeConsistency extends Command
     public function handle()
     {
         if ($venueId = $this->option('venue-id')) {
-            $venues = Venue::where('id', $venueId)->get();
+            $venues = Venue::query()->where('id', $venueId)->get();
         } else {
             $venues = Venue::all();
         }

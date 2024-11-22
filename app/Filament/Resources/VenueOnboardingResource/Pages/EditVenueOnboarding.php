@@ -3,7 +3,7 @@
 namespace App\Filament\Resources\VenueOnboardingResource\Pages;
 
 use App\Filament\Resources\VenueOnboardingResource;
-use Filament\Actions;
+use Filament\Actions\DeleteAction;
 use Filament\Resources\Pages\EditRecord;
 
 class EditVenueOnboarding extends EditRecord
@@ -13,7 +13,7 @@ class EditVenueOnboarding extends EditRecord
     protected function getHeaderActions(): array
     {
         return [
-            Actions\DeleteAction::make(),
+            DeleteAction::make(),
         ];
     }
 }

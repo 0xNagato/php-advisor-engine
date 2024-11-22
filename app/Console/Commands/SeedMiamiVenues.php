@@ -76,7 +76,7 @@ class SeedMiamiVenues extends Command
         $this->newLine();
         $this->info('Miami venues seeding completed.');
 
-        if (! empty($newVenueIds)) {
+        if (filled($newVenueIds)) {
             $this->call(SetVenuePrimeTime::class, [
                 '--start' => '19',
                 '--end' => '21',

@@ -2,7 +2,9 @@
 
 namespace App\Filament\Resources;
 
-use App\Filament\Resources\VenueOnboardingResource\Pages;
+use App\Filament\Resources\VenueOnboardingResource\Pages\ListVenueOnboardings;
+use App\Filament\Resources\VenueOnboardingResource\Pages\ViewVenueOnboarding;
+use App\Models\User;
 use App\Models\VenueOnboarding;
 use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\Placeholder;
@@ -10,8 +12,10 @@ use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
-use Filament\Tables;
+use Filament\Tables\Actions\Action;
+use Filament\Tables\Actions\ViewAction;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Illuminate\Support\HtmlString;
 
@@ -58,13 +62,11 @@ class VenueOnboardingResource extends Resource
                 Section::make('Venues')
                     ->schema([
                         Placeholder::make('venues')
-                            ->content(function (VenueOnboarding $record) {
-                                return new HtmlString(
-                                    view('components.venue-onboarding-locations', [
-                                        'locations' => $record->locations,
-                                    ])->render()
-                                );
-                            }),
+                            ->content(fn (VenueOnboarding $record) => new HtmlString(
+                                view('components.venue-onboarding-locations', [
+                                    'locations' => $record->locations,
+                                ])->render()
+                            )),
                     ]),
 
                 Section::make('Processing')
@@ -81,7 +83,7 @@ class VenueOnboardingResource extends Resource
 
     public static function table(Table $table): Table
     {
-        /** @var \App\Models\User $currentUser */
+        /** @var User $currentUser */
         $currentUser = auth()->user();
 
         return $table
@@ -117,7 +119,7 @@ class VenueOnboardingResource extends Resource
                     ->sortable(),
             ])
             ->filters([
-                Tables\Filters\SelectFilter::make('status')
+                SelectFilter::make('status')
                     ->options([
                         'draft' => 'Draft',
                         'submitted' => 'Submitted',
@@ -125,8 +127,8 @@ class VenueOnboardingResource extends Resource
                     ]),
             ])
             ->actions([
-                Tables\Actions\ViewAction::make(),
-                Tables\Actions\Action::make('process')
+                ViewAction::make(),
+                Action::make('process')
                     ->action(fn (VenueOnboarding $record) => $record->markAsProcessed($user))
                     ->requiresConfirmation()
                     ->visible(fn (VenueOnboarding $record): bool => $record->status === 'submitted')
@@ -146,8 +148,8 @@ class VenueOnboardingResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ListVenueOnboardings::route('/'),
-            'view' => Pages\ViewVenueOnboarding::route('/{record}'),
+            'index' => ListVenueOnboardings::route('/'),
+            'view' => ViewVenueOnboarding::route('/{record}'),
         ];
     }
 }

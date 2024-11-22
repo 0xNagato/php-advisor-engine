@@ -70,6 +70,8 @@ class ReservationService
         $startTime = $this->calculateStartTime($adjustedTime);
         $endTime = $this->calculateEndTime($startTime, $this->region->timezone, $this->timeslotCount);
 
+        $currentTime = Carbon::now($this->region->timezone)->format('H:i:s');
+
         $venues = Venue::available()
             ->where('region', $this->region->id)
             ->withSchedulesForDate(
@@ -80,10 +82,19 @@ class ReservationService
             )
             ->get();
 
+        // Mark schedules as sold out if venue is past cutoff time
+        $venues->each(function ($venue) use ($currentTime) {
+            if ($venue->cutoff_time && $currentTime > $venue->cutoff_time) {
+                $venue->schedules->each(function ($schedule) {
+                    $schedule->is_available = true; // Keep is_available true to match SOLD OUT logic
+                    $schedule->remaining_tables = 0; // Set to 0 to trigger SOLD OUT display
+                    $schedule->is_bookable = false; // Ensure it can't be booked
+                });
+            }
+        });
+
         return $venues->sortByDesc(function ($venue) {
-            $availableSlots = $venue->schedules->filter(function ($schedule) {
-                return $schedule->is_available && $schedule->remaining_tables > 0;
-            })->count();
+            $availableSlots = $venue->schedules->filter(fn ($schedule) => $schedule->is_available && $schedule->remaining_tables > 0)->count();
 
             return match ($venue->status->value) {
                 'active' => 1000000 + $availableSlots,
