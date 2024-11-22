@@ -241,13 +241,26 @@ class ReservationHub extends Page
 
     protected function getSchedulesToday($venueId, $reservationTime, $endTimeForQuery, $guestCount): Collection
     {
-        return ScheduleWithBooking::with('venue')
+        $schedules = ScheduleWithBooking::with('venue')
             ->where('venue_id', $venueId)
             ->where('booking_date', $this->form->getState()['date'])
             ->where('party_size', $guestCount)
             ->where('start_time', '>=', $reservationTime)
             ->where('start_time', '<=', $endTimeForQuery)
             ->get();
+
+        $venue = Venue::find($venueId);
+        $currentTime = Carbon::now($this->timezone)->format('H:i:s');
+
+        if ($venue->cutoff_time && $currentTime > $venue->cutoff_time) {
+            $schedules->each(function ($schedule) {
+                $schedule->is_available = true; // Keep is_available true to match SOLD OUT logic
+                $schedule->remaining_tables = 0; // Set to 0 to trigger SOLD OUT display
+                $schedule->is_bookable = false; // Ensure it can't be booked
+            });
+        }
+
+        return $schedules;
     }
 
     protected function getSchedulesThisWeek(
