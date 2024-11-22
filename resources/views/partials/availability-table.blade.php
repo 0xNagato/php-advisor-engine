@@ -53,7 +53,7 @@
                                 ])>
                                 @if ($venue->status === VenueStatus::PENDING)
                                     <p>
-                                        <span class="text-xs font-semibold">Not Yet</span>
+                                        <span class="text-xs font-semibold">Soon</span>
                                     </p>
                                 @elseif ($schedule->is_bookable && $schedule->prime_time)
                                     <p class="text-base font-bold">

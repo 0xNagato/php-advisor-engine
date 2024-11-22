@@ -113,7 +113,10 @@ class WeeklyPrimeSchedule extends Component implements HasMingles
                 if (is_array($slots)) {
                     foreach ($slots as $index => $slot) {
                         if ($slot['schedule_template_id']) {
-                            ScheduleTemplate::query()->where('id', $slot['schedule_template_id'])
+                            ScheduleTemplate::query()
+                                ->where('venue_id', $this->venue->id)
+                                ->where('day_of_week', $day)
+                                ->where('start_time', $slot['start'])
                                 ->update(['prime_time' => $this->selectedTimeSlots[$day][$index]]);
                         }
                     }

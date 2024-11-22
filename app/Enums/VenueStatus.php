@@ -13,7 +13,7 @@ enum VenueStatus: string
     {
         return match ($this) {
             self::DRAFT => 'Draft',
-            self::PENDING => 'Not Yet',
+            self::PENDING => 'Soon',
             self::ACTIVE => 'Active',
             self::SUSPENDED => 'Suspended',
         };

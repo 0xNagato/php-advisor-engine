@@ -182,7 +182,17 @@ class Venue extends Model
      */
     public function schedules(): HasMany
     {
-        return $this->hasMany(ScheduleWithBooking::class);
+        return $this->hasMany(ScheduleWithBooking::class, 'venue_id');
+    }
+
+    public function scopeWithSchedulesForDate($query, string $date, int $partySize, string $startTime, string $endTime)
+    {
+        return $query->with(['schedules' => function ($query) use ($date, $partySize, $startTime, $endTime) {
+            $query->where('booking_date', $date)
+                ->where('party_size', $partySize)
+                ->where('start_time', '>=', $startTime)
+                ->where('start_time', '<=', $endTime);
+        }]);
     }
 
     /**

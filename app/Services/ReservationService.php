@@ -72,14 +72,12 @@ class ReservationService
 
         return Venue::available()
             ->where('region', $this->region->id)
-            ->with([
-                'schedules' => function ($query) use ($startTime, $endTime) {
-                    $query->where('booking_date', $this->date)
-                        ->where('party_size', $this->getGuestCount())
-                        ->where('start_time', '>=', $startTime)
-                        ->where('start_time', '<=', $endTime);
-                },
-            ])
+            ->withSchedulesForDate(
+                date: $this->date,
+                partySize: $this->getGuestCount(),
+                startTime: $startTime,
+                endTime: $endTime
+            )
             ->get();
     }
 

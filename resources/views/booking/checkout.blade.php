@@ -8,7 +8,7 @@
                     <div class="flex items-center justify-center w-12 h-12 mx-auto mb-4 bg-red-100 rounded-full">
                         <x-heroicon-o-exclamation-triangle class="w-6 h-6 text-red-600" />
                     </div>
-                    <h3 class="mb-2 text-lg font-medium text-gray-900">Not Yet!</h3>
+                    <h3 class="mb-2 text-lg font-medium text-gray-900">Soon!</h3>
                     <p class="text-sm text-gray-500">
                         {{ config('app.bookings_disabled_message') }}
                     </p>

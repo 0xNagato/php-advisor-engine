@@ -43,7 +43,7 @@
                                     </div>
                                     <div>
                                         @if ($schedule->venue->status === VenueStatus::PENDING)
-                                            <span class="text-xs font-semibold">Not Yet</span>
+                                            <span class="text-xs font-semibold">Soon</span>
                                         @elseif ($schedule->is_bookable && $schedule->prime_time)
                                             @money($schedule->fee($data['guest_count']), $currency)
                                         @elseif($schedule->is_bookable && !$schedule->prime_time)
@@ -86,7 +86,7 @@
                                     </div>
                                     <div>
                                         @if ($schedule->venue->status === VenueStatus::PENDING)
-                                            <span class="text-xs font-semibold">Not Yet</span>
+                                            <span class="text-xs font-semibold">Soon</span>
                                         @elseif ($schedule->is_bookable && $schedule->prime_time)
                                             @money($schedule->fee($data['guest_count']), $currency)
                                         @elseif($schedule->is_bookable && !$schedule->prime_time)
