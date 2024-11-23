@@ -2,10 +2,9 @@
 
 namespace App\Filament\Pages\Admin;
 
+use App\Jobs\SendBulkSmsJob;
 use App\Models\Referral;
 use App\Models\User;
-use App\Notifications\Admin\BulkSmsNotification;
-use App\NotificationsChannels\SmsNotificationChannel;
 use Exception;
 use Filament\Forms\Components\CheckboxList;
 use Filament\Forms\Components\Grid;
@@ -160,16 +159,13 @@ class SmsManager extends Page
         $phoneNumbers = $phoneNumbers->filter()->unique();
 
         try {
-            foreach ($phoneNumbers as $phone) {
-                app(SmsNotificationChannel::class)->send(
-                    notifiable: null,
-                    notification: new BulkSmsNotification($phone, $message)
-                );
-            }
+            $phoneNumbers->chunk(50)->each(function ($chunk) use ($message) {
+                dispatch(new SendBulkSmsJob($chunk->toArray(), $message));
+            });
 
             Notification::make()
                 ->title('Success')
-                ->body('SMS messages sent successfully')
+                ->body('SMS messages have been queued for sending')
                 ->success()
                 ->send();
 
@@ -177,7 +173,7 @@ class SmsManager extends Page
         } catch (Exception $e) {
             Notification::make()
                 ->title('Error')
-                ->body('Failed to send SMS messages: '.$e->getMessage())
+                ->body('Failed to queue SMS messages: '.$e->getMessage())
                 ->danger()
                 ->send();
         }
