@@ -116,6 +116,7 @@ class SeedMiamiVenues extends Command
                 'status' => VenueStatus::PENDING,
                 'region' => 'miami',
                 'user_id' => $user->id,
+                'booking_fee' => 200,
                 'contacts' => [
                     new VenueContactData(
                         contact_name: 'Alex Zhardanovsky',
