@@ -6,6 +6,7 @@ use App\Models\Referral;
 use App\Models\User;
 use App\Notifications\Admin\BulkSmsNotification;
 use App\NotificationsChannels\SmsNotificationChannel;
+use Exception;
 use Filament\Forms\Components\CheckboxList;
 use Filament\Forms\Components\Grid;
 use Filament\Forms\Components\Placeholder;
@@ -170,7 +171,7 @@ class SmsManager extends Page
                 ->send();
 
             $this->form->fill();
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Notification::make()
                 ->title('Error')
                 ->body('Failed to send SMS messages: '.$e->getMessage())

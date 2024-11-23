@@ -18,7 +18,7 @@ class CancelStaleBookings extends Command
         $thirtyMinutesAgo = Carbon::now()->subMinutes(30);
 
         $staleBookings = Booking::query()
-            ->with(['schedule', 'venue', 'concierge', 'partner'])
+            ->with(['schedule', 'venue', 'concierge'])
             ->whereIn('status', [
                 BookingStatus::PENDING,
                 BookingStatus::GUEST_ON_PAGE,
