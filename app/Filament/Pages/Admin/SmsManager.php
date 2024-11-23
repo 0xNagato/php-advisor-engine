@@ -30,6 +30,11 @@ class SmsManager extends Page
 
     public ?array $data = [];
 
+    public static function canAccess(): bool
+    {
+        return auth()->user()?->hasActiveRole('super_admin');
+    }
+
     public function mount(): void
     {
         $this->form->fill();
