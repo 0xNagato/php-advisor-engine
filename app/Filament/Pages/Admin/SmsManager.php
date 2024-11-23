@@ -6,9 +6,9 @@ use App\Models\Referral;
 use App\Models\User;
 use App\Notifications\Admin\BulkSmsNotification;
 use App\NotificationsChannels\SmsNotificationChannel;
+use Filament\Forms\Components\CheckboxList;
 use Filament\Forms\Components\Grid;
 use Filament\Forms\Components\Placeholder;
-use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Form;
 use Filament\Notifications\Notification;
@@ -40,20 +40,17 @@ class SmsManager extends Page
 
         return $form->schema([
             Grid::make(2)->schema([
-                Select::make('data.recipients')
+                CheckboxList::make('data.recipients')
                     ->hiddenLabel()
-                    ->placeholder('Select Recipients')
-                    ->multiple()
                     ->options([
-                        'concierges' => "Active Concierges ({$counts['concierges']})",
+                        'concierges' => "Concierges ({$counts['concierges']})",
                         'pending_concierges' => "Pending Concierges ({$counts['pending_concierges']})",
-                        'partners' => "Active Partners ({$counts['partners']})",
+                        'partners' => "Partners ({$counts['partners']})",
                         'pending_partners' => "Pending Partners ({$counts['pending_partners']})",
                         'venues' => "Venues ({$counts['venues']})",
                     ])
-                    ->searchable()
-                    ->preload()
-                    ->native(false)
+                    ->columns(2)
+                    ->gridDirection('row')
                     ->required()
                     ->columnSpanFull(),
 
@@ -63,6 +60,7 @@ class SmsManager extends Page
                     ->required()
                     ->maxLength(1600)
                     ->rows(6)
+                    ->extraInputAttributes(['class' => 'text-sm'])
                     ->columnSpanFull(),
 
                 Placeholder::make('message_info')
