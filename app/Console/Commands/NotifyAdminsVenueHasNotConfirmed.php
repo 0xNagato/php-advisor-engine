@@ -3,6 +3,7 @@
 namespace App\Console\Commands;
 
 use App\Actions\Booking\NotifyAdminsOfUnconfirmedBooking;
+use App\Enums\BookingStatus;
 use App\Models\Booking;
 use Illuminate\Console\Command;
 
@@ -28,6 +29,7 @@ class NotifyAdminsVenueHasNotConfirmed extends Command
     public function handle(): void
     {
         Booking::query()
+            ->where('status', BookingStatus::CONFIRMED)
             ->whereNull('venue_confirmed_at')
             ->whereNull('resent_venue_confirmation_at')
             ->where('booking_at', '=', now()->addMinutes(30))
