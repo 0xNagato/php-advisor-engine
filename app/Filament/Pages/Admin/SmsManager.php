@@ -20,8 +20,6 @@ class SmsManager extends Page
 {
     protected static ?string $navigationIcon = 'heroicon-o-chat-bubble-left-right';
 
-    protected static ?string $navigationGroup = 'Admin';
-
     protected static ?string $title = 'SMS Manager';
 
     protected static ?int $navigationSort = 40;
