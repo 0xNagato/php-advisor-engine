@@ -49,7 +49,6 @@ class SmsManager extends Page
                         'concierges' => "Concierges ({$counts['concierges']})",
                         'pending_concierges' => "Pending Concierges ({$counts['pending_concierges']})",
                         'partners' => "Partners ({$counts['partners']})",
-                        'pending_partners' => "Pending Partners ({$counts['pending_partners']})",
                         'venues' => "Venues ({$counts['venues']})",
                     ])
                     ->columns(2)
@@ -94,12 +93,6 @@ class SmsManager extends Page
             'partners' => User::query()
                 ->whereHas('roles', fn (Builder $query) => $query->where('name', 'partner'))
                 ->whereNotNull('secured_at')
-                ->whereNotNull('phone')
-                ->count(),
-
-            'pending_partners' => Referral::query()
-                ->where('type', 'partner')
-                ->whereNull('secured_at')
                 ->whereNotNull('phone')
                 ->count(),
 
