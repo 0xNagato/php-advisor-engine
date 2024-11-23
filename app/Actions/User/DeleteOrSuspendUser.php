@@ -54,7 +54,7 @@ class DeleteOrSuspendUser
                 })
                 ->first();
 
-            // Update referrals if user was a referrer
+            // Update referrals where user was a referrer
             if ($user->hasRole(['concierge', 'partner'])) {
                 Referral::query()
                     ->where('referrer_id', $user->id)
@@ -63,6 +63,11 @@ class DeleteOrSuspendUser
                         'referrer_type' => 'partner',
                     ]);
             }
+
+            // Delete the referral where user was the referred user
+            Referral::query()
+                ->where('user_id', $user->id)
+                ->delete();
 
             // Delete cancelled bookings
             if ($user->hasRole('concierge')) {
