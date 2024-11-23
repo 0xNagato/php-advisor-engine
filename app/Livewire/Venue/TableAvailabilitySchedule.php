@@ -123,7 +123,6 @@ class TableAvailabilitySchedule extends Component implements HasMingles
                                 $slot = collect($slots)->firstWhere('start', $schedule->start_time);
                                 if ($slot) {
                                     $schedule->available_tables = $slot[$schedule->party_size] ?? 0;
-                                    $schedule->prime_time = $slot['prime_time'] ?? false;
                                     $schedule->save();
                                 }
                             }
@@ -151,5 +150,70 @@ class TableAvailabilitySchedule extends Component implements HasMingles
 
             return ['success' => false, 'message' => 'Error updating table availability.'];
         }
+    }
+
+    public function duplicateSchedule(array $updatedSchedule): array
+    {
+        try {
+            DB::beginTransaction();
+
+            $sourceDay = array_key_first($updatedSchedule);
+            $sourceSlots = $updatedSchedule[$sourceDay];
+
+            foreach (['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'] as $targetDay) {
+                if ($targetDay === $sourceDay || $this->venue->open_days[$targetDay] !== 'open') {
+                    continue;
+                }
+
+                $updatedSchedule[$targetDay] = $sourceSlots;
+            }
+
+            // Reuse existing save logic
+            foreach ($updatedSchedule as $day => $slots) {
+                if (is_array($slots)) {
+                    $this->venue->scheduleTemplates()
+                        ->where('day_of_week', $day)
+                        ->get()
+                        ->chunk(200)
+                        ->each(function ($schedules) use ($slots) {
+                            foreach ($schedules as $schedule) {
+                                $slot = collect($slots)->firstWhere('start', $schedule->start_time);
+                                if ($slot) {
+                                    $schedule->available_tables = $slot[$schedule->party_size] ?? 0;
+                                    $schedule->save();
+                                }
+                            }
+                        });
+                }
+            }
+
+            DB::commit();
+            $this->generateWeeklySchedule();
+
+            Notification::make()
+                ->title('Schedule duplicated successfully.')
+                ->success()
+                ->send();
+
+            return ['success' => true, 'message' => 'Schedule duplicated successfully.'];
+        } catch (Exception $e) {
+            DB::rollBack();
+            report($e);
+
+            Notification::make()
+                ->title('Error duplicating schedule.')
+                ->danger()
+                ->send();
+
+            return ['success' => false, 'message' => 'Error duplicating schedule.'];
+        }
+    }
+
+    public function refresh(): array
+    {
+        $this->generateWeeklySchedule();
+        $this->loadBusinessHours();
+
+        return $this->mingleData();
     }
 }

@@ -31,9 +31,15 @@ class RoleSwitcher extends Component
      */
     public function switchProfile(int $profileId): void
     {
-        $profile = RoleProfile::query()->find($profileId);
+        $profile = RoleProfile::query()
+            ->with('role')
+            ->find($profileId);
 
         if (! $profile || $profile->user_id !== auth()->id()) {
+            return;
+        }
+
+        if ($profile->is_active) {
             return;
         }
 
