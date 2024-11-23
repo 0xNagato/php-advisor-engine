@@ -4,6 +4,8 @@ namespace App\Actions\User;
 
 use App\Enums\BookingStatus;
 use App\Models\Booking;
+use App\Models\Partner;
+use App\Models\Referral;
 use App\Models\User;
 use Illuminate\Contracts\Database\Query\Builder;
 use Illuminate\Support\Facades\DB;
@@ -44,6 +46,23 @@ class DeleteOrSuspendUser
                 'name' => $user->first_name.' '.$user->last_name,
                 'roles' => $user->roles->pluck('name')->toArray(),
             ];
+
+            // Get house partner for reassigning referrals
+            $housePartner = Partner::query()
+                ->whereHas('user', function (Builder $query) {
+                    $query->where('email', 'house.partner@primavip.co');
+                })
+                ->first();
+
+            // Update referrals if user was a referrer
+            if ($user->hasRole(['concierge', 'partner'])) {
+                Referral::query()
+                    ->where('referrer_id', $user->id)
+                    ->update([
+                        'referrer_id' => $housePartner->user_id,
+                        'referrer_type' => 'partner',
+                    ]);
+            }
 
             // Delete cancelled bookings
             if ($user->hasRole('concierge')) {
