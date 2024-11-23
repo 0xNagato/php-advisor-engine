@@ -11,6 +11,7 @@ use App\Models\Partner;
 use App\Models\User;
 use Filament\Actions\Action;
 use Filament\Actions\ActionGroup;
+use Filament\Forms\Components\Placeholder;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Form;
 use Filament\Notifications\Notification;
@@ -37,7 +38,7 @@ class EditUser extends EditRecord
                     ->email()
                     ->required(),
                 TextInput::make('phone'),
-                \Filament\Forms\Components\PlaceHolder::make('roles')
+                Placeholder::make('roles')
                     ->label('Current Roles')
                     ->content(function () {
                         $coreRoles = $this->record->roles()
