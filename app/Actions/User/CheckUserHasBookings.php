@@ -2,6 +2,7 @@
 
 namespace App\Actions\User;
 
+use App\Enums\BookingStatus;
 use App\Models\Booking;
 use App\Models\User;
 use Illuminate\Contracts\Database\Query\Builder;
@@ -13,10 +14,11 @@ class CheckUserHasBookings
 
     public function handle(User $user): bool
     {
-        // Check for bookings as a concierge
+        // Check for non-cancelled bookings as a concierge
         if ($user->hasRole('concierge')) {
             $hasBookings = Booking::query()
                 ->where('concierge_id', $user->concierge->id)
+                ->where('status', '!=', BookingStatus::CANCELLED)
                 ->exists();
 
             if ($hasBookings) {
@@ -24,12 +26,13 @@ class CheckUserHasBookings
             }
         }
 
-        // Check for bookings as a venue
+        // Check for non-cancelled bookings as a venue
         if ($user->hasRole('venue')) {
             $hasBookings = Booking::query()
                 ->whereHas('venue', function (Builder $query) use ($user) {
                     $query->where('user_id', $user->id);
                 })
+                ->where('status', '!=', BookingStatus::CANCELLED)
                 ->exists();
 
             if ($hasBookings) {
@@ -37,13 +40,14 @@ class CheckUserHasBookings
             }
         }
 
-        // Check for bookings as a partner
+        // Check for non-cancelled bookings as a partner
         if ($user->hasRole('partner')) {
             $hasBookings = Booking::query()
                 ->where(function ($query) use ($user) {
                     $query->where('partner_concierge_id', $user->partner->id)
                         ->orWhere('partner_venue_id', $user->partner->id);
                 })
+                ->where('status', '!=', BookingStatus::CANCELLED)
                 ->exists();
 
             if ($hasBookings) {

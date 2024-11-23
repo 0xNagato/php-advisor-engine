@@ -2,7 +2,10 @@
 
 namespace App\Actions\User;
 
+use App\Enums\BookingStatus;
+use App\Models\Booking;
 use App\Models\User;
+use Illuminate\Contracts\Database\Query\Builder;
 use Illuminate\Support\Facades\DB;
 use Lorisleiva\Actions\Concerns\AsAction;
 
@@ -14,7 +17,7 @@ class DeleteOrSuspendUser
     {
         return DB::transaction(function () use ($user) {
             if (CheckUserHasBookings::run($user)) {
-                // Suspend user
+                // Suspend user if they have non-cancelled bookings
                 $user->update(['suspended_at' => now()]);
 
                 activity()
@@ -24,14 +27,14 @@ class DeleteOrSuspendUser
                         'action' => 'suspended',
                         'user_email' => $user->email,
                         'user_name' => $user->first_name.' '.$user->last_name,
-                        'reason' => 'has_bookings',
+                        'reason' => 'has_active_bookings',
                     ])
-                    ->log('User was suspended due to existing bookings');
+                    ->log('User was suspended due to existing active bookings');
 
                 return [
                     'success' => true,
                     'action' => 'suspended',
-                    'message' => 'User has been suspended as they have associated bookings.',
+                    'message' => 'User has been suspended as they have associated active bookings.',
                 ];
             }
 
@@ -41,6 +44,28 @@ class DeleteOrSuspendUser
                 'name' => $user->first_name.' '.$user->last_name,
                 'roles' => $user->roles->pluck('name')->toArray(),
             ];
+
+            // Delete cancelled bookings
+            if ($user->hasRole('concierge')) {
+                Booking::query()->where('concierge_id', $user->concierge->id)
+                    ->where('status', BookingStatus::CANCELLED)
+                    ->delete();
+            }
+            if ($user->hasRole('venue')) {
+                Booking::query()->whereHas('venue', function (Builder $query) use ($user) {
+                    $query->where('user_id', $user->id);
+                })
+                    ->where('status', BookingStatus::CANCELLED)
+                    ->delete();
+            }
+            if ($user->hasRole('partner')) {
+                Booking::query()->where(function ($query) use ($user) {
+                    $query->where('partner_concierge_id', $user->partner->id)
+                        ->orWhere('partner_venue_id', $user->partner->id);
+                })
+                    ->where('status', BookingStatus::CANCELLED)
+                    ->delete();
+            }
 
             // Delete associated role models
             if ($user->hasRole('concierge')) {

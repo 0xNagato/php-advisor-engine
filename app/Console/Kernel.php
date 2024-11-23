@@ -25,6 +25,9 @@ class Kernel extends ConsoleKernel
             $schedule->command('app:send-venue-booking-reminder')->everyFifteenMinutes();
             $schedule->command('app:notify-admins-venue-has-not-confirmed')->everyFifteenMinutes();
             $schedule->command('app:send-concierge-invitation-reminders')->dailyAt('12:00')->timezone('America/New_York');
+            $schedule->command('bookings:cancel-stale')
+                ->everyMinute()
+                ->withoutOverlapping();
             // $schedule->command('app:send-daily-summary-email')->dailyAt('08:00')->timezone('America/New_York');
         }
 

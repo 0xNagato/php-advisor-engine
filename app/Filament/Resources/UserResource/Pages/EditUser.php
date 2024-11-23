@@ -16,6 +16,7 @@ use Filament\Forms\Components\TextInput;
 use Filament\Forms\Form;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\EditRecord;
+use Illuminate\Contracts\Database\Query\Builder;
 use Illuminate\Support\Facades\DB;
 use STS\FilamentImpersonate\Pages\Actions\Impersonate;
 
@@ -235,7 +236,7 @@ class EditUser extends EditRecord
 
                             // Delete the role profile
                             $this->record->roleProfiles()
-                                ->whereHas('role', fn ($query) => $query->where('name', 'super_admin')
+                                ->whereHas('role', fn (Builder $query) => $query->where('name', 'super_admin')
                                 )
                                 ->delete();
 
