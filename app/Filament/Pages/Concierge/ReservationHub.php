@@ -249,7 +249,7 @@ class ReservationHub extends Page
             ->where('start_time', '<=', $endTimeForQuery)
             ->get();
 
-        $venue = Venue::find($venueId);
+        $venue = Venue::query()->find($venueId);
         $currentTime = Carbon::now($this->timezone)->format('H:i:s');
 
         if ($venue->cutoff_time && $currentTime > $venue->cutoff_time) {

@@ -45,7 +45,7 @@ class User extends Authenticatable implements FilamentUser, HasAvatar
         'first_name', 'last_name', 'email', 'password', 'phone', 'profile_photo_path',
         'payout', 'charity_percentage', 'partner_referral_id', 'concierge_referral_id',
         'timezone', 'secured_at', 'address_1', 'address_2', 'city', 'state', 'zip',
-        'country', 'preferences', 'region',
+        'country', 'preferences', 'region', 'suspended_at',
     ];
 
     protected $hidden = [
@@ -174,7 +174,7 @@ class User extends Authenticatable implements FilamentUser, HasAvatar
     // Filament-related methods
     public function canAccessPanel(Panel $panel): bool
     {
-        return true;
+        return $this->suspended_at === null;
     }
 
     /** @noinspection PhpPossiblePolymorphicInvocationInspection */

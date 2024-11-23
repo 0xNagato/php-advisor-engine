@@ -32,7 +32,6 @@ class PaymentInformation extends Page
 
     public array $payoutOptions = [
         'Direct Deposit',
-        'PayPal',
         'Check',
         'IBAN',
     ];
@@ -59,7 +58,7 @@ class PaymentInformation extends Page
             return ! session('simpleMode');
         }
 
-        return auth()->user()->hasActiveRole(['venue', 'concierge']);
+        return auth()->user()->hasActiveRole(['venue', 'concierge', 'partner']);
     }
 
     public function mount(): void
@@ -67,7 +66,6 @@ class PaymentInformation extends Page
         if (auth()->user()->hasActiveRole('concierge')) {
             $this->payoutOptions = [
                 'Direct Deposit',
-                'PayPal',
             ];
         }
 
