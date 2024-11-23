@@ -27,9 +27,10 @@ class NotifyAdminsVenueHasNotConfirmed extends Command
      */
     public function handle(): void
     {
-        Booking::query()->whereNull('venue_confirmed_at')
+        Booking::query()
+            ->whereNull('venue_confirmed_at')
             ->whereNull('resent_venue_confirmation_at')
-            ->where('confirmed_at', '<=', now()->subMinutes(15))
+            ->where('booking_at', '=', now()->addMinutes(30))
             ->each(function ($booking) {
                 NotifyAdminsOfUnconfirmedBooking::run($booking);
             });

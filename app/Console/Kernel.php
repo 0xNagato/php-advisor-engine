@@ -19,15 +19,29 @@ class Kernel extends ConsoleKernel
         $schedule->command('telescope:prune --hours=48')->daily();
 
         /**
-         * Send reminders for bookings that are due.
+         * Production-only scheduled tasks
          */
         if (config('app.url') === self::PRODUCTION_URL) {
-            $schedule->command('app:send-venue-booking-reminder')->everyFifteenMinutes();
-            $schedule->command('app:notify-admins-venue-has-not-confirmed')->everyFifteenMinutes();
-            $schedule->command('app:send-concierge-invitation-reminders')->dailyAt('12:00')->timezone('America/New_York');
+            // Send daily concierge invitation reminders at noon EST
+            $schedule->command('app:send-concierge-invitation-reminders')
+                ->dailyAt('12:00')
+                ->timezone('America/New_York');
+
+            // Check every minute for bookings happening in 30 minutes and send reminders to venues if unconfirmed
+            $schedule->command('app:send-venue-booking-reminder')
+                ->everyMinute()
+                ->withoutOverlapping();
+
+            // Check every minute for bookings happening in 30 minutes and notify admins if venue hasn't confirmed
+            $schedule->command('app:notify-admins-venue-has-not-confirmed')
+                ->everyMinute()
+                ->withoutOverlapping();
+
+            // Cancel stale bookings that have been pending for too long
             $schedule->command('bookings:cancel-stale')
                 ->everyMinute()
                 ->withoutOverlapping();
+
             // $schedule->command('app:send-daily-summary-email')->dailyAt('08:00')->timezone('America/New_York');
         }
 
