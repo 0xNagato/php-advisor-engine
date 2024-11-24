@@ -123,12 +123,9 @@ class WeeklyPrimeSchedule extends Component implements HasMingles
                 }
             }
 
-            Notification::make()
-                ->title('Weekly prime schedule saved successfully.')
-                ->success()
-                ->send();
-
-            $this->dispatch('weekly-schedule-updated');
+            $this->dispatch('weekly-schedule-updated', [
+                'showNotification' => true,
+            ]);
 
             return ['success' => true, 'message' => 'Weekly prime schedule saved successfully.'];
         } catch (Exception $e) {
