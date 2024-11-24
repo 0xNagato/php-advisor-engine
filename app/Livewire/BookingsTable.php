@@ -19,6 +19,11 @@ class BookingsTable extends BaseWidget
 
     public User $user;
 
+    protected function getTableHeading(): string
+    {
+        return "{$this->user->name} Bookings";
+    }
+
     public function table(Table $table): Table
     {
         $query = Booking::query()
