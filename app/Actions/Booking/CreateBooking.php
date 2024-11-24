@@ -121,14 +121,17 @@ class CreateBooking
 
     private function getConciergeId($isVip)
     {
-        $conciergeId = Auth::user()->concierge?->id;
+        // First priority: VIP check
         if ($isVip) {
-            $conciergeId = Auth::guard('vip_code')->user()->concierge_id;
-        }
-        if (auth()->user()->hasActiveRole('partner')) {
-            $conciergeId = config('app.house.concierge_id');
+            return Auth::guard('vip_code')->user()->concierge_id;
         }
 
-        return $conciergeId;
+        // Second priority: Partner check
+        if (auth()->user()->hasActiveRole('partner')) {
+            return config('app.house.concierge_id');
+        }
+
+        // Default: Regular concierge
+        return Auth::user()?->concierge?->id;
     }
 }

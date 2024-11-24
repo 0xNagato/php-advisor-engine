@@ -44,6 +44,7 @@ interface MingleData {
     notes: string;
   };
   is_vip?: boolean;
+  totalWithTaxesInCents: number;
 }
 
 interface Props {
@@ -96,7 +97,7 @@ onMounted(async () => {
   updateTimer();
   timerInterval = setInterval(updateTimer, 1000);
 
-  if (!hasExpired.value) {
+  if (!hasExpired.value && mingleData.totalWithTaxesInCents > 0) {
     try {
       stripe.value = await loadStripe(mingleData.stripeKey);
       clientSecret.value = await wire.createPaymentIntent();

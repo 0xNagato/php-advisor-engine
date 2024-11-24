@@ -84,6 +84,7 @@ class BookingCheckout extends Component implements HasMingles
             ],
             'is_vip' => (bool) $this->booking->vip_code_id && auth('vip_code')->check(),
             'allowedPaymentMethods' => ['card', 'link'],
+            'totalWithTaxesInCents' => (int) $this->booking->total_with_tax_in_cents,
         ];
     }
 
