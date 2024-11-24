@@ -40,6 +40,7 @@ class VenueContactBookingConfirmed extends Notification implements ShouldQueue
             phone: $this->contact->contact_phone,
             templateKey: 'venue_contact_booking_confirmed',
             templateData: [
+                'venue_name' => $notifiable->venue->name,
                 'booking_date' => Carbon::toNotificationFormat($notifiable->booking_at),
                 'booking_time' => $notifiable->booking_at->format('g:ia'),
                 'guest_name' => $notifiable->guest_name,

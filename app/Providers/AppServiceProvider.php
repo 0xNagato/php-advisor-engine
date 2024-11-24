@@ -68,7 +68,7 @@ class AppServiceProvider extends ServiceProvider
                 return 'tomorrow';
             }
 
-            return $date->format('l \\t\\h\\e jS');
+            return $date->format('D M jS');
         });
 
         Carbon::macro('inAppTimezone', fn (): Carbon => $this->tz(config('app.default_timezone')));
