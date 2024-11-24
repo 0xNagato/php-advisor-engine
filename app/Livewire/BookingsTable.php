@@ -98,7 +98,7 @@ class BookingsTable extends BaseWidget
                             }
                         }
 
-                        return empty($roles) ? '-' : implode(' & ', $roles);
+                        return blank($roles) ? '-' : implode(' & ', $roles);
                     }),
 
                 TextColumn::make('total_fee')

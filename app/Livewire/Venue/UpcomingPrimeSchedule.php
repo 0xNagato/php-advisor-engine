@@ -55,7 +55,7 @@ class UpcomingPrimeSchedule extends Component implements HasMingles
     #[On('weekly-schedule-updated')]
     public function weeklyScheduleUpdated($data = []): void
     {
-        if (! empty($data['showNotification'])) {
+        if (filled($data['showNotification'])) {
             Notification::make()
                 ->title('Weekly prime schedule saved successfully.')
                 ->success()
