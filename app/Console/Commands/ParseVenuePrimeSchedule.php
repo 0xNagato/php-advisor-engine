@@ -74,7 +74,7 @@ class ParseVenuePrimeSchedule extends Command
 
     private function parseWithClaude(string $text, int $attempt = 1): array
     {
-        $this->output->write("\n🤔 Analyzing schedule (attempt {$attempt}/{self::MAX_RETRIES})... ");
+        $this->output->write("\n🤔 Analyzing schedule (attempt {$attempt}/3)... ");
 
         try {
             $response = Http::withHeaders([
@@ -82,7 +82,7 @@ class ParseVenuePrimeSchedule extends Command
                 'x-api-key' => config('services.anthropic.api_key'),
             ])->post('https://api.anthropic.com/v1/messages', [
                 'model' => 'claude-3-sonnet-20240229',
-                'max_tokens' => 1024,
+                'max_tokens' => 4096,
                 'messages' => [
                     [
                         'role' => 'user',
