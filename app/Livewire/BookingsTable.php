@@ -31,23 +31,31 @@ class BookingsTable extends BaseWidget
             ])
             ->whereNotNull('confirmed_at')
             ->where(function (EloquentBuilder $query) {
-                // Venue bookings
-                $query->when($this->user->venue, function (Builder $query) {
+                $hasCondition = false;
+
+                if ($this->user->venue) {
                     $query->orWhereHas('schedule', function (Builder $query) {
                         $query->where('venue_id', $this->user->venue->id);
                     });
-                })
-                // Concierge bookings
-                    ->when($this->user->concierge, function (Builder $query) {
-                        $query->orWhere('concierge_id', $this->user->concierge->id);
-                    })
-                // Partner bookings (both venue and concierge referrals)
-                    ->when($this->user->partner, function (Builder $query) {
-                        $query->orWhere('partner_venue_id', $this->user->partner->id)
-                            ->orWhere('partner_concierge_id', $this->user->partner->id);
-                    });
-            })
-            ->orderByDesc('confirmed_at');
+                    $hasCondition = true;
+                }
+
+                if ($this->user->concierge) {
+                    $query->orWhere('concierge_id', $this->user->concierge->id);
+                    $hasCondition = true;
+                }
+
+                if ($this->user->partner) {
+                    $query->orWhere('partner_venue_id', $this->user->partner->id)
+                        ->orWhere('partner_concierge_id', $this->user->partner->id);
+                    $hasCondition = true;
+                }
+
+                // If no valid relationships, return no results
+                if (! $hasCondition) {
+                    $query->whereRaw('1 = 0');
+                }
+            });
 
         return $table
             ->query($query)
