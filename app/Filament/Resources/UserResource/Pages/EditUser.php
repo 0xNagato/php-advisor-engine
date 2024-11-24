@@ -6,6 +6,7 @@ use App\Actions\User\CheckUserHasBookings;
 use App\Actions\User\DeleteOrSuspendUser;
 use App\Actions\User\SuspendUser;
 use App\Filament\Resources\UserResource;
+use App\Livewire\BookingsTable;
 use App\Models\Concierge;
 use App\Models\Partner;
 use App\Models\User;
@@ -26,6 +27,16 @@ use STS\FilamentImpersonate\Pages\Actions\Impersonate;
 class EditUser extends EditRecord
 {
     protected static string $resource = UserResource::class;
+
+    public function getFooterWidgets(): array
+    {
+        return [
+            BookingsTable::make([
+                'user' => $this->record,
+                'columnSpan' => 'full',
+            ]),
+        ];
+    }
 
     public function form(Form $form): Form
     {

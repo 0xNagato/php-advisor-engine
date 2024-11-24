@@ -12,7 +12,6 @@ use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
-use Filament\Tables\Actions\Action;
 use Filament\Tables\Actions\ViewAction;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
@@ -133,12 +132,6 @@ class VenueOnboardingResource extends Resource
             ])
             ->actions([
                 ViewAction::make(),
-                Action::make('process')
-                    ->action(fn (VenueOnboarding $record) => $record->markAsProcessed($user))
-                    ->requiresConfirmation()
-                    ->visible(fn (VenueOnboarding $record): bool => $record->status === 'submitted')
-                    ->color('success')
-                    ->icon('heroicon-o-check'),
             ])
             ->defaultSort('created_at', 'desc');
     }
