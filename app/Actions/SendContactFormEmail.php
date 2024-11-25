@@ -18,7 +18,9 @@ class SendContactFormEmail
         $formattedMessage .= "Message:\n{$data['message']}";
 
         Mail::send([], [], function ($message) use ($formattedMessage, $user) {
-            $message->to('alex@primavip.co')
+            $message->to('prima@primavip.co')
+                ->cc('kevin@primavip.co')
+                ->cc('alex@primavip.co')
                 ->bcc('andru.weir@gmail.com')
                 ->replyTo($user->email)
                 ->subject('New message from '.$user->name)
