@@ -156,7 +156,7 @@
     <section class="pt-[20px] px-[0] pb-[18px] md:pt-[30px] md:pb-[48px]">
         <div
             class="max-w-full pl-[20px] pr-[20px] mx-[auto] w-full  md:my-[0] md:pl-[50px] md:pr-[50px] md:max-w-[1043px]">
-            <h2 class="not-italic font-normal text-center text-[36px] leading-[normal]">Supported By:</h2>
+            <h2 class="not-italic font-normal text-center text-[36px] leading-[normal]">Available On PRIMA</h2>
             <!--- Partner Images --->
             <div class="pt-[11px]">
                 <!-- Desktop Layout -->
