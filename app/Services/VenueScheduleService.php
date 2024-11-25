@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\Venue;
 use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Collection;
 
 class VenueScheduleService
 {
@@ -12,7 +13,7 @@ class VenueScheduleService
         foreach ($schedule as $dayOfWeek => $daySchedule) {
             $venue->scheduleTemplates()
                 ->where('day_of_week', $dayOfWeek)
-                ->chunk(200, function ($templates) use ($daySchedule) {
+                ->chunk(200, function (Collection $templates) use ($daySchedule) {
                     foreach ($templates as $template) {
                         $startTime = Carbon::createFromFormat('H:i:s', $template->start_time);
                         $isPrimeTime = false;
