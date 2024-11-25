@@ -157,12 +157,39 @@
         <div
             class="max-w-full pl-[20px] pr-[20px] mx-[auto] w-full  md:my-[0] md:pl-[50px] md:pr-[50px] md:max-w-[1043px]">
             <h2 class="not-italic font-normal text-center text-[36px] leading-[normal]">Supported By:</h2>
-            <!--- Partner Image --->
+            <!--- Partner Images --->
             <div class="pt-[11px]">
-                <img src="/assets/images/partner-image.png" width="auto" height="auto" loading="lazy"
-                    alt="logo" class="hidden md:block">
-                <img src="/assets/images/partner_image_mobile.png" width="auto" height="auto" loading="lazy"
-                    alt="logo" class="block md:hidden mt-[43px]">
+                <!-- Desktop Layout -->
+                <div class="hidden md:grid grid-cols-6 gap-8 items-center justify-items-center max-w-[1000px] mx-auto">
+                    <img src="https://prima-bucket.nyc3.digitaloceanspaces.com/venues/mandolin.png" width="auto"
+                        height="auto" loading="lazy" alt="Mandolin" class="max-h-12">
+                    <img src="https://prima-bucket.nyc3.digitaloceanspaces.com/venues/margot-sobe.png" width="auto"
+                        height="auto" loading="lazy" alt="Margot" class="max-h-12">
+                    <img src="https://prima-bucket.nyc3.digitaloceanspaces.com/venues/paya.png" width="auto"
+                        height="auto" loading="lazy" alt="Paya" class="max-h-12 invert">
+                    <img src="https://prima-bucket.nyc3.digitaloceanspaces.com/venues/sereia.png" width="auto"
+                        height="auto" loading="lazy" alt="Sereia" class="max-h-12">
+                    <img src="https://prima-bucket.nyc3.digitaloceanspaces.com/venues/sparrow.png" width="auto"
+                        height="auto" loading="lazy" alt="Sparrow" class="max-h-12">
+                    <img src="https://prima-bucket.nyc3.digitaloceanspaces.com/venues/le-jardinier.png" width="auto"
+                        height="auto" loading="lazy" alt="Le Jardinier" class="max-h-12">
+                </div>
+
+                <!-- Mobile Layout -->
+                <div class="grid grid-cols-2 gap-6 md:hidden mt-4 max-w-[300px] mx-auto">
+                    <img src="https://prima-bucket.nyc3.digitaloceanspaces.com/venues/mandolin.png" width="auto"
+                        height="auto" loading="lazy" alt="Mandolin" class="max-h-10">
+                    <img src="https://prima-bucket.nyc3.digitaloceanspaces.com/venues/margot-sobe.png" width="auto"
+                        height="auto" loading="lazy" alt="Margot" class="max-h-10">
+                    <img src="https://prima-bucket.nyc3.digitaloceanspaces.com/venues/paya.png" width="auto"
+                        height="auto" loading="lazy" alt="Paya" class="max-h-10 invert">
+                    <img src="https://prima-bucket.nyc3.digitaloceanspaces.com/venues/sereia.png" width="auto"
+                        height="auto" loading="lazy" alt="Sereia" class="max-h-10">
+                    <img src="https://prima-bucket.nyc3.digitaloceanspaces.com/venues/sparrow.png" width="auto"
+                        height="auto" loading="lazy" alt="Sparrow" class="max-h-10">
+                    <img src="https://prima-bucket.nyc3.digitaloceanspaces.com/venues/le-jardinier.png" width="auto"
+                        height="auto" loading="lazy" alt="Le Jardinier" class="max-h-10">
+                </div>
             </div>
             <!--- Partner Images End --->
         </div>
@@ -761,34 +788,43 @@
     <!--- Section10 End --->
     <!--- Section11 --->
     <section class="pt-[0px] px-[0] pb-[37px] md:pt-[44px] md:pb-[40px] bg-[#F9F9F9]">
-        <div
-            class="max-w-full pl-[00px] pr-[00px] mx-[auto] w-full md:max-w-[967px]  md:my-[0] md:pl-[50px] md:pr-[50px]">
-            <div class="flex flex-wrap items-center">
-                {{-- <div class="w-full md:w-7/12">
-                    <img src="/assets/images/venue.jpeg" width="auto" height="auto" loading="lazy"
-                        alt="Venue" class="block">
-                </div> --}}
-                <div class="w-full pt-[30px] pl-[30px] pr-[30px] md:pt-[0px] md:pr-[0px] md:pl-[63px] md:w-5/12">
-                    <h2 class="text-[28.177px] font-normal leading-[115.8%] text-center md:text-left">Join PRIMA</h2>
-                    <p class="text-[16px] leading-[normal] pt-[29px]">
-                        <span class="text-[18px] items-center flex gap-[7px] text-left">
-                            <img src="/assets/images/icon.png" width="15" height="auto" alt="icon"
-                                loading="lazy"> Maximize Revenue from Prime-Time Reservations </span>
-                        <span class="text-[18px] items-center flex gap-[7px] text-left mt-[15px]">
-                            <img src="/assets/images/icon.png" width="15" height="auto" alt="icon"
-                                loading="lazy"> Regain Control Over Your Booking System </span>
-                        <span class="text-[18px] items-center flex gap-[7px] text-left mt-[15px]">
-                            <img src="/assets/images/icon.png" width="15" height="auto" alt="icon"
-                                loading="lazy"> Ensure Full Occupancy During All Service Times </span>
-                    </p>
-                    <a class="rounded-[5.199px] bg-[#5046E5] w-full min-h-[45px] text-[14px] not-italic font-semibold leading-[normal] text-[#FFF] [transition:all_.5s_ease] hover:background: transparent hover:bg-transparent hover:text-[#5046E5] inline-flex items-center justify-center border-[1.3px] border-[solid] border-[#5046E5] mt-[26px] md:mt-[34px]"
-                        href="#" @click.prevent="$dispatch('open-modal', { id: 'contact' })">
-                        Talk to PRIMA →
-                    </a>
-                    <a class="rounded-[5.199px] bg-transparent w-full min-h-[45px]  text-[14px]  not-italic font-semibold leading-[normal] text-[#000] [transition:all_.5s_ease] hover:background: transparent hover:bg-[#000] hover:text-[#fff] inline-flex items-center justify-center border-[1.3px] border-[solid] border-[#000] mt-[8px] underline [text-underline-offset:3px]"
-                        href="#" @click.prevent="$dispatch('open-modal', { id: 'video' })">
-                        Watch Our Explainer
-                    </a>
+        <div class="max-w-full px-6 md:px-[50px] mx-auto w-full md:max-w-[967px]">
+            <div class="flex flex-wrap items-center justify-center">
+                <div class="w-full md:w-8/12 max-w-[800px]">
+                    <div class="text-center">
+                        <h2 class="text-[28.177px] font-normal leading-[115.8%] text-center">Join PRIMA</h2>
+                        <div class="max-w-[600px] md:max-w-[800px] mx-auto px-6 md:px-0">
+                            <div class="pt-[29px] space-y-4 max-w-[400px] md:max-w-none mx-auto">
+                                <div class="flex items-start gap-[7px]">
+                                    <img src="/assets/images/icon.png" width="15" height="auto" alt="icon"
+                                        loading="lazy" class="mt-1.5">
+                                    <span class="text-[18px] text-left">Maximize Revenue from Prime-Time
+                                        Reservations</span>
+                                </div>
+                                <div class="flex items-start gap-[7px]">
+                                    <img src="/assets/images/icon.png" width="15" height="auto" alt="icon"
+                                        loading="lazy" class="mt-1.5">
+                                    <span class="text-[18px] text-left">Regain Control Over Your Booking System</span>
+                                </div>
+                                <div class="flex items-start gap-[7px]">
+                                    <img src="/assets/images/icon.png" width="15" height="auto" alt="icon"
+                                        loading="lazy" class="mt-1.5">
+                                    <span class="text-[18px] text-left">Ensure Full Occupancy During All Service
+                                        Times</span>
+                                </div>
+                            </div>
+                            <div class="flex flex-col justify-center gap-4 mt-8 md:flex-row">
+                                <a class="w-full md:w-auto rounded-[5.199px] bg-[#5046E5] min-h-[45px] text-[14px] font-semibold text-white hover:bg-transparent hover:text-[#5046E5] flex items-center justify-center border-[1.3px] border-[#5046E5] px-12"
+                                    href="#" @click.prevent="$dispatch('open-modal', { id: 'contact' })">
+                                    Talk to PRIMA →
+                                </a>
+                                <a class="w-full md:w-auto rounded-[5.199px] bg-transparent min-h-[45px] text-[14px] font-semibold text-[#000] hover:bg-[#000] hover:text-white flex items-center justify-center border-[1.3px] border-[#000] px-12 underline [text-underline-offset:3px]"
+                                    href="#" @click.prevent="$dispatch('open-modal', { id: 'video' })">
+                                    Watch Our Explainer
+                                </a>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>

@@ -108,6 +108,7 @@ class DeleteOrSuspendUser
                 $user->partner->delete();
             }
             if ($user->hasRole('venue')) {
+                $user->venue->specialPricing()->delete();
                 $user->venue->delete();
             }
 
