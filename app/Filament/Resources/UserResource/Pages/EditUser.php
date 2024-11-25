@@ -13,6 +13,7 @@ use App\Models\User;
 use Filament\Actions\Action;
 use Filament\Actions\ActionGroup;
 use Filament\Forms\Components\Placeholder;
+use Filament\Forms\Components\Section;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Form;
 use Filament\Notifications\Notification;
@@ -42,28 +43,33 @@ class EditUser extends EditRecord
     {
         return $form
             ->schema([
-                TextInput::make('first_name')
-                    ->required(),
-                TextInput::make('last_name')
-                    ->required(),
-                TextInput::make('email')
-                    ->email()
-                    ->required(),
-                TextInput::make('phone'),
-                Placeholder::make('roles')
-                    ->label('Current Roles')
-                    ->content(function () {
-                        $coreRoles = $this->record->roles()
-                            ->whereIn('name', ['partner', 'concierge', 'super_admin', 'venue'])
-                            ->pluck('name')
-                            ->map(fn ($role) => match ($role) {
-                                'super_admin' => 'Super Admin',
-                                default => ucfirst($role)
-                            })
-                            ->join(', ');
+                Section::make('User Information')
+                    ->description('Basic user account information')
+                    ->schema([
+                        TextInput::make('first_name')
+                            ->required(),
+                        TextInput::make('last_name')
+                            ->required(),
+                        TextInput::make('email')
+                            ->email()
+                            ->required(),
+                        TextInput::make('phone'),
+                        Placeholder::make('roles')
+                            ->label('Current Roles')
+                            ->content(function () {
+                                $coreRoles = $this->record->roles()
+                                    ->whereIn('name', ['partner', 'concierge', 'super_admin', 'venue'])
+                                    ->pluck('name')
+                                    ->map(fn ($role) => match ($role) {
+                                        'super_admin' => 'Super Admin',
+                                        default => ucfirst($role)
+                                    })
+                                    ->join(', ');
 
-                        return $coreRoles ?: 'No core roles assigned';
-                    }),
+                                return $coreRoles ?: 'No core roles assigned';
+                            }),
+                    ])
+                    ->columns(2),
             ]);
     }
 

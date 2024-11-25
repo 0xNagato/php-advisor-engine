@@ -48,6 +48,22 @@ class ParseVenuePrimeSchedule extends Command
         try {
             $this->output->write("\n🤔 Analyzing schedule... ");
             $parsedData = ParseVenueScheduleWithClaude::run($scheduleText);
+
+            // Save response to JSON file
+            $timestamp = now()->format('Y-m-d_H-i-s');
+            $debugPath = storage_path('logs/venue-schedules/');
+            if (! file_exists($debugPath)) {
+                mkdir($debugPath, 0755, true);
+            }
+
+            $debugFile = $debugPath."schedule_response_{$timestamp}.json";
+            file_put_contents($debugFile, json_encode([
+                'input' => $scheduleText,
+                'response' => $parsedData,
+            ], JSON_PRETTY_PRINT));
+
+            $this->info("\nDebug file saved to: {$debugFile}");
+
             $this->output->write("\r".str_repeat(' ', 70)."\r");
 
             foreach ($parsedData['venues'] as $venueData) {

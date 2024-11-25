@@ -42,7 +42,7 @@ class ListVenues extends ListRecords
                         $query->where('status', BookingStatus::CONFIRMED);
                     }])
                     ->join('users', 'venues.user_id', '=', 'users.id')
-                    ->orderByDesc('users.secured_at')
+                    ->orderByDesc('users.updated_at')
             )
             ->columns([
                 TextColumn::make('name')
@@ -118,6 +118,7 @@ class ListVenues extends ListRecords
                         $lastLogging = $venue->user->authentications()->latest('login_at')->first()->login_at ?? null;
 
                         return view('partials.venue-table-modal-view', [
+                            'user' => $venue->user,
                             'secured_at' => $venue->user->secured_at,
                             'referrer_name' => $venue->user->referrer?->name ?? '-',
                             'bookings_count' => number_format($venue->bookings_count),

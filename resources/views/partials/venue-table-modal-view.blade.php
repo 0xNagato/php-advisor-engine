@@ -3,6 +3,17 @@
     <!-- Current Information -->
     <div>
         <dl class="grid grid-cols-2 text-xs sm:text-sm gap-x-4 gap-y-2">
+            <dt class="font-semibold">User:</dt>
+            <dd>
+                @if (auth()->user()->hasRole('super_admin'))
+                    <a href="{{ route('filament.admin.resources.users.edit', ['record' => $user]) }}"
+                        class="text-indigo-600 hover:underline">
+                        {{ $user->name }}
+                    </a>
+                @else
+                    N/A
+                @endif
+            </dd>
             <dt class="font-semibold">Date Joined:</dt>
             <dd>{{ $secured_at ? $secured_at->format('D M j, Y') : 'N/A' }}</dd>
             <dt class="font-semibold">Referred By:</dt>
@@ -28,7 +39,6 @@
             @else
                 <dd>No contacts available</dd>
             @endif
-
         </dl>
     </div>
 
