@@ -3,6 +3,7 @@
 namespace App\Console\Commands;
 
 use App\Actions\Venue\ParseVenueScheduleWithClaude;
+use App\Data\VenueContactData;
 use App\Enums\VenueStatus;
 use App\Models\Partner;
 use App\Models\Referral;
@@ -114,8 +115,19 @@ class ParseVenuePrimeSchedule extends Command
     {
         $this->info("\nCreating new venue user...");
 
-        $this->info('Enter email:');
-        $email = trim(fgets($inputHandle));
+        while (true) {
+            $this->info('Enter email:');
+            $email = trim(fgets($inputHandle));
+
+            // Check for existing user with this email
+            if (User::query()->where('email', $email)->exists()) {
+                $this->error('A user with this email already exists. Please use a different email.');
+
+                continue;
+            }
+
+            break;
+        }
 
         $this->info('Enter first name:');
         $firstName = trim(fgets($inputHandle));
@@ -128,6 +140,12 @@ class ParseVenuePrimeSchedule extends Command
 
         DB::beginTransaction();
         try {
+            $housePartner = Partner::query()
+                ->whereHas('user', function (Builder $query) {
+                    $query->where('email', 'house.partner@primavip.co');
+                })
+                ->first();
+
             /** @var User $user */
             $user = User::query()->create([
                 'first_name' => $firstName,
@@ -135,6 +153,7 @@ class ParseVenuePrimeSchedule extends Command
                 'email' => $email,
                 'phone' => $phone,
                 'password' => bcrypt(Str::random()),
+                'partner_referral_id' => $housePartner?->id,
                 'secured_at' => now(),
             ]);
 
@@ -155,14 +174,17 @@ class ParseVenuePrimeSchedule extends Command
                 '6' => 6,
                 '8' => 8,
             ];
-            $venue->save();
 
-            // Create referral
-            $housePartner = Partner::query()
-                ->whereHas('user', function (Builder $query) {
-                    $query->where('email', 'house.partner@primavip.co');
-                })
-                ->first();
+            // Add primary contact to contacts array
+            $venue->contacts = collect([
+                new VenueContactData(
+                    contact_name: "$firstName $lastName",
+                    contact_phone: $phone,
+                    use_for_reservations: true,
+                ),
+            ]);
+
+            $venue->save();
 
             Referral::query()->create([
                 'referrer_id' => $housePartner?->user->id,
