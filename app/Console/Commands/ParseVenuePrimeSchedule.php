@@ -177,30 +177,27 @@ class ParseVenuePrimeSchedule extends Command
             $user->assignRole('venue');
 
             // Create venue
-            $venue = new Venue;
-            $venue->name = $name;
-            $venue->status = VenueStatus::PENDING;
-            $venue->user_id = $user->id;
-            $venue->contact_phone = $phone;
-            $venue->primary_contact_name = "$firstName $lastName";
-            $venue->party_sizes = [
-                'Special Request' => 0,
-                '2' => 2,
-                '4' => 4,
-                '6' => 6,
-                '8' => 8,
-            ];
-
-            // Add primary contact to contacts array
-            $venue->contacts = collect([
-                new VenueContactData(
-                    contact_name: "$firstName $lastName",
-                    contact_phone: $phone,
-                    use_for_reservations: true,
-                ),
+            $venue = Venue::create([
+                'name' => $name,
+                'status' => VenueStatus::DRAFT,
+                'user_id' => $user->id,
+                'contact_phone' => $phone,
+                'primary_contact_name' => "$firstName $lastName",
+                'party_sizes' => [
+                    'Special Request' => 0,
+                    '2' => 2,
+                    '4' => 4,
+                    '6' => 6,
+                    '8' => 8,
+                ],
+                'contacts' => collect([
+                    new VenueContactData(
+                        contact_name: "$firstName $lastName",
+                        contact_phone: $phone,
+                        use_for_reservations: true,
+                    ),
+                ]),
             ]);
-
-            $venue->save();
 
             Referral::query()->create([
                 'referrer_id' => $housePartner?->user->id,
