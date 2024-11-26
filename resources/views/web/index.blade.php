@@ -160,35 +160,36 @@
             <!--- Partner Images --->
             <div class="pt-[11px]">
                 <!-- Desktop Layout -->
-                <div class="hidden md:grid grid-cols-6 gap-8 items-center justify-items-center max-w-[1000px] mx-auto">
+                <div
+                    class="hidden md:grid grid-cols-6 gap-8 items-center justify-items-center max-w-[1000px] mx-auto mt-4">
                     <img src="https://prima-bucket.nyc3.digitaloceanspaces.com/venues/mandolin.png" width="auto"
-                        height="auto" loading="lazy" alt="Mandolin" class="max-h-12">
+                        height="auto" loading="lazy" alt="Mandolin" class="max-h-20">
                     <img src="https://prima-bucket.nyc3.digitaloceanspaces.com/venues/margot-sobe.png" width="auto"
-                        height="auto" loading="lazy" alt="Margot" class="max-h-12">
+                        height="auto" loading="lazy" alt="Margot" class="max-h-20">
                     <img src="https://prima-bucket.nyc3.digitaloceanspaces.com/venues/paya.png" width="auto"
-                        height="auto" loading="lazy" alt="Paya" class="max-h-12 invert">
+                        height="auto" loading="lazy" alt="Paya" class="max-h-20">
                     <img src="https://prima-bucket.nyc3.digitaloceanspaces.com/venues/sereia.png" width="auto"
-                        height="auto" loading="lazy" alt="Sereia" class="max-h-12">
+                        height="auto" loading="lazy" alt="Sereia" class="max-h-20">
                     <img src="https://prima-bucket.nyc3.digitaloceanspaces.com/venues/sparrow.png" width="auto"
-                        height="auto" loading="lazy" alt="Sparrow" class="max-h-12">
-                    <img src="https://prima-bucket.nyc3.digitaloceanspaces.com/venues/le-jardinier.png" width="auto"
-                        height="auto" loading="lazy" alt="Le Jardinier" class="max-h-12">
+                        height="auto" loading="lazy" alt="Sparrow" class="max-h-20">
+                    <img src="https://prima-bucket.nyc3.digitaloceanspaces.com/venues/latelier-de-joel-robuchon.png"
+                        width="auto" height="auto" loading="lazy" alt="Le Jardinier" class="max-h-20">
                 </div>
 
                 <!-- Mobile Layout -->
                 <div class="grid grid-cols-2 gap-6 md:hidden mt-4 max-w-[300px] mx-auto">
                     <img src="https://prima-bucket.nyc3.digitaloceanspaces.com/venues/mandolin.png" width="auto"
-                        height="auto" loading="lazy" alt="Mandolin" class="max-h-10">
+                        height="auto" loading="lazy" alt="Mandolin" class="max-h-20">
                     <img src="https://prima-bucket.nyc3.digitaloceanspaces.com/venues/margot-sobe.png" width="auto"
-                        height="auto" loading="lazy" alt="Margot" class="max-h-10">
+                        height="auto" loading="lazy" alt="Margot" class="max-h-20">
                     <img src="https://prima-bucket.nyc3.digitaloceanspaces.com/venues/paya.png" width="auto"
-                        height="auto" loading="lazy" alt="Paya" class="max-h-10 invert">
+                        height="auto" loading="lazy" alt="Paya" class="max-h-20">
                     <img src="https://prima-bucket.nyc3.digitaloceanspaces.com/venues/sereia.png" width="auto"
-                        height="auto" loading="lazy" alt="Sereia" class="max-h-10">
+                        height="auto" loading="lazy" alt="Sereia" class="max-h-20">
                     <img src="https://prima-bucket.nyc3.digitaloceanspaces.com/venues/sparrow.png" width="auto"
-                        height="auto" loading="lazy" alt="Sparrow" class="max-h-10">
-                    <img src="https://prima-bucket.nyc3.digitaloceanspaces.com/venues/le-jardinier.png" width="auto"
-                        height="auto" loading="lazy" alt="Le Jardinier" class="max-h-10">
+                        height="auto" loading="lazy" alt="Sparrow" class="max-h-20">
+                    <img src="https://prima-bucket.nyc3.digitaloceanspaces.com/venues/latelier-de-joel-robuchon.png"
+                        width="auto" height="auto" loading="lazy" alt="Le Jardinier" class="max-h-20">
                 </div>
             </div>
             <!--- Partner Images End --->
