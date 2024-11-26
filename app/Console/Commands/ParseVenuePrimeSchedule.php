@@ -10,6 +10,7 @@ use App\Models\Referral;
 use App\Models\User;
 use App\Models\Venue;
 use App\Services\VenueScheduleService;
+use App\Traits\FormatsPhoneNumber;
 use Exception;
 use Illuminate\Console\Command;
 use Illuminate\Contracts\Database\Query\Builder;
@@ -18,6 +19,8 @@ use Illuminate\Support\Str;
 
 class ParseVenuePrimeSchedule extends Command
 {
+    use FormatsPhoneNumber;
+
     protected $signature = 'venue:parse-schedules {--dry-run}';
 
     protected $description = 'Parse venue schedules using Claude';
@@ -131,9 +134,16 @@ class ParseVenuePrimeSchedule extends Command
     {
         $this->info("\nCreating new venue user...");
 
+        // Email validation
         while (true) {
             $this->info('Enter email:');
             $email = trim(fgets($inputHandle));
+
+            if (! filter_var($email, FILTER_VALIDATE_EMAIL)) {
+                $this->error('Please enter a valid email address.');
+
+                continue;
+            }
 
             // Check for existing user with this email
             if (User::query()->where('email', $email)->exists()) {
@@ -145,14 +155,53 @@ class ParseVenuePrimeSchedule extends Command
             break;
         }
 
-        $this->info('Enter first name:');
-        $firstName = trim(fgets($inputHandle));
+        // First name validation
+        while (true) {
+            $this->info('Enter first name:');
+            $firstName = trim(fgets($inputHandle));
 
-        $this->info('Enter last name:');
-        $lastName = trim(fgets($inputHandle));
+            if (strlen($firstName) < 2 || ! preg_match('/^[a-zA-Z\s\'-]+$/', $firstName)) {
+                $this->error('Please enter a valid first name (minimum 2 characters, letters, spaces, hyphens and apostrophes only).');
 
-        $this->info('Enter phone number (e.g. +16473823326):');
-        $phone = trim(fgets($inputHandle));
+                continue;
+            }
+
+            break;
+        }
+
+        // Last name validation
+        while (true) {
+            $this->info('Enter last name:');
+            $lastName = trim(fgets($inputHandle));
+
+            if (strlen($lastName) < 2 || ! preg_match('/^[a-zA-Z\s\'-]+$/', $lastName)) {
+                $this->error('Please enter a valid last name (minimum 2 characters, letters, spaces, hyphens and apostrophes only).');
+
+                continue;
+            }
+
+            break;
+        }
+
+        // Phone validation
+        while (true) {
+            $this->info('Enter phone number (e.g. +16473823326):');
+            $phone = trim(fgets($inputHandle));
+
+            // Remove all non-numeric characters
+            $numbers = preg_replace('/[^0-9]/', '', $phone);
+
+            // Check if we have 10-15 digits
+            if (strlen($numbers) >= 10 && strlen($numbers) <= 15) {
+                // Format with + prefix
+                $phone = '+'.$numbers;
+                break;
+            }
+
+            $this->error('Please enter a valid phone number (10-15 digits)');
+
+            continue;
+        }
 
         DB::beginTransaction();
         try {
@@ -177,7 +226,7 @@ class ParseVenuePrimeSchedule extends Command
             $user->assignRole('venue');
 
             // Create venue
-            $venue = Venue::create([
+            $venue = Venue::query()->create([
                 'name' => $name,
                 'status' => VenueStatus::DRAFT,
                 'user_id' => $user->id,
@@ -208,7 +257,7 @@ class ParseVenuePrimeSchedule extends Command
                 'referrer_type' => 'partner',
             ]);
 
-            $this->venueScheduleService->createDefaultScheduleTemplates($venue, $venueData['schedule']);
+            $this->venueScheduleService->updateSchedule($venue, $venueData['schedule']);
 
             DB::commit();
             $this->info("✅ Created new venue: {$venue->name}");
