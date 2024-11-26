@@ -192,7 +192,7 @@ class ParseVenuePrimeSchedule extends Command
             $numbers = preg_replace('/[^0-9]/', '', $phone);
 
             // Check if we have 10-15 digits
-            if (strlen($numbers) >= 10 && strlen($numbers) <= 15) {
+            if (strlen((string) $numbers) >= 10 && strlen((string) $numbers) <= 15) {
                 // Format with + prefix
                 $phone = '+'.$numbers;
                 break;
