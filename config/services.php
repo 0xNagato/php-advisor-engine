@@ -61,4 +61,8 @@ return [
     'anthropic' => [
         'api_key' => env('ANTHROPIC_API_KEY'),
     ],
+
+    'manychat' => [
+        'api_key' => env('MANYCHAT_API_KEY'),
+    ],
 ];

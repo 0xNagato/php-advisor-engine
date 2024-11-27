@@ -5,6 +5,8 @@
 
 namespace App\Providers;
 
+use App\Models\User;
+use App\Observers\UserManyChatObserver;
 use App\Services\Booking\BookingCalculationService;
 use App\Services\Booking\EarningCreationService;
 use App\Services\Booking\NonPrimeEarningsCalculationService;
@@ -101,9 +103,9 @@ class AppServiceProvider extends ServiceProvider
             $app->make(NonPrimeEarningsCalculationService::class)
         ));
 
-        Model::preventLazyLoading(! $this->app->isProduction());
-
         JsonResource::withoutWrapping();
+        Model::preventLazyLoading(! $this->app->isProduction());
+        User::observe(UserManyChatObserver::class);
     }
 
     /**
