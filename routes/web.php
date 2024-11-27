@@ -23,7 +23,9 @@ Route::get('/privacy', function () {
 
 Route::get('/onboarding', VenueOnboarding::class)->name('onboarding');
 
-Route::redirect('/app', 'https://apps.apple.com/us/app/prima-vip/id6504947227');
+Route::redirect('/app', config('app.apple_app_store_url'));
+Route::redirect('/iphone', config('app.apple_app_store_url'));
+Route::redirect('/ipad', config('app.apple_app_store_url'));
 
 /**
  * Short URL handling for both domains:

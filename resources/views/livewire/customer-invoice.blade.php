@@ -282,9 +282,9 @@
                     </div>
                 </div>
             @endif
-            @if (auth()->check() && auth()->user()->hasActiveRole('super_admin'))
+            {{-- @if (auth()->check() && auth()->user()->hasActiveRole('super_admin'))
                 <x-filament::actions :actions="[$this->resendInvoiceAction, $this->deleteBookingAction]" class="w-full mt-4" />
-            @endif
+            @endif --}}
         </div>
         <!-- End Body -->
     </div>
