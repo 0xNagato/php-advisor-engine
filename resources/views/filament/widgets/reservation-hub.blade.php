@@ -146,124 +146,122 @@
                     <div class="-mt-6"></div>
                 @endif
 
-                @nonmobileapp
-                    <div x-show="tab === 'collectPayment'" class="mt-6">
-                        <!-- @todo Refactor this to a separate component -->
+                <div x-show="tab === 'collectPayment'" class="mt-6">
+                    <!-- @todo Refactor this to a separate component -->
 
-                        <div wire:ignore class="flex flex-col items-center gap-3" x-data="{}"
-                            x-init="() => {
-                                function initializeStripe() {
-                                    if (window.Stripe) {
-                                        setupStripe();
-                                    } else {
-                                        setTimeout(initializeStripe, 10);
+                    <div wire:ignore class="flex flex-col items-center gap-3" x-data="{}"
+                        x-init="() => {
+                            function initializeStripe() {
+                                if (window.Stripe) {
+                                    setupStripe();
+                                } else {
+                                    setTimeout(initializeStripe, 10);
+                                }
+                            }
+                        
+                            function setupStripe() {
+                                const stripe = Stripe('{{ config('services.stripe.key') }}');
+                                const elements = stripe.elements();
+                                const card = elements.create('card', {
+                                    disableLink: true,
+                                    hidePostalCode: true
+                                });
+                                card.mount('#card-element');
+                        
+                                const form = document.getElementById('form');
+                        
+                                form.addEventListener('submit', async (e) => {
+                                    e.preventDefault();
+                                    $wire.$set('isLoading', true);
+                        
+                                    @if($booking->prime_time)
+                                    const { token, error } = await stripe.createToken(card);
+                        
+                                    if (error) {
+                                        $wire.$set('isLoading', false);
+                                        return;
                                     }
-                                }
-                            
-                                function setupStripe() {
-                                    const stripe = Stripe('{{ config('services.stripe.key') }}');
-                                    const elements = stripe.elements();
-                                    const card = elements.create('card', {
-                                        disableLink: true,
-                                        hidePostalCode: true
-                                    });
-                                    card.mount('#card-element');
-                            
-                                    const form = document.getElementById('form');
-                            
-                                    form.addEventListener('submit', async (e) => {
-                                        e.preventDefault();
-                                        $wire.$set('isLoading', true);
-                            
-                                        @if($booking->prime_time)
-                                        const { token, error } = await stripe.createToken(card);
-                            
-                                        if (error) {
-                                            $wire.$set('isLoading', false);
-                                            return;
-                                        }
-                                        @else
-                                        var token = { id: '' };
-                                        @endif
-                            
-                                        const formData = {
-                                            first_name: document.querySelector('input[name=first_name]').value,
-                                            last_name: document.querySelector('input[name=last_name]').value,
-                                            phone: document.querySelector('input[name=phone]').value,
-                                            email: document.querySelector('input[name=email]').value,
-                                            notes: document.querySelector('textarea[name=notes]').value,
-                                            token: token?.id ?? ''
-                                        };
-                            
-                                        @if(!$booking->prime_time)
-                                        formData.real_customer_confirmation = document.querySelector('input[name=real_customer_confirmation]').checked;
-                                        @endif
-                            
-                                        $wire.$call('completeBooking', formData);
-                                    })
-                            
-                                }
-                            
-                                initializeStripe();
-                            }">
-
-                            <form id="form" class="w-full">
-                                <fieldset class="flex flex-col items-center gap-2 disabled:opacity-50">
-                                    <div class="flex items-center w-full gap-2">
-                                        <label class="w-full">
-                                            <input name="first_name" type="text"
-                                                class="w-full rounded-lg border border-gray-300 text-sm h-[40px] focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
-                                                placeholder="First Name" required>
-                                        </label>
-
-                                        <label class="w-full">
-                                            <input name="last_name" type="text"
-                                                class="w-full rounded-lg border border-gray-300 text-sm h-[40px] focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
-                                                placeholder="Last Name" required>
-                                        </label>
-
-                                    </div>
-
-                                    <label class="w-full">
-                                        <input name="phone" type="text"
-                                            class="w-full rounded-lg border border-gray-300 text-sm h-[40px] focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
-                                            placeholder="Cell Phone Number" required>
-                                    </label>
-
-                                    <label class="w-full">
-                                        <input name="email" type="email"
-                                            class="w-full rounded-lg border border-gray-300 text-sm h-[40px] focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
-                                            placeholder="Email Address (optional)">
-                                    </label>
-
-                                    <label class="w-full">
-                                        <textarea name="notes"
-                                            class="w-full text-sm border border-gray-300 rounded-lg focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
-                                            placeholder="Notes/Special Requests (optional)"></textarea>
-                                    </label>
-
-                                    <div id="card-element"
-                                        class="-mt-1.5 w-full rounded-lg border border-gray-400 text-sm bg-white px-2 py-3 h-[40px] {{ !$booking->prime_time ? 'hidden' : '' }}">
-                                        <!-- A Stripe Element will be inserted here. -->
-                                    </div>
-
-                                    @if (!$booking->prime_time)
-                                        <label class="flex items-center w-full mb-2 text-xs">
-                                            <input type="checkbox" name="real_customer_confirmation"
-                                                class="text-indigo-600 rounded form-checkbox">
-                                            <span class="ml-2 text-xs text-gray-700">I am booking this reservation for a
-                                                real customer</span>
-                                        </label>
+                                    @else
+                                    var token = { id: '' };
                                     @endif
+                        
+                                    const formData = {
+                                        first_name: document.querySelector('input[name=first_name]').value,
+                                        last_name: document.querySelector('input[name=last_name]').value,
+                                        phone: document.querySelector('input[name=phone]').value,
+                                        email: document.querySelector('input[name=email]').value,
+                                        notes: document.querySelector('textarea[name=notes]').value,
+                                        token: token?.id ?? ''
+                                    };
+                        
+                                    @if(!$booking->prime_time)
+                                    formData.real_customer_confirmation = document.querySelector('input[name=real_customer_confirmation]').checked;
+                                    @endif
+                        
+                                    $wire.$call('completeBooking', formData);
+                                })
+                        
+                            }
+                        
+                            initializeStripe();
+                        }">
 
-                                    <x-filament::button class="w-full" type="submit" size="xl">
-                                        Complete Reservation
-                                    </x-filament::button>
-                                </fieldset>
-                            </form>
-                        </div>
+                        <form id="form" class="w-full">
+                            <fieldset class="flex flex-col items-center gap-2 disabled:opacity-50">
+                                <div class="flex items-center w-full gap-2">
+                                    <label class="w-full">
+                                        <input name="first_name" type="text"
+                                            class="w-full rounded-lg border border-gray-300 text-sm h-[40px] focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
+                                            placeholder="First Name" required>
+                                    </label>
+
+                                    <label class="w-full">
+                                        <input name="last_name" type="text"
+                                            class="w-full rounded-lg border border-gray-300 text-sm h-[40px] focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
+                                            placeholder="Last Name" required>
+                                    </label>
+
+                                </div>
+
+                                <label class="w-full">
+                                    <input name="phone" type="text"
+                                        class="w-full rounded-lg border border-gray-300 text-sm h-[40px] focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
+                                        placeholder="Cell Phone Number" required>
+                                </label>
+
+                                <label class="w-full">
+                                    <input name="email" type="email"
+                                        class="w-full rounded-lg border border-gray-300 text-sm h-[40px] focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
+                                        placeholder="Email Address (optional)">
+                                </label>
+
+                                <label class="w-full">
+                                    <textarea name="notes"
+                                        class="w-full text-sm border border-gray-300 rounded-lg focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
+                                        placeholder="Notes/Special Requests (optional)"></textarea>
+                                </label>
+
+                                <div id="card-element"
+                                    class="-mt-1.5 w-full rounded-lg border border-gray-400 text-sm bg-white px-2 py-3 h-[40px] {{ !$booking->prime_time ? 'hidden' : '' }}">
+                                    <!-- A Stripe Element will be inserted here. -->
+                                </div>
+
+                                @if (!$booking->prime_time)
+                                    <label class="flex items-center w-full mb-2 text-xs">
+                                        <input type="checkbox" name="real_customer_confirmation"
+                                            class="text-indigo-600 rounded form-checkbox">
+                                        <span class="ml-2 text-xs text-gray-700">I am booking this reservation for a
+                                            real customer</span>
+                                    </label>
+                                @endif
+
+                                <x-filament::button class="w-full" type="submit" size="xl">
+                                    Complete Reservation
+                                </x-filament::button>
+                            </fieldset>
+                        </form>
                     </div>
-                @endnonmobileapp
+                </div>
 
                 <div x-show="tab === 'smsPayment'" class="flex flex-col gap-4 mt-4">
                     <!-- SMS Payment Link Tab Content -->
@@ -292,9 +290,30 @@
                 <livewire:booking.invoice-small :booking="$booking" />
             </div>
 
-            <x-filament::button wire:click="cancelBooking" class="w-full opacity-50" color="gray">
+            <x-filament::button x-on:click="$dispatch('open-modal', { id: 'confirm-cancel-booking' })"
+                class="w-full opacity-50" color="gray">
                 Abandon Reservation
             </x-filament::button>
+
+            <x-filament::modal id="confirm-cancel-booking">
+                <x-slot name="heading">
+                    Confirm Cancellation
+                </x-slot>
+
+                <div class="text-gray-600">
+                    Are you sure you want to abandon this reservation? This action cannot be undone.
+                </div>
+
+                <x-slot name="footerActions">
+                    <x-filament::button x-on:click="close" color="gray">
+                        Cancel
+                    </x-filament::button>
+
+                    <x-filament::button wire:click="cancelBooking" color="danger" x-on:click="close">
+                        Yes, Abandon Reservation
+                    </x-filament::button>
+                </x-slot>
+            </x-filament::modal>
         @elseif($booking && $booking->status === BookingStatus::CONFIRMED)
             <div class="flex flex-col items-center gap-3" id="form">
                 <div class="text-xl font-semibold text-black divider divider-neutral">Reservation Confirmed</div>

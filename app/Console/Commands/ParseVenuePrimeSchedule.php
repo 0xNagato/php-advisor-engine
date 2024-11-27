@@ -232,6 +232,7 @@ class ParseVenuePrimeSchedule extends Command
                 'user_id' => $user->id,
                 'contact_phone' => $phone,
                 'primary_contact_name' => "$firstName $lastName",
+                'booking_fee' => 200,
                 'party_sizes' => [
                     'Special Request' => 0,
                     '2' => 2,

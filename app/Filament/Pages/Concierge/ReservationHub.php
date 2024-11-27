@@ -363,6 +363,16 @@ class ReservationHub extends Page
         $this->qrCode = null;
         $this->bookingUrl = null;
 
+        if (isPrimaApp()) {
+            $this->js("
+                if (window.ReactNativeWebView) {
+                    window.ReactNativeWebView.postMessage(JSON.stringify({
+                        type: 'abandonReservation'
+                    }));
+                }
+            ");
+        }
+
         if ($this->scheduleTemplateId && $this->date) {
             $this->redirect(AvailabilityCalendar::getUrl());
         }

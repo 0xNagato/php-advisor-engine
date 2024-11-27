@@ -4,9 +4,17 @@
     "details": [
       {
         "appID": "B9KA4PF37X.co.primavip.mobile",
-        "paths": ["*"]
+        "paths": [
+          "/platform/reservation-hub",
+          "/platform/*",
+          "NOT /platform/login",
+          "NOT /platform/password-reset",
+          "NOT /login",
+          "NOT /password-reset",
+          "NOT /platform/auth/*",
+          "NOT /auth/*"
+        ]
       }
-      // If you want to be more specific about which paths are handled by your app, you can adjust the "paths" array.
     ]
   },
   "webcredentials": {
