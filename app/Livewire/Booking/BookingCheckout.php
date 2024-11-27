@@ -31,6 +31,9 @@ class BookingCheckout extends Component implements HasMingles
     public function mount(Booking $booking): void
     {
         $this->booking = $booking;
+        if ($this->booking->vip_code_id) {
+            $this->booking->load('vipCode');
+        }
 
         if ($this->booking->clicked_at === null) {
             $this->booking->update(['clicked_at' => now()]);
@@ -82,7 +85,7 @@ class BookingCheckout extends Component implements HasMingles
                 'phone' => $this->booking->guest_phone ?? '',
                 'notes' => $this->booking->notes ?? '',
             ],
-            'is_vip' => (bool) $this->booking->vip_code_id && auth('vip_code')->check(),
+            'vipCode' => $this->booking->vipCode?->code,
             'allowedPaymentMethods' => ['card', 'link'],
             'totalWithTaxesInCents' => (int) $this->booking->total_with_tax_in_cents,
         ];

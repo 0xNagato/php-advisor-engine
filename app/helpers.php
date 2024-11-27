@@ -46,7 +46,7 @@ if (! function_exists('isPastCutoffTime')) {
             return false;
         }
 
-        $timezone = $timezone ?? Region::find($venue->region)->timezone;
+        $timezone ??= Region::query()->find($venue->region)->timezone;
 
         return now()->setTimezone($timezone)->format('H:i:s') > $venue->cutoff_time;
     }

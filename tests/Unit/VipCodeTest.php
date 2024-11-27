@@ -25,8 +25,9 @@ test('vip code returns code as auth password', function () {
 });
 
 test('vip code has correct link attribute', function () {
-    $vipCode = VipCode::factory()->create(['code' => 'abc123']);
-    $expectedLink = route('vip.login').'/abc123';
+    $newCode = 'abc123';
+    $vipCode = VipCode::factory()->create(['code' => $newCode]);
+    $expectedLink = route('v.booking', $newCode);
     expect($vipCode->link)->toBe($expectedLink);
 });
 

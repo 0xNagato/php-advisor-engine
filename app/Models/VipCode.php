@@ -42,7 +42,7 @@ class VipCode extends Authenticatable
 
     public function link(): Attribute
     {
-        return Attribute::make(get: fn () => route('vip.login').'/'.$this->code);
+        return Attribute::make(get: fn () => route('v.booking', $this->code));
     }
 
     /**
