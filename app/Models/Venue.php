@@ -75,6 +75,7 @@ class Venue extends Model
             'business_hours' => 'array',
             'party_sizes' => 'array',
             'status' => VenueStatus::class,
+            'cutoff_time' => 'datetime',
         ];
     }
 

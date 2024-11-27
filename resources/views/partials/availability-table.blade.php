@@ -35,7 +35,7 @@
                         <td
                             class="p-1 pr-2 {{ $loop->first ? 'hidden sm:table-cell' : '' }} {{ $loop->last ? 'hidden sm:table-cell' : '' }}">
                             <button
-                                @if ($schedule->is_bookable && $venue->status === VenueStatus::ACTIVE) wire:click="createBooking({{ $schedule->id }}, '{{ $schedule->booking_date->format('Y-m-d') }}')" @else x-on:click="$dispatch('open-modal', { id: 'pending-venue-{{ $venue->id }}' })" @endif
+                                @if ($schedule->is_bookable && $venue->status === VenueStatus::ACTIVE) wire:click="createBooking({{ $schedule->id }}, '{{ $schedule->booking_date->format('Y-m-d') }}')" @elseif ($venue->status === VenueStatus::PENDING) x-on:click="$dispatch('open-modal', { id: 'pending-venue-{{ $venue->id }}' })" @elseif (isPastCutoffTime($venue)) x-on:click="$dispatch('open-modal', { id: 'cutoff-venue-{{ $venue->id }}' })" @endif
                                 @class([
                                     'text-sm font-semibold rounded p-1 w-full mx-1 flex flex-col gap-y-[1px] justify-center items-center h-12',
                                     'bg-green-600 text-white cursor-pointer hover:bg-green-500' =>
@@ -79,7 +79,7 @@
                                     <p class="text-xs uppercase text-nowrap">
                                         @if (!$schedule->is_bookable)
                                             @if (isPastCutoffTime($venue))
-                                                N/A
+                                                --
                                             @elseif ($schedule->is_available && $schedule->remaining_tables === 0)
                                                 Sold Out
                                             @else
@@ -117,6 +117,31 @@
 
             <x-slot name="footerActions">
                 <x-filament::button x-on:click="$dispatch('close-modal', { id: 'pending-venue-{{ $venue->id }}' })">
+                    Close
+                </x-filament::button>
+            </x-slot>
+        </x-filament::modal>
+    @endif
+
+    @if ($venue->cutoff_time)
+        <x-filament::modal id="cutoff-venue-{{ $venue->id }}" width="md">
+            <x-slot name="heading">
+                {{ $venue->name }} - Booking Cutoff Time
+            </x-slot>
+
+            <p class="mt-2">
+                Online bookings for {{ $venue->name }} are available until {{ $venue->cutoff_time->format('g:i A') }}
+                daily.
+            </p>
+
+            <p class="mt-4">
+                If you require a last-minute reservation, please write to us at
+                <a href="mailto:prima@primavip.co" class="text-primary-600 hover:text-primary-500">prima@primavip.co</a>
+                and our team will assist.
+            </p>
+
+            <x-slot name="footerActions">
+                <x-filament::button x-on:click="$dispatch('close-modal', { id: 'cutoff-venue-{{ $venue->id }}' })">
                     Close
                 </x-filament::button>
             </x-slot>
