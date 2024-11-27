@@ -73,18 +73,22 @@
                                         </p>
                                     @endif
                                 @else
-                                    <p class="text-xs text-nowrap">
-                                        @if ($schedule->is_available && $schedule->remaining_tables === 0)
-                                            SOLD OUT
-                                        @else
-                                            CLOSED
-                                        @endif
+                                    <p class="text-xs uppercase text-nowrap">
+                                        @if (!$schedule->is_bookable)
+                                            @if ($venue->cutoff_time && $schedule->start_time > $venue->cutoff_time)
+                                                N/A
+                                            @elseif ($schedule->is_available && $schedule->remaining_tables === 0)
+                                                Sold Out
+                                            @else
+                                                Closed
+                                            @endif
                                     </p>
                                 @endif
-                            </button>
-                        </td>
-                    @endforeach
-                </tr>
+                    @endif
+                    </button>
+                    </td>
+            @endforeach
+            </tr>
             @endforeach
         </tbody>
     </table>
