@@ -1,4 +1,7 @@
-@php use App\Enums\VenueStatus; @endphp
+@php
+    use App\Enums\VenueStatus;
+    use App\Models\Region;
+@endphp
 <div class="relative -mx-4 -mt-4 bg-white border-t sm:mx-0 sm:mt-0">
     <table class="w-full table-auto">
         <thead class="text-xs uppercase">
@@ -75,20 +78,20 @@
                                 @else
                                     <p class="text-xs uppercase text-nowrap">
                                         @if (!$schedule->is_bookable)
-                                            @if ($venue->cutoff_time && $schedule->start_time > $venue->cutoff_time)
+                                            @if (isPastCutoffTime($venue))
                                                 N/A
                                             @elseif ($schedule->is_available && $schedule->remaining_tables === 0)
                                                 Sold Out
                                             @else
                                                 Closed
                                             @endif
+                                        @endif
                                     </p>
                                 @endif
-                    @endif
-                    </button>
-                    </td>
-            @endforeach
-            </tr>
+                            </button>
+                        </td>
+                    @endforeach
+                </tr>
             @endforeach
         </tbody>
     </table>
