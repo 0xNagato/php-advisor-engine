@@ -23,24 +23,32 @@ class ManyChatService
         $this->client = new ManyChat;
     }
 
+    public function findSubscriberByUserId(int|string $userId): ?array
+    {
+        $response = $this->client->send(new FindSubscriberByCustomField(
+            fieldId: ManyChatCustomField::USER_ID->getId(),
+            fieldValue: $userId
+        ));
+
+        if ($response->successful()) {
+            return $response->json('data.0');
+        }
+
+        return null;
+    }
+
     public function syncUser(User $user): bool
     {
         try {
-            $response = $this->client->send(new FindSubscriberByCustomField(
-                fieldId: ManyChatCustomField::USER_ID->getId(),
-                fieldValue: $user->id
-            ));
+            $subscriber = $this->findSubscriberByUserId($user->id);
 
-            if ($response->successful()) {
-                $subscriber = $response->json('data.0');
-                $subscriberId = $subscriber['id'] ?? null;
-
-                return $subscriberId ?
-                    $this->updateSubscriber($subscriberId, $user, $subscriber) :
-                    $this->createSubscriber($user);
+            if ($subscriber && ($subscriber['status'] ?? null) === 'deleted') {
+                $subscriber = null;
             }
 
-            return false;
+            return $subscriber
+                ? $this->updateSubscriber($subscriber['id'], $user, $subscriber)
+                : $this->createSubscriber($user);
         } catch (Exception $e) {
             Log::error('ManyChat sync error', [
                 'user' => $user->id,
