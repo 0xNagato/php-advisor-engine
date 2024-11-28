@@ -80,6 +80,8 @@ Route::get('/venues/contact-bookings', VenueContactRecentBookings::class)
 
 Route::post('/exception-form', ExceptionFormController::class)->name('exception.form');
 
+Route::get('v/{code}', AvailabilityCalendar::class)->name('v.booking');
+
 Route::group(['prefix' => 'vip', 'as' => 'vip.'], function () {
     Route::get('login/{code?}', Login::class)->name('login');
     Route::group(['middleware' => 'vip'], function () {

@@ -43,7 +43,7 @@ interface MingleData {
     phone: string;
     notes: string;
   };
-  is_vip?: boolean;
+  vipCode?: string;
   totalWithTaxesInCents: number;
 }
 
@@ -348,8 +348,8 @@ const emailInvoice = async () => {
           {{ isLoading ? 'Processing...' : 'Complete Reservation' }}
         </button>
         <a
-          v-if="mingleData.is_vip"
-          href="/vip/booking"
+          v-if="mingleData.vipCode"
+          :href="`/v/${mingleData.vipCode}`"
           class="mt-4 block w-full rounded bg-gray-700 px-4 py-2 text-center font-semibold text-white hover:bg-gray-800"
         >
           Return to Availability Calendar

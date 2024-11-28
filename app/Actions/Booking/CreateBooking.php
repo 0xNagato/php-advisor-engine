@@ -132,6 +132,6 @@ class CreateBooking
         }
 
         // Default: Regular concierge
-        return Auth::user()?->concierge?->id;
+        return Auth::user()?->concierge?->id ?? config('app.house.concierge_id');
     }
 }
