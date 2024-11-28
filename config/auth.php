@@ -1,7 +1,6 @@
 <?php
 
 use App\Models\User;
-use App\Models\VipCode;
 
 return [
 
@@ -43,10 +42,6 @@ return [
             'driver' => 'session',
             'provider' => 'users',
         ],
-        'vip_code' => [
-            'driver' => 'session',
-            'provider' => 'vip_codes',
-        ],
     ],
 
     /*
@@ -70,11 +65,6 @@ return [
         'users' => [
             'driver' => 'eloquent',
             'model' => User::class,
-        ],
-
-        'vip_codes' => [
-            'driver' => 'vip_code',
-            'model' => VipCode::class,
         ],
 
         // 'users' => [

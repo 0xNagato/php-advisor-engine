@@ -4,7 +4,6 @@ use App\Http\Controllers\Booking\BookingCheckoutController;
 use App\Http\Controllers\DemoAuthController;
 use App\Http\Controllers\DownloadInvoiceController;
 use App\Http\Controllers\ExceptionFormController;
-use App\Http\Controllers\Vip\LogoutController;
 use App\Livewire\Booking\CreateBooking;
 use App\Livewire\Booking\CustomerInvoice;
 use App\Livewire\Concierge\ConciergeInvitation;
@@ -14,7 +13,6 @@ use App\Livewire\Venue\VenueContactRecentBookings;
 use App\Livewire\Venue\VenueSpecialRequestConfirmation;
 use App\Livewire\VenueOnboarding;
 use App\Livewire\Vip\AvailabilityCalendar;
-use App\Livewire\Vip\Login;
 use AshAllenDesign\ShortURL\Controllers\ShortURLController;
 
 Route::get('/privacy', function () {
@@ -80,14 +78,8 @@ Route::get('/venues/contact-bookings', VenueContactRecentBookings::class)
 
 Route::post('/exception-form', ExceptionFormController::class)->name('exception.form');
 
-Route::get('v/{code}', AvailabilityCalendar::class)->name('v.booking');
+Route::get('vip/login/{code?}', fn ($code = null) => redirect($code ? "/v/{$code}" : '/'))->name('vip.login');
 
-Route::group(['prefix' => 'vip', 'as' => 'vip.'], function () {
-    Route::get('login/{code?}', Login::class)->name('login');
-    Route::group(['middleware' => 'vip'], function () {
-        Route::get('booking', AvailabilityCalendar::class)->name('booking');
-        Route::get('logout', LogoutController::class)->name('logout');
-    });
-});
+Route::get('v/{code}', AvailabilityCalendar::class)->name('v.booking');
 
 require __DIR__.'/auth.php';

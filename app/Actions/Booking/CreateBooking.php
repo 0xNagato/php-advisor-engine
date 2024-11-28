@@ -7,6 +7,7 @@ use App\Enums\BookingStatus;
 use App\Events\BookingCreated;
 use App\Models\Booking;
 use App\Models\ScheduleTemplate;
+use App\Models\VipCode;
 use App\Services\SalesTaxService;
 use AshAllenDesign\ShortURL\Facades\ShortURL;
 use chillerlan\QRCode\QRCode;
@@ -33,7 +34,7 @@ class CreateBooking
         array $data,
         string $timezone,
         string $currency,
-        bool $isVip = false
+        ?VipCode $vipCode = null
     ): CreateBookingReturnData {
         $scheduleTemplate = ScheduleTemplate::query()->findOrFail($scheduleTemplateId);
 
@@ -52,8 +53,7 @@ class CreateBooking
             new RuntimeException('Booking cannot be created more than '.self::MAX_DAYS_IN_ADVANCE.' days in advance.')
         );
 
-        $conciergeId = $this->getConciergeId($isVip);
-        $vipCodeId = Auth::guard('vip_code')->user()?->id;
+        $conciergeId = $this->getConciergeId($vipCode);
 
         $booking = Booking::query()->create([
             'schedule_template_id' => $scheduleTemplate?->id,
@@ -63,7 +63,7 @@ class CreateBooking
             'booking_at' => $bookingAt,
             'currency' => $currency,
             'is_prime' => $scheduleTemplate?->prime_time,
-            'vip_code_id' => $vipCodeId,
+            'vip_code_id' => $vipCode?->id,
         ]);
 
         $taxData = app(SalesTaxService::class)->calculateTax(
@@ -119,11 +119,11 @@ class CreateBooking
         ]);
     }
 
-    private function getConciergeId($isVip)
+    private function getConciergeId(?VipCode $vipCode = null)
     {
         // First priority: VIP check
-        if ($isVip) {
-            return Auth::guard('vip_code')->user()->concierge_id;
+        if ($vipCode) {
+            return $vipCode->concierge_id;
         }
 
         // Second priority: Partner check

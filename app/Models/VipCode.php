@@ -7,31 +7,16 @@ use App\Services\CurrencyConversionService;
 use Illuminate\Contracts\Database\Query\Builder;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasManyThrough;
-use Illuminate\Foundation\Auth\User as Authenticatable;
 
-class VipCode extends Authenticatable
+class VipCode extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['code', 'concierge_id'];
-
-    public function getAuthIdentifierName(): string
-    {
-        return 'id';
-    }
-
-    public function getAuthIdentifier(): mixed
-    {
-        return $this->getKey();
-    }
-
-    public function getAuthPassword(): string
-    {
-        return $this->code;
-    }
+    protected $fillable = ['code', 'concierge_id', 'is_active'];
 
     protected function casts(): array
     {
@@ -43,6 +28,11 @@ class VipCode extends Authenticatable
     public function link(): Attribute
     {
         return Attribute::make(get: fn () => route('v.booking', $this->code));
+    }
+
+    public function scopeActive($query)
+    {
+        return $query->where('is_active', true);
     }
 
     /**

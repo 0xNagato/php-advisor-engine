@@ -6,14 +6,13 @@ use App\Actions\Booking\CreateBooking;
 use App\Models\Region;
 use App\Models\Venue;
 use App\Services\ReservationService;
-use App\Services\VipAuthenticationService;
+use App\Services\VipCodeService;
 use App\Traits\ManagesBookingForms;
 use Exception;
 use Filament\Forms\Form;
 use Filament\Notifications\Notification;
 use Filament\Pages\Page;
 use Illuminate\Database\Eloquent\Collection;
-use Illuminate\Support\Facades\Auth;
 
 /**
  * @property Form $form
@@ -21,8 +20,6 @@ use Illuminate\Support\Facades\Auth;
 class AvailabilityCalendar extends Page
 {
     use ManagesBookingForms;
-
-    private VipAuthenticationService $authService;
 
     protected static string $layout = 'components.layouts.app';
 
@@ -45,22 +42,17 @@ class AvailabilityCalendar extends Page
 
     public string $code = '';
 
-    public function boot(VipAuthenticationService $authService): void
-    {
-        $this->authService = $authService;
-    }
-
     public function mount(): void
     {
-        if (! Auth::guard('vip_code')->check() && blank($this->code)) {
-            $this->redirect(route('vip.login'));
+        if (blank($this->code)) {
+            $this->redirect('/');
         }
 
-        if (filled($this->code)) {
-            $this->validateCode();
+        if (! $vipCode = app(VipCodeService::class)->findByCode($this->code)) {
+            $this->redirect('/');
         }
 
-        $region_id = Auth::guard('vip_code')->user()->concierge->user->region ?? config('app.default_region');
+        $region_id = $vipCode->concierge->user->region ?? config('app.default_region');
 
         $this->region = Region::query()->find($region_id);
         $this->timezone = $this->region->timezone;
@@ -94,13 +86,14 @@ class AvailabilityCalendar extends Page
         $data = $this->form->getState();
         $data['date'] = $date ?? $data['date'];
 
+        $vipCode = app(VipCodeService::class)->findByCode($this->code);
         try {
             $result = CreateBooking::run(
                 scheduleTemplateId: $scheduleTemplateId,
                 data: $data,
                 timezone: $this->region->timezone,
                 currency: $this->region->currency,
-                isVip: true);
+                vipCode: $vipCode);
             $this->redirect($result->bookingVipUrl);
         } catch (Exception $e) {
             Notification::make()
@@ -125,26 +118,5 @@ class AvailabilityCalendar extends Page
             $this->venues = $reservation->getAvailableVenues();
             $this->timeslotHeaders = $reservation->getTimeslotHeaders();
         }
-    }
-
-    public function validateCode(): void
-    {
-        $vipCode = $this->authService->authenticate($this->code);
-        if ($vipCode) {
-            $this->handleSuccessfulAuthentication($vipCode);
-        } else {
-            $this->handleFailedAuthentication();
-        }
-    }
-
-    private function handleSuccessfulAuthentication($vipCode): void
-    {
-        $this->authService->login($vipCode);
-    }
-
-    private function handleFailedAuthentication(): void
-    {
-        $this->addError('code', 'The provided code is incorrect.');
-        $this->redirectRoute('vip.login');
     }
 }

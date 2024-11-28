@@ -6,22 +6,7 @@ use Illuminate\Database\QueryException;
 
 test('vip code has fillable attributes', function () {
     $vipCode = new VipCode;
-    expect($vipCode->getFillable())->toBe(['code', 'concierge_id']);
-});
-
-test('vip code uses id as auth identifier name', function () {
-    $vipCode = new VipCode;
-    expect($vipCode->getAuthIdentifierName())->toBe('id');
-});
-
-test('vip code returns correct auth identifier', function () {
-    $vipCode = VipCode::factory()->create();
-    expect($vipCode->getAuthIdentifier())->toBe($vipCode->id);
-});
-
-test('vip code returns code as auth password', function () {
-    $vipCode = VipCode::factory()->create(['code' => 'test123']);
-    expect($vipCode->getAuthPassword())->toBe('test123');
+    expect($vipCode->getFillable())->toBe(['code', 'concierge_id', 'is_active']);
 });
 
 test('vip code has correct link attribute', function () {
