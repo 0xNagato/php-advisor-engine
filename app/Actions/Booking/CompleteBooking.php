@@ -19,12 +19,17 @@ class CompleteBooking
     public function handle(Booking $booking, string $paymentIntentId, array $formData): array
     {
         try {
-            $stripe = new StripeClient(config('services.stripe.secret'));
-            $paymentIntent = $stripe->paymentIntents->retrieve($paymentIntentId, ['expand' => ['latest_charge']]);
+            $stripeCharge = null;
 
-            throw_if($paymentIntent->status !== 'succeeded', new Exception('Payment not successful'));
+            // Only process Stripe payment for prime bookings with payment intent
+            if ($booking->prime_time && $paymentIntentId) {
+                $stripe = new StripeClient(config('services.stripe.secret'));
+                $paymentIntent = $stripe->paymentIntents->retrieve($paymentIntentId, ['expand' => ['latest_charge']]);
 
-            $stripeCharge = $paymentIntent->latest_charge;
+                throw_if($paymentIntent->status !== 'succeeded', new Exception('Payment not successful'));
+
+                $stripeCharge = $paymentIntent->latest_charge;
+            }
 
             $formattedPhone = $this->getInternationalFormattedPhoneNumber($formData['phone']);
 
@@ -35,9 +40,9 @@ class CompleteBooking
                 'guest_phone' => $formattedPhone,
                 'guest_email' => $formData['email'],
                 'status' => BookingStatus::CONFIRMED,
-                'stripe_payment_intent_id' => $paymentIntentId,
-                'stripe_charge_id' => $stripeCharge->id,
-                'stripe_charge' => $stripeCharge->toArray(),
+                'stripe_payment_intent_id' => $paymentIntentId ?: null,
+                'stripe_charge_id' => $stripeCharge?->id,
+                'stripe_charge' => $stripeCharge?->toArray(),
                 'confirmed_at' => now(),
                 'notes' => $formData['notes'] ?? null,
             ]);
