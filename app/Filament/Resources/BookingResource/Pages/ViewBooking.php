@@ -6,6 +6,7 @@
 
 namespace App\Filament\Resources\BookingResource\Pages;
 
+use App\Actions\Booking\RefundBooking;
 use App\Enums\BookingStatus;
 use App\Filament\Resources\BookingResource;
 use App\Models\Booking;
@@ -45,7 +46,7 @@ class ViewBooking extends ViewRecord
         $this->record = Booking::with('earnings.user')
             ->firstWhere('id', $record);
 
-        abort_if(! in_array($this->record->status, [BookingStatus::CONFIRMED, BookingStatus::NO_SHOW], true), 404);
+        abort_if(! in_array($this->record->status, [BookingStatus::CONFIRMED, BookingStatus::NO_SHOW, BookingStatus::REFUNDED], true), 404);
 
         if (auth()->user()->hasActiveRole('super_admin') || auth()->user()->hasActiveRole('partner') || auth()->user()->hasActiveRole('concierge')) {
             $this->showConcierges = true;
@@ -63,6 +64,17 @@ class ViewBooking extends ViewRecord
     public function resendInvoice(): void
     {
         $this->booking->notify(new CustomerBookingConfirmed);
+
+        activity()
+            ->performedOn($this->record)
+            ->withProperties([
+                'guest_name' => $this->record->guest_name,
+                'guest_phone' => $this->record->guest_phone,
+                'guest_email' => $this->record->guest_email,
+                'amount' => $this->record->total_with_tax_in_cents,
+                'currency' => $this->record->currency,
+            ])
+            ->log('Invoice resent to customer');
 
         Notification::make()
             ->title('Customer Invoice Resent')
@@ -113,12 +125,13 @@ class ViewBooking extends ViewRecord
             ))
             ->modalSubmitActionLabel('Delete')
             ->modalCancelActionLabel('Cancel')
+            ->hidden(fn () => auth()->id() !== 1)
             ->action(fn () => $this->deleteBooking());
     }
 
     private function deleteBooking(): void
     {
-        if (! auth()->user()->hasActiveRole('super_admin')) {
+        if (auth()->id() !== 1) {
             Notification::make()
                 ->danger()
                 ->title('Unauthorized')
@@ -138,6 +151,18 @@ class ViewBooking extends ViewRecord
             return;
         }
 
+        activity()
+            ->performedOn($this->record)
+            ->withProperties([
+                'guest_name' => $this->record->guest_name,
+                'venue_name' => $this->record->venue->name,
+                'booking_time' => $this->record->booking_at->format('M d, Y h:i A'),
+                'guest_count' => $this->record->guest_count,
+                'amount' => $this->record->total_with_tax_in_cents,
+                'currency' => $this->record->currency,
+            ])
+            ->log('Booking deleted');
+
         $this->record->delete();
 
         Notification::make()
@@ -152,6 +177,99 @@ class ViewBooking extends ViewRecord
         } else {
             // If no valid previous URL, redirect to the bookings index
             $this->redirect(BookingResource::getUrl());
+        }
+    }
+
+    public function refundBookingAction(): Action
+    {
+        return Action::make('refundBooking')
+            ->label('Process Refund')
+            ->color('danger')
+            ->icon('gmdi-money')
+            ->form([
+                \Filament\Forms\Components\Select::make('stripe_reason')
+                    ->label('Stripe Reason')
+                    ->required()
+                    ->options([
+                        'duplicate' => 'Duplicate Charge',
+                        'fraudulent' => 'Fraudulent',
+                        'requested_by_customer' => 'Requested by Customer',
+                    ])
+                    ->placeholder('Select a reason for Stripe'),
+                \Filament\Forms\Components\Textarea::make('refund_reason')
+                    ->label('Internal Notes')
+                    ->required()
+                    ->placeholder('Please provide detailed internal notes about this refund')
+                    ->maxLength(255),
+            ])
+            ->requiresConfirmation()
+            ->modalIcon('heroicon-o-exclamation-triangle')
+            ->modalIconColor('danger')
+            ->modalHeading('Process Refund')
+            ->modalDescription(fn () => new HtmlString(
+                'Are you sure you want to process a refund for this booking?<br><br>'.
+                "<div class='text-sm'>".
+                "<p class='p-1 mb-2 text-xs font-semibold text-red-600 bg-red-100 border border-red-300 rounded-md'>This action will be logged and cannot be undone.</p>".
+                "<p class='text-lg font-semibold'>{$this->record->guest_name}</p>".
+                '<p><strong>Amount to be refunded:</strong> '.money($this->record->total_with_tax_in_cents, $this->record->currency).'</p>'.
+                '</div>'
+            ))
+            ->modalSubmitActionLabel('Refund')
+            ->modalCancelActionLabel('Cancel')
+            ->disabled(fn () => $this->record->status === BookingStatus::REFUNDED)
+            ->extraAttributes(['class' => 'w-full'])
+            ->action(function (array $data) {
+                $this->processRefund($data['stripe_reason'], $data['refund_reason']);
+            });
+    }
+
+    private function processRefund(string $stripeReason, string $internalReason): void
+    {
+        if (! auth()->user()->hasActiveRole('super_admin')) {
+            Notification::make()
+                ->danger()
+                ->title('Unauthorized')
+                ->body('You do not have permission to process refunds.')
+                ->send();
+
+            return;
+        }
+
+        $result = RefundBooking::run($this->record, $stripeReason);
+
+        if ($result['success']) {
+            // Update the booking with our internal reason
+            $this->record->update([
+                'refund_reason' => $internalReason,
+            ]);
+
+            activity()
+                ->performedOn($this->record)
+                ->withProperties([
+                    'guest_name' => $this->record->guest_name,
+                    'venue_name' => $this->record->venue->name,
+                    'booking_time' => $this->record->booking_at->format('M d, Y h:i A'),
+                    'amount_refunded' => $this->record->total_with_tax_in_cents,
+                    'currency' => $this->record->currency,
+                    'refund_id' => $result['refund_id'] ?? null,
+                    'stripe_reason' => $stripeReason,
+                    'internal_reason' => $internalReason,
+                ])
+                ->log('Booking refunded');
+
+            Notification::make()
+                ->success()
+                ->title('Refund Processed')
+                ->body('The refund has been successfully processed.')
+                ->send();
+
+            $this->redirect($this->getResource()::getUrl('index'));
+        } else {
+            Notification::make()
+                ->danger()
+                ->title('Refund Failed')
+                ->body($result['message'])
+                ->send();
         }
     }
 }

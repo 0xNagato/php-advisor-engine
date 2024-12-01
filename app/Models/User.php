@@ -40,6 +40,8 @@ class User extends Authenticatable implements FilamentUser, HasAvatar
     use HasRoles;
     use Notifiable;
 
+    protected $with = ['activeProfile'];
+
     // Attributes
     protected $fillable = [
         'first_name', 'last_name', 'email', 'password', 'phone', 'profile_photo_path',
@@ -168,7 +170,9 @@ class User extends Authenticatable implements FilamentUser, HasAvatar
      */
     public function activeProfile(): HasOne
     {
-        return $this->hasOne(RoleProfile::class)->where('is_active', true);
+        return $this->hasOne(RoleProfile::class)
+            ->where('is_active', true)
+            ->with('role');
     }
 
     // Filament-related methods

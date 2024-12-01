@@ -1,4 +1,5 @@
 @php
+    use App\Enums\BookingStatus;
     use App\Filament\Resources\ConciergeResource;
     use App\Filament\Resources\PartnerResource;
     use App\Filament\Resources\VenueResource;
@@ -134,6 +135,37 @@
                     </span>
                 </div>
 
+                @if ($booking->status === BookingStatus::REFUNDED)
+                    <div>
+                        <span class="block text-xs text-gray-500 uppercase">Status:</span>
+                        <span class="block text-xs font-medium text-gray-800 sm:text-sm dark:text-gray-200">
+                            {{ $booking->status->label() }}
+                        </span>
+                    </div>
+
+                    <div>
+                        <span class="block text-xs text-gray-500 uppercase">Refund Reason:</span>
+                        <span class="block text-xs font-medium text-gray-800 sm:text-sm dark:text-gray-200">
+                            {{ \Illuminate\Support\Str::title(str_replace('_', ' ', $booking->refund_data['reason'])) }}
+                        </span>
+                    </div>
+
+                    @if (auth()->check() && auth()->user()->hasActiveRole('super_admin'))
+                        <div>
+                            <span class="block text-xs text-gray-500 uppercase">Internal Notes:</span>
+                            <span class="block text-xs font-medium text-gray-800 sm:text-sm dark:text-gray-200">
+                                {{ $booking->refund_reason }}
+                            </span>
+                        </div>
+                    @endif
+                @else
+                    <div>
+                        <span class="block text-xs text-gray-500 uppercase">Status:</span>
+                        <span class="block text-xs font-medium text-gray-800 sm:text-sm dark:text-gray-200">
+                            {{ $booking->status->label() }}
+                        </span>
+                    </div>
+                @endif
             </div>
             <!-- End Grid -->
 
@@ -282,9 +314,9 @@
                     </div>
                 </div>
             @endif
-            {{-- @if (auth()->check() && auth()->user()->hasActiveRole('super_admin'))
-                <x-filament::actions :actions="[$this->resendInvoiceAction, $this->deleteBookingAction]" class="w-full mt-4" />
-            @endif --}}
+            @if (auth()->check() && auth()->user()->hasActiveRole('super_admin'))
+                <x-filament::actions :actions="[$this->resendInvoiceAction, $this->refundBookingAction, $this->deleteBookingAction]" class="w-full mt-4" />
+            @endif
         </div>
         <!-- End Body -->
     </div>

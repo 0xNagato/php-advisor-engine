@@ -62,6 +62,8 @@ class BookingCheckout extends Component implements HasMingles
             'payment_method_types' => ['card', 'link'],
         ]);
 
+        // $this->booking->update(['stripe_payment_intent_id' => $paymentIntent->id]);
+
         return $paymentIntent->client_secret;
     }
 

@@ -23,6 +23,17 @@ class ManyChatService
         $this->client = new ManyChat;
     }
 
+    private function logActivity(User $user, string $action, array $properties): void
+    {
+        activity()
+            ->performedOn($user)
+            ->withProperties(array_merge([
+                'action' => $action,
+                'user_id' => $user->id,
+            ], $properties))
+            ->log("ManyChat {$action}");
+    }
+
     public function findSubscriberByUserId(int|string $userId): ?array
     {
         $response = $this->client->send(new FindSubscriberByCustomField(
@@ -30,11 +41,7 @@ class ManyChatService
             fieldValue: $userId
         ));
 
-        if ($response->successful()) {
-            return $response->json('data.0');
-        }
-
-        return null;
+        return $response->successful() ? $response->json('data.0') : null;
     }
 
     public function syncUser(User $user): bool
@@ -69,6 +76,12 @@ class ManyChatService
                 phone: $user->phone,
                 whatsappPhone: $user->phone,
             ));
+
+            $this->logActivity($user, 'create_subscriber', [
+                'status' => $response->status(),
+                'subscriber_id' => $response->json('data.id'),
+                'response' => $response->json(),
+            ]);
 
             if ($response->successful()) {
                 $subscriberId = $response->json('data.id');
@@ -115,6 +128,19 @@ class ManyChatService
                 email: ($subscriber['email'] ?? null) !== $user->email ? $user->email : null,
                 phone: ($subscriber['phone'] ?? null) !== $user->phone ? $user->phone : null,
             ));
+
+            $this->logActivity($user, 'update_subscriber', [
+                'status' => $infoResponse->status(),
+                'subscriber_id' => $subscriberId,
+                'previous_data' => [
+                    'first_name' => $subscriber['first_name'],
+                    'last_name' => $subscriber['last_name'],
+                    'email' => $subscriber['email'] ?? null,
+                    'phone' => $subscriber['phone'] ?? null,
+                    'whatsapp_phone' => $subscriber['whatsapp_phone'] ?? null,
+                ],
+                'response' => $infoResponse->json(),
+            ]);
 
             $tags = $this->buildTagsForUser($user);
             $success = true;

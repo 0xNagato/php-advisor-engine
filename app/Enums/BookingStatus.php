@@ -10,5 +10,20 @@ enum BookingStatus: string
     case CONFIRMED = 'confirmed';
     case COMPLETED = 'completed';
 
+    case REFUNDED = 'refunded';
+
     case NO_SHOW = 'no_show';
+
+    public function label(): string
+    {
+        return match ($this) {
+            self::PENDING => 'Pending',
+            self::GUEST_ON_PAGE => 'Guest on Page',
+            self::CANCELLED => 'Cancelled',
+            self::CONFIRMED => 'Confirmed',
+            self::COMPLETED => 'Completed',
+            self::REFUNDED => 'Refunded',
+            self::NO_SHOW => 'No Show',
+        };
+    }
 }

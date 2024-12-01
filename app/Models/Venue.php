@@ -19,12 +19,14 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use RuntimeException;
+use Spatie\Activitylog\LogOptions;
+use Spatie\Activitylog\Traits\LogsActivity;
 use Spatie\LaravelData\DataCollection;
 use Throwable;
 
 class Venue extends Model
 {
-    use HasEarnings, HasFactory;
+    use HasEarnings, HasFactory, LogsActivity;
 
     public const int DEFAULT_TABLES = 10;
 
@@ -288,13 +290,38 @@ class Venue extends Model
         throw_if(! $partner || ! $partner->user,
             new RuntimeException('Invalid partner ID or associated user not found.'));
 
+        $oldPartnerId = $this->user->partner_referral_id;
         $newUserId = $partner->user_id;
 
-        DB::transaction(function () use ($newPartnerId, $newUserId) {
+        DB::transaction(function () use ($newPartnerId, $newUserId, $oldPartnerId) {
             $this->user->update(['partner_referral_id' => $newPartnerId]);
 
             Referral::query()->where('user_id', $this->user_id)
                 ->update(['referrer_id' => $newUserId]);
+
+            // Log the partner change explicitly
+            activity()
+                ->performedOn($this)
+                ->withProperties([
+                    'action' => 'change_partner',
+                    'previous_partner_id' => $oldPartnerId,
+                    'new_partner_id' => $newPartnerId,
+                ])
+                ->log('Venue partner changed');
         });
+    }
+
+    public function getActivitylogOptions(): LogOptions
+    {
+        return LogOptions::defaults()
+            ->logOnly(['status'])  // Remove user.partner_referral_id since we'll handle it separately
+            ->setDescriptionForEvent(fn (string $eventName) => match ($eventName) {
+                'updated' => $this->wasChanged('status')
+                    ? 'Venue status changed'
+                    : 'Venue updated',
+                default => "Venue {$eventName}"
+            })
+            ->logOnlyDirty()
+            ->dontSubmitEmptyLogs();
     }
 }

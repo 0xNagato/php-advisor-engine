@@ -94,6 +94,9 @@ class ReservationHub extends Page
 
         if ($this->booking !== null) {
             $this->booking = Booking::with('schedule.venue')->find($this->booking->id);
+            if ($this->booking->status === BookingStatus::REFUNDED) {
+                $this->resetBooking();
+            }
         }
 
         $this->form->fill();

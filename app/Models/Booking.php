@@ -60,6 +60,10 @@ class Booking extends Model
         'total_fee',
         'total_with_tax_in_cents',
         'vip_code_id',
+        'stripe_payment_intent_id',
+        'refunded_at',
+        'refund_data',
+        'refund_reason',
     ];
 
     protected $appends = ['guest_name', 'local_formatted_guest_phone'];
@@ -239,6 +243,8 @@ class Booking extends Model
             'clicked_at' => 'datetime',
             'venue_confirmed_at' => 'datetime',
             'resent_venue_confirmation_at' => 'datetime',
+            'refunded_at' => 'datetime',
+            'refund_data' => 'array',
         ];
     }
 }
