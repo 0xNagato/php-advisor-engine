@@ -72,12 +72,16 @@ class AdminTopReferrersTable extends BaseWidget
                     ->size('xs')
                     ->label('Referrer')
                     ->formatStateUsing(fn (User $record) => $record->first_name.' '.$record->last_name)
-                    ->url(function (User $record): string {
+                    ->url(function (User $record): ?string {
                         if ($record->concierge) {
                             return ConciergeResource::getUrl('view', ['record' => $record->concierge]);
                         }
 
-                        return PartnerResource::getUrl('view', ['record' => $record->partner]);
+                        if ($record->partner) {
+                            return PartnerResource::getUrl('view', ['record' => $record->partner]);
+                        }
+
+                        return null;
                     }),
                 TextColumn::make('total_referrals')
                     ->size('xs')
