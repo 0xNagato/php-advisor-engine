@@ -15,6 +15,8 @@ use App\Notifications\Booking\CustomerBookingConfirmed;
 use App\Traits\FormatsPhoneNumber;
 use Carbon\Carbon;
 use Filament\Actions\Action;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\Textarea;
 use Filament\Forms\Get;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\ViewRecord;
@@ -193,7 +195,7 @@ class ViewBooking extends ViewRecord
             ->color('danger')
             ->icon('gmdi-money')
             ->form([
-                \Filament\Forms\Components\Select::make('refund_type')
+                Select::make('refund_type')
                     ->label('Refund Type')
                     ->required()
                     ->options([
@@ -206,7 +208,7 @@ class ViewBooking extends ViewRecord
                     })
                     ->default('full'),
 
-                \Filament\Forms\Components\Select::make('guest_count')
+                Select::make('guest_count')
                     ->label('Number of Guests to Refund')
                     ->options(function () {
                         $guestCount = $this->record->guest_count;
@@ -222,7 +224,7 @@ class ViewBooking extends ViewRecord
                         $this->refundAmount = $this->calculateRefundAmount($get('refund_type'), $state);
                     }),
 
-                \Filament\Forms\Components\Select::make('stripe_reason')
+                Select::make('stripe_reason')
                     ->label('Stripe Reason')
                     ->required()
                     ->options([
@@ -232,7 +234,7 @@ class ViewBooking extends ViewRecord
                     ])
                     ->placeholder('Select a reason for Stripe'),
 
-                \Filament\Forms\Components\Textarea::make('refund_reason')
+                Textarea::make('refund_reason')
                     ->label('Internal Notes')
                     ->required()
                     ->placeholder('Please provide detailed internal notes about this refund')

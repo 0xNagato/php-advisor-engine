@@ -248,9 +248,9 @@ class Booking extends Model
         ];
     }
 
-    public function getFinalTotalAttribute(): int
+    protected function finalTotal(): Attribute
     {
-        return $this->total_fee - $this->total_refunded;
+        return Attribute::make(get: fn () => $this->total_fee - $this->total_refunded);
     }
 
     protected static function booted()

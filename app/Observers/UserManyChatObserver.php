@@ -19,7 +19,7 @@ class UserManyChatObserver
     public function updated(User $user): void
     {
         if ($this->shouldSync($user) &&
-            ($user->isDirty(['phone', 'first_name', 'last_name', 'email', 'region']) || $user->roles()->isDirty())
+            ($user->isDirty(['phone', 'first_name', 'last_name', 'email', 'region']) || $user->roles()->count() !== $user->getOriginal('roles_count'))
         ) {
             $this->manyChatService->syncUser($user);
         }
@@ -31,6 +31,6 @@ class UserManyChatObserver
             return false;
         }
 
-        return $user->roles()->exists();
+        return $user->relationLoaded('roles') ? $user->roles->isNotEmpty() : $user->roles()->exists();
     }
 }
