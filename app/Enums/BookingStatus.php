@@ -14,6 +14,8 @@ enum BookingStatus: string
 
     case NO_SHOW = 'no_show';
 
+    case PARTIALLY_REFUNDED = 'partially_refunded';
+
     public function label(): string
     {
         return match ($this) {
@@ -24,6 +26,7 @@ enum BookingStatus: string
             self::COMPLETED => 'Completed',
             self::REFUNDED => 'Refunded',
             self::NO_SHOW => 'No Show',
+            self::PARTIALLY_REFUNDED => 'Partially Refunded',
         };
     }
 }

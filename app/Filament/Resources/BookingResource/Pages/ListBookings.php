@@ -28,7 +28,11 @@ class ListBookings extends ListRecords
                 $query = $query
                     ->with('venue')
                     ->orderByDesc('created_at')
-                    ->whereIn('status', [BookingStatus::CONFIRMED, BookingStatus::REFUNDED]);
+                    ->whereIn('status', [
+                        BookingStatus::CONFIRMED,
+                        BookingStatus::REFUNDED,
+                        BookingStatus::PARTIALLY_REFUNDED,
+                    ]);
 
                 if (auth()->user()->hasActiveRole('concierge')) {
                     return $query->where('concierge_id', auth()->user()->concierge->id);
@@ -63,7 +67,10 @@ class ListBookings extends ListRecords
                     ->query(fn (Builder $query): Builder => $query->whereNotNull('vip_code_id')),
                 Filter::make('refunded')
                     ->label('Refunded')
-                    ->query(fn (Builder $query): Builder => $query->where('status', BookingStatus::REFUNDED)),
+                    ->query(fn (Builder $query): Builder => $query->whereIn('status', [
+                        BookingStatus::REFUNDED,
+                        BookingStatus::PARTIALLY_REFUNDED,
+                    ])),
             ])
             ->actions([
                 Action::make('resendNotification')

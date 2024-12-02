@@ -247,4 +247,16 @@ class Booking extends Model
             'refund_data' => 'array',
         ];
     }
+
+    public function getFinalTotalAttribute(): int
+    {
+        return $this->total_fee - $this->total_refunded;
+    }
+
+    protected static function booted()
+    {
+        static::creating(function ($booking) {
+            $booking->original_total = $booking->total_fee;
+        });
+    }
 }

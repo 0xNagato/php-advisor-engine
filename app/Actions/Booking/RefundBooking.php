@@ -13,7 +13,7 @@ class RefundBooking
 {
     use AsAction;
 
-    public function handle(Booking $booking, ?string $reason = null): array
+    public function handle(Booking $booking, ?string $reason = null, ?int $amount = null): array
     {
         try {
             if (! $booking->stripe_charge_id && ! $booking->stripe_payment_intent_id) {
@@ -22,19 +22,18 @@ class RefundBooking
 
             $stripe = new StripeClient(config('services.stripe.secret'));
 
-            // If we have a payment intent, refund through that
+            $refundParams = [
+                'reason' => $reason,
+                'amount' => $amount ?? $booking->total_with_tax_in_cents,
+            ];
+
             if ($booking->stripe_payment_intent_id) {
-                $refund = $stripe->refunds->create([
-                    'payment_intent' => $booking->stripe_payment_intent_id,
-                    'reason' => $reason,
-                ]);
+                $refundParams['payment_intent'] = $booking->stripe_payment_intent_id;
             } else {
-                // Legacy support for old charges
-                $refund = $stripe->refunds->create([
-                    'charge' => $booking->stripe_charge_id,
-                    'reason' => $reason,
-                ]);
+                $refundParams['charge'] = $booking->stripe_charge_id;
             }
+
+            $refund = $stripe->refunds->create($refundParams);
 
             $booking->update([
                 'status' => BookingStatus::REFUNDED,

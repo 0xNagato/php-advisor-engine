@@ -15,6 +15,7 @@ use App\Notifications\Booking\CustomerBookingConfirmed;
 use App\Traits\FormatsPhoneNumber;
 use Carbon\Carbon;
 use Filament\Actions\Action;
+use Filament\Forms\Get;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\ViewRecord;
 use Illuminate\Support\Facades\URL;
@@ -41,12 +42,19 @@ class ViewBooking extends ViewRecord
 
     public ?string $originalPreviousUrl = null;
 
+    public ?int $refundAmount = null;
+
     public function mount(string|int $record): void
     {
         $this->record = Booking::with('earnings.user')
             ->firstWhere('id', $record);
 
-        abort_if(! in_array($this->record->status, [BookingStatus::CONFIRMED, BookingStatus::NO_SHOW, BookingStatus::REFUNDED], true), 404);
+        abort_if(! in_array($this->record->status, [
+            BookingStatus::CONFIRMED,
+            BookingStatus::NO_SHOW,
+            BookingStatus::REFUNDED,
+            BookingStatus::PARTIALLY_REFUNDED,
+        ], true), 404);
 
         if (auth()->user()->hasActiveRole('super_admin') || auth()->user()->hasActiveRole('partner') || auth()->user()->hasActiveRole('concierge')) {
             $this->showConcierges = true;
@@ -59,6 +67,8 @@ class ViewBooking extends ViewRecord
 
         // Store the original previous URL
         $this->originalPreviousUrl = URL::previous();
+
+        $this->refundAmount = $this->record->total_with_tax_in_cents;
     }
 
     public function resendInvoice(): void
@@ -89,14 +99,10 @@ class ViewBooking extends ViewRecord
             ->color('indigo')
             ->icon('gmdi-message')
             ->requiresConfirmation()
-            ->modalDescription(function () {
-                $formattedNumber = $this->getFormattedPhoneNumber($this->record->guest_phone);
-
-                return new HtmlString(
-                    'Are you sure you want to resend the invoice?<br>'.
-                    "<span class='block mt-2 text-lg font-bold'>$formattedNumber</span>"
-                );
-            })
+            ->modalDescription(fn (Get $get) => new HtmlString(
+                'Are you sure you want to resend the invoice?<br>'.
+                "<span class='block mt-2 text-lg font-bold'>{$this->getFormattedPhoneNumber($this->record->guest_phone)}</span>"
+            ))
             ->extraAttributes(['class' => 'w-full'])
             ->action(fn () => $this->resendInvoice());
     }
@@ -112,7 +118,7 @@ class ViewBooking extends ViewRecord
             ->modalIconColor('danger')
             ->modalHeading('Delete Booking')
             ->extraAttributes(['class' => 'w-full'])
-            ->modalDescription(fn () => new HtmlString(
+            ->modalDescription(fn (Get $get) => new HtmlString(
                 'Are you certain you want to delete this booking? This action is irreversible.<br><br>'.
                 "<div class='text-sm'>".
                 "<p class='p-1 mb-2 text-xs font-semibold text-red-600 bg-red-100 border border-red-300 rounded-md'>This action will be logged and cannot be undone.</p>".
@@ -187,6 +193,35 @@ class ViewBooking extends ViewRecord
             ->color('danger')
             ->icon('gmdi-money')
             ->form([
+                \Filament\Forms\Components\Select::make('refund_type')
+                    ->label('Refund Type')
+                    ->required()
+                    ->options([
+                        'full' => 'Full Refund',
+                        'partial' => 'Partial Refund (By Guest Count)',
+                    ])
+                    ->live()
+                    ->afterStateUpdated(function ($state, $get) {
+                        $this->refundAmount = $this->calculateRefundAmount($state, $get('guest_count'));
+                    })
+                    ->default('full'),
+
+                \Filament\Forms\Components\Select::make('guest_count')
+                    ->label('Number of Guests to Refund')
+                    ->options(function () {
+                        $guestCount = $this->record->guest_count;
+
+                        return collect(range(1, $guestCount))
+                            ->mapWithKeys(fn ($count) => [$count => "{$count} Guest(s)"])
+                            ->toArray();
+                    })
+                    ->visible(fn (Get $get) => $get('refund_type') === 'partial')
+                    ->required(fn (Get $get) => $get('refund_type') === 'partial')
+                    ->live()
+                    ->afterStateUpdated(function ($state, $get) {
+                        $this->refundAmount = $this->calculateRefundAmount($get('refund_type'), $state);
+                    }),
+
                 \Filament\Forms\Components\Select::make('stripe_reason')
                     ->label('Stripe Reason')
                     ->required()
@@ -196,6 +231,7 @@ class ViewBooking extends ViewRecord
                         'requested_by_customer' => 'Requested by Customer',
                     ])
                     ->placeholder('Select a reason for Stripe'),
+
                 \Filament\Forms\Components\Textarea::make('refund_reason')
                     ->label('Internal Notes')
                     ->required()
@@ -211,7 +247,9 @@ class ViewBooking extends ViewRecord
                 "<div class='text-sm'>".
                 "<p class='p-1 mb-2 text-xs font-semibold text-red-600 bg-red-100 border border-red-300 rounded-md'>This action will be logged and cannot be undone.</p>".
                 "<p class='text-lg font-semibold'>{$this->record->guest_name}</p>".
-                '<p><strong>Amount to be refunded:</strong> '.money($this->record->total_with_tax_in_cents, $this->record->currency).'</p>'.
+                '<p><strong>Amount to be refunded:</strong> '.
+                money($this->refundAmount, $this->record->currency).
+                '</p>'.
                 '</div>'
             ))
             ->modalSubmitActionLabel('Refund')
@@ -219,11 +257,16 @@ class ViewBooking extends ViewRecord
             ->disabled(fn () => $this->record->status === BookingStatus::REFUNDED)
             ->extraAttributes(['class' => 'w-full'])
             ->action(function (array $data) {
-                $this->processRefund($data['stripe_reason'], $data['refund_reason']);
+                $this->processRefund(
+                    $data['stripe_reason'],
+                    $data['refund_reason'],
+                    $data['refund_type'],
+                    $data['guest_count'] ?? null
+                );
             });
     }
 
-    private function processRefund(string $stripeReason, string $internalReason): void
+    private function processRefund(string $stripeReason, string $internalReason, string $refundType, ?int $guestCount): void
     {
         if (! auth()->user()->hasActiveRole('super_admin')) {
             Notification::make()
@@ -235,12 +278,14 @@ class ViewBooking extends ViewRecord
             return;
         }
 
-        $result = RefundBooking::run($this->record, $stripeReason);
+        $refundAmount = $this->calculateRefundAmount($refundType, $guestCount);
+        $result = RefundBooking::run($this->record, $stripeReason, $refundAmount);
 
         if ($result['success']) {
-            // Update the booking with our internal reason
             $this->record->update([
                 'refund_reason' => $internalReason,
+                'refunded_guest_count' => $guestCount,
+                'status' => $refundType === 'full' ? BookingStatus::REFUNDED : BookingStatus::PARTIALLY_REFUNDED,
             ]);
 
             activity()
@@ -249,11 +294,13 @@ class ViewBooking extends ViewRecord
                     'guest_name' => $this->record->guest_name,
                     'venue_name' => $this->record->venue->name,
                     'booking_time' => $this->record->booking_at->format('M d, Y h:i A'),
-                    'amount_refunded' => $this->record->total_with_tax_in_cents,
+                    'amount_refunded' => $refundAmount,
                     'currency' => $this->record->currency,
                     'refund_id' => $result['refund_id'] ?? null,
                     'stripe_reason' => $stripeReason,
                     'internal_reason' => $internalReason,
+                    'refund_type' => $refundType,
+                    'refunded_guest_count' => $guestCount,
                 ])
                 ->log('Booking refunded');
 
@@ -271,5 +318,17 @@ class ViewBooking extends ViewRecord
                 ->body($result['message'])
                 ->send();
         }
+    }
+
+    private function calculateRefundAmount(string $refundType, ?int $guestCount): int
+    {
+        if ($refundType === 'full' || ! $guestCount || $guestCount === $this->record->guest_count) {
+            return $this->record->total_with_tax_in_cents;
+        }
+
+        // Calculate per guest amount and ensure we get exact division
+        $perGuestAmount = (int) ($this->record->total_with_tax_in_cents / $this->record->guest_count);
+
+        return $perGuestAmount * $guestCount;
     }
 }

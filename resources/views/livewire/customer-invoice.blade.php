@@ -135,11 +135,14 @@
                     </span>
                 </div>
 
-                @if ($booking->status === BookingStatus::REFUNDED)
+                @if ($booking->status === BookingStatus::REFUNDED || $booking->status === BookingStatus::PARTIALLY_REFUNDED)
                     <div>
                         <span class="block text-xs text-gray-500 uppercase">Status:</span>
                         <span class="block text-xs font-medium text-gray-800 sm:text-sm dark:text-gray-200">
                             {{ $booking->status->label() }}
+                            @if ($booking->status === BookingStatus::PARTIALLY_REFUNDED)
+                                ({{ money($booking->refund_data['amount'], $booking->currency) }} refunded)
+                            @endif
                         </span>
                     </div>
 
