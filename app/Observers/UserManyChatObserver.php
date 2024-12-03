@@ -19,7 +19,7 @@ class UserManyChatObserver
     public function updated(User $user): void
     {
         if ($this->shouldSync($user) &&
-            ($user->isDirty(['phone', 'first_name', 'last_name', 'email', 'region']) || $user->roles()->count() !== $user->getOriginal('roles_count'))
+            ($user->isDirty(['phone', 'first_name', 'last_name', 'email', 'region']) || $user->rolesChanged())
         ) {
             $this->manyChatService->syncUser($user);
         }

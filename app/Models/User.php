@@ -11,7 +11,6 @@ use BezhanSalleh\FilamentShield\Traits\HasPanelShield;
 use Filament\Models\Contracts\FilamentUser;
 use Filament\Models\Contracts\HasAvatar;
 use Filament\Panel;
-use Illuminate\Contracts\Database\Query\Builder;
 use Illuminate\Database\Eloquent\Casts\AsArrayObject;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Collection;
@@ -354,10 +353,20 @@ class User extends Authenticatable implements FilamentUser, HasAvatar
         return in_array($activeProfile->role->name, $roles, true);
     }
 
+    protected bool $rolesChanged = false;
+
+    public function rolesChanged(): bool
+    {
+        return $this->rolesChanged;
+    }
+
     protected static function booted()
     {
-        static::addGlobalScope('withRolesCount', function (Builder $builder) {
-            $builder->withCount('roles');
+        static::saved(function (User $user) {
+            // Check if roles relationship was modified
+            if ($user->relationLoaded('roles') && $user->roles()->count() !== ($user->getOriginal('roles_count') ?? 0)) {
+                $user->rolesChanged = true;
+            }
         });
     }
 }
