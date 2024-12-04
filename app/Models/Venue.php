@@ -28,7 +28,7 @@ class Venue extends Model
 {
     use HasEarnings, HasFactory, LogsActivity;
 
-    public const int DEFAULT_TABLES = 10;
+    public const int DEFAULT_TABLES = 0;
 
     public const int DEFAULT_START_HOUR = 11; // 11:00 AM
 
