@@ -20,6 +20,7 @@ export default {
     './resources/js/**/*.{vue,js,ts,jsx,tsx}',
   ],
   plugins: [
+    require('@tailwindcss/aspect-ratio'),
     plugin(function ({ addVariant }) {
       return addVariant('prima-native', ['&.prima-native', '.prima-native &']);
     }),

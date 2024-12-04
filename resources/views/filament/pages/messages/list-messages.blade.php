@@ -3,7 +3,7 @@
 @endphp
 
 <x-filament-panels::page>
-    <x-filament::section>
+    <x-filament::section class="text-xs sm:text-base">
         <x-slot name="heading">
             @if ($isDemo)
                 Welcome to the PRIMA Demo!
@@ -21,7 +21,8 @@
         </x-slot>
 
         @nonmobileapp
-            <div class="flex flex-col items-center p-3 mb-4 -m-2 text-sm border-2 border-indigo-600 rounded-lg bg-gray-50">
+            <div
+                class="flex flex-col items-center p-3 mb-4 -m-2 text-xs border-2 border-indigo-600 rounded-lg sm:text-base bg-gray-50">
                 <div class="flex items-center mb-3">
                     <img src="https://is1-ssl.mzstatic.com/image/thumb/Purple221/v4/2f/36/1f/2f361f98-4d81-10ab-66d6-66d207e66c6a/AppIcon-0-0-1x_U007epad-0-85-220.png/230x0w.webp"
                         class="w-12 h-12 mr-4 rounded-lg" alt="Apple App Store Logo">
@@ -87,6 +88,16 @@
                     if you have any questions.
                 </p>
             @endif
+        </div>
+
+        <div class="mt-6 text-center">
+            <p class="mb-2 text-xs font-medium sm:text-base">Watch this to learn how PRIMA works</p>
+            <div class="aspect-w-9 aspect-h-16 rounded-lg overflow-hidden">
+                <iframe src="https://player.getclipara.com/share/8426?autoplay=0" class="w-full h-full"
+                    allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    allowfullscreen>
+                </iframe>
+            </div>
         </div>
     </x-filament::section>
 

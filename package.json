@@ -37,6 +37,7 @@
         "vite": "^5.1.6"
     },
     "dependencies": {
+        "@tailwindcss/aspect-ratio": "^0.4.2",
         "@vitejs/plugin-vue": "^5.1.2",
         "dayjs": "^1.11.13",
         "intl-tel-input": "^24.3.6",

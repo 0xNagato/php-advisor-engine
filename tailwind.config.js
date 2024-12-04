@@ -25,6 +25,7 @@ export default {
   ],
 
   plugins: [
+    require('@tailwindcss/aspect-ratio'),
     plugin(function ({ addVariant }) {
       return addVariant('prima-native', ['&.prima-native', '.prima-native &']);
     }),

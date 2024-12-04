@@ -6,7 +6,9 @@
             {{ $record->venue->name }}
         </div>
 
-        @if ($record->venue_confirmed_at)
+        @if ($record->status === BookingStatus::REFUNDED || $record->status === BookingStatus::PARTIALLY_REFUNDED)
+            <x-heroicon-s-arrow-path-rounded-square class="h-4 w-4 -mt-0.5 text-red-600" />
+        @elseif ($record->venue_confirmed_at)
             <x-heroicon-s-check-circle class="h-4 w-4 -mt-0.5 text-green-600" />
         @else
             <x-heroicon-s-clock class="h-4 w-4 -mt-0.5 text-gray-400" />

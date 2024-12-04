@@ -131,7 +131,7 @@
                 <div>
                     <span class="block text-xs text-gray-500 uppercase">Date Paid:</span>
                     <span class="block text-xs font-medium text-gray-800 sm:text-sm dark:text-gray-200">
-                        {{ $booking->confirmed_at->format('M d, Y g:i A') }}
+                        {{ $booking->confirmed_at->setTimezone(auth()->user()->timezone)->format('M d, Y g:i A') }}
                     </span>
                 </div>
 
@@ -318,7 +318,12 @@
                 </div>
             @endif
             @if (auth()->check() && auth()->user()->hasActiveRole('super_admin'))
-                <x-filament::actions :actions="[$this->resendInvoiceAction, $this->refundBookingAction, $this->deleteBookingAction]" class="w-full mt-4" />
+                <x-filament::actions :actions="[
+                    $this->resendInvoiceAction,
+                    $this->refundBookingAction,
+                    $this->cancelBookingAction,
+                    $this->deleteBookingAction,
+                ]" class="w-full mt-4" />
             @endif
         </div>
         <!-- End Body -->

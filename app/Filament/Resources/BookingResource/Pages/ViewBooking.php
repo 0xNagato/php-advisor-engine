@@ -98,13 +98,15 @@ class ViewBooking extends ViewRecord
     {
         return Action::make('resendInvoice')
             ->label('Resend Customer Invoice')
-            ->color('indigo')
+            ->color('primary')
             ->icon('gmdi-message')
             ->requiresConfirmation()
             ->modalDescription(fn (Get $get) => new HtmlString(
                 'Are you sure you want to resend the invoice?<br>'.
                 "<span class='block mt-2 text-lg font-bold'>{$this->getFormattedPhoneNumber($this->record->guest_phone)}</span>"
             ))
+            ->button()
+            ->size('lg')
             ->extraAttributes(['class' => 'w-full'])
             ->action(fn () => $this->resendInvoice());
     }
@@ -119,6 +121,8 @@ class ViewBooking extends ViewRecord
             ->modalIcon('heroicon-o-exclamation-triangle')
             ->modalIconColor('danger')
             ->modalHeading('Delete Booking')
+            ->button()
+            ->size('lg')
             ->extraAttributes(['class' => 'w-full'])
             ->modalDescription(fn (Get $get) => new HtmlString(
                 'Are you certain you want to delete this booking? This action is irreversible.<br><br>'.
@@ -190,6 +194,10 @@ class ViewBooking extends ViewRecord
 
     public function refundBookingAction(): Action
     {
+        if (! $this->record->is_prime) {
+            return Action::make('refundBooking')->hidden();
+        }
+
         return Action::make('refundBooking')
             ->label('Process Refund')
             ->color('danger')
@@ -256,7 +264,7 @@ class ViewBooking extends ViewRecord
             ))
             ->modalSubmitActionLabel('Refund')
             ->modalCancelActionLabel('Cancel')
-            ->disabled(fn () => $this->record->status === BookingStatus::REFUNDED)
+            ->disabled(fn () => in_array($this->record->status, [BookingStatus::REFUNDED, BookingStatus::PARTIALLY_REFUNDED]))
             ->extraAttributes(['class' => 'w-full'])
             ->action(function (array $data) {
                 $this->processRefund(
@@ -332,5 +340,84 @@ class ViewBooking extends ViewRecord
         $perGuestAmount = (int) ($this->record->total_with_tax_in_cents / $this->record->guest_count);
 
         return $perGuestAmount * $guestCount;
+    }
+
+    public function cancelBookingAction(): Action
+    {
+        if ($this->record->is_prime) {
+            return Action::make('cancelBooking')->hidden();
+        }
+
+        $venueTimezone = $this->record->venue->inRegion->timezone;
+        $bookingTime = $this->record->booking_at->setTimezone($venueTimezone);
+        $currentTime = now()->setTimezone($venueTimezone);
+
+        $canCancel = $currentTime->lt($bookingTime);
+
+        return Action::make('cancelBooking')
+            ->label('Cancel Booking')
+            ->color('danger')
+            ->icon('heroicon-o-x-circle')
+            ->requiresConfirmation()
+            ->modalIcon('heroicon-o-exclamation-triangle')
+            ->modalIconColor('danger')
+            ->modalHeading('Cancel Booking')
+            ->modalDescription(fn () => new HtmlString(
+                'Are you sure you want to cancel this booking?<br><br>'.
+                "<div class='text-sm'>".
+                "<p class='p-1 mb-2 text-xs font-semibold text-red-600 bg-red-100 border border-red-300 rounded-md'>This action will be logged and cannot be undone.</p>".
+                "<p class='text-lg font-semibold'>{$this->record->guest_name}</p>".
+                "<p><strong>Venue:</strong> {$this->record->venue->name}</p>".
+                "<p><strong>Guest Count:</strong> {$this->record->guest_count}</p>".
+                "<p><strong>Booking Time:</strong> {$this->record->booking_at->format('M d, Y h:i A')}</p>".
+                '</div>'
+            ))
+            ->button()
+            ->size('lg')
+            ->extraAttributes(['class' => 'w-full'])
+            ->disabled(fn () => $this->record->status === BookingStatus::CANCELLED ||
+                ! $canCancel
+            )
+            ->action(function () {
+                $this->cancelNonPrimeBooking();
+            });
+    }
+
+    private function cancelNonPrimeBooking(): void
+    {
+        if ($this->record->is_prime) {
+            Notification::make()
+                ->danger()
+                ->title('Invalid Action')
+                ->body('Cannot cancel a prime booking. Please use refund instead.')
+                ->send();
+
+            return;
+        }
+
+        $this->record->update([
+            'status' => BookingStatus::CANCELLED,
+        ]);
+
+        // Delete any existing earnings
+        $this->record->earnings()->delete();
+
+        activity()
+            ->performedOn($this->record)
+            ->withProperties([
+                'guest_name' => $this->record->guest_name,
+                'venue_name' => $this->record->venue->name,
+                'booking_time' => $this->record->booking_at->format('M d, Y h:i A'),
+                'guest_count' => $this->record->guest_count,
+            ])
+            ->log('Non-prime booking cancelled');
+
+        Notification::make()
+            ->success()
+            ->title('Booking Cancelled')
+            ->body('The booking has been successfully cancelled.')
+            ->send();
+
+        $this->redirect($this->getResource()::getUrl('index'));
     }
 }

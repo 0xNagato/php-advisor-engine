@@ -23,9 +23,9 @@ class Kernel extends ConsoleKernel
          */
         if (config('app.url') === self::PRODUCTION_URL) {
             // Send daily concierge invitation reminders at noon EST
-            $schedule->command('app:send-concierge-invitation-reminders')
-                ->dailyAt('12:00')
-                ->timezone('America/New_York');
+            // $schedule->command('app:send-concierge-invitation-reminders')
+            //     ->dailyAt('12:00')
+            //     ->timezone('America/New_York');
 
             // Check every minute for bookings happening in 30 minutes and send reminders to venues if unconfirmed
             $schedule->command('app:send-venue-booking-reminder')
