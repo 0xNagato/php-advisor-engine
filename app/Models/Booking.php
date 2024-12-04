@@ -6,6 +6,7 @@ use App\Data\Stripe\StripeChargeData;
 use App\Enums\BookingStatus;
 use App\Services\Booking\BookingCalculationService;
 use App\Traits\FormatsPhoneNumber;
+use App\Traits\HasImmutableBookingProperties;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -20,6 +21,7 @@ class Booking extends Model
 {
     use FormatsPhoneNumber;
     use HasFactory;
+    use HasImmutableBookingProperties;
     use Notifiable;
 
     /**
@@ -74,6 +76,16 @@ class Booking extends Model
 
         static::creating(static function (Booking $booking) {
             $booking->uuid = Str::uuid();
+            $booking->total_fee = $booking->totalFee();
+
+            if ($booking->is_prime) {
+                $booking->venue_earnings =
+                    $booking->total_fee *
+                    ($booking->venue->payout_venue / 100);
+                $booking->concierge_earnings =
+                    $booking->total_fee *
+                    ($booking->concierge->payout_percentage / 100);
+            }
         });
 
         static::updated(static function (Booking $booking) {
@@ -91,19 +103,6 @@ class Booking extends Model
                 $booking->wasChanged('status')
             ) {
                 $booking->earnings()->delete();
-            }
-        });
-
-        static::saving(static function (Booking $booking) {
-            $booking->total_fee = $booking->totalFee();
-
-            if ($booking->is_prime) {
-                $booking->venue_earnings =
-                    $booking->total_fee *
-                    ($booking->venue->payout_venue / 100);
-                $booking->concierge_earnings =
-                    $booking->total_fee *
-                    ($booking->concierge->payout_percentage / 100);
             }
         });
 
