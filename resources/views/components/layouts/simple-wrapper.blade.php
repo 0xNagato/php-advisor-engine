@@ -2,6 +2,7 @@
     'wrapperClass' => '',
     'headerClass' => '',
     'contentClass' => 'max-w-lg',
+    'logoUrl' => false,
 ])
 
 {{-- This is a simple wrapper mainly used for none logged in users with the logo and copyright --}}
@@ -13,7 +14,11 @@
         'w-full text-xl font-bold leading-5 tracking-tight text-left text-gray-950',
         $headerClass,
     ])>
-        PRIMA
+        @if ($logoUrl)
+            <a href="{{ $logoUrl }}">PRIMA</a>
+        @else
+            PRIMA
+        @endif
     </div>
     <div @class([
         'flex flex-col items-center flex-grow mt-6 w-full mx-auto',

@@ -154,6 +154,7 @@ onMounted(async () => {
 });
 
 const agreeToText = ref(true);
+const agreeToArrival = ref(true);
 
 const handleSubmit = async (event: Event) => {
   event.preventDefault();
@@ -281,7 +282,9 @@ const emailInvoice = async () => {
       >
         Secure Your Reservation
       </h1>
-      <p class="mb-4 text-center">Enter Payment Information To Confirm.</p>
+      <p class="mb-4 text-center">
+        {{ mingleData.totalWithTaxesInCents > 0 ? 'Enter Payment Information To Confirm.' : 'Enter Contact Information To Confirm.' }}
+      </p>
       <p class="mb-4 text-xl font-semibold text-center">
         Time Remaining: {{ formattedTime }}
       </p>
@@ -354,6 +357,19 @@ const emailInvoice = async () => {
             />
             <span class="ml-2 text-sm text-gray-700">
               I agree to receive my reservation confirmation via text message.
+            </span>
+          </label>
+        </div>
+        <div class="mx-2 mt-2">
+          <label class="flex items-center">
+            <input
+              v-model="agreeToArrival"
+              type="checkbox"
+              required
+              class="text-indigo-600 rounded form-checkbox size-4"
+            />
+            <span class="ml-2 text-sm text-gray-700">
+              I am booking a real reservation and will arrive within 15 minutes of the reserved time.
             </span>
           </label>
         </div>

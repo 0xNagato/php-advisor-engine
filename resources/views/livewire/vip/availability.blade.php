@@ -6,7 +6,7 @@
     $stickyHeaderTopPosition = 'top-0';
 @endphp
 
-<x-layouts.simple-wrapper content-class="max-w-3xl">
+<x-layouts.simple-wrapper content-class="max-w-3xl" logo-url="{{ url('/') }}">
     <div class="w-full">
         {{ $this->form }}
     </div>
