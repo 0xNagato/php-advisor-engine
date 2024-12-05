@@ -4,6 +4,7 @@ namespace App\Filament\Pages\Concierge;
 
 use App\Actions\Booking\CreateBooking;
 use App\Enums\BookingStatus;
+use App\Enums\VenueStatus;
 use App\Events\BookingCancelled;
 use App\Models\Booking;
 use App\Models\Region;
@@ -131,6 +132,7 @@ class ReservationHub extends Page
                     ->prefixIcon('heroicon-m-building-storefront')
                     ->options(
                         fn () => Venue::available()
+                            ->where('status', VenueStatus::ACTIVE)
                             ->where('region', session('region', 'miami'))
                             ->pluck('name', 'id')
                     )

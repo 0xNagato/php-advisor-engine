@@ -6,6 +6,7 @@ use App\Actions\Booking\CreateBooking;
 use App\Actions\Region\GetUserRegion;
 use App\Data\Booking\CreateBookingReturnData;
 use App\Enums\BookingStatus;
+use App\Enums\VenueStatus;
 use App\Events\BookingCancelled;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Api\BookingCreateRequest;
@@ -13,9 +14,11 @@ use App\Http\Requests\Api\BookingUpdateRequest;
 use App\Http\Resources\BookingResource;
 use App\Models\Booking;
 use App\Models\Region;
+use App\Models\Venue;
 use App\Notifications\Booking\SendCustomerBookingPaymentForm;
 use App\Services\BookingService;
 use Exception;
+use Illuminate\Contracts\Database\Query\Builder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Response;
 use Stripe\Exception\ApiErrorException;
@@ -25,6 +28,28 @@ class BookingController extends Controller
     public function store(BookingCreateRequest $request): JsonResponse|Response
     {
         $validatedData = $request->validated();
+
+        // Get the venue from the schedule template ID
+        $venue = Venue::query()
+            ->whereHas('scheduleTemplates', function (Builder $query) use ($validatedData) {
+                $query->where('id', $validatedData['schedule_template_id']);
+            })
+            ->first();
+
+        if (! $venue || $venue->status !== VenueStatus::ACTIVE) {
+            activity()
+                ->withProperties([
+                    'venue_id' => $venue?->id,
+                    'venue_status' => $venue?->status,
+                    'concierge_id' => auth()->user()?->concierge?->id,
+                    'concierge_name' => auth()->user()?->name,
+                ])
+                ->log('Booking creation failed - Venue not active');
+
+            return response()->json([
+                'message' => 'Venue is not currently accepting bookings',
+            ], 422);
+        }
 
         /** @var Region $region */
         $region = GetUserRegion::run();
@@ -37,7 +62,28 @@ class BookingController extends Controller
                 $region->timezone,
                 $region->currency
             );
-        } catch (Exception) {
+
+            activity()
+                ->performedOn($booking->booking)
+                ->withProperties([
+                    'venue_id' => $venue->id,
+                    'venue_name' => $venue->name,
+                    'concierge_id' => auth()->user()?->concierge?->id,
+                    'concierge_name' => auth()->user()?->name,
+                ])
+                ->log('Booking created successfully');
+
+        } catch (Exception $e) {
+            activity()
+                ->withProperties([
+                    'venue_id' => $venue->id,
+                    'venue_name' => $venue->name,
+                    'concierge_id' => auth()->user()?->concierge?->id,
+                    'concierge_name' => auth()->user()?->name,
+                    'error' => $e->getMessage(),
+                ])
+                ->log('Booking creation failed - Exception');
+
             return response()->json([
                 'message' => 'Booking failed',
             ], 404);
@@ -65,9 +111,34 @@ class BookingController extends Controller
         $validatedData = $request->validated();
 
         if ($booking->status !== BookingStatus::PENDING) {
+            activity()
+                ->performedOn($booking)
+                ->withProperties([
+                    'booking_status' => $booking->status,
+                    'concierge_id' => auth()->user()?->concierge?->id,
+                    'concierge_name' => auth()->user()?->name,
+                ])
+                ->log('Booking update failed - Invalid status');
+
             return response()->json([
                 'message' => 'Booking already confirmed or cancelled',
             ], 404);
+        }
+
+        if (! $booking->venue || $booking->venue->status !== VenueStatus::ACTIVE) {
+            activity()
+                ->performedOn($booking)
+                ->withProperties([
+                    'venue_id' => $booking->venue?->id,
+                    'venue_status' => $booking->venue?->status,
+                    'concierge_id' => auth()->user()?->concierge?->id,
+                    'concierge_name' => auth()->user()?->name,
+                ])
+                ->log('Booking update failed - Venue not active');
+
+            return response()->json([
+                'message' => 'Venue is not currently accepting bookings',
+            ], 422);
         }
 
         if (! $booking->is_prime) {
@@ -81,6 +152,16 @@ class BookingController extends Controller
             'guest_email' => $validatedData['email'],
             'notes' => $validatedData['notes'],
         ]);
+
+        activity()
+            ->performedOn($booking)
+            ->withProperties([
+                'venue_id' => $booking->venue?->id,
+                'venue_name' => $booking->venue?->name,
+                'concierge_id' => auth()->user()?->concierge?->id,
+                'concierge_name' => auth()->user()?->name,
+            ])
+            ->log('Booking updated successfully');
 
         $booking->notify(new SendCustomerBookingPaymentForm(url: $validatedData['bookingUrl']));
 
@@ -129,6 +210,16 @@ class BookingController extends Controller
         app(BookingService::class)->processBooking($booking, $validatedData);
 
         $booking->update(['concierge_referral_type' => 'app']);
+
+        activity()
+            ->performedOn($booking)
+            ->withProperties([
+                'venue_id' => $booking->venue?->id,
+                'venue_name' => $booking->venue?->name,
+                'concierge_id' => auth()->user()?->concierge?->id,
+                'concierge_name' => auth()->user()?->name,
+            ])
+            ->log('Non-prime booking created successfully');
 
         return response()->json([
             'message' => 'Booking created successfully',

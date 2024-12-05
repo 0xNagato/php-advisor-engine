@@ -90,15 +90,15 @@
             @endif
         </div>
 
-        <div class="mt-6 text-center">
+        {{-- <div class="mt-6 text-center">
             <p class="mb-2 text-xs font-medium sm:text-base">Watch this to learn how PRIMA works</p>
-            <div class="aspect-w-9 aspect-h-16 rounded-lg overflow-hidden">
+            <div class="overflow-hidden rounded-lg aspect-w-9 aspect-h-16">
                 <iframe src="https://player.getclipara.com/share/8426?autoplay=0" class="w-full h-full"
                     allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                     allowfullscreen>
                 </iframe>
             </div>
-        </div>
+        </div> --}}
     </x-filament::section>
 
     @if ($messages->isNotEmpty())
