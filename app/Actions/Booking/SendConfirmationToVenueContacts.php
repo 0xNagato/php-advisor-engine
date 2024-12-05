@@ -28,7 +28,7 @@ class SendConfirmationToVenueContacts extends Action
         /** @var Collection<VenueContactData> $contacts */
         $contacts = $booking->venue->contacts ?? collect();
 
-        $url = route('venues.confirm', ['token' => $booking->uuid]);
+        $url = route('venues.confirm', ['booking' => $booking]);
         $confirmationUrl = ShortURL::destinationUrl($url)->make()->default_short_url;
 
         foreach ($contacts as $contact) {

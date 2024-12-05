@@ -17,25 +17,20 @@ class VenueBookingConfirmation extends Page
 {
     public Booking $booking;
 
+    public bool $showUndoButton = false;
+
     protected static string $layout = 'components.layouts.app';
 
     protected static string $view = 'livewire.venue-booking-confirmation';
 
-    public function mount(string $token): void
+    public function mount(Booking $booking): void
     {
-        $this->booking = Booking::with('venue')->where('uuid', $token)->firstOrFail();
+        $this->booking = $booking;
+        $this->showUndoButton = $this->booking->venue_confirmed_at !== null &&
+            $this->booking->venue_confirmed_at->isAfter(now()->subHour());
     }
 
-    public function confirmBookingAction(): Action
-    {
-        return Action::make('confirmBooking')
-            ->label('Confirm Booking')
-            ->color(Color::Green)
-            ->requiresConfirmation()
-            ->action(fn () => $this->confirmBooking());
-    }
-
-    private function confirmBooking(): void
+    public function confirmBooking(): void
     {
         if ($this->booking->venue_confirmed_at === null) {
             Log::info('Venue confirmed booking', [
@@ -43,6 +38,7 @@ class VenueBookingConfirmation extends Page
                 'booking' => $this->booking->id,
             ]);
             $this->booking->update(['venue_confirmed_at' => now()]);
+            $this->showUndoButton = true;
         }
 
         Notification::make()
@@ -51,27 +47,31 @@ class VenueBookingConfirmation extends Page
             ->send();
     }
 
+    public function undoConfirmationAction(): Action
+    {
+        return Action::make('undoConfirmation')
+            ->label('Undo Confirmation')
+            ->color(Color::Gray)
+            ->requiresConfirmation()
+            ->modalHeading('Undo Booking Confirmation')
+            ->modalDescription('Are you sure you want to undo this booking confirmation? The guest will be notified of this change.')
+            ->modalSubmitActionLabel('Yes, undo confirmation')
+            ->modalCancelActionLabel('No, keep confirmation')
+            ->action(fn () => $this->undoConfirmation());
+    }
+
+    private function undoConfirmation(): void
+    {
+        $this->booking->update(['venue_confirmed_at' => null]);
+        $this->showUndoButton = false;
+
+        Notification::make()
+            ->title('Booking confirmation has been undone')
+            ->success()
+            ->send();
+    }
+
     /**
-     * @throws Exception
-     */
-    /**
-     * Determines if the current time is past the allowable booking confirmation time,
-     * which is one hour after the booking time. This method uses the session timezone
-     * to ensure consistent time comparisons.
-     *
-     * Problems Encountered:
-     * 1. **Carbon Timezone Handling**:
-     *    - Initial attempts using Carbon resulted in incorrect time comparisons.
-     *    — The issue was likely due to implicit timezone handling in Carbon, where the
-     *      `booking_at` time was not always correctly interpreted in the intended timezone.
-     *
-     * 2. **Explicit Timezone Conversion**:
-     *    - Switching to PHP's native `DateTime` and `DateTimeZone` classes provided more
-     *      explicit control over timezone conversions, ensuring that both the booking time,
-     *      and the current time were correctly interpreted and compared.
-     *
-     * @return bool True if the current time is past the booking time plus one hour, false otherwise.
-     *
      * @throws Exception
      */
     #[Computed]
@@ -83,5 +83,54 @@ class VenueBookingConfirmation extends Page
         $currentTime = new DateTime('now', new DateTimeZone($timezone));
 
         return $currentTime > $bookingTimePlusOneHour;
+    }
+
+    #[Computed]
+    public function bookingDetails(): array
+    {
+        if ($this->booking->is_prime) {
+            $totalFee = $this->booking->total_fee;
+            $venueEarnings = $totalFee * 0.60; // 60% as per the agreement
+
+            return [
+                'type' => 'prime',
+                'totalFee' => $totalFee,
+                'venueEarnings' => $venueEarnings,
+            ];
+        }
+
+        $perDinerFee = $this->booking->venue->non_prime_fee_per_head;
+        $totalFee = $perDinerFee * $this->booking->guest_count;
+
+        return [
+            'type' => 'non-prime',
+            'perDinerFee' => $perDinerFee,
+            'totalFee' => $totalFee,
+        ];
+    }
+
+    public function confirmBookingAction(): Action
+    {
+        return Action::make('confirmBooking')
+            ->label('Are You Sure You Want to Confirm?')
+            ->color('success')
+            ->button()
+            ->size('lg')
+            ->extraAttributes(['class' => 'w-full'])
+            ->action(function () {
+                if ($this->booking->venue_confirmed_at === null) {
+                    Log::info('Venue confirmed booking', [
+                        'name' => $this->booking->venue->name,
+                        'booking' => $this->booking->id,
+                    ]);
+                    $this->booking->update(['venue_confirmed_at' => now()]);
+                    $this->showUndoButton = true;
+                }
+
+                Notification::make()
+                    ->title('Thank you for confirming the booking')
+                    ->success()
+                    ->send();
+            });
     }
 }

@@ -53,7 +53,7 @@ Route::get('/invoice/download/{uuid}', DownloadInvoiceController::class)
 
 Route::get('/invoice/{token}', CustomerInvoice::class)->name('customer.invoice');
 
-Route::get('/venues/confirm/{token}', VenueBookingConfirmation::class)
+Route::get('/venues/confirm/{booking:uuid}', VenueBookingConfirmation::class)
     ->name('venues.confirm');
 
 Route::get('/venues/confirm/special-request/{token}', VenueSpecialRequestConfirmation::class)
