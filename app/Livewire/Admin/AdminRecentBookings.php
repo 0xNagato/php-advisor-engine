@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Admin;
 
+use App\Enums\BookingStatus;
 use App\Models\Booking;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
@@ -43,6 +44,7 @@ class AdminRecentBookings extends BaseWidget
             ->join('schedule_templates', 'bookings.schedule_template_id', '=', 'schedule_templates.id')
             ->join('venues', 'schedule_templates.venue_id', '=', 'venues.id')
             ->whereNotNull('bookings.confirmed_at')
+            ->whereIn('bookings.status', [BookingStatus::CONFIRMED, BookingStatus::REFUNDED, BookingStatus::PARTIALLY_REFUNDED])
             ->whereBetween('bookings.created_at', [$startDate, $endDate])
             ->orderByDesc('bookings.created_at')
             ->limit(10);

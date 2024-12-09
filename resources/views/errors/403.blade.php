@@ -33,6 +33,14 @@
                                     ->get();
                             @endphp
 
+                            <script>
+                                window.ReactNativeWebView?.postMessage(JSON.stringify({
+                                    type: 'CURRENT_ROLE',
+                                    roleId: {{ $activeProfile?->id ?? 'null' }},
+                                    roleName: '{{ $activeProfile?->role?->name ?? '' }}'
+                                }));
+                            </script>
+
                             <p class="mt-2 text-base font-semibold text-black">
                                 You do not have permission to access this page.
                             </p>
@@ -53,7 +61,12 @@
 
                                 <div class="mt-6 space-y-3">
                                     @foreach ($profiles as $profile)
-                                        <form action="{{ route('role.switch', $profile->id) }}" method="POST">
+                                        <form action="{{ route('role.switch', $profile->id) }}" method="POST"
+                                            onsubmit="setTimeout(() => window.ReactNativeWebView?.postMessage(JSON.stringify({
+                                                  type: 'ROLE_SWITCHED',
+                                                  roleId: {{ $profile->id }},
+                                                  roleName: '{{ $profile->role->name }}'
+                                              })), 100)">
                                             @csrf
                                             <button type="submit"
                                                 class="w-full px-4 py-2 text-sm font-medium text-gray-700 transition bg-white border border-gray-300 rounded-lg shadow-sm hover:bg-gray-50">
