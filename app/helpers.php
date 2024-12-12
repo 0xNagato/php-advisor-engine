@@ -22,6 +22,13 @@ if (! function_exists('isPrimaApp')) {
     }
 }
 
+if (! function_exists('isAndroid')) {
+    function isAndroid(): bool
+    {
+        return str_contains(request()->header('sec-ch-ua-platform'), 'Android');
+    }
+}
+
 if (! function_exists('moneyWithoutCents')) {
     function moneyWithoutCents($amount, $currency): string
     {

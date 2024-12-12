@@ -25,31 +25,41 @@ class DateRangeFilterWidget extends Widget
 
     public string $endDate = '';
 
+    public array $ranges = [];
+
+    public function mount(): void
+    {
+        $this->ranges = [
+            'past_30_days' => [
+                'start' => now()->subDays(30)->toDateString(),
+                'end' => now()->toDateString(),
+            ],
+            'past_week' => [
+                'start' => now()->subDays(6)->toDateString(),
+                'end' => now()->toDateString(),
+            ],
+            'month' => [
+                'start' => now()->startOfMonth()->toDateString(),
+                'end' => now()->endOfMonth()->toDateString(),
+            ],
+            'quarter' => [
+                'start' => now()->startOfQuarter()->toDateString(),
+                'end' => now()->endOfQuarter()->toDateString(),
+            ],
+            'year' => [
+                'start' => now()->startOfYear()->toDateString(),
+                'end' => now()->endOfYear()->toDateString(),
+            ],
+        ];
+    }
+
     public function setDateRange(string $range): void
     {
         $this->range = $range;
-
-        switch ($range) {
-            case 'past_30_days':
-                $this->startDate = now()->subDays(30)->toDateString();
-                $this->endDate = now()->toDateString();
-                break;
-            case 'past_week':
-                $this->startDate = now()->subDays(6)->toDateString();
-                $this->endDate = now()->toDateString();
-                break;
-            case 'month':
-                $this->startDate = now()->startOfMonth()->toDateString();
-                $this->endDate = now()->endOfMonth()->toDateString();
-                break;
-            case 'quarter':
-                $this->startDate = now()->startOfQuarter()->toDateString();
-                $this->endDate = now()->endOfQuarter()->toDateString();
-                break;
-            case 'year':
-                $this->startDate = now()->startOfYear()->toDateString();
-                $this->endDate = now()->endOfYear()->toDateString();
-                break;
+        if (isset($this->ranges[$range])) {
+            $this->range = $range;
+            $this->startDate = $this->ranges[$range]['start'];
+            $this->endDate = $this->ranges[$range]['end'];
         }
 
         $this->dispatch('dateRangeUpdated', startDate: $this->startDate, endDate: $this->endDate);
