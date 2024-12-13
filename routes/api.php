@@ -9,6 +9,7 @@ use App\Http\Controllers\Api\RegionController;
 use App\Http\Controllers\Api\ReservationHubController;
 use App\Http\Controllers\Api\RoleProfileController;
 use App\Http\Controllers\Api\TimeslotController;
+use App\Http\Controllers\Api\UpdatePushTokenController;
 use App\Http\Controllers\Api\VenueController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -31,6 +32,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/profiles', [RoleProfileController::class, 'index']);
     Route::post('/profiles/{profile}/switch', [RoleProfileController::class, 'switch']);
     Route::get('/me', MeController::class);
+    Route::post('/update-push-token', UpdatePushTokenController::class);
 });
 
 Route::get('/app-config', AppConfigController::class)->name('app-config');

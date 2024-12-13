@@ -17,7 +17,7 @@ class BookingCreateRequest extends FormRequest
                 'required',
                 'date_format:Y-m-d',
                 function ($attribute, $value, $fail) {
-                    $scheduleTemplate = ScheduleTemplate::find($this->input('schedule_template_id'));
+                    $scheduleTemplate = ScheduleTemplate::query()->find($this->input('schedule_template_id'));
                     $timezone = $scheduleTemplate?->venue?->inRegion?->timezone ?? config('app.timezone');
 
                     $date = Carbon::createFromFormat('Y-m-d', $value, $timezone);
