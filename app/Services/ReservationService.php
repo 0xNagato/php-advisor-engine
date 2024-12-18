@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Actions\Region\GetUserRegion;
+use App\Enums\VenueStatus;
 use App\Models\Region;
 use App\Models\ScheduleWithBooking;
 use App\Models\Venue;
@@ -93,15 +94,23 @@ class ReservationService
             }
         });
 
-        return $venues->sortByDesc(function ($venue) {
-            $availableSlots = $venue->schedules->filter(fn ($schedule) => $schedule->is_available && $schedule->remaining_tables > 0)->count();
+        return $venues
+            // First sort: Active venues by availability and name
+            ->sortBy([
+                // Primary sort: ACTIVE venues with slots first, ACTIVE but closed second, PENDING last
+                fn ($venue) => match (true) {
+                    $venue->status === VenueStatus::PENDING => 2,                                                 // SOON venues absolute last
+                    $venue->status === VenueStatus::ACTIVE && $venue->schedules->every(fn ($s) => ! $s->is_bookable) => 1,  // All slots CLOSED
+                    default => 0                                                                                  // Active venues with available slots first
+                },
 
-            return match ($venue->status->value) {
-                'active' => 1000000 + $availableSlots,
-                'pending' => $availableSlots,
-                default => 0,
-            };
-        })->values();
+                // Secondary sort: by number of available slots (most first)
+                fn ($venue) => -$venue->schedules->filter(fn ($s) => $s->is_bookable)->count(),
+
+                // Third sort: alphabetical by venue name (A-Z)
+                fn ($venue) => strtolower($venue->name),
+            ])
+            ->values();
     }
 
     /**
