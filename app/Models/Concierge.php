@@ -43,10 +43,10 @@ class Concierge extends Model
     {
         return Attribute::make(get: function () {
             $sales = $this->sales_this_month;
-            if ($sales >= 0 && $sales <= 20) {
+            if ($sales >= 0 && $sales <= 10) {
                 return 10;
             }
-            if ($sales >= 21 && $sales <= 50) {
+            if ($sales >= 11 && $sales <= 20) {
                 return 12;
             }
 
