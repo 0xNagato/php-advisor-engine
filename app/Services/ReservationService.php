@@ -93,14 +93,19 @@ class ReservationService
             }
         });
 
-        return $venues->sortByDesc(function ($venue) {
+        return $venues->sortBy(function ($venue) {
             $availableSlots = $venue->schedules->filter(fn ($schedule) => $schedule->is_available && $schedule->remaining_tables > 0)->count();
 
-            return match ($venue->status->value) {
-                'active' => 1000000 + $availableSlots,
-                'pending' => $availableSlots,
-                default => 0,
+            // Create a score that prioritizes available slots first
+            // We use negative availableSlots so more slots = lower number = higher in list
+            $statusScore = match ($venue->status->value) {
+                'active' => 0,           // Active venues get priority within same slot count
+                'pending' => 1000000,    // Pending venues come after active
+                default => 2000000,      // Others come last
             };
+
+            // Combine scores: -availableSlots ensures more slots = higher position
+            return sprintf('%020d|%020d|%s', -$availableSlots, $statusScore, strtolower($venue->name));
         })->values();
     }
 
