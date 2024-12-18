@@ -6,6 +6,8 @@
 
 namespace App\Filament\Resources\BookingResource\Pages;
 
+use App\Actions\Booking\ConvertToNonPrime;
+use App\Actions\Booking\ConvertToPrime;
 use App\Actions\Booking\RefundBooking;
 use App\Enums\BookingStatus;
 use App\Filament\Resources\BookingResource;
@@ -264,7 +266,8 @@ class ViewBooking extends ViewRecord
             ))
             ->modalSubmitActionLabel('Refund')
             ->modalCancelActionLabel('Cancel')
-            ->disabled(fn () => in_array($this->record->status, [BookingStatus::REFUNDED, BookingStatus::PARTIALLY_REFUNDED]))
+            ->disabled(fn () => in_array($this->record->status,
+                [BookingStatus::REFUNDED, BookingStatus::PARTIALLY_REFUNDED]))
             ->extraAttributes(['class' => 'w-full'])
             ->action(function (array $data) {
                 $this->processRefund(
@@ -276,8 +279,12 @@ class ViewBooking extends ViewRecord
             });
     }
 
-    private function processRefund(string $stripeReason, string $internalReason, string $refundType, ?int $guestCount): void
-    {
+    private function processRefund(
+        string $stripeReason,
+        string $internalReason,
+        string $refundType,
+        ?int $guestCount
+    ): void {
         if (! auth()->user()->hasActiveRole('super_admin')) {
             Notification::make()
                 ->danger()
@@ -419,5 +426,77 @@ class ViewBooking extends ViewRecord
             ->send();
 
         $this->redirect($this->getResource()::getUrl('index'));
+    }
+
+    public function convertToNonPrimeBookingAction(): Action
+    {
+        if (! $this->record->is_prime || auth()->id() !== 1
+            || $this->record->created_at->lt(Carbon::now()->subHours(24))) {
+            return Action::make('convertToNonPrimeBooking')->hidden();
+        }
+
+        return Action::make('convertToNonPrimeBooking')
+            ->label('Convert to Non Prime')
+            ->color('warning')->icon('gmdi-money-off-csred-o')
+            ->requiresConfirmation()
+            ->modalDescription(fn (Get $get) => new HtmlString(
+                'Are you sure you want to convert this booking?<br>'.
+                "<div class='text-sm'>".
+                "<p class='p-1 mb-2 text-xs font-semibold text-red-600 bg-red-100 border border-red-300 rounded-md'>This action will be logged and cannot be undone.</p>".
+                "<p class='text-lg font-semibold'>{$this->record->guest_name}</p>".
+                "<p><strong>Venue:</strong> {$this->record->venue->name}</p>".
+                "<p><strong>Guest Count:</strong> {$this->record->guest_count}</p>".
+                '<p><strong>Fee:</strong> '.money($this->record->total_fee, $this->record->currency).'</p>'.
+                "<p><strong>Booking Time:</strong> {$this->record->booking_at->format('M d, Y h:i A')}</p>".
+                '</div>'
+            ))
+            ->button()
+            ->size('lg')
+            ->extraAttributes(['class' => 'w-full'])
+            ->action(function () {
+                $result = ConvertToNonPrime::run($this->record);
+
+                Notification::make()
+                    ->success()
+                    ->title('Booking Converted to Non Prime')
+                    ->body($result['message'])
+                    ->send();
+            });
+    }
+
+    public function convertToPrimeBookingAction(): Action
+    {
+        if ($this->record->is_prime || auth()->id() !== 1
+            || $this->record->created_at->lt(Carbon::now()->subHours(24))) {
+            return Action::make('convertToPrimeBooking')->hidden();
+        }
+
+        return Action::make('convertToPrimeBooking')
+            ->label('Convert to Prime')
+            ->color('warning')->icon('gmdi-price-check-o')
+            ->requiresConfirmation()
+            ->modalDescription(fn (Get $get) => new HtmlString(
+                'Are you sure you want to convert this booking?<br>'.
+                "<div class='text-sm'>".
+                "<p class='p-1 mb-2 text-xs font-semibold text-red-600 bg-red-100 border border-red-300 rounded-md'>This action will be logged and cannot be undone.</p>".
+                "<p class='text-lg font-semibold'>{$this->record->guest_name}</p>".
+                "<p><strong>Venue:</strong> {$this->record->venue->name}</p>".
+                "<p><strong>Guest Count:</strong> {$this->record->guest_count}</p>".
+                '<p><strong>Fee:</strong> '.money($this->record->total_fee, $this->record->currency).'</p>'.
+                "<p><strong>Booking Time:</strong> {$this->record->booking_at->format('M d, Y h:i A')}</p>".
+                '</div>'
+            ))
+            ->button()
+            ->size('lg')
+            ->extraAttributes(['class' => 'w-full'])
+            ->action(function () {
+                $result = ConvertToPrime::run($this->record);
+
+                Notification::make()
+                    ->success()
+                    ->title('Booking Converted to Prime')
+                    ->body($result['message'])
+                    ->send();
+            });
     }
 }

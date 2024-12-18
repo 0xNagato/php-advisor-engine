@@ -11,6 +11,7 @@ use Filament\Resources\Pages\ListRecords;
 use Filament\Tables\Actions\Action;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\Filter;
+use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 
@@ -71,6 +72,8 @@ class ListBookings extends ListRecords
                         BookingStatus::REFUNDED,
                         BookingStatus::PARTIALLY_REFUNDED,
                     ])),
+                SelectFilter::make('is_prime')
+                    ->options([0 => 'Non Prime', 1 => 'Prime']),
             ])
             ->actions([
                 Action::make('resendNotification')

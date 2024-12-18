@@ -32,6 +32,87 @@ class BookingService
         BookingPaid::dispatch($booking);
     }
 
+    public function convertToNonPrime(Booking $booking): void
+    {
+        if (! $booking->is_prime) {
+            return;
+        }
+
+        // Delete earnings
+        $booking->earnings()->delete();
+        // Update booking
+        $booking->venue_earnings = 0;
+        $booking->concierge_earnings = 0;
+        $booking->platform_earnings = 0;
+        $booking->partner_concierge_id = null;
+        $booking->partner_venue_id = null;
+        $booking->partner_concierge_fee = 0;
+        $booking->partner_venue_fee = 0;
+        $booking->is_prime = 0;
+        $booking->total_fee = 0;
+        $booking->total_with_tax_in_cents = 0;
+        $booking->meta = array_merge(
+            $booking->meta ?? [],
+            ['converted_to_non_prime_at' => now()]
+        );
+        $booking->save();
+    }
+
+    public function convertToPrime(Booking $booking): void
+    {
+        if ($booking->is_prime) {
+            return;
+        }
+
+        // Delete earnings
+        $booking->earnings()->delete();
+
+        // Update booking prime property
+        $booking->is_prime = 1;
+        $booking->meta = array_merge(
+            $booking->meta ?? [],
+            ['converted_to_prime_at' => now()]
+        );
+        $booking->save();
+
+        $booking->total_fee = $this->getPrimeTotalFee($booking);
+        $booking->venue_earnings =
+            $booking->total_fee *
+            ($booking->venue->payout_venue / 100);
+        $booking->concierge_earnings =
+            $booking->total_fee *
+            ($booking->concierge->payout_percentage / 100);
+        $booking->save();
+
+        $taxData = app(SalesTaxService::class)->calculateTax(
+            $booking->venue->region,
+            $booking->total_fee,
+            noTax: config('app.no_tax')
+        );
+
+        $totalWithTaxInCents = $booking->total_fee + $taxData->amountInCents;
+
+        $booking->update([
+            'tax' => $taxData->tax,
+            'tax_amount_in_cents' => $taxData->amountInCents,
+            'city' => $taxData->region,
+            'total_with_tax_in_cents' => $totalWithTaxInCents,
+        ]);
+    }
+
+    private function getPrimeTotalFee(Booking $booking): int
+    {
+        $booking->load('schedule.venue');
+        $schedule = $booking->schedule;
+        $venue = $schedule->venue;
+
+        $extraPeople = max(0, $booking->guest_count - 2);
+
+        $extraFee = $extraPeople * $venue->increment_fee;
+
+        return ($schedule->effective_fee + $extraFee) * 100;
+    }
+
     /**
      * @throws ApiErrorException
      */

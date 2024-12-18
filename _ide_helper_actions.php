@@ -59,6 +59,20 @@ class NotifyAdminsOfUnconfirmedBooking
 {
 }
 /**
+ * @method static \Lorisleiva\Actions\Decorators\JobDecorator|\Lorisleiva\Actions\Decorators\UniqueJobDecorator makeJob(\App\Models\Booking $booking, ?string $reason = null, ?int $amount = null)
+ * @method static \Lorisleiva\Actions\Decorators\UniqueJobDecorator makeUniqueJob(\App\Models\Booking $booking, ?string $reason = null, ?int $amount = null)
+ * @method static \Illuminate\Foundation\Bus\PendingDispatch dispatch(\App\Models\Booking $booking, ?string $reason = null, ?int $amount = null)
+ * @method static \Illuminate\Foundation\Bus\PendingDispatch|\Illuminate\Support\Fluent dispatchIf(bool $boolean, \App\Models\Booking $booking, ?string $reason = null, ?int $amount = null)
+ * @method static \Illuminate\Foundation\Bus\PendingDispatch|\Illuminate\Support\Fluent dispatchUnless(bool $boolean, \App\Models\Booking $booking, ?string $reason = null, ?int $amount = null)
+ * @method static dispatchSync(\App\Models\Booking $booking, ?string $reason = null, ?int $amount = null)
+ * @method static dispatchNow(\App\Models\Booking $booking, ?string $reason = null, ?int $amount = null)
+ * @method static dispatchAfterResponse(\App\Models\Booking $booking, ?string $reason = null, ?int $amount = null)
+ * @method static array run(\App\Models\Booking $booking, ?string $reason = null, ?int $amount = null)
+ */
+class RefundBooking
+{
+}
+/**
  * @method static \Lorisleiva\Actions\Decorators\JobDecorator|\Lorisleiva\Actions\Decorators\UniqueJobDecorator makeJob(\App\Models\Booking $booking)
  * @method static \Lorisleiva\Actions\Decorators\UniqueJobDecorator makeUniqueJob(\App\Models\Booking $booking)
  * @method static \Illuminate\Foundation\Bus\PendingDispatch dispatch(\App\Models\Booking $booking)

@@ -1,5 +1,6 @@
 <?php
 
+use App\Constants\BookingPercentages;
 use App\Models\Booking;
 use App\Models\Concierge;
 use App\Models\Earning;
@@ -109,6 +110,24 @@ if (! function_exists('getAllEarningsAmount')) {
             'partnerVenueEarning' => $partnerVenueEarning,
             'platFormEarnings' => $platFormEarnings,
             'remainderForPartner' => $remainderForPartner,
+        ];
+    }
+}
+
+if (! function_exists('getNonPrimeEarningsAmounts')) {
+    function getNonPrimeEarningsAmounts(Booking $booking): array
+    {
+        $fee = $booking->venue->non_prime_fee_per_head * $booking->guest_count;
+        $concierge_earnings = $fee - ($fee * (BookingPercentages::PLATFORM_PERCENTAGE_CONCIERGE / 100));
+        $platform_concierge = $fee * (BookingPercentages::PLATFORM_PERCENTAGE_CONCIERGE / 100);
+        $platform_venue = $fee * (BookingPercentages::PLATFORM_PERCENTAGE_Venue / 100);
+        $platform_earnings = $platform_concierge + $platform_venue;
+        $venue_earnings = ($concierge_earnings + $platform_earnings) * -1;
+
+        return [
+            'concierge_earnings' => $concierge_earnings * 100,
+            'venue_earnings' => $venue_earnings * 100,
+            'platform_earnings' => $platform_earnings * 100,
         ];
     }
 }

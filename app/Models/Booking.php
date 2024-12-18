@@ -66,6 +66,7 @@ class Booking extends Model
         'refunded_at',
         'refund_data',
         'refund_reason',
+        'meta',
     ];
 
     protected $appends = ['guest_name', 'local_formatted_guest_phone'];
@@ -244,6 +245,7 @@ class Booking extends Model
             'resent_venue_confirmation_at' => 'datetime',
             'refunded_at' => 'datetime',
             'refund_data' => 'array',
+            'meta' => 'array',
         ];
     }
 

@@ -323,6 +323,8 @@
                     $this->refundBookingAction,
                     $this->cancelBookingAction,
                     $this->deleteBookingAction,
+                    $this->convertToNonPrimeBookingAction,
+                    $this->convertToPrimeBookingAction,
                 ]" class="w-full mt-4" />
             @endif
         </div>

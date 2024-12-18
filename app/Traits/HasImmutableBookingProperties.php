@@ -5,8 +5,6 @@ namespace App\Traits;
 trait HasImmutableBookingProperties
 {
     protected array $immutableProperties = [
-        'total_fee',
-        'is_prime',
         'schedule_template_id',
         'booking_at',
     ];
