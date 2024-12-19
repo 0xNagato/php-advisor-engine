@@ -95,30 +95,36 @@ class ReservationService
         });
 
         $sorted = $venues
-            // First separate into groups and sort each group
+            // Group venues based on availability and status
             ->groupBy(function ($venue) {
                 if ($venue->status === VenueStatus::PENDING) {
                     return 'pending';  // SOON venues
                 }
 
-                // For active venues, check if they have any bookable slots
+                $hasPrimeSlots = $venue->schedules->contains(fn ($s) => $s->is_bookable && $s->prime_time);
+                if ($hasPrimeSlots) {
+                    return 'prime_available';  // Venues with prime slots
+                }
+
                 $hasBookableSlots = $venue->schedules->contains(fn ($s) => $s->is_bookable);
 
-                return $hasBookableSlots ? 'active_available' : 'active_closed';
+                return $hasBookableSlots ? 'non_prime_available' : 'active_closed';
             })
-            ->map(fn ($group) =>
+            ->map(function ($group) {
                 // Sort each group alphabetically A-Z
-                $group->sortBy(fn ($venue) => strtolower($venue->name)))
+                return $group->sortBy(fn ($venue) => strtolower($venue->name));
+            })
             // Combine groups in desired order
             ->pipe(function ($groups) {
                 return collect([])
-                    ->concat($groups->get('active_available', collect()))  // Available venues first
-                    ->concat($groups->get('active_closed', collect()))     // Closed venues second
-                    ->concat($groups->get('pending', collect()));         // SOON venues last
+                    ->concat($groups->get('prime_available', collect()))     // Prime slots first
+                    ->concat($groups->get('non_prime_available', collect())) // Non-prime slots second
+                    ->concat($groups->get('active_closed', collect()))       // Closed venues third
+                    ->concat($groups->get('pending', collect()));            // SOON venues last
             });
 
         // Convert back to Eloquent Collection
-        return Collection::make($sorted->values()->all());
+        return \Illuminate\Database\Eloquent\Collection::make($sorted->values()->all());
     }
 
     /**
