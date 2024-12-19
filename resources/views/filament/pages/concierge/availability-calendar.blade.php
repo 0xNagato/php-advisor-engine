@@ -10,6 +10,8 @@
     <div>
         @if (filled($venues))
             @include('partials.availability-table')
+        @else
+            @include('partials.availability-empty-state')
         @endif
     </div>
 </x-filament-panels::page>
