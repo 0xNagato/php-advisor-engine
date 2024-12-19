@@ -110,10 +110,9 @@ class ReservationService
 
                 return $hasBookableSlots ? 'non_prime_available' : 'active_closed';
             })
-            ->map(function ($group) {
+            ->map(fn ($group) =>
                 // Sort each group alphabetically A-Z
-                return $group->sortBy(fn ($venue) => strtolower($venue->name));
-            })
+                $group->sortBy(fn ($venue) => strtolower($venue->name)))
             // Combine groups in desired order
             ->pipe(function ($groups) {
                 return collect([])
@@ -124,7 +123,7 @@ class ReservationService
             });
 
         // Convert back to Eloquent Collection
-        return \Illuminate\Database\Eloquent\Collection::make($sorted->values()->all());
+        return Collection::make($sorted->values()->all());
     }
 
     /**
