@@ -87,26 +87,29 @@ class ReservationService
         $venues->each(function ($venue) use ($currentTime) {
             if ($venue->cutoff_time && $currentTime > $venue->cutoff_time) {
                 $venue->schedules->each(function ($schedule) {
-                    $schedule->is_available = true; // Keep is_available true to match SOLD OUT logic
-                    $schedule->remaining_tables = 0; // Set to 0 to trigger SOLD OUT display
-                    $schedule->is_bookable = false; // Ensure it can't be booked
+                    $schedule->is_available = true;
+                    $schedule->remaining_tables = 0;
+                    $schedule->is_bookable = false;
                 });
             }
         });
 
         $sorted = $venues
-            // Group venues based on availability and status
+            // Group venues based on availability and status, only considering middle 3 timeslots
             ->groupBy(function ($venue) {
                 if ($venue->status === VenueStatus::PENDING) {
-                    return 'pending';  // SOON venues
+                    return 'pending';
                 }
 
-                $hasPrimeSlots = $venue->schedules->contains(fn ($s) => $s->is_bookable && $s->prime_time);
+                // Get middle 3 schedules (indices 1,2,3 if timeslotCount is 5)
+                $middleSchedules = $venue->schedules->slice(1, 3);
+
+                $hasPrimeSlots = $middleSchedules->contains(fn ($s) => $s->is_bookable && $s->prime_time);
                 if ($hasPrimeSlots) {
-                    return 'prime_available';  // Venues with prime slots
+                    return 'prime_available';
                 }
 
-                $hasBookableSlots = $venue->schedules->contains(fn ($s) => $s->is_bookable);
+                $hasBookableSlots = $middleSchedules->contains(fn ($s) => $s->is_bookable);
 
                 return $hasBookableSlots ? 'non_prime_available' : 'active_closed';
             })
