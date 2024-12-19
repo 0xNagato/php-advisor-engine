@@ -16,7 +16,9 @@
             @include('partials.availability-table')
         </div>
     @else
-        @include('partials.availability-empty-state')
+        <div class="mt-8">
+            @include('partials.availability-empty-state')
+        </div>
     @endif
 
     <style>
