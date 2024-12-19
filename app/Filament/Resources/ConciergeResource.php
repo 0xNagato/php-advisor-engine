@@ -24,4 +24,9 @@ class ConciergeResource extends Resource
             'edit' => EditConcierge::route('/{record}/edit'),
         ];
     }
+
+    public static function canAccess(): bool
+    {
+        return auth()->user()->hasActiveRole('super_admin');
+    }
 }

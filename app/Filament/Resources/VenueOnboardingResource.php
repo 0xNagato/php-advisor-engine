@@ -119,7 +119,8 @@ class VenueOnboardingResource extends Resource
                         default => 'gray',
                     }),
                 TextColumn::make('created_at')
-                    ->dateTime()
+                    ->dateTime('m/d/Y g:i A')
+                    ->timezone(auth()->user()->timezone ?? config('app.timezone'))
                     ->sortable(),
             ])
             ->filters([

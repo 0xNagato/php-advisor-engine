@@ -203,7 +203,7 @@ return [
     'default_timezone' => env('LOCAL_ENV_TIMEZONE', 'America/New_York'),
     'default_region' => env('LOCAL_ENV_REGION', 'miami'),
     'no_tax' => env('NO_TAX', true),
-    'active_regions' => ['miami'],
+    'active_regions' => ['miami', 'los_angeles'],
     'dev_ip_address' => env('DEV_IP_ADDRESS'),
     'native_key' => env('APP_NATIVE_KEY'),
     'platform_url' => env('PLATFORM_URL', '/platform'),

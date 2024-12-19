@@ -82,6 +82,8 @@
 
 @livewire('notifications')
 @filamentScripts
+<tallstackui:script />
+@livewireStyles
 @vite('resources/js/app.js')
 </body>
 </html>

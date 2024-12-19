@@ -5,15 +5,20 @@ declare(strict_types=1);
 namespace App\Livewire;
 
 use App\Data\VenueOnboardingData;
+use App\Models\Region;
 use App\Models\User;
 use App\Models\VenueOnboarding as VenueOnboardingModel;
 use App\Notifications\VenueAgreementCopy;
 use App\Notifications\VenueOnboardingSubmitted;
 use App\Traits\FormatsPhoneNumber;
+use Exception;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Session;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 use Livewire\Attributes\Validate;
 use Livewire\Component;
 use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
@@ -49,7 +54,7 @@ class VenueOnboarding extends Component
 
     public bool $has_logos = false;
 
-    /** @var array<int, ?TemporaryUploadedFile> */
+    /** @var array<int, TemporaryUploadedFile|null> */
     public array $logo_files = [];
 
     public bool $agreement_accepted = false;
@@ -82,8 +87,23 @@ class VenueOnboarding extends Component
 
     public int $current_venue_index = 0;
 
+    /** @var array<int, string> */
+    public array $venue_regions = [];
+
+    /** @var array<int, array{value: string, label: string}> */
+    public array $availableRegions = [];
+
     public function mount(): void
     {
+        // Initialize available regions
+        $this->availableRegions = Region::active()
+            ->get()
+            ->map(fn (Region $region) => [
+                'value' => $region->id,
+                'label' => $region->name,
+            ])
+            ->toArray();
+
         // Load saved state from session if it exists
         if (Session::has('venue_onboarding')) {
             $savedState = Session::get('venue_onboarding');
@@ -102,9 +122,10 @@ class VenueOnboarding extends Component
         } else {
             $this->venue_names = array_fill(0, $this->venue_count, '');
             $this->venue_prime_hours = array_fill(0, $this->venue_count, []);
-            $this->venue_use_non_prime_incentive = array_fill(0, $this->venue_count, false);
-            $this->venue_non_prime_per_diem = array_fill(0, $this->venue_count, null);
+            $this->venue_use_non_prime_incentive = array_fill(0, $this->venue_count, true);
+            $this->venue_non_prime_per_diem = array_fill(0, $this->venue_count, 10.0);
             $this->logo_files = array_fill(0, $this->venue_count, null);
+            $this->venue_regions = array_fill(0, $this->venue_count, 'miami');
             $this->step = 'company';
         }
 
@@ -138,6 +159,7 @@ class VenueOnboarding extends Component
             'company_name' => $this->company_name,
             'venue_count' => $this->venue_count,
             'venue_names' => $this->venue_names,
+            'venue_regions' => $this->venue_regions,
             'has_logos' => $this->has_logos,
             'agreement_accepted' => $this->agreement_accepted,
             'venue_prime_hours' => $this->venue_prime_hours,
@@ -147,7 +169,7 @@ class VenueOnboarding extends Component
             'first_name' => $this->first_name,
             'last_name' => $this->last_name,
             'email' => $this->email,
-            'phone' => $this->phone, // Phone is already formatted at this point
+            'phone' => $this->phone,
         ]);
     }
 
@@ -156,13 +178,15 @@ class VenueOnboarding extends Component
         if ($this->venue_count > count($this->venue_names)) {
             $this->venue_names = array_pad($this->venue_names, $this->venue_count, '');
             $this->venue_prime_hours = array_pad($this->venue_prime_hours, $this->venue_count, []);
-            $this->venue_use_non_prime_incentive = array_pad($this->venue_use_non_prime_incentive, $this->venue_count, false);
-            $this->venue_non_prime_per_diem = array_pad($this->venue_non_prime_per_diem, $this->venue_count, null);
+            $this->venue_use_non_prime_incentive = array_pad($this->venue_use_non_prime_incentive, $this->venue_count, true);
+            $this->venue_non_prime_per_diem = array_pad($this->venue_non_prime_per_diem, $this->venue_count, 10.0);
+            $this->venue_regions = array_pad($this->venue_regions, $this->venue_count, 'miami');
         } else {
             $this->venue_names = array_slice($this->venue_names, 0, $this->venue_count);
             $this->venue_prime_hours = array_slice($this->venue_prime_hours, 0, $this->venue_count);
             $this->venue_use_non_prime_incentive = array_slice($this->venue_use_non_prime_incentive, 0, $this->venue_count);
             $this->venue_non_prime_per_diem = array_slice($this->venue_non_prime_per_diem, 0, $this->venue_count);
+            $this->venue_regions = array_slice($this->venue_regions, 0, $this->venue_count);
         }
 
         $this->logo_files = array_fill(0, $this->venue_count, null);
@@ -246,17 +270,14 @@ class VenueOnboarding extends Component
             foreach ($this->venue_names as $index => $name) {
                 $location = $onboarding->locations()->create([
                     'name' => $name,
+                    'region' => $this->venue_regions[$index],
                     'prime_hours' => $this->venue_prime_hours[$index] ?? [],
                     'use_non_prime_incentive' => $this->venue_use_non_prime_incentive[$index] ?? false,
                     'non_prime_per_diem' => $this->venue_use_non_prime_incentive[$index] ?
                         $this->venue_non_prime_per_diem[$index] :
                         null,
+                    'logo_path' => $this->has_logos ? $this->storeLogo($index, $name) : null,
                 ]);
-
-                if ($this->has_logos && isset($this->logo_files[$index])) {
-                    $path = $this->logo_files[$index]->store('venue-logos', 'public');
-                    $location->update(['logo_path' => $path]);
-                }
             }
 
             if ($this->send_agreement_copy) {
@@ -334,5 +355,64 @@ class VenueOnboarding extends Component
         Session::forget('venue_onboarding');
         $this->reset();
         $this->mount();
+    }
+
+    public function updatedHasLogos(bool $value): void
+    {
+        if (! $value) {
+            $this->logo_files = array_fill(0, $this->venue_count, null);
+        }
+    }
+
+    public function deleteUpload(array $content, int $index): void
+    {
+        if (blank($this->logo_files[$index])) {
+            return;
+        }
+
+        $this->logo_files[$index] = null;
+    }
+
+    protected function storeLogo(int $index, string $venueName): ?string
+    {
+        if (blank($this->logo_files[$index])) {
+            return null;
+        }
+
+        try {
+            $file = $this->logo_files[$index];
+            $region = Str::slug($this->venue_regions[$index]);
+            $venue = Str::slug($venueName);
+            $company = Str::slug($this->company_name);
+            $random = Str::random(6);
+
+            $fileName = implode('-', [
+                $region,
+                $venue,
+                $company,
+                $random,
+            ]).'.'.$file->getClientOriginalExtension();
+
+            $path = $file->storeAs(
+                'onboarded_venues',
+                $fileName,
+                ['disk' => 'do']
+            );
+
+            Storage::disk('do')->setVisibility($path, 'public');
+
+            return $path;
+        } catch (Exception $e) {
+            Log::error('Error storing file:', [
+                'error' => $e->getMessage(),
+                'file_info' => [
+                    'original_name' => $file->getClientOriginalName(),
+                    'mime_type' => $file->getMimeType(),
+                    'size' => $file->getSize(),
+                ],
+            ]);
+
+            return null;
+        }
     }
 }

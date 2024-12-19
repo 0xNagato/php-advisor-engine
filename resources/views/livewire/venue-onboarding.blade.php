@@ -117,45 +117,47 @@
                             <div class="space-y-4">
                                 <label class="block text-sm text-gray-700">Please list the names of the venues</label>
                                 @foreach ($venue_names as $index => $name)
-                                    <div>
-                                        <input type="text" wire:model="venue_names.{{ $index }}"
-                                            placeholder="Venue {{ $index + 1 }}"
-                                            class="w-full border-gray-300 rounded-lg shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
-                                        @error("venue_names.{$index}")
-                                            <span class="mt-1 text-xs text-red-600">{{ $message }}</span>
-                                        @enderror
+                                    <div class="grid grid-cols-5 gap-4">
+                                        <div class="col-span-3">
+                                            <label class="block mb-2 text-sm text-gray-700">Venue Name</label>
+                                            <input type="text" wire:model="venue_names.{{ $index }}"
+                                                class="w-full border-gray-300 rounded-lg shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                                            @error("venue_names.{$index}")
+                                                <span class="mt-1 text-xs text-red-600">{{ $message }}</span>
+                                            @enderror
+                                        </div>
+                                        <div class="col-span-2">
+                                            <label class="block mb-2 text-sm text-gray-700">Region</label>
+                                            <select wire:model="venue_regions.{{ $loop->index }}"
+                                                class="w-full border-gray-300 rounded-lg shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                                                @foreach ($availableRegions as $region)
+                                                    <option value="{{ $region['value'] }}">
+                                                        {{ $region['label'] }}
+                                                    </option>
+                                                @endforeach
+                                            </select>
+                                        </div>
                                     </div>
                                 @endforeach
                             </div>
 
                             <div>
-                                <label class="block text-sm text-gray-700">Would you like to upload logos of your
-                                    restaurants?</label>
-                                <div class="mt-2 space-y-3">
-                                    <label class="flex items-center">
-                                        <input type="radio" wire:model.live="has_logos" value="1"
-                                            class="w-4 h-4 text-indigo-600 border-gray-300 focus:ring-indigo-500">
-                                        <span class="ml-3 text-sm text-gray-700">Yes, I will upload the logos</span>
-                                    </label>
-                                    <label class="flex items-center">
-                                        <input type="radio" wire:model.live="has_logos" value="0"
-                                            class="w-4 h-4 text-indigo-600 border-gray-300 focus:ring-indigo-500">
-                                        <span class="ml-3 text-sm text-gray-700">No, PRIMA can source the logos</span>
-                                    </label>
-                                </div>
+                                <label class="flex items-start space-x-4">
+                                    <input type="checkbox" wire:model.live="has_logos"
+                                        class="w-6 h-6 mt-0.5 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500">
+                                    <span class="text-sm">
+                                        <span class="block font-medium text-gray-700">Upload Venue Logos</span>
+                                        <span class="text-gray-500">Provide logos for each venue or let PRIMA source
+                                            them</span>
+                                    </span>
+                                </label>
 
                                 @if ($has_logos)
-                                    <div class="mt-4 space-y-4">
+                                    <div class="mt-6 space-y-6">
                                         @foreach ($venue_names as $index => $name)
-                                            <div>
-                                                <label class="block mb-1 text-sm text-gray-700">Logo for
-                                                    {{ $name ?: 'Venue ' . ($index + 1) }}</label>
-                                                <input type="file" wire:model="logo_files.{{ $index }}"
-                                                    accept="image/*" class="w-full">
-                                                @error("logo_files.{$index}")
-                                                    <span class="mt-1 text-xs text-red-600">{{ $message }}</span>
-                                                @enderror
-                                            </div>
+                                            <x-file-upload name="logo_{{ $index }}" :label="$name ?: 'Venue ' . ($index + 1) . ' Logo'"
+                                                model="logo_files.{{ $index }}" :file="$logo_files[$index] ?? null"
+                                                :error="$errors->first('logo_files.' . $index)" wire:click="deleteUpload([], {{ $index }})" />
                                         @endforeach
                                     </div>
                                 @endif

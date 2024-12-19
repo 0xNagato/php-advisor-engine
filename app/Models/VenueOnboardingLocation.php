@@ -17,6 +17,7 @@ class VenueOnboardingLocation extends Model
     protected $fillable = [
         'venue_onboarding_id',
         'name',
+        'region',
         'logo_path',
         'created_venue_id',
         'prime_hours',

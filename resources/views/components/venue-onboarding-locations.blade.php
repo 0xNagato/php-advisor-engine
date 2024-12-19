@@ -7,7 +7,7 @@
                 <h3 class="text-sm font-medium text-gray-900">{{ $location->name }}</h3>
                 @if ($location->logo_path)
                     <img src="{{ Storage::url($location->logo_path) }}" alt="{{ $location->name }} logo"
-                        class="object-contain h-8">
+                        class="object-contain h-16">
                 @endif
             </div>
 
