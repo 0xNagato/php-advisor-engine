@@ -35,7 +35,7 @@
                         <td
                             class="p-1 pr-2 {{ $loop->first ? 'hidden sm:table-cell' : '' }} {{ $loop->last ? 'hidden sm:table-cell' : '' }}">
                             <button
-                                @if ($schedule->is_bookable && $venue->status === VenueStatus::ACTIVE) wire:click="createBooking({{ $schedule->id }}, '{{ $schedule->booking_date->format('Y-m-d') }}')" @elseif ($venue->status === VenueStatus::PENDING) x-on:click="$dispatch('open-modal', { id: 'pending-venue-{{ $venue->id }}' })" @elseif (isPastCutoffTime($venue)) x-on:click="$dispatch('open-modal', { id: 'cutoff-venue-{{ $venue->id }}' })" @endif
+                                @if ($schedule->is_bookable && $venue->status === VenueStatus::ACTIVE) wire:click="createBooking({{ $schedule->id }}, '{{ $schedule->booking_date->format('Y-m-d') }}')" @elseif ($venue->status === VenueStatus::UPCOMING) x-on:click="$dispatch('open-modal', { id: 'pending-venue-{{ $venue->id }}' })" @elseif (isPastCutoffTime($venue)) x-on:click="$dispatch('open-modal', { id: 'cutoff-venue-{{ $venue->id }}' })" @endif
                                 @class([
                                     'text-sm font-semibold rounded p-1 w-full mx-1 flex flex-col gap-y-[1px] justify-center items-center h-12',
                                     'bg-green-600 text-white cursor-pointer hover:bg-green-500' =>
@@ -57,7 +57,7 @@
                                 ])>
                                 @if ($venue->status === VenueStatus::PENDING)
                                     <p>
-                                        <span class="text-sm font-semibold uppercase">Soon</span>
+                                        <span class="text-sm font-semibold uppercase">Not Yet</span>
                                     </p>
                                 @elseif ($schedule->is_bookable && $schedule->prime_time)
                                     <p class="text-base font-bold">
