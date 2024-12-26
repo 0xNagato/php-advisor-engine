@@ -83,9 +83,6 @@ class ConciergeReferral extends Page
                                         type: PhoneNumberType::MOBILE,
                                         lenient: true,
                                     )
-                                    ->validationMessages([
-                                        'validation.phone' => 'The phone number is invalid.',
-                                    ])
                                     ->columnSpan(2)
                                     ->hiddenLabel(),
                                 Actions::make([

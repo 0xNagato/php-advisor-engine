@@ -188,4 +188,6 @@ return [
 
     'attributes' => [],
 
+    'phone' => 'Please enter a valid phone number in the :attribute field.',
+
 ];

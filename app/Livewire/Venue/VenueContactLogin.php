@@ -59,9 +59,6 @@ class VenueContactLogin extends Component implements HasForms
                     type: PhoneNumberType::MOBILE,
                     lenient: true,
                 )
-                ->validationMessages([
-                    'validation.phone' => 'The phone number is invalid.',
-                ])
                 ->required(),
         ];
     }
