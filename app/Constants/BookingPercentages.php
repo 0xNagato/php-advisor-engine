@@ -7,7 +7,7 @@ class BookingPercentages
     /**
      * The percentage of the booking fee that goes to the platform for concierge bookings.
      */
-    public const int PLATFORM_PERCENTAGE_CONCIERGE = 10;
+    public const int PLATFORM_PERCENTAGE_CONCIERGE = 20;
 
     /**
      * The percentage of the booking fee that goes to the platform for venue bookings.
@@ -17,7 +17,7 @@ class BookingPercentages
     /**
      * The percentage of the booking fee that goes to the concierge for non-prime bookings.
      */
-    public const int NON_PRIME_CONCIERGE_PERCENTAGE = 90;
+    public const int NON_PRIME_CONCIERGE_PERCENTAGE = 80;
 
     /**
      * The processing fee percentage for non-prime bookings charged to the venue.
