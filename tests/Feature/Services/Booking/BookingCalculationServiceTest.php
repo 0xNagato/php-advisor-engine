@@ -121,12 +121,12 @@ test('non prime booking calculation', function () {
 
         $this->assertDatabaseCount('earnings', 2);
         assertEarningExists($booking, 'venue_paid', -2200);
-        assertEarningExists($booking, 'concierge_bounty', 1800);
+        assertEarningExists($booking, 'concierge_bounty', 1600);
 
         $freshBooking = $booking->fresh();
-        expect($freshBooking->concierge_earnings)->toBe(1800)
+        expect($freshBooking->concierge_earnings)->toBe(1600)
             ->and($freshBooking->venue_earnings)->toBe(-2200)
-            ->and($freshBooking->platform_earnings)->toBe(400);
+            ->and($freshBooking->platform_earnings)->toBe(600);
     });
 });
 
@@ -138,12 +138,12 @@ test('non prime booking with different guest count', function () {
 
         $this->assertDatabaseCount('earnings', 2);
         assertEarningExists($booking, 'venue_paid', -5500);
-        assertEarningExists($booking, 'concierge_bounty', 4500);
+        assertEarningExists($booking, 'concierge_bounty', 4000);
 
         $freshBooking = $booking->fresh();
-        expect($freshBooking->concierge_earnings)->toBe(4500)
+        expect($freshBooking->concierge_earnings)->toBe(4000)
             ->and($freshBooking->venue_earnings)->toBe(-5500)
-            ->and($freshBooking->platform_earnings)->toBe(1000);
+            ->and($freshBooking->platform_earnings)->toBe(1500);
     });
 });
 
@@ -156,11 +156,11 @@ test('non prime booking with custom fee', function () {
 
         $this->assertDatabaseCount('earnings', 2);
         assertEarningExists($booking, 'venue_paid', -3300);
-        assertEarningExists($booking, 'concierge_bounty', 2700);
+        assertEarningExists($booking, 'concierge_bounty', 2400);
 
         $freshBooking = $booking->fresh();
-        expect($freshBooking->concierge_earnings)->toBe(2700)
+        expect($freshBooking->concierge_earnings)->toBe(2400)
             ->and($freshBooking->venue_earnings)->toBe(-3300)
-            ->and($freshBooking->platform_earnings)->toBe(600);
+            ->and($freshBooking->platform_earnings)->toBe(900);
     });
 });
