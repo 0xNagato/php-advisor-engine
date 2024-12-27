@@ -57,7 +57,7 @@ trait ManagesBookingForms
                 ->hidden(fn (Get $get) => $get('radio_date') !== 'select_date')
                 ->afterStateUpdated(fn ($state, $set) => $set('date', Carbon::parse($state)->format('Y-m-d')))
                 ->prefixIcon('heroicon-m-calendar')
-                ->native(false)
+                ->native(true)
                 ->closeOnDateSelection(),
             $this->getGuestCountInput(),
             Select::make('reservation_time')
