@@ -7,6 +7,7 @@ use App\Enums\VenueStatus;
 use App\Models\Region;
 use App\Models\ScheduleWithBooking;
 use App\Models\Venue;
+use App\Traits\HandlesVenueClosures;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Carbon;
 
@@ -19,6 +20,8 @@ use Illuminate\Support\Carbon;
  */
 class ReservationService
 {
+    use HandlesVenueClosures;
+
     /**
      * The region associated with the current user.
      */
@@ -34,20 +37,6 @@ class ReservationService
      * The number of days in advance that reservations can be made.
      */
     public const int AVAILABILITY_DAYS = 3;
-
-    /**
-     * Dates when all venues are closed (format: MM-DD)
-     */
-    private const CLOSED_DATES = [
-        '12-25', // Christmas Day
-        '12-31', // New Year's Eve
-    ];
-
-    /**
-     * Venues that can override closed dates
-     */
-    private const OVERRIDE_VENUES = [
-    ];
 
     /**
      * Constructor for ReservationService.
@@ -87,6 +76,7 @@ class ReservationService
 
         $currentTime = Carbon::now($this->region->timezone)->format('H:i:s');
 
+        /** @var Collection<int, Venue> $venues */
         $venues = Venue::available()
             ->where('region', $this->region->id)
             ->withSchedulesForDate(
@@ -97,29 +87,7 @@ class ReservationService
             )
             ->get();
 
-        // If it's a closed date, mark non-override venues as closed
-        if (in_array(Carbon::parse($this->date)->format('m-d'), self::CLOSED_DATES, true)) {
-            $overrideVenues = $this->getOverrideVenues();
-
-            $venues->each(function ($venue) use ($overrideVenues) {
-                if (! in_array($venue->slug, $overrideVenues, true)) {
-                    $venue->schedules->each(function ($schedule) {
-                        if ($schedule->is_available) {
-                            // If the venue was going to be open, mark as sold out
-                            $schedule->is_available = true;
-                            $schedule->remaining_tables = 0;
-                            $schedule->is_bookable = false;
-                        } else {
-                            // If the venue was already closed, keep it closed
-                            $schedule->is_available = false;
-                            $schedule->remaining_tables = 0;
-                            $schedule->is_bookable = false;
-                        }
-                    });
-                }
-                // Override venues keep their original availability
-            });
-        }
+        $venues = $this->applyClosureRules($venues, $this->date);
 
         // Mark schedules as sold out if venue is past cutoff time
         $venues->each(function ($venue) use ($currentTime) {
@@ -261,6 +229,14 @@ class ReservationService
         $schedulesByDate = $this->getSchedulesByDate($venueId)->take($this->timeslotCount);
         $schedulesThisWeek = $this->getSchedulesThisWeek($venueId)->take($this->timeslotCount);
 
+        // Apply closure rules if needed
+        if ($this->isClosedDate($this->date)) {
+            $venue = Venue::find($venueId);
+            $schedulesByDate = $this->applyClosureRules(new Collection([$venue]), $this->date)
+                ->first()
+                ?->schedules ?? $schedulesByDate;
+        }
+
         return [
             'schedulesByDate' => $this->transformSchedules($schedulesByDate),
             'schedulesThisWeek' => $this->transformSchedules($schedulesThisWeek),
@@ -337,16 +313,5 @@ class ReservationService
             ->whereDate('booking_date', '<=', $currentDate->addDays(self::AVAILABILITY_DAYS))
             ->orderBy('booking_date')
             ->get();
-    }
-
-    /**
-     * Get the list of venues that can override closed dates
-     */
-    private function getOverrideVenues(): array
-    {
-        $envOverrides = env('OVERRIDE_VENUES', '');
-        $envVenues = array_filter(explode(',', $envOverrides));
-
-        return array_merge(self::OVERRIDE_VENUES, $envVenues);
     }
 }

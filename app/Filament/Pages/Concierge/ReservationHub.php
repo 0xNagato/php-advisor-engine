@@ -12,6 +12,7 @@ use App\Models\ScheduleTemplate;
 use App\Models\ScheduleWithBooking;
 use App\Models\Venue;
 use App\Services\BookingService;
+use App\Traits\HandlesVenueClosures;
 use App\Traits\ManagesBookingForms;
 use Exception;
 use Filament\Forms\Components\Select;
@@ -30,6 +31,7 @@ use Stripe\Exception\ApiErrorException;
  */
 class ReservationHub extends Page
 {
+    use HandlesVenueClosures;
     use ManagesBookingForms;
 
     protected static ?string $navigationIcon = 'heroicon-o-building-storefront';
@@ -254,14 +256,21 @@ class ReservationHub extends Page
             ->where('start_time', '<=', $endTimeForQuery)
             ->get();
 
-        $venue = Venue::query()->find($venueId);
+        $venue = Venue::find($venueId);
+
+        // Apply closure rules if needed
+        if ($this->isClosedDate($this->form->getState()['date'])) {
+            $schedules = $this->applySingleVenueClosureRules($schedules, $this->form->getState()['date'], $venue->slug);
+        }
+
+        // Apply cutoff time logic
         $currentTime = Carbon::now($this->timezone)->format('H:i:s');
 
         if ($venue->cutoff_time && $currentTime > $venue->cutoff_time) {
             $schedules->each(function ($schedule) {
-                $schedule->is_available = true; // Keep is_available true to match SOLD OUT logic
-                $schedule->remaining_tables = 0; // Set to 0 to trigger SOLD OUT display
-                $schedule->is_bookable = false; // Ensure it can't be booked
+                $schedule->is_available = true;
+                $schedule->remaining_tables = 0;
+                $schedule->is_bookable = false;
             });
         }
 
