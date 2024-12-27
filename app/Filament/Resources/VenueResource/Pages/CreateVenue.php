@@ -15,6 +15,7 @@ use Filament\Forms\Components\TextInput;
 use Filament\Forms\Form;
 use Filament\Resources\Pages\CreateRecord;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\DB;
 use libphonenumber\PhoneNumberType;
 use Str;
 use Ysfkaya\FilamentPhoneInput\Forms\PhoneInput;
@@ -79,7 +80,8 @@ class CreateVenue extends CreateRecord
                             ->maxLength(255),
                         Select::make('region')
                             ->placeholder('Select Region')
-                            ->options(Region::all()->sortBy('id')->pluck('name', 'id')),
+                            ->options(Region::all()->sortBy('id')->pluck('name', 'id'))
+                            ->required(),
                         TextInput::make('primary_contact_name')
                             ->label('Primary Contact Name')
                             ->required(),
@@ -147,49 +149,51 @@ class CreateVenue extends CreateRecord
 
     protected function handleRecordCreation(array $data): Model
     {
-        $partnerId = (auth()->user()->main_role === 'Partner') ? auth()->user()->partner->id : null;
+        return DB::transaction(function () use ($data) {
+            $partnerId = (auth()->user()->main_role === 'Partner') ? auth()->user()->partner->id : null;
 
-        $user = User::query()->create([
-            'first_name' => $data['first_name'],
-            'last_name' => $data['last_name'],
-            'email' => $data['email'],
-            'phone' => $data['phone'],
-            'password' => Str::random(8),
-            'partner_referral_id' => $partnerId,
-        ]);
+            $user = User::query()->create([
+                'first_name' => $data['first_name'],
+                'last_name' => $data['last_name'],
+                'email' => $data['email'],
+                'phone' => $data['phone'],
+                'password' => Str::random(8),
+                'partner_referral_id' => $partnerId,
+            ]);
 
-        Referral::query()->create([
-            'user_id' => $user->id,
-            'type' => 'venue',
-            'referrer_type' => auth()->user()->main_role,
-            'referrer_id' => auth()->id(),
-            'email' => $data['email'],
-            'phone' => $data['phone'],
-        ]);
+            Referral::query()->create([
+                'user_id' => $user->id,
+                'type' => 'venue',
+                'referrer_type' => auth()->user()->main_role,
+                'referrer_id' => auth()->id(),
+                'email' => $data['email'],
+                'phone' => $data['phone'],
+            ]);
 
-        $user->assignRole('venue');
+            $user->assignRole('venue');
 
-        // VenueCreated::dispatch($venue);
+            // VenueCreated::dispatch($venue);
 
-        return $user->venue()->create([
-            'name' => $data['name'],
-            'primary_contact_name' => $data['primary_contact_name'],
-            'contact_phone' => $data['contact_phone'],
-            'payout_venue' => $data['payout_venue'],
-            'booking_fee' => $data['booking_fee'],
-            'contacts' => $data['contacts'],
-            'region' => $data['region'],
-            'venue_logo_path' => $data['venue_logo_path'],
-            'open_days' => [
-                'monday' => 'open',
-                'tuesday' => 'open',
-                'wednesday' => 'open',
-                'thursday' => 'open',
-                'friday' => 'open',
-                'saturday' => 'open',
-                'sunday' => 'open',
-            ],
-        ]);
+            return $user->venue()->create([
+                'name' => $data['name'],
+                'primary_contact_name' => $data['primary_contact_name'],
+                'contact_phone' => $data['contact_phone'],
+                'payout_venue' => $data['payout_venue'],
+                'booking_fee' => $data['booking_fee'],
+                'contacts' => $data['contacts'],
+                'region' => $data['region'],
+                'venue_logo_path' => $data['venue_logo_path'],
+                'open_days' => [
+                    'monday' => 'open',
+                    'tuesday' => 'open',
+                    'wednesday' => 'open',
+                    'thursday' => 'open',
+                    'friday' => 'open',
+                    'saturday' => 'open',
+                    'sunday' => 'open',
+                ],
+            ]);
+        });
     }
 
     protected function getRedirectUrl(): string
