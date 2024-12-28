@@ -67,7 +67,8 @@ class Venue extends Model
         'non_prime_type',
         'status',
         'cutoff_time',
-        'daily_booking_cap',
+        'daily_prime_bookings_cap',
+        'daily_non_prime_bookings_cap',
     ];
 
     protected function casts(): array

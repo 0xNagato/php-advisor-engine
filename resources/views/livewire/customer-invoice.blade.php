@@ -131,7 +131,7 @@
                 <div>
                     <span class="block text-xs text-gray-500 uppercase">Date Paid:</span>
                     <span class="block text-xs font-medium text-gray-800 sm:text-sm dark:text-gray-200">
-                        {{ $booking->confirmed_at->setTimezone(auth()->user()->timezone)->format('M d, Y g:i A') }}
+                        {{ $booking->confirmed_at->setTimezone(auth()->user()?->timezone ?? 'America/New_York')->format('M d, Y g:i A') }}
                     </span>
                 </div>
 

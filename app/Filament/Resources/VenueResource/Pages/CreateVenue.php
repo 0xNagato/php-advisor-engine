@@ -97,7 +97,20 @@ class CreateVenue extends CreateRecord
                                 lenient: true,
                             )
                             ->initialCountry('US'),
-
+                        TextInput::make('daily_prime_bookings_cap')
+                            ->label('Daily Prime Bookings Cap')
+                            ->helperText('Maximum number of prime-time bookings allowed per day. Leave empty for no limit.')
+                            ->numeric()
+                            ->nullable()
+                            ->minValue(1)
+                            ->maxValue(999),
+                        TextInput::make('daily_non_prime_bookings_cap')
+                            ->label('Daily Non-Prime Bookings Cap')
+                            ->helperText('Maximum number of non-prime-time bookings allowed per day. Leave empty for no limit.')
+                            ->numeric()
+                            ->nullable()
+                            ->minValue(1)
+                            ->maxValue(999),
                     ]),
 
                 Repeater::make('contacts')
@@ -192,6 +205,8 @@ class CreateVenue extends CreateRecord
                     'saturday' => 'open',
                     'sunday' => 'open',
                 ],
+                'daily_prime_bookings_cap' => $data['daily_prime_bookings_cap'] ?? null,
+                'daily_non_prime_bookings_cap' => $data['daily_non_prime_bookings_cap'] ?? null,
             ]);
         });
     }
