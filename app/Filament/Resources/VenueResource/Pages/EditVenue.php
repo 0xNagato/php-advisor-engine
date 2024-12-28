@@ -69,7 +69,13 @@ class EditVenue extends EditRecord
                             )
                             ->required()
                             ->initialCountry('US'),
-
+                        TextInput::make('daily_booking_cap')
+                            ->label('Daily Booking Cap')
+                            ->helperText('Maximum number of bookings allowed per day. Leave empty for no limit.')
+                            ->numeric()
+                            ->nullable()
+                            ->minValue(1)
+                            ->maxValue(999),
                     ]),
                 Repeater::make('contacts')
                     ->columnSpanFull()

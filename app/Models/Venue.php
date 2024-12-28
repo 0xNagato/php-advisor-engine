@@ -66,6 +66,7 @@ class Venue extends Model
         'non_prime_type',
         'status',
         'cutoff_time',
+        'daily_booking_cap',
     ];
 
     protected function casts(): array
@@ -78,6 +79,7 @@ class Venue extends Model
             'party_sizes' => 'array',
             'status' => VenueStatus::class,
             'cutoff_time' => 'datetime',
+            'daily_booking_cap' => 'integer',
         ];
     }
 
