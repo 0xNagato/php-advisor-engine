@@ -79,14 +79,14 @@ class ConciergeReportDashboard extends Dashboard
             ]),
             ConciergeRecentBookings::make([
                 'concierge' => auth()->user()->concierge,
-                'columnSpan' => '1',
+                'columnSpan' => 'full',
             ]),
-            ConciergeOverallLeaderboard::make([
-                'concierge' => auth()->user()->concierge,
-                'startDate' => Carbon::parse($this->filters['startDate']),
-                'endDate' => Carbon::parse($this->filters['endDate']),
-                'columnSpan' => 1,
-            ]),
+            // ConciergeOverallLeaderboard::make([
+            //     'concierge' => auth()->user()->concierge,
+            //     'startDate' => Carbon::parse($this->filters['startDate']),
+            //     'endDate' => Carbon::parse($this->filters['endDate']),
+            //     'columnSpan' => 1,
+            // ]),
         ];
     }
 
