@@ -61,6 +61,7 @@ class Venue extends Model
         'minimum_spend',
         'logo_path',
         'region',
+        'timezone',
         'increment_fee',
         'non_prime_fee_per_head',
         'non_prime_type',

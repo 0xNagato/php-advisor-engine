@@ -150,7 +150,8 @@ class CreateVenue extends CreateRecord
     protected function handleRecordCreation(array $data): Model
     {
         return DB::transaction(function () use ($data) {
-            $partnerId = (auth()->user()->main_role === 'Partner') ? auth()->user()->partner->id : null;
+            $partnerId = auth()->user()->hasActiveRole('partner') ? auth()->user()->partner->id : null;
+            $region = Region::find($data['region']);
 
             $user = User::query()->create([
                 'first_name' => $data['first_name'],
@@ -172,8 +173,6 @@ class CreateVenue extends CreateRecord
 
             $user->assignRole('venue');
 
-            // VenueCreated::dispatch($venue);
-
             return $user->venue()->create([
                 'name' => $data['name'],
                 'primary_contact_name' => $data['primary_contact_name'],
@@ -182,6 +181,7 @@ class CreateVenue extends CreateRecord
                 'booking_fee' => $data['booking_fee'],
                 'contacts' => $data['contacts'],
                 'region' => $data['region'],
+                'timezone' => $region->timezone,
                 'venue_logo_path' => $data['venue_logo_path'],
                 'open_days' => [
                     'monday' => 'open',
