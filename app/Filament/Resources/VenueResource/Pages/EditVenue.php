@@ -6,6 +6,7 @@ use App\Enums\VenueStatus;
 use App\Filament\Resources\VenueResource;
 use App\Filament\Resources\VenueResource\Components\VenueContactsForm;
 use App\Models\Partner;
+use App\Models\Region;
 use App\Models\Venue;
 use Filament\Actions\Action;
 use Filament\Actions\ActionGroup;
@@ -54,6 +55,17 @@ class EditVenue extends EditRecord
                             ->label('Venue Name')
                             ->required()
                             ->maxLength(255),
+                        Select::make('region')
+                            ->placeholder('Select Region')
+                            ->options(Region::all()->sortBy('id')->pluck('name', 'id'))
+                            ->required()
+                            ->afterStateUpdated(function ($state, Venue $record) {
+                                $region = Region::find($state);
+                                if ($region) {
+                                    $record->timezone = $region->timezone;
+                                    $record->save();
+                                }
+                            }),
                         TextInput::make('primary_contact_name')
                             ->label('Primary Contact Name')
                             ->required(),
