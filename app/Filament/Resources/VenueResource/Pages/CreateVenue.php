@@ -164,7 +164,7 @@ class CreateVenue extends CreateRecord
     {
         return DB::transaction(function () use ($data) {
             $partnerId = auth()->user()->hasActiveRole('partner') ? auth()->user()->partner->id : null;
-            $region = Region::find($data['region']);
+            $region = Region::query()->find($data['region']);
 
             $user = User::query()->create([
                 'first_name' => $data['first_name'],

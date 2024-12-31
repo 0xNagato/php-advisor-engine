@@ -231,7 +231,7 @@ class ReservationService
 
         // Apply closure rules if needed
         if ($this->isClosedDate($this->date)) {
-            $venue = Venue::find($venueId);
+            $venue = Venue::query()->find($venueId);
             $schedulesByDate = $this->applyClosureRules(new Collection([$venue]), $this->date)
                 ->first()
                 ?->schedules ?? $schedulesByDate;

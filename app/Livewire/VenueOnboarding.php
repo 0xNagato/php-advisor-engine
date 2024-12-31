@@ -355,7 +355,7 @@ class VenueOnboarding extends Component
     {
         $partners = User::query()
             ->select(['id', 'first_name', 'last_name'])
-            ->whereHas('roles', fn ($query) => $query->where('name', 'partner'))
+            ->whereHas('roles', fn (\Illuminate\Contracts\Database\Query\Builder $query) => $query->where('name', 'partner'))
             ->orderBy('first_name')
             ->get()
             ->map(fn ($user) => [

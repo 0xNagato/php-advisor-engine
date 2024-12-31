@@ -255,7 +255,7 @@ class ReservationHub extends Page
             ->where('start_time', '<=', $endTimeForQuery)
             ->get();
 
-        $venue = Venue::find($venueId);
+        $venue = Venue::query()->find($venueId);
 
         // Apply closure rules if needed
         if ($this->isClosedDate($this->form->getState()['date'])) {

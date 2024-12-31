@@ -17,7 +17,7 @@ return new class extends Migration
         // Update existing venues with their region's timezone
         $venues = Venue::all();
         foreach ($venues as $venue) {
-            $region = Region::find($venue->region);
+            $region = Region::query()->find($venue->region);
             if ($region) {
                 $venue->update(['timezone' => $region->timezone]);
             }

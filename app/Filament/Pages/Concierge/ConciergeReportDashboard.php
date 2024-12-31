@@ -3,7 +3,6 @@
 namespace App\Filament\Pages\Concierge;
 
 use App\Filament\DateRangeFilterAction;
-use App\Livewire\Concierge\ConciergeOverallLeaderboard;
 use App\Livewire\Concierge\ConciergeRecentBookings;
 use App\Livewire\ConciergeOverview;
 use App\Livewire\DateRangeFilterWidget;

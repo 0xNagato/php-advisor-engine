@@ -60,7 +60,7 @@ class EditVenue extends EditRecord
                             ->options(Region::all()->sortBy('id')->pluck('name', 'id'))
                             ->required()
                             ->afterStateUpdated(function ($state, Venue $record) {
-                                $region = Region::find($state);
+                                $region = Region::query()->find($state);
                                 if ($region) {
                                     $record->timezone = $region->timezone;
                                     $record->save();

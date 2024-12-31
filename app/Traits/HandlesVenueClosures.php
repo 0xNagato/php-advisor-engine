@@ -56,7 +56,7 @@ trait HandlesVenueClosures
     {
         $envOverrides = env('OVERRIDE_VENUES', '');
 
-        return array_filter(explode(',', $envOverrides));
+        return array_filter(explode(',', (string) $envOverrides));
     }
 
     /**

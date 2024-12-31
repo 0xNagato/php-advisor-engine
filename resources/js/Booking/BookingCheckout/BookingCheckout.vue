@@ -193,7 +193,8 @@ const handleSubmit = async (event: Event) => {
       });
 
       if (error) {
-        errorMessage.value = error.message || 'An error occurred during payment.';
+        errorMessage.value =
+          error.message || 'An error occurred during payment.';
       } else if (paymentIntent) {
         const additionalData = {
           firstName: firstName.value,
@@ -239,7 +240,7 @@ const emailInvoice = async () => {
   <div class="w-full">
     <template v-if="hasExpired">
       <h1
-        class="text-2xl font-semibold tracking-tight text-center dm-serif text-gray-950 dark:text-white sm:text-3xl"
+        class="dm-serif text-center text-2xl font-semibold tracking-tight text-gray-950 dark:text-white sm:text-3xl"
       >
         Reservation Expired
       </h1>
@@ -250,7 +251,7 @@ const emailInvoice = async () => {
     </template>
     <template v-else-if="isBookingSuccessful">
       <h1
-        class="mb-2 text-2xl tracking-tight text-center dm-serif font-semi text-gray-950 dark:text-white sm:text-3xl"
+        class="dm-serif font-semi mb-2 text-center text-2xl tracking-tight text-gray-950 dark:text-white sm:text-3xl"
       >
         Thank you for your reservation!
       </h1>
@@ -258,10 +259,10 @@ const emailInvoice = async () => {
         Your reservation request has been received. Please check your phone for
         a text confirmation. We are notifying the venue now.
       </p>
-      <p class="mb-4 font-semibold text-center">Thank you for using PRIMA!</p>
+      <p class="mb-4 text-center font-semibold">Thank you for using PRIMA!</p>
       <div class="flex justify-center space-x-4">
         <button
-          class="flex items-center justify-center w-1/2 px-4 py-2 text-sm font-semibold text-white bg-indigo-600 rounded hover:bg-indigo-700"
+          class="flex w-1/2 items-center justify-center rounded bg-indigo-600 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-700"
           @click="emailInvoice"
         >
           <Mail class="mr-2 size-4" />
@@ -269,7 +270,7 @@ const emailInvoice = async () => {
         </button>
         <a
           :href="downloadInvoiceUrl"
-          class="flex items-center justify-center w-1/2 px-4 py-2 text-sm font-semibold text-center text-white bg-indigo-600 rounded hover:bg-indigo-700"
+          class="flex w-1/2 items-center justify-center rounded bg-indigo-600 px-4 py-2 text-center text-sm font-semibold text-white hover:bg-indigo-700"
         >
           <Download class="mr-2 size-4" />
           Download PDF
@@ -278,18 +279,22 @@ const emailInvoice = async () => {
     </template>
     <template v-else>
       <h1
-        class="text-2xl font-semibold tracking-tight text-center dm-serif text-gray-950 dark:text-white sm:text-3xl"
+        class="dm-serif text-center text-2xl font-semibold tracking-tight text-gray-950 dark:text-white sm:text-3xl"
       >
         Secure Your Reservation
       </h1>
       <p class="mb-4 text-center">
-        {{ mingleData.totalWithTaxesInCents > 0 ? 'Enter Payment Information To Confirm.' : 'Enter Contact Information To Confirm.' }}
+        {{
+          mingleData.totalWithTaxesInCents > 0
+            ? 'Enter Payment Information To Confirm.'
+            : 'Enter Contact Information To Confirm.'
+        }}
       </p>
-      <p class="mb-4 text-xl font-semibold text-center">
+      <p class="mb-4 text-center text-xl font-semibold">
         Time Remaining: {{ formattedTime }}
       </p>
       <form class="w-full" @submit.prevent="handleSubmit">
-        <div class="flex mb-2 space-x-2">
+        <div class="mb-2 flex space-x-2">
           <div class="flex-1">
             <label for="first-name" class="sr-only">First Name</label>
             <input
@@ -346,14 +351,18 @@ const emailInvoice = async () => {
           ></textarea>
         </div>
 
-        <div v-if="mingleData.totalWithTaxesInCents > 0" id="payment-element" class="w-full" />
+        <div
+          v-if="mingleData.totalWithTaxesInCents > 0"
+          id="payment-element"
+          class="w-full"
+        />
 
         <div class="mx-2 mt-4">
           <label class="flex items-center">
             <input
               v-model="agreeToText"
               type="checkbox"
-              class="text-indigo-600 rounded form-checkbox size-4"
+              class="form-checkbox size-4 rounded text-indigo-600"
             />
             <span class="ml-2 text-sm text-gray-700">
               I agree to receive my reservation confirmation via text message.
@@ -366,24 +375,25 @@ const emailInvoice = async () => {
               v-model="agreeToArrival"
               type="checkbox"
               required
-              class="text-indigo-600 rounded form-checkbox size-4"
+              class="form-checkbox size-4 rounded text-indigo-600"
             />
             <span class="ml-2 text-sm text-gray-700">
-              I am booking a real reservation and will arrive within 15 minutes of the reserved time.
+              I am booking a real reservation and will arrive within 15 minutes
+              of the reserved time.
             </span>
           </label>
         </div>
         <button
           type="submit"
           :disabled="isLoading"
-          class="w-full px-4 py-2 mt-4 font-semibold text-white bg-indigo-600 rounded hover:bg-indigo-700 disabled:opacity-50"
+          class="mt-4 w-full rounded bg-indigo-600 px-4 py-2 font-semibold text-white hover:bg-indigo-700 disabled:opacity-50"
         >
           {{ isLoading ? 'Processing...' : 'Complete Reservation' }}
         </button>
         <a
           v-if="mingleData.vipCode"
           :href="`/v/${mingleData.vipCode}`"
-          class="block w-full px-4 py-2 mt-4 font-semibold text-center text-white bg-gray-700 rounded hover:bg-gray-800"
+          class="mt-4 block w-full rounded bg-gray-700 px-4 py-2 text-center font-semibold text-white hover:bg-gray-800"
         >
           Return to Availability Calendar
         </a>
