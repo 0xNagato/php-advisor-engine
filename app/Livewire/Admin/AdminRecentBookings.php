@@ -40,11 +40,12 @@ class AdminRecentBookings extends BaseWidget
                 'bookings.currency',
                 'bookings.is_prime',
                 'venues.name as venue_name',
+                'bookings.status',
             ])
             ->join('schedule_templates', 'bookings.schedule_template_id', '=', 'schedule_templates.id')
             ->join('venues', 'schedule_templates.venue_id', '=', 'venues.id')
             ->whereNotNull('bookings.confirmed_at')
-            ->whereIn('bookings.status', [BookingStatus::CONFIRMED, BookingStatus::REFUNDED, BookingStatus::PARTIALLY_REFUNDED])
+            ->whereIn('bookings.status', [BookingStatus::CONFIRMED, BookingStatus::REFUNDED, BookingStatus::PARTIALLY_REFUNDED, BookingStatus::CANCELLED])
             ->whereBetween('bookings.created_at', [$startDate, $endDate])
             ->orderByDesc('bookings.created_at')
             ->limit(10);
@@ -70,8 +71,20 @@ class AdminRecentBookings extends BaseWidget
                     ->label('Fee')
                     ->size('xs')
                     ->formatStateUsing(function (Booking $booking) {
+                        if ($booking->status === BookingStatus::CANCELLED) {
+                            return new HtmlString('<span class="text-xs italic text-gray-500">Cancelled</span>');
+                        }
+
                         if (! $booking->is_prime) {
                             return new HtmlString('<span class="text-xs italic text-gray-500">Non-Prime</span>');
+                        }
+
+                        if ($booking->status === BookingStatus::REFUNDED) {
+                            return new HtmlString('<span class="text-xs italic text-gray-500">Refunded</span>');
+                        }
+
+                        if ($booking->status === BookingStatus::PARTIALLY_REFUNDED) {
+                            return new HtmlString('<span class="text-xs italic text-gray-500">Partially Refunded</span>');
                         }
 
                         return $booking->total_fee > 0

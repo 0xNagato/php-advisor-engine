@@ -58,6 +58,7 @@ class ViewBooking extends ViewRecord
             BookingStatus::NO_SHOW,
             BookingStatus::REFUNDED,
             BookingStatus::PARTIALLY_REFUNDED,
+            BookingStatus::CANCELLED,
         ], true), 404);
 
         if (auth()->user()->hasActiveRole('super_admin') || auth()->user()->hasActiveRole('partner') || auth()->user()->hasActiveRole('concierge')) {
@@ -355,12 +356,6 @@ class ViewBooking extends ViewRecord
             return Action::make('cancelBooking')->hidden();
         }
 
-        $venueTimezone = $this->record->venue->inRegion->timezone;
-        $bookingTime = $this->record->booking_at->setTimezone($venueTimezone);
-        $currentTime = now()->setTimezone($venueTimezone);
-
-        $canCancel = $currentTime->lt($bookingTime);
-
         return Action::make('cancelBooking')
             ->label('Cancel Booking')
             ->color('danger')
@@ -382,9 +377,7 @@ class ViewBooking extends ViewRecord
             ->button()
             ->size('lg')
             ->extraAttributes(['class' => 'w-full'])
-            ->disabled(fn () => $this->record->status === BookingStatus::CANCELLED ||
-                ! $canCancel
-            )
+            ->disabled(fn () => $this->record->status === BookingStatus::CANCELLED)
             ->action(function () {
                 $this->cancelNonPrimeBooking();
             });
