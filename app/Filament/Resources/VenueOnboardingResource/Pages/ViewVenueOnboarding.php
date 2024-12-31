@@ -4,8 +4,11 @@ namespace App\Filament\Resources\VenueOnboardingResource\Pages;
 
 use App\Actions\GenerateVenueAgreement;
 use App\Filament\Resources\VenueOnboardingResource;
+use App\Notifications\VenueAgreementCopy;
 use Filament\Actions\Action;
+use Filament\Notifications\Notification;
 use Filament\Resources\Pages\ViewRecord;
+use Illuminate\Support\Facades\Notification as NotificationFacade;
 
 class ViewVenueOnboarding extends ViewRecord
 {
@@ -26,6 +29,23 @@ class ViewVenueOnboarding extends ViewRecord
                         ['Content-Type' => 'application/pdf']
                     );
                 })
+                ->color('gray'),
+
+            Action::make('resend_agreement')
+                ->label('Resend Agreement')
+                ->icon('heroicon-o-envelope')
+                ->action(function () {
+                    NotificationFacade::route('mail', $this->record->email)
+                        ->notify(new VenueAgreementCopy($this->record));
+
+                    Notification::make()
+                        ->title('Agreement sent successfully')
+                        ->success()
+                        ->send();
+                })
+                ->requiresConfirmation()
+                ->modalHeading('Resend Agreement')
+                ->modalDescription('Are you sure you want to resend the agreement to '.$this->record->email.'?')
                 ->color('gray'),
 
             Action::make('process')
