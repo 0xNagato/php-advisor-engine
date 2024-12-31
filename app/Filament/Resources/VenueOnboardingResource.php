@@ -42,13 +42,26 @@ class VenueOnboardingResource extends Resource
                         Placeholder::make('company_name')
                             ->label('Company Name')
                             ->content(fn (VenueOnboarding $record): string => $record->company_name),
+                        Placeholder::make('partner_name')
+                            ->label('PRIMA Partner')
+                            ->content(function (VenueOnboarding $record): string|HtmlString {
+                                if (! $record->partnerUser?->partner) {
+                                    return 'No Partner Assigned';
+                                }
+
+                                $url = route('filament.admin.resources.partners.view', ['record' => $record->partnerUser->partner->id]);
+
+                                return new HtmlString(
+                                    "<a href='{$url}' class='text-primary-600 hover:text-primary-500'>{$record->partnerUser->first_name} {$record->partnerUser->last_name}</a>"
+                                );
+                            }),
                         Placeholder::make('venue_count')
                             ->label('Number of Venues')
                             ->content(fn (VenueOnboarding $record): string => $record->venue_count),
                         Placeholder::make('has_logos')
                             ->label('Has Logos')
                             ->content(fn (VenueOnboarding $record): string => $record->has_logos ? 'Yes' : 'No'),
-                    ])->columns(3),
+                    ])->columns(2),
 
                 Section::make('Contact Information')
                     ->schema([

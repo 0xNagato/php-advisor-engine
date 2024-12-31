@@ -47,5 +47,8 @@ class VenueOnboardingData extends Data
         public bool $agreement_accepted,
 
         public bool $send_agreement_copy,
+
+        #[Required]
+        public ?int $partner_id,
     ) {}
 }

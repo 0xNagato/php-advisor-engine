@@ -33,6 +33,7 @@ class VenueOnboarding extends Component
     /** @var array<string,string> */
     protected array $steps = [
         'company' => 'Company',
+        'partner' => 'Partner',
         'venues' => 'Venues',
         'prime-hours' => 'Hours',
         'incentive' => 'Incentives',
@@ -92,6 +93,9 @@ class VenueOnboarding extends Component
 
     /** @var array<int, array{value: string, label: string}> */
     public array $availableRegions = [];
+
+    #[Validate('required|exists:users,id')]
+    public ?string $partner_id = null;
 
     public function mount(): void
     {
@@ -170,6 +174,7 @@ class VenueOnboarding extends Component
             'last_name' => $this->last_name,
             'email' => $this->email,
             'phone' => $this->phone,
+            'partner_id' => $this->partner_id,
         ]);
     }
 
@@ -260,6 +265,7 @@ class VenueOnboarding extends Component
                 'logo_files' => null,
                 'agreement_accepted' => $this->agreement_accepted,
                 'send_agreement_copy' => $this->send_agreement_copy,
+                'partner_id' => $this->partner_id,
             ]);
 
             $onboarding = VenueOnboardingModel::create([
@@ -316,6 +322,9 @@ class VenueOnboarding extends Component
                     },
                 ],
             ]),
+            'partner' => $this->validate([
+                'partner_id' => 'required|exists:users,id',
+            ]),
             'venues' => $this->validate([
                 'venue_count' => 'required|integer|min:1',
                 'venue_names.*' => [
@@ -344,10 +353,21 @@ class VenueOnboarding extends Component
 
     public function render(): View
     {
-        return view('livewire.venue-onboarding')
-            ->layout('components.layouts.app', [
-                'title' => $this->submitted ? 'Onboarding Submitted' : 'Venue Onboarding',
+        $partners = User::query()
+            ->select(['id', 'first_name', 'last_name'])
+            ->whereHas('roles', fn ($query) => $query->where('name', 'partner'))
+            ->orderBy('first_name')
+            ->get()
+            ->map(fn ($user) => [
+                'id' => $user->id,
+                'name' => "{$user->first_name} {$user->last_name}",
             ]);
+
+        return view('livewire.venue-onboarding', [
+            'partners' => $partners,
+        ])->layout('components.layouts.app', [
+            'title' => $this->submitted ? 'Onboarding Submitted' : 'Venue Onboarding',
+        ]);
     }
 
     public function resetForm(): void

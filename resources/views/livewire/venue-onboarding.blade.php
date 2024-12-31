@@ -50,6 +50,9 @@
                                 @enderror
                             </div>
 
+                            <x-type-ahead label="Name of PRIMA Partner" placeholder="Search for a partner..."
+                                :items="$partners" wire-model="partner_id" :error="$errors->first('partner_id')" />
+
                             <div class="grid grid-cols-2 gap-4">
                                 <div>
                                     <label class="block mb-2 text-sm text-gray-700">First Name</label>
