@@ -79,19 +79,19 @@ class DeleteOrSuspendUser
                 ->delete();
 
             // Delete cancelled bookings
-            if ($user->hasRole('concierge')) {
+            if ($user->hasRole('concierge') && $user->concierge) {
                 Booking::query()->where('concierge_id', $user->concierge->id)
                     ->where('status', BookingStatus::CANCELLED)
                     ->delete();
             }
-            if ($user->hasRole('venue')) {
+            if ($user->hasRole('venue') && $user->venue) {
                 Booking::query()->whereHas('venue', function (Builder $query) use ($user) {
                     $query->where('user_id', $user->id);
                 })
                     ->where('status', BookingStatus::CANCELLED)
                     ->delete();
             }
-            if ($user->hasRole('partner')) {
+            if ($user->hasRole('partner') && $user->partner) {
                 Booking::query()->where(function ($query) use ($user) {
                     $query->where('partner_concierge_id', $user->partner->id)
                         ->orWhere('partner_venue_id', $user->partner->id);
@@ -101,13 +101,13 @@ class DeleteOrSuspendUser
             }
 
             // Delete associated role models
-            if ($user->hasRole('concierge')) {
+            if ($user->hasRole('concierge') && $user->concierge) {
                 $user->concierge->delete();
             }
-            if ($user->hasRole('partner')) {
+            if ($user->hasRole('partner') && $user->partner) {
                 $user->partner->delete();
             }
-            if ($user->hasRole('venue')) {
+            if ($user->hasRole('venue') && $user->venue) {
                 $user->venue->specialPricing()->delete();
                 $user->venue->delete();
             }
