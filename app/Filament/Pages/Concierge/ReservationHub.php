@@ -5,7 +5,6 @@ namespace App\Filament\Pages\Concierge;
 use App\Actions\Booking\CreateBooking;
 use App\Enums\BookingStatus;
 use App\Enums\VenueStatus;
-use App\Events\BookingCancelled;
 use App\Models\Booking;
 use App\Models\Region;
 use App\Models\ScheduleTemplate;
@@ -371,8 +370,7 @@ class ReservationHub extends Page
             return;
         }
 
-        $this->booking->update(['status' => 'cancelled']);
-        BookingCancelled::dispatch($this->booking);
+        $this->booking->update(['status' => BookingStatus::ABANDONED]);
         $this->booking = null;
         $this->qrCode = null;
         $this->bookingUrl = null;

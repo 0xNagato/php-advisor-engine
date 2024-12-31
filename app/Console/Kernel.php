@@ -37,8 +37,8 @@ class Kernel extends ConsoleKernel
                 ->everyMinute()
                 ->withoutOverlapping();
 
-            // Cancel stale bookings that have been pending for too long
-            $schedule->command('bookings:cancel-stale')
+            // Abandon stale bookings that have been pending for too long
+            $schedule->command('bookings:abandon-stale')
                 ->everyMinute()
                 ->withoutOverlapping();
 

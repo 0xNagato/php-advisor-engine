@@ -7,11 +7,11 @@ use App\Models\Booking;
 use Carbon\Carbon;
 use Illuminate\Console\Command;
 
-class CancelStaleBookings extends Command
+class AbandonStaleBookings extends Command
 {
-    protected $signature = 'bookings:cancel-stale';
+    protected $signature = 'bookings:abandon-stale';
 
-    protected $description = 'Cancel bookings that have been pending or guest_on_page for more than 30 minutes';
+    protected $description = 'Abandon bookings that have been pending or guest_on_page for more than 30 minutes';
 
     public function handle()
     {
@@ -38,15 +38,15 @@ class CancelStaleBookings extends Command
             activity()
                 ->performedOn($booking)
                 ->withProperties([
-                    'action' => 'auto_cancelled',
+                    'action' => 'auto_abandoned',
                     'previous_status' => $booking->status,
                     'booking_id' => $booking->id,
                 ])
-                ->log('Booking automatically cancelled due to inactivity');
+                ->log('Booking automatically abandoned due to inactivity');
 
-            $booking->update(['status' => BookingStatus::CANCELLED]);
+            $booking->update(['status' => BookingStatus::ABANDONED]);
         }
 
-        $this->info("Successfully cancelled {$count} stale bookings.");
+        $this->info("Successfully abandoned {$count} stale bookings.");
     }
 }

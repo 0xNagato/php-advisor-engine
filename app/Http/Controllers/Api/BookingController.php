@@ -7,7 +7,6 @@ use App\Actions\Region\GetUserRegion;
 use App\Data\Booking\CreateBookingReturnData;
 use App\Enums\BookingStatus;
 use App\Enums\VenueStatus;
-use App\Events\BookingCancelled;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Api\BookingCreateRequest;
 use App\Http\Requests\Api\BookingUpdateRequest;
@@ -175,8 +174,7 @@ class BookingController extends Controller
         $booking = Booking::query()->findOrFail($id);
 
         if ($booking) {
-            $booking->update(['status' => 'cancelled']);
-            BookingCancelled::dispatch($booking);
+            $booking->update(['status' => BookingStatus::ABANDONED]);
         }
 
         return response()->json([

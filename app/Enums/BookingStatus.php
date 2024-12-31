@@ -6,6 +6,8 @@ enum BookingStatus: string
 {
     case PENDING = 'pending';
     case GUEST_ON_PAGE = 'guest_on_page';
+
+    case ABANDONED = 'abandoned';
     case CANCELLED = 'cancelled';
     case CONFIRMED = 'confirmed';
     case COMPLETED = 'completed';
@@ -22,6 +24,7 @@ enum BookingStatus: string
             self::PENDING => 'Pending',
             self::GUEST_ON_PAGE => 'Guest on Page',
             self::CANCELLED => 'Cancelled',
+            self::ABANDONED => 'Abandoned',
             self::CONFIRMED => 'Confirmed',
             self::COMPLETED => 'Completed',
             self::REFUNDED => 'Refunded',
