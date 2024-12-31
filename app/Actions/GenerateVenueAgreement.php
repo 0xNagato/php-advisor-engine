@@ -23,6 +23,7 @@ class GenerateVenueAgreement
             'last_name' => $onboarding->last_name,
             'use_non_prime_incentive' => $onboarding->use_non_prime_incentive,
             'non_prime_per_diem' => $onboarding->non_prime_per_diem,
+            'created_at' => $onboarding->created_at,
         ]);
 
         return $pdf->output();

@@ -132,7 +132,7 @@
             </p>
             <p>
                 <span class="signature-label">Date of Acceptance:</span>
-                {{ now()->format('F j, Y') }}
+                {{ $created_at->format('F j, Y') }}
             </p>
         </div>
     </div>
