@@ -3,6 +3,7 @@
 namespace App\Traits;
 
 use App\Actions\Reservations\GetReservationTimeOptions;
+use App\Services\ReservationService;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Hidden;
 use Filament\Forms\Components\Select;
@@ -65,8 +66,15 @@ trait ManagesBookingForms
                 ->options(fn (Get $get) => GetReservationTimeOptions::run(date: $get('date')))
                 ->disableOptionWhen(function (Get $get, $value) {
                     $isCurrentDay = $get('date') === now($this->timezone)->format('Y-m-d');
+                    if (! $isCurrentDay) {
+                        return false;
+                    }
 
-                    return $isCurrentDay && $value < now($this->timezone)->format('H:i:s');
+                    $currentTime = now($this->timezone);
+                    $optionTime = Carbon::createFromFormat('H:i:s', $value, $this->timezone);
+
+                    // Only allow times that are at least MINUTES_PAST minutes in the future
+                    return $optionTime->isBefore($currentTime->copy()->addMinutes(ReservationService::MINUTES_PAST));
                 })
                 ->placeholder('Select Time')
                 ->hiddenLabel()
