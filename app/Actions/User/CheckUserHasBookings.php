@@ -15,7 +15,7 @@ class CheckUserHasBookings
     public function handle(User $user): bool
     {
         // Check for non-cancelled bookings as a concierge
-        if ($user->hasRole('concierge')) {
+        if ($user->hasRole('concierge') && $user->concierge) {
             $hasBookings = Booking::query()
                 ->where('concierge_id', $user->concierge->id)
                 ->where('status', '!=', BookingStatus::CANCELLED)
@@ -27,7 +27,7 @@ class CheckUserHasBookings
         }
 
         // Check for non-cancelled bookings as a venue
-        if ($user->hasRole('venue')) {
+        if ($user->hasRole('venue') && $user->venue) {
             $hasBookings = Booking::query()
                 ->whereHas('venue', function (Builder $query) use ($user) {
                     $query->where('user_id', $user->id);
@@ -41,7 +41,7 @@ class CheckUserHasBookings
         }
 
         // Check for non-cancelled bookings as a partner
-        if ($user->hasRole('partner')) {
+        if ($user->hasRole('partner') && $user->partner) {
             $hasBookings = Booking::query()
                 ->where(function ($query) use ($user) {
                     $query->where('partner_concierge_id', $user->partner->id)
