@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Actions\Booking\CheckCustomerHasNonPrimeBooking;
 use App\Actions\Booking\CreateBooking;
 use App\Actions\Region\GetUserRegion;
 use App\Data\Booking\CreateBookingReturnData;
@@ -205,6 +206,31 @@ class BookingController extends Controller
      */
     private function handleNonPrimeBooking(Booking $booking, array $validatedData): JsonResponse
     {
+        // Check if customer already has a non-prime booking for this day
+        $hasExistingBooking = CheckCustomerHasNonPrimeBooking::run(
+            $validatedData['phone'],
+            $booking->booking_at->format('Y-m-d'),
+            $booking->venue->timezone
+        );
+
+        if ($hasExistingBooking) {
+            activity()
+                ->performedOn($booking)
+                ->withProperties([
+                    'venue_id' => $booking->venue?->id,
+                    'venue_name' => $booking->venue?->name,
+                    'guest_phone' => $validatedData['phone'],
+                    'booking_date' => $booking->booking_at->format('Y-m-d'),
+                    'concierge_id' => auth()->user()?->concierge?->id,
+                    'concierge_name' => auth()->user()?->name,
+                ])
+                ->log('Non-prime booking update failed - Customer already has booking for this day');
+
+            return response()->json([
+                'message' => 'Customer already has a non-prime booking for this day',
+            ], 422);
+        }
+
         app(BookingService::class)->processBooking($booking, $validatedData);
 
         $booking->update(['concierge_referral_type' => 'app']);

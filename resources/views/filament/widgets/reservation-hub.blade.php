@@ -320,10 +320,17 @@
                 <p class="text-center">Thank you for the booking!<br>We are notifying the venue now.</p>
             </div>
 
-            <x-filament::button wire:click="resetBooking" class="w-full bg-[#421fff] h-[48px]"
-                icon="gmdi-restaurant-menu">
-                Back to Reservation Hub
-            </x-filament::button>
+            @if ($scheduleTemplateId && $date)
+                <x-filament::button wire:click="resetBookingAndReturnToAvailabilityCalendar"
+                    class="w-full bg-[#421fff] h-[48px]" icon="gmdi-calendar-month">
+                    Back to Availability Calendar
+                </x-filament::button>
+            @else
+                <x-filament::button wire:click="resetBooking" class="w-full bg-[#421fff] h-[48px]"
+                    icon="gmdi-restaurant-menu">
+                    Back to Reservation Hub
+                </x-filament::button>
+            @endif
 
             <div class="flex gap-4">
 

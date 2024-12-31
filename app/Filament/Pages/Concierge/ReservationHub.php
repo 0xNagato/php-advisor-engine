@@ -2,6 +2,7 @@
 
 namespace App\Filament\Pages\Concierge;
 
+use App\Actions\Booking\CheckCustomerHasNonPrimeBooking;
 use App\Actions\Booking\CreateBooking;
 use App\Enums\BookingStatus;
 use App\Enums\VenueStatus;
@@ -334,15 +335,36 @@ class ReservationHub extends Page
             return;
         }
 
-        if (! $this->booking->prime_time && ! ($form['real_customer_confirmation'] ?? false)) {
-            Notification::make()
-                ->title('Confirmation Required')
-                ->body('Please confirm that you are booking for a real customer.')
-                ->danger()
-                ->send();
-            $this->isLoading = false;
+        if (! $this->booking->prime_time) {
+            // Check for real customer confirmation
+            if (! ($form['real_customer_confirmation'] ?? false)) {
+                Notification::make()
+                    ->title('Confirmation Required')
+                    ->body('Please confirm that you are booking for a real customer.')
+                    ->danger()
+                    ->send();
+                $this->isLoading = false;
 
-            return;
+                return;
+            }
+
+            // Check for existing non-prime booking
+            $hasExistingBooking = CheckCustomerHasNonPrimeBooking::run(
+                $form['phone'],
+                $this->booking->booking_at->format('Y-m-d'),
+                $this->booking->venue->timezone
+            );
+
+            if ($hasExistingBooking) {
+                Notification::make()
+                    ->title('Booking Not Allowed')
+                    ->body('Customer already has a non-prime booking for this day.')
+                    ->danger()
+                    ->send();
+                $this->isLoading = false;
+
+                return;
+            }
         }
 
         try {
@@ -419,5 +441,11 @@ class ReservationHub extends Page
     public function SMSSent(): void
     {
         $this->SMSSent = true;
+    }
+
+    public function resetBookingAndReturnToAvailabilityCalendar(): void
+    {
+        $this->resetBooking();
+        $this->redirect(AvailabilityCalendar::getUrl());
     }
 }
