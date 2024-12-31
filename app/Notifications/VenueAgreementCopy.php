@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Notifications;
 
+use App\Actions\GenerateVenueAgreement;
 use App\Models\VenueOnboarding;
-use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
@@ -26,16 +26,7 @@ class VenueAgreementCopy extends Notification implements ShouldQueue
 
     public function toMail(object $notifiable): MailMessage
     {
-        $venue_names = $this->onboarding->locations->pluck('name')->toArray();
-
-        $pdf = PDF::loadView('pdfs.venue-agreement', [
-            'company_name' => $this->onboarding->company_name,
-            'venue_names' => $venue_names,
-            'first_name' => $this->onboarding->first_name,
-            'last_name' => $this->onboarding->last_name,
-            'use_non_prime_incentive' => $this->onboarding->use_non_prime_incentive,
-            'non_prime_per_diem' => $this->onboarding->non_prime_per_diem,
-        ]);
+        $pdfContent = GenerateVenueAgreement::run($this->onboarding);
 
         return (new MailMessage)
             ->subject('Your PRIMA Venue Agreement')
@@ -46,7 +37,7 @@ class VenueAgreementCopy extends Notification implements ShouldQueue
             ->line("Signed By: {$this->onboarding->first_name} {$this->onboarding->last_name}")
             ->line('Date: '.$this->onboarding->created_at->format('F j, Y'))
             ->attachData(
-                $pdf->output(),
+                $pdfContent,
                 'prima-venue-agreement.pdf',
                 [
                     'mime' => 'application/pdf',
