@@ -2,15 +2,17 @@
 
 namespace App\Livewire\Booking;
 
+use App\Actions\Booking\CheckCustomerHasNonPrimeBooking;
 use App\Actions\Booking\CompleteBooking;
 use App\Enums\BookingStatus;
 use App\Mail\CustomerInvoice;
 use App\Models\Booking;
+use App\Notifications\MultipleNonPrimeBookingAttemptNotification;
 use App\Traits\FormatsPhoneNumber;
-use Filament\Notifications\Notification;
 use Ijpatricio\Mingle\Concerns\InteractsWithMingles;
 use Ijpatricio\Mingle\Contracts\HasMingles;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Notification;
 use Livewire\Attributes\Url;
 use Livewire\Component;
 use Stripe\Exception\ApiErrorException;
@@ -24,6 +26,8 @@ class BookingCheckout extends Component implements HasMingles
     const int TIME_LIMIT_IN_MINUTES = 15;
 
     public Booking $booking;
+
+    public ?Booking $existingBooking = null;
 
     #[Url]
     public $r = '';
@@ -111,5 +115,65 @@ class BookingCheckout extends Component implements HasMingles
     public function getDownloadInvoiceUrl(): string
     {
         return route('customer.invoice.download', ['uuid' => $this->booking->uuid]);
+    }
+
+    public function checkForExistingBooking(array $formData): ?array
+    {
+        if (! $this->booking->is_prime) {
+            $hasExistingBooking = CheckCustomerHasNonPrimeBooking::run(
+                $formData['phone'],
+                $this->booking->booking_at->format('Y-m-d'),
+                $this->booking->venue->timezone
+            );
+
+            if ($hasExistingBooking) {
+                $this->existingBooking = Booking::query()
+                    ->where('guest_phone', $formData['phone'])
+                    ->where('is_prime', false)
+                    ->whereDate('booking_at', $this->booking->booking_at->format('Y-m-d'))
+                    ->first();
+
+                return [
+                    'error' => 'multiple_booking',
+                    'message' => 'You already have a non-prime reservation for this day.',
+                ];
+            }
+        }
+
+        return null;
+    }
+
+    public function submitCustomerMessage(string $message, string $phone): array
+    {
+        $existingBooking = CheckCustomerHasNonPrimeBooking::run(
+            $phone,
+            $this->booking->booking_at->format('Y-m-d'),
+            $this->booking->venue->timezone
+        );
+
+        if (! $existingBooking) {
+            return [
+                'success' => false,
+                'message' => 'Unable to process request: No existing booking found.',
+            ];
+        }
+
+        $notification = new MultipleNonPrimeBookingAttemptNotification(
+            $existingBooking,
+            $this->booking,
+            $message
+        );
+
+        Notification::route('mail', [
+            'prima@primavip.co' => 'PRIMA Team',
+            'kevin@primavip.co' => 'Kevin',
+            'alex@primavip.co' => 'Alex',
+            'andru.weir@gmail.com' => 'Andru',
+        ])->notify($notification);
+
+        return [
+            'success' => true,
+            'message' => 'Thank you for letting us know. Our team will review your request.',
+        ];
     }
 }

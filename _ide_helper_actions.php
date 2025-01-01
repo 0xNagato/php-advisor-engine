@@ -3,6 +3,20 @@
 namespace App\Actions\Booking;
 
 /**
+ * @method static \Lorisleiva\Actions\Decorators\JobDecorator|\Lorisleiva\Actions\Decorators\UniqueJobDecorator makeJob(string $phoneNumber, string $bookingDate, ?string $timezone = null)
+ * @method static \Lorisleiva\Actions\Decorators\UniqueJobDecorator makeUniqueJob(string $phoneNumber, string $bookingDate, ?string $timezone = null)
+ * @method static \Illuminate\Foundation\Bus\PendingDispatch dispatch(string $phoneNumber, string $bookingDate, ?string $timezone = null)
+ * @method static \Illuminate\Foundation\Bus\PendingDispatch|\Illuminate\Support\Fluent dispatchIf(bool $boolean, string $phoneNumber, string $bookingDate, ?string $timezone = null)
+ * @method static \Illuminate\Foundation\Bus\PendingDispatch|\Illuminate\Support\Fluent dispatchUnless(bool $boolean, string $phoneNumber, string $bookingDate, ?string $timezone = null)
+ * @method static dispatchSync(string $phoneNumber, string $bookingDate, ?string $timezone = null)
+ * @method static dispatchNow(string $phoneNumber, string $bookingDate, ?string $timezone = null)
+ * @method static dispatchAfterResponse(string $phoneNumber, string $bookingDate, ?string $timezone = null)
+ * @method static \App\Models\Booking|null run(string $phoneNumber, string $bookingDate, ?string $timezone = null)
+ */
+class CheckCustomerHasNonPrimeBooking
+{
+}
+/**
  * @method static \Lorisleiva\Actions\Decorators\JobDecorator|\Lorisleiva\Actions\Decorators\UniqueJobDecorator makeJob(\App\Models\Booking $booking, string $paymentIntentId, array $formData)
  * @method static \Lorisleiva\Actions\Decorators\UniqueJobDecorator makeUniqueJob(\App\Models\Booking $booking, string $paymentIntentId, array $formData)
  * @method static \Illuminate\Foundation\Bus\PendingDispatch dispatch(\App\Models\Booking $booking, string $paymentIntentId, array $formData)
@@ -14,6 +28,34 @@ namespace App\Actions\Booking;
  * @method static array run(\App\Models\Booking $booking, string $paymentIntentId, array $formData)
  */
 class CompleteBooking
+{
+}
+/**
+ * @method static \Lorisleiva\Actions\Decorators\JobDecorator|\Lorisleiva\Actions\Decorators\UniqueJobDecorator makeJob(\App\Models\Booking $booking)
+ * @method static \Lorisleiva\Actions\Decorators\UniqueJobDecorator makeUniqueJob(\App\Models\Booking $booking)
+ * @method static \Illuminate\Foundation\Bus\PendingDispatch dispatch(\App\Models\Booking $booking)
+ * @method static \Illuminate\Foundation\Bus\PendingDispatch|\Illuminate\Support\Fluent dispatchIf(bool $boolean, \App\Models\Booking $booking)
+ * @method static \Illuminate\Foundation\Bus\PendingDispatch|\Illuminate\Support\Fluent dispatchUnless(bool $boolean, \App\Models\Booking $booking)
+ * @method static dispatchSync(\App\Models\Booking $booking)
+ * @method static dispatchNow(\App\Models\Booking $booking)
+ * @method static dispatchAfterResponse(\App\Models\Booking $booking)
+ * @method static array run(\App\Models\Booking $booking)
+ */
+class ConvertToNonPrime
+{
+}
+/**
+ * @method static \Lorisleiva\Actions\Decorators\JobDecorator|\Lorisleiva\Actions\Decorators\UniqueJobDecorator makeJob(\App\Models\Booking $booking)
+ * @method static \Lorisleiva\Actions\Decorators\UniqueJobDecorator makeUniqueJob(\App\Models\Booking $booking)
+ * @method static \Illuminate\Foundation\Bus\PendingDispatch dispatch(\App\Models\Booking $booking)
+ * @method static \Illuminate\Foundation\Bus\PendingDispatch|\Illuminate\Support\Fluent dispatchIf(bool $boolean, \App\Models\Booking $booking)
+ * @method static \Illuminate\Foundation\Bus\PendingDispatch|\Illuminate\Support\Fluent dispatchUnless(bool $boolean, \App\Models\Booking $booking)
+ * @method static dispatchSync(\App\Models\Booking $booking)
+ * @method static dispatchNow(\App\Models\Booking $booking)
+ * @method static dispatchAfterResponse(\App\Models\Booking $booking)
+ * @method static array run(\App\Models\Booking $booking)
+ */
+class ConvertToPrime
 {
 }
 /**
@@ -102,6 +144,36 @@ namespace App\Actions\Concierge;
 class EnsureVipCodeExists
 {
 }
+namespace App\Actions;
+
+/**
+ * @method static \Lorisleiva\Actions\Decorators\JobDecorator|\Lorisleiva\Actions\Decorators\UniqueJobDecorator makeJob(\App\Models\VenueOnboarding $onboarding)
+ * @method static \Lorisleiva\Actions\Decorators\UniqueJobDecorator makeUniqueJob(\App\Models\VenueOnboarding $onboarding)
+ * @method static \Illuminate\Foundation\Bus\PendingDispatch dispatch(\App\Models\VenueOnboarding $onboarding)
+ * @method static \Illuminate\Foundation\Bus\PendingDispatch|\Illuminate\Support\Fluent dispatchIf(bool $boolean, \App\Models\VenueOnboarding $onboarding)
+ * @method static \Illuminate\Foundation\Bus\PendingDispatch|\Illuminate\Support\Fluent dispatchUnless(bool $boolean, \App\Models\VenueOnboarding $onboarding)
+ * @method static dispatchSync(\App\Models\VenueOnboarding $onboarding)
+ * @method static dispatchNow(\App\Models\VenueOnboarding $onboarding)
+ * @method static dispatchAfterResponse(\App\Models\VenueOnboarding $onboarding)
+ * @method static string run(\App\Models\VenueOnboarding $onboarding)
+ */
+class GenerateVenueAgreement
+{
+}
+/**
+ * @method static \Lorisleiva\Actions\Decorators\JobDecorator|\Lorisleiva\Actions\Decorators\UniqueJobDecorator makeJob(array $data, mixed $user)
+ * @method static \Lorisleiva\Actions\Decorators\UniqueJobDecorator makeUniqueJob(array $data, mixed $user)
+ * @method static \Illuminate\Foundation\Bus\PendingDispatch dispatch(array $data, mixed $user)
+ * @method static \Illuminate\Foundation\Bus\PendingDispatch|\Illuminate\Support\Fluent dispatchIf(bool $boolean, array $data, mixed $user)
+ * @method static \Illuminate\Foundation\Bus\PendingDispatch|\Illuminate\Support\Fluent dispatchUnless(bool $boolean, array $data, mixed $user)
+ * @method static dispatchSync(array $data, mixed $user)
+ * @method static dispatchNow(array $data, mixed $user)
+ * @method static dispatchAfterResponse(array $data, mixed $user)
+ * @method static mixed run(array $data, mixed $user)
+ */
+class SendContactFormEmail
+{
+}
 namespace App\Actions\Partner;
 
 /**
@@ -148,22 +220,6 @@ namespace App\Actions\Reservations;
  * @method static array run(string $date, mixed $onlyShowFuture = false)
  */
 class GetReservationTimeOptions
-{
-}
-namespace App\Actions;
-
-/**
- * @method static \Lorisleiva\Actions\Decorators\JobDecorator|\Lorisleiva\Actions\Decorators\UniqueJobDecorator makeJob(array $data, mixed $user)
- * @method static \Lorisleiva\Actions\Decorators\UniqueJobDecorator makeUniqueJob(array $data, mixed $user)
- * @method static \Illuminate\Foundation\Bus\PendingDispatch dispatch(array $data, mixed $user)
- * @method static \Illuminate\Foundation\Bus\PendingDispatch|\Illuminate\Support\Fluent dispatchIf(bool $boolean, array $data, mixed $user)
- * @method static \Illuminate\Foundation\Bus\PendingDispatch|\Illuminate\Support\Fluent dispatchUnless(bool $boolean, array $data, mixed $user)
- * @method static dispatchSync(array $data, mixed $user)
- * @method static dispatchNow(array $data, mixed $user)
- * @method static dispatchAfterResponse(array $data, mixed $user)
- * @method static mixed run(array $data, mixed $user)
- */
-class SendContactFormEmail
 {
 }
 namespace App\Actions\SpecialRequest;

@@ -29,6 +29,17 @@ interface Wire {
   ) => Promise<{ success: boolean; message: string }>;
   emailInvoice: () => Promise<void>;
   getDownloadInvoiceUrl: () => Promise<string>;
+  checkForExistingBooking: (data: { phone: string }) => Promise<{
+    error?: string;
+    message?: string;
+  } | null>;
+  submitCustomerMessage: (
+    message: string,
+    phone: string,
+  ) => Promise<{
+    success: boolean;
+    message: string;
+  }>;
 }
 
 interface MingleData {
@@ -88,6 +99,33 @@ const updateTimer = () => {
 let timerInterval: ReturnType<typeof setInterval>;
 
 const isBookingSuccessful = ref(false);
+
+const showMultipleBookingModal = ref(false);
+const customerMessage = ref('');
+
+const submitCustomerMessage = async () => {
+  if (!customerMessage.value || !phone.value) return;
+
+  isLoading.value = true;
+  try {
+    const response = await wire.submitCustomerMessage(
+      customerMessage.value,
+      phone.value,
+    );
+    if (response.success) {
+      showMultipleBookingModal.value = false;
+      successMessage.value = response.message;
+      customerMessage.value = '';
+    } else {
+      errorMessage.value = response.message;
+    }
+  } catch (error) {
+    console.error('Error submitting message:', error);
+    errorMessage.value = 'An error occurred while sending your message.';
+  } finally {
+    isLoading.value = false;
+  }
+};
 
 onMounted(async () => {
   if (mingleData.status === 'confirmed') {
@@ -162,6 +200,17 @@ const handleSubmit = async (event: Event) => {
   errorMessage.value = '';
 
   try {
+    const bookingCheck = await wire.checkForExistingBooking({
+      phone: phone.value,
+    });
+
+    if (bookingCheck?.error === 'multiple_booking') {
+      showMultipleBookingModal.value = true;
+      errorMessage.value = bookingCheck.message ?? 'Multiple booking detected';
+      isLoading.value = false;
+      return;
+    }
+
     if (mingleData.totalWithTaxesInCents === 0) {
       const additionalData = {
         firstName: firstName.value,
@@ -244,10 +293,24 @@ const emailInvoice = async () => {
       >
         Reservation Expired
       </h1>
-      <p class="mb-4 text-center">
-        Sorry, this payment link is expired. Please consult with your PRIMA
-        Concierge to request a new payment link.
+      <p class="my-4 text-center">
+        Sorry, this payment link is expired.
+        <template v-if="mingleData.vipCode">
+          Please return to the availability calendar to try again.
+        </template>
+        <template v-else>
+          Please consult with your PRIMA Concierge to request a new payment
+          link.
+        </template>
       </p>
+      <div v-if="mingleData.vipCode" class="flex justify-center">
+        <a
+          :href="`/v/${mingleData.vipCode}`"
+          class="rounded bg-indigo-600 px-4 py-2 text-center font-semibold text-white hover:bg-indigo-700"
+        >
+          Return to Availability Calendar
+        </a>
+      </div>
     </template>
     <template v-else-if="isBookingSuccessful">
       <h1
@@ -402,6 +465,45 @@ const emailInvoice = async () => {
         {{ errorMessage }}
       </div>
     </template>
+    <div
+      v-if="showMultipleBookingModal"
+      class="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-0"
+    >
+      <div
+        class="fixed inset-0 bg-black/50"
+        @click="showMultipleBookingModal = false"
+      ></div>
+      <div class="relative w-full max-w-md rounded-lg bg-white p-6">
+        <h3 class="mb-4 text-lg font-medium">Multiple Booking Request</h3>
+        <p class="mb-4 text-sm text-gray-600">
+          You already have a non-prime reservation for this day. Please let us
+          know why you're trying to make another reservation and our team will
+          review your request.
+        </p>
+        <textarea
+          v-model="customerMessage"
+          class="mb-4 w-full rounded border p-3 text-sm"
+          rows="3"
+          placeholder="Please explain why you need another reservation..."
+          required
+        ></textarea>
+        <div class="flex justify-end gap-x-3">
+          <button
+            class="rounded border px-4 py-2 text-sm text-gray-600 hover:bg-gray-50"
+            @click="showMultipleBookingModal = false"
+          >
+            Cancel
+          </button>
+          <button
+            class="rounded bg-indigo-600 px-4 py-2 text-sm text-white hover:bg-indigo-700"
+            :disabled="isLoading"
+            @click="submitCustomerMessage"
+          >
+            {{ isLoading ? 'Submitting...' : 'Submit Request' }}
+          </button>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 

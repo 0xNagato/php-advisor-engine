@@ -13,7 +13,7 @@ class CheckCustomerHasNonPrimeBooking
     use AsAction;
     use FormatsPhoneNumber;
 
-    public function handle(string $phoneNumber, string $bookingDate, ?string $timezone = null): bool
+    public function handle(string $phoneNumber, string $bookingDate, ?string $timezone = null): ?Booking
     {
         // Create the date range in local timezone
         $date = Carbon::parse($bookingDate, $timezone ?: 'UTC');
@@ -31,6 +31,6 @@ class CheckCustomerHasNonPrimeBooking
                 BookingStatus::ABANDONED,
             ])
             ->whereBetween('booking_at', [$startOfDay, $endOfDay])
-            ->exists();
+            ->first();
     }
 }
