@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Venue;
 
+use App\Constants\BookingPercentages;
 use App\Models\Booking;
 use DateTime;
 use DateTimeZone;
@@ -90,7 +91,7 @@ class VenueBookingConfirmation extends Page
     {
         if ($this->booking->is_prime) {
             $totalFee = $this->booking->total_fee;
-            $venueEarnings = $totalFee * 0.60; // 60% as per the agreement
+            $venueEarnings = $totalFee * ($this->booking->venue->payout_venue / 100);
 
             return [
                 'type' => 'prime',
@@ -100,11 +101,17 @@ class VenueBookingConfirmation extends Page
         }
 
         $perDinerFee = $this->booking->venue->non_prime_fee_per_head;
-        $totalFee = $perDinerFee * $this->booking->guest_count;
+        $subtotal = $perDinerFee * $this->booking->guest_count;
+        $venueFee = $subtotal * (BookingPercentages::NON_PRIME_PROCESSING_FEE_PERCENTAGE / 100);
+        $totalFee = $subtotal + $venueFee;
+
+        $guestCount = $this->booking->guest_count;
 
         return [
             'type' => 'non-prime',
+            'guestCount' => $guestCount,
             'perDinerFee' => $perDinerFee,
+            'venueFee' => $venueFee,
             'totalFee' => $totalFee,
         ];
     }

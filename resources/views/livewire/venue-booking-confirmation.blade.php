@@ -39,17 +39,23 @@
                 @if ($this->bookingDetails['type'] === 'prime')
                     <h3 class="mb-3 font-semibold">Prime Booking Details</h3>
                     <div class="space-y-2">
-                        <p>Total Booking Fee: {{ money($this->bookingDetails['totalFee'], $booking->currency) }}
+                        <p><span class="font-semibold">Total Booking Fee:</span>
+                            {{ money($this->bookingDetails['totalFee'], $booking->currency) }}
                         </p>
-                        <p>Venue Earnings:
+                        <p><span class="font-semibold">Venue Earnings:</span>
                             {{ money($this->bookingDetails['venueEarnings'], $booking->currency) }}</p>
                     </div>
                 @else
                     <h3 class="mb-3 font-semibold">Non-Prime Booking Details</h3>
                     <div class="space-y-2">
-                        <p>Incentive Plan: {{ money($this->bookingDetails['perDinerFee'] * 100, $booking->currency) }}
-                            per diner</p>
-                        <p>Total Fee: {{ money($this->bookingDetails['totalFee'] * 100, $booking->currency) }}</p>
+                        <p><span class="font-semibold">Incentive Plan:</span>
+                            {{ money($this->bookingDetails['perDinerFee'] * 100, $booking->currency) }} per guest</p>
+                        <p><span class="font-semibold">Guest Count:</span> {{ $this->bookingDetails['guestCount'] }}</p>
+                        <p><span class="font-semibold">PRIMA Platform Fee:</span>
+                            {{ money($this->bookingDetails['venueFee'] * 100, $booking->currency) }}
+                        </p>
+                        <p><span class="font-semibold">Total Fee:</span>
+                            {{ money($this->bookingDetails['totalFee'] * 100, $booking->currency) }}</p>
                     </div>
                 @endif
             </div>
