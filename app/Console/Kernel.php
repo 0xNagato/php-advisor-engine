@@ -38,9 +38,9 @@ class Kernel extends ConsoleKernel
                 ->withoutOverlapping();
 
             // Abandon stale bookings that have been pending for too long
-            $schedule->command('bookings:abandon-stale')
-                ->everyMinute()
-                ->withoutOverlapping();
+            // $schedule->command('bookings:abandon-stale')
+            //     ->everyMinute()
+            //     ->withoutOverlapping();
 
             // $schedule->command('app:send-daily-summary-email')->dailyAt('08:00')->timezone('America/New_York');
         }
