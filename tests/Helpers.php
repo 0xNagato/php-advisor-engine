@@ -6,19 +6,37 @@ use App\Models\Concierge;
 use App\Models\Earning;
 use App\Models\ScheduleTemplate;
 use App\Models\Venue;
+use App\Services\SalesTaxService;
 
 const MAX_PARTNER_PERCENTAGE = 0.20;
 
 if (! function_exists('createBooking')) {
     function createBooking($venue, $concierge, $amount = 20000)
     {
-        return Booking::factory()->create([
+        $booking = Booking::factory()->create([
+            'schedule_template_id' => ScheduleTemplate::factory()->create(['venue_id' => $venue->id])->id,
+            'concierge_id' => $concierge->id,
             'uuid' => Str::uuid(),
             'is_prime' => true,
             'total_fee' => $amount,
-            'concierge_id' => $concierge->id,
-            'schedule_template_id' => ScheduleTemplate::factory()->create(['venue_id' => $venue->id])->id,
         ]);
+
+        $taxData = app(SalesTaxService::class)->calculateTax(
+            $booking->venue->region,
+            $booking->total_fee,
+            noTax: config('app.no_tax')
+        );
+
+        $totalWithTaxInCents = $booking->total_fee + $taxData->amountInCents;
+
+        $booking->update([
+            'tax' => $taxData->tax,
+            'tax_amount_in_cents' => $taxData->amountInCents,
+            'city' => $taxData->region,
+            'total_with_tax_in_cents' => $totalWithTaxInCents,
+        ]);
+
+        return $booking;
     }
 }
 
@@ -110,6 +128,24 @@ if (! function_exists('getAllEarningsAmount')) {
             'partnerVenueEarning' => $partnerVenueEarning,
             'platFormEarnings' => $platFormEarnings,
             'remainderForPartner' => $remainderForPartner,
+        ];
+    }
+}
+
+if (! function_exists('getNonPrimeBookingEarnings')) {
+    function getNonPrimeBookingEarnings(int $guestCount, Venue $venue): array
+    {
+        $fee = $guestCount * $venue->non_prime_fee_per_head;
+        $concierge_earnings = $fee - ($fee * (BookingPercentages::PLATFORM_PERCENTAGE_CONCIERGE / 100));
+        $platform_concierge = $fee * (BookingPercentages::PLATFORM_PERCENTAGE_CONCIERGE / 100);
+        $platform_venue = $fee * (BookingPercentages::PLATFORM_PERCENTAGE_VENUE / 100);
+        $platform_earnings = $platform_concierge + $platform_venue;
+        $venue_earnings = ($concierge_earnings + $platform_earnings) * -1;
+
+        return [
+            'venue_earnings' => (int) $venue_earnings * 100,
+            'concierge_earnings' => (int) $concierge_earnings * 100,
+            'platform_earnings' => (int) $platform_earnings * 100,
         ];
     }
 }

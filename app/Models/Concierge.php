@@ -59,7 +59,7 @@ class Concierge extends Model
      */
     protected function sales(): Attribute
     {
-        return Attribute::make(get: fn () => $this->bookings()->where('status', BookingStatus::CONFIRMED)->count());
+        return Attribute::make(get: fn () => $this->bookings()->confirmed()->count());
     }
 
     /**
@@ -68,7 +68,7 @@ class Concierge extends Model
     protected function salesThisMonth(): Attribute
     {
         return Attribute::make(get: fn () => $this->bookings()
-            ->where('status', BookingStatus::CONFIRMED)
+            ->confirmed()
             ->whereMonth('created_at', now()->month)
             ->count());
     }
@@ -91,7 +91,8 @@ class Concierge extends Model
 
     public function referralEarningsInUSD(): Attribute
     {
-        return Attribute::make(get: fn () => app(CurrencyConversionService::class)->convertToUSD($this->referralEarningsByCurrency));
+        return Attribute::make(get: fn (
+        ) => app(CurrencyConversionService::class)->convertToUSD($this->referralEarningsByCurrency));
     }
 
     public function formattedReferralEarningsInUSD(): Attribute
@@ -102,7 +103,7 @@ class Concierge extends Model
     public function bookings(): HasMany
     {
         return $this->hasMany(Booking::class, 'concierge_id')
-            ->where('status', BookingStatus::CONFIRMED);
+            ->whereIn('status', [BookingStatus::CONFIRMED, BookingStatus::VENUE_CONFIRMED]);
     }
 
     /**

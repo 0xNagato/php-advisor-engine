@@ -216,7 +216,8 @@ return [
     'house' => [
         'concierge_id' => env('HOUSE_CONCIERGE_ID', 1),
     ],
-    'widget_cache_timeout_minutes' => env('WIDGET_CACHE_TIMEOUT_MINUTES', 5),
+    'widget_cache_timeout_minutes' => (int) env('WIDGET_CACHE_TIMEOUT_MINUTES', 5),
+    'override_venues' => env('OVERRIDE_VENUES', ''),
 
     /*
     |--------------------------------------------------------------------------
@@ -230,7 +231,8 @@ return [
     */
 
     'bookings_enabled' => env('BOOKINGS_ENABLED', true),
-    'bookings_disabled_message' => env('BOOKINGS_DISABLED_MESSAGE', 'Bookings are currently disabled while we are onboarding venues and concierges. We expect to be live by mid-November.'),
+    'bookings_disabled_message' => env('BOOKINGS_DISABLED_MESSAGE',
+        'Bookings are currently disabled while we are onboarding venues and concierges. We expect to be live by mid-November.'),
 
     /*
     |--------------------------------------------------------------------------

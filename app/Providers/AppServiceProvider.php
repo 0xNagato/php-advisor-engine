@@ -1,6 +1,7 @@
 <?php
 
 /** @noinspection UnknownInspectionInspection */
+
 /** @noinspection JSUnresolvedReference, JSUnresolvedLibraryURL */
 
 namespace App\Providers;
@@ -25,6 +26,7 @@ use Illuminate\Validation\ValidationException;
 use Laravel\Telescope\TelescopeApplicationServiceProvider;
 use Lorisleiva\Actions\Facades\Actions;
 use Opcodes\LogViewer\Facades\LogViewer;
+use Stripe\StripeClient;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -74,7 +76,8 @@ class AppServiceProvider extends ServiceProvider
         });
 
         Carbon::macro('inAppTimezone', fn (): Carbon => $this->tz(config('app.default_timezone')));
-        Carbon::macro('inUserTimezone', fn (): Carbon => $this->tz(auth()->user()?->timezone ?? config('app.default_timezone')));
+        Carbon::macro('inUserTimezone',
+            fn (): Carbon => $this->tz(auth()->user()?->timezone ?? config('app.default_timezone')));
 
         Blade::directive('mobileapp', static fn () => '<?php if(isPrimaApp()): ?>');
 
@@ -114,9 +117,12 @@ class AppServiceProvider extends ServiceProvider
     public function register(): void
     {
         if ($this->app->environment('local') ||
-            ($this->app->environment('production') && in_array(request()->getHost(), ['demo.primavip.co', 'dev.primavip.co']))) {
+            ($this->app->environment('production') && in_array(request()->getHost(),
+                ['demo.primavip.co', 'dev.primavip.co']))) {
             $this->app->register(TelescopeServiceProvider::class);
             $this->app->register(TelescopeApplicationServiceProvider::class);
         }
+
+        $this->app->singleton(StripeClient::class, fn () => new StripeClient(config('services.stripe.secret')));
     }
 }

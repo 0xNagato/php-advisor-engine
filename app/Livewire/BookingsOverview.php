@@ -24,11 +24,12 @@ class BookingsOverview extends BaseWidget
 
         $bookings = Booking::query()
             ->whereBetween('confirmed_at', [$startDate, $endDate])
-            ->where('status', BookingStatus::CONFIRMED)
+            ->whereIn('status',
+                [BookingStatus::CONFIRMED, BookingStatus::VENUE_CONFIRMED, BookingStatus::PARTIALLY_REFUNDED])
             ->select(
                 DB::raw('COUNT(*) as count'),
-                DB::raw('SUM(total_fee) as total_amount'),
-                DB::raw('SUM(platform_earnings) as platform_earnings'),
+                DB::raw('SUM(total_fee - total_refunded) as total_amount'),
+                DB::raw('SUM(platform_earnings - platform_earnings_refunded) as platform_earnings'),
                 'currency'
             )
             ->groupBy('currency')
@@ -38,7 +39,8 @@ class BookingsOverview extends BaseWidget
 
         $currencyService = app(CurrencyConversionService::class);
         $totalAmountUSD = $currencyService->convertToUSD($bookings->pluck('total_amount', 'currency')->toArray());
-        $platformEarningsUSD = $currencyService->convertToUSD($bookings->pluck('platform_earnings', 'currency')->toArray());
+        $platformEarningsUSD = $currencyService->convertToUSD($bookings->pluck('platform_earnings',
+            'currency')->toArray());
 
         $chartData = $this->getChartData($startDate, $endDate);
 
@@ -46,10 +48,12 @@ class BookingsOverview extends BaseWidget
             $this->createStat('Bookings', $totalBookings)
                 ->chart($chartData['bookings'])
                 ->color('success'),
-            $this->createStat('Total Amount', $totalAmountUSD, 'USD', $bookings->pluck('total_amount', 'currency')->toArray())
+            $this->createStat('Total Amount', $totalAmountUSD, 'USD',
+                $bookings->pluck('total_amount', 'currency')->toArray())
                 ->chart($chartData['amounts'])
                 ->color('success'),
-            $this->createStat('Platform Earnings', $platformEarningsUSD, 'USD', $bookings->pluck('platform_earnings', 'currency')->toArray())
+            $this->createStat('Platform Earnings', $platformEarningsUSD, 'USD',
+                $bookings->pluck('platform_earnings', 'currency')->toArray())
                 ->chart($chartData['earnings'])
                 ->color('success'),
         ];
@@ -58,8 +62,8 @@ class BookingsOverview extends BaseWidget
     protected function getChartData($startDate, $endDate): array
     {
         $dailyData = Booking::query()
+            ->confirmed()
             ->whereBetween('confirmed_at', [$startDate, $endDate])
-            ->where('status', BookingStatus::CONFIRMED)
             ->selectRaw('DATE(confirmed_at) as date, COUNT(*) as bookings, SUM(total_fee) as total_amount, SUM(platform_earnings) as platform_earnings, currency')
             ->groupBy('date', 'currency')
             ->orderBy('date')
@@ -86,8 +90,12 @@ class BookingsOverview extends BaseWidget
         ];
     }
 
-    protected function createStat(string $label, float $value, ?string $currency = null, ?array $currencyBreakdown = null): Stat
-    {
+    protected function createStat(
+        string $label,
+        float $value,
+        ?string $currency = null,
+        ?array $currencyBreakdown = null
+    ): Stat {
         $currencySymbol = $this->getCurrencySymbol($currency);
         $formattedValue = $currency
             ? $currencySymbol.number_format($value, 2)

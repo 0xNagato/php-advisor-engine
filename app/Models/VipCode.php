@@ -48,7 +48,8 @@ class VipCode extends Model
      */
     public function bookings(): HasMany
     {
-        return $this->hasMany(Booking::class)->where('status', BookingStatus::CONFIRMED);
+        return $this->hasMany(Booking::class)
+            ->whereIn('status', [BookingStatus::CONFIRMED, BookingStatus::VENUE_CONFIRMED]);
     }
 
     /**
@@ -58,7 +59,7 @@ class VipCode extends Model
     {
         return $this->hasManyThrough(Earning::class, Booking::class)
             ->whereHas('booking', function (Builder $query) {
-                $query->where('status', BookingStatus::CONFIRMED);
+                $query->confirmed();
             })
             ->whereIn('earnings.type', ['concierge', 'concierge_bounty']);
     }

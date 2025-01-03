@@ -3,6 +3,7 @@
 namespace App\Livewire\Venue;
 
 use App\Constants\BookingPercentages;
+use App\Enums\BookingStatus;
 use App\Models\Booking;
 use DateTime;
 use DateTimeZone;
@@ -34,11 +35,16 @@ class VenueBookingConfirmation extends Page
     public function confirmBooking(): void
     {
         if ($this->booking->venue_confirmed_at === null) {
-            Log::info('Venue confirmed booking', [
-                'name' => $this->booking->venue->name,
-                'booking' => $this->booking->id,
-            ]);
-            $this->booking->update(['venue_confirmed_at' => now()]);
+            $payload = [
+                'venue_confirmed_at' => now(),
+                'status' => BookingStatus::VENUE_CONFIRMED,
+            ];
+            activity()
+                ->performedOn($this->booking)
+                ->withProperties($payload)
+                ->log('Venue '.$this->booking->venue->name.' confirmed booking');
+
+            $this->booking->update($payload);
             $this->showUndoButton = true;
         }
 

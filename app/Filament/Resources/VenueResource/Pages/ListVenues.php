@@ -2,7 +2,6 @@
 
 namespace App\Filament\Resources\VenueResource\Pages;
 
-use App\Enums\BookingStatus;
 use App\Filament\Resources\PartnerResource\Pages\ViewPartner;
 use App\Filament\Resources\VenueResource;
 use App\Models\Region;
@@ -38,9 +37,11 @@ class ListVenues extends ListRecords
             ->query(
                 Venue::query()
                     ->with(['partnerReferral.user.partner', 'user.authentications'])
-                    ->withCount(['bookings' => function ($query) {
-                        $query->where('status', BookingStatus::CONFIRMED);
-                    }])
+                    ->withCount([
+                        'bookings' => function ($query) {
+                            $query->confirmed();
+                        },
+                    ])
                     ->join('users', 'venues.user_id', '=', 'users.id')
                     ->orderByDesc('users.updated_at')
             )

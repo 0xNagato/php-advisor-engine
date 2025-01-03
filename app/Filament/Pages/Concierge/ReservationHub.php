@@ -97,7 +97,7 @@ class ReservationHub extends Page
 
         if ($this->booking !== null) {
             $this->booking = Booking::with('schedule.venue')->find($this->booking->id);
-            if ($this->booking->status === BookingStatus::REFUNDED) {
+            if ($this->booking->is_refunded_or_partially_refunded) {
                 $this->resetBooking();
             }
         }

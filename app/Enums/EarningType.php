@@ -14,6 +14,7 @@ enum EarningType: string implements HasLabel
     case CONCIERGE_REFERRAL_2 = 'concierge_referral_2';
     case VENUE_PAID = 'venue_paid';
     case CONCIERGE_BOUNTY = 'concierge_bounty';
+    case REFUND = 'refund';
 
     public function getLabel(): ?string
     {
@@ -26,6 +27,7 @@ enum EarningType: string implements HasLabel
             self::CONCIERGE_REFERRAL_2 => 'Concierge Referral 2',
             self::VENUE_PAID => 'Venue Paid',
             self::CONCIERGE_BOUNTY => 'Concierge Bounty',
+            self::REFUND => 'Refund',
         };
     }
 }

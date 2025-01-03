@@ -2,6 +2,7 @@
 
 namespace App\Livewire;
 
+use App\Enums\EarningType;
 use App\Models\Earning;
 use App\Models\Partner;
 use App\Services\CurrencyConversionService;
@@ -37,7 +38,8 @@ class PartnerOverview extends BaseWidget
         $prevTotalEarningsUSD = $currencyService->convertToUSD($prevEarnings['earnings']);
 
         $avgBookingValue = $this->getAverageBookingValue($startDate, $endDate);
-        $prevAvgBookingValue = $this->getAverageBookingValue($startDate->copy()->subDays($startDate->diffInDays($endDate)), $startDate);
+        $prevAvgBookingValue = $this->getAverageBookingValue($startDate->copy()->subDays($startDate->diffInDays($endDate)),
+            $startDate);
 
         return [
             $this->createStat('Bookings', $earnings['number_of_bookings'], null, $prevEarnings['number_of_bookings'])
@@ -56,9 +58,14 @@ class PartnerOverview extends BaseWidget
     {
         $partnerEarnings = Earning::query()
             ->join('bookings', 'earnings.booking_id', '=', 'bookings.id')
-            ->whereIn('earnings.type', ['partner_concierge', 'partner_venue'])
+            ->whereIn('earnings.type', [
+                EarningType::PARTNER_CONCIERGE,
+                EarningType::PARTNER_VENUE,
+                EarningType::REFUND,
+            ])
             ->whereNotNull('bookings.confirmed_at')
             ->whereBetween('bookings.confirmed_at', [$startDate, $endDate])
+            ->where('earnings.user_id', $this->partner->user_id)
             ->where(function ($q) {
                 $q->where('bookings.partner_concierge_id', $this->partner->id)
                     ->orWhere('bookings.partner_venue_id', $this->partner->id);
@@ -88,9 +95,14 @@ class PartnerOverview extends BaseWidget
     {
         $result = Earning::query()
             ->join('bookings', 'earnings.booking_id', '=', 'bookings.id')
-            ->whereIn('earnings.type', ['partner_concierge', 'partner_venue'])
+            ->whereIn('earnings.type', [
+                EarningType::PARTNER_CONCIERGE,
+                EarningType::PARTNER_VENUE,
+                EarningType::REFUND,
+            ])
             ->whereNotNull('bookings.confirmed_at')
             ->whereBetween('bookings.confirmed_at', [$startDate, $endDate])
+            ->where('earnings.user_id', $this->partner->user_id)
             ->where(function ($q) {
                 $q->where('bookings.partner_concierge_id', $this->partner->id)
                     ->orWhere('bookings.partner_venue_id', $this->partner->id);
@@ -120,7 +132,12 @@ class PartnerOverview extends BaseWidget
     {
         $dailyData = Earning::query()
             ->join('bookings', 'earnings.booking_id', '=', 'bookings.id')
-            ->whereIn('earnings.type', ['partner_concierge', 'partner_venue'])
+            ->whereIn('earnings.type', [
+                EarningType::PARTNER_CONCIERGE,
+                EarningType::PARTNER_VENUE,
+                EarningType::REFUND,
+            ])
+            ->where('earnings.user_id', $this->partner->user_id)
             ->whereNotNull('bookings.confirmed_at')
             ->whereBetween('bookings.confirmed_at', [$startDate, $endDate])
             ->where(function ($q) {
@@ -136,7 +153,8 @@ class PartnerOverview extends BaseWidget
 
         $chartData = $dailyData->groupBy('date')->map(function ($dayData) use ($currencyService) {
             $totalBookings = $dayData->sum('bookings');
-            $totalEarningsUSD = $currencyService->convertToUSD($dayData->pluck('total_earnings', 'currency')->toArray());
+            $totalEarningsUSD = $currencyService->convertToUSD($dayData->pluck('total_earnings',
+                'currency')->toArray());
 
             $avgEarningUSD = 0.0;
             foreach ($dayData as $item) {
@@ -189,8 +207,11 @@ class PartnerOverview extends BaseWidget
         };
     }
 
-    protected function createEarningsStat(float $totalEarningsUSD, float $prevTotalEarningsUSD, array $currencyBreakdown): Stat
-    {
+    protected function createEarningsStat(
+        float $totalEarningsUSD,
+        float $prevTotalEarningsUSD,
+        array $currencyBreakdown
+    ): Stat {
         $stat = Stat::make('Earnings', '$'.number_format($totalEarningsUSD, 2));
 
         $breakdownDescription = collect($currencyBreakdown)

@@ -10,6 +10,7 @@ enum BookingStatus: string
     case ABANDONED = 'abandoned';
     case CANCELLED = 'cancelled';
     case CONFIRMED = 'confirmed';
+    case VENUE_CONFIRMED = 'venue_confirmed';
     case COMPLETED = 'completed';
 
     case REFUNDED = 'refunded';
@@ -26,6 +27,7 @@ enum BookingStatus: string
             self::CANCELLED => 'Cancelled',
             self::ABANDONED => 'Abandoned',
             self::CONFIRMED => 'Confirmed',
+            self::VENUE_CONFIRMED => 'Venue Confirmed',
             self::COMPLETED => 'Completed',
             self::REFUNDED => 'Refunded',
             self::NO_SHOW => 'No Show',

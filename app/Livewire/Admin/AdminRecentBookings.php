@@ -37,6 +37,7 @@ class AdminRecentBookings extends BaseWidget
                 'bookings.id',
                 'bookings.booking_at',
                 'bookings.total_fee',
+                'bookings.total_refunded',
                 'bookings.currency',
                 'bookings.is_prime',
                 'venues.name as venue_name',
@@ -45,7 +46,8 @@ class AdminRecentBookings extends BaseWidget
             ->join('schedule_templates', 'bookings.schedule_template_id', '=', 'schedule_templates.id')
             ->join('venues', 'schedule_templates.venue_id', '=', 'venues.id')
             ->whereNotNull('bookings.confirmed_at')
-            ->whereIn('bookings.status', [BookingStatus::CONFIRMED, BookingStatus::REFUNDED, BookingStatus::PARTIALLY_REFUNDED, BookingStatus::CANCELLED])
+            ->whereIn('bookings.status',
+                [BookingStatus::CONFIRMED, BookingStatus::VENUE_CONFIRMED, BookingStatus::REFUNDED, BookingStatus::PARTIALLY_REFUNDED, BookingStatus::CANCELLED])
             ->whereBetween('bookings.created_at', [$startDate, $endDate])
             ->orderByDesc('bookings.created_at')
             ->limit(10);
@@ -88,7 +90,7 @@ class AdminRecentBookings extends BaseWidget
                         }
 
                         return $booking->total_fee > 0
-                            ? money($booking->total_fee, $booking->currency)
+                            ? money($booking->total_fee - $booking->total_refunded, $booking->currency)
                             : '-';
                     }),
             ]);
