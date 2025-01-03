@@ -148,6 +148,7 @@ class BookingSearch extends Page implements HasTable
 
         return $table
             ->query($query)
+            ->recordUrl(fn (Booking $record) => route('filament.admin.resources.bookings.view', ['record' => $record]))
             ->defaultSort('created_at', 'desc')
             ->columns([
                 TextColumn::make('created_at')
