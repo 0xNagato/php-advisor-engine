@@ -17,7 +17,7 @@
                 Email Invoice
             </x-filament::button>
             <x-filament::button color="indigo" class="w-1/2" size="sm" icon="gmdi-file-download-o" tag="a"
-                                :href="route('customer.invoice.download', ['uuid' => $booking->uuid])">
+                :href="route('customer.invoice.download', ['uuid' => $booking->uuid])">
                 Download PDF
             </x-filament::button>
         </div>
@@ -26,7 +26,7 @@
             <form wire:submit="emailInvoice" class="max-w-3xl p-4 mx-auto my-4 bg-gray-100 border rounded-lg">
                 {{ $this->form }}
                 <button type="submit"
-                        class="w-full px-4 py-2 mt-4 text-xs font-semibold text-white bg-indigo-600 rounded-lg sm:text-xs">
+                    class="w-full px-4 py-2 mt-4 text-xs font-semibold text-white bg-indigo-600 rounded-lg sm:text-xs">
                     Send Email
                 </button>
             </form>
@@ -46,7 +46,7 @@
             <!-- SVG Background Element -->
             <figure class="absolute inset-x-0 bottom-0 -mb-px ">
                 <svg preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg" x="0px" y="0px"
-                     viewBox="0 0 1920 100.1">
+                    viewBox="0 0 1920 100.1">
                     <path fill="currentColor" class="fill-white" d="M0,0c0,0,934.4,93.4,1920,0v100.1H0L0,0z"></path>
                 </svg>
             </figure>
@@ -227,25 +227,27 @@
                             class="inline-flex items-center px-4 py-3 text-xs text-gray-800 border-b sm:text-sm last:border-b-0 dark:border-gray-700 dark:text-gray-200">
                             <div class="flex items-center justify-between w-full">
                                 <span>{{ $booking->status->label() }}</span>
-                                <span>
-                                    {{ money($booking->total_refunded, $booking->currency) }}
+                                <span class="text-red-500">
+                                    -{{ money($booking->total_refunded, $booking->currency) }}
                                 </span>
                             </div>
                         </li>
                     @endif
-                    <li
-                        class="inline-flex items-center px-4 py-3 text-xs font-semibold text-gray-800 sm:text-sm bg-gray-50 dark:bg-slate-800 dark:text-gray-200">
-                        <div class="flex items-center justify-between w-full">
-                            <span>Amount Paid</span>
-                            <span>
-                                @if (in_array($booking->status, [BookingStatus::REFUNDED, BookingStatus::PARTIALLY_REFUNDED]))
-                                    {{ money($booking->final_total, $booking->currency) }}
-                                @else
-                                    {{ money($booking->total_with_tax_in_cents, $booking->currency) }}
-                                @endif
-                            </span>
-                        </div>
-                    </li>
+                    @if (!in_array($booking->status, [BookingStatus::PENDING, BookingStatus::GUEST_ON_PAGE]))
+                        <li
+                            class="inline-flex items-center px-4 py-3 text-xs font-semibold text-gray-800 sm:text-sm bg-gray-50 dark:bg-slate-800 dark:text-gray-200">
+                            <div class="flex items-center justify-between w-full">
+                                <span>Amount Paid</span>
+                                <span>
+                                    @if (in_array($booking->status, [BookingStatus::REFUNDED, BookingStatus::PARTIALLY_REFUNDED]))
+                                        {{ money($booking->final_total, $booking->currency) }}
+                                    @else
+                                        {{ money($booking->total_with_tax_in_cents, $booking->currency) }}
+                                    @endif
+                                </span>
+                            </div>
+                        </li>
+                    @endif
                 </ul>
 
                 @if (isset($customerInvoice) || $download)
