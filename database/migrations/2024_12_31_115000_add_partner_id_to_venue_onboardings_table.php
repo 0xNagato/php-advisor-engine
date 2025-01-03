@@ -9,18 +9,22 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('venue_onboardings', function (Blueprint $table) {
-            $table->foreignId('partner_id')
-                ->nullable()
-                ->constrained('users')
-                ->nullOnDelete();
+            if (! Schema::hasColumn('venue_onboardings', 'partner_id')) {
+                $table->foreignId('partner_id')
+                    ->nullable()
+                    ->constrained('users')
+                    ->nullOnDelete();
+            }
         });
     }
 
     public function down(): void
     {
         Schema::table('venue_onboardings', function (Blueprint $table) {
-            $table->dropForeignId('venue_onboardings_partner_id_foreign');
-            $table->dropColumn('partner_id');
+            if (Schema::hasColumn('venue_onboardings', 'partner_id')) {
+                $table->dropForeignId('venue_onboardings_partner_id_foreign');
+                $table->dropColumn('partner_id');
+            }
         });
     }
 };
