@@ -14,6 +14,7 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Concerns\InteractsWithTable;
 use Filament\Tables\Contracts\HasTable;
 use Filament\Tables\Table;
+use Illuminate\Contracts\Database\Query\Builder;
 use Illuminate\Support\Carbon;
 
 class BookingSearch extends Page implements HasTable
@@ -130,12 +131,12 @@ class BookingSearch extends Page implements HasTable
 
         if ($this->data['venue_search'] ?? null) {
             $search = $this->data['venue_search'];
-            $query->whereHas('venue', fn ($q) => $q->where('name', 'like', "%{$search}%"));
+            $query->whereHas('venue', fn (Builder $q) => $q->where('name', 'like', "%{$search}%"));
         }
 
         if ($this->data['concierge_search'] ?? null) {
             $search = $this->data['concierge_search'];
-            $query->whereHas('concierge.user', function ($q) use ($search) {
+            $query->whereHas('concierge.user', function (Builder $q) use ($search) {
                 $q->where('first_name', 'like', "%{$search}%")
                     ->orWhere('last_name', 'like', "%{$search}%");
             });
@@ -147,14 +148,21 @@ class BookingSearch extends Page implements HasTable
 
         return $table
             ->query($query)
+            ->defaultSort('created_at', 'desc')
             ->columns([
+                TextColumn::make('created_at')
+                    ->label('Created')
+                    ->size('xs')
+                    ->formatStateUsing(fn (Booking $record): string => Carbon::parse($record->created_at)
+                        ->timezone(auth()->user()->timezone ?? config('app.timezone'))
+                        ->format('M j, Y g:ia'))
+                    ->sortable(),
                 TextColumn::make('booking_at')
-                    ->label('Date')
-                    ->formatStateUsing(function (Booking $record): string {
-                        return Carbon::parse($record->booking_at)
-                            ->timezone($record->schedule->venue->timezone ?? config('app.timezone'))
-                            ->format('D, M j, Y g:ia');
-                    })
+                    ->label('Booking Date')
+                    ->size('xs')
+                    ->formatStateUsing(fn (Booking $record): string => Carbon::parse($record->booking_at)
+                        ->timezone($record->schedule->venue->timezone ?? config('app.timezone'))
+                        ->format('M j, Y g:ia'))
                     ->sortable(),
                 TextColumn::make('guest_name')
                     ->label('Guest Information')
@@ -177,11 +185,14 @@ class BookingSearch extends Page implements HasTable
                     ->html(),
                 TextColumn::make('venue.name')
                     ->label('Venue')
+                    ->size('xs')
                     ->sortable(),
                 TextColumn::make('concierge.user.name')
-                    ->label('Concierge'),
+                    ->label('Concierge')
+                    ->size('xs'),
                 TextColumn::make('status')
                     ->badge()
+                    ->size('xs')
                     ->color(fn (BookingStatus $state): string => match ($state) {
                         BookingStatus::CONFIRMED => 'success',
                         BookingStatus::PENDING => 'warning',
@@ -191,6 +202,7 @@ class BookingSearch extends Page implements HasTable
                     }),
                 TextColumn::make('total_fee')
                     ->money(fn ($record) => $record->currency, 100)
+                    ->size('xs')
                     ->sortable(),
             ])
             ->paginated([25, 50, 100, 250]);
