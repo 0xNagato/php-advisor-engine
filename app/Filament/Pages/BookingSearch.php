@@ -16,11 +16,13 @@ use Filament\Tables\Contracts\HasTable;
 use Filament\Tables\Table;
 use Illuminate\Contracts\Database\Query\Builder;
 use Illuminate\Support\Carbon;
+use Livewire\Attributes\Url;
 
 class BookingSearch extends Page implements HasTable
 {
     use InteractsWithTable;
 
+    #[Url()]
     public ?array $data = [];
 
     protected static ?string $navigationIcon = 'heroicon-o-magnifying-glass';
@@ -42,13 +44,15 @@ class BookingSearch extends Page implements HasTable
 
     public function mount(): void
     {
-        $this->form->fill([
-            'booking_id' => '',
-            'customer_search' => '',
-            'venue_search' => '',
-            'concierge_search' => '',
-            'status' => null,
-        ]);
+        if (empty($this->data)) {
+            $this->form->fill([
+                'booking_id' => '',
+                'customer_search' => '',
+                'venue_search' => '',
+                'concierge_search' => '',
+                'status' => null,
+            ]);
+        }
     }
 
     public function form(Form $form): Form
