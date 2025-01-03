@@ -53,14 +53,6 @@ class ViewBooking extends ViewRecord
         $this->record = Booking::with('earnings.user')
             ->firstWhere('id', $record);
 
-        abort_if(! in_array($this->record->status, [
-            BookingStatus::CONFIRMED,
-            BookingStatus::NO_SHOW,
-            BookingStatus::REFUNDED,
-            BookingStatus::PARTIALLY_REFUNDED,
-            BookingStatus::CANCELLED,
-        ], true), 404);
-
         if (auth()->user()->hasActiveRole('super_admin') || auth()->user()->hasActiveRole('partner') || auth()->user()->hasActiveRole('concierge')) {
             $this->showConcierges = true;
         }
