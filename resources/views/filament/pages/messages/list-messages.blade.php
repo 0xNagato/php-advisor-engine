@@ -37,6 +37,11 @@
             </div>
         @endnonmobileapp
 
+        <div class="flex justify-center -mx-6 sm:hidden">
+            <img src="{{ asset('images/concierge-earnings-infographic.png') }}" alt="Concierge Earnings Infographic"
+                class="w-full">
+        </div>
+
         <div class="flex flex-col gap-4">
             @if ($isDemo)
                 <p>
