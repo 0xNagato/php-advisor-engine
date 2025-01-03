@@ -125,11 +125,15 @@ class BookingSearch extends Page implements HasTable
 
         if ($this->data['customer_search'] ?? null) {
             $search = $this->data['customer_search'];
-            $query->where(function ($query) use ($search) {
-                $query->where('guest_first_name', 'like', "%{$search}%")
-                    ->orWhere('guest_last_name', 'like', "%{$search}%")
-                    ->orWhere('guest_email', 'like', "%{$search}%")
-                    ->orWhere('guest_phone', 'like', "%{$search}%");
+            $terms = explode(' ', $search);
+
+            $query->where(function ($query) use ($terms) {
+                foreach ($terms as $term) {
+                    $query->orWhere('guest_first_name', 'like', "%{$term}%")
+                        ->orWhere('guest_last_name', 'like', "%{$term}%")
+                        ->orWhere('guest_email', 'like', "%{$term}%")
+                        ->orWhere('guest_phone', 'like', "%{$term}%");
+                }
             });
         }
 
@@ -140,9 +144,15 @@ class BookingSearch extends Page implements HasTable
 
         if ($this->data['concierge_search'] ?? null) {
             $search = $this->data['concierge_search'];
-            $query->whereHas('concierge.user', function (Builder $q) use ($search) {
-                $q->where('first_name', 'like', "%{$search}%")
-                    ->orWhere('last_name', 'like', "%{$search}%");
+            $terms = explode(' ', $search);
+
+            $query->whereHas('concierge.user', function (Builder $q) use ($terms) {
+                foreach ($terms as $term) {
+                    $q->where(function ($q) use ($term) {
+                        $q->where('first_name', 'like', "%{$term}%")
+                            ->orWhere('last_name', 'like', "%{$term}%");
+                    });
+                }
             });
         }
 
