@@ -31,6 +31,7 @@ class ListBookings extends ListRecords
                     ->orderByDesc('created_at')
                     ->whereIn('status', [
                         BookingStatus::CONFIRMED,
+                        BookingStatus::VENUE_CONFIRMED,
                         BookingStatus::REFUNDED,
                         BookingStatus::PARTIALLY_REFUNDED,
                     ]);
@@ -61,6 +62,8 @@ class ListBookings extends ListRecords
             ])
             ->paginated([10, 25, 50, 100])
             ->filters([
+                Filter::make('confirmed')
+                    ->query(fn (Builder $query) => $query->whereNotNull('confirmed_at')),
                 Filter::make('unconfirmed')
                     ->query(fn (Builder $query) => $query->whereNull('venue_confirmed_at')),
                 Filter::make('vip_code_id')

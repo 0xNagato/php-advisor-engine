@@ -2,6 +2,7 @@
 
 namespace App\Livewire;
 
+use App\Enums\EarningType;
 use App\Models\Earning;
 use App\Models\Venue;
 use App\Services\CurrencyConversionService;
@@ -48,7 +49,12 @@ class VenueOverview extends BaseWidget
             $this->createStat('Prime Bookings', $earnings['prime_bookings'], null, $prevEarnings['prime_bookings'])
                 ->chart($chartData['prime_bookings'])
                 ->color('primary'),
-            $this->createStat('Incentivised Bookings', $earnings['incentivised_bookings'], null, $prevEarnings['incentivised_bookings'])
+            $this->createStat(
+                'Incentivised Bookings',
+                $earnings['incentivised_bookings'],
+                null,
+                $prevEarnings['incentivised_bookings']
+            )
                 ->chart($chartData['incentivised_bookings'])
                 ->color('warning'),
             $this->createStat('Total Earnings', $totalEarningsUSD, $currencySymbol, $prevTotalEarningsUSD)
@@ -74,7 +80,7 @@ class VenueOverview extends BaseWidget
             ->select(
                 DB::raw('COUNT(DISTINCT CASE WHEN bookings.is_prime = 1 THEN bookings.id END) as prime_bookings'),
                 DB::raw('COUNT(DISTINCT CASE WHEN bookings.is_prime = 0 THEN bookings.id END) as incentivised_bookings'),
-                DB::raw('SUM(CASE WHEN earnings.type = "venue" THEN earnings.amount ELSE 0 END) as venue_earnings'),
+                DB::raw('SUM(CASE WHEN earnings.type IN ("'.EarningType::VENUE->value.'", "'.EarningType::REFUND->value.'") THEN earnings.amount ELSE 0 END) as venue_earnings'),
                 DB::raw('SUM(CASE WHEN earnings.type = "venue_paid" THEN earnings.amount ELSE 0 END) as venue_paid'),
                 'earnings.currency'
             )
@@ -103,7 +109,7 @@ class VenueOverview extends BaseWidget
                 earnings.currency,
                 COUNT(DISTINCT CASE WHEN bookings.is_prime = 1 THEN bookings.id END) as prime_bookings,
                 COUNT(DISTINCT CASE WHEN bookings.is_prime = 0 THEN bookings.id END) as incentivised_bookings,
-                SUM(CASE WHEN earnings.type = "venue" THEN earnings.amount ELSE 0 END) as prime_earnings,
+                SUM(CASE WHEN earnings.type IN ("'.EarningType::VENUE->value.'", "'.EarningType::REFUND->value.'") THEN earnings.amount ELSE 0 END) as prime_earnings,
                 SUM(CASE WHEN earnings.type = "venue_paid" THEN earnings.amount ELSE 0 END) as incentivised_cost
             ')
             ->groupBy('date', 'earnings.currency')
@@ -115,8 +121,14 @@ class VenueOverview extends BaseWidget
         $chartData = $dailyData->groupBy('date')->map(function ($dayData) use ($currencyService) {
             $primeBookings = $dayData->sum('prime_bookings');
             $incentivisedBookings = $dayData->sum('incentivised_bookings');
-            $primeEarningsUSD = $currencyService->convertToUSD($dayData->pluck('prime_earnings', 'currency')->toArray());
-            $incentivisedCostUSD = $currencyService->convertToUSD($dayData->pluck('incentivised_cost', 'currency')->toArray());
+            $primeEarningsUSD = $currencyService->convertToUSD($dayData->pluck(
+                'prime_earnings',
+                'currency'
+            )->toArray());
+            $incentivisedCostUSD = $currencyService->convertToUSD($dayData->pluck(
+                'incentivised_cost',
+                'currency'
+            )->toArray());
 
             return [
                 'total_bookings' => $primeBookings + $incentivisedBookings,
@@ -138,8 +150,12 @@ class VenueOverview extends BaseWidget
         ];
     }
 
-    protected function createStat(string $label, float $value, ?string $currencySymbol = null, float $previousValue = 0): Stat
-    {
+    protected function createStat(
+        string $label,
+        float $value,
+        ?string $currencySymbol = null,
+        float $previousValue = 0
+    ): Stat {
         $formattedValue = $currencySymbol
             ? $currencySymbol.number_format($value, 2)
             : number_format($value);

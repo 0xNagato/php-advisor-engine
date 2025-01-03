@@ -39,7 +39,8 @@ class TopVenues extends Widget
             ->join('schedule_templates', 'bookings.schedule_template_id', '=', 'schedule_templates.id')
             ->join('venues', 'schedule_templates.venue_id', '=', 'venues.id')
             ->whereNotNull('bookings.confirmed_at')
-            ->when($startDate && $endDate, fn (Builder $query) => $query->whereBetween('bookings.confirmed_at', [$startDate, $endDate]))
+            ->when($startDate && $endDate,
+                fn (Builder $query) => $query->whereBetween('bookings.confirmed_at', [$startDate, $endDate]))
             ->where('earnings.type', 'partner_venue')
             ->where('earnings.user_id', $this->partner->user_id)
             ->groupBy('venues.id', 'venues.name', 'earnings.currency')
@@ -54,7 +55,8 @@ class TopVenues extends Widget
             ->get();
 
         $venueTotals = $earnings->groupBy('venue_id')->map(function ($venueEarnings) use ($currencyService) {
-            $totalUSD = $venueEarnings->sum(fn ($earning) => $currencyService->convertToUSD([$earning->currency => $earning->total_earned]));
+            $totalUSD = $venueEarnings->sum(fn ($earning
+            ) => $currencyService->convertToUSD([$earning->currency => $earning->total_earned]));
 
             return [
                 'venue_id' => $venueEarnings->first()->venue_id,

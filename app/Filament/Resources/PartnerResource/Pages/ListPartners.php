@@ -159,8 +159,9 @@ class ListPartners extends ListRecords
                     ), 0)')
                         ->from('earnings')
                         ->join('bookings', 'earnings.booking_id', '=', 'bookings.id')
-                        ->whereIn('earnings.type', ['partner_concierge', 'partner_venue'])
+                        ->whereIn('earnings.type', ['partner_concierge', 'partner_venue', 'refund'])
                         ->whereNotNull('bookings.confirmed_at')
+                        ->whereColumn('earnings.user_id', 'partners.user_id')
                         ->where(function ($q) {
                             $q->whereColumn('bookings.partner_concierge_id', 'partners.id')
                                 ->orWhereColumn('bookings.partner_venue_id', 'partners.id');

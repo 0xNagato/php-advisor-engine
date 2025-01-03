@@ -2,6 +2,7 @@
 
 namespace App\Livewire;
 
+use App\Enums\EarningType;
 use App\Models\Booking;
 use App\Models\Earning;
 use Filament\Support\RawJs;
@@ -20,16 +21,17 @@ class PayoutBreakdownChart extends ChartWidget
 
         $earnings = Earning::with('user')
             ->where('booking_id', $this->booking->id)
-            ->get();
+            ->where('type', '!=', EarningType::REFUND)
+            ->get()->sumByUserAndType();
 
         $data = $earnings->map(fn ($earning) => [
-            'label' => $earning->user->name.' ('.Str::title(str_replace('_', ' ', $earning->type)).')',
-            'value' => $earning->amount,
+            'label' => $earning['user']->name.' ('.Str::title(str_replace('_', ' ', $earning['type'])).')',
+            'value' => $earning['amount'],
         ])->toArray();
 
         $data[] = [
             'label' => 'PRIMA',
-            'value' => $this->booking->platform_earnings,
+            'value' => $this->booking->final_platform_earnings_total,
         ];
 
         return [
@@ -101,6 +103,7 @@ class PayoutBreakdownChart extends ChartWidget
                 }
             }
         }
-        JS);
+        JS
+        );
     }
 }

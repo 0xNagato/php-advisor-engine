@@ -58,7 +58,7 @@ class BookingCheckout extends Component implements HasMingles
      */
     public function createPaymentIntent(): string
     {
-        $stripe = new StripeClient(config('services.stripe.secret'));
+        $stripe = app(StripeClient::class);
 
         $paymentIntent = $stripe->paymentIntents->create([
             'amount' => $this->booking->total_with_tax_in_cents,

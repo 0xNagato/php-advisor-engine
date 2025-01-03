@@ -2,10 +2,13 @@
 
 namespace App\Models;
 
+use App\Collections\EarningCollection;
+use Illuminate\Database\Eloquent\Attributes\CollectedBy;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
+#[CollectedBy(EarningCollection::class)]
 class Earning extends Model
 {
     protected $fillable = [

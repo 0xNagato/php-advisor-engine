@@ -2,7 +2,6 @@
 
 namespace App\Console\Commands;
 
-use App\Enums\BookingStatus;
 use App\Filament\Resources\ConciergeResource\Pages\ViewConcierge;
 use App\Mail\DailySummaryEmail;
 use App\Models\Booking;
@@ -34,7 +33,8 @@ class SendDailySummaryEmail extends Command
 
         $currencyService = app(CurrencyConversionService::class);
         $totalAmountUSD = $currencyService->convertToUSD($bookings->pluck('total_amount', 'currency')->toArray());
-        $platformEarningsUSD = $currencyService->convertToUSD($bookings->pluck('platform_earnings', 'currency')->toArray());
+        $platformEarningsUSD = $currencyService->convertToUSD($bookings->pluck('platform_earnings',
+            'currency')->toArray());
 
         $newConciergesInvited = Referral::query()->where('type', 'concierge')
             ->whereBetween('created_at', [$startDate, $endDate])
@@ -44,10 +44,12 @@ class SendDailySummaryEmail extends Command
             ->whereBetween('secured_at', [$startDate, $endDate])
             ->count();
 
-        $topReferrersInvitations = User::query()->withCount(['referrals' => function ($query) use ($startDate, $endDate) {
-            $query->where('type', 'concierge')
-                ->whereBetween('created_at', [$startDate, $endDate]);
-        }])
+        $topReferrersInvitations = User::query()->withCount([
+            'referrals' => function ($query) use ($startDate, $endDate) {
+                $query->where('type', 'concierge')
+                    ->whereBetween('created_at', [$startDate, $endDate]);
+            },
+        ])
             ->orderByDesc('referrals_count')
             ->limit(5)
             ->get()
@@ -57,12 +59,14 @@ class SendDailySummaryEmail extends Command
                 'count' => $user->referrals_count,
             ]);
 
-        $topReferrersSecured = User::query()->withCount(['referrals' => function ($query) use ($startDate, $endDate) {
-            $query->where('type', 'concierge')
-                ->whereHas('user', function ($subQuery) use ($startDate, $endDate) {
-                    $subQuery->whereBetween('secured_at', [$startDate, $endDate]);
-                });
-        }])
+        $topReferrersSecured = User::query()->withCount([
+            'referrals' => function ($query) use ($startDate, $endDate) {
+                $query->where('type', 'concierge')
+                    ->whereHas('user', function ($subQuery) use ($startDate, $endDate) {
+                        $subQuery->whereBetween('secured_at', [$startDate, $endDate]);
+                    });
+            },
+        ])
             ->orderByDesc('referrals_count')
             ->limit(5)
             ->get()
@@ -111,8 +115,8 @@ class SendDailySummaryEmail extends Command
     protected function getBookingsData($startDate, $endDate)
     {
         return Booking::query()
+            ->confirmed()
             ->whereBetween('confirmed_at', [$startDate, $endDate])
-            ->where('status', BookingStatus::CONFIRMED)
             ->select(
                 DB::raw('COUNT(*) as count'),
                 DB::raw('SUM(total_fee) as total_amount'),

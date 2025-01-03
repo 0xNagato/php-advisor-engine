@@ -66,6 +66,9 @@ class Booking extends Model
         'refunded_at',
         'refund_data',
         'refund_reason',
+        'original_total',
+        'total_refunded',
+        'platform_earnings_refunded',
         'meta',
     ];
 
@@ -127,7 +130,7 @@ class Booking extends Model
 
     public function scopeConfirmed($query)
     {
-        return $query->where('status', BookingStatus::CONFIRMED);
+        return $query->whereIn('status', [BookingStatus::CONFIRMED, BookingStatus::VENUE_CONFIRMED]);
     }
 
     public function scopeNoShow($query)
@@ -254,10 +257,36 @@ class Booking extends Model
         return Attribute::make(get: fn () => $this->total_fee - $this->total_refunded);
     }
 
-    protected static function booted()
+    protected function finalPlatformEarningsTotal(): Attribute
+    {
+        return Attribute::make(get: fn () => $this->platform_earnings - $this->platform_earnings_refunded);
+    }
+
+    protected static function booted(): void
     {
         static::creating(function ($booking) {
             $booking->original_total = $booking->total_fee;
         });
+    }
+
+    protected function isConfirmed(): Attribute
+    {
+        return Attribute::make(
+            get: fn () => $this->status === BookingStatus::CONFIRMED
+        );
+    }
+
+    protected function isRefunded(): Attribute
+    {
+        return Attribute::make(
+            get: fn () => $this->status === BookingStatus::REFUNDED
+        );
+    }
+
+    protected function isRefundedOrPartiallyRefunded(): Attribute
+    {
+        return Attribute::make(
+            get: fn () => in_array($this->status, [BookingStatus::REFUNDED, BookingStatus::PARTIALLY_REFUNDED])
+        );
     }
 }

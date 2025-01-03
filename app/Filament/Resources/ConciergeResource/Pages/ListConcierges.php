@@ -2,7 +2,6 @@
 
 namespace App\Filament\Resources\ConciergeResource\Pages;
 
-use App\Enums\BookingStatus;
 use App\Filament\Resources\ConciergeResource;
 use App\Models\Concierge;
 use App\Models\User;
@@ -186,7 +185,7 @@ class ListConcierges extends ListRecords
             ])
             ->withCount([
                 'bookings' => function ($query) {
-                    $query->where('status', BookingStatus::CONFIRMED);
+                    $query->confirmed();
                 }, 'referrals', 'concierges',
             ]);
     }

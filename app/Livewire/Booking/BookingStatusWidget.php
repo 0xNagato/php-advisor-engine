@@ -20,8 +20,8 @@ class BookingStatusWidget extends Component
         $this->booking = $booking;
     }
 
-    public function render(): \Illuminate\Contracts\View\View|\Illuminate\Foundation\Application|Factory|View|Application
-    {
+    public function render(
+    ): \Illuminate\Contracts\View\View|\Illuminate\Foundation\Application|Factory|View|Application {
         return view('livewire.booking-status-widget', [
             'booking' => $this->booking,
         ]);
@@ -36,6 +36,9 @@ class BookingStatusWidget extends Component
             BookingStatus::COMPLETED => 'The booking has been completed successfully.',
             BookingStatus::CANCELLED => 'The booking has been cancelled. Check if there was a mistake.',
             BookingStatus::NO_SHOW => 'The guest did not show up for the booking.',
+            BookingStatus::REFUNDED => 'The booking has been refunded.',
+            BookingStatus::PARTIALLY_REFUNDED => 'The booking has been partially refunded.',
+            BookingStatus::VENUE_CONFIRMED => 'The venue has confirmed the booking.',
         };
     }
 }

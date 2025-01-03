@@ -77,6 +77,13 @@ class ConciergeOverview extends BaseWidget
 
     protected function getEarnings(Carbon $startDate, Carbon $endDate): array
     {
+        $earningTypes = [
+            EarningType::CONCIERGE,
+            EarningType::CONCIERGE_REFERRAL_1,
+            EarningType::CONCIERGE_REFERRAL_2,
+            EarningType::CONCIERGE_BOUNTY,
+            EarningType::REFUND,
+        ];
         $earnings = Earning::query()
             ->whereNotNull('bookings.confirmed_at')
             ->when($this->isVip, function (Builder $query) {
@@ -85,9 +92,14 @@ class ConciergeOverview extends BaseWidget
             ->join('bookings', 'earnings.booking_id', '=', 'bookings.id')
             ->where('earnings.user_id', $this->concierge->user_id)
             ->whereBetween('bookings.confirmed_at', [$startDate, $endDate])
-            ->whereIn('earnings.type', [EarningType::CONCIERGE, EarningType::CONCIERGE_REFERRAL_1, EarningType::CONCIERGE_REFERRAL_2, EarningType::CONCIERGE_BOUNTY])
+            ->whereIn('earnings.type', values: $earningTypes)
             ->select(
-                DB::raw('COUNT(DISTINCT CASE WHEN earnings.type IN ("'.EarningType::CONCIERGE->value.'", "'.EarningType::CONCIERGE_BOUNTY->value.'") THEN bookings.id END)
+                DB::raw('COUNT(
+                    DISTINCT CASE WHEN
+                        earnings.type IN ("'.EarningType::CONCIERGE->value.'", "'.EarningType::CONCIERGE_BOUNTY->value.'")
+                        and earnings.type NOT IN ("'.EarningType::REFUND->value.'")
+                    THEN bookings.id END
+                    )
                 as number_of_direct_bookings'),
                 DB::raw('COUNT(DISTINCT CASE WHEN earnings.type IN
                 ("'.EarningType::CONCIERGE_REFERRAL_1->value.'", "'.EarningType::CONCIERGE_REFERRAL_2->value.'") THEN bookings.id END) as number_of_referral_bookings'),
@@ -106,6 +118,7 @@ class ConciergeOverview extends BaseWidget
 
     protected function getAverageBookingValue(Carbon $startDate, Carbon $endDate): float
     {
+        $earningTypes = [EarningType::CONCIERGE, EarningType::CONCIERGE_BOUNTY, EarningType::REFUND];
         $result = Earning::query()
             ->whereNotNull('bookings.confirmed_at')
             ->when($this->isVip, function (Builder $query) {
@@ -114,7 +127,7 @@ class ConciergeOverview extends BaseWidget
             ->join('bookings', 'earnings.booking_id', '=', 'bookings.id')
             ->where('earnings.user_id', $this->concierge->user_id)
             ->whereBetween('bookings.confirmed_at', [$startDate, $endDate])
-            ->whereIn('earnings.type', [EarningType::CONCIERGE, EarningType::CONCIERGE_BOUNTY])
+            ->whereIn('earnings.type', $earningTypes)
             ->selectRaw('earnings.currency, AVG(earnings.amount) as average_earning, COUNT(*) as booking_count')
             ->groupBy('earnings.currency')
             ->get();
@@ -138,6 +151,10 @@ class ConciergeOverview extends BaseWidget
 
     protected function getChartData(Carbon $startDate, Carbon $endDate): array
     {
+        $earningTypes = [
+            EarningType::CONCIERGE, EarningType::CONCIERGE_REFERRAL_1, EarningType::CONCIERGE_REFERRAL_2,
+            EarningType::CONCIERGE_BOUNTY,
+        ];
         $dailyData = Earning::query()
             ->whereNotNull('bookings.confirmed_at')
             ->when($this->isVip, function (Builder $query) {
@@ -146,7 +163,7 @@ class ConciergeOverview extends BaseWidget
             ->join('bookings', 'earnings.booking_id', '=', 'bookings.id')
             ->where('earnings.user_id', $this->concierge->user_id)
             ->whereBetween('bookings.confirmed_at', [$startDate, $endDate])
-            ->whereIn('earnings.type', [EarningType::CONCIERGE, EarningType::CONCIERGE_REFERRAL_1, EarningType::CONCIERGE_REFERRAL_2, EarningType::CONCIERGE_BOUNTY])
+            ->whereIn('earnings.type', $earningTypes)
             ->selectRaw('DATE(bookings.confirmed_at) as date, earnings.currency, earnings.type, COUNT(*) as bookings, SUM(earnings.amount) as total_earnings, AVG(earnings.amount) as avg_earning')
             ->groupBy('date', 'earnings.currency', 'earnings.type')
             ->orderBy('date')

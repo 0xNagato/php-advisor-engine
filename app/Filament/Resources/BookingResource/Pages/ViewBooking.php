@@ -10,10 +10,13 @@ use App\Actions\Booking\ConvertToNonPrime;
 use App\Actions\Booking\ConvertToPrime;
 use App\Actions\Booking\RefundBooking;
 use App\Enums\BookingStatus;
+use App\Enums\EarningType;
 use App\Filament\Resources\BookingResource;
 use App\Models\Booking;
+use App\Models\Earning;
 use App\Models\Region;
 use App\Notifications\Booking\CustomerBookingConfirmed;
+use App\Services\Booking\BookingCalculationService;
 use App\Traits\FormatsPhoneNumber;
 use Carbon\Carbon;
 use Filament\Actions\Action;
@@ -189,7 +192,7 @@ class ViewBooking extends ViewRecord
 
     public function refundBookingAction(): Action
     {
-        if (! $this->record->is_prime) {
+        if (! $this->record->is_prime || $this->record->is_refunded_or_partially_refunded) {
             return Action::make('refundBooking')->hidden();
         }
 
@@ -207,7 +210,8 @@ class ViewBooking extends ViewRecord
                     ])
                     ->live()
                     ->afterStateUpdated(function ($state, $get) {
-                        $this->refundAmount = $this->calculateRefundAmount($state, $get('guest_count'));
+                        $this->refundAmount = app(BookingCalculationService::class)
+                            ->calculateRefundAmount($this->record, $state, $get('guest_count'));
                     })
                     ->default('full'),
 
@@ -224,7 +228,8 @@ class ViewBooking extends ViewRecord
                     ->required(fn (Get $get) => $get('refund_type') === 'partial')
                     ->live()
                     ->afterStateUpdated(function ($state, $get) {
-                        $this->refundAmount = $this->calculateRefundAmount($get('refund_type'), $state);
+                        $this->refundAmount = app(BookingCalculationService::class)
+                            ->calculateRefundAmount($this->record, $get('refund_type'), $state);
                     }),
 
                 Select::make('stripe_reason')
@@ -278,23 +283,37 @@ class ViewBooking extends ViewRecord
         string $refundType,
         ?int $guestCount
     ): void {
-        if (! auth()->user()->hasActiveRole('super_admin')) {
-            Notification::make()
-                ->danger()
-                ->title('Unauthorized')
-                ->body('You do not have permission to process refunds.')
-                ->send();
-
-            return;
-        }
-
-        $refundAmount = $this->calculateRefundAmount($refundType, $guestCount);
+        $refundAmount = app(BookingCalculationService::class)->calculateRefundAmount($this->record, $refundType,
+            $guestCount);
         $result = RefundBooking::run($this->record, $stripeReason, $refundAmount);
 
         if ($result['success']) {
+            // Calculate refund percentage for partial refunds
+            $refundPercentage = $refundType === 'full' ? 1 : $guestCount / $this->record->guest_count;
+
+            // Create refund earnings for each original earning
+            foreach ($this->record->earnings as $earning) {
+                $earningRefundAmount = (int) ($earning->amount * $refundPercentage);
+
+                if ($earningRefundAmount > 0) {
+                    Earning::query()->create([
+                        'user_id' => $earning->user_id,
+                        'booking_id' => $this->record->id,
+                        'type' => $earning->type,
+                        'amount' => -$earningRefundAmount,
+                        'currency' => $earning->currency,
+                        'percentage' => $earning->percentage,
+                        'percentage_of' => EarningType::REFUND->value,
+                        'confirmed_at' => now(),
+                    ]);
+                }
+            }
+
             $this->record->update([
                 'refund_reason' => $internalReason,
                 'refunded_guest_count' => $guestCount,
+                'total_refunded' => $refundAmount,
+                'platform_earnings_refunded' => (int) ($this->record->platform_earnings * $refundPercentage),
                 'status' => $refundType === 'full' ? BookingStatus::REFUNDED : BookingStatus::PARTIALLY_REFUNDED,
             ]);
 
@@ -328,18 +347,6 @@ class ViewBooking extends ViewRecord
                 ->body($result['message'])
                 ->send();
         }
-    }
-
-    private function calculateRefundAmount(string $refundType, ?int $guestCount): int
-    {
-        if ($refundType === 'full' || ! $guestCount || $guestCount === $this->record->guest_count) {
-            return $this->record->total_with_tax_in_cents;
-        }
-
-        // Calculate per guest amount and ensure we get exact division
-        $perGuestAmount = (int) ($this->record->total_with_tax_in_cents / $this->record->guest_count);
-
-        return $perGuestAmount * $guestCount;
     }
 
     public function cancelBookingAction(): Action

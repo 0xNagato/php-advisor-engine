@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Partner;
 
+use App\Enums\BookingStatus;
 use App\Filament\Resources\PartnerResource\Pages\ViewPartner;
 use App\Services\CurrencyConversionService;
 use Carbon\Carbon;
@@ -45,7 +46,10 @@ class PartnerOverallLeaderboard extends Widget
 
                 $allEarnings = $conciergeEarnings->union($venueEarnings)->get();
 
-                $partnerTotals = $allEarnings->groupBy('partner_id')->map(function (Collection $partnerEarnings) use ($currencyService): array {
+                $partnerTotals = $allEarnings->filter(fn ($row
+                ) => $row->total_amount > 0)->groupBy('partner_id')->map(function (Collection $partnerEarnings) use (
+                    $currencyService
+                ): array {
                     $totalEarned = $partnerEarnings->sum('total_amount');
                     $totalUSD = $currencyService->convertToUSD([$partnerEarnings->first()->currency => $totalEarned]);
 
@@ -81,6 +85,8 @@ class PartnerOverallLeaderboard extends Widget
             ->join('earnings', 'earnings.booking_id', '=', 'bookings.id')
             ->whereNotNull('bookings.confirmed_at')
             ->whereBetween('bookings.confirmed_at', [$startDate, $endDate])
+            ->whereIn('bookings.status',
+                [BookingStatus::CONFIRMED, BookingStatus::VENUE_CONFIRMED, BookingStatus::PARTIALLY_REFUNDED])
             ->whereIn('earnings.type', ['partner_concierge', 'partner_venue'])
             ->select(
                 'partners.id as partner_id',

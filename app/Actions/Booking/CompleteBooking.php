@@ -16,6 +16,10 @@ class CompleteBooking
     use AsAction;
     use FormatsPhoneNumber;
 
+    public function __construct(
+        protected readonly StripeClient $stripeClient
+    ) {}
+
     public function handle(Booking $booking, string $paymentIntentId, array $formData): array
     {
         try {
@@ -23,8 +27,8 @@ class CompleteBooking
 
             // Only process Stripe payment for prime bookings with payment intent
             if ($booking->prime_time && $paymentIntentId) {
-                $stripe = new StripeClient(config('services.stripe.secret'));
-                $paymentIntent = $stripe->paymentIntents->retrieve($paymentIntentId, ['expand' => ['latest_charge']]);
+
+                $paymentIntent = $this->stripeClient->paymentIntents->retrieve($paymentIntentId, ['expand' => ['latest_charge']]);
 
                 throw_if($paymentIntent->status !== 'succeeded', new Exception('Payment not successful'));
 

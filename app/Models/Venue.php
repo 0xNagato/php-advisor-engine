@@ -195,12 +195,14 @@ class Venue extends Model
 
     public function scopeWithSchedulesForDate($query, string $date, int $partySize, string $startTime, string $endTime)
     {
-        return $query->with(['schedules' => function ($query) use ($date, $partySize, $startTime, $endTime) {
-            $query->where('booking_date', $date)
-                ->where('party_size', $partySize)
-                ->where('start_time', '>=', $startTime)
-                ->where('start_time', '<=', $endTime);
-        }]);
+        return $query->with([
+            'schedules' => function ($query) use ($date, $partySize, $startTime, $endTime) {
+                $query->where('booking_date', $date)
+                    ->where('party_size', $partySize)
+                    ->where('start_time', '>=', $startTime)
+                    ->where('start_time', '<=', $endTime);
+            },
+        ]);
     }
 
     /**
@@ -245,7 +247,7 @@ class Venue extends Model
         return $this->hasManyThrough(
             Booking::class, // The final model you want to access (Booking)
             ScheduleTemplate::class // The intermediate model (ScheduleTemplate)
-        )->where('status', BookingStatus::CONFIRMED);
+        )->whereIn('status', [BookingStatus::CONFIRMED, BookingStatus::VENUE_CONFIRMED]);
     }
 
     /**

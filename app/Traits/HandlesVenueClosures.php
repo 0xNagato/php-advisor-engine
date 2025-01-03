@@ -54,7 +54,7 @@ trait HandlesVenueClosures
 
     protected function getOverrideVenues(): array
     {
-        $envOverrides = env('OVERRIDE_VENUES', '');
+        $envOverrides = config('app.override_venues');
 
         return array_filter(explode(',', (string) $envOverrides));
     }
@@ -62,8 +62,11 @@ trait HandlesVenueClosures
     /**
      * Apply closure rules to a single venue's schedules
      */
-    protected function applySingleVenueClosureRules(Collection $schedules, string|Carbon $date, string $venueSlug): Collection
-    {
+    protected function applySingleVenueClosureRules(
+        Collection $schedules,
+        string|Carbon $date,
+        string $venueSlug
+    ): Collection {
         if (! $this->isClosedDate($date)) {
             return $schedules;
         }

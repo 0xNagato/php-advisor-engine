@@ -13,12 +13,15 @@ class RefundBooking
 {
     use AsAction;
 
+    public function __construct(protected StripeClient $stripeClient) {}
+
     public function handle(Booking $booking, ?string $reason = null, ?int $amount = null): array
     {
         try {
-            throw_if(! $booking->stripe_charge_id && ! $booking->stripe_payment_intent_id, new Exception('No payment information found for this booking.'));
-
-            $stripe = new StripeClient(config('services.stripe.secret'));
+            throw_if(
+                ! $booking->stripe_charge_id && ! $booking->stripe_payment_intent_id,
+                new Exception('No payment information found for this booking.')
+            );
 
             $refundParams = [
                 'reason' => $reason,
@@ -31,7 +34,7 @@ class RefundBooking
                 $refundParams['charge'] = $booking->stripe_charge_id;
             }
 
-            $refund = $stripe->refunds->create($refundParams);
+            $refund = $this->stripeClient->refunds->create($refundParams);
 
             $booking->update([
                 'status' => BookingStatus::REFUNDED,

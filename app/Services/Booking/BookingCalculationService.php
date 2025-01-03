@@ -31,4 +31,16 @@ readonly class BookingCalculationService
     {
         $this->nonPrimeEarningsCalculationService->calculate($booking);
     }
+
+    public function calculateRefundAmount(Booking $booking, string $refundType, ?int $guestCount = 0): int
+    {
+        if ($refundType === 'full' || ! $guestCount || $guestCount === $booking->guest_count) {
+            return $booking->total_with_tax_in_cents;
+        }
+
+        // Calculate per guest amount and ensure we get exact division
+        $perGuestAmount = (int) ($booking->total_with_tax_in_cents / $booking->guest_count);
+
+        return $perGuestAmount * $guestCount;
+    }
 }
