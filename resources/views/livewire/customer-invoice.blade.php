@@ -131,7 +131,7 @@
                 <div>
                     <span class="block text-xs text-gray-500 uppercase">Date Paid:</span>
                     <span class="block text-xs font-medium text-gray-800 sm:text-sm dark:text-gray-200">
-                        {{ $booking->confirmed_at->setTimezone(auth()->user()?->timezone ?? 'America/New_York')->format('M d, Y g:i A') }}
+                        {{ $booking->confirmed_at?->setTimezone(auth()->user()?->timezone ?? 'America/New_York')->format('M d, Y g:i A') }}
                     </span>
                 </div>
 
@@ -233,12 +233,12 @@
                 @endif
             </div>
 
-            @if (auth()->check() && auth()->user()->hasActiveRole('super_admin'))
+            @if (auth()->check() &&
+                    auth()->user()->hasActiveRole('super_admin') &&
+                    $booking->status !== BookingStatus::PENDING &&
+                    $booking->status !== BookingStatus::GUEST_ON_PAGE)
                 @php
                     $booking->load('earnings.user.venue', 'earnings.user.concierge', 'earnings.user.partner');
-                    // Eager loading because resend customer invoice would break everytime
-                    // I'll buy you lunch if you fix this and can explain why this is happening
-                    // - Andrew
                 @endphp
                 <div class="mt-6">
                     <div class="flex flex-col gap-8 lg:flex-row">
