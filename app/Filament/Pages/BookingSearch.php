@@ -1,0 +1,198 @@
+<?php
+
+namespace App\Filament\Pages;
+
+use App\Enums\BookingStatus;
+use App\Models\Booking;
+use Filament\Forms\Components\Grid;
+use Filament\Forms\Components\Section;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\TextInput;
+use Filament\Forms\Form;
+use Filament\Pages\Page;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Concerns\InteractsWithTable;
+use Filament\Tables\Contracts\HasTable;
+use Filament\Tables\Table;
+use Illuminate\Support\Carbon;
+
+class BookingSearch extends Page implements HasTable
+{
+    use InteractsWithTable;
+
+    public ?array $data = [];
+
+    protected static ?string $navigationIcon = 'heroicon-o-magnifying-glass';
+
+    protected static ?string $navigationLabel = 'Booking Search';
+
+    protected static ?string $title = 'Booking Search';
+
+    protected static ?string $navigationGroup = 'Advanced Tools';
+
+    protected static ?int $navigationSort = 2;
+
+    protected static string $view = 'filament.pages.booking-search';
+
+    public static function canAccess(): bool
+    {
+        return auth()->user()->hasActiveRole('super_admin');
+    }
+
+    public function mount(): void
+    {
+        $this->form->fill([
+            'booking_id' => '',
+            'customer_search' => '',
+            'venue_search' => '',
+            'concierge_search' => '',
+            'status' => null,
+        ]);
+    }
+
+    public function form(Form $form): Form
+    {
+        return $form
+            ->schema([
+                Section::make()
+                    ->schema([
+                        Grid::make(5)
+                            ->schema([
+                                TextInput::make('booking_id')
+                                    ->label('Booking ID')
+                                    ->placeholder('ID')
+                                    ->numeric()
+                                    ->live(debounce: 300)
+                                    ->afterStateUpdated(function () {
+                                        $this->resetTable();
+                                    })
+                                    ->columnSpan(1),
+                                TextInput::make('customer_search')
+                                    ->label('Customer Search')
+                                    ->placeholder('Name, Email or Phone')
+                                    ->live(debounce: 500)
+                                    ->minLength(3)
+                                    ->afterStateUpdated(function () {
+                                        $this->resetTable();
+                                    })
+                                    ->columnSpan(1),
+                                TextInput::make('venue_search')
+                                    ->label('Venue Search')
+                                    ->placeholder('Venue Name')
+                                    ->live(debounce: 500)
+                                    ->minLength(3)
+                                    ->afterStateUpdated(function () {
+                                        $this->resetTable();
+                                    })
+                                    ->columnSpan(1),
+                                TextInput::make('concierge_search')
+                                    ->label('Concierge Search')
+                                    ->placeholder('Concierge Name')
+                                    ->live(debounce: 500)
+                                    ->minLength(3)
+                                    ->afterStateUpdated(function () {
+                                        $this->resetTable();
+                                    })
+                                    ->columnSpan(1),
+                                Select::make('status')
+                                    ->options(BookingStatus::class)
+                                    ->placeholder('All Statuses')
+                                    ->live()
+                                    ->afterStateUpdated(function () {
+                                        $this->resetTable();
+                                    })
+                                    ->columnSpan(1),
+                            ]),
+                    ]),
+            ])
+            ->statePath('data');
+    }
+
+    public function table(Table $table): Table
+    {
+        $query = Booking::query()
+            ->with(['venue', 'concierge.user', 'schedule.venue']);
+
+        // Apply filters
+        if ($this->data['booking_id'] ?? null) {
+            $query->where('id', $this->data['booking_id']);
+        }
+
+        if ($this->data['customer_search'] ?? null) {
+            $search = $this->data['customer_search'];
+            $query->where(function ($query) use ($search) {
+                $query->where('guest_first_name', 'like', "%{$search}%")
+                    ->orWhere('guest_last_name', 'like', "%{$search}%")
+                    ->orWhere('guest_email', 'like', "%{$search}%")
+                    ->orWhere('guest_phone', 'like', "%{$search}%");
+            });
+        }
+
+        if ($this->data['venue_search'] ?? null) {
+            $search = $this->data['venue_search'];
+            $query->whereHas('venue', fn ($q) => $q->where('name', 'like', "%{$search}%"));
+        }
+
+        if ($this->data['concierge_search'] ?? null) {
+            $search = $this->data['concierge_search'];
+            $query->whereHas('concierge.user', function ($q) use ($search) {
+                $q->where('first_name', 'like', "%{$search}%")
+                    ->orWhere('last_name', 'like', "%{$search}%");
+            });
+        }
+
+        if ($this->data['status'] ?? null) {
+            $query->where('status', $this->data['status']);
+        }
+
+        return $table
+            ->query($query)
+            ->columns([
+                TextColumn::make('booking_at')
+                    ->label('Date')
+                    ->formatStateUsing(function (Booking $record): string {
+                        return Carbon::parse($record->booking_at)
+                            ->timezone($record->schedule->venue->timezone ?? config('app.timezone'))
+                            ->format('D, M j, Y g:ia');
+                    })
+                    ->sortable(),
+                TextColumn::make('guest_name')
+                    ->label('Guest Information')
+                    ->size('xs')
+                    ->formatStateUsing(function (Booking $record): string {
+                        $parts = [];
+
+                        if ($record->guest_name) {
+                            $parts[] = $record->guest_name;
+                        }
+                        if ($record->guest_phone) {
+                            $parts[] = $record->guest_phone;
+                        }
+                        if ($record->guest_email) {
+                            $parts[] = $record->guest_email;
+                        }
+
+                        return implode('<br>', $parts);
+                    })
+                    ->html(),
+                TextColumn::make('venue.name')
+                    ->label('Venue')
+                    ->sortable(),
+                TextColumn::make('concierge.user.name')
+                    ->label('Concierge'),
+                TextColumn::make('status')
+                    ->badge()
+                    ->color(fn (BookingStatus $state): string => match ($state) {
+                        BookingStatus::CONFIRMED => 'success',
+                        BookingStatus::PENDING => 'warning',
+                        BookingStatus::CANCELLED => 'danger',
+                        BookingStatus::NO_SHOW => 'gray',
+                        default => 'gray',
+                    }),
+                TextColumn::make('total_fee')
+                    ->money(fn ($record) => $record->currency, 100)
+                    ->sortable(),
+            ])
+            ->paginated([25, 50, 100, 250]);
+    }
+}
