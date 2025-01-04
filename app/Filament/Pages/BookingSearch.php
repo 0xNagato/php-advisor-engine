@@ -175,9 +175,7 @@ class BookingSearch extends Page implements HasTable
                 TextColumn::make('booking_at')
                     ->label('Booking Date')
                     ->size('xs')
-                    ->formatStateUsing(fn (Booking $record): string => Carbon::parse($record->booking_at)
-                        ->timezone($record->schedule->venue->timezone ?? config('app.timezone'))
-                        ->format('M j, Y g:ia'))
+                    ->formatStateUsing(fn (Booking $record): string => $record->booking_at->format('M j, Y g:ia'))
                     ->sortable(),
                 TextColumn::make('guest_name')
                     ->label('Guest Information')

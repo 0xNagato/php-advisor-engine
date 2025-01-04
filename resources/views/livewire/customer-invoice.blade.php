@@ -122,6 +122,13 @@
                 </div>
 
                 <div>
+                    <span class="block text-xs text-gray-500 uppercase">Created At:</span>
+                    <span class="block text-xs font-medium text-gray-800 sm:text-sm dark:text-gray-200">
+                        {{ $booking->created_at->setTimezone(auth()->user()?->timezone ?? 'America/New_York')->format('M d, Y g:i A') }}
+                    </span>
+                </div>
+
+                <div>
                     <span class="block text-xs text-gray-500 uppercase">Booking Time:</span>
                     <span class="block text-xs font-medium text-gray-800 sm:text-sm dark:text-gray-200">
                         {{ $booking->booking_at->format('M d, Y g:i A') }}
@@ -129,9 +136,26 @@
                 </div>
 
                 <div>
-                    <span class="block text-xs text-gray-500 uppercase">Date Paid:</span>
+                    <span
+                        class="block text-xs text-gray-500 uppercase">{{ $booking->is_prime ? 'Date Paid' : 'Date Confirmed' }}:</span>
                     <span class="block text-xs font-medium text-gray-800 sm:text-sm dark:text-gray-200">
                         {{ $booking->confirmed_at?->setTimezone(auth()->user()?->timezone ?? 'America/New_York')->format('M d, Y g:i A') }}
+                    </span>
+                </div>
+
+                <div>
+                    <span class="block text-xs text-gray-500 uppercase">Concierge:</span>
+                    <span class="block text-xs font-medium text-gray-800 sm:text-sm dark:text-gray-200">
+                        @if ($booking->concierge && auth()->check() && auth()->user()->hasActiveRole('super_admin'))
+                            <a href="{{ route('filament.admin.pages.booking-search', ['data' => ['concierge_search' => $booking->concierge->user->name]]) }}"
+                                class="text-indigo-600 hover:text-indigo-800">
+                                {{ $booking->concierge->user->name }}
+                            </a>
+                        @elseif ($booking->concierge)
+                            {{ $booking->concierge->user->name }}
+                        @else
+                            -
+                        @endif
                     </span>
                 </div>
 
