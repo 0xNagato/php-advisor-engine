@@ -1,19 +1,23 @@
 @php use App\Enums\BookingStatus; @endphp
 @php use libphonenumber\PhoneNumberFormat; @endphp
 <div class='flex flex-col w-full gap-1 text-xs' data-cy="booking-card">
-    <div class="flex items-center gap-1 font-semibold">
-        <div>
-            {{ $record->venue->name }}
+    <div class="flex items-center justify-between gap-1">
+        <div class="flex items-center gap-1 font-semibold">
+            <div>
+                {{ $record->venue->name }}
+            </div>
+
+            @if ($record->status === BookingStatus::REFUNDED || $record->status === BookingStatus::PARTIALLY_REFUNDED)
+                <x-heroicon-s-arrow-path-rounded-square class="h-4 w-4 -mt-0.5 text-red-600" />
+                <span class="text-xs text-red-600">
+                    {{ $record->status === BookingStatus::REFUNDED ? 'Refunded' : 'Partial Refund' }}
+                </span>
+            @elseif ($record->venue_confirmed_at)
+                <x-heroicon-s-check-circle class="h-4 w-4 -mt-0.5 text-green-600" />
+            @else
+                <x-heroicon-s-clock class="h-4 w-4 -mt-0.5 text-gray-400" />
+            @endif
         </div>
-
-        @if ($record->status === BookingStatus::REFUNDED || $record->status === BookingStatus::PARTIALLY_REFUNDED)
-            <x-heroicon-s-arrow-path-rounded-square class="h-4 w-4 -mt-0.5 text-red-600" />
-        @elseif ($record->venue_confirmed_at)
-            <x-heroicon-s-check-circle class="h-4 w-4 -mt-0.5 text-green-600" />
-        @else
-            <x-heroicon-s-clock class="h-4 w-4 -mt-0.5 text-gray-400" />
-        @endif
-
     </div>
     <div class="flex items-center gap-1">
         <div class="font-semibold">{{ $record->guest_name }}:</div>

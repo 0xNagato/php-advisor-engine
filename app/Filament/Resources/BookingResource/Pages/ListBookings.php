@@ -14,6 +14,7 @@ use Filament\Tables\Filters\Filter;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\HtmlString;
 
 class ListBookings extends ListRecords
 {
@@ -34,6 +35,7 @@ class ListBookings extends ListRecords
                         BookingStatus::VENUE_CONFIRMED,
                         BookingStatus::REFUNDED,
                         BookingStatus::PARTIALLY_REFUNDED,
+                        BookingStatus::CANCELLED,
                     ]);
 
                 if (auth()->user()->hasActiveRole('concierge')) {
@@ -57,7 +59,24 @@ class ListBookings extends ListRecords
                     )),
                 TextColumn::make('total_fee')
                     ->size('xs')
-                    ->money(fn ($record) => $record->currency, divideBy: 100)
+                    ->formatStateUsing(function (Booking $record) {
+                        if ($record->status === BookingStatus::REFUNDED) {
+                            return new HtmlString(
+                                '<span class="text-red-600">-'.money($record->total_refunded, $record->currency).'</span>'
+                            );
+                        }
+
+                        if ($record->status === BookingStatus::PARTIALLY_REFUNDED) {
+                            $remaining = $record->total_with_tax_in_cents - $record->total_refunded;
+
+                            return new HtmlString(
+                                '<span class="text-red-600">-'.money($record->total_refunded, $record->currency).'</span><br>'.
+                                '<span class="text-xs">('.money($remaining, $record->currency).')</span>'
+                            );
+                        }
+
+                        return money($record->total_fee, $record->currency);
+                    })
                     ->alignRight(),
             ])
             ->paginated([10, 25, 50, 100])
@@ -80,14 +99,20 @@ class ListBookings extends ListRecords
             ])
             ->actions([
                 Action::make('resendNotification')
-                    ->hidden(fn () => ! auth()->user()->hasActiveRole('super_admin'))
+                    ->hidden(fn (Booking $record) => ! auth()->user()->hasActiveRole('super_admin') ||
+                        $record->venue_confirmed_at !== null ||
+                        $record->booking_at->setTimezone($record->venue->timezone)->isPast() ||
+                        in_array($record->status, [
+                            BookingStatus::REFUNDED,
+                            BookingStatus::PARTIALLY_REFUNDED,
+                            BookingStatus::CANCELLED,
+                        ])
+                    )
                     ->label('Resend Notification')
                     ->requiresConfirmation()
-                    ->icon(fn (Booking $record
-                    ) => is_null($record->venue_confirmed_at) ? 'ri-refresh-line' : 'heroicon-o-check-circle')
+                    ->icon(fn (Booking $record) => 'ri-refresh-line')
                     ->iconButton()
-                    ->color(fn (Booking $record) => is_null($record->venue_confirmed_at) ? 'indigo' : 'success')
-                    ->requiresConfirmation()
+                    ->color('indigo')
                     ->action(function (Booking $record) {
                         SendConfirmationToVenueContacts::run($record);
                         $record->update(['resent_venue_confirmation_at' => now()]);
