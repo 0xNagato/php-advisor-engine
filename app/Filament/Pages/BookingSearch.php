@@ -50,7 +50,8 @@ class BookingSearch extends Page implements HasTable
                 'customer_search' => '',
                 'venue_search' => '',
                 'concierge_search' => '',
-                'status' => null,
+                'status' => [
+                ],
             ]);
         }
     }
@@ -100,7 +101,16 @@ class BookingSearch extends Page implements HasTable
                                     })
                                     ->columnSpan(1),
                                 Select::make('status')
-                                    ->options(BookingStatus::class)
+                                    ->multiple()
+                                    ->options([
+                                        BookingStatus::PENDING->value => BookingStatus::PENDING->label(),
+                                        BookingStatus::GUEST_ON_PAGE->value => BookingStatus::GUEST_ON_PAGE->label(),
+                                        BookingStatus::ABANDONED->value => BookingStatus::ABANDONED->label(),
+                                        BookingStatus::CANCELLED->value => BookingStatus::CANCELLED->label(),
+                                        BookingStatus::CONFIRMED->value => BookingStatus::CONFIRMED->label(),
+                                        BookingStatus::REFUNDED->value => BookingStatus::REFUNDED->label(),
+                                        BookingStatus::PARTIALLY_REFUNDED->value => BookingStatus::PARTIALLY_REFUNDED->label(),
+                                    ])
                                     ->placeholder('All Statuses')
                                     ->live()
                                     ->afterStateUpdated(function () {
@@ -157,7 +167,8 @@ class BookingSearch extends Page implements HasTable
         }
 
         if ($this->data['status'] ?? null) {
-            $query->where('status', $this->data['status']);
+            $statuses = is_array($this->data['status']) ? $this->data['status'] : [$this->data['status']];
+            $query->whereIn('status', $statuses);
         }
 
         return $table
