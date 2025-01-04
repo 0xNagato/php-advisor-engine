@@ -80,8 +80,10 @@ class VenueEarnings extends Page
                 ->iconButton()
                 ->icon('heroicon-o-calendar')
                 ->form([
-                    DatePicker::make('startDate'),
-                    DatePicker::make('endDate'),
+                    DatePicker::make('startDate')
+                        ->native(true),
+                    DatePicker::make('endDate')
+                        ->native(true),
                     // ...
                 ]),
         ];

@@ -44,7 +44,7 @@ class BookingSearch extends Page implements HasTable
 
     public function mount(): void
     {
-        if (empty($this->data)) {
+        if (blank($this->data)) {
             $this->form->fill([
                 'booking_id' => '',
                 'customer_search' => '',
@@ -125,7 +125,7 @@ class BookingSearch extends Page implements HasTable
 
         if ($this->data['customer_search'] ?? null) {
             $search = $this->data['customer_search'];
-            $terms = explode(' ', $search);
+            $terms = explode(' ', (string) $search);
 
             $query->where(function ($query) use ($terms) {
                 foreach ($terms as $term) {
@@ -144,7 +144,7 @@ class BookingSearch extends Page implements HasTable
 
         if ($this->data['concierge_search'] ?? null) {
             $search = $this->data['concierge_search'];
-            $terms = explode(' ', $search);
+            $terms = explode(' ', (string) $search);
 
             $query->whereHas('concierge.user', function (Builder $q) use ($terms) {
                 foreach ($terms as $term) {

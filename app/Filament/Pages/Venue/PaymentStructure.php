@@ -113,7 +113,7 @@ class PaymentStructure extends Page
                 ->schema([
                     DatePicker::make('date')
                         ->label('Date')
-                        ->native(false)
+                        ->native(true)
                         ->required(),
                     TextInput::make('fee')
                         ->label('Fee')
