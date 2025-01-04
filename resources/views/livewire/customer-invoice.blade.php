@@ -269,7 +269,7 @@
                         <div class="w-full lg:w-1/2">
                             <livewire:booking.earnings-breakdown :booking="$booking" />
                         </div>
-                        @if (!$booking->is_refunded)
+                        @if (!$booking->is_refunded && $booking->status !== BookingStatus::CANCELLED)
                             <div class="w-full -mt-2 lg:w-1/2">
                                 <livewire:payout-breakdown-chart :booking="$booking" />
                             </div>
