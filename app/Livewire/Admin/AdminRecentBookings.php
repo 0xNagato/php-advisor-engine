@@ -40,6 +40,7 @@ class AdminRecentBookings extends BaseWidget
                 'bookings.total_refunded',
                 'bookings.currency',
                 'bookings.is_prime',
+                'bookings.platform_earnings',
                 'venues.name as venue_name',
                 'bookings.status',
             ])
@@ -78,28 +79,31 @@ class AdminRecentBookings extends BaseWidget
                         }
 
                         if (! $booking->is_prime) {
-                            return new HtmlString('<span class="text-xs italic text-gray-500">Non-Prime</span>');
+                            return new HtmlString(
+                                '<span class="text-xs italic text-gray-500">Non-Prime</span><br>'.
+                                '<span class="text-xs text-green-600">'.money($booking->platform_earnings ?? 0, $booking->currency).' (Platform Earnings)</span>'
+                            );
                         }
 
                         if ($booking->status === BookingStatus::REFUNDED) {
                             return new HtmlString(
                                 '<span class="text-xs italic text-gray-500">Refunded</span><br>'.
-                                '<span class="text-xs text-red-600">-'.money($booking->total_refunded, $booking->currency).'</span>'
+                                '<span class="text-xs text-red-600">-'.money($booking->total_refunded ?? 0, $booking->currency).'</span>'
                             );
                         }
 
                         if ($booking->status === BookingStatus::PARTIALLY_REFUNDED) {
-                            $remaining = $booking->total_fee - $booking->total_refunded;
+                            $remaining = ($booking->total_fee ?? 0) - ($booking->total_refunded ?? 0);
 
                             return new HtmlString(
                                 '<span class="text-xs italic text-gray-500">Partially Refunded</span><br>'.
-                                '<span class="text-xs text-red-600">-'.money($booking->total_refunded, $booking->currency).'</span><br>'.
+                                '<span class="text-xs text-red-600">-'.money($booking->total_refunded ?? 0, $booking->currency).'</span><br>'.
                                 '<span class="text-xs text-amber-600">'.money($remaining, $booking->currency).' remaining</span>'
                             );
                         }
 
                         return $booking->total_fee > 0
-                            ? money($booking->total_fee - $booking->total_refunded, $booking->currency)
+                            ? money($booking->total_fee - ($booking->total_refunded ?? 0), $booking->currency)
                             : '-';
                     }),
             ]);
