@@ -70,12 +70,6 @@ class ConciergeReportDashboard extends Dashboard
                 'startDate' => Carbon::parse($this->filters['startDate']),
                 'endDate' => Carbon::parse($this->filters['endDate']),
             ]),
-            ConciergeOverview::make([
-                'concierge' => auth()->user()->concierge,
-                'startDate' => Carbon::parse($this->filters['startDate']),
-                'endDate' => Carbon::parse($this->filters['endDate']),
-                'isVip' => true,
-            ]),
             ConciergeRecentBookings::make([
                 'concierge' => auth()->user()->concierge,
                 'columnSpan' => 'full',

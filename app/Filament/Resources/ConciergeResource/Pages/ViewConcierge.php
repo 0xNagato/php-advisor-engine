@@ -108,12 +108,6 @@ class ViewConcierge extends ViewRecord
                 'startDate' => Carbon::parse($this->filters['startDate']),
                 'endDate' => Carbon::parse($this->filters['endDate']),
             ]),
-            ConciergeOverview::make([
-                'concierge' => $this->getRecord(),
-                'startDate' => Carbon::parse($this->filters['startDate']),
-                'endDate' => Carbon::parse($this->filters['endDate']),
-                'isVip' => true,
-            ]),
             ConciergeRecentBookings::make([
                 'concierge' => $this->getRecord(),
                 'hideConcierge' => true,

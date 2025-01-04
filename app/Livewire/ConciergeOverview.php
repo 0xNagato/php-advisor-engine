@@ -2,6 +2,7 @@
 
 namespace App\Livewire;
 
+use App\Enums\BookingStatus;
 use App\Enums\EarningType;
 use App\Models\Concierge;
 use App\Models\Earning;
@@ -38,11 +39,8 @@ class ConciergeOverview extends BaseWidget
         $totalEarningsUSD = $currencyService->convertToUSD($earnings['earnings']);
         $prevTotalEarningsUSD = $currencyService->convertToUSD($prevEarnings['earnings']);
 
-        $avgBookingValue = $this->getAverageBookingValue($startDate, $endDate);
-        $prevAvgBookingValue = $this->getAverageBookingValue(
-            $startDate->copy()->subDays($startDate->diffInDays($endDate)),
-            $startDate
-        );
+        $avgBookingValue = $earnings['average_per_booking'];
+        $prevAvgBookingValue = $prevEarnings['average_per_booking'];
 
         return [
             $this->createStat(
@@ -93,6 +91,7 @@ class ConciergeOverview extends BaseWidget
             ->where('earnings.user_id', $this->concierge->user_id)
             ->whereBetween('bookings.confirmed_at', [$startDate, $endDate])
             ->whereIn('earnings.type', values: $earningTypes)
+            ->whereNotIn('bookings.status', [BookingStatus::REFUNDED, BookingStatus::PARTIALLY_REFUNDED])
             ->select(
                 DB::raw('COUNT(
                     DISTINCT CASE WHEN
@@ -109,10 +108,16 @@ class ConciergeOverview extends BaseWidget
             ->groupBy('earnings.currency')
             ->get();
 
+        $directBookings = $earnings->sum('number_of_direct_bookings');
+        $totalEarnings = $earnings->pluck('total_earnings', 'currency')->toArray();
+        $currencyService = app(CurrencyConversionService::class);
+        $totalEarningsUSD = $currencyService->convertToUSD($totalEarnings);
+
         return [
-            'number_of_direct_bookings' => $earnings->sum('number_of_direct_bookings'),
+            'number_of_direct_bookings' => $directBookings,
             'number_of_referral_bookings' => $earnings->sum('number_of_referral_bookings'),
-            'earnings' => $earnings->pluck('total_earnings', 'currency')->toArray(),
+            'earnings' => $totalEarnings,
+            'average_per_booking' => $directBookings > 0 ? $totalEarningsUSD / $directBookings : 0,
         ];
     }
 
