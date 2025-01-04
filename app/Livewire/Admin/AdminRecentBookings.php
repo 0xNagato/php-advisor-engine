@@ -47,6 +47,7 @@ class AdminRecentBookings extends BaseWidget
             ->join('schedule_templates', 'bookings.schedule_template_id', '=', 'schedule_templates.id')
             ->join('venues', 'schedule_templates.venue_id', '=', 'venues.id')
             ->whereNotNull('bookings.confirmed_at')
+            ->whereNotNull('bookings.guest_phone')
             ->whereIn('bookings.status',
                 [BookingStatus::CONFIRMED, BookingStatus::VENUE_CONFIRMED, BookingStatus::REFUNDED, BookingStatus::PARTIALLY_REFUNDED, BookingStatus::CANCELLED])
             ->whereBetween('bookings.created_at', [$startDate, $endDate])
