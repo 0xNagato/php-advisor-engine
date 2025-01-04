@@ -106,6 +106,12 @@ class ViewBooking extends ViewRecord
             ->button()
             ->size('lg')
             ->extraAttributes(['class' => 'w-full'])
+            ->hidden(fn () => ! in_array($this->record->status, [
+                BookingStatus::CONFIRMED,
+                BookingStatus::VENUE_CONFIRMED,
+                BookingStatus::REFUNDED,
+                BookingStatus::PARTIALLY_REFUNDED,
+            ]))
             ->action(fn () => $this->resendInvoice());
     }
 
@@ -192,7 +198,13 @@ class ViewBooking extends ViewRecord
 
     public function refundBookingAction(): Action
     {
-        if (! $this->record->is_prime || $this->record->is_refunded_or_partially_refunded) {
+        if (! $this->record->is_prime
+            || $this->record->is_refunded_or_partially_refunded
+            || ! in_array($this->record->status, [
+                BookingStatus::CONFIRMED,
+                BookingStatus::VENUE_CONFIRMED,
+            ])
+        ) {
             return Action::make('refundBooking')->hidden();
         }
 
@@ -351,7 +363,12 @@ class ViewBooking extends ViewRecord
 
     public function cancelBookingAction(): Action
     {
-        if ($this->record->is_prime) {
+        if ($this->record->is_prime
+            || ! in_array($this->record->status, [
+                BookingStatus::CONFIRMED,
+                BookingStatus::VENUE_CONFIRMED,
+            ])
+        ) {
             return Action::make('cancelBooking')->hidden();
         }
 
@@ -423,7 +440,12 @@ class ViewBooking extends ViewRecord
     public function convertToNonPrimeBookingAction(): Action
     {
         if (! $this->record->is_prime || auth()->id() !== 1
-            || $this->record->created_at->lt(Carbon::now()->subHours(24))) {
+            || $this->record->created_at->lt(Carbon::now()->subHours(24))
+            || ! in_array($this->record->status, [
+                BookingStatus::CONFIRMED,
+                BookingStatus::VENUE_CONFIRMED,
+            ])
+        ) {
             return Action::make('convertToNonPrimeBooking')->hidden();
         }
 
@@ -458,8 +480,14 @@ class ViewBooking extends ViewRecord
 
     public function convertToPrimeBookingAction(): Action
     {
-        if ($this->record->is_prime || auth()->id() !== 1
-            || $this->record->created_at->lt(Carbon::now()->subHours(24))) {
+        if ($this->record->is_prime
+            || auth()->id() !== 1
+            || $this->record->created_at->lt(Carbon::now()->subHours(24))
+            || ! in_array($this->record->status, [
+                BookingStatus::CONFIRMED,
+                BookingStatus::VENUE_CONFIRMED,
+            ])
+        ) {
             return Action::make('convertToPrimeBooking')->hidden();
         }
 
@@ -489,6 +517,65 @@ class ViewBooking extends ViewRecord
                     ->title('Booking Converted to Prime')
                     ->body($result['message'])
                     ->send();
+            });
+    }
+
+    public function abandonBookingAction(): Action
+    {
+        if (! in_array($this->record->status, [
+            BookingStatus::PENDING,
+            BookingStatus::GUEST_ON_PAGE,
+        ])) {
+            return Action::make('abandonBooking')->hidden();
+        }
+
+        return Action::make('abandonBooking')
+            ->label('Mark as Abandoned')
+            ->color('warning')
+            ->icon('heroicon-o-x-mark')
+            ->requiresConfirmation()
+            ->modalIcon('heroicon-o-exclamation-triangle')
+            ->modalIconColor('warning')
+            ->modalHeading('Mark Booking as Abandoned')
+            ->modalDescription(fn () => new HtmlString(
+                'Are you sure you want to mark this booking as abandoned?<br><br>'.
+                "<div class='text-sm'>".
+                "<p class='p-1 mb-2 text-xs font-semibold text-red-600 bg-red-100 border border-red-300 rounded-md'>This action will be logged and cannot be undone.</p>".
+                "<p class='text-lg font-semibold'>{$this->record->guest_name}</p>".
+                "<p><strong>Venue:</strong> {$this->record->venue->name}</p>".
+                "<p><strong>Guest Count:</strong> {$this->record->guest_count}</p>".
+                "<p><strong>Booking Time:</strong> {$this->record->booking_at->format('M d, Y h:i A')}</p>".
+                '</div>'
+            ))
+            ->button()
+            ->size('lg')
+            ->extraAttributes(['class' => 'w-full'])
+            ->action(function () {
+                $this->record->update([
+                    'status' => BookingStatus::ABANDONED,
+                ]);
+
+                // Delete any existing earnings
+                $this->record->earnings()->delete();
+
+                activity()
+                    ->performedOn($this->record)
+                    ->withProperties([
+                        'guest_name' => $this->record->guest_name,
+                        'venue_name' => $this->record->venue->name,
+                        'booking_time' => $this->record->booking_at->format('M d, Y h:i A'),
+                        'guest_count' => $this->record->guest_count,
+                        'previous_status' => $this->record->status,
+                    ])
+                    ->log('Booking marked as abandoned');
+
+                Notification::make()
+                    ->success()
+                    ->title('Booking Abandoned')
+                    ->body('The booking has been marked as abandoned.')
+                    ->send();
+
+                $this->redirect($this->getResource()::getUrl('index'));
             });
     }
 }

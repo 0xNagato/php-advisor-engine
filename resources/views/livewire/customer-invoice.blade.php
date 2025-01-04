@@ -233,7 +233,7 @@
                             </div>
                         </li>
                     @endif
-                    @if (!in_array($booking->status, [BookingStatus::PENDING, BookingStatus::GUEST_ON_PAGE]))
+                    @if (!in_array($booking->status, [BookingStatus::PENDING, BookingStatus::GUEST_ON_PAGE, BookingStatus::ABANDONED]))
                         <li
                             class="inline-flex items-center px-4 py-3 text-xs font-semibold text-gray-800 sm:text-sm bg-gray-50 dark:bg-slate-800 dark:text-gray-200">
                             <div class="flex items-center justify-between w-full">
@@ -261,6 +261,7 @@
                     auth()->user()->hasActiveRole('super_admin') &&
                     $booking->status !== BookingStatus::PENDING &&
                     $booking->status !== BookingStatus::GUEST_ON_PAGE &&
+                    $booking->status !== BookingStatus::ABANDONED &&
                     $booking->status !== BookingStatus::CANCELLED)
                 @php
                     $booking->load('earnings.user.venue', 'earnings.user.concierge', 'earnings.user.partner');
@@ -278,7 +279,9 @@
                     </div>
                 </div>
             @endif
-            @if (auth()->check() && auth()->user()->hasActiveRole('super_admin'))
+            @if (auth()->check() &&
+                    auth()->user()->hasActiveRole('super_admin') &&
+                    !in_array($booking->status, [BookingStatus::PENDING, BookingStatus::GUEST_ON_PAGE, BookingStatus::ABANDONED]))
                 <x-filament::actions :actions="[
                     $this->resendInvoiceAction,
                     $this->refundBookingAction,
@@ -286,7 +289,12 @@
                     $this->deleteBookingAction,
                     $this->convertToNonPrimeBookingAction,
                     $this->convertToPrimeBookingAction,
+                    $this->abandonBookingAction,
                 ]" class="w-full mt-4" />
+            @elseif (auth()->check() &&
+                    auth()->user()->hasActiveRole('super_admin') &&
+                    in_array($booking->status, [BookingStatus::PENDING, BookingStatus::GUEST_ON_PAGE]))
+                <x-filament::actions :actions="[$this->abandonBookingAction]" class="w-full mt-4" />
             @endif
         </div>
         <!-- End Body -->
