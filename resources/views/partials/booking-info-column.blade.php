@@ -12,6 +12,9 @@
                 <span class="text-xs text-red-600">
                     {{ $record->status === BookingStatus::REFUNDED ? 'Refunded' : 'Partial Refund' }}
                 </span>
+            @elseif ($record->status === BookingStatus::CANCELLED)
+                <x-heroicon-s-x-circle class="h-4 w-4 -mt-0.5 text-red-600" />
+                <span class="text-xs text-red-600">Cancelled</span>
             @elseif ($record->venue_confirmed_at)
                 <x-heroicon-s-check-circle class="h-4 w-4 -mt-0.5 text-green-600" />
             @else
@@ -19,17 +22,35 @@
             @endif
         </div>
     </div>
-    <div class="flex items-center gap-1">
-        <div class="font-semibold">{{ $record->guest_name }}:</div>
-        <div>{{ formatInternationalPhoneNumber($record->guest_phone) }}</div>
-    </div>
+
+    @if ($record->guest_name || $record->guest_phone)
+        @if ($record->guest_name)
+            <div class="flex items-center gap-1">
+                <div class="font-semibold">{{ $record->guest_name }}:</div>
+                @if ($record->guest_phone)
+                    <div>{{ formatInternationalPhoneNumber($record->guest_phone) }}</div>
+                @endif
+            </div>
+        @elseif($record->guest_phone)
+            <div class="flex items-center gap-1">
+                <div>{{ formatInternationalPhoneNumber($record->guest_phone) }}</div>
+            </div>
+        @endif
+    @endif
 
     <div class="flex items-center gap-1">
         <div class="font-semibold">Booking:</div>
         <div>{{ $record->booking_at->format('M j, Y g:ia') }}</div>
     </div>
 
-    @if (!$record->venue_confirmed_at && auth()->user()->hasActiveRole('super_admin'))
+    @if (
+        !$record->venue_confirmed_at &&
+            auth()->user()->hasActiveRole('super_admin') &&
+            !in_array($record->status, [
+                BookingStatus::REFUNDED,
+                BookingStatus::PARTIALLY_REFUNDED,
+                BookingStatus::CANCELLED,
+            ]))
         <div class="mt-2 font-semibold">Venue Contacts:</div>
         @if ($record->venue && $record->venue->contacts)
             @foreach ($record->venue->contacts->where('use_for_reservations', true) as $contact)
