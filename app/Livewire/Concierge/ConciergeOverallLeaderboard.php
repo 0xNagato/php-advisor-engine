@@ -45,6 +45,7 @@ class ConciergeOverallLeaderboard extends Widget
                     EarningType::CONCIERGE,
                     EarningType::CONCIERGE_REFERRAL_1,
                     EarningType::CONCIERGE_REFERRAL_2,
+                    EarningType::CONCIERGE_BOUNTY,
                 ];
 
                 $earnings = Earning::query()
@@ -54,7 +55,7 @@ class ConciergeOverallLeaderboard extends Widget
                         DB::raw('SUM(earnings.amount) as total_earned'),
                         'earnings.currency',
                         DB::raw("CONCAT(users.first_name, ' ', users.last_name) as user_name"),
-                        DB::raw('COUNT(DISTINCT CASE WHEN earnings.type = "concierge" THEN earnings.booking_id END) as direct_booking_count'),
+                        DB::raw('COUNT(DISTINCT CASE WHEN earnings.type IN ("concierge", "concierge_bounty") THEN earnings.booking_id END) as direct_booking_count'),
                         DB::raw('COUNT(DISTINCT CASE WHEN earnings.type IN ("concierge_referral_1", "concierge_referral_2") THEN earnings.booking_id END) as referral_booking_count')
                     )
                     ->join('concierges', 'concierges.user_id', '=', 'earnings.user_id')
