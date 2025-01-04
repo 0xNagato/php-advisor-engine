@@ -19,6 +19,22 @@ enum BookingStatus: string
 
     case PARTIALLY_REFUNDED = 'partially_refunded';
 
+    public const REPORTING_STATUSES = [
+        self::CONFIRMED,
+        self::VENUE_CONFIRMED,
+        self::COMPLETED,
+        self::REFUNDED,
+        self::PARTIALLY_REFUNDED,
+    ];
+
+    public const NON_REPORTING_STATUSES = [
+        self::PENDING,
+        self::GUEST_ON_PAGE,
+        self::ABANDONED,
+        self::CANCELLED,
+        self::NO_SHOW,
+    ];
+
     public function label(): string
     {
         return match ($this) {
