@@ -43,29 +43,30 @@
                     </thead>
                     <tbody class="divide-y divide-gray-200">
                         @foreach ($leaderboardData as $index => $concierge)
-                            <tr class="{{ auth()->user()->hasActiveRole('super_admin') ? 'hover:bg-gray-50 cursor-pointer' : '' }}"
-                                @if (auth()->user()->hasActiveRole('super_admin')) wire:click="viewConcierge({{ $concierge['concierge_id'] }})" @endif>
-                                <td
-                                    class="whitespace-nowrap px-3 text-xs font-medium py-[1rem] text-gray-950 first-of-type:ps-4 last-of-type:pe-4 sm:first-of-type:ps-6 sm:last-of-type:pe-6">
-                                    {{ $index + 1 }}
+                            <tr
+                                class="{{ auth()->user()->hasActiveRole('super_admin') ? 'hover:bg-gray-100' : 'cursor-not-allowed' }}">
+                                <td>
+                                    <div class="px-3 py-1 text-xs font-medium whitespace-nowrap">
+                                        {{ $index + 1 }}
+                                    </div>
                                 </td>
-                                <td
-                                    class="whitespace-nowrap px-3 text-xs py-[1rem] text-gray-950 first-of-type:ps-4 last-of-type:pe-4 sm:first-of-type:ps-6 sm:last-of-type:pe-6">
-                                    @if (auth()->user()->concierge && auth()->user()->concierge->user_id === $concierge['user_id'])
-                                        You
-                                    @elseif(auth()->user()->hasActiveRole('super_admin'))
-                                        {{ $concierge['user_name'] }}
-                                    @else
+                                <td>
+                                    @if (auth()->user()->hasActiveRole('super_admin'))
                                         @php
-                                            $nameParts = explode(' ', $concierge['user_name']);
-                                            $obfuscatedName = implode(
-                                                ' ',
-                                                array_map(function ($part) {
-                                                    return $part[0] . str_repeat('*', strlen($part) - 1);
-                                                }, $nameParts),
-                                            );
+                                            $nameParts = !empty($concierge['user_name'])
+                                                ? explode(' ', $concierge['user_name'])
+                                                : [''];
+                                            $firstName = $nameParts[0] ?? '';
+                                            $lastName =
+                                                count($nameParts) > 1 ? implode(' ', array_slice($nameParts, 1)) : '';
                                         @endphp
-                                        {{ $obfuscatedName }}
+                                        <div class="px-3 py-1 text-xs whitespace-nowrap text-gray-950">
+                                            {{ $firstName }} <span class="text-gray-500">{{ $lastName }}</span>
+                                        </div>
+                                    @else
+                                        <div class="px-3 py-1 text-xs whitespace-nowrap">
+                                            {{ $concierge['user_name'] ?? 'Unknown User' }}
+                                        </div>
                                     @endif
                                 </td>
                                 <td
