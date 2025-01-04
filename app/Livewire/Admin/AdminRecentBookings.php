@@ -82,11 +82,20 @@ class AdminRecentBookings extends BaseWidget
                         }
 
                         if ($booking->status === BookingStatus::REFUNDED) {
-                            return new HtmlString('<span class="text-xs italic text-gray-500">Refunded</span>');
+                            return new HtmlString(
+                                '<span class="text-xs italic text-gray-500">Refunded</span><br>'.
+                                '<span class="text-xs text-red-600">-'.money($booking->total_refunded, $booking->currency).'</span>'
+                            );
                         }
 
                         if ($booking->status === BookingStatus::PARTIALLY_REFUNDED) {
-                            return new HtmlString('<span class="text-xs italic text-gray-500">Partially Refunded</span>');
+                            $remaining = $booking->total_fee - $booking->total_refunded;
+
+                            return new HtmlString(
+                                '<span class="text-xs italic text-gray-500">Partially Refunded</span><br>'.
+                                '<span class="text-xs text-red-600">-'.money($booking->total_refunded, $booking->currency).'</span><br>'.
+                                '<span class="text-xs text-amber-600">'.money($remaining, $booking->currency).' remaining</span>'
+                            );
                         }
 
                         return $booking->total_fee > 0
