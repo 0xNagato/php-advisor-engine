@@ -80,10 +80,7 @@ class AdminRecentBookings extends BaseWidget
                         }
 
                         if (! $booking->is_prime) {
-                            return new HtmlString(
-                                '<span class="text-xs italic text-gray-500">Non-Prime</span><br>'.
-                                '<span class="text-xs text-green-600">'.money($booking->platform_earnings ?? 0, $booking->currency).' (Platform Earnings)</span>'
-                            );
+                            return new HtmlString('<span class="text-xs italic text-gray-500">Non-Prime</span>');
                         }
 
                         if ($booking->status === BookingStatus::REFUNDED) {
