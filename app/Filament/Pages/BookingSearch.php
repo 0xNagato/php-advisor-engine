@@ -211,8 +211,11 @@ class BookingSearch extends Page implements HasTable
                     ->color(fn (BookingStatus $state): string => match ($state) {
                         BookingStatus::CONFIRMED => 'success',
                         BookingStatus::PENDING => 'warning',
+                        BookingStatus::GUEST_ON_PAGE => 'warning',
                         BookingStatus::CANCELLED => 'danger',
                         BookingStatus::NO_SHOW => 'gray',
+                        BookingStatus::REFUNDED => 'danger',
+                        BookingStatus::PARTIALLY_REFUNDED => 'danger',
                         default => 'gray',
                     }),
                 TextColumn::make('total_fee')
@@ -221,5 +224,11 @@ class BookingSearch extends Page implements HasTable
                     ->sortable(),
             ])
             ->paginated([25, 50, 100, 250]);
+    }
+
+    public function clearFilters(): void
+    {
+        $this->form->fill([]);
+        $this->resetTable();
     }
 }
