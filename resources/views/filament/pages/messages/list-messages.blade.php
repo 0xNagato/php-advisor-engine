@@ -8,7 +8,7 @@
             @if ($isDemo)
                 Welcome to the PRIMA Demo!
             @else
-                Welcome to PRIMA!
+                How PRIMA Works
             @endif
         </x-slot>
 
@@ -59,7 +59,7 @@
                     Hi {{ auth()->user()->first_name }},
                 </p>
                 <p>
-                    Welcome to PRIMA!
+                    How PRIMA Works
                 </p>
                 <p>
                     PRIMA is currently LIVE in Miami, and you may begin booking reservations starting immediately.
