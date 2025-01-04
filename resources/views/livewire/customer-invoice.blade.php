@@ -260,7 +260,8 @@
             @if (auth()->check() &&
                     auth()->user()->hasActiveRole('super_admin') &&
                     $booking->status !== BookingStatus::PENDING &&
-                    $booking->status !== BookingStatus::GUEST_ON_PAGE)
+                    $booking->status !== BookingStatus::GUEST_ON_PAGE &&
+                    $booking->status !== BookingStatus::CANCELLED)
                 @php
                     $booking->load('earnings.user.venue', 'earnings.user.concierge', 'earnings.user.partner');
                 @endphp
@@ -269,7 +270,7 @@
                         <div class="w-full lg:w-1/2">
                             <livewire:booking.earnings-breakdown :booking="$booking" />
                         </div>
-                        @if (!$booking->is_refunded && $booking->status !== BookingStatus::CANCELLED)
+                        @if (!$booking->is_refunded)
                             <div class="w-full -mt-2 lg:w-1/2">
                                 <livewire:payout-breakdown-chart :booking="$booking" />
                             </div>
