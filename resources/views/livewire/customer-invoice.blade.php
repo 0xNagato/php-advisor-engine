@@ -310,7 +310,6 @@
                     $this->resendInvoiceAction,
                     $this->refundBookingAction,
                     $this->cancelBookingAction,
-                    $this->deleteBookingAction,
                     $this->convertToNonPrimeBookingAction,
                     $this->convertToPrimeBookingAction,
                     $this->abandonBookingAction,
