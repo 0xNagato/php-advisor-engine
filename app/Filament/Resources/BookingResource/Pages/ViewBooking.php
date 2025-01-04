@@ -186,14 +186,6 @@ class ViewBooking extends ViewRecord
             ->title('Booking Deleted')
             ->body('The booking has been successfully deleted.')
             ->send();
-
-        // Redirect to the original previous URL if it's valid
-        if ($this->originalPreviousUrl) {
-            $this->redirect($this->originalPreviousUrl);
-        } else {
-            // If no valid previous URL, redirect to the bookings index
-            $this->redirect(BookingResource::getUrl());
-        }
     }
 
     public function refundBookingAction(): Action
@@ -351,7 +343,6 @@ class ViewBooking extends ViewRecord
                 ->body('The refund has been successfully processed.')
                 ->send();
 
-            $this->redirect($this->getResource()::getUrl('index'));
         } else {
             Notification::make()
                 ->danger()
@@ -433,8 +424,6 @@ class ViewBooking extends ViewRecord
             ->title('Booking Cancelled')
             ->body('The booking has been successfully cancelled.')
             ->send();
-
-        $this->redirect($this->getResource()::getUrl('index'));
     }
 
     public function convertToNonPrimeBookingAction(): Action
@@ -575,7 +564,69 @@ class ViewBooking extends ViewRecord
                     ->body('The booking has been marked as abandoned.')
                     ->send();
 
-                $this->redirect($this->getResource()::getUrl('index'));
             });
+    }
+
+    public function uncancelBookingAction(): Action
+    {
+        return Action::make('uncancelBooking')
+            ->label('Uncancel Booking')
+            ->color('warning')
+            ->icon('heroicon-o-arrow-path')
+            ->requiresConfirmation()
+            ->modalIcon('heroicon-o-exclamation-triangle')
+            ->modalIconColor('warning')
+            ->modalHeading('Uncancel Booking')
+            ->button()
+            ->size('lg')
+            ->extraAttributes(['class' => 'w-full'])
+            ->modalDescription(fn () => new HtmlString(
+                'Are you certain you want to uncancel this booking?<br><br>'.
+                "<div class='text-sm'>".
+                "<p class='p-1 mb-2 text-xs font-semibold text-yellow-600 bg-yellow-100 border border-yellow-300 rounded-md'>This action will be logged.</p>".
+                "<p class='text-lg font-semibold'>{$this->record->guest_name}</p>".
+                "<p><strong>Venue:</strong> {$this->record->venue->name}</p>".
+                "<p><strong>Guest Count:</strong> {$this->record->guest_count}</p>".
+                "<p><strong>Booking Time:</strong> {$this->record->booking_at->format('M d, Y h:i A')}</p>".
+                '</div>'
+            ))
+            ->modalSubmitActionLabel('Uncancel')
+            ->modalCancelActionLabel('Cancel')
+            ->hidden(fn () => auth()->id() !== 1 || $this->record->status !== BookingStatus::CANCELLED)
+            ->action(fn () => $this->uncancelBooking());
+    }
+
+    private function uncancelBooking(): void
+    {
+        if (auth()->id() !== 1) {
+            Notification::make()
+                ->danger()
+                ->title('Unauthorized')
+                ->body('You do not have permission to uncancel bookings.')
+                ->send();
+
+            return;
+        }
+
+        // Calculate non-prime earnings and update status
+        Booking::calculateNonPrimeEarnings($this->record, true);
+
+        activity()
+            ->performedOn($this->record)
+            ->withProperties([
+                'guest_name' => $this->record->guest_name,
+                'venue_name' => $this->record->venue->name,
+                'booking_time' => $this->record->booking_at->format('M d, Y h:i A'),
+                'guest_count' => $this->record->guest_count,
+                'previous_status' => BookingStatus::CANCELLED->value,
+                'new_status' => BookingStatus::CONFIRMED->value,
+            ])
+            ->log('Booking uncancelled');
+
+        Notification::make()
+            ->success()
+            ->title('Booking Uncancelled')
+            ->body('The booking has been successfully uncancelled and earnings restored.')
+            ->send();
     }
 }
