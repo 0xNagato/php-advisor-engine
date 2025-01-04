@@ -29,6 +29,7 @@ class ListBookings extends ListRecords
             ->modifyQueryUsing(function ($query) {
                 $query = $query
                     ->with('venue')
+                    ->whereNotNull('guest_phone')
                     ->orderByDesc('created_at')
                     ->whereIn('status', [
                         BookingStatus::CONFIRMED,
