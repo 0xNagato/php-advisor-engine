@@ -69,6 +69,10 @@ class ViewConcierge extends ViewRecord
             $subheading .= "<div class='mt-1 text-xs'>Referral: <a href='$referrerUrl' class='text-primary-600 hover:underline'>$referrerName</a> ($referrerType)</div>";
         }
 
+        if ($concierge->hotel_name) {
+            $subheading .= "<div class='mt-1 text-xs'>Hotel/Company: {$concierge->hotel_name}</div>";
+        }
+
         return new HtmlString("<div class='flex flex-col'>$subheading</div>");
     }
 

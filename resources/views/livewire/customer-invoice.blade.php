@@ -150,6 +150,9 @@
                             <a href="{{ route('filament.admin.pages.booking-search', ['data' => ['concierge_search' => $booking->concierge->user->name]]) }}"
                                 class="text-indigo-600 hover:text-indigo-800">
                                 {{ $booking->concierge->user->name }}
+                                @if ($booking->concierge->hotel_name)
+                                    ({{ $booking->concierge->hotel_name }})
+                                @endif
                             </a>
                         @elseif ($booking->concierge)
                             {{ $booking->concierge->user->name }}
