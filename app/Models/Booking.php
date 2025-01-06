@@ -7,6 +7,7 @@ use App\Enums\BookingStatus;
 use App\Services\Booking\BookingCalculationService;
 use App\Traits\FormatsPhoneNumber;
 use App\Traits\HasImmutableBookingProperties;
+use Illuminate\Database\Eloquent\Casts\AsArrayObject;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -248,7 +249,7 @@ class Booking extends Model
             'resent_venue_confirmation_at' => 'datetime',
             'refunded_at' => 'datetime',
             'refund_data' => 'array',
-            'meta' => 'array',
+            'meta' => AsArrayObject::class,
         ];
     }
 

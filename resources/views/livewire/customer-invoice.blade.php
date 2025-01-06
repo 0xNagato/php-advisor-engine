@@ -116,6 +116,11 @@
                         @else
                             <span class="block text-xs font-medium text-gray-800 sm:text-sm dark:text-gray-200">
                                 Non-Prime
+                                @isset($booking->meta['non_prime_incentive'])
+                                    <span class="text-xs text-gray-500">
+                                        ({{ money($booking->meta['non_prime_incentive']['fee_per_head'] * 100 ?? 0, $booking->currency) }}/guest)
+                                    </span>
+                                @endisset
                             </span>
                         @endif
                     </div>
@@ -220,8 +225,9 @@
                         class="inline-flex items-center px-4 py-3 text-xs text-gray-800 border-b sm:text-sm gap-x-2 last:border-b-0 dark:border-gray-700 dark:text-gray-200">
                         <div class="flex flex-col w-full">
                             <div class="flex items-center justify-between w-full">
-                                <span class="font-medium">{{ $booking->venue->name }} ({{ $booking->guest_count }}
-                                    guests)</span>
+                                <span class="font-medium">
+                                    {{ $booking->venue->name }} ({{ $booking->guest_count }} guests)
+                                </span>
                                 <span class="font-medium">
                                     {{ money($booking->total_fee, $booking->currency) }}
                                 </span>

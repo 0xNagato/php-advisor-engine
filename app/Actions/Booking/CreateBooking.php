@@ -6,6 +6,7 @@ use App\Data\Booking\CreateBookingReturnData;
 use App\Enums\BookingStatus;
 use App\Events\BookingCreated;
 use App\Models\Booking;
+use App\Models\Concierge;
 use App\Models\ScheduleTemplate;
 use App\Models\VipCode;
 use App\Services\SalesTaxService;
@@ -54,6 +55,29 @@ class CreateBooking
         );
 
         $conciergeId = $this->getConciergeId($vipCode);
+        $concierge = Concierge::with('user')->find($conciergeId);
+
+        // Get venue for non-prime incentive data
+        $venue = $scheduleTemplate->venue;
+
+        // Prepare meta data for non-prime bookings
+        $meta = [];
+        $meta['venue'] = [
+            'id' => $venue->id,
+            'name' => $venue->name,
+        ];
+        $meta['concierge'] = [
+            'id' => $conciergeId,
+            'name' => $concierge->user->name ?? 'Unknown',
+            'hotel_name' => $concierge->hotel_name ?? 'Unknown',
+        ];
+        if (! $scheduleTemplate->prime_time) {
+            $meta['non_prime_incentive'] = [
+                'fee_per_head' => $venue->non_prime_fee_per_head,
+                'type' => $venue->non_prime_type,
+                'created_at' => now()->toDateTimeString(),
+            ];
+        }
 
         $booking = Booking::query()->create([
             'schedule_template_id' => $scheduleTemplate?->id,
@@ -64,6 +88,7 @@ class CreateBooking
             'currency' => $currency,
             'is_prime' => $scheduleTemplate?->prime_time,
             'vip_code_id' => $vipCode?->id,
+            'meta' => $meta,
         ]);
 
         $taxData = app(SalesTaxService::class)->calculateTax(

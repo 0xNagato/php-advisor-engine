@@ -63,16 +63,6 @@ class BookingController extends Controller
                 $region->currency
             );
 
-            activity()
-                ->performedOn($booking->booking)
-                ->withProperties([
-                    'venue_id' => $venue->id,
-                    'venue_name' => $venue->name,
-                    'concierge_id' => auth()->user()?->concierge?->id,
-                    'concierge_name' => auth()->user()?->name,
-                ])
-                ->log('Booking created successfully');
-
         } catch (Exception $e) {
             activity()
                 ->withProperties([
