@@ -212,9 +212,17 @@ class EditVenue extends EditRecord
                     ->requiresConfirmation(),
                 Action::make('Active')
                     ->action(function () {
-                        $this->getRecord()->update([
+                        $venue = $this->getRecord();
+                        $venue->update([
                             'status' => VenueStatus::ACTIVE,
                         ]);
+
+                        // Set secured_at for venue's user if not already set
+                        if (! $venue->user->secured_at) {
+                            $venue->user->update([
+                                'secured_at' => now(),
+                            ]);
+                        }
                     })
                     ->requiresConfirmation(),
                 Action::make('Suspended')
