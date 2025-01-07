@@ -91,12 +91,17 @@ class ReservationService
 
         // Mark schedules as sold out if venue is past cutoff time
         $venues->each(function ($venue) use ($currentTime) {
-            if ($venue->cutoff_time && $currentTime > $venue->cutoff_time) {
-                $venue->schedules->each(function ($schedule) {
-                    $schedule->is_available = true;
-                    $schedule->remaining_tables = 0;
-                    $schedule->is_bookable = false;
-                });
+            if ($venue->cutoff_time) {
+                $currentTimeCarbon = Carbon::createFromFormat('H:i:s', $currentTime, $this->region->timezone);
+                $cutoffTimeCarbon = Carbon::createFromFormat('H:i:s', $venue->cutoff_time->format('H:i:s'), $this->region->timezone);
+
+                if ($currentTimeCarbon->gt($cutoffTimeCarbon)) {
+                    $venue->schedules->each(function ($schedule) {
+                        $schedule->is_available = true;
+                        $schedule->remaining_tables = 0;
+                        $schedule->is_bookable = false;
+                    });
+                }
             }
         });
 

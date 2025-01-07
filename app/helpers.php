@@ -2,6 +2,7 @@
 
 use App\Models\Region;
 use App\Traits\FormatsPhoneNumber;
+use Carbon\Carbon;
 
 if (! function_exists('formatInternationalPhoneNumber')) {
     function formatInternationalPhoneNumber($phoneNumber): string
@@ -54,7 +55,9 @@ if (! function_exists('isPastCutoffTime')) {
         }
 
         $timezone ??= Region::query()->find($venue->region)->timezone;
+        $now = now()->setTimezone($timezone);
+        $cutoffTime = Carbon::parse($venue->cutoff_time)->setTimezone($timezone);
 
-        return now()->setTimezone($timezone)->format('H:i:s') > $venue->cutoff_time;
+        return $now->format('H:i:s') > $cutoffTime->format('H:i:s');
     }
 }
