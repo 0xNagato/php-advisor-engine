@@ -2,7 +2,7 @@
 
 namespace App\Models;
 
-use App\Data\VenueContactData;
+use App\Casts\VenueContactCollection;
 use App\Enums\BookingStatus;
 use App\Enums\VenueStatus;
 use App\Models\Traits\HasEarnings;
@@ -21,7 +21,6 @@ use Illuminate\Support\Str;
 use RuntimeException;
 use Spatie\Activitylog\LogOptions;
 use Spatie\Activitylog\Traits\LogsActivity;
-use Spatie\LaravelData\DataCollection;
 use Throwable;
 
 class Venue extends Model
@@ -75,7 +74,7 @@ class Venue extends Model
     {
         return [
             'open_days' => 'array',
-            'contacts' => DataCollection::class.':'.VenueContactData::class,
+            'contacts' => VenueContactCollection::class,
             'non_prime_time' => 'array',
             'business_hours' => 'array',
             'party_sizes' => 'array',

@@ -31,7 +31,9 @@ class ManageContacts extends Widget implements HasForms
         $this->venue = $venue;
 
         $this->form->fill([
-            'contacts' => $this->venue->contacts?->toArray(),
+            'contacts' => $this->venue->contacts
+                ->filter(fn ($contact) => $contact->contact_name !== 'Additional Contact')
+                ->toArray(),
         ]);
     }
 

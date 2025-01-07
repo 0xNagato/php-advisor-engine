@@ -218,4 +218,17 @@ class EditVenue extends EditRecord
                 ->button(),
         ];
     }
+
+    protected function mutateFormDataBeforeFill(array $data): array
+    {
+        if (! isset($data['contacts'])) {
+            return $data;
+        }
+
+        $data['contacts'] = collect($data['contacts'])
+            ->filter(fn ($contact) => $contact['contact_name'] !== 'Additional Contact')
+            ->toArray();
+
+        return $data;
+    }
 }
