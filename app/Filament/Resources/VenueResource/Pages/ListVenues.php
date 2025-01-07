@@ -49,6 +49,12 @@ class ListVenues extends ListRecords
                 TextColumn::make('name')
                     ->size('xs')
                     ->searchable(),
+                TextColumn::make('region')
+                    ->formatStateUsing(fn ($state) => Region::find($state)?->name ?? '-')
+                    ->label('Region')
+                    ->grow(false)
+                    ->size('xs')
+                    ->visibleFrom('lg'),
                 TextColumn::make('partnerReferral.user.name')->label('Partner')
                     ->url(fn (Venue $record) => $record->partnerReferral?->user?->partner
                         ? ViewPartner::getUrl(['record' => $record->partnerReferral->user->partner])
@@ -98,6 +104,11 @@ class ListVenues extends ListRecords
                     ->icon('impersonate-icon')
                     ->action(fn (Venue $record) => $this->impersonate($record->user))
                     ->hidden(fn () => isPrimaApp()),
+                EditAction::make()
+                    ->iconButton()
+                    ->extraAttributes([
+                        'class' => 'hidden md:inline-flex',
+                    ]),
                 Action::make('viewConcierge')
                     ->iconButton()
                     ->icon('tabler-maximize')

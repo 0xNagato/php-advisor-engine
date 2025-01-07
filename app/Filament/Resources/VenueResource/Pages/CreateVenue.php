@@ -6,6 +6,7 @@ use App\Filament\Resources\VenueResource;
 use App\Models\Referral;
 use App\Models\Region;
 use App\Models\User;
+use App\Models\Venue;
 use Filament\Forms\Components\Checkbox;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Repeater;
@@ -13,10 +14,13 @@ use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Form;
+use Filament\Forms\Get;
 use Filament\Resources\Pages\CreateRecord;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 use libphonenumber\PhoneNumberType;
+use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 use Str;
 use Ysfkaya\FilamentPhoneInput\Forms\PhoneInput;
 use Ysfkaya\FilamentPhoneInput\PhoneInputNumberType;
@@ -67,17 +71,30 @@ class CreateVenue extends CreateRecord
                 Section::make('Venue Information')
                     ->icon('heroicon-m-building-storefront')
                     ->schema([
-                        FileUpload::make('venue_logo_path')
-                            ->label('Venue Logo')
-                            ->disk('do')
-                            ->imageEditor()
-                            ->visibility('public')
-                            ->directory('venues')
-                            ->moveFiles(),
                         TextInput::make('name')
                             ->label('Venue Name')
                             ->required()
                             ->maxLength(255),
+                        FileUpload::make('logo_path')
+                            ->label('Venue Logo')
+                            ->disk('do')
+                            ->directory(app()->environment().'/venues')
+                            ->moveFiles()
+                            ->imageEditor()
+                            ->acceptedFileTypes(['image/jpeg', 'image/png', 'image/webp'])
+                            ->maxSize(8192)
+                            ->getUploadedFileNameForStorageUsing(
+                                function (TemporaryUploadedFile $file, Get $get) {
+                                    // Generate slug from the venue name
+                                    $venueName = $get('name') ?? null;
+                                    if (! $venueName) {
+                                        return null;
+                                    }
+                                    $slug = Str::slug($venueName);
+
+                                    return $slug.'-'.time().'.'.$file->getClientOriginalExtension();
+                                }
+                            ),
                         Select::make('region')
                             ->placeholder('Select Region')
                             ->options(Region::all()->sortBy('id')->pluck('name', 'id'))
@@ -195,7 +212,7 @@ class CreateVenue extends CreateRecord
                 'contacts' => $data['contacts'],
                 'region' => $data['region'],
                 'timezone' => $region->timezone,
-                'venue_logo_path' => $data['venue_logo_path'],
+                'logo_path' => $data['logo_path'],
                 'open_days' => [
                     'monday' => 'open',
                     'tuesday' => 'open',
@@ -214,5 +231,12 @@ class CreateVenue extends CreateRecord
     protected function getRedirectUrl(): string
     {
         return $this->previousUrl ?? self::getResource()::getUrl('index');
+    }
+
+    protected function afterCreate(): void
+    {
+        if ($this->getRecord()->logo_path) {
+            Storage::disk('do')->setVisibility($this->getRecord()->logo_path, 'public');
+        }
     }
 }

@@ -20,7 +20,9 @@ use Filament\Notifications\Notification;
 use Filament\Resources\Pages\EditRecord;
 use Filament\Support\Enums\ActionSize;
 use Illuminate\Contracts\Support\Htmlable;
+use Illuminate\Support\Facades\Storage;
 use libphonenumber\PhoneNumberType;
+use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 use RuntimeException;
 use Ysfkaya\FilamentPhoneInput\Forms\PhoneInput;
 use Ysfkaya\FilamentPhoneInput\PhoneInputNumberType;
@@ -46,11 +48,17 @@ class EditVenue extends EditRecord
                 Section::make('Venue Information')
                     ->icon('heroicon-m-building-storefront')
                     ->schema([
-                        FileUpload::make('venue_logo_path')
+                        FileUpload::make('logo_path')
                             ->label('Venue Logo')
                             ->disk('do')
-                            ->directory('venues')
-                            ->visibility('public'),
+                            ->directory(app()->environment().'/venues')
+                            ->moveFiles()
+                            ->imageEditor()
+                            ->acceptedFileTypes(['image/jpeg', 'image/png', 'image/webp'])
+                            ->maxSize(8192)
+                            ->getUploadedFileNameForStorageUsing(
+                                fn (Venue $record, TemporaryUploadedFile $file): string => $record->slug.'-'.time().'.'.$file->getClientOriginalExtension()
+                            ),
                         TextInput::make('name')
                             ->label('Venue Name')
                             ->required()
@@ -230,5 +238,12 @@ class EditVenue extends EditRecord
             ->toArray();
 
         return $data;
+    }
+
+    protected function afterSave(): void
+    {
+        if ($this->getRecord()->logo_path) {
+            Storage::disk('do')->setVisibility($this->getRecord()->logo_path, 'public');
+        }
     }
 }
