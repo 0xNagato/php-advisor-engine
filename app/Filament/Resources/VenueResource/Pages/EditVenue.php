@@ -56,6 +56,7 @@ class EditVenue extends EditRecord
                             ->imageEditor()
                             ->acceptedFileTypes(['image/jpeg', 'image/png', 'image/webp'])
                             ->maxSize(8192)
+                            ->imagePreviewHeight('254')
                             ->getUploadedFileNameForStorageUsing(
                                 fn (Venue $record, TemporaryUploadedFile $file): string => $record->slug.'-'.time().'.'.$file->getClientOriginalExtension()
                             ),

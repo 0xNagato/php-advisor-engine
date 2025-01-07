@@ -83,6 +83,7 @@ class CreateVenue extends CreateRecord
                             ->imageEditor()
                             ->acceptedFileTypes(['image/jpeg', 'image/png', 'image/webp'])
                             ->maxSize(8192)
+                            ->imagePreviewHeight('254')
                             ->getUploadedFileNameForStorageUsing(
                                 function (TemporaryUploadedFile $file, Get $get) {
                                     // Generate slug from the venue name

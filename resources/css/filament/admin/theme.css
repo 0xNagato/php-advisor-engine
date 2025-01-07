@@ -186,3 +186,7 @@ body::before {
     gap: 12px;
   }
 }
+
+.filepond--image-preview {
+  @apply bg-indigo-100;
+}
