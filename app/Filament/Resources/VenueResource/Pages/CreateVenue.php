@@ -129,6 +129,11 @@ class CreateVenue extends CreateRecord
                             ->nullable()
                             ->minValue(1)
                             ->maxValue(999),
+                        TextInput::make('cutoff_time')
+                            ->label('Cutoff Time')
+                            ->type('time')
+                            ->helperText('Time after which same-day reservations cannot be made. Leave empty to allow same-day bookings until closing.')
+                            ->nullable(),
                     ]),
 
                 Repeater::make('contacts')
