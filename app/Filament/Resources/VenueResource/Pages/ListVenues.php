@@ -15,6 +15,7 @@ use Filament\Tables\Actions\ViewAction;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
 
 class ListVenues extends ListRecords
 {
@@ -151,6 +152,11 @@ class ListVenues extends ListRecords
             ->paginated([10, 25, 50, 100])
             ->filters([
                 SelectFilter::make('region')
+                    ->query(function (Builder $query, mixed $state) {
+                        if ($state) {
+                            $query->where('venues.region', $state);
+                        }
+                    })
                     ->options(Region::query()->pluck('name', 'id')),
             ]);
     }
