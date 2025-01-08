@@ -388,9 +388,21 @@ class ReservationHub extends Page
     {
         $this->booking = $this->booking->fresh();
 
-        if ($this->booking->status === BookingStatus::CONFIRMED) {
+        if (! in_array($this->booking->status, [BookingStatus::PENDING, BookingStatus::GUEST_ON_PAGE])) {
             return;
         }
+
+        // Log the activity before updating the status
+        activity()
+            ->performedOn($this->booking)
+            ->withProperties([
+                'booking_id' => $this->booking->id,
+                'new_status' => BookingStatus::ABANDONED->value,
+                'concierge_id' => auth()->user()->concierge->id,
+                'concierge_name' => auth()->user()->name,
+                'previous_status' => $this->booking->status->value,
+            ])
+            ->log('ReservationHub - Booking marked as abandoned');
 
         $this->booking->update(['status' => BookingStatus::ABANDONED]);
         $this->booking = null;

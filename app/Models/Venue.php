@@ -90,6 +90,7 @@ class Venue extends Model
         parent::boot();
 
         static::creating(static function (Venue $venue) {
+            $venue->increment_fee = 50;
             $venue->slug = Str::slug("$venue->region-$venue->name");
 
             $venue->open_days = [
@@ -320,13 +321,7 @@ class Venue extends Model
     public function getActivitylogOptions(): LogOptions
     {
         return LogOptions::defaults()
-            ->logOnly(['status'])  // Remove user.partner_referral_id since we'll handle it separately
-            ->setDescriptionForEvent(fn (string $eventName) => match ($eventName) {
-                'updated' => $this->wasChanged('status')
-                    ? 'Venue status changed'
-                    : 'Venue updated',
-                default => "Venue {$eventName}"
-            })
+            ->setDescriptionForEvent(fn (string $eventName) => "Venue has been {$eventName}")
             ->logOnlyDirty()
             ->dontSubmitEmptyLogs();
     }

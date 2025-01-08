@@ -94,6 +94,19 @@ class AvailabilityCalendar extends Page
                 timezone: $this->region->timezone,
                 currency: $this->region->currency,
                 vipCode: $vipCode);
+
+            activity()
+                ->performedOn($result->booking)
+                ->withProperties([
+                    'booking_id' => $result->booking->id,
+                    'vip_code' => $this->code,
+                    'schedule_template_id' => $scheduleTemplateId,
+                    'booking_date' => $data['date'],
+                    'guest_count' => $data['guest_count'],
+                    'reservation_time' => $data['reservation_time'],
+                ])
+                ->log('VIP booking created');
+
             $this->redirect($result->bookingVipUrl);
         } catch (Exception $e) {
             Notification::make()

@@ -17,12 +17,15 @@ use Illuminate\Database\Eloquent\Relations\HasOneThrough;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
+use Spatie\Activitylog\LogOptions;
+use Spatie\Activitylog\Traits\LogsActivity;
 
 class Booking extends Model
 {
     use FormatsPhoneNumber;
     use HasFactory;
     use HasImmutableBookingProperties;
+    use LogsActivity;
     use Notifiable;
 
     /**
@@ -304,5 +307,12 @@ class Booking extends Model
         return $this->modificationRequests()
             ->where('status', BookingModificationRequest::STATUS_PENDING)
             ->exists();
+    }
+
+    public function getActivitylogOptions(): LogOptions
+    {
+        return LogOptions::defaults()
+            ->logOnlyDirty()
+            ->dontSubmitEmptyLogs();
     }
 }
