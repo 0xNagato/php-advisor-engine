@@ -237,6 +237,14 @@ class EditVenue extends EditRecord
                         ]);
                     })
                     ->requiresConfirmation(),
+                Action::make('Hidden')
+                    ->action(function () {
+                        $this->getRecord()->update([
+                            'status' => VenueStatus::HIDDEN,
+                        ]);
+                    })
+                    ->requiresConfirmation()
+                    ->visible(fn () => auth()->user()->hasRole('super_admin')),
             ])
                 ->label($this->getRecord()->status->getLabel())
                 ->icon('polaris-status-icon')

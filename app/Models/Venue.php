@@ -156,7 +156,7 @@ class Venue extends Model
     {
         return $query->whereHas('user', function (Builder $query) {
             $query->whereNotNull('secured_at');
-        })->whereIn('status', ['active', 'pending']);
+        });
     }
 
     protected function logo(): Attribute

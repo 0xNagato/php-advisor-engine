@@ -5,7 +5,7 @@ namespace App\Enums;
 enum VenueStatus: string
 {
     case DRAFT = 'draft';
-
+    case HIDDEN = 'hidden';
     case UPCOMING = 'upcoming';
     case PENDING = 'pending';
     case ACTIVE = 'active';
@@ -15,6 +15,7 @@ enum VenueStatus: string
     {
         return match ($this) {
             self::DRAFT => 'Draft',
+            self::HIDDEN => 'Hidden',
             self::UPCOMING => 'Not Yet',
             self::PENDING => 'Soon',
             self::ACTIVE => 'Active',

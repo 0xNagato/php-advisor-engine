@@ -17,7 +17,7 @@
         </thead>
         <tbody>
             @foreach ($venues as $venue)
-                <tr class="odd:bg-gray-100">
+                <tr class="odd:bg-gray-100 {{ $venue->status === VenueStatus::HIDDEN ? 'opacity-50' : '' }}">
                     <td class="pl-2 text-center w-28">
                         <div class="flex items-center justify-center h-12">
                             @if ($venue->logo_path)
@@ -26,6 +26,9 @@
                             @else
                                 <span class="text-xs font-semibold text-center uppercase line-clamp-2">
                                     {{ $venue->name }}
+                                    @if ($venue->status === VenueStatus::HIDDEN)
+                                        <span class="block text-[10px] text-gray-500">(Hidden)</span>
+                                    @endif
                                 </span>
                             @endif
                         </div>
@@ -35,7 +38,11 @@
                         <td
                             class="p-1 pr-2 {{ $loop->first ? 'hidden sm:table-cell' : '' }} {{ $loop->last ? 'hidden sm:table-cell' : '' }}">
                             <button
-                                @if ($schedule->is_bookable && $venue->status === VenueStatus::ACTIVE && !isPastCutoffTime($venue)) wire:click="createBooking({{ $schedule->id }}, '{{ $schedule->booking_date->format('Y-m-d') }}')"
+                                @if (
+                                    $schedule->is_bookable &&
+                                        ($venue->status === VenueStatus::ACTIVE ||
+                                            (auth()->user()?->hasRole('super_admin') && $venue->status === VenueStatus::HIDDEN)) &&
+                                        !isPastCutoffTime($venue)) wire:click="createBooking({{ $schedule->id }}, '{{ $schedule->booking_date->format('Y-m-d') }}')"
                                 @elseif ($venue->status === VenueStatus::UPCOMING)
                                     x-on:click="$dispatch('open-modal', { id: 'pending-venue-{{ $venue->id }}' })"
                                 @elseif (isPastCutoffTime($venue))
@@ -45,15 +52,21 @@
                                     'bg-green-600 text-white cursor-pointer hover:bg-green-500' =>
                                         $schedule->prime_time &&
                                         $schedule->is_bookable &&
-                                        $venue->status === VenueStatus::ACTIVE,
+                                        ($venue->status === VenueStatus::ACTIVE ||
+                                            (auth()->user()?->hasRole('super_admin') &&
+                                                $venue->status === VenueStatus::HIDDEN)),
                                     'bg-info-400 text-white cursor-pointer hover:bg-info-500' =>
                                         !$schedule->prime_time &&
                                         $schedule->is_bookable &&
-                                        $venue->status === VenueStatus::ACTIVE,
+                                        ($venue->status === VenueStatus::ACTIVE ||
+                                            (auth()->user()?->hasRole('super_admin') &&
+                                                $venue->status === VenueStatus::HIDDEN)),
                                     'bg-[#E29B46] text-white cursor-pointer hover:bg-orange-500' =>
                                         $schedule->has_low_inventory &&
                                         $schedule->is_bookable &&
-                                        $venue->status === VenueStatus::ACTIVE,
+                                        ($venue->status === VenueStatus::ACTIVE ||
+                                            (auth()->user()?->hasRole('super_admin') &&
+                                                $venue->status === VenueStatus::HIDDEN)),
                                     'bg-gray-200 text-gray-500 border-none cursor-not-allowed' =>
                                         !$schedule->is_bookable && $venue->status !== VenueStatus::PENDING,
                                     'bg-gray-200 text-gray-500 hover:bg-gray-200 cursor-pointer' =>

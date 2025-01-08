@@ -79,6 +79,15 @@ class ReservationService
         /** @var Collection<int, Venue> $venues */
         $venues = Venue::available()
             ->where('region', $this->region->id)
+            ->where(function ($query) {
+                $statuses = [VenueStatus::ACTIVE, VenueStatus::PENDING];
+
+                if (auth()->check() && auth()->user()->hasRole('super_admin')) {
+                    $statuses[] = VenueStatus::HIDDEN;
+                }
+
+                $query->whereIn('status', $statuses);
+            })
             ->withSchedulesForDate(
                 date: $this->date,
                 partySize: $this->getGuestCount(),
@@ -111,6 +120,9 @@ class ReservationService
                 if ($venue->status === VenueStatus::PENDING) {
                     return 'pending';
                 }
+                if ($venue->status === VenueStatus::HIDDEN) {
+                    return 'hidden';
+                }
 
                 // Get middle 3 schedules (indices 1,2,3 if timeslotCount is 5)
                 $middleSchedules = $venue->schedules->slice(1, 3);
@@ -130,10 +142,11 @@ class ReservationService
             // Combine groups in desired order
             ->pipe(function ($groups) {
                 return collect([])
-                    ->concat($groups->get('prime_available', collect()))     // Prime slots first
-                    ->concat($groups->get('non_prime_available', collect())) // Non-prime slots second
-                    ->concat($groups->get('active_closed', collect()))       // Closed venues third
-                    ->concat($groups->get('pending', collect()));            // SOON venues last
+                    ->concat($groups->get('hidden', collect()))           // Hidden venues first
+                    ->concat($groups->get('prime_available', collect()))  // Then prime slots
+                    ->concat($groups->get('non_prime_available', collect())) // Then non-prime slots
+                    ->concat($groups->get('active_closed', collect()))    // Then closed venues
+                    ->concat($groups->get('pending', collect()));         // SOON venues last
             });
 
         // Convert back to Eloquent Collection
