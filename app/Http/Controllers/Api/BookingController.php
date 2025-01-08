@@ -44,7 +44,7 @@ class BookingController extends Controller
                     'concierge_id' => auth()->user()?->concierge?->id,
                     'concierge_name' => auth()->user()?->name,
                 ])
-                ->log('Booking creation failed - Venue not active');
+                ->log('API - Booking creation failed - Venue not active');
 
             return response()->json([
                 'message' => 'Venue is not currently accepting bookings',
@@ -72,7 +72,7 @@ class BookingController extends Controller
                     'concierge_name' => auth()->user()?->name,
                     'error' => $e->getMessage(),
                 ])
-                ->log('Booking creation failed - Exception');
+                ->log('API - Booking creation failed - Exception');
 
             return response()->json([
                 'message' => 'Booking failed',
@@ -108,7 +108,7 @@ class BookingController extends Controller
                     'concierge_id' => auth()->user()?->concierge?->id,
                     'concierge_name' => auth()->user()?->name,
                 ])
-                ->log('Booking update failed - Invalid status');
+                ->log('API - Booking update failed - Invalid status');
 
             return response()->json([
                 'message' => 'Booking already confirmed or cancelled',
@@ -124,7 +124,7 @@ class BookingController extends Controller
                     'concierge_id' => auth()->user()?->concierge?->id,
                     'concierge_name' => auth()->user()?->name,
                 ])
-                ->log('Booking update failed - Venue not active');
+                ->log('API - Booking update failed - Venue not active');
 
             return response()->json([
                 'message' => 'Venue is not currently accepting bookings',
@@ -151,7 +151,7 @@ class BookingController extends Controller
                 'concierge_id' => auth()->user()?->concierge?->id,
                 'concierge_name' => auth()->user()?->name,
             ])
-            ->log('Booking updated successfully');
+            ->log('API - Booking updated successfully');
 
         $booking->notify(new SendCustomerBookingPaymentForm(url: $validatedData['bookingUrl']));
 
@@ -162,14 +162,39 @@ class BookingController extends Controller
 
     public function destroy($id): JsonResponse
     {
+        /** @var Booking $booking */
         $booking = Booking::query()->findOrFail($id);
 
-        if ($booking) {
-            $booking->update(['status' => BookingStatus::ABANDONED]);
+        if (! in_array($booking->status, [BookingStatus::PENDING, BookingStatus::GUEST_ON_PAGE])) {
+            activity()
+                ->performedOn($booking)
+                ->withProperties([
+                    'booking_id' => $booking->id,
+                    'current_status' => $booking->status,
+                    'concierge_id' => auth()->user()?->concierge?->id,
+                    'concierge_name' => auth()->user()?->name,
+                ])
+                ->log('API - Booking abandon failed - Invalid status');
+
+            return response()->json([
+                'message' => 'Booking cannot be abandoned in its current status',
+            ]);
         }
 
+        $booking->update(['status' => BookingStatus::ABANDONED]);
+
+        activity()
+            ->performedOn($booking)
+            ->withProperties([
+                'booking_id' => $booking->id,
+                'previous_status' => $booking->getOriginal('status'),
+                'concierge_id' => auth()->user()?->concierge?->id,
+                'concierge_name' => auth()->user()?->name,
+            ])
+            ->log('API - Booking abandoned successfully');
+
         return response()->json([
-            'message' => 'Booking Cancelled',
+            'message' => 'Booking Abandoned',
         ]);
     }
 
@@ -214,7 +239,7 @@ class BookingController extends Controller
                     'concierge_id' => auth()->user()?->concierge?->id,
                     'concierge_name' => auth()->user()?->name,
                 ])
-                ->log('Non-prime booking update failed - Customer already has booking for this day');
+                ->log('API - Non-prime booking update failed - Customer already has booking for this day');
 
             return response()->json([
                 'message' => 'Customer already has a non-prime booking for this day',
@@ -233,7 +258,7 @@ class BookingController extends Controller
                 'concierge_id' => auth()->user()?->concierge?->id,
                 'concierge_name' => auth()->user()?->name,
             ])
-            ->log('Non-prime booking created successfully');
+            ->log('API - Non-prime booking created successfully');
 
         return response()->json([
             'message' => 'Booking created successfully',
