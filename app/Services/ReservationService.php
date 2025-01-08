@@ -104,7 +104,10 @@ class ReservationService
                 $currentTimeCarbon = Carbon::createFromFormat('H:i:s', $currentTime, $this->region->timezone);
                 $cutoffTimeCarbon = Carbon::createFromFormat('H:i:s', $venue->cutoff_time->format('H:i:s'), $this->region->timezone);
 
-                if ($currentTimeCarbon->gt($cutoffTimeCarbon)) {
+                // Only apply cutoff time check if the reservation is for today
+                $isToday = Carbon::parse($this->date, $this->region->timezone)->isToday();
+
+                if ($isToday && $currentTimeCarbon->gt($cutoffTimeCarbon)) {
                     $venue->schedules->each(function ($schedule) {
                         $schedule->is_available = true;
                         $schedule->remaining_tables = 0;
