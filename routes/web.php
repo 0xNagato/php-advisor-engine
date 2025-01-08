@@ -10,6 +10,7 @@ use App\Livewire\Concierge\ConciergeInvitation;
 use App\Livewire\Venue\VenueBookingConfirmation;
 use App\Livewire\Venue\VenueContactLogin;
 use App\Livewire\Venue\VenueContactRecentBookings;
+use App\Livewire\Venue\VenueModificationRequestConfirmation;
 use App\Livewire\Venue\VenueSpecialRequestConfirmation;
 use App\Livewire\VenueOnboarding;
 use App\Livewire\Vip\AvailabilityCalendar;
@@ -84,4 +85,14 @@ Route::get('v/{code}', AvailabilityCalendar::class)->name('v.booking');
 Route::post('/role/switch/{profile}', [App\Http\Controllers\RoleSwitcherController::class, 'switch'])
     ->middleware(['web', 'auth'])
     ->name('role.switch');
+
+Route::prefix('venue')->name('venue.')->group(function () {
+    Route::get('modification-request/{modificationRequest}', VenueModificationRequestConfirmation::class)
+        ->name('modification-request')
+        ->middleware(['signed'])
+        ->missing(function () {
+            return response()->view('errors.modification-request-expired', [], 403);
+        });
+});
+
 require __DIR__.'/auth.php';

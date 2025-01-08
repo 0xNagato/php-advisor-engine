@@ -15,6 +15,7 @@ class SmsTemplates
         'customer_booking_confirmed_non_prime' => 'Hello from PRIMA VIP! Your reservation at {venue_name} {booking_date} at {booking_time} has been booked by {concierge_name} and is now confirmed. Please arrive within 15 minutes of your reservation or your table may be released. Thank you for booking with us!',
         'customer_booking_confirmed_prime' => 'PRIMA reservation at {venue_name} {booking_date} at {booking_time} with {guest_count} guests. View your invoice at {invoice_url}.',
         'customer_booking_payment_form' => 'Your reservation at {venue_name} is pending. Please click {payment_url} to secure your booking within the next 5 minutes.',
+        'customer_modification_requested' => 'We have received your reservation change request from {concierge_name}. We are reaching out to the restaurant to confirm and will notify you shortly. Thank you! Team PRIMA',
         'partner_created' => 'Welcome to PRIMA! Your account has been created. Please click {login_url} to login and update your payment info and begin making reservations. Thank you for joining us!',
         'two_factor_code' => 'Do not share this code with anyone. Your 2FA login code for PRIMA is {code}',
         'venue_contact_booking_confirmed' => 'Pending Booking @{venue_name}: {booking_date} @ {booking_time}, {guest_name}, {guest_count} guests, {guest_phone}. Click {confirmation_url} to confirm.',
@@ -22,5 +23,10 @@ class SmsTemplates
         'venue_special_request_confirmation' => 'PRIMA Special Request from {customer_name}: {booking_date} at {booking_time}, {party_size} guests, Min. Spend {minimum_spend}. Click {confirmation_url} to view this request.',
         'venue_welcome' => '❤️ Thank you for joining PRIMA! Our concierge team is currently being onboarded and will start generating reservations soon! We will notify you via text as soon as we are ready to launch! With gratitude, Team PRIMA.',
         'customer_booking_refunded' => 'Hi {guest_name}, we have refunded your reservation fee of {amount} for {venue_name}. Thank you! PRIMA VIP.',
+        'venue_modification_request' => 'PRIMA Change Request: {guest_name} {guest_phone} {booking_date} {booking_time} Change requested: {changes_requested}. Click {confirmation_url} to respond.',
+        'customer_modification_approved' => 'Thank you for your patience! Your requested changes have been approved by {venue_name}.',
+        'customer_modification_rejected' => 'Sorry, your changes have not been approved by {venue_name}. Please contact your PRIMA Concierge to create a new reservation.',
+        'concierge_modification_approved' => 'To concierge: Your requested reservation change at {venue_name} is approved. We have notified the customer.',
+        'concierge_modification_rejected' => 'We are sorry, but {venue_name} cannot accommodate your change request. If you\'d like to have this reservation cancelled, you may do so through the PRIMA App.',
     ];
 }

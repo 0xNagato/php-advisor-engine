@@ -51,6 +51,8 @@ class ViewBooking extends ViewRecord
 
     public ?int $refundAmount = null;
 
+    protected $listeners = ['booking-modified' => '$refresh'];
+
     public function mount(string|int $record): void
     {
         $this->record = Booking::with('earnings.user')
