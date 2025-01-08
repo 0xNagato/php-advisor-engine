@@ -290,4 +290,19 @@ class Booking extends Model
             get: fn () => in_array($this->status, [BookingStatus::REFUNDED, BookingStatus::PARTIALLY_REFUNDED])
         );
     }
+
+    /**
+     * @return HasMany<BookingModificationRequest, $this>
+     */
+    public function modificationRequests(): HasMany
+    {
+        return $this->hasMany(BookingModificationRequest::class);
+    }
+
+    public function hasActiveModificationRequest(): bool
+    {
+        return $this->modificationRequests()
+            ->where('status', BookingModificationRequest::STATUS_PENDING)
+            ->exists();
+    }
 }

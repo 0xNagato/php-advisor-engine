@@ -128,6 +128,20 @@ class RefundBooking
 class SendConfirmationToVenueContacts
 {
 }
+/**
+ * @method static \Lorisleiva\Actions\Decorators\JobDecorator|\Lorisleiva\Actions\Decorators\UniqueJobDecorator makeJob(\App\Models\BookingModificationRequest $modificationRequest)
+ * @method static \Lorisleiva\Actions\Decorators\UniqueJobDecorator makeUniqueJob(\App\Models\BookingModificationRequest $modificationRequest)
+ * @method static \Illuminate\Foundation\Bus\PendingDispatch dispatch(\App\Models\BookingModificationRequest $modificationRequest)
+ * @method static \Illuminate\Foundation\Bus\PendingDispatch|\Illuminate\Support\Fluent dispatchIf(bool $boolean, \App\Models\BookingModificationRequest $modificationRequest)
+ * @method static \Illuminate\Foundation\Bus\PendingDispatch|\Illuminate\Support\Fluent dispatchUnless(bool $boolean, \App\Models\BookingModificationRequest $modificationRequest)
+ * @method static dispatchSync(\App\Models\BookingModificationRequest $modificationRequest)
+ * @method static dispatchNow(\App\Models\BookingModificationRequest $modificationRequest)
+ * @method static dispatchAfterResponse(\App\Models\BookingModificationRequest $modificationRequest)
+ * @method static void run(\App\Models\BookingModificationRequest $modificationRequest)
+ */
+class SendModificationRequestToVenueContacts
+{
+}
 namespace App\Actions\Concierge;
 
 /**
