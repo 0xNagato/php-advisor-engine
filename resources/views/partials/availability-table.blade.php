@@ -68,24 +68,24 @@
                                         {{ moneyWithoutCents($schedule->fee($data['guest_count']), $currency) }}
                                     </p>
                                     @if ($schedule->has_low_inventory)
-                                        <p class="-mt-1 text-xs font-light">
+                                        <p class="-mt-1 text-xs font-semibold text-white">
                                             Last Tables
                                         </p>
                                     @endif
                                     @if ($schedule->no_wait)
-                                        <p class="-mt-1 text-xs font-medium">
+                                        <p class="-mt-1 text-xs font-semibold text-white">
                                             No Wait
                                         </p>
                                     @endif
                                 @elseif($schedule->is_bookable && !$schedule->prime_time)
                                     <p class="text-xs uppercase text-nowrap sm:text-base">No Fee</p>
                                     @if ($schedule->has_low_inventory)
-                                        <p class="-mt-1 text-xs font-light">
+                                        <p class="-mt-1 text-xs font-semibold text-white">
                                             Last Tables
                                         </p>
                                     @endif
                                     @if ($schedule->no_wait)
-                                        <p class="-mt-1 text-xs font-medium">
+                                        <p class="-mt-1 text-xs font-semibold text-white">
                                             No Wait
                                         </p>
                                     @endif
