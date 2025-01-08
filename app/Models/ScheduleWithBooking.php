@@ -32,6 +32,11 @@ class ScheduleWithBooking extends Model
 
     public $timestamps = false;
 
+    protected $appends = [
+        'formatted_start_time',
+        'no_wait',
+    ];
+
     /**
      * @return BelongsTo<Venue, $this>
      */
@@ -96,5 +101,10 @@ class ScheduleWithBooking extends Model
             'booking_date' => 'date',
             'booking_at' => 'datetime',
         ];
+    }
+
+    protected function noWait(): Attribute
+    {
+        return Attribute::make(get: fn () => $this->venue->no_wait ?? false);
     }
 }

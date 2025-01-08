@@ -68,6 +68,7 @@ class Venue extends Model
         'cutoff_time',
         'daily_prime_bookings_cap',
         'daily_non_prime_bookings_cap',
+        'no_wait',
     ];
 
     protected function casts(): array

@@ -72,11 +72,21 @@
                                             Last Tables
                                         </p>
                                     @endif
+                                    @if ($schedule->no_wait)
+                                        <p class="-mt-1 text-xs font-medium">
+                                            No Wait
+                                        </p>
+                                    @endif
                                 @elseif($schedule->is_bookable && !$schedule->prime_time)
                                     <p class="text-xs uppercase text-nowrap sm:text-base">No Fee</p>
                                     @if ($schedule->has_low_inventory)
                                         <p class="-mt-1 text-xs font-light">
                                             Last Tables
+                                        </p>
+                                    @endif
+                                    @if ($schedule->no_wait)
+                                        <p class="-mt-1 text-xs font-medium">
+                                            No Wait
                                         </p>
                                     @endif
                                 @else

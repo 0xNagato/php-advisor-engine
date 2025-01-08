@@ -6,7 +6,6 @@ use App\Filament\Resources\VenueResource;
 use App\Models\Referral;
 use App\Models\Region;
 use App\Models\User;
-use App\Models\Venue;
 use Filament\Forms\Components\Checkbox;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Repeater;

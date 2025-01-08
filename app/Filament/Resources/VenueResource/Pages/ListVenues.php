@@ -50,7 +50,7 @@ class ListVenues extends ListRecords
                     ->size('xs')
                     ->searchable(),
                 TextColumn::make('region')
-                    ->formatStateUsing(fn ($state) => Region::find($state)?->name ?? '-')
+                    ->formatStateUsing(fn ($state) => Region::query()->find($state)?->name ?? '-')
                     ->label('Region')
                     ->grow(false)
                     ->size('xs')

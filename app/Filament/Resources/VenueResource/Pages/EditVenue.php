@@ -15,6 +15,7 @@ use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Toggle;
 use Filament\Forms\Form;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\EditRecord;
@@ -109,6 +110,10 @@ class EditVenue extends EditRecord
                             ->type('time')
                             ->helperText('Time after which same-day reservations cannot be made. Leave empty to allow same-day bookings until closing.')
                             ->nullable(),
+                        Toggle::make('no_wait')
+                            ->label('No Wait')
+                            ->helperText('When enabled, guests will be seated immediately upon arrival')
+                            ->default(false),
                     ]),
                 Repeater::make('contacts')
                     ->columnSpanFull()

@@ -3,6 +3,7 @@
 namespace App\Console\Commands;
 
 use App\Models\Venue;
+use Exception;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Storage;
@@ -43,7 +44,7 @@ class CheckVenueLogos extends Command
                     403 => "<fg=yellow>$status Forbidden</>",
                     default => "<fg=red>$status Error</>"
                 };
-            } catch (\Exception $e) {
+            } catch (Exception $e) {
                 $status = 'Error';
                 $statusText = "<fg=red>Failed: {$e->getMessage()}</>";
             }
