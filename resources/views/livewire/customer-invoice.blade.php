@@ -335,7 +335,11 @@
                     auth()->check() &&
                     (auth()->user()->hasActiveRole('super_admin') || auth()->user()->hasActiveRole('concierge')) &&
                     !$booking->prime_time &&
-                    $booking->booking_at->isFuture();
+                    $booking->booking_at->isFuture() &&
+                    in_array($booking->status, [
+                        \App\Enums\BookingStatus::CONFIRMED,
+                        \App\Enums\BookingStatus::VENUE_CONFIRMED,
+                    ]);
             @endphp
 
             @if ($canModifyBooking)
