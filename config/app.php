@@ -216,7 +216,7 @@ return [
     'house' => [
         'concierge_id' => env('HOUSE_CONCIERGE_ID', 1),
     ],
-    'venue_booking_notification_phones' => env('VENUE_BOOKING_NOTIFICATION_PHONES', '+16473823326,+17865147601,+19176644415'),
+    'venue_booking_notification_phones' => env('VENUE_BOOKING_NOTIFICATION_PHONES', '+17865147601,+19176644415'),
     'widget_cache_timeout_minutes' => (int) env('WIDGET_CACHE_TIMEOUT_MINUTES', 5),
     'override_venues' => env('OVERRIDE_VENUES', ''),
 

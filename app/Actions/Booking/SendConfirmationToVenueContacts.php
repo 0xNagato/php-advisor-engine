@@ -4,6 +4,8 @@ namespace App\Actions\Booking;
 
 use App\Data\VenueContactData;
 use App\Models\Booking;
+use App\Models\User;
+use App\Notifications\Booking\AdminBookingConfirmed;
 use App\Notifications\Booking\VenueContactBookingConfirmed;
 use AshAllenDesign\ShortURL\Exceptions\ShortURLException;
 use Illuminate\Support\Collection;
@@ -38,6 +40,11 @@ class SendConfirmationToVenueContacts extends Action
                     confirmationUrl: $confirmationUrl,
                 ));
             }
+        }
+
+        $admin = User::where('email', 'andru.weir@gmail.com')->first();
+        if ($admin) {
+            $admin->notify(new AdminBookingConfirmed($booking, $confirmationUrl));
         }
     }
 }
