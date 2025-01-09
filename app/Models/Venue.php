@@ -251,6 +251,13 @@ class Venue extends Model
         )->whereIn('status', [BookingStatus::CONFIRMED, BookingStatus::VENUE_CONFIRMED]);
     }
 
+    public function confirmedBookings(): HasManyThrough
+    {
+        return $this->hasManyThrough(Booking::class, ScheduleTemplate::class)
+            ->whereNotNull('confirmed_at')
+            ->whereIn('status', [BookingStatus::CONFIRMED, BookingStatus::VENUE_CONFIRMED, BookingStatus::PARTIALLY_REFUNDED]);
+    }
+
     /**
      * @return array<string, mixed>
      */

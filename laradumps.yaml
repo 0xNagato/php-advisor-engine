@@ -23,7 +23,7 @@ observers:
   gate: false
 logs:
   info: true
-  warning: true
+  warning: false
   emergency: true
   alert: true
   debug: true

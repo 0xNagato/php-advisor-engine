@@ -13,9 +13,7 @@ use Filament\Tables\Actions\Action;
 use Filament\Tables\Actions\EditAction;
 use Filament\Tables\Actions\ViewAction;
 use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Builder;
 
 class ListVenues extends ListRecords
 {
@@ -38,12 +36,8 @@ class ListVenues extends ListRecords
             ->query(
                 Venue::query()
                     ->with(['partnerReferral.user.partner', 'user.authentications'])
-                    ->withCount([
-                        'bookings' => function ($query) {
-                            $query->confirmed();
-                        },
-                    ])
-                    ->join('users', 'venues.user_id', '=', 'users.id')
+                    ->withCount(['confirmedBookings'])
+                    ->leftJoin('users', 'venues.user_id', '=', 'users.id')
                     ->orderByDesc('users.updated_at')
             )
             ->columns([
@@ -67,7 +61,8 @@ class ListVenues extends ListRecords
                     ->grow(false)
                     ->size('xs')
                     ->formatStateUsing(fn (Venue $venue) => $venue->formatted_total_earnings_in_u_s_d),
-                TextColumn::make('bookings_count')->label('Bookings')
+                TextColumn::make('confirmed_bookings_count')
+                    ->label('Bookings')
                     ->visibleFrom('sm')
                     ->grow(false)
                     ->size('xs')
@@ -134,7 +129,7 @@ class ListVenues extends ListRecords
                             'user' => $venue->user,
                             'secured_at' => $venue->user->secured_at,
                             'referrer_name' => $venue->user->referrer?->name ?? '-',
-                            'bookings_count' => number_format($venue->bookings_count),
+                            'bookings_count' => number_format($venue->confirmed_bookings_count),
                             'earningsInUSD' => $venue->formattedTotalEarningsInUSD,
                             'recentBookings' => $recentBookings,
                             'last_login' => $lastLogging,
@@ -149,15 +144,6 @@ class ListVenues extends ListRecords
                     ->modalCancelAction(false)
                     ->slideOver(self::USE_SLIDE_OVER),
             ])
-            ->paginated([10, 25, 50, 100])
-            ->filters([
-                SelectFilter::make('region')
-                    ->query(function (Builder $query, mixed $state) {
-                        if ($state) {
-                            $query->where('venues.region', $state);
-                        }
-                    })
-                    ->options(Region::query()->pluck('name', 'id')),
-            ]);
+            ->paginated([10, 25, 50, 100]);
     }
 }
