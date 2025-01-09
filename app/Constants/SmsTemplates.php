@@ -21,7 +21,7 @@ class SmsTemplates
         'venue_contact_booking_confirmed' => 'Pending Booking @{venue_name}: {booking_date} @ {booking_time}, {guest_name}, {guest_count} guests, {guest_phone}. Click {confirmation_url} to confirm.',
         'venue_contact_login' => 'Click the link to login: {login_url}',
         'venue_special_request_confirmation' => 'PRIMA Special Request from {customer_name}: {booking_date} at {booking_time}, {party_size} guests, Min. Spend {minimum_spend}. Click {confirmation_url} to view this request.',
-        'venue_welcome' => '❤️ Thank you for joining PRIMA! Our concierge team is currently being onboarded and will start generating reservations soon! We will notify you via text as soon as we are ready to launch! With gratitude, Team PRIMA.',
+        'venue_welcome' => 'Thank you for joining PRIMA! We look forward to working with you! If you have any questions, our team is always available.',
         'customer_booking_refunded' => 'Hi {guest_name}, we have refunded your reservation fee of {amount} for {venue_name}. Thank you! PRIMA VIP.',
         'venue_modification_request' => 'PRIMA Change Request: {guest_name} {guest_phone} {booking_date} {booking_time} Change requested: {changes_requested}. Click {confirmation_url} to respond.',
         'customer_modification_approved' => 'Thank you for your patience! Your requested changes have been approved by {venue_name}.',
