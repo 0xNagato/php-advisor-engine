@@ -24,8 +24,6 @@ class PhoneNumberParser
 
     public function parse(): ?PhoneNumberData
     {
-        Log::info('Parsing phone number '.$this->phone);
-
         $contactPhone = $this->getInternationalFormattedPhoneNumber($this->phone);
         $phoneUtil = PhoneNumberUtil::getInstance();
 
