@@ -67,7 +67,7 @@
         </form>
     </x-filament::section>
 
-    {{-- <x-filament::section>
+    <x-filament::section>
 
         <div class="pb-4 text-sm font-semibold text-black">
             PRIMA donates 5% of proceeds to help feed the homeless.
@@ -89,5 +89,5 @@
                 </x-filament::button>
             </div>
         </form>
-    </x-filament::section> --}}
+    </x-filament::section>
 </x-filament-panels::page>
