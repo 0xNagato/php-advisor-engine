@@ -4,6 +4,7 @@ namespace App\Filament\Pages;
 
 use App\Enums\BookingStatus;
 use App\Filament\Resources\UserResource;
+use App\Models\Earning;
 use App\Models\User;
 use Carbon\Carbon;
 use Filament\Forms\Components\DatePicker;
@@ -12,6 +13,7 @@ use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Form;
 use Filament\Pages\Page;
+use Filament\Tables\Actions\Action;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Concerns\InteractsWithTable;
 use Filament\Tables\Contracts\HasTable;
@@ -178,7 +180,33 @@ class PaymentExports extends Page implements HasTable
                     ->label('Earnings')
                     ->size('xs')
                     ->sortable()
-                    ->formatStateUsing(fn ($record) => money($record->total_earnings, $record->currency).' '.$record->currency),
+                    ->color('primary')
+                    ->formatStateUsing(fn ($record) => money($record->total_earnings, $record->currency).' '.$record->currency)
+                    ->action(
+                        Action::make('viewEarnings')
+                            ->slideOver()
+                            ->modalSubmitAction(false)
+                            ->modalCancelAction(false)
+                            ->modalHeading(fn ($record) => "{$record->name} - Earnings Breakdown")
+                            ->modalContent(function ($record) {
+                                $startDate = Carbon::parse($this->data['startDate'])->startOfDay();
+                                $endDate = Carbon::parse($this->data['endDate'])->endOfDay();
+
+                                $earnings = Earning::query()
+                                    ->with(['booking'])
+                                    ->where('user_id', $record->id)
+                                    ->whereHas('booking', function ($query) use ($startDate, $endDate) {
+                                        $query->whereBetween('confirmed_at', [$startDate, $endDate]);
+                                    })
+                                    ->get()
+                                    ->groupBy('booking_id');
+
+                                return view('components.tables.earnings-breakdown', [
+                                    'earnings' => $earnings,
+                                    'currency' => $record->currency,
+                                ]);
+                            })
+                    ),
 
                 // Hidden Columns (for export)
                 TextColumn::make('currency')->hidden(),
@@ -210,12 +238,44 @@ class PaymentExports extends Page implements HasTable
                     ->hidden(),
             ])
             ->headerActions([
-                ExportAction::make()->exports([
-                    ExcelExport::make('table')
-                        ->fromTable()
-                        ->askForWriterType()
-                        ->withFilename("Earnings-{$dateRange}"),
-                ]),
+                ExportAction::make('exportAll')
+                    ->size('xs')
+                    ->exports([
+                        ExcelExport::make('table')
+                            ->fromTable()
+                            ->askForWriterType()
+                            ->withFilename("Earnings-{$dateRange}"),
+                    ]),
+                ExportAction::make('exportMissingBankInfo')
+                    ->label('Export Missing Bank Info')
+                    ->size('xs')
+                    ->exports([
+                        ExcelExport::make('missing_bank_info')
+                            ->fromTable()
+                            ->modifyQueryUsing(function ($query) {
+                                return $query->where(function ($q) {
+                                    $q->whereNull('payout')
+                                        ->orWhere('payout', '=', '')
+                                        ->orWhere('payout', '=', '{}');
+                                });
+                            })
+                            ->except([
+                                'first_name',
+                                'last_name',
+                                'address_1',
+                                'address_2',
+                                'city',
+                                'state',
+                                'zip',
+                                'country',
+                                'payout.payout_name',
+                                'payout.payout_type',
+                                'payout.account_type',
+                                'payout.account_number',
+                                'payout.routing_number',
+                            ])
+                            ->withFilename("Missing-Banking-Info-{$dateRange}"),
+                    ]),
             ]);
     }
 
