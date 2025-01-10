@@ -163,6 +163,7 @@ class PaymentExports extends Page implements HasTable
                     ->url(fn (User $record): string => UserResource::getUrl('edit', ['record' => $record])),
                 TextColumn::make('bookings_count')
                     ->label('Bookings')
+                    ->size('xs')
                     ->color('primary')
                     ->sortable()
                     ->url(fn (User $record): string => BookingSearch::getUrl([
@@ -175,6 +176,7 @@ class PaymentExports extends Page implements HasTable
                     ])),
                 TextColumn::make('total_earnings')
                     ->label('Earnings')
+                    ->size('xs')
                     ->sortable()
                     ->formatStateUsing(fn ($record) => money($record->total_earnings, $record->currency).' '.$record->currency),
 
