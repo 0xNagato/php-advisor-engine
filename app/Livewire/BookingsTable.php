@@ -33,6 +33,7 @@ class BookingsTable extends BaseWidget
                 'partnerConcierge.user',
                 'partnerVenue.user',
                 'schedule',
+                'earnings',
             ])
             ->whereNotNull('confirmed_at')
             ->where(function (EloquentBuilder $query) {
@@ -79,7 +80,6 @@ class BookingsTable extends BaseWidget
                     ->formatStateUsing(fn (Booking $record) => "{$record->guest_name} ({$record->guest_count})"),
 
                 TextColumn::make('role')
-                    ->label('Your Role')
                     ->getStateUsing(function (Booking $record) {
                         $roles = [];
 
@@ -105,6 +105,18 @@ class BookingsTable extends BaseWidget
                     ->label('Total Fee')
                     ->money(fn (Booking $record) => $record->currency)
                     ->state(fn (Booking $record) => $record->total_fee / 100)
+                    ->alignRight(),
+
+                TextColumn::make('earnings')
+                    ->label('Earnings')
+                    ->money(fn (Booking $record) => $record->currency)
+                    ->state(function (Booking $record) {
+                        $earnings = $record->earnings
+                            ->where('user_id', $this->user->id)
+                            ->sum('amount');
+
+                        return $earnings ? $earnings / 100 : 0;
+                    })
                     ->alignRight(),
             ])
             ->defaultSort('confirmed_at', 'desc')
