@@ -58,7 +58,7 @@ class ReferralsTable extends BaseWidget
             )
             ->recordUrl(function (Referral $record) {
                 if ($record->has_secured) {
-                    return ConciergeReferralEarnings::getUrl([$record->user->concierge->id]);
+                    return ConciergeReferralEarnings::getUrl([$record->user?->concierge?->id]);
                 }
 
                 return null;

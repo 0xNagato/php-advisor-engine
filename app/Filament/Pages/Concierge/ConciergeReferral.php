@@ -3,6 +3,7 @@
 namespace App\Filament\Pages\Concierge;
 
 use App\Actions\Partner\InviteConciergeViaSms;
+use App\Filament\Resources\BookingResource\Pages\ListBookings;
 use App\Models\Referral;
 use App\Models\User;
 use App\Notifications\Concierge\NotifyConciergeReferral;
@@ -15,6 +16,8 @@ use Filament\Forms\Form;
 use Filament\Forms\Get;
 use Filament\Notifications\Notification;
 use Filament\Pages\Page;
+use Illuminate\Contracts\Support\Htmlable;
+use Illuminate\Support\HtmlString;
 use Illuminate\Validation\ValidationException;
 use libphonenumber\PhoneNumberType;
 use Ysfkaya\FilamentPhoneInput\Forms\PhoneInput;
@@ -196,5 +199,14 @@ class ConciergeReferral extends Page
             ->title($exception->getMessage())
             ->danger()
             ->send();
+    }
+
+    public function getSubheading(): string|Htmlable
+    {
+        return new HtmlString(
+            '<div class="p-2 mt-2 text-sm text-gray-500 border border-indigo-100 rounded-md bg-indigo-50">
+                <p>You can refer other concierges to PRIMA and earn commissions on all of their bookings from this page. If you are looking for your bookings, please visit the <a href="'.ListBookings::getUrl().'" class="text-primary-600 hover:text-primary-500">Bookings</a> tab.</p>
+            </div>'
+        );
     }
 }
