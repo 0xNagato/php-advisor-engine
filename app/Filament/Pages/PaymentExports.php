@@ -211,6 +211,7 @@ class PaymentExports extends Page implements HasTable
                 ExportAction::make()->exports([
                     ExcelExport::make('table')
                         ->fromTable()
+                        ->askForWriterType()
                         ->withFilename("Earnings-{$dateRange}"),
                 ]),
             ]);
