@@ -125,6 +125,11 @@ class User extends Authenticatable implements FilamentUser, HasAvatar
         return $this->hasMany(Earning::class);
     }
 
+    public function confirmedEarnings(): HasMany
+    {
+        return $this->earnings()->whereNotNull('confirmed_at');
+    }
+
     /**
      * @return HasMany<Announcement, $this>
      */

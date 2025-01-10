@@ -12,7 +12,8 @@ class VenueContactCollection implements CastsAttributes
     public function get(Model $model, string $key, mixed $value, array $attributes): DataCollection
     {
         $contacts = json_decode((string) $value, true) ?? [];
-        $additionalPhones = array_filter(array_map('trim', explode(',', config('app.venue_booking_notification_phones') ?? '')));
+        $additionalPhones = array_filter(array_map('trim',
+            explode(',', config('app.venue_booking_notification_phones') ?? '')));
 
         foreach ($additionalPhones as $phone) {
             $exists = false;

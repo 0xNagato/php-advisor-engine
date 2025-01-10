@@ -4,6 +4,7 @@ namespace App\Filament\Pages;
 
 use App\Enums\BookingStatus;
 use App\Models\Booking;
+use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Grid;
 use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Select;
@@ -62,7 +63,22 @@ class BookingSearch extends Page implements HasTable
             ->schema([
                 Section::make()
                     ->schema([
-                        Grid::make(5)
+                        Grid::make(2)
+                            ->schema([
+                                DatePicker::make('start_date')
+                                    ->label('Start Date')
+                                    ->live()
+                                    ->afterStateUpdated(function () {
+                                        $this->resetTable();
+                                    }),
+                                DatePicker::make('end_date')
+                                    ->label('End Date')
+                                    ->live()
+                                    ->afterStateUpdated(function () {
+                                        $this->resetTable();
+                                    }),
+                            ]),
+                        Grid::make(3)
                             ->schema([
                                 TextInput::make('booking_id')
                                     ->label('Booking ID')
@@ -71,8 +87,7 @@ class BookingSearch extends Page implements HasTable
                                     ->live(debounce: 300)
                                     ->afterStateUpdated(function () {
                                         $this->resetTable();
-                                    })
-                                    ->columnSpan(1),
+                                    }),
                                 TextInput::make('customer_search')
                                     ->label('Customer Search')
                                     ->placeholder('Name, Email or Phone')
@@ -80,8 +95,17 @@ class BookingSearch extends Page implements HasTable
                                     ->minLength(3)
                                     ->afterStateUpdated(function () {
                                         $this->resetTable();
-                                    })
-                                    ->columnSpan(1),
+                                    }),
+                                TextInput::make('user_id')
+                                    ->label('User ID')
+                                    ->numeric()
+                                    ->live(debounce: 300)
+                                    ->afterStateUpdated(function () {
+                                        $this->resetTable();
+                                    }),
+                            ]),
+                        Grid::make(3)
+                            ->schema([
                                 TextInput::make('venue_search')
                                     ->label('Venue Search')
                                     ->placeholder('Venue Name')
@@ -89,8 +113,7 @@ class BookingSearch extends Page implements HasTable
                                     ->minLength(3)
                                     ->afterStateUpdated(function () {
                                         $this->resetTable();
-                                    })
-                                    ->columnSpan(1),
+                                    }),
                                 TextInput::make('concierge_search')
                                     ->label('Concierge Search')
                                     ->placeholder('Concierge Name')
@@ -98,10 +121,8 @@ class BookingSearch extends Page implements HasTable
                                     ->minLength(3)
                                     ->afterStateUpdated(function () {
                                         $this->resetTable();
-                                    })
-                                    ->columnSpan(1),
+                                    }),
                                 Select::make('status')
-                                    ->multiple()
                                     ->options([
                                         BookingStatus::PENDING->value => BookingStatus::PENDING->label(),
                                         BookingStatus::GUEST_ON_PAGE->value => BookingStatus::GUEST_ON_PAGE->label(),
@@ -115,8 +136,7 @@ class BookingSearch extends Page implements HasTable
                                     ->live()
                                     ->afterStateUpdated(function () {
                                         $this->resetTable();
-                                    })
-                                    ->columnSpan(1),
+                                    }),
                             ]),
                     ]),
             ])
@@ -131,6 +151,25 @@ class BookingSearch extends Page implements HasTable
         // Apply filters
         if ($this->data['booking_id'] ?? null) {
             $query->where('id', $this->data['booking_id']);
+        }
+
+        if ($this->data['user_id'] ?? null) {
+            $query->where(function ($query) {
+                $query->whereHas('venue.user', fn (Builder $q) => $q->where('id', $this->data['user_id']))
+                    ->orWhereHas('concierge.user', fn (Builder $q) => $q->where('id', $this->data['user_id']))
+                    ->orWhereHas('partnerVenue.user', fn (Builder $q) => $q->where('id', $this->data['user_id']))
+                    ->orWhereHas('partnerConcierge.user', fn (Builder $q) => $q->where('id', $this->data['user_id']));
+            });
+        }
+
+        if ($this->data['start_date'] ?? null) {
+            $query->where('booking_at', '>=',
+                Carbon::parse($this->data['start_date'])->startOfDay());
+        }
+
+        if ($this->data['end_date'] ?? null) {
+            $query->where('booking_at', '<=',
+                Carbon::parse($this->data['end_date'])->endOfDay());
         }
 
         if ($this->data['customer_search'] ?? null) {

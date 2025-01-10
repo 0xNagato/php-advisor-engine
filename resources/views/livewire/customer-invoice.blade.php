@@ -331,11 +331,15 @@
             @endif
 
             @php
+                $venueTimezone = $booking->venue->timezone;
+                $currentTime = now()->setTimezone($venueTimezone);
+                $bookingTime = \Carbon\Carbon::createFromFormat('Y-m-d H:i:s', $booking->booking_at, $venueTimezone);
+
                 $canModifyBooking =
                     auth()->check() &&
                     (auth()->user()->hasActiveRole('super_admin') || auth()->user()->hasActiveRole('concierge')) &&
                     !$booking->prime_time &&
-                    $booking->booking_at->isFuture() &&
+                    $bookingTime->greaterThan($currentTime) &&
                     in_array($booking->status, [
                         \App\Enums\BookingStatus::CONFIRMED,
                         \App\Enums\BookingStatus::VENUE_CONFIRMED,

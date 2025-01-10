@@ -35,6 +35,13 @@ enum BookingStatus: string
         self::NO_SHOW,
     ];
 
+    public const PAYOUT_STATUSES = [
+        self::CONFIRMED,
+        self::VENUE_CONFIRMED,
+        self::COMPLETED,
+        self::PARTIALLY_REFUNDED,
+    ];
+
     public function label(): string
     {
         return match ($this) {
