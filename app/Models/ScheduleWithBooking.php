@@ -115,6 +115,7 @@ class ScheduleWithBooking extends Model
     {
         return Attribute::make(
             get: function () {
+                return false;
                 $bufferTime = now($this->venue->timezone)->addMinutes(ReservationService::MINUTES_PAST);
                 $scheduleStartTime = Carbon::createFromFormat('H:i:s', $this->start_time);
                 $now = now($this->venue->timezone);
