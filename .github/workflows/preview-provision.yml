@@ -19,5 +19,5 @@ jobs:
             FORGE_SERVER: ${{ secrets.FORGE_SERVER_ID }}
             FORGE_GIT_REPOSITORY: ${{ github.repository }}
             FORGE_GIT_BRANCH: ${{ github.head_ref }}
-            FORGE_DOMAIN: harbor.com
+            FORGE_DOMAIN: primavip.vip
         run: harbor provision
