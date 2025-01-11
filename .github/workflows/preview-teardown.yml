@@ -1,0 +1,23 @@
+name: preview-teardown
+on:
+  pull_request:
+    types: [closed]
+jobs:
+  harbor-teardown:
+    if: |
+      github.event.pull_request.draft == false &&
+      contains(github.event.pull_request.title, '[harbor]')
+    runs-on: ubuntu-latest
+    container:
+      image: kirschbaumdevelopment/laravel-test-runner:8.1
+    steps:
+      - name: Install Harbor
+        run: composer global require mehrancodes/laravel-harbor -q
+      - name: Start Teardown
+        env:
+          FORGE_TOKEN: ${{ secrets.FORGE_TOKEN }}
+          FORGE_SERVER: ${{ secrets.FORGE_SERVER }}
+          FORGE_GIT_REPOSITORY: ${{ github.repository }}
+          FORGE_GIT_BRANCH: ${{ github.head_ref }}
+          FORGE_DOMAIN: primavip.vip
+        run: harbor teardown
