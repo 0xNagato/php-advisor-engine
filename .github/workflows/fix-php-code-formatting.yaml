@@ -1,4 +1,6 @@
 name: Laravel Pint
+permissions:
+  contents: write
 
 on:
   pull_request:
