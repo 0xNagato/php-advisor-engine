@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use App\Services\ReservationService;
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -35,6 +37,7 @@ class ScheduleWithBooking extends Model
     protected $appends = [
         'formatted_start_time',
         'no_wait',
+        'is_within_buffer',
     ];
 
     /**
@@ -106,5 +109,19 @@ class ScheduleWithBooking extends Model
     protected function noWait(): Attribute
     {
         return Attribute::make(get: fn () => $this->venue->no_wait ?? false);
+    }
+
+    protected function isWithinBuffer(): Attribute
+    {
+        return Attribute::make(
+            get: function () {
+                $bufferTime = now($this->venue->timezone)->addMinutes(ReservationService::MINUTES_PAST);
+                $scheduleStartTime = Carbon::createFromFormat('H:i:s', $this->start_time);
+                $now = now($this->venue->timezone);
+
+                return $now->format('Y-m-d') === Carbon::parse($this->booking_at)->format('Y-m-d') &&
+                       $scheduleStartTime->lt($bufferTime);
+            }
+        );
     }
 }

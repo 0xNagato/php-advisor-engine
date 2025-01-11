@@ -40,6 +40,7 @@
                             <button
                                 @if (
                                     $schedule->is_bookable &&
+                                        !$schedule->is_within_buffer &&
                                         ($venue->status === VenueStatus::ACTIVE ||
                                             (auth()->user()?->hasRole('super_admin') && $venue->status === VenueStatus::HIDDEN))) wire:click="createBooking({{ $schedule->id }}, '{{ $schedule->booking_date->format('Y-m-d') }}')"
                                 @elseif ($venue->status === VenueStatus::UPCOMING)
@@ -47,31 +48,39 @@
                                 @class([
                                     'text-sm font-semibold rounded p-1 w-full mx-1 flex flex-col gap-y-[1px] justify-center items-center h-12',
                                     'bg-green-600 text-white cursor-pointer hover:bg-green-500' =>
+                                        !$schedule->is_within_buffer &&
                                         $schedule->prime_time &&
                                         $schedule->is_bookable &&
                                         ($venue->status === VenueStatus::ACTIVE ||
                                             (auth()->user()?->hasRole('super_admin') &&
                                                 $venue->status === VenueStatus::HIDDEN)),
                                     'bg-info-400 text-white cursor-pointer hover:bg-info-500' =>
+                                        !$schedule->is_within_buffer &&
                                         !$schedule->prime_time &&
                                         $schedule->is_bookable &&
                                         ($venue->status === VenueStatus::ACTIVE ||
                                             (auth()->user()?->hasRole('super_admin') &&
                                                 $venue->status === VenueStatus::HIDDEN)),
                                     'bg-[#E29B46] text-white cursor-pointer hover:bg-orange-500' =>
+                                        !$schedule->is_within_buffer &&
                                         $schedule->has_low_inventory &&
                                         $schedule->is_bookable &&
                                         ($venue->status === VenueStatus::ACTIVE ||
                                             (auth()->user()?->hasRole('super_admin') &&
                                                 $venue->status === VenueStatus::HIDDEN)),
                                     'bg-gray-200 text-gray-500 border-none cursor-not-allowed' =>
-                                        !$schedule->is_bookable && $venue->status !== VenueStatus::PENDING,
+                                        (!$schedule->is_bookable && $venue->status !== VenueStatus::PENDING) ||
+                                        $schedule->is_within_buffer,
                                     'bg-gray-200 text-gray-500 hover:bg-gray-200 cursor-pointer' =>
                                         $venue->status === VenueStatus::PENDING,
                                 ])>
                                 @if ($venue->status === VenueStatus::PENDING)
                                     <p>
                                         <span class="text-sm font-semibold uppercase">Not Yet</span>
+                                    </p>
+                                @elseif ($schedule->is_within_buffer)
+                                    <p class="text-xs text-gray-500">
+                                        N/A
                                     </p>
                                 @elseif ($schedule->is_bookable && $schedule->prime_time)
                                     <p class="text-base font-bold">

@@ -71,7 +71,7 @@
     "fakerphp/faker": "^1.9.1",
     "flavorly/laravel-actions-ide-helper": "^0.7.4",
     "kitloong/laravel-migrations-generator": "^7.0",
-    "laradumps/laradumps": "^3.5",
+    "laradumps/laradumps": "^3.0",
     "larastan/larastan": "^2.0",
     "laravel/pint": "^1.13",
     "mockery/mockery": "^1.4.4",

@@ -19,21 +19,24 @@
                         <div id="time-slots" class="grid grid-cols-3 gap-2 md:grid-cols-5">
                             @foreach ($schedulesToday as $index => $schedule)
                                 <button
-                                    @if ($schedule->is_bookable && $schedule->venue->status === VenueStatus::ACTIVE) wire:click="createBooking({{ $schedule->schedule_template_id }})" @endif
+                                    @if ($schedule->is_bookable && !$schedule->is_within_buffer && $schedule->venue->status === VenueStatus::ACTIVE) wire:click="createBooking({{ $schedule->schedule_template_id }})" @endif
                                     @class([
                                         'flex flex-col gap-1 items-center p-3 text-sm font-semibold leading-none rounded-xl justify-center',
                                         'outline outline-2 outline-offset-2 outline-green-600' =>
                                             $schedule->start_time === $data['reservation_time'] &&
                                             $schedule->is_bookable &&
+                                            !$schedule->is_within_buffer &&
                                             $schedule->venue->status === VenueStatus::ACTIVE,
                                         'outline outline-2 outline-offset-2 outline-gray-100' =>
                                             $schedule->start_time === $data['reservation_time'] &&
-                                            !$schedule->is_bookable,
+                                            (!$schedule->is_bookable || $schedule->is_within_buffer),
                                         'bg-green-600 text-white cursor-pointer hover:bg-green-500' =>
                                             $schedule->is_bookable &&
+                                            !$schedule->is_within_buffer &&
                                             $schedule->venue->status === VenueStatus::ACTIVE,
                                         'bg-gray-100 text-gray-400 border-none cursor-default' =>
                                             !$schedule->is_bookable ||
+                                            $schedule->is_within_buffer ||
                                             $schedule->venue->status === VenueStatus::PENDING,
                                         'hidden md:block' =>
                                             $index === 0 || $index === $schedulesToday->count() - 1,
