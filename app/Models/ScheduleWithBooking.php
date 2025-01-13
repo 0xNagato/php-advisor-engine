@@ -115,13 +115,17 @@ class ScheduleWithBooking extends Model
     {
         return Attribute::make(
             get: function () {
-                return false;
-                $bufferTime = now($this->venue->timezone)->addMinutes(ReservationService::MINUTES_PAST);
-                $scheduleStartTime = Carbon::createFromFormat('H:i:s', $this->start_time);
-                $now = now($this->venue->timezone);
+                $venueTimezone = $this->venue->timezone;
+                $now = now($venueTimezone);
+                $bufferTime = $now->copy()->addMinutes(ReservationService::MINUTES_PAST);
+                $bookingTime = new Carbon($this->booking_at, $venueTimezone);
 
-                return $now->format('Y-m-d') === Carbon::parse($this->booking_at)->format('Y-m-d') &&
-                       $scheduleStartTime->lt($bufferTime);
+                // Only check buffer if booking is for today
+                if ($now->format('Y-m-d') !== $bookingTime->format('Y-m-d')) {
+                    return false;
+                }
+
+                return ! $bookingTime->gte($bufferTime);
             }
         );
     }
