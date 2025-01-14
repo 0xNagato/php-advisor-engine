@@ -15,9 +15,9 @@ Platform, where all of your earnings will be visible in real time.
 
 **As a PRIMA Concierge, you will receive:**
 
-- 10% of the gross booking fees for the first 20 monthly reservations.
-- 12% of the gross booking fees for reservations 20 through 50.
-- 15% of the gross booking fees for any reservations after the first 50.
+- 10% of the gross booking fees for the first 10 monthly reservations
+- 12% of the gross booking fees for reservations 11 through 20
+- 15% of the gross booking fees for any reservations after 20
 
 **All commissions are calculated on a monthly basis and reset at the end of the month.**
 
@@ -26,7 +26,7 @@ Platform, where all of your earnings will be visible in real time.
 If you are booking your 15th monthly reservation, and the reservation is for 6 people, the total booking fee is $400
 and you will earn 12% or $48 for the reservation.
 
-If you are booking your 60th monthly reservation, and the reservation is for 4 people, the total booking fee is $300
+If you are booking your 25th monthly reservation, and the reservation is for 4 people, the total booking fee is $300
 and you will earn 15% or $45 for the reservation.
 
 All tiers reset at the end of each calendar month.

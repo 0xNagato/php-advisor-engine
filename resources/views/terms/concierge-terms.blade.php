@@ -2,11 +2,11 @@
     CONCIERGE AGREEMENT
 </p>
 <p dir="ltr">
-    This Concierge Agreement (this “Agreement”) is entered into by and among
-    [PRIMA] INC, a Delaware corporation (“PRIMA”), and the
-    concierge accepting this Agreement (“Concierge”).
+    This Concierge Agreement (this "Agreement") is entered into by and among
+    [PRIMA] INC, a Delaware corporation ("PRIMA"), and the
+    concierge accepting this Agreement ("Concierge").
     PRIMA connects customers with prime-time reservations at in-demand
-    venues (“Reservations”) via PRIMA’s platform (the “Platform”). The
+    venues ("Reservations") via PRIMA's platform (the "Platform"). The
     Concierge desires to refer customers to the Platform to make Reservations.
 </p>
 <p dir="ltr">
@@ -20,25 +20,25 @@
     1. Definitions.
 </p>
 <p dir="ltr">
-    (a) “Gross Reservation Fee” means the Reservation Fee less any
+    (a) "Gross Reservation Fee" means the Reservation Fee less any
     applicable credit card or payment processor fees and any refunds.
 </p>
 <p dir="ltr">
-    (b) “Qualified Reservation” means a Reservation made by a
+    (b) "Qualified Reservation" means a Reservation made by a
     Concierge-referred customer on the Platform.
 </p>
 <p dir="ltr">
-    (c) “Reservation Fee” means the amount PRIMA charges a customer for a
+    (c) "Reservation Fee" means the amount PRIMA charges a customer for a
     Reservation.
 </p>
 <p dir="ltr">
     2. Commission. Subject to Section 3 below, PRIMA shall pay Concierge a
-    commission (the “Commission”) in the amount equal to:
+    commission (the "Commission") in the amount equal to:
 </p>
 <ol>
     <li dir="ltr">
         <p dir="ltr">
-            10% of the Gross Reservation Fees for the first 20 Qualified
+            10% of the Gross Reservation Fees for the first 10 Qualified
             Reservations of a calendar month; plus
         </p>
     </li>
@@ -46,7 +46,7 @@
 <ol start="2">
     <li dir="ltr">
         <p dir="ltr">
-            12% of the Gross Reservation Fees for the 21st through 50th
+            12% of the Gross Reservation Fees for the 11th through 20th
             Qualified Reservations of a calendar month; plus
         </p>
     </li>
@@ -54,7 +54,7 @@
 <ol start="3">
     <li dir="ltr">
         <p dir="ltr">
-            15% of the Gross Reservation Fees for the 51st and any additional
+            15% of the Gross Reservation Fees for the 21st and any additional
             Qualified Reservations of a calendar month.
         </p>
     </li>
@@ -118,7 +118,7 @@
 <p dir="ltr">
     (e) Notices. Any notices to be given hereunder shall be deemed to have
     been properly given if sent by email or overnight courier, to the parties
-    hereto as set forth on the Platform, or in Concierge’s account information,
+    hereto as set forth on the Platform, or in Concierge's account information,
     or at such other email address or address as either party may advise the
     other in writing.
 </p>
