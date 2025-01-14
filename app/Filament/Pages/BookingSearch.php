@@ -18,6 +18,9 @@ use Filament\Tables\Table;
 use Illuminate\Contracts\Database\Query\Builder;
 use Illuminate\Support\Carbon;
 use Livewire\Attributes\Url;
+use Maatwebsite\Excel\Excel;
+use pxlrbt\FilamentExcel\Actions\Tables\ExportAction;
+use pxlrbt\FilamentExcel\Exports\ExcelExport;
 
 class BookingSearch extends Page implements HasTable
 {
@@ -210,8 +213,13 @@ class BookingSearch extends Page implements HasTable
             $query->whereIn('status', $statuses);
         }
 
+        $startDate = $this->data['start_date'] ? Carbon::parse($this->data['start_date'])->format('M j, Y') : 'All Time';
+        $endDate = $this->data['end_date'] ? Carbon::parse($this->data['end_date'])->format('M j, Y') : 'Present';
+        $dateRange = "{$startDate}-{$endDate}";
+
         return $table
             ->query($query)
+            ->heading('Bookings: '.$startDate.' to '.$endDate)
             ->recordUrl(fn (Booking $record) => route('filament.admin.resources.bookings.view', ['record' => $record]))
             ->defaultSort('created_at', 'desc')
             ->columns([
@@ -270,6 +278,38 @@ class BookingSearch extends Page implements HasTable
                     ->money(fn ($record) => $record->currency, 100)
                     ->size('xs')
                     ->sortable(),
+                TextColumn::make('id')
+                    ->label('Booking ID')
+                    ->hidden(),
+                TextColumn::make('guest_email')
+                    ->label('Guest Email')
+                    ->hidden(),
+                TextColumn::make('guest_phone')
+                    ->label('Guest Phone')
+                    ->hidden(),
+                TextColumn::make('guest_count')
+                    ->label('Guest Count')
+                    ->hidden(),
+                TextColumn::make('total_fee')
+                    ->label('Total Fee')
+                    ->formatStateUsing(fn ($record) => money($record->total_fee, $record->currency))
+                    ->hidden(),
+                TextColumn::make('currency')
+                    ->hidden(),
+                TextColumn::make('status')
+                    ->formatStateUsing(fn (BookingStatus $state): string => $state->label())
+                    ->hidden(),
+            ])
+            ->headerActions([
+                ExportAction::make('export')
+                    ->label('Export Results')
+                    ->size('xs')
+                    ->exports([
+                        ExcelExport::make('bookings')
+                            ->fromTable()
+                            ->withWriterType(Excel::CSV)
+                            ->withFilename("Bookings-Export-{$dateRange}"),
+                    ]),
             ])
             ->paginated([25, 50, 100, 250]);
     }
