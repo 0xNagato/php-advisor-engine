@@ -4,7 +4,7 @@
 
 <p dir="ltr">
     This Venue Agreement (this “Agreement”) is entered into by and among
-    [PRIMA] LLC, a Florida limited liability company (“PRIMA”), and the
+    [PRIMA] INC, a Delaware corporation (“PRIMA”), and the
     venue accepting this Agreement (“Venue”).
 </p>
 <p dir="ltr">

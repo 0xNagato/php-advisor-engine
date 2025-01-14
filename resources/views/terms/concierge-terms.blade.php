@@ -3,10 +3,8 @@
 </p>
 <p dir="ltr">
     This Concierge Agreement (this “Agreement”) is entered into by and among
-    [PRIMA] LLC, a Florida limited liability company (“PRIMA”), and the
+    [PRIMA] INC, a Delaware corporation (“PRIMA”), and the
     concierge accepting this Agreement (“Concierge”).
-</p>
-<p dir="ltr">
     PRIMA connects customers with prime-time reservations at in-demand
     venues (“Reservations”) via PRIMA’s platform (the “Platform”). The
     Concierge desires to refer customers to the Platform to make Reservations.

@@ -204,7 +204,7 @@ class ConciergeReferral extends Page
     public function getSubheading(): string|Htmlable
     {
         return new HtmlString(
-            '<div class="p-2 mt-2 text-sm text-gray-500 border border-indigo-100 rounded-md bg-indigo-50">
+            '<div class="mt-2 text-sm text-gray-500">
                 <p>You can refer other concierges to PRIMA and earn commissions on all of their bookings from this page. If you are looking for your bookings, please visit the <a href="'.ListBookings::getUrl().'" class="text-primary-600 hover:text-primary-500">Bookings</a> tab.</p>
             </div>'
         );

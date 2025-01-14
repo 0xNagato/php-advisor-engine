@@ -1,4 +1,6 @@
 <x-filament-panels::page>
+    <x-referral-link-card type="concierge" />
+
     {{ $this->tabbedForm }}
 
     <livewire:concierge.referrals-table />

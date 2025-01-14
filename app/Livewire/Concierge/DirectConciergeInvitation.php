@@ -2,14 +2,15 @@
 
 namespace App\Livewire\Concierge;
 
-use App\Models\Referral;
+use App\Models\Concierge;
+use App\Models\Partner;
 use App\Traits\HandlesConciergeInvitation;
 use DanHarrin\LivewireRateLimiting\WithRateLimiting;
 use Filament\Actions\Action;
 use Filament\Pages\Concerns\InteractsWithFormActions;
 use Filament\Pages\SimplePage;
 
-class ConciergeInvitation extends SimplePage
+class DirectConciergeInvitation extends SimplePage
 {
     use HandlesConciergeInvitation;
     use InteractsWithFormActions;
@@ -19,32 +20,25 @@ class ConciergeInvitation extends SimplePage
 
     protected static string $layout = 'components.layouts.app';
 
-    public function mount(?Referral $referral = null): void
+    public function mount(string $type, string $id): void
     {
         abort_unless(boolean: request()?->hasValidSignature(), code: 401);
 
-        if (! $referral) {
-            abort(404, 'Missing referral');
-        }
-
-        $this->handleExistingReferral($referral);
-    }
-
-    protected function handleExistingReferral(Referral $referral): void
-    {
-        $this->referral = $referral;
-
-        if ($referral->secured_at || $referral->user_id) {
-            $this->invitationUsedMessage = 'This invitation has already been claimed.';
-
-            return;
+        try {
+            match ($type) {
+                'partner' => $this->invitingPartner = Partner::findOrFail($id),
+                'concierge' => $this->invitingConcierge = Concierge::findOrFail($id),
+                default => abort(404, "Invalid type: {$type}"),
+            };
+        } catch (\Exception $e) {
+            abort(404, $e->getMessage());
         }
 
         $this->form->fill([
-            'first_name' => $referral->first_name,
-            'last_name' => $referral->last_name,
-            'email' => $referral->email,
-            'phone' => $referral->phone,
+            'first_name' => '',
+            'last_name' => '',
+            'email' => '',
+            'phone' => '',
         ]);
     }
 

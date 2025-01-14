@@ -1,0 +1,222 @@
+<?php
+
+namespace App\Traits;
+
+use App\Models\Concierge;
+use App\Models\Partner;
+use App\Models\Referral;
+use App\Models\User;
+use App\Notifications\Concierge\ConciergeRegisteredEmail;
+use DanHarrin\LivewireRateLimiting\Exceptions\TooManyRequestsException;
+use Filament\Forms\Components\Checkbox;
+use Filament\Forms\Components\Placeholder;
+use Filament\Forms\Components\TextInput;
+use Filament\Forms\Form;
+use Filament\Notifications\Notification;
+use Illuminate\Contracts\Support\Htmlable;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\HtmlString;
+use Illuminate\Validation\Rules\Password as PasswordRule;
+use libphonenumber\PhoneNumberType;
+use Ysfkaya\FilamentPhoneInput\Forms\PhoneInput;
+use Ysfkaya\FilamentPhoneInput\PhoneInputNumberType;
+
+trait HandlesConciergeInvitation
+{
+    public ?Referral $referral = null;
+
+    public ?Partner $invitingPartner = null;
+
+    public ?Concierge $invitingConcierge = null;
+
+    public ?array $data = [];
+
+    public ?string $invitationUsedMessage = null;
+
+    public function getTitle(): string|Htmlable
+    {
+        return 'Create Your Account';
+    }
+
+    public function getHeading(): string|Htmlable
+    {
+        if ($this->invitationUsedMessage) {
+            return '';
+        }
+
+        return 'Create Your Account';
+    }
+
+    public function getSubheading(): string|Htmlable|null
+    {
+        if ($this->referral) {
+            return "Referral from {$this->referral->referrer->name}";
+        }
+
+        $inviter = $this->invitingPartner ?? $this->invitingConcierge;
+
+        return "Referral from {$inviter->user->name}";
+    }
+
+    public function form(Form $form): Form
+    {
+        return $form
+            ->schema([
+                TextInput::make('first_name')
+                    ->hiddenLabel()
+                    ->placeholder('First Name')
+                    ->required(),
+                TextInput::make('last_name')
+                    ->hiddenLabel()
+                    ->placeholder('Last Name')
+                    ->required(),
+                TextInput::make('email')
+                    ->hiddenLabel()
+                    ->placeholder('Email Address')
+                    ->unique(User::class)
+                    ->type('email')
+                    ->columnSpan(2)
+                    ->required(),
+                PhoneInput::make('phone')
+                    ->hiddenLabel()
+                    ->onlyCountries(config('app.countries'))
+                    ->displayNumberFormat(PhoneInputNumberType::E164)
+                    ->disallowDropdown()
+                    ->validateFor(
+                        country: config('app.countries'),
+                        type: PhoneNumberType::MOBILE,
+                        lenient: true,
+                    )
+                    ->columnSpan(2)
+                    ->required(),
+                TextInput::make('hotel_name')
+                    ->label('Affiliation')
+                    ->hiddenLabel()
+                    ->placeholder('Hotel Name, Company Name or Your Name')
+                    ->columnSpan(2)
+                    ->required(),
+                TextInput::make('password')
+                    ->hiddenLabel()
+                    ->password()
+                    ->revealable(filament()->arePasswordsRevealable())
+                    ->required()
+                    ->rule(PasswordRule::default())
+                    ->placeholder('Password')
+                    ->columnSpan(2)
+                    ->same('passwordConfirmation'),
+                TextInput::make('passwordConfirmation')
+                    ->hiddenLabel()
+                    ->password()
+                    ->revealable(filament()->arePasswordsRevealable())
+                    ->required()
+                    ->placeholder('Confirm Password')
+                    ->columnSpan(2)
+                    ->dehydrated(false),
+                $this->getTermsAndConditionsFormComponent()
+                    ->columnSpan(2),
+                Checkbox::make('send_agreement_copy')
+                    ->label('Send me a copy of this agreement via email')
+                    ->columnSpan(2),
+            ])
+            ->extraAttributes(['class' => 'inline-form'])
+            ->columns([
+                'default' => 2,
+            ])
+            ->statePath('data');
+    }
+
+    protected function getTermsAndConditionsFormComponent(): Placeholder
+    {
+        $label = new HtmlString("
+            <div class='font-bold text-center text-indigo-800 underline cursor-pointer' x-data='{}' @click='\$dispatch(\"open-modal\", { id: \"concierge-modal\" })'>
+                Create Your Account to Accept PRIMA Concierge Terms and Conditions
+            </div>
+        ");
+
+        return Placeholder::make('termsAndConditions')
+            ->content($label)
+            ->hiddenLabel();
+    }
+
+    public function secureAccount(): void
+    {
+        try {
+            $this->rateLimit(5);
+        } catch (TooManyRequestsException $exception) {
+            Notification::make()
+                ->title("Too many requests! Please wait another {$exception->secondsUntilAvailable} seconds to create your account.")
+                ->danger()
+                ->send();
+
+            return;
+        }
+
+        if ($this->invitationUsedMessage) {
+            Notification::make()
+                ->title($this->invitationUsedMessage)
+                ->danger()
+                ->send();
+            $this->redirect(config('app.platform_url'));
+        }
+
+        $data = $this->form->getState();
+
+        if (! $this->referral) {
+            $this->referral = Referral::create([
+                'referrer_id' => $this->invitingPartner?->user_id ?? $this->invitingConcierge->user_id,
+                'email' => $data['email'],
+                'phone' => $data['phone'],
+                'first_name' => $data['first_name'],
+                'last_name' => $data['last_name'],
+                'type' => 'concierge',
+                'referrer_type' => $this->invitingPartner ? 'partner' : 'concierge',
+            ]);
+        }
+
+        $userData = [
+            'first_name' => $data['first_name'],
+            'last_name' => $data['last_name'],
+            'email' => $data['email'],
+            'phone' => $data['phone'],
+            'password' => bcrypt($data['password']),
+            'secured_at' => now(),
+        ];
+
+        if ($this->referral->referrer_type === 'partner') {
+            $userData['partner_referral_id'] = $this->referral->referrer->partner->id;
+        } else {
+            $userData['concierge_referral_id'] = $this->referral->referrer->concierge->id;
+        }
+
+        $user = User::query()->create($userData);
+
+        $this->referral->update([
+            'user_id' => $user->id,
+            'secured_at' => now(),
+        ]);
+
+        Referral::query()
+            ->where('id', '!=', $this->referral->id)
+            ->where(function ($query) use ($data) {
+                $query->where('email', $data['email'])
+                    ->orWhere('phone', $data['phone']);
+            })
+            ->delete();
+
+        $user->assignRole('concierge');
+        $user->concierge()->create([
+            'hotel_name' => $data['hotel_name'],
+        ]);
+
+        $user->notify(new ConciergeRegisteredEmail(
+            sendAgreementCopy: $data['send_agreement_copy'] ?? false,
+            userData: [
+                'first_name' => $data['first_name'],
+                'last_name' => $data['last_name'],
+                'date' => now()->format('F j, Y'),
+            ]
+        ));
+        Auth::login($user);
+        $this->redirect(config('app.platform_url'));
+    }
+}

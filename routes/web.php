@@ -7,6 +7,7 @@ use App\Http\Controllers\ExceptionFormController;
 use App\Livewire\Booking\CreateBooking;
 use App\Livewire\Booking\CustomerInvoice;
 use App\Livewire\Concierge\ConciergeInvitation;
+use App\Livewire\Concierge\DirectConciergeInvitation;
 use App\Livewire\Venue\VenueBookingConfirmation;
 use App\Livewire\Venue\VenueContactLogin;
 use App\Livewire\Venue\VenueContactRecentBookings;
@@ -66,10 +67,6 @@ Route::get('/bookings/create/{token}', CreateBooking::class)->name('bookings.cre
 // New customer booking flow
 Route::get('/checkout/{booking:uuid}', BookingCheckoutController::class)->name('booking.checkout');
 
-Route::get('/invitation/{referral}', ConciergeInvitation::class)
-    ->name('concierge.invitation')
-    ->middleware('signed');
-
 Route::get('/demo/auth/{user_id}', [DemoAuthController::class, 'auth'])->name('demo.auth');
 Route::get('/demo/redirect', [DemoAuthController::class, 'redirect'])->name('demo.redirect');
 
@@ -94,5 +91,13 @@ Route::prefix('venue')->name('venue.')->group(function () {
             return response()->view('errors.modification-request-expired', [], 403);
         });
 });
+
+Route::get('/join/{type}/{id}', DirectConciergeInvitation::class)
+    ->name('concierge.join.direct')
+    ->middleware(['signed']);
+
+Route::get('/invitation/{referral}', ConciergeInvitation::class)
+    ->name('concierge.invitation')
+    ->middleware('signed');
 
 require __DIR__.'/auth.php';
