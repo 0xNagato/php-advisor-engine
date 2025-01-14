@@ -21,6 +21,7 @@ use Filament\Tables\Table;
 use Illuminate\Contracts\Database\Query\Builder;
 use Illuminate\Support\Facades\DB;
 use Livewire\Attributes\Url;
+use Maatwebsite\Excel\Excel;
 use pxlrbt\FilamentExcel\Actions\Tables\ExportAction;
 use pxlrbt\FilamentExcel\Exports\ExcelExport;
 
@@ -115,11 +116,11 @@ class PaymentExports extends Page implements HasTable
                 DB::raw('COUNT(DISTINCT earnings.booking_id) as bookings_count'),
             ])
             ->when($this->data['startDate'] ?? null, function (Builder $query) {
-                $query->where('earnings.confirmed_at', '>=',
+                $query->where('bookings.confirmed_at', '>=',
                     Carbon::parse($this->data['startDate'])->startOfDay());
             })
             ->when($this->data['endDate'] ?? null, function (Builder $query) {
-                $query->where('earnings.confirmed_at', '<=',
+                $query->where('bookings.confirmed_at', '<=',
                     Carbon::parse($this->data['endDate'])->endOfDay());
             })
             ->when($this->data['name_search'] ?? null, function (Builder $query) {
@@ -243,7 +244,7 @@ class PaymentExports extends Page implements HasTable
                     ->exports([
                         ExcelExport::make('table')
                             ->fromTable()
-                            ->askForWriterType()
+                            ->withWriterType(Excel::CSV)
                             ->withFilename("Earnings-{$dateRange}"),
                     ]),
                 ExportAction::make('exportMissingBankInfo')
@@ -252,6 +253,7 @@ class PaymentExports extends Page implements HasTable
                     ->exports([
                         ExcelExport::make('missing_bank_info')
                             ->fromTable()
+                            ->withWriterType(Excel::CSV)
                             ->modifyQueryUsing(fn ($query) => $query->where(function ($q) {
                                 $q->whereNull('payout')
                                     ->orWhere('payout', '=', '')
