@@ -7,6 +7,7 @@ use App\Enums\BookingStatus;
 use App\Events\BookingPaid;
 use App\Models\Booking;
 use App\Models\Region;
+use App\Notifications\Booking\ConciergeFirstBooking;
 use App\Notifications\Booking\CustomerBookingConfirmed;
 use App\Traits\FormatsPhoneNumber;
 use Stripe\Charge;
@@ -28,6 +29,10 @@ class BookingService
 
         $booking->notify(new CustomerBookingConfirmed);
         SendConfirmationToVenueContacts::run($booking);
+
+        if ($booking->concierge && $booking->concierge->bookings()->count() === 1) {
+            $booking->concierge->user->notify(new ConciergeFirstBooking($booking));
+        }
 
         BookingPaid::dispatch($booking);
     }

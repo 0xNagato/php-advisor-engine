@@ -29,5 +29,6 @@ class SmsTemplates
         'customer_modification_rejected' => 'Sorry, your changes have not been approved by {venue_name}. Please contact your PRIMA Concierge to create a new reservation.',
         'concierge_modification_approved' => 'To concierge: Your requested reservation change at {venue_name} is approved. We have notified the customer.',
         'concierge_modification_rejected' => 'We are sorry, but {venue_name} cannot accommodate your change request. If you\'d like to have this reservation cancelled, you may do so through the PRIMA App.',
+        'concierge_first_booking' => "Thank you for using PRIMA for the first time! Your reservation for {guest_name} is currently being transmitted to {venue_name}. Reservations may take up to 30 minutes to show up at the restaurant, however, rest assured that all is okay. Thank you!\n\n(This notification is only sent for the first booking)",
     ];
 }
