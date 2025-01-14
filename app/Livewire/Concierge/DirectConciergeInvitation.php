@@ -6,6 +6,7 @@ use App\Models\Concierge;
 use App\Models\Partner;
 use App\Traits\HandlesConciergeInvitation;
 use DanHarrin\LivewireRateLimiting\WithRateLimiting;
+use Exception;
 use Filament\Actions\Action;
 use Filament\Pages\Concerns\InteractsWithFormActions;
 use Filament\Pages\SimplePage;
@@ -26,11 +27,11 @@ class DirectConciergeInvitation extends SimplePage
 
         try {
             match ($type) {
-                'partner' => $this->invitingPartner = Partner::findOrFail($id),
-                'concierge' => $this->invitingConcierge = Concierge::findOrFail($id),
+                'partner' => $this->invitingPartner = Partner::query()->findOrFail($id),
+                'concierge' => $this->invitingConcierge = Concierge::query()->findOrFail($id),
                 default => abort(404, "Invalid type: {$type}"),
             };
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             abort(404, $e->getMessage());
         }
 

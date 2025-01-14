@@ -6,11 +6,11 @@ use function Pest\Laravel\actingAs;
 use function Pest\Laravel\get;
 
 test('user can view login page', function () {
-get('/platform/login')
-->assertStatus(200)
-->assertSee('Login')
-->assertSee('Sign in');
-    });
+    get('/platform/login')
+        ->assertStatus(200)
+        ->assertSee('Login')
+        ->assertSee('Sign in');
+});
 
 test('user can access platform messages page', function () {
     $user = User::role('concierge')->first();
@@ -31,6 +31,6 @@ test('user can access platform vip code page', function () {
 });
 
 test('user cannot access admin panel when not authenticated', function () {
-get('/platform/messages')
-->assertRedirect('/platform/login');
-    });
+    get('/platform/messages')
+        ->assertRedirect('/platform/login');
+});

@@ -42,7 +42,7 @@ class SendConfirmationToVenueContacts extends Action
             }
         }
 
-        $admin = User::where('email', 'andru.weir@gmail.com')->first();
+        $admin = User::query()->where('email', 'andru.weir@gmail.com')->first();
         if ($admin) {
             $admin->notify(new AdminBookingConfirmed($booking, $confirmationUrl));
         }

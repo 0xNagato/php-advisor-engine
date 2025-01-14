@@ -171,7 +171,7 @@ trait HandlesConciergeInvitation
         $data = $this->form->getState();
 
         if (! $this->referral) {
-            $this->referral = Referral::create([
+            $this->referral = Referral::query()->create([
                 'referrer_id' => $this->invitingPartner?->user_id ?? $this->invitingConcierge->user_id,
                 'email' => $data['email'],
                 'phone' => $data['phone'],

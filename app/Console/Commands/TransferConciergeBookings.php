@@ -43,7 +43,7 @@ class TransferConciergeBookings extends Command
                 DB::beginTransaction();
 
                 // Get all bookings for source concierge
-                $bookings = Booking::where('concierge_id', $sourceConcierge->id)->get();
+                $bookings = Booking::query()->where('concierge_id', $sourceConcierge->id)->get();
                 $this->info("Found {$bookings->count()} bookings to transfer");
 
                 foreach ($bookings as $booking) {
@@ -51,13 +51,13 @@ class TransferConciergeBookings extends Command
                     $booking->update(['concierge_id' => $targetConcierge->id]);
 
                     // Transfer associated earnings
-                    Earning::where('booking_id', $booking->id)
+                    Earning::query()->where('booking_id', $booking->id)
                         ->where('user_id', $sourceConcierge->user_id)
                         ->update(['user_id' => $targetConcierge->user_id]);
                 }
 
                 // Transfer any remaining earnings
-                Earning::where('user_id', $sourceConcierge->user_id)
+                Earning::query()->where('user_id', $sourceConcierge->user_id)
                     ->whereIn('type', ['concierge', 'concierge_bounty'])
                     ->update(['user_id' => $targetConcierge->user_id]);
 

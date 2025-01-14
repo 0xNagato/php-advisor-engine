@@ -195,7 +195,7 @@ class PaymentExports extends Page implements HasTable
                                 $earnings = Earning::query()
                                     ->with(['booking'])
                                     ->where('user_id', $record->id)
-                                    ->whereHas('booking', function ($query) use ($startDate, $endDate) {
+                                    ->whereHas('booking', function (Builder $query) use ($startDate, $endDate) {
                                         $query->whereBetween('confirmed_at', [$startDate, $endDate]);
                                     })
                                     ->get()
@@ -252,13 +252,11 @@ class PaymentExports extends Page implements HasTable
                     ->exports([
                         ExcelExport::make('missing_bank_info')
                             ->fromTable()
-                            ->modifyQueryUsing(function ($query) {
-                                return $query->where(function ($q) {
-                                    $q->whereNull('payout')
-                                        ->orWhere('payout', '=', '')
-                                        ->orWhere('payout', '=', '{}');
-                                });
-                            })
+                            ->modifyQueryUsing(fn ($query) => $query->where(function ($q) {
+                                $q->whereNull('payout')
+                                    ->orWhere('payout', '=', '')
+                                    ->orWhere('payout', '=', '{}');
+                            }))
                             ->except([
                                 'first_name',
                                 'last_name',

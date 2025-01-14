@@ -23,9 +23,7 @@ class ConciergeInvitation extends SimplePage
     {
         abort_unless(boolean: request()?->hasValidSignature(), code: 401);
 
-        if (! $referral) {
-            abort(404, 'Missing referral');
-        }
+        abort_unless($referral, 404, 'Missing referral');
 
         $this->handleExistingReferral($referral);
     }
