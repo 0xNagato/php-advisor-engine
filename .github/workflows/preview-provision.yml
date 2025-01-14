@@ -1,7 +1,7 @@
 name: preview-provision
 on:
   pull_request:
-    types: [opened, edited, reopened, ready_for_review]
+    types: [opened, edited, reopened, ready_for_review, synchronize]
 jobs:
   harbor-provision:
     if: |
