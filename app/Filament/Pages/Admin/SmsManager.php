@@ -4,6 +4,7 @@ namespace App\Filament\Pages\Admin;
 
 use App\Jobs\SendBulkSmsJob;
 use App\Models\Referral;
+use App\Models\Region;
 use App\Models\User;
 use Exception;
 use Filament\Forms\Components\CheckboxList;
@@ -14,6 +15,7 @@ use Filament\Forms\Form;
 use Filament\Notifications\Notification;
 use Filament\Pages\Page;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Collection;
 
 class SmsManager extends Page
 {
@@ -54,6 +56,24 @@ class SmsManager extends Page
                     ->columns(2)
                     ->gridDirection('row')
                     ->required()
+                    ->live()
+                    ->columnSpanFull(),
+
+                CheckboxList::make('data.regions')
+                    ->label('Target Regions')
+                    ->helperText('Only send to users in selected regions. Leave empty to send to all regions.')
+                    ->options(Region::query()->orderBy('name')->pluck('name', 'id'))
+                    ->gridDirection('row')
+                    ->live()
+                    ->afterStateUpdated(function () {
+                        $this->form->fill([
+                            'data' => [
+                                'recipients' => $this->data['recipients'] ?? [],
+                                'regions' => $this->data['regions'] ?? [],
+                                'message' => $this->data['message'] ?? '',
+                            ],
+                        ]);
+                    })
                     ->columnSpanFull(),
 
                 Textarea::make('data.message')
@@ -77,81 +97,82 @@ class SmsManager extends Page
 
     public function getRecipientCounts(): array
     {
+        $selectedRegions = $this->data['regions'] ?? [];
+
+        $conciergesQuery = User::query()
+            ->whereHas('roles', fn (Builder $query) => $query->where('name', 'concierge'))
+            ->whereNotNull('secured_at')
+            ->whereNotNull('phone');
+
+        if (filled($selectedRegions)) {
+            $conciergesQuery->where(function ($query) use ($selectedRegions) {
+                foreach ($selectedRegions as $region) {
+                    $query->orWhereJsonContains('notification_regions', $region);
+                }
+            });
+        }
+
+        $pendingConciergesQuery = Referral::query()
+            ->where('type', 'concierge')
+            ->whereNull('secured_at')
+            ->whereNotNull('phone');
+
+        if (filled($selectedRegions)) {
+            $pendingConciergesQuery->where(function ($query) use ($selectedRegions) {
+                $query->whereIn('region_id', $selectedRegions)
+                    ->orWhereNull('region_id');
+            });
+        }
+
+        $partnersQuery = User::query()
+            ->whereHas('roles', fn (Builder $query) => $query->where('name', 'partner'))
+            ->whereNotNull('secured_at')
+            ->whereNotNull('phone');
+
+        if (filled($selectedRegions)) {
+            $partnersQuery->where(function ($query) use ($selectedRegions) {
+                foreach ($selectedRegions as $region) {
+                    $query->orWhereJsonContains('notification_regions', $region);
+                }
+            });
+        }
+
+        $venuesQuery = User::query()
+            ->whereHas('roles', fn (Builder $query) => $query->where('name', 'venue'))
+            ->whereNotNull('phone');
+
+        if (filled($selectedRegions)) {
+            $venuesQuery->where(function ($query) use ($selectedRegions) {
+                foreach ($selectedRegions as $region) {
+                    $query->orWhereJsonContains('notification_regions', $region);
+                }
+            });
+        }
+
         return [
-            'concierges' => User::query()
-                ->whereHas('roles', fn (Builder $query) => $query->where('name', 'concierge'))
-                ->whereNotNull('secured_at')
-                ->whereNotNull('phone')
-                ->count(),
-
-            'pending_concierges' => Referral::query()
-                ->where('type', 'concierge')
-                ->whereNull('secured_at')
-                ->whereNotNull('phone')
-                ->count(),
-
-            'partners' => User::query()
-                ->whereHas('roles', fn (Builder $query) => $query->where('name', 'partner'))
-                ->whereNotNull('secured_at')
-                ->whereNotNull('phone')
-                ->count(),
-
-            'venues' => User::query()
-                ->whereHas('roles', fn (Builder $query) => $query->where('name', 'venue'))
-                ->whereNotNull('phone')
-                ->count(),
+            'concierges' => $conciergesQuery->count(),
+            'pending_concierges' => $pendingConciergesQuery->count(),
+            'partners' => $partnersQuery->count(),
+            'venues' => $venuesQuery->count(),
         ];
     }
 
     public function send(): void
     {
-        $data = $this->form->getState()['data'];
-        $recipients = collect($data['recipients']);
-        $message = $data['message'];
-        $phoneNumbers = collect();
-
-        if ($recipients->contains('concierges')) {
-            $phoneNumbers->push(...User::query()
-                ->whereHas('roles', fn (Builder $query) => $query->where('name', 'concierge'))
-                ->whereNotNull('secured_at')
-                ->whereNotNull('phone')
-                ->pluck('phone'));
-        }
-
-        if ($recipients->contains('pending_concierges')) {
-            $phoneNumbers->push(...Referral::query()
-                ->where('type', 'concierge')
-                ->whereNull('secured_at')
-                ->whereNotNull('phone')
-                ->pluck('phone'));
-        }
-
-        if ($recipients->contains('partners')) {
-            $phoneNumbers->push(...User::query()
-                ->whereHas('roles', fn (Builder $query) => $query->where('name', 'partner'))
-                ->whereNotNull('secured_at')
-                ->whereNotNull('phone')
-                ->pluck('phone'));
-        }
-
-        if ($recipients->contains('pending_partners')) {
-            $phoneNumbers->push(...Referral::query()
-                ->where('type', 'partner')
-                ->whereNull('secured_at')
-                ->whereNotNull('phone')
-                ->pluck('phone'));
-        }
-
-        if ($recipients->contains('venues')) {
-            $phoneNumbers->push(...User::query()
-                ->whereHas('roles', fn (Builder $query) => $query->where('name', 'venue'))
-                ->whereNotNull('phone')
-                ->pluck('phone'));
-        }
-
-        $phoneNumbers = $phoneNumbers->filter()->unique();
-
         try {
+            $message = $this->data['message'];
+            $recipients = $this->getSelectedRecipients();
+
+            // Log total count and recipient details
+            logger()->info('SMS Recipients Count: '.$recipients->count());
+            logger()->info('SMS Recipients:', $recipients->map(fn ($recipient) => [
+                'name' => $recipient->first_name.' '.$recipient->last_name,
+                'phone' => $recipient->phone,
+                'role' => $recipient->role_type,
+            ])->toArray());
+
+            $phoneNumbers = $recipients->pluck('phone')->filter()->unique();
+
             $phoneNumbers->chunk(50)->each(function ($chunk) use ($message) {
                 dispatch(new SendBulkSmsJob($chunk->toArray(), $message));
             });
@@ -161,8 +182,6 @@ class SmsManager extends Page
                 ->body('SMS messages have been queued for sending')
                 ->success()
                 ->send();
-
-            $this->form->fill();
         } catch (Exception $e) {
             Notification::make()
                 ->title('Error')
@@ -170,5 +189,86 @@ class SmsManager extends Page
                 ->danger()
                 ->send();
         }
+    }
+
+    public function getSelectedRecipients(): Collection
+    {
+        $data = $this->data;
+        $recipients = collect($data['recipients'] ?? []);
+        $query = null;
+
+        if ($recipients->contains('concierges')) {
+            $query = User::query()
+                ->whereHas('roles', fn (Builder $query) => $query->where('name', 'concierge'))
+                ->whereNotNull('secured_at')
+                ->whereNotNull('phone')
+                ->select('first_name', 'last_name', 'phone')
+                ->selectRaw("'concierge' as role_type");
+
+            if (filled($data['regions'])) {
+                $query->where(function ($query) use ($data) {
+                    foreach ($data['regions'] as $region) {
+                        $query->orWhereJsonContains('notification_regions', $region);
+                    }
+                });
+            }
+        }
+
+        if ($recipients->contains('pending_concierges')) {
+            $pendingQuery = Referral::query()
+                ->where('type', 'concierge')
+                ->whereNull('secured_at')
+                ->whereNotNull('phone')
+                ->select('first_name', 'last_name', 'phone')
+                ->selectRaw("'pending_concierge' as role_type");
+
+            if (filled($data['regions'])) {
+                $pendingQuery->where(function ($query) use ($data) {
+                    $query->whereIn('region_id', $data['regions'])
+                        ->orWhereNull('region_id');
+                });
+            }
+
+            $query = $query ? $query->union($pendingQuery) : $pendingQuery;
+        }
+
+        if ($recipients->contains('partners')) {
+            $partnersQuery = User::query()
+                ->whereHas('roles', fn (Builder $query) => $query->where('name', 'partner'))
+                ->whereNotNull('secured_at')
+                ->whereNotNull('phone')
+                ->select('first_name', 'last_name', 'phone')
+                ->selectRaw("'partner' as role_type");
+
+            if (filled($data['regions'])) {
+                $partnersQuery->where(function ($query) use ($data) {
+                    foreach ($data['regions'] as $region) {
+                        $query->orWhereJsonContains('notification_regions', $region);
+                    }
+                });
+            }
+
+            $query = $query ? $query->union($partnersQuery) : $partnersQuery;
+        }
+
+        if ($recipients->contains('venues')) {
+            $venuesQuery = User::query()
+                ->whereHas('roles', fn (Builder $query) => $query->where('name', 'venue'))
+                ->whereNotNull('phone')
+                ->select('first_name', 'last_name', 'phone')
+                ->selectRaw("'venue' as role_type");
+
+            if (filled($data['regions'])) {
+                $venuesQuery->where(function ($query) use ($data) {
+                    foreach ($data['regions'] as $region) {
+                        $query->orWhereJsonContains('notification_regions', $region);
+                    }
+                });
+            }
+
+            $query = $query ? $query->union($venuesQuery) : $venuesQuery;
+        }
+
+        return $query ? $query->get() : User::query()->whereRaw('1=0')->get();
     }
 }

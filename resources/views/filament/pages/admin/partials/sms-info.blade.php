@@ -1,9 +1,11 @@
 <div x-data="{
     message: $wire.get('data.message') ?? '',
     recipients: $wire.get('data.recipients') ?? [],
+    regions: $wire.get('data.regions') ?? [],
     recipientCounts: {{ json_encode($recipientCounts) }},
     get length() { return this.message.length },
     get recipientCount() {
+        if (!this.recipients.length) return 0;
         return this.recipients.reduce((total, group) => total + (this.recipientCounts[group] || 0), 0)
     },
     get credits() {
@@ -12,8 +14,16 @@
         return 3;
     },
     get totalCredits() { return this.credits * this.recipientCount }
-}" x-init="$watch('$wire.get(\'data.message\')', value => message = value ?? '');
-$watch('$wire.get(\'data.recipients\')', value => recipients = value ?? []);" class="space-y-4">
+}" x-init="$wire.$watch('data.message', value => message = value ?? '');
+$wire.$watch('data.recipients', async (value) => {
+    recipients = value ?? [];
+    await $wire.$refresh();
+    recipientCounts = await $wire.getRecipientCounts();
+});
+$wire.$watch('data.regions', async () => {
+    await $wire.$refresh();
+    recipientCounts = await $wire.getRecipientCounts();
+});" class="space-y-4">
     <div class="grid grid-cols-3 gap-4">
         <div class="p-3 bg-white border border-gray-100 rounded-lg shadow-sm">
             <div class="text-sm font-medium text-gray-500">Characters</div>

@@ -5,10 +5,12 @@ namespace App\Traits;
 use App\Models\Concierge;
 use App\Models\Partner;
 use App\Models\Referral;
+use App\Models\Region;
 use App\Models\User;
 use App\Notifications\Concierge\ConciergeRegisteredEmail;
 use DanHarrin\LivewireRateLimiting\Exceptions\TooManyRequestsException;
 use Filament\Forms\Components\Checkbox;
+use Filament\Forms\Components\CheckboxList;
 use Filament\Forms\Components\Placeholder;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Form;
@@ -112,6 +114,13 @@ trait HandlesConciergeInvitation
                     ->placeholder('Confirm Password')
                     ->columnSpan(2)
                     ->dehydrated(false),
+                CheckboxList::make('notification_regions')
+                    ->label('Notification Preferences')
+                    ->helperText('Select the regions you would like to receive notifications about new venues and opportunities.')
+                    ->options(Region::query()->orderBy('name')->pluck('name', 'id'))
+                    ->columns(2)
+                    ->gridDirection('row')
+                    ->columnSpan(2),
                 $this->getTermsAndConditionsFormComponent()
                     ->columnSpan(2),
                 Checkbox::make('send_agreement_copy')

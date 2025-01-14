@@ -2,32 +2,14 @@
 
 namespace App\Filament\Pages\Concierge;
 
-use App\Actions\Partner\InviteConciergeViaSms;
-use App\Filament\Resources\BookingResource\Pages\ListBookings;
-use App\Models\Referral;
-use App\Models\User;
-use App\Notifications\Concierge\NotifyConciergeReferral;
-use Filament\Forms\Components\Actions;
-use Filament\Forms\Components\Actions\Action;
-use Filament\Forms\Components\Tabs;
-use Filament\Forms\Components\Tabs\Tab;
-use Filament\Forms\Components\TextInput;
-use Filament\Forms\Form;
-use Filament\Forms\Get;
-use Filament\Notifications\Notification;
+use App\Livewire\Partner\ConciergeInvitationForms;
+use App\Traits\HandlesBulkInviteConciergeInvitations;
 use Filament\Pages\Page;
-use Illuminate\Contracts\Support\Htmlable;
-use Illuminate\Support\HtmlString;
-use Illuminate\Validation\ValidationException;
-use libphonenumber\PhoneNumberType;
-use Ysfkaya\FilamentPhoneInput\Forms\PhoneInput;
-use Ysfkaya\FilamentPhoneInput\PhoneInputNumberType;
 
-/**
- * @property Form $tabbedForm
- */
 class ConciergeReferral extends Page
 {
+    use HandlesBulkInviteConciergeInvitations;
+
     protected static ?string $navigationIcon = 'gmdi-people-alt-tt';
 
     protected static string $view = 'filament.pages.concierge.concierge-referral';
@@ -35,10 +17,6 @@ class ConciergeReferral extends Page
     protected static ?int $navigationSort = 2;
 
     protected static ?string $title = 'My Referrals';
-
-    public ?array $emailData = [];
-
-    public ?array $phoneData = [];
 
     public static function canAccess(): bool
     {
@@ -49,164 +27,10 @@ class ConciergeReferral extends Page
         return auth()->user()->hasActiveRole('concierge');
     }
 
-    public function mount(): void
-    {
-        $this->tabbedForm->fill();
-    }
-
-    public function tabbedForm(Form $form): Form
-    {
-        return $form
-            ->schema([
-                Tabs::make('tabs')
-                    ->extraAttributes(['class' => 'single-col-tabs'])
-                    ->tabs([
-                        Tab::make('Send SMS')
-                            ->icon('gmdi-phone-android-o')
-                            ->schema([
-                                TextInput::make('first_name')
-                                    ->hiddenLabel()
-                                    ->live()
-                                    ->columnSpan(1)
-                                    ->extraAttributes(['class' => 'mr-2'])
-                                    ->placeholder('First Name'),
-                                TextInput::make('last_name')
-                                    ->hiddenLabel()
-                                    ->live()
-                                    ->columnSpan(1)
-                                    ->placeholder('Last Name'),
-                                PhoneInput::make('phone')
-                                    ->live()
-                                    ->displayNumberFormat(PhoneInputNumberType::E164)
-                                    ->disallowDropdown()
-                                    ->placeholder('Phone Number')
-                                    ->onlyCountries(config('app.countries'))
-                                    ->validateFor(
-                                        country: config('app.countries'),
-                                        type: PhoneNumberType::MOBILE,
-                                        lenient: true,
-                                    )
-                                    ->columnSpan(2)
-                                    ->hiddenLabel(),
-                                Actions::make([
-                                    Action::make('sendText')
-                                        ->label('Send SMS')
-                                        ->disabled(fn (Get $get
-                                        ) => blank($get('phone')) || $get('first_name') === '' ||
-                                            $get('last_name') === '')
-                                        ->action(function () {
-                                            $this->sendInviteViaText();
-                                        }),
-                                ])->columnSpanFull()
-                                    ->fullWidth(),
-                            ])
-                            ->statePath('phoneData')
-                            ->columns([
-                                'default' => '2',
-                            ]),
-                        Tab::make('Send Email')
-                            ->icon('gmdi-email-o')
-                            ->schema([
-                                TextInput::make('first_name')
-                                    ->live()
-                                    ->hiddenLabel()
-                                    ->columnSpan(1)
-                                    ->extraAttributes(['class' => 'mr-2'])
-                                    ->placeholder('First Name'),
-                                TextInput::make('last_name')
-                                    ->live()
-                                    ->hiddenLabel()
-                                    ->columnSpan(1)
-                                    ->placeholder('Last Name'),
-                                TextInput::make('email')
-                                    ->live()
-                                    ->placeholder('Email Address')
-                                    ->unique(User::class, 'email')
-                                    ->type('email')
-                                    ->columnSpan(2)
-                                    ->hiddenLabel(),
-                                Actions::make([
-                                    Action::make('sendEmail')
-                                        ->label('Send Email')
-                                        ->disabled(fn (Get $get
-                                        ) => blank($get('email')) || $get('first_name') === ''
-                                            || $get('last_name') === '')
-                                        ->action(function () {
-                                            $this->sendInviteViaEmail();
-                                        }),
-                                ])
-                                    ->columnSpanFull()
-                                    ->fullWidth(),
-                            ])
-                            ->statePath('emailData')
-                            ->columns([
-                                'default' => '2',
-                            ]),
-                    ]),
-            ]);
-    }
-
-    public function sendInviteViaEmail(): void
-    {
-        $data = $this->tabbedForm->getState()['emailData'];
-
-        $referral = Referral::query()->create([
-            'referrer_id' => auth()->id(),
-            'email' => $data['email'],
-            'first_name' => $data['first_name'],
-            'last_name' => $data['last_name'],
-            'type' => 'concierge',
-            'referrer_type' => strtolower(auth()->user()->main_role),
-        ]);
-
-        $this->tabbedForm->fill();
-
-        $referral->notify(new NotifyConciergeReferral(referral: $referral, channel: 'mail'));
-
-        $this->dispatch('concierge-referred');
-
-        Notification::make()
-            ->title('Invite sent successfully.')
-            ->success()
-            ->send();
-    }
-
-    public function sendInviteViaText(): void
-    {
-        $data = $this->tabbedForm->getState()['phoneData'];
-
-        InviteConciergeViaSms::run($data);
-
-        $this->dispatch('concierge-referred');
-        $this->tabbedForm->fill();
-
-        Notification::make()
-            ->title('Invite sent successfully.')
-            ->success()
-            ->send();
-    }
-
-    protected function getForms(): array
+    protected function getHeaderWidgets(): array
     {
         return [
-            'tabbedForm',
+            ConciergeInvitationForms::make(),
         ];
-    }
-
-    protected function onValidationError(ValidationException $exception): void
-    {
-        Notification::make()
-            ->title($exception->getMessage())
-            ->danger()
-            ->send();
-    }
-
-    public function getSubheading(): string|Htmlable
-    {
-        return new HtmlString(
-            '<div class="mt-2 text-sm text-gray-500">
-                <p>You can refer other concierges to PRIMA and earn commissions on all of their bookings from this page. If you are looking for your bookings, please visit the <a href="'.ListBookings::getUrl().'" class="text-primary-600 hover:text-primary-500">Bookings</a> tab.</p>
-            </div>'
-        );
     }
 }

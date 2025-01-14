@@ -8,6 +8,22 @@
             </x-filament::button>
         </div>
     </form>
+
+    @if (config('app.env') === 'local')
+        <div class="h-64 p-4 mt-4 overflow-y-auto font-mono text-xs text-white bg-gray-800 rounded-lg">
+            <div class="space-y-1">
+                @foreach ($this->getSelectedRecipients() as $recipient)
+                    <div>
+                        <span class="text-purple-400">{{ $recipient->role_type }}</span>
+                        <span class="text-blue-400">{{ $recipient->first_name }} {{ $recipient->last_name }}</span>
+                        <span class="text-gray-400">{{ $recipient->phone }}</span>
+                    </div>
+                @endforeach
+            </div>
+        </div>
+    @endif
+
+    <x-filament-actions::modals />
 </x-filament-panels::page>
 
 @push('styles')

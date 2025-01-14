@@ -39,6 +39,8 @@ class DirectConciergeInvitation extends SimplePage
             'last_name' => '',
             'email' => '',
             'phone' => '',
+            'notification_regions' => [],
+            'hotel_name' => '',
         ]);
     }
 

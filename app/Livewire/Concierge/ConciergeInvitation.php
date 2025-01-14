@@ -45,6 +45,8 @@ class ConciergeInvitation extends SimplePage
             'last_name' => $referral->last_name,
             'email' => $referral->email,
             'phone' => $referral->phone,
+            'notification_regions' => $referral->region_id ? [$referral->region_id] : [],
+            'hotel_name' => $referral->company_name,
         ]);
     }
 

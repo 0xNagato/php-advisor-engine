@@ -47,7 +47,7 @@ class User extends Authenticatable implements FilamentUser, HasAvatar
         'first_name', 'last_name', 'email', 'password', 'phone', 'profile_photo_path',
         'payout', 'charity_percentage', 'partner_referral_id', 'concierge_referral_id',
         'timezone', 'secured_at', 'address_1', 'address_2', 'city', 'state', 'zip',
-        'country', 'preferences', 'region', 'suspended_at', 'expo_push_token',
+        'country', 'preferences', 'region', 'suspended_at', 'expo_push_token', 'notification_regions',
     ];
 
     protected $hidden = [
@@ -65,6 +65,7 @@ class User extends Authenticatable implements FilamentUser, HasAvatar
             'secured_at' => 'datetime',
             'payout' => AsArrayObject::class,
             'preferences' => NotificationPreferencesData::class,
+            'notification_regions' => AsArrayObject::class,
         ];
     }
 

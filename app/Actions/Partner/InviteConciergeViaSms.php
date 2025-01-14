@@ -22,7 +22,9 @@ class InviteConciergeViaSms
             'first_name' => $data['first_name'],
             'last_name' => $data['last_name'],
             'type' => 'concierge',
+            'region_id' => $data['region_id'],
             'referrer_type' => strtolower(auth()->user()->main_role),
+            'company_name' => $data['company_name'],
         ]);
 
         $referral->notify(new NotifyConciergeReferral(referral: $referral, channel: 'sms'));
