@@ -9,9 +9,9 @@
         </h1>
 
         @if (filled($booking->notes))
-            <div class="p-4 border rounded-md shadow-sm bg-gray-50">
-                <h2 class="mb-2 font-semibold text-gray-800">Reservation Notes</h2>
-                <p class="text-sm text-gray-700">{{ $booking->notes }}</p>
+            <div class="p-4 border border-red-500 rounded-md shadow-sm bg-red-50">
+                <h2 class="mb-2 font-semibold text-red-800">Reservation Notes</h2>
+                <p class="text-sm text-red-700">{{ $booking->notes }}</p>
             </div>
         @endif
 
