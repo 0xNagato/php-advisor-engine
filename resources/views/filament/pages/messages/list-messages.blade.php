@@ -59,9 +59,6 @@
                     Hi {{ auth()->user()->first_name }},
                 </p>
                 <p>
-                    How PRIMA Works
-                </p>
-                <p>
                     PRIMA is currently LIVE in Miami, and you may begin booking reservations starting immediately.
                 </p>
                 <p>

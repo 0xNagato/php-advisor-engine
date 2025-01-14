@@ -6,7 +6,7 @@
             PRIMA
         </div>
         <div class="p-2 text-2xl font-black text-center dm-serif">
-            Everybody Wins
+            Everybody Wins<span class="font-sans font-normal">™</span>
         </div>
     </div>
     <div class="flex items-center justify-center p-4">

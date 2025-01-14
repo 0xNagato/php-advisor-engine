@@ -36,18 +36,28 @@ class VenueContactBookingConfirmed extends Notification implements ShouldQueue
 
     public function toSMS(Booking $notifiable): SmsData
     {
+        $templateKey = filled($notifiable->notes)
+            ? 'venue_contact_booking_confirmed_notes'
+            : 'venue_contact_booking_confirmed';
+
+        $templateData = [
+            'venue_name' => $notifiable->venue->name,
+            'booking_date' => Carbon::toNotificationFormat($notifiable->booking_at),
+            'booking_time' => $notifiable->booking_at->format('g:ia'),
+            'guest_name' => $notifiable->guest_name,
+            'guest_count' => $notifiable->guest_count,
+            'guest_phone' => $notifiable->guest_phone,
+            'confirmation_url' => $this->confirmationUrl,
+        ];
+
+        if (filled($notifiable->notes)) {
+            $templateData['notes'] = $notifiable->notes;
+        }
+
         return new SmsData(
             phone: $this->contact->contact_phone,
-            templateKey: 'venue_contact_booking_confirmed',
-            templateData: [
-                'venue_name' => $notifiable->venue->name,
-                'booking_date' => Carbon::toNotificationFormat($notifiable->booking_at),
-                'booking_time' => $notifiable->booking_at->format('g:ia'),
-                'guest_name' => $notifiable->guest_name,
-                'guest_count' => $notifiable->guest_count,
-                'guest_phone' => $notifiable->guest_phone,
-                'confirmation_url' => $this->confirmationUrl,
-            ]
+            templateKey: $templateKey,
+            templateData: $templateData,
         );
     }
 }

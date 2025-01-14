@@ -20,7 +20,7 @@
         PRIMA
     </div>
     <div class="p-2 mb-4 text-2xl font-bold tracking-tight text-center dm-serif text-gray-950">
-        Everybody Wins
+        Everybody Wins<span class="font-sans font-normal">™</span>
     </div>
 
     @if ($showWrapper)

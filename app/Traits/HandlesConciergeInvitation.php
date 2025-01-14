@@ -52,12 +52,12 @@ trait HandlesConciergeInvitation
     public function getSubheading(): string|Htmlable|null
     {
         if ($this->referral) {
-            return "Referral from {$this->referral->referrer->name}";
+            return "You were referred by: {$this->referral->referrer->name}";
         }
 
         $inviter = $this->invitingPartner ?? $this->invitingConcierge;
 
-        return "Referral from {$inviter->user->name}";
+        return "You were referred by: {$inviter->user->name}";
     }
 
     public function form(Form $form): Form
@@ -94,7 +94,7 @@ trait HandlesConciergeInvitation
                 TextInput::make('hotel_name')
                     ->label('Affiliation')
                     ->hiddenLabel()
-                    ->placeholder('Hotel Name, Company Name or Your Name')
+                    ->placeholder('Hotel, Company or Your Name')
                     ->columnSpan(2)
                     ->required(),
                 TextInput::make('password')
@@ -115,16 +115,34 @@ trait HandlesConciergeInvitation
                     ->columnSpan(2)
                     ->dehydrated(false),
                 CheckboxList::make('notification_regions')
-                    ->label('Notification Preferences')
-                    ->helperText('Select the regions you would like to receive notifications about new venues and opportunities.')
-                    ->options(Region::query()->orderBy('name')->pluck('name', 'id'))
-                    ->columns(2)
+                    ->label(new HtmlString('
+                        <div class="block w-full mb-1">Notification Preferences</div>
+                        <div class="block w-full mb-2 font-normal text-gray-500">Select the regions where you plan on creating bookings so we can notify you about new venues and experiences.</div>
+                    '))
+                    ->options(function () {
+                        $regions = Region::all();
+                        $orderedNames = ['Miami', 'Los Angeles', 'Ibiza', 'New York'];
+
+                        return $regions->sortBy(function ($region) use ($orderedNames) {
+                            $index = array_search($region->name, $orderedNames);
+
+                            return $index === false ? PHP_INT_MAX : $index;
+                        })
+                            ->pluck('name', 'id');
+                    })
+                    ->columns([
+                        'default' => 2,
+                        'sm' => 2,
+                        'md' => 2,
+                        'lg' => 2,
+                        'xl' => 2,
+                    ])
                     ->gridDirection('row')
                     ->columnSpan(2),
                 $this->getTermsAndConditionsFormComponent()
                     ->columnSpan(2),
                 Checkbox::make('send_agreement_copy')
-                    ->label('Send me a copy of this agreement via email')
+                    ->label('Email me a copy of the agreement')
                     ->columnSpan(2),
             ])
             ->extraAttributes(['class' => 'inline-form'])
@@ -137,8 +155,11 @@ trait HandlesConciergeInvitation
     protected function getTermsAndConditionsFormComponent(): Placeholder
     {
         $label = new HtmlString("
-            <div class='font-bold text-center text-indigo-800 underline cursor-pointer' x-data='{}' @click='\$dispatch(\"open-modal\", { id: \"concierge-modal\" })'>
-                Create Your Account to Accept PRIMA Concierge Terms and Conditions
+            <div class='px-3 py-1 text-xs text-center border border-indigo-600 rounded-lg bg-indigo-50'>
+                By creating your PRIMA Concierge Account, you are agreeing to our Terms Of Service.
+            </div>
+            <div class='mt-2 text-xs font-bold text-center text-indigo-800 underline cursor-pointer' x-data='{}' @click='\$dispatch(\"open-modal\", { id: \"concierge-modal\" })'>
+                Click Here To See Concierge Terms And Conditions
             </div>
         ");
 

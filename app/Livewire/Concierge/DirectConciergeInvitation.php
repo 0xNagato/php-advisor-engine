@@ -40,7 +40,11 @@ class DirectConciergeInvitation extends SimplePage
             'last_name' => '',
             'email' => '',
             'phone' => '',
-            'notification_regions' => [],
+            'notification_regions' => [
+                $this->invitingPartner?->user?->region ??
+                $this->invitingConcierge?->user?->region ??
+                'miami',
+            ],
             'hotel_name' => '',
         ]);
     }
