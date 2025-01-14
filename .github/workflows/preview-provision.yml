@@ -15,9 +15,10 @@ jobs:
         run: composer global require mehrancodes/laravel-harbor -q
       - name: Start Provisioning
         env:
-            FORGE_TOKEN: ${{ secrets.FORGE_API_TOKEN }}
-            FORGE_SERVER: ${{ secrets.FORGE_SERVER_ID }}
-            FORGE_GIT_REPOSITORY: ${{ github.repository }}
-            FORGE_GIT_BRANCH: ${{ github.head_ref }}
-            FORGE_DOMAIN: primavip.vip
+          FORGE_DEPLOY_SCRIPT: ${{ vars.DEPLOY_SCRIPT }}
+          FORGE_TOKEN: ${{ secrets.FORGE_API_TOKEN }}
+          FORGE_SERVER: ${{ secrets.FORGE_SERVER_ID }}
+          FORGE_GIT_REPOSITORY: ${{ github.repository }}
+          FORGE_GIT_BRANCH: ${{ github.head_ref }}
+          FORGE_DOMAIN: primavip.vip
         run: harbor provision
