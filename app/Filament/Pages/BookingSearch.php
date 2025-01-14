@@ -220,9 +220,24 @@ class BookingSearch extends Page implements HasTable
         return $table
             ->query($query)
             ->heading('Bookings: '.$startDate.' to '.$endDate)
+            ->headerActions([
+                ExportAction::make('export')
+                    ->label('Export Results')
+                    ->size('xs')
+                    ->exports([
+                        ExcelExport::make('bookings')
+                            ->fromTable()
+                            ->except(['no_show'])
+                            ->withWriterType(Excel::CSV)
+                            ->withFilename("Bookings-Export-{$dateRange}"),
+                    ]),
+            ])
             ->recordUrl(fn (Booking $record) => route('filament.admin.resources.bookings.view', ['record' => $record]))
             ->defaultSort('created_at', 'desc')
             ->columns([
+                TextColumn::make('id')
+                    ->label('Booking ID')
+                    ->hidden(),
                 TextColumn::make('created_at')
                     ->label('Created')
                     ->size('xs')
@@ -235,7 +250,12 @@ class BookingSearch extends Page implements HasTable
                     ->size('xs')
                     ->formatStateUsing(fn (Booking $record): string => $record->booking_at->format('M j, Y g:ia'))
                     ->sortable(),
-                TextColumn::make('guest_name')
+                TextColumn::make('is_prime')
+                    ->label('Prime')
+                    ->alignCenter()
+                    ->formatStateUsing(fn (Booking $record): string => $record->is_prime ? 'Yes' : 'No')
+                    ->size('xs'),
+                TextColumn::make('no_show')
                     ->label('Guest Information')
                     ->size('xs')
                     ->formatStateUsing(function (Booking $record): string {
@@ -254,13 +274,26 @@ class BookingSearch extends Page implements HasTable
                         return implode('<br>', $parts);
                     })
                     ->html(),
+                TextColumn::make('guest_name')
+                    ->hidden(),
+                TextColumn::make('guest_email')
+                    ->hidden(),
+                TextColumn::make('guest_phone')
+                    ->hidden(),
+                TextColumn::make('guest_count')
+                    ->hidden(),
                 TextColumn::make('venue.name')
                     ->label('Venue')
                     ->size('xs')
                     ->sortable(),
+                TextColumn::make('venue.region')
+                    ->hidden(),
                 TextColumn::make('concierge.user.name')
                     ->label('Concierge')
                     ->size('xs'),
+                TextColumn::make('concierge.hotel_name')
+                    ->label('Hotel/Company')
+                    ->hidden(),
                 TextColumn::make('status')
                     ->badge()
                     ->size('xs')
@@ -278,38 +311,6 @@ class BookingSearch extends Page implements HasTable
                     ->money(fn ($record) => $record->currency, 100)
                     ->size('xs')
                     ->sortable(),
-                TextColumn::make('id')
-                    ->label('Booking ID')
-                    ->hidden(),
-                TextColumn::make('guest_email')
-                    ->label('Guest Email')
-                    ->hidden(),
-                TextColumn::make('guest_phone')
-                    ->label('Guest Phone')
-                    ->hidden(),
-                TextColumn::make('guest_count')
-                    ->label('Guest Count')
-                    ->hidden(),
-                TextColumn::make('total_fee')
-                    ->label('Total Fee')
-                    ->formatStateUsing(fn ($record) => money($record->total_fee, $record->currency))
-                    ->hidden(),
-                TextColumn::make('currency')
-                    ->hidden(),
-                TextColumn::make('status')
-                    ->formatStateUsing(fn (BookingStatus $state): string => $state->label())
-                    ->hidden(),
-            ])
-            ->headerActions([
-                ExportAction::make('export')
-                    ->label('Export Results')
-                    ->size('xs')
-                    ->exports([
-                        ExcelExport::make('bookings')
-                            ->fromTable()
-                            ->withWriterType(Excel::CSV)
-                            ->withFilename("Bookings-Export-{$dateRange}"),
-                    ]),
             ])
             ->paginated([25, 50, 100, 250]);
     }
