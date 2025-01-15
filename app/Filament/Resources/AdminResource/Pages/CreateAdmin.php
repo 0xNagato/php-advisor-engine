@@ -56,6 +56,7 @@ class CreateAdmin extends CreateRecord
                                 lenient: true,
                             )
                             ->initialCountry('US')
+                            ->unique(User::class, 'phone')
                             ->required(),
                         TextInput::make('password')
                             ->placeholder('Password')

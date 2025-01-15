@@ -76,6 +76,7 @@ class ProfileSettings extends Widget implements HasForms
                 ->unique('users', ignorable: auth()->user())
                 ->email(),
             PhoneInput::make('phone')
+                ->unique('users', ignorable: auth()->user())
                 ->required()
                 ->onlyCountries(config('app.countries'))
                 ->displayNumberFormat(PhoneInputNumberType::E164)

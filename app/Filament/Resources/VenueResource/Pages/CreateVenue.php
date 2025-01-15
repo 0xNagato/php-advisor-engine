@@ -65,6 +65,7 @@ class CreateVenue extends CreateRecord
                                 lenient: true,
                             )
                             ->initialCountry('US')
+                            ->unique(User::class, 'phone')
                             ->required(),
                     ]),
                 Section::make('Venue Information')

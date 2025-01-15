@@ -56,6 +56,7 @@ class CreateConcierge extends CreateRecord
                                 lenient: true,
                             )
                             ->initialCountry('US')
+                            ->unique(User::class, 'phone')
                             ->required(),
                     ]),
                 Section::make('Hotel Information')
