@@ -81,9 +81,34 @@ return [
     'timezone' => 'UTC',
 
     'countries' => [
-        'US', 'CA', 'PR', 'GB', 'AT', 'BE', 'BG', 'HR', 'CY', 'CZ', 'DK', 'EE', 'FI', 'FR',
-        'DE', 'GR', 'HU', 'IE', 'IT', 'LV', 'LT', 'LU', 'MT', 'NL', 'PL', 'PT', 'RO', 'SK',
-        'SI', 'ES', 'SE', 'AE',
+        // North America
+        'US', 'CA', 'MX', 'GT', 'BZ', 'HN', 'SV', 'NI', 'CR', 'PA',
+
+        // Caribbean
+        'CU', 'HT', 'DO', 'PR', 'JM', 'BS', 'BB', 'TT',
+
+        // South America
+        'CO', 'VE', 'GY', 'SR', 'BR', 'EC', 'PE', 'BO', 'PY', 'CL', 'AR', 'UY',
+
+        // Europe
+        'GB', 'IE', 'FR', 'BE', 'NL', 'DE', 'CH', 'IT', 'ES', 'PT', 'AT', 'PL', 'CZ', 'SK',
+        'HU', 'RO', 'BG', 'HR', 'SI', 'GR', 'AL', 'MK', 'ME', 'RS', 'BA', 'LU', 'DK', 'NO',
+        'SE', 'FI', 'EE', 'LV', 'LT', 'BY', 'UA', 'MD',
+
+        // Asia
+        'RU', 'GE', 'AZ', 'AM', 'KZ', 'UZ', 'TM', 'KG', 'TJ', 'CN', 'MN', 'KP', 'KR', 'JP',
+        'VN', 'LA', 'KH', 'TH', 'MM', 'MY', 'SG', 'ID', 'PH', 'BN', 'TL', 'NP', 'BT', 'BD',
+        'IN', 'PK', 'AF', 'IR', 'IQ', 'SY', 'LB', 'JO', 'IL', 'SA', 'YE', 'OM', 'AE', 'QA',
+        'BH', 'KW',
+
+        // Africa
+        'EG', 'LY', 'TN', 'DZ', 'MA', 'MR', 'ML', 'NE', 'TD', 'SD', 'ER', 'ET', 'DJ', 'SO',
+        'KE', 'UG', 'RW', 'BI', 'TZ', 'SN', 'GM', 'GW', 'GN', 'SL', 'LR', 'CI', 'GH', 'TG',
+        'BJ', 'NG', 'CM', 'GA', 'GQ', 'CG', 'CD', 'AO', 'ZM', 'MW', 'MZ', 'ZW', 'BW', 'NA',
+        'ZA', 'LS', 'SZ',
+
+        // Oceania
+        'AU', 'NZ', 'PG', 'SB', 'VU', 'NC', 'FJ', 'WS', 'TO', 'TV', 'KI', 'MH', 'FM', 'PW',
     ],
     // 'countries' => ['US', 'CA'],
 

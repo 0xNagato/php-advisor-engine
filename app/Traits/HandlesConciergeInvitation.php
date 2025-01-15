@@ -90,6 +90,7 @@ trait HandlesConciergeInvitation
                         lenient: true,
                     )
                     ->columnSpan(2)
+                    ->unique(User::class, 'phone')
                     ->required(),
                 TextInput::make('hotel_name')
                     ->label('Affiliation')
