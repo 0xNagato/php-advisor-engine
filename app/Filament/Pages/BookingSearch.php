@@ -26,8 +26,17 @@ class BookingSearch extends Page implements HasTable
 {
     use InteractsWithTable;
 
-    #[Url()]
-    public ?array $data = [];
+    #[Url(as: 'filters')]
+    public ?array $data = [
+        'booking_id' => '',
+        'customer_search' => '',
+        'venue_search' => '',
+        'concierge_search' => '',
+        'start_date' => '',
+        'end_date' => '',
+        'status' => [],
+        'user_id' => '',
+    ];
 
     protected static ?string $navigationIcon = 'heroicon-o-magnifying-glass';
 
@@ -54,8 +63,10 @@ class BookingSearch extends Page implements HasTable
                 'customer_search' => '',
                 'venue_search' => '',
                 'concierge_search' => '',
-                'status' => [
-                ],
+                'start_date' => '',
+                'end_date' => '',
+                'status' => [],
+                'user_id' => '',
             ]);
         }
     }
