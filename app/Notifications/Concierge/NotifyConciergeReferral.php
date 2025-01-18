@@ -6,6 +6,7 @@ use App\Data\SmsData;
 use App\Models\Referral;
 use App\Models\User;
 use App\NotificationsChannels\SmsNotificationChannel;
+use App\Services\PrimaShortUrls;
 use AshAllenDesign\ShortURL\Exceptions\ShortURLException;
 use AshAllenDesign\ShortURL\Facades\ShortURL;
 use Illuminate\Bus\Queueable;
@@ -54,6 +55,7 @@ class NotifyConciergeReferral extends Notification
                 'first_name' => $notifiable->first_name,
                 'referrer' => $this->referrer->name,
                 'url' => $this->shortURL,
+                'how_it_works' => PrimaShortUrls::get('how-it-works'),
             ]
         );
     }

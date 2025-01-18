@@ -5,6 +5,7 @@ namespace App\Notifications\Concierge;
 use App\Data\SmsData;
 use App\Models\User;
 use App\NotificationsChannels\SmsNotificationChannel;
+use App\Services\PrimaShortUrls;
 use AshAllenDesign\ShortURL\Exceptions\ShortURLException;
 use AshAllenDesign\ShortURL\Facades\ShortURL;
 use Filament\Facades\Filament;
@@ -58,6 +59,8 @@ class ConciergeCreated extends Notification
             templateKey: 'concierge_created',
             templateData: [
                 'login_url' => $this->passwordResetUrl,
+                'more_info' => PrimaShortUrls::get('more-info'),
+                'how_it_works' => PrimaShortUrls::get('how-it-works'),
             ]
         );
     }

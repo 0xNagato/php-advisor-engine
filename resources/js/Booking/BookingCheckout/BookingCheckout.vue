@@ -441,8 +441,16 @@ const emailInvoice = async () => {
               class="form-checkbox size-4 rounded text-indigo-600"
             />
             <span class="ml-2 text-sm text-gray-700">
-              I am booking a real reservation and will arrive within 15 minutes
-              of the reserved time.
+              <template v-if="mingleData.totalWithTaxesInCents > 0">
+                <span class="font-semibold">
+                  I understand that this fee is for a prime time reservation and
+                  is not applied towards my bill at the restaurant.
+                </span>
+              </template>
+              <template v-else>
+                I am booking a real reservation and will arrive within 15
+                minutes of the reserved time.
+              </template>
             </span>
           </label>
         </div>

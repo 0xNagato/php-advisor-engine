@@ -7,6 +7,7 @@ use App\Models\Partner;
 use App\Models\Referral;
 use App\Models\Region;
 use App\Models\User;
+use App\Notifications\Concierge\ConciergeCreated;
 use App\Notifications\Concierge\ConciergeRegisteredEmail;
 use DanHarrin\LivewireRateLimiting\Exceptions\TooManyRequestsException;
 use Filament\Forms\Components\Checkbox;
@@ -247,6 +248,9 @@ trait HandlesConciergeInvitation
                 'date' => now()->format('F j, Y'),
             ]
         ));
+
+        $user->notify(new ConciergeCreated($user));
+
         Auth::login($user);
         $this->redirect(config('app.platform_url'));
     }

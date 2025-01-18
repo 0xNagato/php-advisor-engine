@@ -5,7 +5,6 @@ namespace App\Notifications\Booking;
 use App\Data\SmsData;
 use App\Data\VenueContactData;
 use App\Models\Booking;
-use Carbon\Carbon;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Notification;
@@ -42,7 +41,7 @@ class VenueContactBookingConfirmed extends Notification implements ShouldQueue
 
         $templateData = [
             'venue_name' => $notifiable->venue->name,
-            'booking_date' => Carbon::toNotificationFormat($notifiable->booking_at),
+            'booking_date' => $notifiable->booking_at->format('M jS'),
             'booking_time' => $notifiable->booking_at->format('g:ia'),
             'guest_name' => $notifiable->guest_name,
             'guest_count' => $notifiable->guest_count,

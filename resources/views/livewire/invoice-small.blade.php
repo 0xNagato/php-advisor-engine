@@ -18,21 +18,23 @@
                 <div>{{ $booking->booking_at->format('g:i a') }}, {{ $booking->guest_count }} guests</div>
             </div>
         </div>
-        <div class="flex flex-col gap-1 text-right">
-            <div class="font-semibold">
-                @money($booking->total_with_tax_in_cents, $booking->currency)
+        @if ($booking->is_prime)
+            <div class="flex flex-col gap-1 text-right">
+                <div class="font-semibold">
+                    @money($booking->total_with_tax_in_cents, $booking->currency)
+                </div>
+                <div class="text-xs text-slate-700">
+                    @if ($booking->tax > 0)
+                        <div class="flex justify-between gap-x-2">
+                            <span>Subtotal:</span> <span>@money($booking->total_fee, $booking->currency)</span>
+                        </div>
+                        <div class="flex justify-between gap-x-2">
+                            <span>{{ $region->tax_rate_term }}:</span>
+                            <span>@money($booking->tax_amount_in_cents, $booking->currency)</span>
+                        </div>
+                    @endif
+                </div>
             </div>
-            <div class="text-xs text-slate-700">
-                @if ($booking->tax > 0)
-                    <div class="flex justify-between gap-x-2">
-                        <span>Subtotal:</span> <span>@money($booking->total_fee, $booking->currency)</span>
-                    </div>
-                    <div class="flex justify-between gap-x-2">
-                        <span>{{ $region->tax_rate_term }}:</span>
-                        <span>@money($booking->tax_amount_in_cents, $booking->currency)</span>
-                    </div>
-                @endif
-            </div>
-        </div>
+        @endif
     </div>
 </x-filament-widgets::widget>
