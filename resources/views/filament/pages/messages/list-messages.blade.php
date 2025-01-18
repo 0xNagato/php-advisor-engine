@@ -3,6 +3,7 @@
 @endphp
 
 <x-filament-panels::page>
+    {{-- <livewire:comic-strip :pages="['/images/comic/1.webp', '/images/comic/2.webp', '/images/comic/3.webp', '/images/comic/4.webp']" /> --}}
     @nonmobileapp
         <div
             class="flex flex-col items-center p-3 -my-4 text-xs border-2 border-indigo-600 rounded-lg sm:text-base bg-gray-50">
