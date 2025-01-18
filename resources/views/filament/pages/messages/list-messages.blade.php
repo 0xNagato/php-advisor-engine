@@ -3,6 +3,22 @@
 @endphp
 
 <x-filament-panels::page>
+    @nonmobileapp
+        <div
+            class="flex flex-col items-center p-3 -my-4 text-xs border-2 border-indigo-600 rounded-lg sm:text-base bg-gray-50">
+            <div class="flex items-center mb-3">
+                <img src="https://is1-ssl.mzstatic.com/image/thumb/Purple221/v4/2f/36/1f/2f361f98-4d81-10ab-66d6-66d207e66c6a/AppIcon-0-0-1x_U007epad-0-85-220.png/230x0w.webp"
+                    class="w-12 h-12 mr-4 rounded-lg" alt="Apple App Store Logo">
+                <div>
+                    For the best experience, please download the PRIMA App for iPhone!
+                </div>
+            </div>
+            <a href="https://apps.apple.com/us/app/prima-vip/id6504947227?platform=iphone" target="_blank">
+                <img src="https://developer.apple.com/app-store/marketing/guidelines/images/badge-example-preferred_2x.png"
+                    alt="Download on the App Store" class="h-10">
+            </a>
+        </div>
+    @endnonmobileapp
     <x-filament::section class="text-xs sm:text-base">
         <x-slot name="heading">
             @if ($isDemo)
@@ -20,24 +36,7 @@
             @endif
         </x-slot>
 
-        @nonmobileapp
-            <div
-                class="flex flex-col items-center p-3 mb-4 -m-2 text-xs border-2 border-indigo-600 rounded-lg sm:text-base bg-gray-50">
-                <div class="flex items-center mb-3">
-                    <img src="https://is1-ssl.mzstatic.com/image/thumb/Purple221/v4/2f/36/1f/2f361f98-4d81-10ab-66d6-66d207e66c6a/AppIcon-0-0-1x_U007epad-0-85-220.png/230x0w.webp"
-                        class="w-12 h-12 mr-4 rounded-lg" alt="Apple App Store Logo">
-                    <div>
-                        For the best experience, please download the PRIMA App for iPhone!
-                    </div>
-                </div>
-                <a href="https://apps.apple.com/us/app/prima-vip/id6504947227?platform=iphone" target="_blank">
-                    <img src="https://developer.apple.com/app-store/marketing/guidelines/images/badge-example-preferred_2x.png"
-                        alt="Download on the App Store" class="h-10">
-                </a>
-            </div>
-        @endnonmobileapp
-
-        <div class="flex justify-center -mx-6 sm:hidden">
+        <div class="flex justify-center -mx-6 -mt-6 sm:hidden">
             <img src="{{ asset('images/concierge-earnings-infographic-new.png') }}" alt="Concierge Earnings Infographic"
                 class="w-full">
         </div>
