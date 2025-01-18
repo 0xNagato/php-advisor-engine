@@ -144,12 +144,16 @@
                                 </button>
                             @endnonmobileapp
                         </div>
+
+                    </div>
+                    <div class="w-full mt-2">
+                        <livewire:booking.invoice-small :booking="$booking" />
                     </div>
                 @else
                     <div class="-mt-6"></div>
                 @endif
 
-                <div x-show="tab === 'collectPayment'" class="mt-6">
+                <div x-show="tab === 'collectPayment'" class="mt-4">
                     <!-- @todo Refactor this to a separate component -->
 
                     <div wire:ignore class="flex flex-col items-center gap-3" x-data="{}"
@@ -266,7 +270,7 @@
                     </div>
                 </div>
 
-                <div x-show="tab === 'smsPayment'" class="flex flex-col gap-4 mt-4">
+                <div x-show="tab === 'smsPayment'" class="flex flex-col gap-4 mt-2">
                     <!-- SMS Payment Link Tab Content -->
                     @env('local')
                     <x-filament::button tag="a" href="{{ $bookingUrl }}" target="_blank" color="success"
@@ -287,10 +291,6 @@
 
                     <livewire:booking.booking-status-widget :booking="$booking" />
                 </div>
-            </div>
-
-            <div class="w-full">
-                <livewire:booking.invoice-small :booking="$booking" />
             </div>
 
             <x-filament::button x-on:click="$dispatch('open-modal', { id: 'confirm-cancel-booking' })"
