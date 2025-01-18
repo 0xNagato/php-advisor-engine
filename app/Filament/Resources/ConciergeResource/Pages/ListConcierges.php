@@ -38,7 +38,7 @@ class ListConcierges extends ListRecords
             ->columns([
                 TextColumn::make('user.name')
                     ->size('xs')->sortable(['last_name'])
-                    ->searchable(['first_name', 'last_name']),
+                    ->searchable(['first_name', 'last_name', 'phone']),
                 TextColumn::make('user.referrer.name')
                     ->sortable(['referrer_first_name'])
                     ->url(fn (Concierge $concierge) => $concierge->user->referral?->referrer_route)

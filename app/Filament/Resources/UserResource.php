@@ -46,6 +46,7 @@ class UserResource extends Resource
                             'partner',
                             'concierge',
                             'venue',
+                            'venue_manager',
                         ])
                     )
                     ->preload()
@@ -78,7 +79,7 @@ class UserResource extends Resource
             ->columns([
                 TextColumn::make('name')
                     ->sortable()
-                    ->searchable(['first_name', 'last_name']),
+                    ->searchable(['first_name', 'last_name', 'phone']),
                 TextColumn::make('email')
                     ->searchable()
                     ->sortable()
@@ -91,6 +92,7 @@ class UserResource extends Resource
                             'concierge' => 'blue',
                             'venue' => 'green',
                             'partner' => 'yellow',
+                            'venue_manager' => 'orange',
                             default => 'gray'
                         };
 
