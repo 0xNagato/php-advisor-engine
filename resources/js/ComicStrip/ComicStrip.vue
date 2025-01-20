@@ -63,7 +63,7 @@ const onZoomChange = (swiper: SwiperType, scale: number) => {
         minRatio: 1,
         toggle: true,
       }"
-      class="h-full [--swiper-pagination-bullet-horizontal-gap:6px] [--swiper-pagination-bullet-inactive-color:#5045E6] [--swiper-pagination-bullet-inactive-opacity:0.2] [--swiper-pagination-bullet-size:10px] [--swiper-theme-color:#5045E6]"
+      class="h-full [--swiper-navigation-color:#5045E6] [--swiper-navigation-sides-offset:10px] [--swiper-navigation-size:44px] [--swiper-pagination-bottom:20px] [--swiper-pagination-bullet-horizontal-gap:6px] [--swiper-pagination-bullet-inactive-color:#5045E6] [--swiper-pagination-bullet-inactive-opacity:0.2] [--swiper-pagination-bullet-size:12px] [--swiper-theme-color:#5045E6]"
       @slide-change="onSlideChange"
       @zoom-change="onZoomChange"
     >
