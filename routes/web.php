@@ -8,6 +8,7 @@ use App\Livewire\Booking\CreateBooking;
 use App\Livewire\Booking\CustomerInvoice;
 use App\Livewire\Concierge\ConciergeInvitation;
 use App\Livewire\Concierge\DirectConciergeInvitation;
+use App\Livewire\Story;
 use App\Livewire\Venue\VenueBookingConfirmation;
 use App\Livewire\Venue\VenueContactLogin;
 use App\Livewire\Venue\VenueContactRecentBookings;
@@ -20,6 +21,8 @@ use AshAllenDesign\ShortURL\Controllers\ShortURLController;
 Route::get('/privacy', function () {
     return view('privacy');
 });
+
+Route::get('/story', Story::class)->name('story');
 
 Route::get('/onboarding', VenueOnboarding::class)->name('onboarding');
 
