@@ -31,7 +31,7 @@ class ReservationService
      * The minimum number of minutes in the future a reservation can be made while the date is today.
      * If a reservation is requested within this window, it will be adjusted to the next available time slot.
      */
-    public const int MINUTES_PAST = 90;
+    public const int MINUTES_PAST = 35;
 
     /**
      * The number of days in advance that reservations can be made.

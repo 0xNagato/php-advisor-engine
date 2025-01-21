@@ -15,7 +15,7 @@ trait ManagesBookingForms
 {
     public const int AVAILABILITY_DAYS = 3;
 
-    public const int MINUTES_PAST = 60;
+    public const int MINUTES_PAST = 35;
 
     public const int MINUTES_FUTURE = 120;
 
