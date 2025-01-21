@@ -285,6 +285,17 @@ class PaymentExports extends Page implements HasTable
                         ExcelExport::make('missing_bank_info')
                             ->fromTable()
                             ->withWriterType(Excel::CSV)
+                            ->withColumns([
+                                Column::make('name')
+                                    ->formatStateUsing(fn ($record) => $record->name.($record->hasRole('concierge')
+                                            ? " - Hotel/Company: {$record->concierge?->hotel_name}"
+                                            : ($record->hasRole('venue') || $record->hasRole('venue_manager')
+                                                ? " - Venue: {$record->venue?->name}"
+                                                : ''
+                                            )
+                                    )
+                                    ),
+                            ])
                             ->modifyQueryUsing(fn ($query) => $query->where(function ($q) {
                                 $q->whereNull('payout')
                                     ->orWhere('payout', '=', '')
