@@ -88,7 +88,7 @@
                                     </p>
                                     @if ($schedule->has_low_inventory)
                                         <p class="-mt-1 text-xs font-semibold text-white">
-                                            Last Tables
+                                            {{ $schedule->remaining_tables === 1 ? 'Last Table' : 'Last Tables' }}
                                         </p>
                                     @endif
                                     @if ($schedule->no_wait)
@@ -105,7 +105,7 @@
                                     <p class="text-xs uppercase text-nowrap sm:text-base">No Fee</p>
                                     @if ($schedule->has_low_inventory)
                                         <p class="-mt-1 text-xs font-semibold text-white">
-                                            Last Tables
+                                            {{ $schedule->remaining_tables === 1 ? 'Last Table' : 'Last Tables' }}
                                         </p>
                                     @endif
                                     @if ($schedule->no_wait)
