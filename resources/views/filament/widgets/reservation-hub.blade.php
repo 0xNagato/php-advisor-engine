@@ -148,6 +148,12 @@
                     </div>
                     <div class="w-full mt-2">
                         <livewire:booking.invoice-small :booking="$booking" />
+                        @if ($booking->venue->is_omakase)
+                            <div
+                                class="mt-2 p-3 text-sm font-medium text-indigo-600 bg-indigo-50 border border-indigo-200 rounded-lg">
+                                {{ $booking->venue->omakase_details }}
+                            </div>
+                        @endif
                     </div>
                 @else
                     <div class="-mt-6"></div>
