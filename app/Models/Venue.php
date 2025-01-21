@@ -31,7 +31,7 @@ class Venue extends Model
 
     public const int DEFAULT_START_HOUR = 11; // 11:00 AM
 
-    public const int DEFAULT_END_HOUR = 22; // 10:00 PM
+    public const int DEFAULT_END_HOUR = 23; // 11:00 PM
 
     /**
      * The attributes that are mass assignable.
