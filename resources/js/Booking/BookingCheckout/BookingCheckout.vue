@@ -56,6 +56,8 @@ interface MingleData {
   };
   vipCode?: string;
   totalWithTaxesInCents: number;
+  isOmakase: boolean;
+  omakaseDetails: string;
 }
 
 interface Props {
@@ -356,6 +358,13 @@ const emailInvoice = async () => {
       <p class="mb-4 text-center text-xl font-semibold">
         Time Remaining: {{ formattedTime }}
       </p>
+      <div v-if="mingleData.isOmakase" class="mb-4 text-center">
+        <p
+          class="rounded-lg border border-indigo-200 bg-indigo-50 p-2 text-sm font-semibold text-indigo-600"
+        >
+          {{ mingleData.omakaseDetails }}
+        </p>
+      </div>
       <form class="w-full" @submit.prevent="handleSubmit">
         <div class="mb-2 flex space-x-2">
           <div class="flex-1">
@@ -432,7 +441,7 @@ const emailInvoice = async () => {
             </span>
           </label>
         </div>
-        <div class="mx-2 mt-2">
+        <div v-if="!mingleData.isOmakase" class="mx-2 mt-2">
           <label class="flex items-center">
             <input
               v-model="agreeToArrival"

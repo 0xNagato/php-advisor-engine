@@ -14,6 +14,7 @@ use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Select;
+use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Forms\Form;
@@ -114,6 +115,13 @@ class EditVenue extends EditRecord
                             ->label('No Wait')
                             ->helperText('When enabled, guests will be seated immediately upon arrival')
                             ->default(false),
+                        Toggle::make('is_omakase')
+                            ->label('Is Omakase')
+                            ->helperText('Enable if guests pay for the meal rather than just the reservation. This affects how payouts are calculated.')
+                            ->default(false),
+                        Textarea::make('omakase_details')
+                            ->label('Omakase Details')
+                            ->nullable(),
                     ]),
                 Repeater::make('contacts')
                     ->columnSpanFull()

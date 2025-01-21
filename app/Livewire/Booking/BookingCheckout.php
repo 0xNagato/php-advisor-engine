@@ -92,6 +92,8 @@ class BookingCheckout extends Component implements HasMingles
             'vipCode' => $this->booking->vipCode?->code,
             'allowedPaymentMethods' => ['card', 'link'],
             'totalWithTaxesInCents' => (int) $this->booking->total_with_tax_in_cents,
+            'isOmakase' => $this->booking->venue->is_omakase,
+            'omakaseDetails' => $this->booking->venue->omakase_details,
         ];
     }
 

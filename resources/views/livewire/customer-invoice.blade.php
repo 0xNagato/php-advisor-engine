@@ -285,7 +285,11 @@
 
                 @if (isset($customerInvoice) || $download)
                     <div class="mt-4 font-semibold text-center">
-                        Fees paid are for reservation only. Not applicable towards venue bill.
+                        @if ($booking->venue->is_omakase)
+                            {{ $booking->venue->omakase_details }}
+                        @else
+                            Fees paid are for reservation only. Not applicable towards venue bill.
+                        @endif
                     </div>
                 @endif
             </div>

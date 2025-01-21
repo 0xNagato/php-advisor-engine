@@ -69,6 +69,8 @@ class Venue extends Model
         'daily_prime_bookings_cap',
         'daily_non_prime_bookings_cap',
         'no_wait',
+        'is_omakase',
+        'omakase_details',
     ];
 
     protected function casts(): array
