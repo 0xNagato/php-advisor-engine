@@ -20,9 +20,11 @@ use Filament\Tables\Contracts\HasTable;
 use Filament\Tables\Table;
 use Illuminate\Contracts\Database\Query\Builder;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\HtmlString;
 use Livewire\Attributes\Url;
 use Maatwebsite\Excel\Excel;
 use pxlrbt\FilamentExcel\Actions\Tables\ExportAction;
+use pxlrbt\FilamentExcel\Columns\Column;
 use pxlrbt\FilamentExcel\Exports\ExcelExport;
 
 class PaymentExports extends Page implements HasTable
@@ -150,7 +152,9 @@ class PaymentExports extends Page implements HasTable
         $dateRange = "{$startDate}-{$endDate}";
 
         return $table
-            ->query($query)
+            ->query(
+                $query->with(['concierge', 'venue'])
+            )
             ->heading('Earnings: '.$startDate.' - '.$endDate)
             ->defaultSort('total_earnings', 'desc')
             ->paginated([10, 25, 50, 100])
@@ -162,7 +166,23 @@ class PaymentExports extends Page implements HasTable
                     ->color('primary')
                     ->size('xs')
                     ->wrap()
-                    ->words(2)
+                    ->html()
+                    ->formatStateUsing(function (User $record): string {
+                        $subtext = '';
+
+                        if ($record->hasRole('concierge')) {
+                            $subtext = "Hotel/Company: {$record->concierge?->hotel_name}";
+                        } elseif ($record->hasRole('venue') || $record->hasRole('venue_manager')) {
+                            $subtext = "Venue: {$record->venue?->name}";
+                        }
+
+                        return new HtmlString(
+                            "<div class='flex flex-col gap-1'>
+                                <span>{$record->name}</span>
+                                ".($subtext ? "<span class='text-[10px] sm:text-xs text-gray-500'>{$subtext}</span>" : '').'
+                            </div>'
+                        );
+                    })
                     ->url(fn (User $record): string => UserResource::getUrl('edit', ['record' => $record])),
                 TextColumn::make('bookings_count')
                     ->label('Bookings')
@@ -242,10 +262,21 @@ class PaymentExports extends Page implements HasTable
                 ExportAction::make('exportAll')
                     ->size('xs')
                     ->exports([
-                        ExcelExport::make('table')
+                        ExcelExport::make()
                             ->fromTable()
                             ->withWriterType(Excel::CSV)
-                            ->withFilename("Earnings-{$dateRange}"),
+                            ->withColumns([
+                                Column::make('name')
+                                    ->formatStateUsing(fn ($record) => $record->name.($record->hasRole('concierge')
+                                            ? " - Hotel/Company: {$record->concierge?->hotel_name}"
+                                            : ($record->hasRole('venue') || $record->hasRole('venue_manager')
+                                                ? " - Venue: {$record->venue?->name}"
+                                                : ''
+                                            )
+                                    )
+                                    ),
+                            ])
+                            ->withFilename("Payment-Exports-{$dateRange}"),
                     ]),
                 ExportAction::make('exportMissingBankInfo')
                     ->label('Export Missing Bank Info')

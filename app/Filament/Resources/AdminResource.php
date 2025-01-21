@@ -21,6 +21,11 @@ class AdminResource extends Resource
 
     protected static ?int $navigationSort = 20;
 
+    public static function shouldRegisterNavigation(): bool
+    {
+        return false;
+    }
+
     public static function canAccess(): bool
     {
         return auth()->user()->hasActiveRole('super_admin');

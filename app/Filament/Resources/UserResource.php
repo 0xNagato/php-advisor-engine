@@ -10,7 +10,9 @@ use Filament\Forms\Components\TextInput;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\Filter;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Str;
 use STS\FilamentImpersonate\Impersonate;
 
@@ -112,7 +114,33 @@ class UserResource extends Resource
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
-            ->filters([])
+            ->filters([
+                Filter::make('role')
+                    ->form([
+                        Select::make('role')
+                            ->options([
+                                'super_admin' => 'Super Admin',
+                                'partner' => 'Partner',
+                                'concierge' => 'Concierge',
+                                'venue' => 'Venue',
+                                'venue_manager' => 'Venue Manager',
+                            ])
+                            ->placeholder('All Roles')
+                            ->label('Role'),
+                    ])
+                    ->query(function (Builder $query, array $data): Builder {
+                        return $query->when(
+                            $data['role'],
+                            fn (Builder $query, string $role): Builder => $query->whereHas(
+                                'roleProfiles',
+                                fn (Builder $query) => $query->whereHas(
+                                    'role',
+                                    fn (Builder $query) => $query->where('name', $role)
+                                )
+                            )
+                        );
+                    }),
+            ])
             ->actions([
                 Impersonate::make()
                     ->redirectTo(config('app.platform_url')),
