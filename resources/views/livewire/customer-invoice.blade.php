@@ -323,6 +323,7 @@
                     $this->convertToPrimeBookingAction,
                     $this->abandonBookingAction,
                     $this->uncancelBookingAction,
+                    $this->markAsNoShowAction,
                 ]" class="w-full mt-4" />
             @elseif (auth()->check() &&
                     auth()->user()->hasActiveRole('super_admin') &&

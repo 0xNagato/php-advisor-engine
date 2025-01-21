@@ -11,6 +11,7 @@ use App\Actions\Booking\ConvertToPrime;
 use App\Actions\Booking\RefundBooking;
 use App\Enums\BookingStatus;
 use App\Enums\EarningType;
+use App\Events\BookingMarkedAsNoShow;
 use App\Filament\Resources\BookingResource;
 use App\Models\Booking;
 use App\Models\Earning;
@@ -65,7 +66,7 @@ class ViewBooking extends ViewRecord
         $this->authorizeAccess();
 
         $this->booking = $this->record;
-        $this->region = Region::query()->find($this->booking->city);
+        $this->region = Region::query()->find($this->booking->city)->first();
 
         // Store the original previous URL
         $this->originalPreviousUrl = URL::previous();
@@ -556,6 +557,79 @@ class ViewBooking extends ViewRecord
             ->success()
             ->title('Booking Uncancelled')
             ->body('The booking has been successfully uncancelled and earnings restored.')
+            ->send();
+    }
+
+    public function markAsNoShowAction(): Action
+    {
+        if (! auth()->user()->hasAnyRole(['venue', 'venue_manager', 'super_admin'])
+            || $this->record->is_prime
+            || $this->record->no_show
+            || ! in_array($this->record->status, [
+                BookingStatus::CONFIRMED,
+                BookingStatus::VENUE_CONFIRMED,
+            ])
+        ) {
+            return Action::make('markAsNoShow')->hidden();
+        }
+
+        return Action::make('markAsNoShow')
+            ->label('Mark as No-Show')
+            ->color('danger')
+            ->icon('mdi-ghost-outline')
+            ->requiresConfirmation()
+            ->modalIcon('heroicon-o-exclamation-triangle')
+            ->modalIconColor('danger')
+            ->modalHeading('Mark as No-Show')
+            ->modalDescription(fn () => new HtmlString(
+                'Are you sure you want to mark this booking as a no-show?<br><br>'.
+                "<div class='text-sm'>".
+                "<p class='p-1 mb-2 text-xs font-semibold text-red-600 bg-red-100 border border-red-300 rounded-md'>This action will reverse any concierge earnings and cannot be undone.</p>".
+                "<p class='text-lg font-semibold'>{$this->record->guest_name}</p>".
+                "<p><strong>Venue:</strong> {$this->record->venue->name}</p>".
+                "<p><strong>Guest Count:</strong> {$this->record->guest_count}</p>".
+                "<p><strong>Booking Time:</strong> {$this->record->booking_at->format('M d, Y h:i A')}</p>".
+                '</div>'
+            ))
+            ->button()
+            ->size('lg')
+            ->extraAttributes(['class' => 'w-full'])
+            ->action(function () {
+                $this->markAsNoShow();
+            });
+    }
+
+    private function markAsNoShow(): void
+    {
+        if (! auth()->user()->hasAnyRole(['venue', 'venue_manager', 'super_admin'])) {
+            Notification::make()
+                ->danger()
+                ->title('Unauthorized')
+                ->body('You do not have permission to mark bookings as no-show.')
+                ->send();
+
+            return;
+        }
+
+        // Dispatch the event to handle the no-show logic
+        BookingMarkedAsNoShow::dispatch($this->record);
+
+        activity()
+            ->performedOn($this->record)
+            ->withProperties([
+                'guest_name' => $this->record->guest_name,
+                'venue_name' => $this->record->venue->name,
+                'booking_time' => $this->record->booking_at->format('M d, Y h:i A'),
+                'guest_count' => $this->record->guest_count,
+                'marked_by' => auth()->user()->name,
+                'marked_by_role' => auth()->user()->roles->pluck('name')->first(),
+            ])
+            ->log('Booking marked as no-show');
+
+        Notification::make()
+            ->success()
+            ->title('Booking Marked as No-Show')
+            ->body('The booking has been marked as no-show and concierge earnings have been reversed.')
             ->send();
     }
 }

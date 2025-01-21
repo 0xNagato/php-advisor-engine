@@ -145,6 +145,7 @@ class BookingSearch extends Page implements HasTable
                                         BookingStatus::CONFIRMED->value => BookingStatus::CONFIRMED->label(),
                                         BookingStatus::REFUNDED->value => BookingStatus::REFUNDED->label(),
                                         BookingStatus::PARTIALLY_REFUNDED->value => BookingStatus::PARTIALLY_REFUNDED->label(),
+                                        BookingStatus::NO_SHOW->value => BookingStatus::NO_SHOW->label(),
                                     ])
                                     ->placeholder('All Statuses')
                                     ->live()
