@@ -2,11 +2,12 @@
 
 namespace App\Livewire;
 
+use Illuminate\Contracts\Support\Htmlable;
 use Livewire\Component;
 
 class Story extends Component
 {
-    public function getHeading(): string|\Illuminate\Contracts\Support\Htmlable
+    public function getHeading(): string|Htmlable
     {
         return 'Story';
     }

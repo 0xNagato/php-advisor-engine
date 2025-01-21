@@ -14,6 +14,7 @@ use App\Enums\EarningType;
 use App\Events\BookingMarkedAsNoShow;
 use App\Filament\Resources\BookingResource;
 use App\Models\Booking;
+use App\Models\Concierge;
 use App\Models\Earning;
 use App\Models\Region;
 use App\Notifications\Booking\CustomerBookingConfirmed;
@@ -26,8 +27,10 @@ use Filament\Forms\Components\Textarea;
 use Filament\Forms\Get;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\ViewRecord;
+use Illuminate\Contracts\Database\Query\Builder;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\HtmlString;
+use InvalidArgumentException;
 
 /**
  * @property Booking $record
@@ -631,5 +634,70 @@ class ViewBooking extends ViewRecord
             ->title('Booking Marked as No-Show')
             ->body('The booking has been marked as no-show and concierge earnings have been reversed.')
             ->send();
+    }
+
+    public function transferBookingAction(): Action
+    {
+        return Action::make('transferBooking')
+            ->label('Transfer Booking')
+            ->icon('heroicon-o-arrow-path-rounded-square')
+            ->hidden(fn () => ! auth()->user()->hasActiveRole('super_admin') ||
+                ! in_array($this->record->status, [BookingStatus::CONFIRMED, BookingStatus::VENUE_CONFIRMED])
+            )
+            ->form([
+                Select::make('concierge_id')
+                    ->label('New Concierge')
+                    ->required()
+                    ->searchable()
+                    ->preload()
+                    ->options(fn () => Concierge::query()
+                        ->where('id', '!=', $this->record->concierge_id)
+                        ->whereHas('user', fn (Builder $query) => $query->whereHas('roles', fn (Builder $q) => $q->where('name', 'concierge')
+                        )
+                            ->whereNull('suspended_at')
+                        )
+                        ->with('user')
+                        ->get()
+                        ->mapWithKeys(fn ($concierge) => [$concierge->id => $concierge->user->name.
+                             ($concierge->hotel_name ? " ({$concierge->hotel_name})" : '')]
+                        )),
+            ])
+            ->requiresConfirmation()
+            ->modalIcon('heroicon-o-exclamation-triangle')
+            ->modalIconColor('warning')
+            ->modalHeading('Transfer Booking')
+            ->modalDescription(fn () => new HtmlString(
+                'Are you sure you want to transfer this booking to another concierge?<br><br>'.
+                "<div class='text-sm'>".
+                "<p class='p-1 mb-2 text-xs font-semibold border rounded-md text-amber-600 bg-amber-100 border-amber-300'>This action will transfer all earnings to the new concierge.</p>".
+                "<p class='text-lg font-semibold'>{$this->record->guest_name}</p>".
+                "<p><strong>Current Concierge:</strong> {$this->record->concierge->user->name}</p>".
+                "<p><strong>Venue:</strong> {$this->record->venue->name}</p>".
+                "<p><strong>Guest Count:</strong> {$this->record->guest_count}</p>".
+                "<p><strong>Booking Time:</strong> {$this->record->booking_at->format('M d, Y h:i A')}</p>".
+                '</div>'
+            ))
+            ->size('lg')
+            ->extraAttributes(['class' => 'w-full'])
+            ->action(function (array $data): void {
+                try {
+                    /** @var Concierge $newConcierge */
+                    $newConcierge = Concierge::query()->findOrFail($data['concierge_id']);
+
+                    $this->record->transferToConcierge($newConcierge);
+
+                    Notification::make()
+                        ->success()
+                        ->title('Booking Transferred')
+                        ->body("Booking has been transferred to {$newConcierge->user->name}")
+                        ->send();
+                } catch (InvalidArgumentException $e) {
+                    Notification::make()
+                        ->danger()
+                        ->title('Transfer Failed')
+                        ->body($e->getMessage())
+                        ->send();
+                }
+            });
     }
 }

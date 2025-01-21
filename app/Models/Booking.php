@@ -17,6 +17,7 @@ use Illuminate\Database\Eloquent\Relations\HasOneThrough;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
+use InvalidArgumentException;
 use Spatie\Activitylog\LogOptions;
 use Spatie\Activitylog\Traits\LogsActivity;
 
@@ -314,5 +315,39 @@ class Booking extends Model
         return LogOptions::defaults()
             ->logOnlyDirty()
             ->dontSubmitEmptyLogs();
+    }
+
+    public function transferToConcierge(Concierge $newConcierge): void
+    {
+        throw_unless(in_array($this->status, [BookingStatus::CONFIRMED, BookingStatus::VENUE_CONFIRMED]), new InvalidArgumentException('Only confirmed bookings can be transferred.'));
+
+        DB::transaction(function () use ($newConcierge) {
+            $oldConciergeId = $this->concierge_id;
+            $oldPlatformEarnings = $this->platform_earnings;
+
+            $this->earnings()
+                ->delete();
+
+            $this->update([
+                'concierge_id' => $newConcierge->id,
+            ]);
+
+            app(BookingCalculationService::class)->calculateEarnings($this);
+
+            activity()
+                ->performedOn($this)
+                ->withProperties([
+                    'old_concierge_id' => $oldConciergeId,
+                    'new_concierge_id' => $newConcierge->id,
+                    'booking_id' => $this->id,
+                    'guest_name' => $this->guest_name,
+                    'venue_name' => $this->venue->name,
+                    'booking_time' => $this->booking_at->format('M d, Y h:i A'),
+                    'transferred_by' => auth()->user()->name,
+                    'old_platform_earnings' => $oldPlatformEarnings,
+                    'new_platform_earnings' => $this->platform_earnings,
+                ])
+                ->log('Booking transferred to new concierge');
+        });
     }
 }

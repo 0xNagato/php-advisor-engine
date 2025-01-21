@@ -14,11 +14,9 @@ class PrimaShortUrls
 
     public static function get(string $key): string
     {
-        return Cache::rememberForever("prima_short_url_{$key}", function () use ($key) {
-            return ShortURL::destinationUrl(static::URLS[$key])
-                ->urlKey($key)
-                ->make()
-                ->default_short_url;
-        });
+        return Cache::rememberForever("prima_short_url_{$key}", fn () => ShortURL::destinationUrl(static::URLS[$key])
+            ->urlKey($key)
+            ->make()
+            ->default_short_url);
     }
 }

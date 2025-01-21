@@ -324,6 +324,7 @@
                     $this->abandonBookingAction,
                     $this->uncancelBookingAction,
                     $this->markAsNoShowAction,
+                    $this->transferBookingAction,
                 ]" class="w-full mt-4" />
             @elseif (auth()->check() &&
                     auth()->user()->hasActiveRole('super_admin') &&
