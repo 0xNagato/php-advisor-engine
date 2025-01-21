@@ -2,7 +2,9 @@
 
 namespace App\Livewire\Concierge;
 
+use App\Enums\BookingStatus;
 use App\Models\VipCode;
+use App\Services\CurrencyConversionService;
 use Filament\Support\Enums\IconPosition;
 use Filament\Tables\Actions\Action;
 use Filament\Tables\Columns\TextColumn;
@@ -10,7 +12,7 @@ use Filament\Tables\Columns\ToggleColumn;
 use Filament\Tables\Concerns\HasFilters;
 use Filament\Tables\Table;
 use Filament\Widgets\TableWidget;
-use Illuminate\Support\Facades\DB;
+use Illuminate\Database\Eloquent\Builder;
 
 class VipCodesTable extends TableWidget
 {
@@ -36,9 +38,20 @@ class VipCodesTable extends TableWidget
         $startDate = $this->tableFilters['startDate'];
         $endDate = $this->tableFilters['endDate'];
 
-        $query = VipCode::with(['concierge.user', 'earnings'])
-            ->withCount('bookings')
-            ->whereBetween(DB::raw('DATE(created_at)'), [$startDate, $endDate]);
+        $query = VipCode::with([
+            'concierge.user',
+            'earnings' => function ($query) use ($startDate, $endDate) {
+                $query->whereNotNull('earnings.confirmed_at')
+                    ->whereBetween('earnings.created_at', [$startDate, $endDate])
+                    ->get(['amount', 'earnings.currency']);
+            },
+        ])
+            ->withCount([
+                'bookings' => function (Builder $query) use ($startDate, $endDate) {
+                    $query->whereIn('status', BookingStatus::REPORTING_STATUSES)
+                        ->whereBetween('created_at', [$startDate, $endDate]);
+                },
+            ]);
 
         if (auth()->user()->hasActiveRole('concierge')) {
             $query->where('concierge_id', auth()->user()->concierge->id);
@@ -66,22 +79,36 @@ class VipCodesTable extends TableWidget
                     ->visibleFrom('sm')
                     ->alignCenter()
                     ->size('xs'),
-                TextColumn::make('total_earnings_in_u_s_d')
+                TextColumn::make('earnings')
                     ->label('Earned')
                     ->size('xs')
                     ->alignRight()
-                    ->formatStateUsing(
-                        fn (VipCode $vipCode): string => money($vipCode->total_earnings_in_u_s_d * 100, 'USD')
-                    ),
+                    ->formatStateUsing(function (VipCode $vipCode): string {
+                        $byCurrency = $vipCode->earnings->groupBy('currency')
+                            ->map(fn ($currencyGroup) => $currencyGroup->sum('amount') * 100)
+                            ->toArray();
+                        $currencyService = app(CurrencyConversionService::class);
+
+                        $inUsd = $currencyService->convertToUSD($byCurrency);
+
+                        return money($inUsd, 'USD');
+                    }),
                 ToggleColumn::make('is_active')
                     ->label('Active'),
+                TextColumn::make('created_at')->date('M jS, Y')
+                    ->label('Created')
+                    ->visibleFrom('sm')
+                    ->size('xs'),
             ])
             ->actions([
                 Action::make('viewVipBookings')
                     ->iconButton()
                     ->icon('tabler-maximize')
                     ->modalHeading('VIP Bookings')
-                    ->modalContent(fn (VipCode $vipCode) => view('partials.vip-code-modal-view', ['vipCode' => $vipCode]))
+                    ->modalContent(fn (VipCode $vipCode) => view(
+                        'partials.vip-code-modal-view',
+                        ['vipCode' => $vipCode]
+                    ))
                     ->modalSubmitAction(false)
                     ->modalCancelAction(false)
                     ->slideOver(self::USE_SLIDE_OVER)

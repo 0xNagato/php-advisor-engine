@@ -17,6 +17,7 @@ class PrimaShortUrls
         return Cache::rememberForever("prima_short_url_{$key}", fn () => ShortURL::destinationUrl(static::URLS[$key])
             ->urlKey($key)
             ->make()
-            ->default_short_url);
+            ->default_short_url
+        );
     }
 }
