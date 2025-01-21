@@ -170,7 +170,7 @@ class PaymentExports extends Page implements HasTable
                     ->color('primary')
                     ->sortable()
                     ->url(fn (User $record): string => BookingSearch::getUrl([
-                        'data' => [
+                        'filters' => [
                             'user_id' => $record->id,
                             'start_date' => $this->data['startDate'] ?? now()->subDays(30)->format('Y-m-d'),
                             'end_date' => $this->data['endDate'] ?? now()->format('Y-m-d'),
