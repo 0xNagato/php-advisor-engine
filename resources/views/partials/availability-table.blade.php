@@ -96,6 +96,11 @@
                                             No Wait
                                         </p>
                                     @endif
+                                    @if ($venue->is_omakase)
+                                        <p class="-mt-1 text-xs font-semibold text-white">
+                                            Omakase
+                                        </p>
+                                    @endif
                                 @elseif($schedule->is_bookable && !$schedule->prime_time)
                                     <p class="text-xs uppercase text-nowrap sm:text-base">No Fee</p>
                                     @if ($schedule->has_low_inventory)
@@ -106,6 +111,11 @@
                                     @if ($schedule->no_wait)
                                         <p class="-mt-1 text-xs font-semibold text-white">
                                             No Wait
+                                        </p>
+                                    @endif
+                                    @if ($venue->is_omakase)
+                                        <p class="-mt-1 text-xs font-semibold text-white">
+                                            Omakase
                                         </p>
                                     @endif
                                 @else
