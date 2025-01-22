@@ -124,12 +124,14 @@ class EditVenue extends EditRecord
                             ->label('Omakase Details')
                             ->nullable(),
                         TextInput::make('omakase_concierge_fee')
-                            ->label('Omakase Concierge Fee')
+                            ->label('Omakase Concierge Fee Per Guest')
                             ->prefix('$')
                             ->numeric()
                             ->visible(fn (Get $get): bool => $get('is_omakase'))
-                            ->helperText('Flat fee paid to concierge for each Omakase booking')
-                            ->required(fn (Get $get): bool => $get('is_omakase')),
+                            ->helperText('Amount paid to concierge per guest for each Omakase booking')
+                            ->required(fn (Get $get): bool => $get('is_omakase'))
+                            ->dehydrateStateUsing(fn ($state) => $state * 100)
+                            ->formatStateUsing(fn ($state) => $state ? $state / 100 : null),
                     ]),
                 Repeater::make('contacts')
                     ->columnSpanFull()

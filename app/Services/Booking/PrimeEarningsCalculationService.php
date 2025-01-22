@@ -55,7 +55,7 @@ readonly class PrimeEarningsCalculationService
     private function calculateConciergeEarnings(Booking $booking): float
     {
         if ($booking->venue->is_omakase && $booking->venue->omakase_concierge_fee) {
-            return $booking->venue->omakase_concierge_fee;
+            return $booking->venue->omakase_concierge_fee * $booking->guest_count;
         }
 
         return $booking->total_fee * ($booking->concierge->payout_percentage / 100);

@@ -128,18 +128,16 @@ class UserResource extends Resource
                             ->placeholder('All Roles')
                             ->label('Role'),
                     ])
-                    ->query(function (Builder $query, array $data): Builder {
-                        return $query->when(
-                            $data['role'],
-                            fn (Builder $query, string $role): Builder => $query->whereHas(
-                                'roleProfiles',
-                                fn (Builder $query) => $query->whereHas(
-                                    'role',
-                                    fn (Builder $query) => $query->where('name', $role)
-                                )
+                    ->query(fn (Builder $query, array $data): Builder => $query->when(
+                        $data['role'],
+                        fn (Builder $query, string $role): Builder => $query->whereHas(
+                            'roleProfiles',
+                            fn (Builder $query) => $query->whereHas(
+                                'role',
+                                fn (Builder $query) => $query->where('name', $role)
                             )
-                        );
-                    }),
+                        )
+                    )),
             ])
             ->actions([
                 Impersonate::make()
