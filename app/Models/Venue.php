@@ -71,6 +71,7 @@ class Venue extends Model
         'no_wait',
         'is_omakase',
         'omakase_details',
+        'omakase_concierge_fee',
     ];
 
     protected function casts(): array

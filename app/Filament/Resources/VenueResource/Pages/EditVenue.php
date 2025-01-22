@@ -18,6 +18,7 @@ use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Forms\Form;
+use Filament\Forms\Get;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\EditRecord;
 use Filament\Support\Enums\ActionSize;
@@ -122,6 +123,13 @@ class EditVenue extends EditRecord
                         Textarea::make('omakase_details')
                             ->label('Omakase Details')
                             ->nullable(),
+                        TextInput::make('omakase_concierge_fee')
+                            ->label('Omakase Concierge Fee')
+                            ->prefix('$')
+                            ->numeric()
+                            ->visible(fn (Get $get): bool => $get('is_omakase'))
+                            ->helperText('Flat fee paid to concierge for each Omakase booking')
+                            ->required(fn (Get $get): bool => $get('is_omakase')),
                     ]),
                 Repeater::make('contacts')
                     ->columnSpanFull()

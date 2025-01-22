@@ -187,6 +187,13 @@ class CreateVenue extends CreateRecord
                         Textarea::make('omakase_details')
                             ->label('Omakase Details')
                             ->nullable(),
+                        TextInput::make('omakase_concierge_fee')
+                            ->label('Omakase Concierge Fee')
+                            ->prefix('$')
+                            ->numeric()
+                            ->visible(fn (Get $get): bool => $get('is_omakase'))
+                            ->helperText('Flat fee paid to concierge for each Omakase booking')
+                            ->required(fn (Get $get): bool => $get('is_omakase')),
                     ]),
             ]);
     }
