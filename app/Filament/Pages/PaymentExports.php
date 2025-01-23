@@ -261,7 +261,7 @@ class PaymentExports extends Page implements HasTable
             ->actions([
                 Action::make('generateInvoice')
                     ->icon('heroicon-m-document-text')
-                    ->color('warning')
+                    ->color('info')
                     ->iconButton()
                     ->visible(fn (User $record): bool => $record->hasRole('venue'))
                     ->requiresConfirmation()
