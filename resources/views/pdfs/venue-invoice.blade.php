@@ -45,6 +45,8 @@
                         <div class="mt-2">
                             <div class="text-xs opacity-75">Invoice Number</div>
                             <div class="text-base font-medium">{{ $invoiceNumber }}</div>
+                            <div class="mt-2 text-xs opacity-75">Due Date</div>
+                            <div class="text-base font-medium">{{ now()->addDays(15)->format('M j, Y') }}</div>
                         </div>
                     </div>
                 </div>

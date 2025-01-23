@@ -151,16 +151,8 @@
                 <div>
                     <span class="block text-xs text-gray-500 uppercase">Concierge:</span>
                     <span class="block text-xs font-medium text-gray-800 sm:text-sm dark:text-gray-200">
-                        @if ($booking->concierge && auth()->check() && auth()->user()->hasActiveRole('super_admin'))
-                            <a href="{{ route('filament.admin.pages.booking-search', ['data' => ['concierge_search' => $booking->concierge->user->name]]) }}"
-                                class="text-indigo-600 hover:text-indigo-800">
-                                {{ $booking->concierge->user->name }}
-                                @if ($booking->concierge->hotel_name)
-                                    ({{ $booking->concierge->hotel_name }})
-                                @endif
-                            </a>
-                        @elseif ($booking->concierge)
-                            {{ $booking->concierge->user->name }}
+                        @if ($booking->concierge)
+                            {{ $this->viewConciergeAction }}
                         @else
                             -
                         @endif

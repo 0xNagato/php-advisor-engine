@@ -69,7 +69,7 @@ class ViewBooking extends ViewRecord
         $this->authorizeAccess();
 
         $this->booking = $this->record;
-        $this->region = Region::query()->find($this->booking->city)->first();
+        $this->region = Region::query()->find($this->booking->venue->region)->first();
 
         // Store the original previous URL
         $this->originalPreviousUrl = URL::previous();
@@ -699,5 +699,59 @@ class ViewBooking extends ViewRecord
                         ->send();
                 }
             });
+    }
+
+    public function viewConciergeAction(): Action
+    {
+        if (! $this->record->concierge) {
+            return Action::make('viewConcierge')->hidden();
+        }
+
+        $concierge = $this->record->concierge;
+
+        return Action::make('viewConcierge')
+            ->label($concierge->user->name)
+            ->link()
+            ->color('primary')
+            ->modalHeading($concierge->user->name)
+            ->modalContent(fn () => new HtmlString(
+                "<div class='space-y-4'>".
+                "<div class='grid grid-cols-2 gap-4 text-sm'>".
+                    '<div>'.
+                        "<span class='block font-medium text-gray-500'>Hotel/Company</span>".
+                        "<span class='block'>{$concierge->hotel_name}</span>".
+                    '</div>'.
+                    '<div>'.
+                        "<span class='block font-medium text-gray-500'>Phone</span>".
+                        "<span class='block'>{$this->getFormattedPhoneNumber($concierge->user->phone)}</span>".
+                    '</div>'.
+                    '<div>'.
+                        "<span class='block font-medium text-gray-500'>Email</span>".
+                        "<span class='block'>{$concierge->user->email}</span>".
+                    '</div>'.
+                '</div>'.
+                '</div>'
+            ))
+            ->modalActions([
+                Action::make('edit')
+                    ->label('Edit')
+                    ->url(fn () => route('filament.admin.resources.users.edit', ['record' => $concierge->user_id]))
+                    ->openUrlInNewTab()
+                    ->icon('heroicon-m-pencil-square')
+                    ->color('warning'),
+                Action::make('overview')
+                    ->label('Overview')
+                    ->url(fn () => route('filament.admin.resources.concierges.view', ['record' => $concierge->id]))
+                    ->openUrlInNewTab()
+                    ->icon('heroicon-m-document-text')
+                    ->color('info'),
+                Action::make('bookings')
+                    ->label('Bookings')
+                    ->url(fn () => route('filament.admin.pages.booking-search', ['filters' => ['concierge_search' => $concierge->user->name]]))
+                    ->openUrlInNewTab()
+                    ->icon('heroicon-m-calendar')
+                    ->color('success'),
+            ])
+            ->modalWidth('md');
     }
 }
