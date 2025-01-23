@@ -11,12 +11,14 @@ use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Form;
 use Filament\Pages\Page;
+use Filament\Tables\Actions\Action;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Concerns\InteractsWithTable;
 use Filament\Tables\Contracts\HasTable;
 use Filament\Tables\Table;
 use Illuminate\Contracts\Database\Query\Builder;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\HtmlString;
 use Livewire\Attributes\Url;
 use Maatwebsite\Excel\Excel;
 use pxlrbt\FilamentExcel\Actions\Tables\ExportAction;
@@ -302,7 +304,52 @@ class BookingSearch extends Page implements HasTable
                     ->hidden(),
                 TextColumn::make('concierge.user.name')
                     ->label('Concierge')
-                    ->size('xs'),
+                    ->size('xs')
+                    ->color('primary')
+                    ->extraAttributes(['class' => 'font-semibold'])
+                    ->action(
+                        Action::make('viewConcierge')
+                            ->modalHeading(fn (Booking $record): string => $record->concierge?->user?->name ?? 'No Concierge')
+                            ->modalContent(fn (Booking $record): HtmlString => new HtmlString(
+                                "<div class='space-y-4'>".
+                                "<div class='grid grid-cols-2 gap-4 text-sm'>".
+                                    '<div>'.
+                                        "<span class='block font-medium text-gray-500'>Hotel/Company</span>".
+                                        "<span class='block'>{$record->concierge?->hotel_name}</span>".
+                                    '</div>'.
+                                    '<div>'.
+                                        "<span class='block font-medium text-gray-500'>Phone</span>".
+                                        "<span class='block'>{$record->concierge?->user?->phone}</span>".
+                                    '</div>'.
+                                    '<div>'.
+                                        "<span class='block font-medium text-gray-500'>Email</span>".
+                                        "<span class='block'>{$record->concierge?->user?->email}</span>".
+                                    '</div>'.
+                                '</div>'.
+                                '</div>'
+                            ))
+                            ->modalActions([
+                                Action::make('edit')
+                                    ->label('Edit')
+                                    ->url(fn (Booking $record) => route('filament.admin.resources.users.edit', ['record' => $record->concierge?->user_id]))
+                                    ->openUrlInNewTab()
+                                    ->icon('heroicon-m-pencil-square')
+                                    ->color('warning'),
+                                Action::make('overview')
+                                    ->label('Overview')
+                                    ->url(fn (Booking $record) => route('filament.admin.resources.concierges.view', ['record' => $record->concierge?->id]))
+                                    ->openUrlInNewTab()
+                                    ->icon('heroicon-m-document-text')
+                                    ->color('info'),
+                                Action::make('bookings')
+                                    ->label('Bookings')
+                                    ->url(fn (Booking $record) => route('filament.admin.pages.booking-search', ['filters' => ['concierge_search' => $record->concierge?->user?->name]]))
+                                    ->openUrlInNewTab()
+                                    ->icon('heroicon-m-calendar')
+                                    ->color('success'),
+                            ])
+                            ->modalWidth('md')
+                    ),
                 TextColumn::make('concierge.hotel_name')
                     ->label('Hotel/Company')
                     ->hidden(),
