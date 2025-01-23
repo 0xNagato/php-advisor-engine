@@ -151,8 +151,13 @@
                 <div>
                     <span class="block text-xs text-gray-500 uppercase">Concierge:</span>
                     <span class="block text-xs font-medium text-gray-800 sm:text-sm dark:text-gray-200">
-                        @if ($booking->concierge)
+                        @if ($booking->concierge && auth()->check() && auth()->user()->hasActiveRole('super_admin'))
                             {{ $this->viewConciergeAction }}
+                        @elseif ($booking->concierge)
+                            {{ $booking->concierge->user->name }}
+                            @if ($booking->concierge->hotel_name)
+                                ({{ $booking->concierge->hotel_name }})
+                            @endif
                         @else
                             -
                         @endif
