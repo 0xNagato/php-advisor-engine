@@ -25,14 +25,6 @@
             <div class="max-w-4xl mx-auto">
                 <div class="flex items-start justify-between mb-4">
                     <div>
-                        <span class="mt-3 mb-1 text-2xl font-bold">INVOICE</span>
-                        <p class="text-base opacity-90">{{ $venue->name }}</p>
-                        <div class="mt-2">
-                            <div class="text-xs opacity-75">Invoice Number</div>
-                            <div class="text-base font-medium">{{ $invoiceNumber }}</div>
-                        </div>
-                    </div>
-                    <div class="text-right">
                         <div>
                             <span class="inline-block px-4 py-1 mb-4 text-2xl font-bold bg-indigo-800 rounded-lg">
                                 PRIMA
@@ -45,6 +37,14 @@
                             <div class="text-base font-medium">
                                 {{ $startDate->format('M j, Y') }} - {{ $endDate->format('M j, Y') }}
                             </div>
+                        </div>
+                    </div>
+                    <div class="text-right">
+                        <span class="mt-3 mb-1 text-2xl font-bold">INVOICE</span>
+                        <p class="text-base opacity-90">{{ $venue->name }}</p>
+                        <div class="mt-2">
+                            <div class="text-xs opacity-75">Invoice Number</div>
+                            <div class="text-base font-medium">{{ $invoiceNumber }}</div>
                         </div>
                     </div>
                 </div>
@@ -60,16 +60,16 @@
                     <div class="overflow-x-auto">
                         <table class="w-full">
                             <thead>
-                                <tr class="border-b border-gray-200">
-                                    <th class="px-3 py-2 text-xs font-medium text-left text-gray-600">Date</th>
-                                    <th class="px-3 py-2 text-xs font-medium text-left text-gray-600">Reference</th>
-                                    <th class="px-3 py-2 text-xs font-medium text-center text-gray-600">Guests</th>
-                                    <th class="px-3 py-2 text-xs font-medium text-right text-gray-600">Incentive Fee
-                                    </th>
-                                    <th class="px-3 py-2 text-xs font-medium text-right text-gray-600">PRIMA Fee
-                                        ({{ \App\Constants\BookingPercentages::NON_PRIME_PROCESSING_FEE_PERCENTAGE }}%)
-                                    </th>
-                                    <th class="px-3 py-2 text-xs font-medium text-right text-gray-600">Total</th>
+                                <tr class="border-b border-gray-200"></tr>
+                                <th class="px-3 py-2 text-xs font-medium text-left text-gray-600">Date</th>
+                                <th class="px-3 py-2 text-xs font-medium text-left text-gray-600">Reference</th>
+                                <th class="px-3 py-2 text-xs font-medium text-center text-gray-600">Guests</th>
+                                <th class="px-3 py-2 text-xs font-medium text-center text-gray-600">Incentive Fee
+                                </th>
+                                <th class="px-3 py-2 text-xs font-medium text-center text-gray-600">Platform Fee
+                                    ({{ \App\Constants\BookingPercentages::NON_PRIME_PROCESSING_FEE_PERCENTAGE }}%)
+                                </th>
+                                <th class="px-3 py-2 text-xs font-medium text-center text-gray-600">Total</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -87,7 +87,11 @@
                                         $totalAmount = $primaFee + $incentiveFee;
                                     @endphp
                                     <tr class="border-b border-gray-100">
-                                        <td class="px-3 py-2">{{ $booking->booking_at->format('M j, Y') }}</td>
+                                        <td class="px-3 py-2">
+                                            <div>{{ $booking->booking_at->format('M j, Y') }}</div>
+                                            <div class="text-xs text-gray-500">
+                                                {{ $booking->booking_at->format('g:i A') }}</div>
+                                        </td>
                                         <td class="px-3 py-2">
                                             <div class="flex items-center">
                                                 <span class="font-medium">NP-{{ $booking->id }}</span>
@@ -104,13 +108,13 @@
                                             </div>
                                         </td>
                                         <td class="px-3 py-2 text-center">{{ $booking->guest_count }}</td>
-                                        <td class="px-3 py-2 font-medium text-right">
+                                        <td class="px-3 py-2 font-medium text-center">
                                             {{ money($incentiveFee, $booking->currency) }}
                                         </td>
-                                        <td class="px-3 py-2 font-medium text-right">
+                                        <td class="px-3 py-2 font-medium text-center">
                                             {{ money($primaFee, $booking->currency) }}
                                         </td>
-                                        <td class="px-3 py-2 font-medium text-right">
+                                        <td class="px-3 py-2 font-medium text-center">
                                             {{ money($totalAmount, $booking->currency) }}
                                         </td>
                                     </tr>
@@ -122,9 +126,9 @@
                                         Total Bookings: {{ $nonPrimeBookings->count() }} |
                                         Total Guests: {{ $nonPrimeBookings->sum('guest_count') }}
                                     </td>
-                                    <td colspan="3" class="px-4 py-3 font-semibold text-right">Non-Prime Total:</td>
-                                    <td class="px-4 py-3 font-semibold text-right">
-                                        {{ money($nonPrimeTotalAmount, $nonPrimeBookings->first()?->currency ?? 'USD') }}
+                                    <td colspan="3" class="px-4 py-3 font-semibold text-center">Non-Prime Total:</td>
+                                    <td class="px-4 py-3 font-semibold text-center">
+                                        {{ money(abs($nonPrimeTotalAmount), $nonPrimeBookings->first()?->currency ?? 'USD') }}
                                     </td>
                                 </tr>
                             </tfoot>
@@ -144,13 +148,17 @@
                                     <th class="px-3 py-2 text-xs font-medium text-left text-gray-600">Date</th>
                                     <th class="px-3 py-2 text-xs font-medium text-left text-gray-600">Reference</th>
                                     <th class="px-3 py-2 text-xs font-medium text-center text-gray-600">Guests</th>
-                                    <th class="px-3 py-2 text-xs font-medium text-right text-gray-600">Amount</th>
+                                    <th class="px-3 py-2 text-xs font-medium text-center text-gray-600">Amount</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 @foreach ($primeBookings as $booking)
                                     <tr class="border-b border-gray-100">
-                                        <td class="px-3 py-2">{{ $booking->booking_at->format('M j, Y') }}</td>
+                                        <td class="px-3 py-2">
+                                            <div>{{ $booking->booking_at->format('M j, Y') }}</div>
+                                            <div class="text-xs text-gray-500">
+                                                {{ $booking->booking_at->format('g:i A') }}</div>
+                                        </td>
                                         <td class="px-3 py-2">
                                             <div class="flex items-center">
                                                 <span class="font-medium">P-{{ $booking->id }}</span>
@@ -167,7 +175,7 @@
                                             </div>
                                         </td>
                                         <td class="px-3 py-2 text-center">{{ $booking->guest_count }}</td>
-                                        <td class="px-3 py-2 font-medium text-right">
+                                        <td class="px-3 py-2 font-medium text-center">
                                             {{ money(abs($booking->earnings->sum('amount')), $booking->currency) }}
                                         </td>
                                     </tr>
@@ -179,8 +187,8 @@
                                         Total Bookings: {{ $primeBookings->count() }} |
                                         Total Guests: {{ $primeBookings->sum('guest_count') }}
                                     </td>
-                                    <td colspan="1" class="px-4 py-3 font-semibold text-right">Prime Total:</td>
-                                    <td class="px-4 py-3 font-semibold text-right">
+                                    <td colspan="1" class="px-4 py-3 font-semibold text-center">Prime Total:</td>
+                                    <td class="px-4 py-3 font-semibold text-center">
                                         {{ money($primeTotalAmount, $primeBookings->first()?->currency ?? 'USD') }}
                                     </td>
                                 </tr>
@@ -214,7 +222,7 @@
             <!-- Footer -->
             <div class="pt-6 mt-8 border-t border-gray-200">
                 <div class="text-sm text-gray-600">
-                    <p class="mb-4">Please make payment within 15 days of invoice date.</p>
+                    <p class="mb-4">Please remit payment within 15 days of receipt of invoice.</p>
 
                     <div class="p-6 border border-gray-200 rounded-lg bg-gray-50">
                         <h4 class="mb-3 font-medium">Payment Information</h4>

@@ -33,6 +33,32 @@ class VenueContactBookingConfirmed extends Notification implements ShouldQueue
         return $this->contact->toChannel();
     }
 
+    private function formatBookingDate(\Carbon\Carbon $date, Booking $notifiable): string
+    {
+        // Create booking date with venue timezone
+        $bookingDate = \Carbon\Carbon::create(
+            $date->year,
+            $date->month,
+            $date->day,
+            $date->hour,
+            $date->minute,
+            $date->second,
+            $notifiable->venue->timezone
+        );
+
+        $venueToday = now()->setTimezone($notifiable->venue->timezone);
+
+        if ($bookingDate->isSameDay($venueToday)) {
+            return 'Today, '.$bookingDate->format('M jS');
+        }
+
+        if ($bookingDate->isSameDay($venueToday->copy()->addDay())) {
+            return 'Tomorrow, '.$bookingDate->format('M jS');
+        }
+
+        return $bookingDate->format('M jS');
+    }
+
     public function toSMS(Booking $notifiable): SmsData
     {
         $templateKey = filled($notifiable->notes)
@@ -41,7 +67,7 @@ class VenueContactBookingConfirmed extends Notification implements ShouldQueue
 
         $templateData = [
             'venue_name' => $notifiable->venue->name,
-            'booking_date' => $notifiable->booking_at->format('M jS'),
+            'booking_date' => $this->formatBookingDate($notifiable->booking_at, $notifiable),
             'booking_time' => $notifiable->booking_at->format('g:ia'),
             'guest_name' => $notifiable->guest_name,
             'guest_count' => $notifiable->guest_count,

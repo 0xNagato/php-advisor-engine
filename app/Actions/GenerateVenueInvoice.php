@@ -67,7 +67,7 @@ class GenerateVenueInvoice
                 'nonPrimeTotalAmount' => $nonPrimeTotalAmount,
                 'startDate' => $startDate,
                 'endDate' => $endDate,
-                'invoiceNumber' => 'NP-'.now()->format('Ymd').'-'.$user->id,
+                'invoiceNumber' => $startDate->format('Ymd').'-'.$endDate->format('Ymd').'-'.$user->id,
                 'dueDate' => now()->addDays(15),
             ])
             ->disk('do', 'public')
