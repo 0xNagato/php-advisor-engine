@@ -258,6 +258,28 @@ class PaymentExports extends Page implements HasTable
                     ->label('Routing Number')
                     ->hidden(),
             ])
+            ->actions([
+                Action::make('generateInvoice')
+                    ->icon('heroicon-m-document-text')
+                    ->color('warning')
+                    ->iconButton()
+                    ->visible(fn (User $record): bool => $record->hasRole('venue'))
+                    ->requiresConfirmation()
+                    ->modalHeading(fn (User $record) => "Generate Invoice for {$record->venue->name}")
+                    ->modalDescription('This will generate an invoice for all bookings in the selected date range.')
+                    ->action(function (User $record) {
+                        $startDate = Carbon::parse($this->data['startDate']);
+                        $endDate = Carbon::parse($this->data['endDate']);
+
+                        $url = route('venue.invoice.download', [
+                            'user' => $record->id,
+                            'startDate' => $startDate->format('Y-m-d'),
+                            'endDate' => $endDate->format('Y-m-d'),
+                        ]);
+
+                        $this->js("window.open('$url', '_blank')");
+                    }),
+            ])
             ->headerActions([
                 ExportAction::make('exportAll')
                     ->size('xs')
