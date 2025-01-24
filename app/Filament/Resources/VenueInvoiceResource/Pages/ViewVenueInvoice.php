@@ -19,6 +19,16 @@ class ViewVenueInvoice extends ViewRecord
 {
     protected static string $resource = VenueInvoiceResource::class;
 
+    public static function canAccess(array $parameters = []): bool
+    {
+        return auth()->user()->hasActiveRole('super_admin');
+    }
+
+    public static function shouldRegisterNavigation(array $parameters = []): bool
+    {
+        return auth()->user()->hasActiveRole('super_admin');
+    }
+
     public function infolist(Infolist $infolist): Infolist
     {
         return $infolist
