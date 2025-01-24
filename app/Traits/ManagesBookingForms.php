@@ -19,7 +19,7 @@ trait ManagesBookingForms
 
     public const int MINUTES_FUTURE = 120;
 
-    public const int MAX_DAYS_IN_ADVANCE = 7;
+    public const int MAX_DAYS_IN_ADVANCE = 14;
 
     public string $timezone;
 
