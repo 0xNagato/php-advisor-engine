@@ -5,12 +5,14 @@ declare(strict_types=1);
 namespace App\Actions;
 
 use App\Enums\EarningType;
+use App\Enums\VenueInvoiceStatus;
 use App\Models\User;
+use App\Models\VenueInvoice;
 use Carbon\Carbon;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\DB;
 use Lorisleiva\Actions\Concerns\AsAction;
-use Spatie\LaravelPdf\PdfBuilder;
-use Str;
+use RuntimeException;
 
 use function Spatie\LaravelPdf\Support\pdf;
 
@@ -18,7 +20,7 @@ class GenerateVenueInvoice
 {
     use AsAction;
 
-    public function handle(User $user, string $startDate, string $endDate): PdfBuilder
+    public function handle(User $user, string $startDate, string $endDate): VenueInvoice
     {
         $startDate = Carbon::parse($startDate)->startOfDay();
         $endDate = Carbon::parse($endDate)->endOfDay();
@@ -47,31 +49,59 @@ class GenerateVenueInvoice
             ->orderBy('booking_at')
             ->get();
 
+        if ($bookings->isEmpty()) {
+            throw new RuntimeException('No bookings found for the specified date range.');
+        }
+
         // Split bookings into prime and non-prime
         $primeBookings = $bookings->where('is_prime', true);
         $nonPrimeBookings = $bookings->where('is_prime', false);
-
-        $path = config('app.env').'/venue-invoices/prima-invoice-'.Str::slug($user->venue->name).'-'.$startDate->format('Ymd').'-'.$endDate->format('Ymd').'.pdf';
 
         // Calculate totals for each type
         $primeTotalAmount = $this->calculateTotal($primeBookings, $user);
         $nonPrimeTotalAmount = $this->calculateTotal($nonPrimeBookings, $user);
 
-        return pdf()
-            ->view('pdfs.venue-invoice', [
-                'venue' => $user->venue,
-                'bookings' => $bookings,
-                'primeBookings' => $primeBookings,
-                'nonPrimeBookings' => $nonPrimeBookings,
-                'primeTotalAmount' => $primeTotalAmount,
-                'nonPrimeTotalAmount' => $nonPrimeTotalAmount,
-                'startDate' => $startDate,
-                'endDate' => $endDate,
-                'invoiceNumber' => $startDate->format('Ymd').'-'.$endDate->format('Ymd').'-'.$user->id,
-                'dueDate' => now()->addDays(15),
-            ])
-            ->disk('do', 'public')
-            ->save($path);
+        return DB::transaction(function () use ($user, $startDate, $endDate, $bookings, $primeBookings, $nonPrimeBookings, $primeTotalAmount, $nonPrimeTotalAmount) {
+            // Create the invoice record
+            $invoice = VenueInvoice::create([
+                'venue_id' => $user->venue->id,
+                'created_by' => auth()->user()->id,
+                'invoice_number' => VenueInvoice::generateInvoiceNumber($user->venue),
+                'start_date' => $startDate,
+                'end_date' => $endDate,
+                'prime_total' => $primeTotalAmount,
+                'non_prime_total' => $nonPrimeTotalAmount,
+                'total_amount' => $primeTotalAmount + $nonPrimeTotalAmount,
+                'currency' => $bookings->first()?->currency ?? 'USD',
+                'due_date' => now()->addDays(15),
+                'status' => VenueInvoiceStatus::DRAFT,
+                'booking_ids' => $bookings->pluck('id')->toArray(),
+            ]);
+
+            // Generate and store PDF
+            $pdfPath = config('app.env').'/venue-invoices/'.$invoice->name().'.pdf';
+
+            pdf()
+                ->view('pdfs.venue-invoice', [
+                    'venue' => $user->venue,
+                    'bookings' => $bookings,
+                    'primeBookings' => $primeBookings,
+                    'nonPrimeBookings' => $nonPrimeBookings,
+                    'primeTotalAmount' => $primeTotalAmount,
+                    'nonPrimeTotalAmount' => $nonPrimeTotalAmount,
+                    'startDate' => $startDate,
+                    'endDate' => $endDate,
+                    'invoiceNumber' => $invoice->invoice_number,
+                    'dueDate' => $invoice->due_date,
+                ])
+                ->disk('do', 'public')
+                ->save($pdfPath);
+
+            // Update invoice with PDF path
+            $invoice->update(['pdf_path' => $pdfPath]);
+
+            return $invoice;
+        });
     }
 
     private function calculateTotal(Collection $bookings, User $user): float

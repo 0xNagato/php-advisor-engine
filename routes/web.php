@@ -1,9 +1,9 @@
 <?php
 
-use App\Actions\GenerateVenueInvoice;
 use App\Http\Controllers\Booking\BookingCheckoutController;
 use App\Http\Controllers\DemoAuthController;
 use App\Http\Controllers\DownloadInvoiceController;
+use App\Http\Controllers\DownloadVenueInvoiceController;
 use App\Http\Controllers\ExceptionFormController;
 use App\Livewire\Booking\CreateBooking;
 use App\Livewire\Booking\CustomerInvoice;
@@ -17,7 +17,6 @@ use App\Livewire\Venue\VenueModificationRequestConfirmation;
 use App\Livewire\Venue\VenueSpecialRequestConfirmation;
 use App\Livewire\VenueOnboarding;
 use App\Livewire\Vip\AvailabilityCalendar;
-use App\Models\User;
 use AshAllenDesign\ShortURL\Controllers\ShortURLController;
 
 Route::get('/privacy', function () {
@@ -105,12 +104,8 @@ Route::get('/invitation/{referral}', ConciergeInvitation::class)
     ->name('concierge.invitation')
     ->middleware('signed');
 
-Route::get('venue-invoice/{user}/{startDate}/{endDate}', function (User $user, string $startDate, string $endDate) {
-    $pdf = GenerateVenueInvoice::run($user, $startDate, $endDate);
-
-    return $pdf
-        ->name('prima-invoice-'.\Str::slug($user->venue->name)."-{$startDate}-{$endDate}.pdf")
-        ->download();
-})->name('venue.invoice.download')->middleware('auth');
+Route::get('venue-invoice/{user}/{startDate}/{endDate}', DownloadVenueInvoiceController::class)
+    ->name('venue.invoice.download')
+    ->middleware('auth');
 
 require __DIR__.'/auth.php';

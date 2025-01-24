@@ -5,6 +5,7 @@ namespace App\Notifications\Booking;
 use App\Data\SmsData;
 use App\Data\VenueContactData;
 use App\Models\Booking;
+use Carbon\Carbon;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Notification;
@@ -33,10 +34,10 @@ class VenueContactBookingConfirmed extends Notification implements ShouldQueue
         return $this->contact->toChannel();
     }
 
-    private function formatBookingDate(\Carbon\Carbon $date, Booking $notifiable): string
+    private function formatBookingDate(Carbon $date, Booking $notifiable): string
     {
         // Create booking date with venue timezone
-        $bookingDate = \Carbon\Carbon::create(
+        $bookingDate = Carbon::create(
             $date->year,
             $date->month,
             $date->day,

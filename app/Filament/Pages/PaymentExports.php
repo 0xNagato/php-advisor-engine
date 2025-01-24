@@ -6,12 +6,14 @@ use App\Enums\BookingStatus;
 use App\Filament\Resources\UserResource;
 use App\Models\Earning;
 use App\Models\User;
+use App\Models\VenueInvoice;
 use Carbon\Carbon;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Form;
+use Filament\Notifications\Notification;
 use Filament\Pages\Page;
 use Filament\Tables\Actions\Action;
 use Filament\Tables\Columns\TextColumn;
@@ -259,17 +261,87 @@ class PaymentExports extends Page implements HasTable
                     ->hidden(),
             ])
             ->actions([
-                Action::make('generateInvoice')
-                    ->icon('heroicon-m-document-text')
+                Action::make('downloadInvoice')
+                    ->icon('heroicon-m-arrow-down-on-square')
                     ->color('info')
                     ->iconButton()
-                    ->visible(fn (User $record): bool => $record->hasRole('venue'))
+                    ->visible(function (User $record): bool {
+                        if (! $record->hasRole('venue')) {
+                            return false;
+                        }
+
+                        $startDate = Carbon::parse($this->data['startDate'])->startOfDay();
+                        $endDate = Carbon::parse($this->data['endDate'])->endOfDay();
+
+                        return VenueInvoice::query()
+                            ->where('venue_id', $record->venue->id)
+                            ->whereBetween('start_date', [$startDate, $endDate])
+                            ->whereBetween('end_date', [$startDate, $endDate])
+                            ->exists();
+                    })
+                    ->tooltip('Download Invoice')
+                    ->action(function (User $record) {
+                        $startDate = Carbon::parse($this->data['startDate'])->startOfDay();
+                        $endDate = Carbon::parse($this->data['endDate'])->endOfDay();
+
+                        $url = route('venue.invoice.download', [
+                            'user' => $record->id,
+                            'startDate' => $startDate->format('Y-m-d'),
+                            'endDate' => $endDate->format('Y-m-d'),
+                        ]);
+
+                        $this->js("window.open('$url', '_blank')");
+                    }),
+
+                Action::make('generateInvoice')
+                    ->icon('heroicon-m-document-plus')
+                    ->color('info')
+                    ->iconButton()
+                    ->visible(function (User $record): bool {
+                        if (! $record->hasRole('venue')) {
+                            return false;
+                        }
+
+                        $startDate = Carbon::parse($this->data['startDate'])->startOfDay();
+                        $endDate = Carbon::parse($this->data['endDate'])->endOfDay();
+
+                        return ! VenueInvoice::query()
+                            ->where('venue_id', $record->venue->id)
+                            ->whereBetween('start_date', [$startDate, $endDate])
+                            ->whereBetween('end_date', [$startDate, $endDate])
+                            ->exists();
+                    })
                     ->requiresConfirmation()
                     ->modalHeading(fn (User $record) => "Generate Invoice for {$record->venue->name}")
-                    ->modalDescription('This will generate an invoice for all bookings in the selected date range.')
+                    ->modalDescription(new HtmlString(
+                        "<div class='space-y-2 text-sm text-gray-600'>".
+                        '<p>This will generate an invoice for all bookings in the selected date range. The process may take a few moments to complete as we generate and upload the PDF.</p>'.
+                        "<p class='p-1 text-xs font-semibold text-gray-600 bg-gray-100 border border-gray-300 rounded-md'>This action will be logged for audit purposes.</p>".
+                        '</div>'
+                    ))
+                    ->successNotification(
+                        Notification::make()
+                            ->success()
+                            ->title('Invoice Generated')
+                            ->body('The invoice has been generated and will open in a new tab.')
+                    )
+                    ->tooltip('Generate Invoice')
                     ->action(function (User $record) {
-                        $startDate = Carbon::parse($this->data['startDate']);
-                        $endDate = Carbon::parse($this->data['endDate']);
+                        $startDate = Carbon::parse($this->data['startDate'])->startOfDay();
+                        $endDate = Carbon::parse($this->data['endDate'])->endOfDay();
+
+                        activity()
+                            ->causedBy(auth()->user())
+                            ->performedOn($record->venue)
+                            ->withProperties([
+                                'date_range' => [
+                                    'start' => $startDate->format('Y-m-d'),
+                                    'end' => $endDate->format('Y-m-d'),
+                                ],
+                                'generated_by' => auth()->user()->name,
+                                'generated_at' => now(),
+                            ])
+                            ->log('Generated venue invoice');
 
                         $url = route('venue.invoice.download', [
                             'user' => $record->id,
