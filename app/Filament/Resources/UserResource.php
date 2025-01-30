@@ -137,13 +137,24 @@ class UserResource extends Resource
                             $direction
                         )
                         ->addBinding(User::class, 'select'))
-                    ->visibleFrom('sm')
                     ->grow(false)
+                    ->tooltip(function ($state, User $record) {
+                        $lastLogin = $record->authentications()->orderByDesc('login_at')->first();
+                        if ($lastLogin && $lastLogin->login_at) {
+                            return Carbon::parse($lastLogin->login_at)
+                                ->setTimezone(auth()->user()->timezone ?? config('app.timezone'))
+                                ->format('M j Y, g:ia');
+                        }
+
+                        return 'Never logged in';
+                    })
                     ->size('xs')
                     ->formatStateUsing(function ($state, User $record) {
                         $lastLogin = $record->authentications()->orderByDesc('login_at')->first();
                         if ($lastLogin && $lastLogin->login_at) {
-                            return Carbon::parse($lastLogin->login_at, auth()->user()->timezone)->diffForHumans();
+                            return Carbon::parse($lastLogin->login_at)
+                                ->setTimezone(auth()->user()->timezone ?? config('app.timezone'))
+                                ->diffForHumans();
                         }
 
                         return 'Never';
@@ -151,12 +162,14 @@ class UserResource extends Resource
                     ->default('Never'),
                 TextColumn::make('created_at')
                     ->dateTime('M j Y, g:ia')
+                    ->timezone(fn () => auth()->user()->timezone ?? config('app.timezone'))
                     ->toggleable(isToggledHiddenByDefault: true)
                     ->size('xs')
                     ->sortable(),
                 TextColumn::make('updated_at')
                     ->label('Last Updated')
                     ->dateTime('M j Y, g:ia')
+                    ->timezone(fn () => auth()->user()->timezone ?? config('app.timezone'))
                     ->visibleFrom('sm')
                     ->size('xs')
                     ->sortable(),
