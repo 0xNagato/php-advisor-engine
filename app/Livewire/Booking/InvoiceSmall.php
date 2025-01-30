@@ -17,6 +17,8 @@ class InvoiceSmall extends Widget
 
     public Region $region;
 
+    public bool $showAmount = true;
+
     public function mount(Booking $booking): void
     {
         $this->booking = $booking;

@@ -18,7 +18,7 @@
                 <div>{{ $booking->booking_at->format('g:i a') }}, {{ $booking->guest_count }} guests</div>
             </div>
         </div>
-        @if ($booking->is_prime)
+        @if ($booking->is_prime && $showAmount)
             <div class="flex flex-col gap-1 text-right">
                 <div class="font-semibold">
                     @money($booking->total_with_tax_in_cents, $booking->currency)

@@ -125,7 +125,7 @@ class VenueBookingConfirmation extends Page
     public function confirmBookingAction(): Action
     {
         return Action::make('confirmBooking')
-            ->label('Are You Sure You Want to Confirm?')
+            ->label('Confirm Booking Now')
             ->color('success')
             ->button()
             ->size('lg')
