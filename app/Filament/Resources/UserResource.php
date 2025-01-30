@@ -12,6 +12,7 @@ use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\HtmlString;
 use Illuminate\Support\Str;
@@ -81,9 +82,15 @@ class UserResource extends Resource
             ->recordUrl(fn (User $record): string => EditUser::getUrl(['record' => $record]))
             ->columns([
                 TextColumn::make('name')
-                    ->sortable()
+                    ->sortable(['first_name', 'last_name'])
                     ->size('sm')
-                    ->searchable(['first_name', 'last_name'])
+                    ->searchable(query: function (Builder $query, string $search): Builder {
+                        return $query
+                            ->where('first_name', 'like', "%{$search}%")
+                            ->orWhere('last_name', 'like', "%{$search}%")
+                            ->orWhere('email', 'like', "%{$search}%")
+                            ->orWhere('phone', 'like', "%{$search}%");
+                    })
                     ->formatStateUsing(fn (User $record): string => new HtmlString(<<<HTML
                         <div class="space-y-0.5">
                             <div class="text-xs font-semibold">{$record->name}</div>
