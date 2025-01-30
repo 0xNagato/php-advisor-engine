@@ -9,7 +9,6 @@ use Filament\Forms\Components\TextInput;
 use Filament\Forms\Form;
 use Filament\Pages\Concerns\InteractsWithFormActions;
 use Filament\Pages\SimplePage;
-use Illuminate\Contracts\Database\Query\Builder;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rules\Password;
 
@@ -86,16 +85,6 @@ class CreatePassword extends SimplePage
             'password' => Hash::make($validated['password']),
             'secured_at' => now(),
         ]);
-
-        $roleProfile = $this->user->roleProfiles()
-            ->whereHas('role', function (Builder $query) {
-                $query->where('name', '!=', 'panel_user');
-            })
-            ->first();
-
-        if ($roleProfile) {
-            $this->user->switchProfile($roleProfile);
-        }
 
         auth()->login($this->user);
 
