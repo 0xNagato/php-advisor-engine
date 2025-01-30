@@ -27,7 +27,7 @@ class ReservationHoursWidget extends Widget
 
     public array $daysOfWeek = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
 
-    protected Venue $venue;
+    public Venue $venue;
 
     protected ReservationHoursService $reservationHoursService;
 
