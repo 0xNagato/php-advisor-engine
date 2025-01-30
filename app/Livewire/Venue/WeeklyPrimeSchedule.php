@@ -15,7 +15,7 @@ class WeeklyPrimeSchedule extends Component implements HasMingles
 {
     use InteractsWithMingles;
 
-    protected Venue $venue;
+    public Venue $venue;
 
     protected array $weeklySchedule = [];
 
@@ -25,7 +25,6 @@ class WeeklyPrimeSchedule extends Component implements HasMingles
 
     public function boot(): void
     {
-        $this->venue = auth()->user()->venue;
         $this->operatingHours = $this->getOperatingHours();
         $this->generateWeeklySchedule();
         $this->initializeSelectedTimeSlots();
@@ -39,6 +38,7 @@ class WeeklyPrimeSchedule extends Component implements HasMingles
     public function mingleData(): array
     {
         return [
+            'venueName' => $this->venue->name,
             'earliestStartTime' => $this->operatingHours['earliest_start_time']->format('H:i'),
             'latestEndTime' => $this->operatingHours['latest_end_time']->format('H:i'),
             'weeklySchedule' => $this->weeklySchedule,

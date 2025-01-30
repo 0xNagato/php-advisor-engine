@@ -26,7 +26,10 @@ use Illuminate\Validation\ValidationException;
 use Laravel\Telescope\TelescopeApplicationServiceProvider;
 use Lorisleiva\Actions\Facades\Actions;
 use Opcodes\LogViewer\Facades\LogViewer;
+use Sentry\State\Scope;
 use Stripe\StripeClient;
+
+use function Sentry\configureScope;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -35,6 +38,17 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        if (auth()->check()) {
+            configureScope(function (Scope $scope): void {
+                $user = auth()->user();
+
+                $scope->setUser([
+                    'email' => $user->email,
+                    'username' => $user->name,
+                ]);
+            });
+        }
+
         if (app()->isLocal()) {
             ($this->{'app'}['request'] ?? null)?->server?->set('HTTPS', 'on');
             URL::forceScheme('https');

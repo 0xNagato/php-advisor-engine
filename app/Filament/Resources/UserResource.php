@@ -5,14 +5,15 @@ namespace App\Filament\Resources;
 use App\Filament\Resources\UserResource\Pages\EditUser;
 use App\Filament\Resources\UserResource\Pages\ListUsers;
 use App\Models\User;
+use Carbon\Carbon;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Filters\Filter;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\HtmlString;
 use Illuminate\Support\Str;
 use STS\FilamentImpersonate\Impersonate;
 
@@ -48,7 +49,6 @@ class UserResource extends Resource
                             'partner',
                             'concierge',
                             'venue',
-                            'venue_manager',
                         ])
                     )
                     ->preload()
@@ -77,15 +77,25 @@ class UserResource extends Resource
                 static::getModel()::query()
                     ->with(['roleProfiles.role'])
             )
+            ->defaultSort('authentications.login_at', 'desc')
             ->recordUrl(fn (User $record): string => EditUser::getUrl(['record' => $record]))
             ->columns([
                 TextColumn::make('name')
                     ->sortable()
-                    ->searchable(['first_name', 'last_name', 'phone']),
-                TextColumn::make('email')
-                    ->searchable()
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
+                    ->size('sm')
+                    ->searchable(['first_name', 'last_name'])
+                    ->formatStateUsing(fn (User $record): string => new HtmlString(<<<HTML
+                        <div class="space-y-0.5">
+                            <div class="text-xs font-semibold">{$record->name}</div>
+                            <div class="text-xs text-gray-500">
+                                {$record->phone}
+                            </div>
+                            <div class="text-xs text-gray-500">
+                                {$record->email}
+                            </div>
+                        </div>
+                    HTML))
+                    ->html(),
                 TextColumn::make('roleProfiles')
                     ->label('Roles')
                     ->getStateUsing(fn (User $record) => $record->roleProfiles->map(function ($profile) {
@@ -105,40 +115,46 @@ class UserResource extends Resource
                         return "<span class='inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-$color-100 text-$color-800 $opacity'>$name$activeMarker</span>";
                     })->join(' '))
                     ->html(),
-                TextColumn::make('created_at')
-                    ->dateTime()
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
-                TextColumn::make('updated_at')
-                    ->dateTime()
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
-            ])
-            ->filters([
-                Filter::make('role')
-                    ->form([
-                        Select::make('role')
-                            ->options([
-                                'super_admin' => 'Super Admin',
-                                'partner' => 'Partner',
-                                'concierge' => 'Concierge',
-                                'venue' => 'Venue',
-                                'venue_manager' => 'Venue Manager',
-                            ])
-                            ->placeholder('All Roles')
-                            ->label('Role'),
-                    ])
-                    ->query(fn (Builder $query, array $data): Builder => $query->when(
-                        $data['role'],
-                        fn (Builder $query, string $role): Builder => $query->whereHas(
-                            'roleProfiles',
-                            fn (Builder $query) => $query->whereHas(
-                                'role',
-                                fn (Builder $query) => $query->where('name', $role)
-                            )
+                TextColumn::make('authentications.login_at')
+                    ->label('Last Login')
+                    ->sortable(query: fn ($query, $direction) => $query
+                        ->orderBy(
+                            DB::raw('(
+                                    SELECT login_at
+                                    FROM authentication_log
+                                    WHERE authentication_log.authenticatable_id = users.id
+                                    AND authentication_log.authenticatable_type = ?
+                                    ORDER BY login_at DESC
+                                    LIMIT 1
+                                )'),
+                            $direction
                         )
-                    )),
+                        ->addBinding(User::class, 'select'))
+                    ->visibleFrom('sm')
+                    ->grow(false)
+                    ->size('xs')
+                    ->formatStateUsing(function ($state, User $record) {
+                        $lastLogin = $record->authentications()->orderByDesc('login_at')->first();
+                        if ($lastLogin && $lastLogin->login_at) {
+                            return Carbon::parse($lastLogin->login_at, auth()->user()->timezone)->diffForHumans();
+                        }
+
+                        return 'Never';
+                    })
+                    ->default('Never'),
+                TextColumn::make('created_at')
+                    ->dateTime('M j Y, g:ia')
+                    ->toggleable(isToggledHiddenByDefault: true)
+                    ->size('xs')
+                    ->sortable(),
+                TextColumn::make('updated_at')
+                    ->label('Last Updated')
+                    ->dateTime('M j Y, g:ia')
+                    ->visibleFrom('sm')
+                    ->size('xs')
+                    ->sortable(),
             ])
+            ->filters([])
             ->actions([
                 Impersonate::make()
                     ->redirectTo(config('app.platform_url')),

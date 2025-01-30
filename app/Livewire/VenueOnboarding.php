@@ -7,10 +7,12 @@ namespace App\Livewire;
 use App\Data\VenueOnboardingData;
 use App\Models\Region;
 use App\Models\User;
+use App\Models\Venue;
 use App\Models\VenueOnboarding as VenueOnboardingModel;
 use App\Notifications\VenueAgreementCopy;
 use App\Notifications\VenueOnboardingSubmitted;
 use App\Traits\FormatsPhoneNumber;
+use Carbon\Carbon;
 use Exception;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Builder;
@@ -31,11 +33,11 @@ class VenueOnboarding extends Component
     use WithFileUploads;
 
     /** @var array<string,string> */
-    protected array $steps = [
+    public array $steps = [
         'company' => 'Company',
-        'partner' => 'Partner',
         'venues' => 'Venues',
-        'prime-hours' => 'Hours',
+        'booking-hours' => 'Hours',
+        'prime-hours' => 'Prime',
         'incentive' => 'Incentives',
         'agreement' => 'Agreement',
     ];
@@ -97,6 +99,9 @@ class VenueOnboarding extends Component
     #[Validate('required|exists:users,id')]
     public ?string $partner_id = null;
 
+    /** @var array<int, array<string, array<string, array{start: string, end: string, closed: bool}>>> */
+    public array $venue_booking_hours = [];
+
     public function mount(): void
     {
         // Initialize available regions
@@ -131,6 +136,15 @@ class VenueOnboarding extends Component
             $this->logo_files = array_fill(0, $this->venue_count, null);
             $this->venue_regions = array_fill(0, $this->venue_count, 'miami');
             $this->step = 'company';
+            $this->venue_booking_hours = array_fill(0, $this->venue_count, [
+                'monday' => ['start' => '11:00:00', 'end' => '22:00:00', 'closed' => false],
+                'tuesday' => ['start' => '11:00:00', 'end' => '22:00:00', 'closed' => false],
+                'wednesday' => ['start' => '11:00:00', 'end' => '22:00:00', 'closed' => false],
+                'thursday' => ['start' => '11:00:00', 'end' => '22:00:00', 'closed' => false],
+                'friday' => ['start' => '11:00:00', 'end' => '22:00:00', 'closed' => false],
+                'saturday' => ['start' => '11:00:00', 'end' => '22:00:00', 'closed' => false],
+                'sunday' => ['start' => '11:00:00', 'end' => '22:00:00', 'closed' => false],
+            ]);
         }
 
         // Generate time slots in 30-minute increments from 11 AM to 11 PM
@@ -175,6 +189,7 @@ class VenueOnboarding extends Component
             'email' => $this->email,
             'phone' => $this->phone,
             'partner_id' => $this->partner_id,
+            'venue_booking_hours' => $this->venue_booking_hours,
         ]);
     }
 
@@ -201,7 +216,7 @@ class VenueOnboarding extends Component
     {
         $this->validateStep();
 
-        if ($this->step === 'prime-hours' || $this->step === 'incentive') {
+        if ($this->step === 'booking-hours' || $this->step === 'prime-hours' || $this->step === 'incentive') {
             if ($this->current_venue_index < count($this->venue_names) - 1) {
                 $this->current_venue_index++;
 
@@ -211,7 +226,8 @@ class VenueOnboarding extends Component
 
         $this->step = match ($this->step) {
             'company' => 'venues',
-            'venues' => 'prime-hours',
+            'venues' => 'booking-hours',
+            'booking-hours' => 'prime-hours',
             'prime-hours' => 'incentive',
             'incentive' => 'agreement',
             default => $this->step
@@ -237,14 +253,24 @@ class VenueOnboarding extends Component
         $currentIndex = array_search($this->step, $steps);
 
         if ($currentIndex > 0) {
-            $this->step = $steps[$currentIndex - 1];
+            $previousStep = $steps[$currentIndex - 1];
+            $this->step = $previousStep;
 
-            // Set to last venue when going back to incentive or prime-hours step
-            if ($this->step === 'incentive' || $this->step === 'prime-hours') {
+            // Reset venue index when moving back
+            if ($previousStep === 'incentive' || $previousStep === 'prime-hours') {
                 $this->current_venue_index = count($this->venue_names) - 1;
             } else {
                 $this->current_venue_index = 0;
             }
+
+            // Update session state immediately
+            Session::put('venue_onboarding', array_merge(
+                Session::get('venue_onboarding', []),
+                [
+                    'step' => $this->step,
+                    'current_venue_index' => $this->current_venue_index,
+                ]
+            ));
         }
     }
 
@@ -266,6 +292,7 @@ class VenueOnboarding extends Component
                 'agreement_accepted' => $this->agreement_accepted,
                 'send_agreement_copy' => $this->send_agreement_copy,
                 'partner_id' => $this->partner_id,
+                'venue_booking_hours' => $this->venue_booking_hours,
             ]);
 
             $onboarding = VenueOnboardingModel::create([
@@ -278,6 +305,7 @@ class VenueOnboarding extends Component
                     'name' => $name,
                     'region' => $this->venue_regions[$index],
                     'prime_hours' => $this->venue_prime_hours[$index] ?? [],
+                    'booking_hours' => $this->venue_booking_hours[$index] ?? [],
                     'use_non_prime_incentive' => $this->venue_use_non_prime_incentive[$index] ?? false,
                     'non_prime_per_diem' => $this->venue_use_non_prime_incentive[$index] ?
                         $this->venue_non_prime_per_diem[$index] :
@@ -310,7 +338,8 @@ class VenueOnboarding extends Component
                 'company_name' => 'required|string|max:255',
                 'first_name' => 'required|string|max:255',
                 'last_name' => 'required|string|max:255',
-                'email' => 'required|email|max:255',
+                'email' => 'required|email|max:255|unique:users,email',
+                'partner_id' => ['required', 'exists:users,id'],
                 'phone' => [
                     'required',
                     'string',
@@ -321,6 +350,8 @@ class VenueOnboarding extends Component
                         }
                     },
                 ],
+            ], [
+                'partner_id.required' => 'Please select a PRIMA Partner',
             ]),
             'partner' => $this->validate([
                 'partner_id' => 'required|exists:users,id',
@@ -347,8 +378,54 @@ class VenueOnboarding extends Component
                 'venue_use_non_prime_incentive' => 'required|array',
                 'venue_non_prime_per_diem' => 'nullable|array',
             ]),
+            'booking-hours' => $this->validate([
+                'venue_booking_hours' => 'required|array',
+                'venue_booking_hours.*' => 'required|array',
+                'venue_booking_hours.*.*.closed' => 'required|boolean',
+                'venue_booking_hours.*.*.start' => [
+                    'required_if:venue_booking_hours.*.*.closed,false',
+                    function ($attribute, $value, $fail) {
+                        if ($value && ! preg_match('/^\d{2}:\d{2}:\d{2}$/', $value)) {
+                            $value = $this->formatTimeToHis($value);
+                            $parts = explode('.', $attribute);
+                            $this->venue_booking_hours[$parts[1]][$parts[2]]['start'] = $value;
+                        }
+                    },
+                ],
+                'venue_booking_hours.*.*.end' => [
+                    'required_if:venue_booking_hours.*.*.closed,false',
+                    function ($attribute, $value, $fail) {
+                        if ($value && ! preg_match('/^\d{2}:\d{2}:\d{2}$/', $value)) {
+                            $value = $this->formatTimeToHis($value);
+                            $parts = explode('.', $attribute);
+                            $this->venue_booking_hours[$parts[1]][$parts[2]]['end'] = $value;
+                        }
+                    },
+                ],
+            ], [
+                'venue_booking_hours.*.*.start.required_if' => 'Opening time is required when venue is open',
+                'venue_booking_hours.*.*.end.required_if' => 'Closing time is required when venue is open',
+                'venue_booking_hours.*.*.end.after' => 'Closing time must be after opening time',
+            ]),
             default => null,
         };
+    }
+
+    private function formatTimeToHis(string $time): string
+    {
+        // Handle various time formats and convert to H:i:s
+        try {
+            // Remove any AM/PM and convert to 24-hour format
+            return Carbon::createFromFormat('h:i A', $time)->format('H:i:s');
+        } catch (Exception) {
+            try {
+                // Try parsing as 24-hour format
+                return Carbon::createFromFormat('H:i', $time)->format('H:i:s');
+            } catch (Exception) {
+                // If all else fails, try to parse the existing format
+                return Carbon::parse($time)->format('H:i:s');
+            }
+        }
     }
 
     public function render(): View
@@ -363,8 +440,16 @@ class VenueOnboarding extends Component
                 'name' => "{$user->first_name} {$user->last_name}",
             ]);
 
+        $timeSlots = [];
+        if ($this->step === 'prime-hours') {
+            foreach (['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'] as $day) {
+                $timeSlots[$day] = $this->getAvailableTimeSlots($day);
+            }
+        }
+
         return view('livewire.venue-onboarding', [
             'partners' => $partners,
+            'availableTimeSlots' => $timeSlots,
         ])->layout('components.layouts.app', [
             'title' => $this->submitted ? 'Onboarding Submitted' : 'Venue Onboarding',
         ]);
@@ -434,5 +519,33 @@ class VenueOnboarding extends Component
 
             return null;
         }
+    }
+
+    protected function getAvailableTimeSlots(string $day): array
+    {
+        // If the venue is closed on this day, return empty array
+        if ($this->venue_booking_hours[$this->current_venue_index][$day]['closed']) {
+            return [];
+        }
+
+        $startTime = Carbon::createFromFormat('H:i:s', $this->venue_booking_hours[$this->current_venue_index][$day]['start'] ?? sprintf('%02d:00:00', Venue::DEFAULT_START_HOUR));
+        $endTime = Carbon::createFromFormat('H:i:s', $this->venue_booking_hours[$this->current_venue_index][$day]['end'] ?? sprintf('%02d:00:00', Venue::DEFAULT_END_HOUR));
+
+        return collect()
+            ->range(0, 48)
+            ->map(function ($slot) {
+                $hour = 11 + floor($slot / 2);
+                $minutes = ($slot % 2) * 30;
+
+                return sprintf('%02d:%02d:00', $hour, $minutes);
+            })
+            ->filter(function ($time) use ($startTime, $endTime) {
+                $slotTime = Carbon::createFromFormat('H:i:s', $time);
+
+                return $slotTime->greaterThanOrEqualTo($startTime) &&
+                       $slotTime->lessThan($endTime);
+            })
+            ->values()
+            ->toArray();
     }
 }

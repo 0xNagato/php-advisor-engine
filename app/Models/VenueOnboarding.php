@@ -60,12 +60,13 @@ class VenueOnboarding extends Model
         return $this->belongsTo(User::class, 'partner_id');
     }
 
-    public function markAsProcessed(User $user): void
+    public function markAsProcessed(User $user, ?string $notes = null): void
     {
         $this->update([
             'processed_at' => now(),
             'processed_by_id' => $user->id,
             'status' => 'completed',
+            'notes' => $notes,
         ]);
     }
 

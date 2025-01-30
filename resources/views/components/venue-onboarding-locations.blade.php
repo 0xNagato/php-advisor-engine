@@ -2,18 +2,27 @@
 
 <div class="space-y-4">
     @foreach ($locations as $location)
-        <div class="p-4 rounded-lg bg-gray-50">
+        <div class="p-4 border rounded-lg bg-gray-50">
             <div class="flex items-center justify-between mb-4">
-                <h3 class="text-sm font-medium text-gray-900">{{ $location->name }}</h3>
+                <h3 class="text-sm font-medium text-gray-900">
+                    @if ($location->created_venue_id)
+                        <a href="{{ \App\Filament\Resources\VenueResource\Pages\ViewVenue::getUrl(['record' => $location->created_venue_id]) }}"
+                            class="text-primary-600 hover:text-primary-500">
+                            {{ $location->name }}
+                        </a>
+                    @else
+                        {{ $location->name }}
+                    @endif
+                </h3>
                 @if ($location->logo_path)
                     <img src="{{ Storage::url($location->logo_path) }}" alt="{{ $location->name }} logo"
                         class="object-contain h-16">
                 @endif
             </div>
 
-            @if ($location->prime_hours)
-                <div class="space-y-3">
-                    <h4 class="text-xs font-medium text-gray-500">Prime Hours</h4>
+            <div class="space-y-3">
+                <h4 class="text-xs font-medium text-gray-500">Prime Hours</h4>
+                @if ($location->prime_hours && count(array_filter($location->prime_hours)))
                     <div class="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3">
                         @foreach (['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'] as $day)
                             @if (!empty($location->prime_hours[$day]))
@@ -39,8 +48,12 @@
                             @endif
                         @endforeach
                     </div>
-                </div>
-            @endif
+                @else
+                    <div class="text-xs text-gray-600">
+                        No prime hours submitted
+                    </div>
+                @endif
+            </div>
 
             @if ($location->use_non_prime_incentive)
                 <div class="pt-4 mt-4 border-t border-gray-200">

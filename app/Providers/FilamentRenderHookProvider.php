@@ -59,11 +59,6 @@ class FilamentRenderHookProvider extends ServiceProvider
         );
 
         FilamentView::registerRenderHook(
-            PanelsRenderHook::GLOBAL_SEARCH_BEFORE,
-            static fn () => Livewire::mount('role-switcher')
-        );
-
-        FilamentView::registerRenderHook(
             PanelsRenderHook::USER_MENU_BEFORE,
             static fn () => view('filament.admin.contact-button')
         );
@@ -133,6 +128,18 @@ class FilamentRenderHookProvider extends ServiceProvider
             // PanelsRenderHook::USER_MENU_PROFILE_AFTER,
             PanelsRenderHook::SIDEBAR_NAV_START,
             static fn () => view('partials.concierge-user-menu')
+        );
+
+        FilamentView::registerRenderHook(
+            PanelsRenderHook::GLOBAL_SEARCH_BEFORE,
+            static fn () => auth()->user()?->hasActiveRole('venue_manager')
+                ? Livewire::mount('venue-switcher')
+                : ''
+        );
+
+        FilamentView::registerRenderHook(
+            PanelsRenderHook::GLOBAL_SEARCH_BEFORE,
+            static fn () => Livewire::mount('role-switcher')
         );
     }
 }

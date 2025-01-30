@@ -21,6 +21,7 @@ class VenueOnboardingLocation extends Model
         'logo_path',
         'created_venue_id',
         'prime_hours',
+        'booking_hours',
         'use_non_prime_incentive',
         'non_prime_per_diem',
     ];
@@ -45,6 +46,7 @@ class VenueOnboardingLocation extends Model
     {
         return [
             'prime_hours' => 'array',
+            'booking_hours' => 'array',
         ];
     }
 }

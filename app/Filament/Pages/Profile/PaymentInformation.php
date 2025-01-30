@@ -58,7 +58,21 @@ class PaymentInformation extends Page
             return ! session('simpleMode');
         }
 
-        return auth()->user()->hasActiveRole(['venue', 'concierge', 'partner']);
+        $user = auth()->user();
+
+        // Allow access for concierge, partner roles
+        if ($user->hasActiveRole(['concierge', 'partner', 'venue'])) {
+            return true;
+        }
+
+        // For venue managers, only allow access if they are the primary manager
+        if ($user->hasActiveRole('venue_manager')) {
+            $currentVenueGroup = $user->currentVenueGroup();
+
+            return $currentVenueGroup && $currentVenueGroup->primary_manager_id === $user->id;
+        }
+
+        return false;
     }
 
     public function mount(): void

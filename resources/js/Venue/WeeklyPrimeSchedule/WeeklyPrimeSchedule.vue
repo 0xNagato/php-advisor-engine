@@ -107,7 +107,9 @@ const handleClearClick = (): void => {
 
 const resetTimeSlots = (): void => {
   Object.keys(selectedTimeSlots.value).forEach((day) => {
-    selectedTimeSlots.value[day] = selectedTimeSlots.value[day].map(() => false);
+    selectedTimeSlots.value[day] = selectedTimeSlots.value[day].map(
+      () => false,
+    );
   });
 };
 
@@ -123,7 +125,7 @@ const confirmClear = async (shouldSave: boolean): Promise<void> => {
 
 <template>
   <div class="mx-auto">
-    <div class="flex items-center justify-end gap-2 mb-4">
+    <div class="mb-4 flex items-center justify-end gap-2">
       <button
         class="flex items-center justify-center rounded-lg bg-gray-600 px-3 py-1.5 text-sm font-semibold text-white hover:bg-gray-700 disabled:opacity-50"
         :disabled="isSaving"
@@ -146,7 +148,7 @@ const confirmClear = async (shouldSave: boolean): Promise<void> => {
       <div
         class="grid grid-cols-[80px_repeat(7,_minmax(0,_1fr))] items-center bg-white"
       >
-        <div class="p-2 text-xs font-medium text-center uppercase sm:text-sm" />
+        <div class="p-2 text-center text-xs font-medium uppercase sm:text-sm" />
         <div v-for="day in daysOfWeek" :key="day" class="p-2 text-center">
           <div class="text-xs font-semibold sm:text-sm">
             {{ formatDay(day) }}
@@ -157,7 +159,7 @@ const confirmClear = async (shouldSave: boolean): Promise<void> => {
         class="grid grid-cols-[80px_repeat(7,_minmax(0,_1fr))] divide-x divide-y divide-white"
       >
         <template v-for="(time, timeIndex) in times" :key="time">
-          <div class="py-4 text-xs text-center bg-white sm:text-sm">
+          <div class="bg-white py-4 text-center text-xs sm:text-sm">
             {{ formatTime(time, 'h:mm A') }}
           </div>
           <div
@@ -177,7 +179,7 @@ const confirmClear = async (shouldSave: boolean): Promise<void> => {
               <input
                 v-model="selectedTimeSlots[day][timeIndex]"
                 type="checkbox"
-                class="text-indigo-600 rounded size-4 sm:size-5"
+                class="size-4 rounded text-indigo-600 sm:size-5"
                 @click.stop
               />
             </template>
@@ -197,7 +199,10 @@ const confirmClear = async (shouldSave: boolean): Promise<void> => {
         leave-from-class="opacity-100"
         leave-to-class="opacity-0"
       >
-        <div v-if="showClearModal" class="fixed inset-0 z-40 transition-opacity bg-gray-500 bg-opacity-75" />
+        <div
+          v-if="showClearModal"
+          class="fixed inset-0 z-40 bg-gray-500 bg-opacity-75 transition-opacity"
+        />
       </Transition>
 
       <Transition
@@ -213,7 +218,9 @@ const confirmClear = async (shouldSave: boolean): Promise<void> => {
           class="fixed inset-0 z-50 flex items-center justify-center p-4"
           @click.self="showClearModal = false"
         >
-          <div class="relative w-full max-w-lg overflow-hidden transition-all transform bg-white rounded-lg shadow-xl">
+          <div
+            class="relative w-full max-w-lg overflow-hidden rounded-lg bg-white shadow-xl transition-all"
+          >
             <div class="px-6 py-4">
               <h3 class="text-lg font-medium leading-6 text-gray-900">
                 Clear Prime Time Schedule
@@ -222,7 +229,7 @@ const confirmClear = async (shouldSave: boolean): Promise<void> => {
                 <p class="text-sm text-gray-500">
                   This will mark all time slots as non-prime. This action will:
                 </p>
-                <ul class="pl-5 mt-2 text-sm text-gray-500 list-disc">
+                <ul class="mt-2 list-disc pl-5 text-sm text-gray-500">
                   <li>Clear all prime time selections</li>
                   <li>Save the changes immediately</li>
                 </ul>
@@ -231,17 +238,17 @@ const confirmClear = async (shouldSave: boolean): Promise<void> => {
                 </p>
               </div>
             </div>
-            <div class="flex justify-end gap-2 px-6 py-4 bg-gray-50">
+            <div class="flex justify-end gap-2 bg-gray-50 px-6 py-4">
               <button
                 type="button"
-                class="inline-flex items-center px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                class="inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
                 @click="showClearModal = false"
               >
                 Cancel
               </button>
               <button
                 type="button"
-                class="inline-flex items-center px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                class="inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
                 :disabled="isSaving"
                 @click="confirmClear(false)"
               >
@@ -249,11 +256,14 @@ const confirmClear = async (shouldSave: boolean): Promise<void> => {
               </button>
               <button
                 type="button"
-                class="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-indigo-600 border border-transparent rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                class="inline-flex items-center rounded-md border border-transparent bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
                 :disabled="isSaving"
                 @click="confirmClear(true)"
               >
-                <LoaderCircle v-if="isSaving" class="mr-2 size-4 animate-spin" />
+                <LoaderCircle
+                  v-if="isSaving"
+                  class="mr-2 size-4 animate-spin"
+                />
                 <span>Reset & Save</span>
               </button>
             </div>

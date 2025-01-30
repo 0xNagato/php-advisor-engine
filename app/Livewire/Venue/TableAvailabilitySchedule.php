@@ -19,7 +19,7 @@ class TableAvailabilitySchedule extends Component implements HasMingles
 
     const int MAX_AVAILABLE_TABLES = 20;
 
-    protected Venue $venue;
+    public Venue $venue;
 
     protected array $weeklySchedule = [];
 
@@ -31,7 +31,7 @@ class TableAvailabilitySchedule extends Component implements HasMingles
 
     public function boot(): void
     {
-        $this->venue = auth()->user()->venue;
+        // $this->venue = auth()->user()->venue;
         $this->currentDay = strtolower(Carbon::now()->format('l'));
         $this->generateWeeklySchedule();
         $this->loadBusinessHours();

@@ -6,6 +6,7 @@ use App\Filament\Resources\ConciergeResource\Pages\ViewConcierge;
 use App\Filament\Resources\PartnerResource\Pages\ViewPartner;
 use App\Filament\Resources\VenueResource\Pages\ViewVenue;
 use App\Traits\FormatsPhoneNumber;
+use Illuminate\Database\Eloquent\Casts\AsArrayObject;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
@@ -33,12 +34,14 @@ class Referral extends Model
         'reminded_at',
         'region_id',
         'company_name',
+        'meta',
     ];
 
     protected function casts(): array
     {
         return [
             'secured_at' => 'datetime',
+            'meta' => AsArrayObject::class,
         ];
     }
 
@@ -99,5 +102,18 @@ class Referral extends Model
             'partner' => $this->referrer->partner ? ViewPartner::getUrl(['record' => $this->referrer->partner]) : null,
             default => null,
         });
+    }
+
+    protected function status(): Attribute
+    {
+        return Attribute::make(
+            get: function () {
+                if ($this->secured_at === null) {
+                    return 'Pending';
+                }
+
+                return 'Accepted';
+            }
+        );
     }
 }

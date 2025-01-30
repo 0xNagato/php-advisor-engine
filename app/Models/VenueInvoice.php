@@ -90,7 +90,7 @@ class VenueInvoice extends Model
         $venuePrefix = substr(strtoupper(preg_replace('/[^A-Za-z0-9]/', '', $venue->name)), 0, 3);
         $venueId = str_pad($venue->id, 4, '0', STR_PAD_LEFT);
         $date = now()->format('Ymd');
-        $sequence = static::whereDate('created_at', now())->count() + 284;
+        $sequence = static::query()->whereDate('created_at', now())->count() + 284;
 
         return "{$prefix}-{$venuePrefix}{$venueId}-{$date}-{$sequence}";
     }

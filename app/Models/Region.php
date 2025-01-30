@@ -155,4 +155,14 @@ class Region extends Model
     {
         return $this->hasMany(Venue::class, 'region', 'id');
     }
+
+    /**
+     * Get the timezone for a specific region
+     */
+    public static function getTimezoneForRegion(string $regionId): ?string
+    {
+        $region = self::query()->firstWhere('id', $regionId);
+
+        return $region?->timezone;
+    }
 }

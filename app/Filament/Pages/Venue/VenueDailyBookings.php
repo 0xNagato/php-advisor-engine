@@ -33,7 +33,7 @@ class VenueDailyBookings extends Page implements HasTable
 
     public static function canAccess(): bool
     {
-        return auth()->user()->hasActiveRole('venue');
+        return auth()->user()->hasActiveRole(['venue', 'venue_manager']);
     }
 
     public function getHeading(): string|Htmlable
@@ -49,16 +49,30 @@ class VenueDailyBookings extends Page implements HasTable
 
     public function table(Table $table): Table
     {
+        $allowedVenueIds = [];
+        if (auth()->user()->hasActiveRole('venue')) {
+            $allowedVenueIds = [auth()->user()->venue->id];
+        } elseif (auth()->user()->hasActiveRole('venue_manager')) {
+            $venueGroup = auth()->user()->currentVenueGroup();
+            $allowedVenueIds = $venueGroup?->getAllowedVenueIds(auth()->user()) ?? [];
+        }
+
         $query = Booking::confirmedOrNoShow()
             ->with('venue')
             ->select('bookings.*', 'earnings.amount as earnings')
             ->join('earnings', function ($join) {
                 $join->on('earnings.booking_id', '=', 'bookings.id')
-                    ->where('earnings.type', '=', 'venue')
+                    ->whereIn('earnings.type', ['venue', 'venue_paid'])
                     ->where('earnings.user_id', '=', $this->venue->user_id);
             })
+            ->when(filled($allowedVenueIds),
+                fn ($query) => $query->whereHas('schedule', function ($q) use ($allowedVenueIds) {
+                    $q->whereIn('venue_id', $allowedVenueIds);
+                }),
+                fn ($query) => $query->whereRaw('1 = 0')
+            )
             ->whereDate('bookings.booking_at', $this->date)
-            ->where('earnings.type', 'venue');
+            ->whereIn('earnings.type', ['venue', 'venue_paid']);
 
         return $table
             ->query($query)

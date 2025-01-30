@@ -33,12 +33,12 @@ class ReservationHoursWidget extends Widget
 
     public function boot(ReservationHoursService $reservationHoursService): void
     {
-        $this->venue = auth()->user()->venue;
         $this->reservationHoursService = $reservationHoursService;
     }
 
-    public function mount(): void
+    public function mount(Venue $venue): void
     {
+        $this->venue = $venue;
         $data = $this->reservationHoursService->loadHours($this->venue);
 
         $this->startTimes = $data->startTimes;

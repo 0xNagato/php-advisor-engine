@@ -3,6 +3,7 @@
 namespace App\Filament\Pages\Venue;
 
 use App\Models\Region;
+use App\Models\User;
 use App\Models\Venue;
 use Filament\Forms\Components\Actions\Action;
 use Filament\Forms\Components\DatePicker;
@@ -35,14 +36,51 @@ class PaymentStructure extends Page
 
     public ?array $specialPricingFormData = [];
 
-    public static function canAccess(array $parameters = []): bool
+    public static function getNavigationGroup(): ?string
     {
-        return auth()->user()->hasActiveRole('venue');
+        if (auth()->user()?->hasActiveRole('venue_manager')) {
+            $currentVenue = auth()->user()?->currentVenueGroup()?->currentVenue(auth()->user());
+
+            return $currentVenue?->name ?? 'Venue Management';
+        }
+
+        return null;
+    }
+
+    public static function canAccess(): bool
+    {
+        /** @var User $user */
+        $user = auth()->user();
+
+        if ($user->hasActiveRole('venue')) {
+            return true;
+        }
+
+        if ($user->hasActiveRole('venue_manager')) {
+            $venueGroup = $user->currentVenueGroup();
+
+            return filled($venueGroup?->getAllowedVenueIds($user));
+        }
+
+        return false;
     }
 
     public function mount(): void
     {
-        $this->venue = auth()->user()->venue ?? abort(403);
+        abort_unless(auth()->user()->hasActiveRole(['venue', 'venue_manager']), 403);
+
+        if (auth()->user()->hasActiveRole('venue')) {
+            $this->venue = auth()->user()->venue;
+        } elseif (auth()->user()->hasActiveRole('venue_manager')) {
+            $venueGroup = auth()->user()->currentVenueGroup();
+            $currentVenue = $venueGroup?->currentVenue(auth()->user());
+
+            abort_unless((bool) $currentVenue, 404, 'No active venue selected');
+            $this->venue = $currentVenue;
+        } else {
+            abort(403, 'You are not authorized to access this page');
+        }
+
         $this->region = $this->venue->inRegion;
 
         $this->bookingFeesForm->fill([

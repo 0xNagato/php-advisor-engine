@@ -219,6 +219,12 @@
                             initializeStripe();
                         }">
 
+                        @if ($booking && !$booking->schedule->prime_time)
+                            <div class="w-full">
+                                <livewire:booking.invoice-small :booking="$booking" />
+                            </div>
+                        @endif
+
                         <form id="form" class="w-full">
                             <fieldset class="flex flex-col items-center gap-2 disabled:opacity-50">
                                 <div class="flex items-center w-full gap-2">

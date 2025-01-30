@@ -2,7 +2,6 @@
 
 namespace App\Livewire\Venue;
 
-use App\Models\ScheduleTemplate;
 use App\Models\Venue;
 use App\Models\VenueTimeSlot;
 use Carbon\Carbon;
@@ -24,7 +23,7 @@ class UpcomingPrimeSchedule extends Component implements HasMingles
 
     private const string TIME_FORMAT = 'H:i:s';
 
-    protected Venue $venue;
+    public Venue $venue;
 
     protected Collection $upcomingDates;
 
@@ -42,6 +41,7 @@ class UpcomingPrimeSchedule extends Component implements HasMingles
     public function mingleData(): array
     {
         return [
+            'venueName' => $this->venue->name,
             'earliestStartTime' => $this->operatingHours['earliest_start_time']->format('H:i'),
             'latestEndTime' => $this->operatingHours['latest_end_time']->format('H:i'),
             'upcomingDates' => $this->upcomingDates,
@@ -67,7 +67,7 @@ class UpcomingPrimeSchedule extends Component implements HasMingles
 
     public function boot(): void
     {
-        $this->venue = auth()->user()->venue;
+        // $this->venue = auth()->user()->venue;
         $this->operatingHours = $this->getOperatingHours();
         $this->upcomingDates = $this->getUpcomingDates();
         $this->generateTimeSlots();
@@ -92,37 +92,84 @@ class UpcomingPrimeSchedule extends Component implements HasMingles
 
     protected function generateTimeSlots(): void
     {
-        $scheduleTemplates = $this->getScheduleTemplates();
-        $venueTimeSlots = $this->getVenueTimeSlots();
+        // Optimize by eager loading and selecting only needed fields
+        $scheduleTemplates = $this->venue->scheduleTemplates()
+            ->select(['id', 'venue_id', 'day_of_week', 'start_time', 'end_time', 'prime_time', 'is_available'])
+            ->where('is_available', true)
+            ->get()
+            ->groupBy('day_of_week');
+
+        // Single query for all venue time slots
+        $venueTimeSlots = VenueTimeSlot::query()
+            ->select(['id', 'schedule_template_id', 'booking_date', 'prime_time'])
+            ->whereIn('booking_date', $this->upcomingDates->map(fn ($date) => $date->format(self::DATE_FORMAT)))
+            ->whereIn('schedule_template_id', $scheduleTemplates->flatten()->pluck('id'))
+            ->get()
+            ->groupBy('booking_date');
 
         foreach ($this->upcomingDates as $date) {
-            $slots = [];
-            $currentTime = $date->copy()->setTimeFromTimeString($this->operatingHours['earliest_start_time']->format(self::TIME_FORMAT));
-            $endTime = $date->copy()->setTimeFromTimeString($this->operatingHours['latest_end_time']->format(self::TIME_FORMAT));
+            $dateString = $date->format(self::DATE_FORMAT);
             $dayOfWeek = strtolower((string) $date->format('l'));
+            $daySchedules = $scheduleTemplates->get($dayOfWeek, collect());
+            $dateOverrides = $venueTimeSlots->get($dateString, collect());
 
-            while ($currentTime->lessThan($endTime)) {
-                $timeSlotStart = $currentTime->format(self::TIME_FORMAT);
-                $timeSlotEnd = $currentTime->copy()->addMinutes(30)->format(self::TIME_FORMAT);
+            $this->timeSlots[$dateString] = $this->generateTimeSlotsForDate(
+                $date,
+                $daySchedules,
+                $dateOverrides
+            );
+        }
+    }
 
-                $scheduleTemplate = $scheduleTemplates[$dayOfWeek]->firstWhere('start_time', $timeSlotStart);
-                $override = $venueTimeSlots->where('schedule_template_id', $scheduleTemplate?->id)
-                    ->firstWhere('booking_date', $date->format(self::DATE_FORMAT));
+    private function generateTimeSlotsForDate(
+        Carbon $date,
+        Collection $daySchedules,
+        Collection $dateOverrides
+    ): array {
+        $slots = [];
+        $currentTime = $this->operatingHours['earliest_start_time']->copy();
+        $endTime = $this->operatingHours['latest_end_time'];
 
-                $slots[] = [
-                    'start' => $timeSlotStart,
-                    'end' => $timeSlotEnd,
-                    'schedule_prime' => $scheduleTemplate?->prime_time ?? false,
-                    'is_override' => $override !== null,
-                    'override_prime' => $override?->prime_time ?? false,
-                    'schedule_template_id' => $scheduleTemplate?->id,
-                ];
+        while ($currentTime->lessThan($endTime)) {
+            $timeSlot = $currentTime->format(self::TIME_FORMAT);
+            $scheduleTemplate = $daySchedules->firstWhere('start_time', $timeSlot);
 
-                $currentTime->addMinutes(30);
+            $override = null;
+            if ($scheduleTemplate) {
+                $override = $dateOverrides->firstWhere('schedule_template_id', $scheduleTemplate->id);
             }
 
-            $this->timeSlots[$date->format(self::DATE_FORMAT)] = $slots;
+            $slots[] = [
+                'start' => $timeSlot,
+                'end' => $currentTime->copy()->addMinutes(30)->format(self::TIME_FORMAT),
+                'schedule_prime' => $scheduleTemplate?->prime_time ?? false,
+                'is_override' => $override !== null,
+                'override_prime' => $override?->prime_time ?? false,
+                'schedule_template_id' => $scheduleTemplate?->id,
+            ];
+
+            $currentTime->addMinutes(30);
         }
+
+        return $slots;
+    }
+
+    private function getScheduleTemplates(): Collection
+    {
+        return $this->venue->scheduleTemplates()
+            ->select(['id', 'venue_id', 'day_of_week', 'start_time', 'end_time', 'prime_time', 'is_available'])
+            ->where('is_available', true)
+            ->get()
+            ->groupBy('day_of_week');
+    }
+
+    private function getVenueTimeSlots(): Collection
+    {
+        return VenueTimeSlot::query()
+            ->select(['id', 'schedule_template_id', 'booking_date', 'prime_time'])
+            ->whereIn('booking_date', $this->upcomingDates->map(fn ($date) => $date->format(self::DATE_FORMAT)))
+            ->whereIn('schedule_template_id', $this->venue->scheduleTemplates->pluck('id'))
+            ->get();
     }
 
     protected function initializeSelectedTimeSlots(): void
@@ -171,24 +218,6 @@ class UpcomingPrimeSchedule extends Component implements HasMingles
                 'message' => 'Error saving prime schedule.',
             ];
         }
-    }
-
-    private function getScheduleTemplates(): Collection
-    {
-        return ScheduleTemplate::query()
-            ->where('venue_id', $this->venue->id)
-            ->get()
-            ->groupBy('day_of_week');
-    }
-
-    private function getVenueTimeSlots(): Collection
-    {
-        $upcomingDates = $this->upcomingDates->map(fn ($date) => $date->format(self::DATE_FORMAT))->toArray();
-
-        return VenueTimeSlot::query()
-            ->whereIn('booking_date', $upcomingDates)
-            ->whereIn('schedule_template_id', $this->venue->scheduleTemplates->pluck('id'))
-            ->get();
     }
 
     private function getExistingOverrides(): Collection

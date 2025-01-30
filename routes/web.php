@@ -1,5 +1,6 @@
 <?php
 
+use App\Filament\Pages\CreatePassword;
 use App\Http\Controllers\Booking\BookingCheckoutController;
 use App\Http\Controllers\DemoAuthController;
 use App\Http\Controllers\DownloadInvoiceController;
@@ -101,8 +102,15 @@ Route::get('/join/{type}/{id}', DirectConciergeInvitation::class)
     ->middleware(['signed']);
 
 Route::get('/invitation/{referral}', ConciergeInvitation::class)
-    ->name('concierge.invitation')
+    ->name('concierge.invitation');
+
+Route::get('password/create/{token}', CreatePassword::class)
+    ->name('password.create')
     ->middleware('signed');
+
+Route::get('venue-manager/invitation/{referral}', App\Filament\Pages\VenueManager\AcceptInvitation::class)
+    ->name('venue-manager.invitation')
+    ->middleware(['signed']);
 
 Route::get('venue-invoice/{user}/{startDate}/{endDate}', DownloadVenueInvoiceController::class)
     ->name('venue.invoice.download')

@@ -34,7 +34,7 @@ class VenueOnboardingSubmitted extends Notification implements ShouldQueue
             ->line("Name: {$this->onboarding->first_name} {$this->onboarding->last_name}")
             ->line("Email: {$this->onboarding->email}")
             ->line("Phone: {$this->onboarding->phone}")
-            ->line('')
+            ->line("Partner: {$this->onboarding->partnerUser->name}")
             ->line("Number of venues: {$this->onboarding->venue_count}")
             ->action('Review Submission', url(config('app.platform_url')."/venue-onboardings/{$this->onboarding->id}"))
             ->line('Thank you for using PRIMA!');

@@ -63,13 +63,13 @@ class VenueRecentBookings extends BaseWidget
             ->columns([
                 TextColumn::make('guest_name')
                     ->label('Guest')
-                    ->formatStateUsing(fn (Booking $booking) => "$booking->guest_name ($booking->guest_count)")
+                    // ->formatStateUsing(fn (Booking $booking) => "$booking->guest_name ($booking->guest_count)")
                     ->size('xs')
                     ->searchable(),
                 TextColumn::make('booking_at')
-                    ->label('Date')
+                    ->label('Reservation')
                     ->size('xs')
-                    ->dateTime('D, M j g:ia'),
+                    ->dateTime('M j g:ia'),
                 TextColumn::make('concierge.user.name')
                     ->size('xs')
                     ->label('Booked By'),

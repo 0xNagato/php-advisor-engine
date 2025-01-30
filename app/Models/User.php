@@ -11,10 +11,12 @@ use BezhanSalleh\FilamentShield\Traits\HasPanelShield;
 use Filament\Models\Contracts\FilamentUser;
 use Filament\Models\Contracts\HasAvatar;
 use Filament\Panel;
+use Illuminate\Contracts\Database\Query\Builder;
 use Illuminate\Database\Eloquent\Casts\AsArrayObject;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\HasOneThrough;
@@ -278,16 +280,14 @@ class User extends Authenticatable implements FilamentUser, HasAvatar
     }
 
     /**
-     * Assign the given role(s) to the user and create corresponding profiles.
+     * Assign one or more roles to the user and create corresponding profiles.
      */
     public function assignRole(Role|string|int|array|Collection $roles): static
     {
-        // Convert single items to array
-        if (is_string($roles) || $roles instanceof Role || is_int($roles)) {
-            $roles = [$roles];
-        }
+        // Normalize input to array
+        $roles = is_array($roles) ? $roles : [$roles];
 
-        /** @var Collection<int, Role> $roleModels */
+        // Convert all inputs to Role models
         $roleModels = collect($roles)
             ->flatten()
             ->map(function ($role) {
@@ -295,36 +295,33 @@ class User extends Authenticatable implements FilamentUser, HasAvatar
                     return $role;
                 }
 
-                $query = Role::query();
-
-                // If numeric, search by ID, otherwise search by name
-                if (is_numeric($role)) {
-                    return $query->find($role);
-                }
-
-                return $query->where('name', $role)->first();
+                return is_numeric($role)
+                    ? Role::query()->find($role)
+                    : Role::query()->where('name', $role)->first();
             })
             ->filter();
 
-        // Sync roles
+        // Sync roles without detaching existing ones
         $this->roles()->sync($roleModels->pluck('id')->toArray(), false);
         $this->forgetCachedPermissions();
 
-        // Check if user has any active profile
+        // Get current active profile status
         $hasActiveProfile = $this->roleProfiles()->where('is_active', true)->exists();
 
-        // Create profiles for core roles if they don't exist
+        // Core roles that should have profiles
+        $coreRoles = ['super_admin', 'venue', 'partner', 'concierge', 'venue_manager'];
+
+        // Create profiles for core roles
         foreach ($roleModels as $role) {
-            if (in_array($role->name, ['super_admin', 'venue', 'partner', 'concierge']) && ! $this->roleProfiles()->where('role_id', $role->id)->exists()) {
+            if (in_array($role->name, $coreRoles) && ! $this->roleProfiles()->where('role_id', $role->id)->exists()) {
                 $this->roleProfiles()->create([
                     'role_id' => $role->id,
                     'name' => ucfirst($role->name).' Profile',
                     'is_active' => ! $hasActiveProfile,
                 ]);
 
-                if (! $hasActiveProfile) {
-                    $hasActiveProfile = true;
-                }
+                // Mark that we now have an active profile
+                $hasActiveProfile = true;
             }
         }
 
@@ -334,12 +331,23 @@ class User extends Authenticatable implements FilamentUser, HasAvatar
     /**
      * Switch to a different role profile.
      *
-     * @throws InvalidArgumentException If profile doesn't belong to user
+     * @param  RoleProfile|string  $profile  Either a RoleProfile instance or a role name string
+     *
+     * @throws InvalidArgumentException If profile doesn't belong to user or role name is invalid
      * @throws Throwable
      */
-    public function switchProfile(RoleProfile $profile): void
+    public function switchProfile(RoleProfile|string $profile): void
     {
-        throw_unless($this->roleProfiles->contains($profile), new InvalidArgumentException('Profile does not belong to this user'));
+        if (is_string($profile)) {
+            $profile = $this->roleProfiles()
+                ->whereHas('role', fn (Builder $query) => $query->where('name', $profile))
+                ->first();
+
+            throw_unless($profile, new InvalidArgumentException("No profile found for role: {$profile}"));
+        }
+
+        throw_unless($this->roleProfiles->contains($profile),
+            new InvalidArgumentException('Profile does not belong to this user'));
 
         DB::transaction(function () use ($profile): void {
             $this->roleProfiles()->update(['is_active' => false]);
@@ -374,5 +382,62 @@ class User extends Authenticatable implements FilamentUser, HasAvatar
                 $user->rolesChanged = true;
             }
         });
+    }
+
+    public function managedVenueGroups(): BelongsToMany
+    {
+        return $this->belongsToMany(VenueGroup::class, 'venue_group_managers')
+            ->withPivot('current_venue_id', 'allowed_venue_ids')
+            ->withTimestamps()
+            ->withCasts([
+                'allowed_venue_ids' => 'array',
+            ]);
+    }
+
+    /**
+     * @return HasMany<VenueGroup, $this>
+     */
+    public function primaryManagedVenueGroups(): HasMany
+    {
+        return $this->hasMany(VenueGroup::class, 'primary_manager_id');
+    }
+
+    public function currentManagedVenue(): ?Venue
+    {
+        $currentGroup = $this->managedVenueGroups()
+            ->wherePivot('current_venue_id', '!=', null)
+            ->first();
+
+        return $currentGroup ? Venue::query()->find($currentGroup->pivot->current_venue_id) : null;
+    }
+
+    public function currentVenueGroup(): ?VenueGroup
+    {
+        return $this->managedVenueGroups()
+            ->wherePivot('is_current', true)
+            ->first()
+            ?? $this->managedVenueGroups()->first();
+    }
+
+    public function switchVenueGroup(VenueGroup $venueGroup): void
+    {
+        throw_unless(
+            $this->managedVenueGroups->contains($venueGroup),
+            new InvalidArgumentException('User does not manage this venue group')
+        );
+
+        DB::transaction(function () use ($venueGroup): void {
+            $this->managedVenueGroups()->updateExistingPivot(
+                $this->managedVenueGroups->pluck('id'),
+                ['is_current' => false]
+            );
+
+            $this->managedVenueGroups()->updateExistingPivot(
+                $venueGroup->id,
+                ['is_current' => true]
+            );
+        });
+
+        $this->load('managedVenueGroups');
     }
 }

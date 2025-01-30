@@ -5,11 +5,16 @@ declare(strict_types=1);
 namespace App\Filament\Resources;
 
 use App\Enums\VenueInvoiceStatus;
-use App\Filament\Resources\VenueInvoiceResource\Pages;
+use App\Filament\Resources\VenueInvoiceResource\Pages\ListVenueInvoices;
+use App\Filament\Resources\VenueInvoiceResource\Pages\ViewVenueInvoice;
 use App\Models\VenueInvoice;
 use Filament\Resources\Resource;
-use Filament\Tables;
+use Filament\Tables\Actions\BulkActionGroup;
+use Filament\Tables\Actions\DeleteBulkAction;
+use Filament\Tables\Actions\ViewAction;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\Filter;
+use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 
@@ -91,19 +96,19 @@ class VenueInvoiceResource extends Resource
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
-                Tables\Filters\SelectFilter::make('status')
+                SelectFilter::make('status')
                     ->options(VenueInvoiceStatus::class),
-                Tables\Filters\Filter::make('overdue')
+                Filter::make('overdue')
                     ->query(fn (Builder $query): Builder => $query
                         ->where('status', VenueInvoiceStatus::SENT->value)
                         ->where('due_date', '<', now())),
             ])
             ->actions([
-                Tables\Actions\ViewAction::make(),
+                ViewAction::make(),
             ])
             ->bulkActions([
-                Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
+                BulkActionGroup::make([
+                    DeleteBulkAction::make(),
                 ]),
             ]);
     }
@@ -111,8 +116,8 @@ class VenueInvoiceResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ListVenueInvoices::route('/'),
-            'view' => Pages\ViewVenueInvoice::route('/{record}'),
+            'index' => ListVenueInvoices::route('/'),
+            'view' => ViewVenueInvoice::route('/{record}'),
         ];
     }
 }

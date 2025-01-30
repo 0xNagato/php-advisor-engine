@@ -3,12 +3,18 @@
 namespace App\Filament\Resources\VenueOnboardingResource\Pages;
 
 use App\Actions\GenerateVenueAgreement;
+use App\Actions\ProcessVenueOnboarding;
 use App\Filament\Resources\VenueOnboardingResource;
+use App\Models\User;
+use App\Models\Venue;
 use App\Notifications\VenueAgreementCopy;
 use Filament\Actions\Action;
+use Filament\Forms\Components\TextArea;
+use Filament\Forms\Components\TextInput;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\ViewRecord;
 use Illuminate\Support\Facades\Notification as NotificationFacade;
+use Illuminate\Validation\ValidationException;
 
 class ViewVenueOnboarding extends ViewRecord
 {
@@ -49,8 +55,56 @@ class ViewVenueOnboarding extends ViewRecord
                 ->color('gray'),
 
             Action::make('process')
-                ->action(fn () => $this->record->markAsProcessed(auth()->user()))
+                ->action(function (array $data) {
+                    /** @var User $user */
+                    $user = auth()->user();
+
+                    try {
+                        app(ProcessVenueOnboarding::class)->execute(
+                            onboarding: $this->record,
+                            processedBy: $user,
+                            notes: $data['notes'],
+                            venueDefaults: [
+                                'payout_venue' => $data['payout_venue'],
+                                'booking_fee' => $data['booking_fee'],
+                            ]
+                        );
+
+                        Notification::make()
+                            ->title('Venue onboarding processed successfully')
+                            ->success()
+                            ->send();
+                    } catch (ValidationException $e) {
+                        foreach ($e->errors() as $error) {
+                            Notification::make()
+                                ->title($error[0])
+                                ->danger()
+                                ->send();
+                        }
+                    }
+                })
+                ->form([
+                    TextInput::make('booking_fee')
+                        ->label('Booking Fee')
+                        ->prefix('$')
+                        ->default(Venue::DEFAULT_BOOKING_FEE)
+                        ->numeric()
+                        ->required(),
+                    TextInput::make('payout_venue')
+                        ->label('Venue Payout')
+                        ->default(Venue::DEFAULT_PAYOUT_VENUE)
+                        ->numeric()
+                        ->suffix('%')
+                        ->required(),
+                    TextArea::make('notes')
+                        ->label('Processing Notes')
+                        ->rows(5)
+                        ->placeholder('Enter any notes about processing this onboarding request')
+                        ->required(),
+                ])
                 ->requiresConfirmation()
+                ->modalHeading('Process Venue Onboarding')
+                ->modalDescription('This will create the venue manager and all associated venues.')
                 ->visible(fn (): bool => $this->record->status === 'submitted')
                 ->color('success')
                 ->icon('heroicon-o-check'),

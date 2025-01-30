@@ -42,6 +42,11 @@ return [
         'name' => 'venue',
     ],
 
+    'venue_manager' => [
+        'enabled' => true,
+        'name' => 'venue_manager',
+    ],
+
     'permission_prefixes' => [
         'resource' => [
             'view',

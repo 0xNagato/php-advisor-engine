@@ -2,14 +2,14 @@
 
 namespace App\Filament\Resources;
 
+use App\Filament\Resources\UserResource\Pages\EditUser;
 use App\Filament\Resources\VenueOnboardingResource\Pages\ListVenueOnboardings;
 use App\Filament\Resources\VenueOnboardingResource\Pages\ViewVenueOnboarding;
 use App\Models\User;
 use App\Models\VenueOnboarding;
-use Filament\Forms\Components\DateTimePicker;
+use Filament\Forms\Components\Grid;
 use Filament\Forms\Components\Placeholder;
 use Filament\Forms\Components\Section;
-use Filament\Forms\Components\Textarea;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables\Actions\ViewAction;
@@ -79,6 +79,7 @@ class VenueOnboardingResource extends Resource
                 Section::make('Venues')
                     ->schema([
                         Placeholder::make('venues')
+                            ->hiddenLabel()
                             ->content(fn (VenueOnboarding $record) => new HtmlString(
                                 view('components.venue-onboarding-locations', [
                                     'locations' => $record->locations,
@@ -88,12 +89,28 @@ class VenueOnboardingResource extends Resource
 
                 Section::make('Processing')
                     ->schema([
-                        Textarea::make('notes')
+                        Grid::make(2)
+                            ->schema([
+                                Placeholder::make('processed_by')
+                                    ->label('Processed By')
+                                    ->content(function (VenueOnboarding $record): string|HtmlString {
+                                        if (! $record->processedBy) {
+                                            return 'Not processed';
+                                        }
+
+                                        $url = EditUser::getUrl(['record' => $record->processedBy]);
+
+                                        return new HtmlString(
+                                            "<a href='{$url}' class='text-primary-600 hover:text-primary-500'>{$record->processedBy->name}</a>"
+                                        );
+                                    }),
+                                Placeholder::make('processed_at')
+                                    ->label('Processed At')
+                                    ->content(fn (VenueOnboarding $record): string => $record->processed_at?->format('M j Y, g:ia') ?? 'Not processed'),
+                            ]),
+                        Placeholder::make('notes')
                             ->label('Processing Notes')
-                            ->rows(3),
-                        DateTimePicker::make('processed_at')
-                            ->label('Processed At')
-                            ->disabled(),
+                            ->content(fn (VenueOnboarding $record): string => $record->notes ?? 'No processing notes'),
                     ]),
             ]);
     }

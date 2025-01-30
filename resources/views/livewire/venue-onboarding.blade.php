@@ -6,19 +6,9 @@
                 <p class="mt-2 text-sm text-gray-500">We'll be in touch shortly to complete your onboarding.</p>
             </div>
         @else
-            <div class="flex items-center justify-center gap-2 mb-6 sm:gap-4">
-                @php
-                    $steps = [
-                        'company' => 'Company',
-                        'venues' => 'Venues',
-                        'prime-hours' => 'Hours',
-                        'incentive' => 'Incentives',
-                        'agreement' => 'Agreement',
-                    ];
-                @endphp
-
+            <div class="flex items-center justify-between mb-4 sm:mb-6 sm:justify-center sm:gap-4">
                 @foreach ($steps as $key => $label)
-                    <div class="flex flex-col items-center gap-1 sm:gap-2">
+                    <div class="flex flex-col items-center gap-0.5 sm:gap-2">
                         <div @class([
                             'w-6 h-6 sm:w-8 sm:h-8 rounded-full flex items-center justify-center text-xs sm:text-sm font-medium',
                             'bg-indigo-600 text-white' => $step === $key,
@@ -26,10 +16,16 @@
                         ])>
                             {{ $loop->iteration }}
                         </div>
-                        <span class="text-[10px] sm:text-sm font-semibold text-gray-700">{{ $label }}</span>
+                        <span @class([
+                            'text-[10px] sm:text-sm font-medium whitespace-nowrap',
+                            'text-indigo-600' => $step === $key,
+                            'text-gray-500' => $step !== $key,
+                        ])>
+                            {{ $label }}
+                        </span>
                     </div>
                     @unless ($loop->last)
-                        <div class="self-center -translate-y-3 h-[2px] w-4 sm:w-8 bg-gray-200"></div>
+                        <div class="self-center -translate-y-3 h-[1px] sm:h-[2px] w-2 sm:w-8 bg-gray-200"></div>
                     @endunless
                 @endforeach
             </div>
@@ -207,48 +203,51 @@
                     @if ($step === 'prime-hours')
                         <div>
                             <div class="mb-6">
-                                <h3 class="text-lg font-medium text-gray-900">
-                                    {{ $venue_names[$current_venue_index] ?: 'Venue ' . ($current_venue_index + 1) }}
-                                    Prime Hours
-                                </h3>
+                                <div class="flex items-center justify-between mb-2">
+                                    <h3 class="mr-2 text-base font-medium text-gray-900 sm:text-lg">
+                                        <div class="text-sm font-semibold text-gray-500 sm:text-base">
+                                            {{ $venue_names[$current_venue_index] ?: 'Venue ' . ($current_venue_index + 1) }}
+                                        </div>
+                                        Prime Hours
+                                    </h3>
+                                    <span class="flex-shrink-0 text-sm text-gray-500 whitespace-nowrap">
+                                        Venue {{ $current_venue_index + 1 }} of {{ count($venue_names) }}
+                                    </span>
+                                </div>
                                 <p class="mt-2 text-sm text-gray-500">
                                     Please specify which hours of the day this restaurant is usually fully booked.
                                     During these times, customers will be given the option to purchase a reservation.
                                 </p>
-                                <div class="flex items-center gap-1 mt-4 text-sm text-gray-500">
-                                    @foreach ($venue_names as $index => $name)
-                                        <span @class([
-                                            'w-6 h-6 flex items-center justify-center rounded-full text-xs font-medium',
-                                            'bg-indigo-600 text-white' => $index === $current_venue_index,
-                                            'bg-gray-100 text-gray-600' => $index !== $current_venue_index,
-                                        ])>
-                                            {{ $index + 1 }}
-                                        </span>
-                                        @unless ($loop->last)
-                                            <div class="w-4 h-px bg-gray-200"></div>
-                                        @endunless
-                                    @endforeach
-                                </div>
                             </div>
 
                             <div class="space-y-6">
                                 @foreach (['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'] as $dayIndex => $dayName)
-                                    @php $day = strtolower($dayName); @endphp
+                                    @php
+                                        $day = strtolower($dayName);
+                                        $timeSlots = $availableTimeSlots[$day] ?? [];
+                                    @endphp
                                     <div>
                                         <h4 class="mb-3 text-sm font-medium text-gray-700">{{ $dayName }}</h4>
-                                        <div class="grid grid-cols-3 gap-2 sm:grid-cols-4 md:grid-cols-6">
-                                            @foreach ($timeSlots as $time)
-                                                <label class="relative flex items-center justify-center">
-                                                    <input type="checkbox"
-                                                        wire:model="venue_prime_hours.{{ $current_venue_index }}.{{ $day }}.{{ $time }}"
-                                                        class="sr-only peer" />
-                                                    <div
-                                                        class="w-full py-2 text-sm text-center bg-white border border-gray-200 rounded-lg cursor-pointer peer-checked:bg-indigo-50 peer-checked:border-indigo-600 peer-checked:text-indigo-600">
-                                                        {{ Carbon\Carbon::createFromFormat('H:i:s', $time)->format('g:i A') }}
-                                                    </div>
-                                                </label>
-                                            @endforeach
-                                        </div>
+                                        @if ($this->venue_booking_hours[$current_venue_index][$day]['closed'])
+                                            <p class="text-sm text-gray-500">Venue is closed on {{ $dayName }}s
+                                            </p>
+                                        @elseif (empty($timeSlots))
+                                            <p class="text-sm text-gray-500">No time slots available</p>
+                                        @else
+                                            <div class="grid grid-cols-3 gap-2 sm:grid-cols-4 md:grid-cols-6">
+                                                @foreach ($timeSlots as $time)
+                                                    <label class="relative flex items-center justify-center">
+                                                        <input type="checkbox"
+                                                            wire:model="venue_prime_hours.{{ $current_venue_index }}.{{ $day }}.{{ $time }}"
+                                                            class="sr-only peer" />
+                                                        <div
+                                                            class="w-full py-2 text-sm text-center bg-white border border-gray-200 rounded-lg cursor-pointer peer-checked:bg-indigo-50 peer-checked:border-indigo-600 peer-checked:text-indigo-600">
+                                                            {{ Carbon\Carbon::createFromFormat('H:i:s', $time)->format('g:i A') }}
+                                                        </div>
+                                                    </label>
+                                                @endforeach
+                                            </div>
+                                        @endif
                                     </div>
                                 @endforeach
                             </div>
@@ -259,25 +258,20 @@
                     @if ($step === 'incentive')
                         <div>
                             <div class="mb-6">
-                                <h3 class="text-lg font-medium text-gray-900">Non-Prime Reservation Incentive Program
-                                </h3>
+                                <div class="flex items-center justify-between w-full mb-2">
+                                    <h3 class="mr-2 text-base font-medium text-gray-900 sm:text-lg">
+                                        <div class="text-sm font-semibold text-gray-500 sm:text-base">
+                                            {{ $venue_names[$current_venue_index] ?: 'Venue ' . ($current_venue_index + 1) }}
+                                        </div>
+                                        Non-Prime Reservation Incentive Program
+                                    </h3>
+                                    <span class="flex-shrink-0 text-sm text-gray-500 whitespace-nowrap">
+                                        Venue {{ $current_venue_index + 1 }} of {{ count($venue_names) }}
+                                    </span>
+                                </div>
                                 <p class="mt-2 text-sm text-gray-500">
                                     Configure the non-prime reservation incentive program for each venue.
                                 </p>
-                                <div class="flex items-center gap-1 mt-4 text-sm text-gray-500">
-                                    @foreach ($venue_names as $index => $name)
-                                        <span @class([
-                                            'w-6 h-6 flex items-center justify-center rounded-full text-xs font-medium',
-                                            'bg-indigo-600 text-white' => $index === $current_venue_index,
-                                            'bg-gray-100 text-gray-600' => $index !== $current_venue_index,
-                                        ])>
-                                            {{ $index + 1 }}
-                                        </span>
-                                        @unless ($loop->last)
-                                            <div class="w-4 h-px bg-gray-200"></div>
-                                        @endunless
-                                    @endforeach
-                                </div>
                             </div>
 
                             <div class="space-y-6">
@@ -319,6 +313,76 @@
                         </div>
                     @endif
 
+                    {{-- Booking Hours Step --}}
+                    @if ($step === 'booking-hours')
+                        <div>
+                            <div class="flex items-center justify-between w-full mb-2">
+                                <h3 class="mr-1 text-base font-medium text-gray-900 sm:text-lg">
+                                    <div class="text-sm font-semibold text-gray-500 sm:text-base">
+                                        {{ $venue_names[$current_venue_index] ?: 'Venue ' . ($current_venue_index + 1) }}
+                                    </div>
+                                    Booking Hours
+                                </h3>
+                                <span class="flex-shrink-0 text-sm text-gray-500 whitespace-nowrap">
+                                    Venue {{ $current_venue_index + 1 }} of {{ count($venue_names) }}
+                                </span>
+                            </div>
+                            <p class="mb-4 text-sm text-gray-500">
+                                Please specify the hours during which this venue would like to accept reservations
+                                through PRIMA. These are the times when customers will be able to make bookings via our
+                                platform.
+                            </p>
+                            <div class="space-y-6">
+                                @foreach (['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'] as $dayName)
+                                    @php $day = strtolower($dayName); @endphp
+                                    <div class="space-y-2">
+                                        <div class="flex items-center justify-between">
+                                            <h4 class="text-sm font-medium text-gray-700">{{ $dayName }}</h4>
+                                            <label class="relative inline-flex items-center cursor-pointer">
+                                                <input type="checkbox"
+                                                    wire:model="venue_booking_hours.{{ $current_venue_index }}.{{ $day }}.closed"
+                                                    class="sr-only peer">
+                                                <div
+                                                    class="w-9 h-5 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-indigo-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-indigo-600">
+                                                </div>
+                                                <span class="ml-2 text-sm font-medium text-gray-500">Closed</span>
+                                            </label>
+                                        </div>
+
+                                        <div class="grid grid-cols-2 gap-4" x-data
+                                            x-show="!$wire.venue_booking_hours[{{ $current_venue_index }}]['{{ $day }}'].closed">
+                                            <div>
+                                                <label for="start-{{ $day }}"
+                                                    class="block text-sm font-medium text-gray-700 sr-only">Opening
+                                                    Time</label>
+                                                <input type="time" id="start-{{ $day }}"
+                                                    wire:model="venue_booking_hours.{{ $current_venue_index }}.{{ $day }}.start"
+                                                    class="block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                                                    step="1800">
+                                                @error("venue_booking_hours.{$current_venue_index}.{$day}.start")
+                                                    <p class="mt-1 text-xs text-red-600">{{ $message }}</p>
+                                                @enderror
+                                            </div>
+
+                                            <div>
+                                                <label for="end-{{ $day }}"
+                                                    class="block text-sm font-medium text-gray-700 sr-only">Closing
+                                                    Time</label>
+                                                <input type="time" id="end-{{ $day }}"
+                                                    wire:model="venue_booking_hours.{{ $current_venue_index }}.{{ $day }}.end"
+                                                    class="block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                                                    step="1800">
+                                                @error("venue_booking_hours.{$current_venue_index}.{$day}.end")
+                                                    <p class="mt-1 text-xs text-red-600">{{ $message }}</p>
+                                                @enderror
+                                            </div>
+                                        </div>
+                                    </div>
+                                @endforeach
+                            </div>
+                        </div>
+                    @endif
+
                     {{-- Navigation --}}
                     <div class="fixed inset-x-0 bottom-0 z-10 px-4 py-4 bg-white border-t sm:px-6">
                         <div class="flex justify-between max-w-xl mx-auto">
@@ -346,7 +410,7 @@
                     </div>
 
                     {{-- Add padding at the bottom to prevent content from being hidden behind fixed buttons --}}
-                    <div class="pb-20"></div>
+                    <div class="pb-10"></div>
                 </div>
             </form>
         @endif

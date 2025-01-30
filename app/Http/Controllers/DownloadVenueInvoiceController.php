@@ -28,9 +28,7 @@ class DownloadVenueInvoiceController extends Controller
             $invoice = GenerateVenueInvoice::run($user, $startDate->format('Y-m-d'), $endDate->format('Y-m-d'));
         }
 
-        if (! Storage::disk('do')->exists($invoice->pdf_path)) {
-            throw new RuntimeException('Invoice PDF not found');
-        }
+        throw_unless(Storage::disk('do')->exists($invoice->pdf_path), new RuntimeException('Invoice PDF not found'));
 
         return Storage::disk('do')->download(
             $invoice->pdf_path,

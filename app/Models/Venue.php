@@ -33,6 +33,10 @@ class Venue extends Model
 
     public const int DEFAULT_END_HOUR = 23; // 11:00 PM
 
+    public const int DEFAULT_PAYOUT_VENUE = 60;
+
+    public const int DEFAULT_BOOKING_FEE = 200;
+
     /**
      * The attributes that are mass assignable.
      *
@@ -69,6 +73,7 @@ class Venue extends Model
         'daily_prime_bookings_cap',
         'daily_non_prime_bookings_cap',
         'no_wait',
+        'venue_group_id',
         'is_omakase',
         'omakase_details',
         'omakase_concierge_fee',
@@ -94,7 +99,17 @@ class Venue extends Model
 
         static::creating(static function (Venue $venue) {
             $venue->increment_fee = 50;
-            $venue->slug = Str::slug("$venue->region-$venue->name");
+
+            // Generate base slug
+            $baseSlug = Str::slug("{$venue->region}-{$venue->name}");
+
+            // Find if any similar slugs exist and get the count
+            $count = static::query()
+                ->where('slug', 'like', $baseSlug.'%')
+                ->count();
+
+            // If similar slugs exist, append the next number
+            $venue->slug = $count ? "{$baseSlug}-".($count + 1) : $baseSlug;
 
             $venue->open_days = [
                 'monday' => 'open',
@@ -334,5 +349,13 @@ class Venue extends Model
             ->setDescriptionForEvent(fn (string $eventName) => "Venue has been {$eventName}")
             ->logOnlyDirty()
             ->dontSubmitEmptyLogs();
+    }
+
+    /**
+     * @return BelongsTo<VenueGroup, $this>
+     */
+    public function venueGroup(): BelongsTo
+    {
+        return $this->belongsTo(VenueGroup::class);
     }
 }

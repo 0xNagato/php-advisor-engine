@@ -154,22 +154,6 @@ trait HandlesConciergeInvitation
             ->statePath('data');
     }
 
-    protected function getTermsAndConditionsFormComponent(): Placeholder
-    {
-        $label = new HtmlString("
-            <div class='px-3 py-1 text-xs text-center border border-indigo-600 rounded-lg bg-indigo-50'>
-                By creating your PRIMA Concierge Account, you are agreeing to our Terms Of Service.
-            </div>
-            <div class='mt-2 text-xs font-bold text-center text-indigo-800 underline cursor-pointer' x-data='{}' @click='\$dispatch(\"open-modal\", { id: \"concierge-modal\" })'>
-                Click Here To See Concierge Terms And Conditions
-            </div>
-        ");
-
-        return Placeholder::make('termsAndConditions')
-            ->content($label)
-            ->hiddenLabel();
-    }
-
     public function secureAccount(): void
     {
         try {
@@ -212,6 +196,7 @@ trait HandlesConciergeInvitation
             'phone' => $data['phone'],
             'password' => bcrypt($data['password']),
             'secured_at' => now(),
+            'notification_regions' => $data['notification_regions'],
         ];
 
         if ($this->referral->referrer_type === 'partner') {
@@ -253,5 +238,21 @@ trait HandlesConciergeInvitation
 
         Auth::login($user);
         $this->redirect(config('app.platform_url'));
+    }
+
+    protected function getTermsAndConditionsFormComponent(): Placeholder
+    {
+        $label = new HtmlString("
+            <div class='px-3 py-1 text-xs text-center border border-indigo-600 rounded-lg bg-indigo-50'>
+                By creating your PRIMA Concierge Account, you are agreeing to our Terms Of Service.
+            </div>
+            <div class='mt-2 text-xs font-bold text-center text-indigo-800 underline cursor-pointer' x-data='{}' @click='\$dispatch(\"open-modal\", { id: \"concierge-modal\" })'>
+                Click Here To See Concierge Terms And Conditions
+            </div>
+        ");
+
+        return Placeholder::make('termsAndConditions')
+            ->content($label)
+            ->hiddenLabel();
     }
 }

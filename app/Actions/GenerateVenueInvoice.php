@@ -49,9 +49,7 @@ class GenerateVenueInvoice
             ->orderBy('booking_at')
             ->get();
 
-        if ($bookings->isEmpty()) {
-            throw new RuntimeException('No bookings found for the specified date range.');
-        }
+        throw_if($bookings->isEmpty(), new RuntimeException('No bookings found for the specified date range.'));
 
         // Split bookings into prime and non-prime
         $primeBookings = $bookings->where('is_prime', true);
@@ -63,7 +61,7 @@ class GenerateVenueInvoice
 
         return DB::transaction(function () use ($user, $startDate, $endDate, $bookings, $primeBookings, $nonPrimeBookings, $primeTotalAmount, $nonPrimeTotalAmount) {
             // Create the invoice record
-            $invoice = VenueInvoice::create([
+            $invoice = VenueInvoice::query()->create([
                 'venue_id' => $user->venue->id,
                 'created_by' => auth()->user()->id,
                 'invoice_number' => VenueInvoice::generateInvoiceNumber($user->venue),
