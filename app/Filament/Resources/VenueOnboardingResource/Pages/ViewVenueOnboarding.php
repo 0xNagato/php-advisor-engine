@@ -9,7 +9,7 @@ use App\Models\User;
 use App\Models\Venue;
 use App\Notifications\VenueAgreementCopy;
 use Filament\Actions\Action;
-use Filament\Forms\Components\TextArea;
+use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\ViewRecord;
@@ -96,7 +96,7 @@ class ViewVenueOnboarding extends ViewRecord
                         ->numeric()
                         ->suffix('%')
                         ->required(),
-                    TextArea::make('notes')
+                    Textarea::make('notes')
                         ->label('Processing Notes')
                         ->rows(5)
                         ->placeholder('Enter any notes about processing this onboarding request')
