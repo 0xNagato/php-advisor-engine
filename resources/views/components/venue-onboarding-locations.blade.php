@@ -15,8 +15,7 @@
                     @endif
                 </h3>
                 @if ($location->logo_path)
-                    <img src="{{ Storage::url($location->logo_path) }}" alt="{{ $location->name }} logo"
-                        class="object-contain h-16">
+                    <img src="{{ $location->logo }}" alt="{{ $location->name }} logo" class="object-contain h-16">
                 @endif
             </div>
 
