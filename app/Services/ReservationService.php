@@ -137,7 +137,11 @@ class ReservationService
 
                 $hasBookableSlots = $middleSchedules->contains(fn ($s) => $s->is_bookable);
 
-                return $hasBookableSlots ? 'non_prime_available' : 'active_closed';
+                return $hasBookableSlots ? 'non_prime_available' : (
+                    $venue->schedules->contains(fn ($s) => $s->is_available && $s->remaining_tables === 0)
+                        ? 'sold_out'
+                        : 'closed'
+                );
             })
             ->map(fn ($group) =>
                 // Sort each group alphabetically A-Z
@@ -148,8 +152,9 @@ class ReservationService
                     ->concat($groups->get('hidden', collect()))           // Hidden venues first
                     ->concat($groups->get('prime_available', collect()))  // Then prime slots
                     ->concat($groups->get('non_prime_available', collect())) // Then non-prime slots
-                    ->concat($groups->get('active_closed', collect()))    // Then closed venues
-                    ->concat($groups->get('pending', collect()));         // SOON venues last
+                    ->concat($groups->get('sold_out', collect()))        // Then sold out venues
+                    ->concat($groups->get('closed', collect()))          // Then closed venues
+                    ->concat($groups->get('pending', collect()));        // SOON venues last
             });
 
         // Convert back to Eloquent Collection
