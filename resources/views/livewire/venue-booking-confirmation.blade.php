@@ -22,7 +22,7 @@
         </div>
         @if (filled($booking->notes))
             <div class="p-4 border border-red-500 rounded-md shadow-sm bg-red-50">
-                <h2 class="mb-2 font-semibold text-red-800">Reservation Notes</h2>
+                <h2 class="mb-2 font-semibold text-red-800">Reservation Notes:</h2>
                 <p class="text-sm text-red-700">{{ $booking->notes }}</p>
             </div>
         @endif
@@ -59,7 +59,7 @@
         <div class="pt-2">
             <div class="p-4 text-sm border rounded-lg bg-gray-50">
                 @if ($this->bookingDetails['type'] === 'prime')
-                    <h3 class="mb-3 font-semibold">Prime Booking Details</h3>
+                    <h3 class="mb-3 font-semibold">Earnings Details:</h3>
                     <div class="space-y-2">
                         <p><span class="font-semibold">Total Booking Fee:</span>
                             {{ money($this->bookingDetails['totalFee'], $booking->currency) }}
@@ -70,7 +70,7 @@
                         </p>
                     </div>
                 @else
-                    <h3 class="mb-3 font-semibold">Non-Prime Booking Details</h3>
+                    <h3 class="mb-3 font-semibold">Non-Prime Booking Details:</h3>
                     <div class="space-y-2">
                         <p><span class="font-semibold">Incentive Plan:</span>
                             {{ money($this->bookingDetails['perDinerFee'] * 100, $booking->currency) }} per guest</p>

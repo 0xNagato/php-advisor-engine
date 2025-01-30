@@ -17,7 +17,7 @@ trait RequiresTwoFactorAuthentication
         /**
          * If a super_admin is impersonating another user, they are not required to use two-factor authentication.
          */
-        if (app('impersonate')->isImpersonating()) {
+        if (app('impersonate')->isImpersonating() || env('APP_ENV') === 'local') {
             return;
         }
 
