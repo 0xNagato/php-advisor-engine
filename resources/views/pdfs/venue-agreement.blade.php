@@ -122,6 +122,20 @@
         @endforeach
     </div>
 
+    <h2>5. Cancellation</h2>
+    <p>
+        Either PRIMA or the Restaurant may terminate this Agreement at any time by providing written notice to the other
+        party. Upon termination:
+    </p>
+    <div class="section">
+        <ul>
+            <li>All fees due to PRIMA shall be paid by the Restaurant within fourteen (14) days of the cancellation
+                date.</li>
+            <li>Any fees owed to the Restaurant by PRIMA must be paid within fourteen (14) days of the calendar month in
+                which the cancellation occurred.</li>
+        </ul>
+    </div>
+
     <div class="signature">
         <p>This Agreement has been electronically accepted by the undersigned on behalf of the parties.</p>
 
