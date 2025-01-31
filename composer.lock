@@ -1215,16 +1215,16 @@
         },
         {
             "name": "aws/aws-sdk-php",
-            "version": "3.339.3",
+            "version": "3.339.4",
             "source": {
                 "type": "git",
                 "url": "https://github.com/aws/aws-sdk-php.git",
-                "reference": "2ceb0a5b4c0dcd3c5ca6ea7480f3da62bd4fd588"
+                "reference": "ea62ad03645ef7a1d3f1cda2de49f0869de3c582"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/aws/aws-sdk-php/zipball/2ceb0a5b4c0dcd3c5ca6ea7480f3da62bd4fd588",
-                "reference": "2ceb0a5b4c0dcd3c5ca6ea7480f3da62bd4fd588",
+                "url": "https://api.github.com/repos/aws/aws-sdk-php/zipball/ea62ad03645ef7a1d3f1cda2de49f0869de3c582",
+                "reference": "ea62ad03645ef7a1d3f1cda2de49f0869de3c582",
                 "shasum": ""
             },
             "require": {
@@ -1307,9 +1307,9 @@
             "support": {
                 "forum": "https://github.com/aws/aws-sdk-php/discussions",
                 "issues": "https://github.com/aws/aws-sdk-php/issues",
-                "source": "https://github.com/aws/aws-sdk-php/tree/3.339.3"
+                "source": "https://github.com/aws/aws-sdk-php/tree/3.339.4"
             },
-            "time": "2025-01-30T19:18:55+00:00"
+            "time": "2025-01-31T19:04:39+00:00"
         },
         {
             "name": "barryvdh/laravel-dompdf",
@@ -3855,7 +3855,6 @@
             "time": "2023-10-12T05:21:21+00:00"
         },
         {
-<<<<<<< HEAD
             "name": "giggsey/libphonenumber-for-php",
             "version": "8.13.54",
             "source": {
@@ -3867,19 +3866,6 @@
                 "type": "zip",
                 "url": "https://api.github.com/repos/giggsey/libphonenumber-for-php/zipball/42d3a03d4f47fcb784666743f4323a7b87a2b2ba",
                 "reference": "42d3a03d4f47fcb784666743f4323a7b87a2b2ba",
-=======
-            "name": "giggsey/libphonenumber-for-php-lite",
-            "version": "8.13.53",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/giggsey/libphonenumber-for-php-lite.git",
-                "reference": "ead50d96f01c191f1c8dd504a20f0062dbd9a2ed"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/giggsey/libphonenumber-for-php-lite/zipball/ead50d96f01c191f1c8dd504a20f0062dbd9a2ed",
-                "reference": "ead50d96f01c191f1c8dd504a20f0062dbd9a2ed",
->>>>>>> 717263d40b7a8e9d9a55a02b006fa961e38d2c11
                 "shasum": ""
             },
             "require": {
@@ -3943,7 +3929,6 @@
                 "issues": "https://github.com/giggsey/libphonenumber-for-php/issues",
                 "source": "https://github.com/giggsey/libphonenumber-for-php"
             },
-<<<<<<< HEAD
             "time": "2025-01-31T14:50:26+00:00"
         },
         {
@@ -4001,9 +3986,6 @@
                 "source": "https://github.com/giggsey/Locale/tree/2.7.0"
             },
             "time": "2024-11-04T11:18:07+00:00"
-=======
-            "time": "2025-01-15T17:07:47+00:00"
->>>>>>> 717263d40b7a8e9d9a55a02b006fa961e38d2c11
         },
         {
             "name": "graham-campbell/result-type",
@@ -11463,30 +11445,30 @@
         },
         {
             "name": "spatie/laravel-permission",
-            "version": "6.10.1",
+            "version": "6.12.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/spatie/laravel-permission.git",
-                "reference": "8bb69d6d67387f7a00d93a2f5fab98860f06e704"
+                "reference": "420ea2a49db480302813d444834baaf7c8674782"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/spatie/laravel-permission/zipball/8bb69d6d67387f7a00d93a2f5fab98860f06e704",
-                "reference": "8bb69d6d67387f7a00d93a2f5fab98860f06e704",
+                "url": "https://api.github.com/repos/spatie/laravel-permission/zipball/420ea2a49db480302813d444834baaf7c8674782",
+                "reference": "420ea2a49db480302813d444834baaf7c8674782",
                 "shasum": ""
             },
             "require": {
-                "illuminate/auth": "^8.12|^9.0|^10.0|^11.0",
-                "illuminate/container": "^8.12|^9.0|^10.0|^11.0",
-                "illuminate/contracts": "^8.12|^9.0|^10.0|^11.0",
-                "illuminate/database": "^8.12|^9.0|^10.0|^11.0",
+                "illuminate/auth": "^8.12|^9.0|^10.0|^11.0|^12.0",
+                "illuminate/container": "^8.12|^9.0|^10.0|^11.0|^12.0",
+                "illuminate/contracts": "^8.12|^9.0|^10.0|^11.0|^12.0",
+                "illuminate/database": "^8.12|^9.0|^10.0|^11.0|^12.0",
                 "php": "^8.0"
             },
             "require-dev": {
-                "larastan/larastan": "^1.0|^2.0",
                 "laravel/passport": "^11.0|^12.0",
-                "orchestra/testbench": "^6.23|^7.0|^8.0|^9.0",
-                "phpunit/phpunit": "^9.4|^10.1"
+                "laravel/pint": "^1.0",
+                "orchestra/testbench": "^6.23|^7.0|^8.0|^9.0|^10.0",
+                "phpunit/phpunit": "^9.4|^10.1|^11.5"
             },
             "type": "library",
             "extra": {
@@ -11534,7 +11516,7 @@
             ],
             "support": {
                 "issues": "https://github.com/spatie/laravel-permission/issues",
-                "source": "https://github.com/spatie/laravel-permission/tree/6.10.1"
+                "source": "https://github.com/spatie/laravel-permission/tree/6.12.0"
             },
             "funding": [
                 {
@@ -11542,7 +11524,7 @@
                     "type": "github"
                 }
             ],
-            "time": "2024-11-08T18:45:41+00:00"
+            "time": "2025-01-31T01:07:40+00:00"
         },
         {
             "name": "spatie/php-structure-discoverer",
@@ -19429,12 +19411,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/Roave/SecurityAdvisories.git",
-                "reference": "4245b3fe2b3efed28fc094928cfe3ae625f18243"
+                "reference": "b6841f6613aeea6dbf722ac1663e6409653873d5"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/Roave/SecurityAdvisories/zipball/4245b3fe2b3efed28fc094928cfe3ae625f18243",
-                "reference": "4245b3fe2b3efed28fc094928cfe3ae625f18243",
+                "url": "https://api.github.com/repos/Roave/SecurityAdvisories/zipball/b6841f6613aeea6dbf722ac1663e6409653873d5",
+                "reference": "b6841f6613aeea6dbf722ac1663e6409653873d5",
                 "shasum": ""
             },
             "conflict": {
@@ -19471,6 +19453,7 @@
                 "asymmetricrypt/asymmetricrypt": "<9.9.99",
                 "athlon1600/php-proxy": "<=5.1",
                 "athlon1600/php-proxy-app": "<=3",
+                "athlon1600/youtube-downloader": "<=4",
                 "austintoddj/canvas": "<=3.4.2",
                 "auth0/wordpress": "<=4.6",
                 "automad/automad": "<2.0.0.0-alpha5",
@@ -20291,7 +20274,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2025-01-30T18:06:22+00:00"
+            "time": "2025-01-30T23:05:03+00:00"
         },
         {
             "name": "sebastian/cli-parser",
@@ -22515,6 +22498,6 @@
     "platform": {
         "php": "^8.3"
     },
-    "platform-dev": [],
+    "platform-dev": {},
     "plugin-api-version": "2.6.0"
 }
