@@ -164,7 +164,7 @@ class ModifyNonPrimeBookingWidget extends Widget implements HasForms
 
         try {
             $formState = $this->form->getState();
-            $schedule = ScheduleWithBooking::query()->find($this->selectedTimeSlotId);
+            $schedule = $this->selectedTimeSlotId ? ScheduleWithBooking::query()->find($this->selectedTimeSlotId) : null;
 
             // Determine request source and user
             $requestSource = auth()->check() ? auth()->user()->main_role : 'customer';
@@ -181,7 +181,7 @@ class ModifyNonPrimeBookingWidget extends Widget implements HasForms
                 'original_time' => $this->booking->booking_at->format('H:i:s'),
                 'requested_time' => $schedule ? $schedule->start_time : $this->booking->booking_at->format('H:i:s'),
                 'original_schedule_template_id' => $this->booking->schedule_template_id,
-                'requested_schedule_template_id' => $this->selectedTimeSlotId,
+                'requested_schedule_template_id' => $this->selectedTimeSlotId ?? $this->booking->schedule_template_id,
                 'status' => 'pending',
                 'meta' => [
                     'request_source' => $requestSource,

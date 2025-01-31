@@ -12,10 +12,20 @@
 
             <div class="px-4 py-3 border-t border-gray-200 sm:px-6">
                 <dl class="space-y-3">
+                    <div class="pb-3 mb-3 border-b border-gray-200">
+                        <dt class="text-sm font-medium text-gray-500">Venue</dt>
+                        <dd class="mt-0.5">
+                            <div class="text-sm font-medium text-gray-900">
+                                {{ $modificationRequest->booking->venue->name }}
+                            </div>
+                        </dd>
+                    </div>
+
                     <div class="flex items-baseline justify-between">
                         <div>
                             <dt class="text-sm font-medium text-gray-500">Guest Name</dt>
-                            <dd class="mt-0.5 text-sm text-gray-900">{{ $modificationRequest->booking->guest_name }}</dd>
+                            <dd class="mt-0.5 text-sm text-gray-900">{{ $modificationRequest->booking->guest_name }}
+                            </dd>
                         </div>
                         <div class="text-right">
                             <dt class="text-sm font-medium text-gray-500">Booking Date</dt>

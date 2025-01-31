@@ -32,6 +32,7 @@ class VenueContactModificationRequested extends Notification implements ShouldQu
             phone: $this->contact->contact_phone,
             templateKey: 'venue_modification_request',
             templateData: [
+                'venue_name' => $booking->venue->name,
                 'guest_name' => $booking->guest_name,
                 'guest_phone' => $booking->guest_phone,
                 'booking_date' => Carbon::toNotificationFormat($booking->booking_at),
