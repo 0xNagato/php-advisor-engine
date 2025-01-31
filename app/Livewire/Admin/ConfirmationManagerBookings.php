@@ -3,6 +3,7 @@
 namespace App\Livewire\Admin;
 
 use App\Actions\Booking\SendConfirmationToVenueContacts;
+use App\Filament\Resources\BookingResource\Pages\ViewBooking;
 use App\Models\Booking;
 use Filament\Tables\Actions\Action;
 use Filament\Tables\Actions\ActionGroup;
@@ -22,8 +23,10 @@ class ConfirmationManagerBookings extends BaseWidget
             ->query(
                 Booking::query()
                     ->confirmed()
-                    ->latest()
+                    ->orderByRaw('venue_confirmed_at IS NOT NULL')
+                    ->orderBy('created_at', 'desc')
             )
+            ->recordUrl(fn (Booking $record) => ViewBooking::getUrl(['record' => $record]))
             ->columns([
                 TextColumn::make('venue.name')
                     ->label('Venue')
