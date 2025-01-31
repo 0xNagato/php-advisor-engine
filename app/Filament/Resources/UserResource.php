@@ -77,19 +77,26 @@ class UserResource extends Resource
             ->query(
                 static::getModel()::query()
                     ->with(['roleProfiles.role'])
+                    ->select('users.*')
+                    ->leftJoin('authentication_log', function ($join) {
+                        $join->on('users.id', '=', 'authentication_log.authenticatable_id')
+                            ->where('authentication_log.authenticatable_type', '=', User::class);
+                    })
+                    ->groupBy('users.id')
+                    ->orderByRaw('COALESCE(MAX(authentication_log.login_at), "1000-01-01") DESC')
             )
-            ->defaultSort('authentications.login_at', 'desc')
             ->recordUrl(fn (User $record): string => EditUser::getUrl(['record' => $record]))
             ->columns([
                 TextColumn::make('name')
                     ->sortable(['first_name', 'last_name'])
                     ->size('sm')
                     ->searchable(query: function (Builder $query, string $search): Builder {
-                        return $query
-                            ->where('first_name', 'like', "%{$search}%")
-                            ->orWhere('last_name', 'like', "%{$search}%")
-                            ->orWhere('email', 'like', "%{$search}%")
-                            ->orWhere('phone', 'like', "%{$search}%");
+                        return $query->where(function ($query) use ($search) {
+                            $query->where('first_name', 'like', "%{$search}%")
+                                ->orWhere('last_name', 'like', "%{$search}%")
+                                ->orWhere('email', 'like', "%{$search}%")
+                                ->orWhere('phone', 'like', "%{$search}%");
+                        });
                     })
                     ->formatStateUsing(fn (User $record): string => new HtmlString(<<<HTML
                         <div class="space-y-0.5">

@@ -13,7 +13,7 @@ observers:
   dump: true
   original_dump: true
   queries: false
-  slow_queries: false
+  slow_queries: true
   mail: true
   logs: true
   http: false
