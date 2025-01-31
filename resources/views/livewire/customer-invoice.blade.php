@@ -328,6 +328,29 @@
 
             @if ($this->canModifyBooking)
                 <x-filament::actions :actions="[$this->cancelBookingAction, $this->modifyGuestInfoAction]" class="w-full mt-4" />
+
+                <x-filament::button wire:click="$dispatch('open-modal', { id: 'modify-booking-{{ $booking->id }}' })"
+                    class="w-full mt-3" icon="heroicon-m-pencil-square" :disabled="$booking->hasActiveModificationRequest()">
+                    {{ $booking->hasActiveModificationRequest() ? 'Modification Request Pending' : 'Modify Booking' }}
+                </x-filament::button>
+
+                <x-filament::modal id="modify-booking-{{ $booking->id }}" width="md">
+                    <x-slot name="heading">
+                        Modify Booking
+                    </x-slot>
+
+                    <x-slot name="description">
+                        <div class="text-sm text-gray-500">
+                            We must confirm all reservations with the participating venue. Please submit any change
+                            requests needed here. We will confirm the changes requested within 15-30 minutes and notify
+                            both you and the customer.
+                        </div>
+                    </x-slot>
+
+                    <div>
+                        <livewire:booking.modify-non-prime-booking-widget :booking="$booking" :show-details="false" />
+                    </div>
+                </x-filament::modal>
             @endif
         </div>
         <!-- End Body -->
