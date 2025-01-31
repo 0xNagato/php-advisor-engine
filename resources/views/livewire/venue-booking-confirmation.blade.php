@@ -28,7 +28,8 @@
         @endif
 
         @if ($booking->venue_confirmed_at)
-            <div class="space-y-4 text-center">
+            <div
+                class="flex flex-col items-center justify-center p-3 space-y-1 text-sm text-gray-600 border border-gray-200 rounded-lg bg-gray-50">
                 <p>We've notified the guests and reminded them to be on time for their reservation.</p>
                 @if ($this->showUndoButton)
                     {{ $this->undoConfirmationAction }}
@@ -36,13 +37,27 @@
             </div>
         @else
             @if ($this->isPastBookingTime)
-                <div class="space-y-4 text-center">
+                <div
+                    class="flex flex-col items-center justify-center p-3 space-y-1 text-sm border border-red-200 rounded-lg bg-red-50">
+                    <p class="text-red-600">
+                        This reservation cannot be confirmed
+                    </p>
                     <p class="text-red-500">
-                        This reservation can no longer be confirmed as it is past the allowable confirmation time.
+                        Confirmation time has passed. Bookings must be confirmed at least
+                        {{ self::MINUTES_BEFORE_BOOKING_CUTOFF }} minutes before the reservation time.
                     </p>
                 </div>
             @else
-                {{ $this->confirmBookingAction }}
+                <div
+                    class="flex flex-col items-center justify-center p-3 space-y-1 text-sm border border-gray-200 rounded-lg bg-gray-50">
+                    <p class="mb-2 text-center text-gray-600">
+                        Please confirm this booking before<br>{{ $cutoffTime }}
+                        <span class="text-gray-500">
+                            ({{ self::MINUTES_BEFORE_BOOKING_CUTOFF }} minutes before the reservation time)
+                        </span>
+                    </p>
+                    {{ $this->confirmBookingAction }}
+                </div>
             @endif
         @endif
 

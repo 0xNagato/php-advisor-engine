@@ -5,8 +5,7 @@ namespace App\Livewire\Venue;
 use App\Constants\BookingPercentages;
 use App\Enums\BookingStatus;
 use App\Models\Booking;
-use DateTime;
-use DateTimeZone;
+use Carbon\Carbon;
 use Exception;
 use Filament\Actions\Action;
 use Filament\Notifications\Notification;
@@ -17,9 +16,13 @@ use Livewire\Attributes\Computed;
 
 class VenueBookingConfirmation extends Page
 {
+    public const MINUTES_BEFORE_BOOKING_CUTOFF = 15;
+
     public Booking $booking;
 
     public bool $showUndoButton = false;
+
+    public ?string $cutoffTime = null;
 
     protected static string $layout = 'components.layouts.app';
 
@@ -30,6 +33,18 @@ class VenueBookingConfirmation extends Page
         $this->booking = $booking;
         $this->showUndoButton = $this->booking->venue_confirmed_at !== null &&
             $this->booking->venue_confirmed_at->isAfter(now()->subHour());
+
+        // Calculate cutoff time
+        $bookingTime = Carbon::createFromFormat(
+            'Y-m-d H:i:s',
+            $this->booking->booking_at,
+            $this->booking->venue->timezone
+        );
+
+        $this->cutoffTime = $bookingTime
+            ->copy()
+            ->subMinutes(self::MINUTES_BEFORE_BOOKING_CUTOFF)
+            ->format('g:i A');
     }
 
     public function confirmBooking(): void
@@ -84,12 +99,18 @@ class VenueBookingConfirmation extends Page
     #[Computed]
     public function isPastBookingTime(): bool
     {
-        $timezone = session('timezone', 'UTC');
-        $bookingTime = new DateTime($this->booking->booking_at, new DateTimeZone($timezone));
-        $bookingTimePlusOneHour = (clone $bookingTime)->modify('+1 hour');
-        $currentTime = new DateTime('now', new DateTimeZone($timezone));
+        $venueTimezone = $this->booking->venue->timezone;
 
-        return $currentTime > $bookingTimePlusOneHour;
+        $bookingTime = Carbon::createFromFormat(
+            'Y-m-d H:i:s',
+            $this->booking->booking_at,
+            $venueTimezone
+        );
+
+        $currentTime = now($venueTimezone);
+
+        // Check if we're within the cutoff period before the booking
+        return $currentTime->diffInMinutes($bookingTime, false) <= self::MINUTES_BEFORE_BOOKING_CUTOFF;
     }
 
     #[Computed]

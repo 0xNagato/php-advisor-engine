@@ -839,9 +839,7 @@ class ViewBooking extends ViewRecord
                     ->body($notificationMessage)
                     ->send();
             })
-            ->visible(fn () => auth()->user()->hasActiveRole('super_admin') ||
-                (auth()->user()->hasActiveRole('concierge') &&
-                 auth()->id() === $this->record->concierge?->user_id))
+            ->visible(fn () => $this->canModifyBooking)
             ->button()
             ->size('lg')
             ->extraAttributes(['class' => 'w-full']);
