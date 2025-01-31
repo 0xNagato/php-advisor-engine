@@ -12,6 +12,7 @@
             <livewire:booking.invoice-small :booking="$booking" :showAmount="false" />
         </div> --}}
         <div class="p-4 space-y-1 text-sm border rounded-lg bg-gray-50">
+            <p><span class="font-semibold">Venue:</span> {{ $booking->venue->name }}</p>
             <p><span class="font-semibold">Booking:</span> {{ $booking->booking_at->format('M j, Y') }} @
                 {{ $booking->booking_at->format('g:i A') }}</p>
             <p><span class="font-semibold">Customer:</span> {{ $booking->guest_first_name }}
