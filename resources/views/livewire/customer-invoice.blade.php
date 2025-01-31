@@ -80,7 +80,7 @@
                     <div class="block text-xs font-medium text-gray-800 sm:text-sm dark:text-gray-200">
                         {{ $booking->guest_name }}
                         <br />
-                        {{ $booking->local_formatted_guest_phone }}
+                        {{ $booking->guest_phone }}
                         @if ($booking->guest_email)
                             <br />
                             {{ $booking->guest_email }}
