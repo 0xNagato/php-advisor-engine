@@ -326,6 +326,7 @@
                     $this->uncancelBookingAction,
                     $this->markAsNoShowAction,
                     $this->transferBookingAction,
+                    $this->modifyGuestInfoAction,
                 ]" class="w-full mt-4" />
             @elseif (auth()->check() &&
                     auth()->user()->hasActiveRole('super_admin') &&
@@ -333,23 +334,7 @@
                 <x-filament::actions :actions="[$this->abandonBookingAction]" class="w-full mt-4" />
             @endif
 
-            @php
-                $venueTimezone = $booking->venue->timezone;
-                $currentTime = now()->setTimezone($venueTimezone);
-                $bookingTime = \Carbon\Carbon::createFromFormat('Y-m-d H:i:s', $booking->booking_at, $venueTimezone);
-
-                $canModifyBooking =
-                    auth()->check() &&
-                    (auth()->user()->hasActiveRole('super_admin') || auth()->user()->hasActiveRole('concierge')) &&
-                    !$booking->prime_time &&
-                    $bookingTime->greaterThan($currentTime) &&
-                    in_array($booking->status, [
-                        \App\Enums\BookingStatus::CONFIRMED,
-                        \App\Enums\BookingStatus::VENUE_CONFIRMED,
-                    ]);
-            @endphp
-
-            @if ($canModifyBooking)
+            @if ($this->canModifyBooking)
                 <x-filament::button wire:click="$dispatch('open-modal', { id: 'modify-booking-{{ $booking->id }}' })"
                     class="w-full mt-3" icon="heroicon-m-pencil-square" :disabled="$booking->hasActiveModificationRequest()">
                     {{ $booking->hasActiveModificationRequest() ? 'Modification Request Pending' : 'Modify Booking' }}

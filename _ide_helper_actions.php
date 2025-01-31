@@ -1,5 +1,21 @@
 <?php
 
+namespace App\Actions\Booking\Authorization;
+
+/**
+ * @method static \Lorisleiva\Actions\Decorators\JobDecorator|\Lorisleiva\Actions\Decorators\UniqueJobDecorator makeJob(\App\Models\Booking $booking, \App\Models\User $user)
+ * @method static \Lorisleiva\Actions\Decorators\UniqueJobDecorator makeUniqueJob(\App\Models\Booking $booking, \App\Models\User $user)
+ * @method static \Illuminate\Foundation\Bus\PendingDispatch dispatch(\App\Models\Booking $booking, \App\Models\User $user)
+ * @method static \Illuminate\Foundation\Bus\PendingDispatch|\Illuminate\Support\Fluent dispatchIf(bool $boolean, \App\Models\Booking $booking, \App\Models\User $user)
+ * @method static \Illuminate\Foundation\Bus\PendingDispatch|\Illuminate\Support\Fluent dispatchUnless(bool $boolean, \App\Models\Booking $booking, \App\Models\User $user)
+ * @method static dispatchSync(\App\Models\Booking $booking, \App\Models\User $user)
+ * @method static dispatchNow(\App\Models\Booking $booking, \App\Models\User $user)
+ * @method static dispatchAfterResponse(\App\Models\Booking $booking, \App\Models\User $user)
+ * @method static bool run(\App\Models\Booking $booking, \App\Models\User $user)
+ */
+class CanModifyBooking
+{
+}
 namespace App\Actions\Booking;
 
 /**
@@ -183,7 +199,7 @@ class GenerateVenueAgreement
  * @method static dispatchSync(\App\Models\User $user, string $startDate, string $endDate)
  * @method static dispatchNow(\App\Models\User $user, string $startDate, string $endDate)
  * @method static dispatchAfterResponse(\App\Models\User $user, string $startDate, string $endDate)
- * @method static \Spatie\LaravelPdf\PdfBuilder run(\App\Models\User $user, string $startDate, string $endDate)
+ * @method static \App\Models\VenueInvoice run(\App\Models\User $user, string $startDate, string $endDate)
  */
 class GenerateVenueInvoice
 {
