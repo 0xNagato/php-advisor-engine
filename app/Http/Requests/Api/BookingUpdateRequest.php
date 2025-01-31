@@ -5,7 +5,6 @@ namespace App\Http\Requests\Api;
 use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Http\Exceptions\HttpResponseException;
-use libphonenumber\PhoneNumberType;
 use Propaganistas\LaravelPhone\Rules\Phone;
 
 class BookingUpdateRequest extends FormRequest
@@ -19,7 +18,6 @@ class BookingUpdateRequest extends FormRequest
                 'required',
                 (new Phone)
                     ->country(config('app.countries'))
-                    ->type(PhoneNumberType::MOBILE)
                     ->lenient(),
             ],
             'email' => ['nullable', 'email'],

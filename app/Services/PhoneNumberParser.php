@@ -22,7 +22,7 @@ class PhoneNumberParser
         return new self($phone);
     }
 
-    public function parse(): ?PhoneNumberData
+    public function parse(): PhoneNumberData
     {
         $contactPhone = $this->getInternationalFormattedPhoneNumber($this->phone);
         $phoneUtil = PhoneNumberUtil::getInstance();
@@ -33,13 +33,16 @@ class PhoneNumberParser
 
             return new PhoneNumberData(
                 phone: $contactPhone,
-                country: $countryCode,
+                country: $countryCode ?? 'Unknown',
             );
         } catch (NumberParseException $exception) {
             Log::error($exception->getMessage());
             Sentry::captureException($exception);
         }
 
-        return null;
+        return new PhoneNumberData(
+            phone: $contactPhone,
+            country: 'Unknown',
+        );
     }
 }

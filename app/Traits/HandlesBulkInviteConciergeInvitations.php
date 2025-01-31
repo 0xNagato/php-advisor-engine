@@ -15,7 +15,6 @@ use Filament\Forms\Set;
 use Filament\Notifications\Notification;
 use Filament\Support\Enums\ActionSize;
 use Filament\Support\Enums\MaxWidth;
-use libphonenumber\PhoneNumberType;
 use Ysfkaya\FilamentPhoneInput\Forms\PhoneInput;
 use Ysfkaya\FilamentPhoneInput\PhoneInputNumberType;
 
@@ -99,7 +98,6 @@ trait HandlesBulkInviteConciergeInvitations
                                         ->disallowDropdown()
                                         ->validateFor(
                                             country: config('app.countries'),
-                                            type: PhoneNumberType::MOBILE,
                                             lenient: true,
                                         )
                                         ->columnSpan(2),

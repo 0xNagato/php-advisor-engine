@@ -13,7 +13,6 @@ use Filament\Forms\Contracts\HasForms;
 use Filament\Forms\Form;
 use Filament\Notifications\Notification;
 use Filament\Widgets\Widget;
-use libphonenumber\PhoneNumberType;
 use Ysfkaya\FilamentPhoneInput\Forms\PhoneInput;
 use Ysfkaya\FilamentPhoneInput\PhoneInputNumberType;
 
@@ -59,7 +58,6 @@ class SMSBookingForm extends Widget implements HasForms
                 ->disallowDropdown()
                 ->validateFor(
                     country: config('app.countries'),
-                    type: PhoneNumberType::MOBILE,
                     lenient: true,
                 )
                 ->columnSpan(2)

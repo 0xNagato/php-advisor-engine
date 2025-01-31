@@ -20,7 +20,6 @@ use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\HtmlString;
 use Illuminate\Validation\Rules\Password as PasswordRule;
-use libphonenumber\PhoneNumberType;
 use Ysfkaya\FilamentPhoneInput\Forms\PhoneInput;
 use Ysfkaya\FilamentPhoneInput\PhoneInputNumberType;
 
@@ -87,7 +86,6 @@ trait HandlesConciergeInvitation
                     ->disallowDropdown()
                     ->validateFor(
                         country: config('app.countries'),
-                        type: PhoneNumberType::MOBILE,
                         lenient: true,
                     )
                     ->columnSpan(2)

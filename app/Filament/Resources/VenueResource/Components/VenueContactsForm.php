@@ -8,7 +8,6 @@ use Filament\Forms\Components\Fieldset;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Forms\Get;
-use libphonenumber\PhoneNumberType;
 use Ysfkaya\FilamentPhoneInput\Forms\PhoneInput;
 use Ysfkaya\FilamentPhoneInput\PhoneInputNumberType;
 
@@ -28,7 +27,6 @@ class VenueContactsForm
                 ->disallowDropdown()
                 ->validateFor(
                     country: config('app.countries'),
-                    type: PhoneNumberType::MOBILE,
                     lenient: true,
                 )
                 ->initialCountry('US'),

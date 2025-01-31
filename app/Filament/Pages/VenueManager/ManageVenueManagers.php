@@ -16,7 +16,6 @@ use Filament\Tables\Concerns\InteractsWithTable;
 use Filament\Tables\Contracts\HasTable;
 use Filament\Tables\Table;
 use Illuminate\Support\HtmlString;
-use libphonenumber\PhoneNumberType;
 use Ysfkaya\FilamentPhoneInput\Forms\PhoneInput;
 use Ysfkaya\FilamentPhoneInput\PhoneInputNumberType;
 
@@ -173,7 +172,6 @@ class ManageVenueManagers extends Page implements HasTable
                                     ->unique('users', 'phone')
                                     ->validateFor(
                                         country: config('app.countries'),
-                                        type: PhoneNumberType::MOBILE,
                                         lenient: true,
                                     )
                                     ->columnSpan(2)

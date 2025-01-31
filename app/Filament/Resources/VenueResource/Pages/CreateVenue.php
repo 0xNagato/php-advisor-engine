@@ -20,7 +20,6 @@ use Filament\Resources\Pages\CreateRecord;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
-use libphonenumber\PhoneNumberType;
 use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 use Str;
 use Ysfkaya\FilamentPhoneInput\Forms\PhoneInput;
@@ -63,7 +62,6 @@ class CreateVenue extends CreateRecord
                             ->disallowDropdown()
                             ->validateFor(
                                 country: config('app.countries'),
-                                type: PhoneNumberType::MOBILE,
                                 lenient: true,
                             )
                             ->initialCountry('US')
@@ -113,7 +111,6 @@ class CreateVenue extends CreateRecord
                             ->disallowDropdown()
                             ->validateFor(
                                 country: config('app.countries'),
-                                type: PhoneNumberType::MOBILE,
                                 lenient: true,
                             )
                             ->initialCountry('US'),
@@ -153,7 +150,6 @@ class CreateVenue extends CreateRecord
                             ->disallowDropdown()
                             ->validateFor(
                                 country: config('app.countries'),
-                                type: PhoneNumberType::MOBILE,
                                 lenient: true,
                             )
                             ->initialCountry('US'),

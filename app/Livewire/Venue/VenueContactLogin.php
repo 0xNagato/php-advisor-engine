@@ -12,7 +12,6 @@ use Filament\Forms\Contracts\HasForms;
 use Filament\Support\Enums\Alignment;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\URL;
-use libphonenumber\PhoneNumberType;
 use Livewire\Component;
 use Ysfkaya\FilamentPhoneInput\Forms\PhoneInput;
 use Ysfkaya\FilamentPhoneInput\PhoneInputNumberType;
@@ -56,7 +55,6 @@ class VenueContactLogin extends Component implements HasForms
                 ->onlyCountries(config('app.countries'))
                 ->validateFor(
                     country: config('app.countries'),
-                    type: PhoneNumberType::MOBILE,
                     lenient: true,
                 )
                 ->required(),

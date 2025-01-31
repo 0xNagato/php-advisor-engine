@@ -19,7 +19,6 @@ use Filament\Notifications\Notification;
 use Filament\Widgets\Widget;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\HtmlString;
-use libphonenumber\PhoneNumberType;
 use Tapp\FilamentTimezoneField\Forms\Components\TimezoneSelect;
 use Ysfkaya\FilamentPhoneInput\Forms\PhoneInput;
 use Ysfkaya\FilamentPhoneInput\PhoneInputNumberType;
@@ -98,7 +97,6 @@ class ProfileSettings extends Widget implements HasForms
                 ->disallowDropdown()
                 ->validateFor(
                     country: config('app.countries'),
-                    type: PhoneNumberType::MOBILE,
                     lenient: true,
                 )
                 ->label('Phone'),

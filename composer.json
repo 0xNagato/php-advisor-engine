@@ -21,6 +21,7 @@
     "codeat3/blade-phosphor-icons": "^2.2",
     "eduard9969/blade-polaris-icons": "^2.6",
     "filament/filament": "3.2.132",
+    "giggsey/libphonenumber-for-php": "^8.13",
     "guzzlehttp/guzzle": "^7.2",
     "hasan-ahani/filament-otp-input": "^1.0",
     "ijpatricio/mingle": "^0.0.18",

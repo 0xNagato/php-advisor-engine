@@ -21,7 +21,6 @@ use Filament\Forms\Form;
 use Filament\Notifications\Notification;
 use Filament\Support\RawJs;
 use Filament\Widgets\Widget;
-use libphonenumber\PhoneNumberType;
 use Sentry;
 use Ysfkaya\FilamentPhoneInput\Forms\PhoneInput;
 use Ysfkaya\FilamentPhoneInput\PhoneInputNumberType;
@@ -110,7 +109,6 @@ class CreateSpecialRequestForm extends Widget implements HasForms
                             ->disallowDropdown()
                             ->validateFor(
                                 country: config('app.countries'),
-                                type: PhoneNumberType::MOBILE,
                                 lenient: true,
                             )
                             ->columnSpan(2)

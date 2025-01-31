@@ -9,7 +9,6 @@ use Filament\Forms\Components\TextInput;
 use Filament\Forms\Form;
 use Filament\Resources\Pages\CreateRecord;
 use Illuminate\Database\Eloquent\Model;
-use libphonenumber\PhoneNumberType;
 use Ysfkaya\FilamentPhoneInput\Forms\PhoneInput;
 use Ysfkaya\FilamentPhoneInput\PhoneInputNumberType;
 
@@ -52,7 +51,6 @@ class CreateAdmin extends CreateRecord
                             ->disallowDropdown()
                             ->validateFor(
                                 country: config('app.countries'),
-                                type: PhoneNumberType::MOBILE,
                                 lenient: true,
                             )
                             ->initialCountry('US')

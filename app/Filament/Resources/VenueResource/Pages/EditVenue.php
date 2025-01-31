@@ -24,7 +24,6 @@ use Filament\Resources\Pages\EditRecord;
 use Filament\Support\Enums\ActionSize;
 use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Support\Facades\Storage;
-use libphonenumber\PhoneNumberType;
 use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 use RuntimeException;
 use Ysfkaya\FilamentPhoneInput\Forms\PhoneInput;
@@ -88,7 +87,6 @@ class EditVenue extends EditRecord
                             ->disallowDropdown()
                             ->validateFor(
                                 country: config('app.countries'),
-                                type: PhoneNumberType::MOBILE,
                                 lenient: true,
                             )
                             ->required()
