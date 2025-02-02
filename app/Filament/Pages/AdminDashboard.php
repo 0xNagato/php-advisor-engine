@@ -4,6 +4,7 @@ namespace App\Filament\Pages;
 
 use App\Filament\DateRangeFilterAction;
 use App\Livewire\Admin\AdminRecentBookings;
+use App\Livewire\BookingAnalyticsWidget;
 use App\Livewire\BookingsOverview;
 use App\Livewire\Concierge\ConciergeOverallLeaderboard;
 use App\Livewire\DateRangeFilterWidget;
@@ -90,6 +91,12 @@ class AdminDashboard extends Dashboard
                 'columnSpan' => '1',
                 'startDate' => Carbon::parse($this->filters['startDate']),
                 'endDate' => Carbon::parse($this->filters['endDate']),
+            ]),
+            BookingAnalyticsWidget::make([
+                'filters' => [
+                    'startDate' => $this->filters['startDate'] ?? null,
+                    'endDate' => $this->filters['endDate'] ?? null,
+                ],
             ]),
             // AdminTopReferrersTable::make([
             //     'startDate' => Carbon::parse($this->filters['startDate']),
