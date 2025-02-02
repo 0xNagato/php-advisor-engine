@@ -89,7 +89,8 @@ class BookingAnalyticsWidget extends Widget
                 'bookings.is_prime',
                 'bookings.currency',
                 DB::raw('COUNT(*) as count'),
-                DB::raw('AVG(bookings.total_fee) as avg_fee')
+                DB::raw('AVG(bookings.total_fee) as avg_fee'),
+                DB::raw('AVG(bookings.platform_earnings) as avg_platform_earnings')
             )
             ->whereBetween('bookings.booking_at', [$startDate, $endDate])
             ->whereIn('bookings.status', [BookingStatus::CONFIRMED, BookingStatus::VENUE_CONFIRMED])
@@ -99,11 +100,12 @@ class BookingAnalyticsWidget extends Widget
             ->map(function ($group) use ($currencyService) {
                 $totalCount = $group->sum('count');
                 $avgFees = $group->mapWithKeys(fn ($item) => [$item->currency => $item->avg_fee])->toArray();
-                $avgFeeUSD = $currencyService->convertToUSD($avgFees);
+                $avgPlatformEarnings = $group->mapWithKeys(fn ($item) => [$item->currency => $item->avg_platform_earnings])->toArray();
 
                 return [
                     'count' => $totalCount,
-                    'avg_fee_usd' => $avgFeeUSD,
+                    'avg_fee_usd' => $currencyService->convertToUSD($avgFees),
+                    'avg_platform_earnings_usd' => $currencyService->convertToUSD($avgPlatformEarnings),
                 ];
             })
             ->toArray();
@@ -118,7 +120,9 @@ class BookingAnalyticsWidget extends Widget
                         WHEN DATEDIFF(bookings.booking_at, bookings.created_at) = 0 THEN "Same day"
                         WHEN DATEDIFF(bookings.booking_at, bookings.created_at) = 1 THEN "Next day"
                         WHEN DATEDIFF(bookings.booking_at, bookings.created_at) <= 7 THEN "2-7 days"
-                        ELSE "8+ days"
+                        WHEN DATEDIFF(bookings.booking_at, bookings.created_at) <= 14 THEN "8-14 days"
+                        WHEN DATEDIFF(bookings.booking_at, bookings.created_at) <= 30 THEN "15-30 days"
+                        ELSE "30+ days"
                     END as lead_time
                 '),
                 DB::raw('COUNT(*) as count')
@@ -131,7 +135,9 @@ class BookingAnalyticsWidget extends Widget
                     WHEN "Same day" THEN 1
                     WHEN "Next day" THEN 2
                     WHEN "2-7 days" THEN 3
-                    ELSE 4
+                    WHEN "8-14 days" THEN 4
+                    WHEN "15-30 days" THEN 5
+                    ELSE 6
                 END
             ')
             ->get()

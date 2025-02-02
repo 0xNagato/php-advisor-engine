@@ -25,7 +25,12 @@
                     <span class="text-sm text-gray-600">{{ $isPrime ? 'Prime' : 'Non-Prime' }}</span>
                     <div class="text-right">
                         <div class="font-medium text-gray-900">{{ $data['count'] }} bookings</div>
-                        <div class="text-sm text-gray-500">Avg: ${{ number_format($data['avg_fee_usd'], 2) }}</div>
+                        <div class="text-sm text-gray-500">
+                            @if ($isPrime)
+                                Avg Fee: ${{ number_format($data['avg_fee_usd'], 2) }}<br>
+                            @endif
+                            Avg Platform: ${{ number_format($data['avg_platform_earnings_usd'], 2) }}
+                        </div>
                     </div>
                 </div>
             @endforeach
