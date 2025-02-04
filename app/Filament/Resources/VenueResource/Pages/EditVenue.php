@@ -116,10 +116,12 @@ class EditVenue extends EditRecord
                             ->default(false),
                         Toggle::make('is_omakase')
                             ->label('Is Omakase')
+                            ->live()
                             ->helperText('Enable if guests pay for the meal rather than just the reservation. This affects how payouts are calculated.')
                             ->default(false),
                         Textarea::make('omakase_details')
                             ->label('Omakase Details')
+                            ->visible(fn (Get $get): bool => $get('is_omakase'))
                             ->nullable(),
                         TextInput::make('omakase_concierge_fee')
                             ->label('Omakase Concierge Fee Per Guest')

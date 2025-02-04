@@ -179,9 +179,11 @@ class CreateVenue extends CreateRecord
                             ->numeric(),
                         Toggle::make('is_omakase')
                             ->label('Is Omakase')
+                            ->live()
                             ->default(false),
                         Textarea::make('omakase_details')
                             ->label('Omakase Details')
+                            ->visible(fn (Get $get): bool => $get('is_omakase'))
                             ->nullable(),
                         TextInput::make('omakase_concierge_fee')
                             ->label('Omakase Concierge Fee')
