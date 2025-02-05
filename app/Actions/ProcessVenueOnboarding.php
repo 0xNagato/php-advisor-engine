@@ -41,6 +41,11 @@ class ProcessVenueOnboarding
                 'phone' => $onboarding->phone,
                 'password' => bcrypt(Str::random(16)),
                 'partner_referral_id' => $partner?->id,
+                'notification_regions' => array_unique(
+                    $onboarding->locations->pluck('region')->toArray()
+                ),
+                'timezone' => Region::getTimezoneForRegion($onboarding->locations->first()->region),
+                'region' => $onboarding->locations->first()->region,
             ]);
 
             $managerUser->assignRole('venue_manager');

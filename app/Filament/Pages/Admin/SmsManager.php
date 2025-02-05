@@ -16,6 +16,7 @@ use Filament\Notifications\Notification;
 use Filament\Pages\Page;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Support\HtmlString;
 
 class SmsManager extends Page
 {
@@ -48,12 +49,12 @@ class SmsManager extends Page
                 CheckboxList::make('data.recipients')
                     ->hiddenLabel()
                     ->options([
-                        'concierges_with_bookings' => "Has Bookings ({$counts['concierges_with_bookings']})",
-                        'concierges_active_no_bookings' => "No Bookings ({$counts['concierges_active_no_bookings']})",
-                        'concierges_inactive' => "Inactive ({$counts['concierges_inactive']})",
-                        'pending_concierges' => "Pending ({$counts['pending_concierges']})",
-                        'partners' => "Partners ({$counts['partners']})",
-                        'venues' => "Venues ({$counts['venues']})",
+                        'concierges_with_bookings' => new HtmlString("<div class='flex flex-col'><div class='text-[10px] text-gray-500'>CONCIERGE</div><div>Has Bookings ({$counts['concierges_with_bookings']})</div></div>"),
+                        'concierges_active_no_bookings' => new HtmlString("<div class='flex flex-col'><div class='text-[10px] text-gray-500'>CONCIERGE</div><div>No Bookings ({$counts['concierges_active_no_bookings']})</div></div>"),
+                        'concierges_inactive' => new HtmlString("<div class='flex flex-col'><div class='text-[10px] text-gray-500'>CONCIERGE</div><div>Inactive ({$counts['concierges_inactive']})</div></div>"),
+                        'pending_concierges' => new HtmlString("<div class='flex flex-col'><div class='text-[10px] text-gray-500'>CONCIERGE</div><div>Pending ({$counts['pending_concierges']})</div></div>"),
+                        'partners' => new HtmlString("Partners ({$counts['partners']})"),
+                        'venues' => new HtmlString("Venues ({$counts['venues']})"),
                     ])
                     ->columns(2)
                     ->gridDirection('row')
