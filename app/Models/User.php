@@ -376,10 +376,15 @@ class User extends Authenticatable implements FilamentUser, HasAvatar
 
     protected static function booted()
     {
-        static::saved(function (User $user) {
+        static::saving(function (User $user) {
             // Check if roles relationship was modified
             if ($user->relationLoaded('roles') && $user->roles()->count() !== ($user->getOriginal('roles_count') ?? 0)) {
                 $user->rolesChanged = true;
+            }
+
+            // Update timezone when region changes
+            if ($user->isDirty('region') && $user->region) {
+                $user->timezone = Region::find($user->region)?->timezone;
             }
         });
     }

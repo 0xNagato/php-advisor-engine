@@ -56,6 +56,9 @@ class ConciergeUserMenu extends Widget implements HasForms
                 ->extraAttributes(['class' => 'text-sm'])
                 ->afterStateUpdated(function (Get $get) {
                     session(['region' => $get('region')]);
+                    $user = auth()->user();
+                    $user->region = $get('region');
+                    $user->save();
                     $this->dispatch('region-changed', $get('region'));
                 })
                 ->default(session('region', ''))

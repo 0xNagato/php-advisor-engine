@@ -48,8 +48,10 @@ class SmsManager extends Page
                 CheckboxList::make('data.recipients')
                     ->hiddenLabel()
                     ->options([
-                        'concierges' => "Concierges ({$counts['concierges']})",
-                        'pending_concierges' => "Pending Concierges ({$counts['pending_concierges']})",
+                        'concierges_with_bookings' => "Has Bookings ({$counts['concierges_with_bookings']})",
+                        'concierges_active_no_bookings' => "No Bookings ({$counts['concierges_active_no_bookings']})",
+                        'concierges_inactive' => "Inactive ({$counts['concierges_inactive']})",
+                        'pending_concierges' => "Pending ({$counts['pending_concierges']})",
                         'partners' => "Partners ({$counts['partners']})",
                         'venues' => "Venues ({$counts['venues']})",
                     ])
@@ -98,62 +100,71 @@ class SmsManager extends Page
     public function getRecipientCounts(): array
     {
         $selectedRegions = $this->data['regions'] ?? [];
+        $sevenDaysAgo = now()->subDays(7);
 
-        $conciergesQuery = User::query()
+        // Concierges with completed bookings
+        $conciergesWithBookingsQuery = User::query()
             ->whereHas('roles', fn (Builder $query) => $query->where('name', 'concierge'))
+            ->whereHas('concierge.bookings', function ($query) {
+                $query->whereNotNull('confirmed_at');
+            })
             ->whereNotNull('secured_at')
             ->whereNotNull('phone');
 
+        // Active concierges without bookings
+        $conciergesActiveNoBookingsQuery = User::query()
+            ->whereHas('roles', fn (Builder $query) => $query->where('name', 'concierge'))
+            ->whereDoesntHave('concierge.bookings', function ($query) {
+                $query->whereNotNull('confirmed_at');
+            })
+            ->whereHas('authentications', function ($query) use ($sevenDaysAgo) {
+                $query->where('login_at', '>=', $sevenDaysAgo);
+            })
+            ->whereNotNull('secured_at')
+            ->whereNotNull('phone');
+
+        // Inactive concierges
+        $conciergesInactiveQuery = User::query()
+            ->whereHas('roles', fn (Builder $query) => $query->where('name', 'concierge'))
+            ->whereDoesntHave('authentications', function ($query) use ($sevenDaysAgo) {
+                $query->where('login_at', '>=', $sevenDaysAgo);
+            })
+            ->whereNotNull('secured_at')
+            ->whereNotNull('phone');
+
+        // Apply region filters if selected
         if (filled($selectedRegions)) {
-            $conciergesQuery->where(function ($query) use ($selectedRegions) {
-                foreach ($selectedRegions as $region) {
-                    $query->orWhereJsonContains('notification_regions', $region);
-                }
-            });
+            $regionFilter = function ($query) use ($selectedRegions) {
+                $query->where(function ($subQuery) use ($selectedRegions) {
+                    foreach ($selectedRegions as $region) {
+                        $subQuery->orWhereJsonContains('notification_regions', $region);
+                    }
+                });
+            };
+
+            $conciergesWithBookingsQuery->where($regionFilter);
+            $conciergesActiveNoBookingsQuery->where($regionFilter);
+            $conciergesInactiveQuery->where($regionFilter);
         }
 
+        // Update the pending concierges count logic
         $pendingConciergesQuery = Referral::query()
             ->where('type', 'concierge')
             ->whereNull('secured_at')
             ->whereNotNull('phone');
 
+        // Only apply region filter if regions are selected
         if (filled($selectedRegions)) {
-            $pendingConciergesQuery->where(function ($query) use ($selectedRegions) {
-                $query->whereIn('region_id', $selectedRegions)
-                    ->orWhereNull('region_id');
-            });
-        }
-
-        $partnersQuery = User::query()
-            ->whereHas('roles', fn (Builder $query) => $query->where('name', 'partner'))
-            ->whereNotNull('secured_at')
-            ->whereNotNull('phone');
-
-        if (filled($selectedRegions)) {
-            $partnersQuery->where(function ($query) use ($selectedRegions) {
-                foreach ($selectedRegions as $region) {
-                    $query->orWhereJsonContains('notification_regions', $region);
-                }
-            });
-        }
-
-        $venuesQuery = User::query()
-            ->whereHas('roles', fn (Builder $query) => $query->where('name', 'venue'))
-            ->whereNotNull('phone');
-
-        if (filled($selectedRegions)) {
-            $venuesQuery->where(function ($query) use ($selectedRegions) {
-                foreach ($selectedRegions as $region) {
-                    $query->orWhereJsonContains('notification_regions', $region);
-                }
-            });
+            $pendingConciergesQuery->whereIn('region_id', $selectedRegions);
         }
 
         return [
-            'concierges' => $conciergesQuery->count(),
+            'concierges_with_bookings' => $conciergesWithBookingsQuery->count(),
+            'concierges_active_no_bookings' => $conciergesActiveNoBookingsQuery->count(),
+            'concierges_inactive' => $conciergesInactiveQuery->count(),
             'pending_concierges' => $pendingConciergesQuery->count(),
-            'partners' => $partnersQuery->count(),
-            'venues' => $venuesQuery->count(),
+            'partners' => $this->getPartnersQuery($selectedRegions)->count(),
+            'venues' => $this->getVenuesQuery($selectedRegions)->count(),
         ];
     }
 
@@ -191,27 +202,74 @@ class SmsManager extends Page
         }
     }
 
+    private function applyRegionFilter(Builder $query, array $regions): void
+    {
+        if (filled($regions)) {
+            $query->where(function ($subQuery) use ($regions) {
+                foreach ($regions as $region) {
+                    $subQuery->orWhereJsonContains('notification_regions', $region);
+                }
+            });
+        }
+    }
+
     public function getSelectedRecipients(): Collection
     {
         $data = $this->data;
         $recipients = collect($data['recipients'] ?? []);
         $query = null;
+        $sevenDaysAgo = now()->subDays(7);
 
-        if ($recipients->contains('concierges')) {
+        if ($recipients->contains('concierges_with_bookings')) {
             $query = User::query()
                 ->whereHas('roles', fn (Builder $query) => $query->where('name', 'concierge'))
+                ->whereHas('concierge.bookings', function ($query) {
+                    $query->whereNotNull('confirmed_at');
+                })
                 ->whereNotNull('secured_at')
-                ->whereNotNull('phone')
-                ->select('first_name', 'last_name', 'phone')
-                ->selectRaw("'concierge' as role_type");
+                ->whereNotNull('phone');
 
-            if (filled($data['regions'])) {
-                $query->where(function ($query) use ($data) {
-                    foreach ($data['regions'] as $region) {
-                        $query->orWhereJsonContains('notification_regions', $region);
-                    }
-                });
-            }
+            $this->applyRegionFilter($query, $data['regions'] ?? []);
+
+            $query->select('first_name', 'last_name', 'phone')
+                ->selectRaw("'concierge_with_bookings' as role_type");
+        }
+
+        if ($recipients->contains('concierges_active_no_bookings')) {
+            $activeNoBookingsQuery = User::query()
+                ->whereHas('roles', fn (Builder $query) => $query->where('name', 'concierge'))
+                ->whereDoesntHave('concierge.bookings', function ($query) {
+                    $query->whereNotNull('confirmed_at');
+                })
+                ->whereHas('authentications', function ($query) use ($sevenDaysAgo) {
+                    $query->where('login_at', '>=', $sevenDaysAgo);
+                })
+                ->whereNotNull('secured_at')
+                ->whereNotNull('phone');
+
+            $this->applyRegionFilter($activeNoBookingsQuery, $data['regions'] ?? []);
+
+            $activeNoBookingsQuery->select('first_name', 'last_name', 'phone')
+                ->selectRaw("'concierge_active_no_bookings' as role_type");
+
+            $query = $query ? $query->union($activeNoBookingsQuery) : $activeNoBookingsQuery;
+        }
+
+        if ($recipients->contains('concierges_inactive')) {
+            $inactiveQuery = User::query()
+                ->whereHas('roles', fn (Builder $query) => $query->where('name', 'concierge'))
+                ->whereDoesntHave('authentications', function ($query) use ($sevenDaysAgo) {
+                    $query->where('login_at', '>=', $sevenDaysAgo);
+                })
+                ->whereNotNull('secured_at')
+                ->whereNotNull('phone');
+
+            $this->applyRegionFilter($inactiveQuery, $data['regions'] ?? []);
+
+            $inactiveQuery->select('first_name', 'last_name', 'phone')
+                ->selectRaw("'concierge_inactive' as role_type");
+
+            $query = $query ? $query->union($inactiveQuery) : $inactiveQuery;
         }
 
         if ($recipients->contains('pending_concierges')) {
@@ -219,14 +277,10 @@ class SmsManager extends Page
                 ->where('type', 'concierge')
                 ->whereNull('secured_at')
                 ->whereNotNull('phone')
-                ->select('first_name', 'last_name', 'phone')
-                ->selectRaw("'pending_concierge' as role_type");
+                ->whereNotNull('region_id');
 
             if (filled($data['regions'])) {
-                $pendingQuery->where(function ($query) use ($data) {
-                    $query->whereIn('region_id', $data['regions'])
-                        ->orWhereNull('region_id');
-                });
+                $pendingQuery->whereIn('region_id', $data['regions']);
             }
 
             $query = $query ? $query->union($pendingQuery) : $pendingQuery;
@@ -236,17 +290,12 @@ class SmsManager extends Page
             $partnersQuery = User::query()
                 ->whereHas('roles', fn (Builder $query) => $query->where('name', 'partner'))
                 ->whereNotNull('secured_at')
-                ->whereNotNull('phone')
-                ->select('first_name', 'last_name', 'phone')
-                ->selectRaw("'partner' as role_type");
+                ->whereNotNull('phone');
 
-            if (filled($data['regions'])) {
-                $partnersQuery->where(function ($query) use ($data) {
-                    foreach ($data['regions'] as $region) {
-                        $query->orWhereJsonContains('notification_regions', $region);
-                    }
-                });
-            }
+            $this->applyRegionFilter($partnersQuery, $data['regions'] ?? []);
+
+            $partnersQuery->select('first_name', 'last_name', 'phone')
+                ->selectRaw("'partner' as role_type");
 
             $query = $query ? $query->union($partnersQuery) : $partnersQuery;
         }
@@ -254,21 +303,74 @@ class SmsManager extends Page
         if ($recipients->contains('venues')) {
             $venuesQuery = User::query()
                 ->whereHas('roles', fn (Builder $query) => $query->where('name', 'venue'))
-                ->whereNotNull('phone')
-                ->select('first_name', 'last_name', 'phone')
-                ->selectRaw("'venue' as role_type");
+                ->whereNotNull('phone');
 
-            if (filled($data['regions'])) {
-                $venuesQuery->where(function ($query) use ($data) {
-                    foreach ($data['regions'] as $region) {
-                        $query->orWhereJsonContains('notification_regions', $region);
-                    }
-                });
-            }
+            $this->applyRegionFilter($venuesQuery, $data['regions'] ?? []);
+
+            $venuesQuery->select('first_name', 'last_name', 'phone')
+                ->selectRaw("'venue' as role_type");
 
             $query = $query ? $query->union($venuesQuery) : $venuesQuery;
         }
 
-        return $query ? $query->get() : User::query()->whereRaw('1=0')->get();
+        if ($query) {
+            $results = $query->get();
+
+            return $results;
+        }
+
+        return User::query()->whereRaw('1=0')->get();
+    }
+
+    private function getPendingConciergesQuery(array $selectedRegions): Builder
+    {
+        $query = Referral::query()
+            ->where('type', 'concierge')
+            ->whereNull('secured_at')
+            ->whereNotNull('phone')
+            ->whereNotNull('region_id');
+
+        if (filled($selectedRegions)) {
+            $query->whereIn('region_id', $selectedRegions);
+        }
+
+        return $query;
+    }
+
+    private function getPartnersQuery(array $selectedRegions): Builder
+    {
+        $query = User::query()
+            ->whereHas('roles', fn (Builder $query) => $query->where('name', 'partner'))
+            ->whereNotNull('secured_at')
+            ->whereNotNull('phone');
+
+        if (filled($selectedRegions)) {
+            $query->where(function ($query) use ($selectedRegions) {
+                foreach ($selectedRegions as $region) {
+                    $query->orWhereJsonContains('notification_regions', $region);
+                }
+            });
+        }
+
+        return $query;
+    }
+
+    private function getVenuesQuery(array $selectedRegions): Builder
+    {
+        $query = User::query()
+            ->whereHas('roles', fn (Builder $query) => $query->where('name', 'venue'))
+            ->whereNotNull('phone')
+            ->select('first_name', 'last_name', 'phone')
+            ->selectRaw("'venue' as role_type");
+
+        if (filled($selectedRegions)) {
+            $query->where(function ($query) use ($selectedRegions) {
+                foreach ($selectedRegions as $region) {
+                    $query->orWhereJsonContains('notification_regions', $region);
+                }
+            });
+        }
+
+        return $query;
     }
 }
