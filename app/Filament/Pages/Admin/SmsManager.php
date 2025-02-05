@@ -277,7 +277,9 @@ class SmsManager extends Page
                 ->where('type', 'concierge')
                 ->whereNull('secured_at')
                 ->whereNotNull('phone')
-                ->whereNotNull('region_id');
+                ->whereNotNull('region_id')
+                ->select('first_name', 'last_name', 'phone')
+                ->selectRaw("'pending_concierge' as role_type");
 
             if (filled($data['regions'])) {
                 $pendingQuery->whereIn('region_id', $data['regions']);
