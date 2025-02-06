@@ -13,6 +13,7 @@ trait HandlesVenueClosures
     private const CLOSED_DATES = [
         '12-25', // Christmas Day
         '12-31', // New Year's Eve
+        '02-14', // Valentine's Day
     ];
 
     /**
