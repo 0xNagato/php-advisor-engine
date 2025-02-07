@@ -25,10 +25,14 @@ trait HandlesVenueClosures
             return $venues;
         }
 
-        $overrideVenues = $this->getOverrideVenues();
+        $closureVenues = $this->getClosureVenues();
+        
+        // If no specific venues are configured, apply to all venues
+        $applyToAll = empty($closureVenues);
 
-        $venues->each(function ($venue) use ($overrideVenues) {
-            if (! in_array($venue->slug, $overrideVenues, true)) {
+        $venues->each(function ($venue) use ($closureVenues, $applyToAll) {
+            // Check both ID and slug to support both formats
+            if ($applyToAll || in_array((string) $venue->id, $closureVenues, true) || in_array($venue->slug, $closureVenues, true)) {
                 $venue->schedules->each(function ($schedule) {
                     if ($schedule->is_available) {
                         // If the venue was going to be open, mark as sold out
@@ -60,6 +64,14 @@ trait HandlesVenueClosures
         return array_filter(explode(',', (string) $envOverrides));
     }
 
+    protected function getClosureVenues(): array
+    {
+        $envClosures = config('app.closure_venues');
+        
+        // If numeric values are provided, convert them to strings for comparison
+        return array_map('strval', array_filter(explode(',', (string) $envClosures)));
+    }
+
     /**
      * Apply closure rules to a single venue's schedules
      */
@@ -72,9 +84,12 @@ trait HandlesVenueClosures
             return $schedules;
         }
 
-        $overrideVenues = $this->getOverrideVenues();
+        $closureVenues = $this->getClosureVenues();
+        
+        // If no specific venues are configured, apply to all venues
+        $applyToAll = empty($closureVenues);
 
-        if (! in_array($venueSlug, $overrideVenues, true)) {
+        if ($applyToAll || in_array($venueSlug, $closureVenues, true)) {
             $schedules->each(function ($schedule) {
                 if ($schedule->is_available) {
                     // If the venue was going to be open, mark as sold out

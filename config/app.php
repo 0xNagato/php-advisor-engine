@@ -244,7 +244,7 @@ return [
     'venue_booking_notification_phones' => env('VENUE_BOOKING_NOTIFICATION_PHONES', '+17865147601,+19176644415'),
     'widget_cache_timeout_minutes' => (int) env('WIDGET_CACHE_TIMEOUT_MINUTES', 5),
     'override_venues' => env('OVERRIDE_VENUES', ''),
-
+    'closure_venues' => env('CLOSURE_VENUES', '73,76'),
     /*
     |--------------------------------------------------------------------------
     | Booking Status
