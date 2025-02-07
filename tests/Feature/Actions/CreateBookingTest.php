@@ -25,9 +25,19 @@ beforeEach(function () {
         $mock->shouldReceive('getAttribute')->with('payout_percentage')->andReturn(10);
     });
 
+    // Create base template (party_size = 0)
+    $baseTemplate = ScheduleTemplate::factory()->create([
+        'venue_id' => $this->venue->id,
+        'start_time' => '14:00:00',
+        'party_size' => 0,
+    ]);
+
+    // Create guest count template
     $this->scheduleTemplate = ScheduleTemplate::factory()->create([
         'venue_id' => $this->venue->id,
         'start_time' => '14:00:00',
+        'day_of_week' => $baseTemplate->day_of_week,
+        'party_size' => 2,
     ]);
 
     $this->action = new CreateBooking;
@@ -145,7 +155,13 @@ it('creates booking with vip code when provided', function () {
 
 it('it calculates correct total amount based on guest count for non prime', function () {
     $guestCount = 3;
-    $this->scheduleTemplate->update(['prime_time' => 0]);
+
+    // Update both templates to non-prime
+    ScheduleTemplate::where('venue_id', $this->venue->id)
+        ->where('start_time', $this->scheduleTemplate->start_time)
+        ->where('day_of_week', $this->scheduleTemplate->day_of_week)
+        ->update(['prime_time' => 0]);
+
     $result = $this->action::run(
         $this->scheduleTemplate->id,
         [
