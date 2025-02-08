@@ -116,11 +116,11 @@
                         @else
                             <span class="block text-xs font-medium text-gray-800 sm:text-sm dark:text-gray-200">
                                 Non-Prime
-                                @isset($booking->meta['non_prime_incentive'])
+                                @if (!$download && isset($booking->meta['non_prime_incentive']))
                                     <span class="text-xs text-gray-500">
                                         ({{ money($booking->meta['non_prime_incentive']['fee_per_head'] * 100 ?? 0, $booking->currency) }}/guest)
                                     </span>
-                                @endisset
+                                @endif
                             </span>
                         @endif
                     </div>
@@ -291,7 +291,9 @@
                 @endif
             </div>
 
-            @if (auth()->check() &&
+            @if (
+                !$download &&
+                    auth()->check() &&
                     auth()->user()->hasActiveRole('super_admin') &&
                     $booking->status !== BookingStatus::PENDING &&
                     $booking->status !== BookingStatus::GUEST_ON_PAGE &&
