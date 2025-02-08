@@ -11,11 +11,7 @@ class GetUserRegion
 
     public function handle(): Region
     {
-        $sessionRegion = session('region');
-        $userRegion = request()->user()?->region;
-        $defaultRegion = config('app.default_region');
-
-        $regionId = $sessionRegion ?? ($userRegion ?: $defaultRegion);
+        $regionId = auth()->user()?->region ?? config('app.default_region');
 
         return Region::query()->where('id', $regionId)->firstOrFail();
     }
