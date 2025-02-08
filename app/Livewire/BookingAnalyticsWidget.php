@@ -58,7 +58,13 @@ class BookingAnalyticsWidget extends Widget
     {
         $dateColumn = $this->showBookingTime ? 'bookings.booking_at' : 'bookings.created_at';
 
-        return Booking::query()
+        // Get total bookings first
+        $total = Booking::query()
+            ->whereBetween($dateColumn, [$startDate, $endDate])
+            ->whereIn('bookings.status', [BookingStatus::CONFIRMED, BookingStatus::VENUE_CONFIRMED])
+            ->count();
+
+        $results = Booking::query()
             ->select('v.name', DB::raw('COUNT(*) as booking_count'))
             ->join('schedule_templates as st', 'bookings.schedule_template_id', '=', 'st.id')
             ->join('venues as v', 'st.venue_id', '=', 'v.id')
@@ -67,37 +73,73 @@ class BookingAnalyticsWidget extends Widget
             ->groupBy('v.id', 'v.name')
             ->orderByDesc('booking_count')
             ->limit(5)
-            ->get()
-            ->toArray();
+            ->get();
+
+        return $results->map(function ($item) use ($total) {
+            return [
+                'name' => $item->name,
+                'booking_count' => $item->booking_count,
+                'percentage' => $total > 0 ? round(($item->booking_count / $total) * 100, 1) : 0,
+            ];
+        })->toArray();
     }
 
     protected function getPopularTimes(Carbon $startDate, Carbon $endDate): array
     {
-        $dateColumn = $this->showBookingTime ? 'bookings.booking_at' : 'bookings.created_at';
+        // Get total bookings first
+        $total = Booking::query()
+            ->whereBetween(
+                $this->showBookingTime ? 'bookings.booking_at' : 'bookings.created_at',
+                [$startDate, $endDate]
+            )
+            ->whereIn('bookings.status', [BookingStatus::CONFIRMED, BookingStatus::VENUE_CONFIRMED])
+            ->count();
 
-        return Booking::query()
-            ->select(DB::raw("TIME_FORMAT($dateColumn, '%l:%i %p') as time_slot"), DB::raw('COUNT(*) as booking_count'))
-            ->whereBetween($dateColumn, [$startDate, $endDate])
+        $results = Booking::query()
+            ->select(
+                DB::raw("TIME_FORMAT(bookings.booking_at, '%l:%i %p') as time_slot"),
+                DB::raw('COUNT(*) as booking_count')
+            )
+            ->whereBetween(
+                $this->showBookingTime ? 'bookings.booking_at' : 'bookings.created_at',
+                [$startDate, $endDate]
+            )
             ->whereIn('bookings.status', [BookingStatus::CONFIRMED, BookingStatus::VENUE_CONFIRMED])
             ->groupBy('time_slot')
             ->orderByDesc('booking_count')
             ->limit(5)
-            ->get()
-            ->toArray();
+            ->get();
+
+        return $results->map(function ($item) use ($total) {
+            return [
+                'time_slot' => $item->time_slot,
+                'booking_count' => $item->booking_count,
+                'percentage' => $total > 0 ? round(($item->booking_count / $total) * 100, 1) : 0,
+            ];
+        })->toArray();
     }
 
     protected function getPartySizes(Carbon $startDate, Carbon $endDate): array
     {
         $dateColumn = $this->showBookingTime ? 'bookings.booking_at' : 'bookings.created_at';
 
-        return Booking::query()
+        $results = Booking::query()
             ->select('bookings.guest_count', DB::raw('COUNT(*) as count'))
             ->whereBetween($dateColumn, [$startDate, $endDate])
             ->whereIn('bookings.status', [BookingStatus::CONFIRMED, BookingStatus::VENUE_CONFIRMED])
             ->groupBy('bookings.guest_count')
             ->orderBy('bookings.guest_count')
-            ->get()
-            ->toArray();
+            ->get();
+
+        $total = $results->sum('count');
+
+        return $results->map(function ($item) use ($total) {
+            return [
+                'guest_count' => $item->guest_count,
+                'count' => $item->count,
+                'percentage' => $total > 0 ? round(($item->count / $total) * 100, 1) : 0,
+            ];
+        })->toArray();
     }
 
     protected function getPrimeAnalysis(Carbon $startDate, Carbon $endDate): array
@@ -136,7 +178,7 @@ class BookingAnalyticsWidget extends Widget
     {
         $dateColumn = $this->showBookingTime ? 'bookings.booking_at' : 'bookings.created_at';
 
-        return Booking::query()
+        $results = Booking::query()
             ->select(
                 DB::raw('
                     CASE
@@ -163,15 +205,24 @@ class BookingAnalyticsWidget extends Widget
                     ELSE 6
                 END
             ')
-            ->get()
-            ->toArray();
+            ->get();
+
+        $total = $results->sum('count');
+
+        return $results->map(function ($item) use ($total) {
+            return [
+                'lead_time' => $item->lead_time,
+                'count' => $item->count,
+                'percentage' => $total > 0 ? round(($item->count / $total) * 100, 1) : 0,
+            ];
+        })->toArray();
     }
 
     protected function getDayAnalysis(Carbon $startDate, Carbon $endDate): array
     {
         $dateColumn = $this->showBookingTime ? 'bookings.booking_at' : 'bookings.created_at';
 
-        return Booking::query()
+        $results = Booking::query()
             ->select(
                 DB::raw("DAYNAME($dateColumn) as day_name"),
                 DB::raw('COUNT(*) as booking_count')
@@ -180,8 +231,17 @@ class BookingAnalyticsWidget extends Widget
             ->whereIn('bookings.status', [BookingStatus::CONFIRMED, BookingStatus::VENUE_CONFIRMED])
             ->groupBy('day_name')
             ->orderByRaw('FIELD(day_name, "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday")')
-            ->get()
-            ->toArray();
+            ->get();
+
+        $total = $results->sum('booking_count');
+
+        return $results->map(function ($item) use ($total) {
+            return [
+                'day_name' => $item->day_name,
+                'booking_count' => $item->booking_count,
+                'percentage' => $total > 0 ? round(($item->booking_count / $total) * 100, 1) : 0,
+            ];
+        })->toArray();
     }
 
     protected function getCalendarDayAnalysis(Carbon $startDate, Carbon $endDate): array

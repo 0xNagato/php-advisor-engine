@@ -29,7 +29,10 @@
                 ]) }}"
                     class="flex items-center justify-between p-1 rounded hover:bg-gray-50">
                     <span class="text-sm text-gray-600">{{ $venue['name'] }}</span>
-                    <span class="font-medium text-gray-900">{{ $venue['booking_count'] }} bookings</span>
+                    <div class="text-right">
+                        <span class="font-medium text-gray-900">{{ $venue['booking_count'] }} bookings</span>
+                        <span class="ml-2 text-sm text-gray-500">({{ $venue['percentage'] }}%)</span>
+                    </div>
                 </a>
             @endforeach
         </div>
@@ -67,7 +70,10 @@
             @foreach ($this->getAnalytics()['popularTimes'] as $time)
                 <div class="flex items-center justify-between">
                     <span class="text-sm text-gray-600">{{ $time['time_slot'] }}</span>
-                    <span class="font-medium text-gray-900">{{ $time['booking_count'] }} bookings</span>
+                    <div class="text-right">
+                        <span class="font-medium text-gray-900">{{ $time['booking_count'] }} bookings</span>
+                        <span class="ml-2 text-sm text-gray-500">({{ $time['percentage'] }}%)</span>
+                    </div>
                 </div>
             @endforeach
         </div>
@@ -82,7 +88,10 @@
             @foreach ($this->getAnalytics()['leadTimeAnalysis'] as $leadTime)
                 <div class="flex items-center justify-between">
                     <span class="text-sm text-gray-600">{{ $leadTime['lead_time'] }}</span>
-                    <span class="font-medium text-gray-900">{{ $leadTime['count'] }} bookings</span>
+                    <div class="text-right">
+                        <span class="font-medium text-gray-900">{{ $leadTime['count'] }} bookings</span>
+                        <span class="ml-2 text-sm text-gray-500">({{ $leadTime['percentage'] }}%)</span>
+                    </div>
                 </div>
             @endforeach
         </div>
@@ -97,7 +106,10 @@
             @foreach ($this->getAnalytics()['partySizes'] as $size)
                 <div class="flex items-center justify-between">
                     <span class="text-sm text-gray-600">{{ $size['guest_count'] }} guests</span>
-                    <span class="font-medium text-gray-900">{{ $size['count'] }} bookings</span>
+                    <div class="text-right">
+                        <span class="font-medium text-gray-900">{{ $size['count'] }} bookings</span>
+                        <span class="ml-2 text-sm text-gray-500">({{ $size['percentage'] }}%)</span>
+                    </div>
                 </div>
             @endforeach
         </div>
@@ -108,15 +120,16 @@
         <div class="p-4 border-b border-gray-200">
             <h3 class="text-base font-semibold text-gray-900">Day of Week</h3>
         </div>
-        <div class="p-4">
-            <div class="grid grid-cols-7 gap-2">
-                @foreach ($this->getAnalytics()['dayAnalysis'] as $day)
-                    <div class="text-center">
-                        <div class="text-xs font-medium text-gray-600">{{ substr($day['day_name'], 0, 3) }}</div>
-                        <div class="mt-1 text-sm font-semibold text-gray-900">{{ $day['booking_count'] }}</div>
+        <div class="p-4 space-y-3">
+            @foreach ($this->getAnalytics()['dayAnalysis'] as $day)
+                <div class="flex items-center justify-between">
+                    <span class="text-sm text-gray-600">{{ $day['day_name'] }}</span>
+                    <div class="text-right">
+                        <span class="font-medium text-gray-900">{{ $day['booking_count'] }} bookings</span>
+                        <span class="ml-2 text-sm text-gray-500">({{ $day['percentage'] }}%)</span>
                     </div>
-                @endforeach
-            </div>
+                </div>
+            @endforeach
         </div>
     </div>
 
@@ -126,7 +139,7 @@
             <h3 class="text-base font-semibold text-gray-900">Calendar Day</h3>
         </div>
         <div class="p-4">
-            <div class="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
+            <div class="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
                 @foreach ($this->getAnalytics()['calendarDayAnalysis'] as $day)
                     <a href="{{ route('filament.admin.pages.booking-search', [
                         'filters' => [
