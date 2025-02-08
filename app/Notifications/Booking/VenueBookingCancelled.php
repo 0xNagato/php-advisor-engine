@@ -10,26 +10,14 @@ use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Notification;
 
-class VenueContactBookingConfirmed extends Notification implements ShouldQueue
+class VenueBookingCancelled extends Notification implements ShouldQueue
 {
     use Queueable;
 
-    /**
-     * Create a new notification instance.
-     */
     public function __construct(
         public VenueContactData $contact,
-        public string $confirmationUrl,
-        public bool $reminder = false,
-    ) {
-        //
-    }
+    ) {}
 
-    /**
-     * Get the notification's delivery channels.
-     *
-     * @return array<int, string>
-     */
     public function via(object $notifiable): array
     {
         return $this->contact->toChannel();
@@ -63,32 +51,15 @@ class VenueContactBookingConfirmed extends Notification implements ShouldQueue
 
     public function toSMS(Booking $notifiable): SmsData
     {
-        $baseTemplate = $this->reminder
-            ? 'venue_contact_booking_confirmed_reminder'
-            : 'venue_contact_booking_confirmed';
-
-        $templateKey = filled($notifiable->notes)
-            ? $baseTemplate.'_notes'
-            : $baseTemplate;
-
-        $templateData = [
-            'venue_name' => $notifiable->venue->name,
-            'booking_date' => $this->formatBookingDate($notifiable->booking_at, $notifiable),
-            'booking_time' => $notifiable->booking_at->format('g:ia'),
-            'guest_name' => $notifiable->guest_name,
-            'guest_count' => $notifiable->guest_count,
-            'guest_phone' => $notifiable->guest_phone,
-            'confirmation_url' => $this->confirmationUrl,
-        ];
-
-        if (filled($notifiable->notes)) {
-            $templateData['notes'] = $notifiable->notes;
-        }
-
         return new SmsData(
             phone: $this->contact->contact_phone,
-            templateKey: $templateKey,
-            templateData: $templateData,
+            templateKey: 'venue_booking_cancelled',
+            templateData: [
+                'guest_name' => $notifiable->guest_name,
+                'guest_phone' => $notifiable->guest_phone,
+                'venue_name' => $notifiable->venue->name,
+                'booking_date' => $this->formatBookingDate($notifiable->booking_at, $notifiable),
+            ]
         );
     }
 }

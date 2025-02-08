@@ -131,15 +131,15 @@ class RefundBooking
 {
 }
 /**
- * @method static \Lorisleiva\Actions\Decorators\JobDecorator|\Lorisleiva\Actions\Decorators\UniqueJobDecorator makeJob(\App\Models\Booking $booking)
- * @method static \Lorisleiva\Actions\Decorators\UniqueJobDecorator makeUniqueJob(\App\Models\Booking $booking)
- * @method static \Illuminate\Foundation\Bus\PendingDispatch dispatch(\App\Models\Booking $booking)
- * @method static \Illuminate\Foundation\Bus\PendingDispatch|\Illuminate\Support\Fluent dispatchIf(bool $boolean, \App\Models\Booking $booking)
- * @method static \Illuminate\Foundation\Bus\PendingDispatch|\Illuminate\Support\Fluent dispatchUnless(bool $boolean, \App\Models\Booking $booking)
- * @method static dispatchSync(\App\Models\Booking $booking)
- * @method static dispatchNow(\App\Models\Booking $booking)
- * @method static dispatchAfterResponse(\App\Models\Booking $booking)
- * @method static void run(\App\Models\Booking $booking)
+ * @method static \Lorisleiva\Actions\Decorators\JobDecorator|\Lorisleiva\Actions\Decorators\UniqueJobDecorator makeJob(\App\Models\Booking $booking, bool $reminder = false)
+ * @method static \Lorisleiva\Actions\Decorators\UniqueJobDecorator makeUniqueJob(\App\Models\Booking $booking, bool $reminder = false)
+ * @method static \Illuminate\Foundation\Bus\PendingDispatch dispatch(\App\Models\Booking $booking, bool $reminder = false)
+ * @method static \Illuminate\Foundation\Bus\PendingDispatch|\Illuminate\Support\Fluent dispatchIf(bool $boolean, \App\Models\Booking $booking, bool $reminder = false)
+ * @method static \Illuminate\Foundation\Bus\PendingDispatch|\Illuminate\Support\Fluent dispatchUnless(bool $boolean, \App\Models\Booking $booking, bool $reminder = false)
+ * @method static dispatchSync(\App\Models\Booking $booking, bool $reminder = false)
+ * @method static dispatchNow(\App\Models\Booking $booking, bool $reminder = false)
+ * @method static dispatchAfterResponse(\App\Models\Booking $booking, bool $reminder = false)
+ * @method static void run(\App\Models\Booking $booking, bool $reminder = false)
  */
 class SendConfirmationToVenueContacts
 {

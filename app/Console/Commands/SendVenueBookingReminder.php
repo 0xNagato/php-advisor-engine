@@ -45,7 +45,7 @@ class SendVenueBookingReminder extends Command
                 $allowedEnd = Carbon::createFromFormat('H:i:s', '20:00:00', $timezone);
 
                 if ($currentLocalTime->between($allowedStart, $allowedEnd)) {
-                    SendConfirmationToVenueContacts::run($booking);
+                    SendConfirmationToVenueContacts::run(booking: $booking, reminder: true);
                     $booking->update(['resent_venue_confirmation_at' => now()]);
                 }
             });

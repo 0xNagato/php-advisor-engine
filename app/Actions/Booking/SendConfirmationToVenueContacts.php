@@ -25,7 +25,7 @@ class SendConfirmationToVenueContacts extends Action
      *
      * @throws ShortURLException If there is an error generating the short URL for the confirmation.
      */
-    public function handle(Booking $booking): void
+    public function handle(Booking $booking, bool $reminder = false): void
     {
         /** @var Collection<VenueContactData> $contacts */
         $contacts = $booking->venue->contacts ?? collect();
@@ -38,6 +38,7 @@ class SendConfirmationToVenueContacts extends Action
                 $booking->notify(new VenueContactBookingConfirmed(
                     contact: $contact,
                     confirmationUrl: $confirmationUrl,
+                    reminder: $reminder,
                 ));
             }
         }

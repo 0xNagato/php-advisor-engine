@@ -21,6 +21,8 @@ class SmsTemplates
         'two_factor_code' => 'Do not share this code with anyone. Your 2FA login code for PRIMA is {code}',
         'venue_contact_booking_confirmed' => 'PRIMA Booking @ {venue_name} {booking_date} @ {booking_time}, {guest_count} guests, {guest_name}, {guest_phone}. Click {confirmation_url} to confirm.',
         'venue_contact_booking_confirmed_notes' => "PRIMA Booking @ {venue_name} {booking_date} @ {booking_time}, {guest_count} guests, {guest_name}, {guest_phone}. Click {confirmation_url} to confirm.\n\nNotes: {notes}",
+        'venue_contact_booking_confirmed_reminder' => "Reminder:\n\nPRIMA Booking @ {venue_name} {booking_date} @ {booking_time}, {guest_count} guests, {guest_name}, {guest_phone}. Click {confirmation_url} to confirm.",
+        'venue_contact_booking_confirmed_reminder_notes' => "Reminder:\n\nPRIMA Booking @ {venue_name} {booking_date} @ {booking_time}, {guest_count} guests, {guest_name}, {guest_phone}. Click {confirmation_url} to confirm.\n\nNotes: {notes}",
         'venue_contact_login' => 'Click the link to login: {login_url}',
         'venue_special_request_confirmation' => 'PRIMA Special Request from {customer_name}: {booking_date} at {booking_time}, {party_size} guests, Min. Spend {minimum_spend}. Click {confirmation_url} to view this request.',
         'venue_welcome' => 'Thank you for joining PRIMA! We look forward to working with you! If you have any questions, our team is always available.',
@@ -31,5 +33,6 @@ class SmsTemplates
         'concierge_modification_approved' => 'Your requested reservation change at {venue_name} is approved. We have notified the customer.',
         'concierge_modification_rejected' => 'We are sorry, but {venue_name} cannot accommodate your change request. If you\'d like to have this reservation cancelled, you may do so through the PRIMA App.',
         'concierge_first_booking' => "Thank you for using PRIMA for the first time! Your reservation for {guest_name} is currently being transmitted to {venue_name}. Reservations may take up to 30 minutes to show up at the restaurant, however, rest assured that all is okay. Thank you!\n\n(This notification is only sent for the first booking)",
+        'venue_booking_cancelled' => 'PRIMA Notice: {guest_name} @ {guest_phone} has cancelled the reservation at {venue_name} on {booking_date}. Please update your records. Thank you.',
     ];
 }
