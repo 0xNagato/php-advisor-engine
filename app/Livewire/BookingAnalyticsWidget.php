@@ -45,6 +45,9 @@ class BookingAnalyticsWidget extends Widget
             'leadTimeAnalysis' => $this->getLeadTimeAnalysis($startDate, $endDate),
             'dayAnalysis' => $this->getDayAnalysis($startDate, $endDate),
             'calendarDayAnalysis' => $this->getCalendarDayAnalysis($startDate, $endDate),
+            'statusAnalysis' => $this->getStatusAnalysis($startDate, $endDate),
+            'topConcierges' => $this->getTopConcierges($startDate, $endDate),
+            'bookingTypeAnalysis' => $this->getBookingTypeAnalysis($startDate, $endDate),
         ];
     }
 
@@ -260,5 +263,106 @@ class BookingAnalyticsWidget extends Widget
                 ];
             })
             ->toArray();
+    }
+
+    protected function getStatusAnalysis(Carbon $startDate, Carbon $endDate): array
+    {
+        $dateColumn = $this->getDateColumn();
+
+        $query = Booking::query()
+            ->select('status', DB::raw('COUNT(*) as count'))
+            ->whereBetween($dateColumn, [$startDate, $endDate])
+            ->groupBy('status');
+
+        $results = $query->get();
+        $total = $results->sum('count');
+
+        return $results->map(function ($item) use ($total) {
+            return [
+                'status' => $item->status->label(),
+                'count' => $item->count,
+                'percentage' => $total > 0 ? round(($item->count / $total) * 100, 1) : 0,
+            ];
+        })->toArray();
+    }
+
+    protected function getTopConcierges(Carbon $startDate, Carbon $endDate): array
+    {
+        $currencyService = app(CurrencyConversionService::class);
+
+        // Get total bookings first for percentage calculation
+        $total = Booking::query()
+            ->whereBetween($this->getDateColumn(), [$startDate, $endDate])
+            ->whereIn('bookings.status', [BookingStatus::CONFIRMED, BookingStatus::VENUE_CONFIRMED])
+            ->count();
+
+        return Booking::query()
+            ->select([
+                'concierges.id',
+                'concierges.hotel_name',
+                'users.first_name',
+                'users.last_name',
+                'bookings.currency',
+                DB::raw('COUNT(*) as booking_count'),
+                DB::raw('AVG(bookings.total_fee) as avg_fee'),
+                DB::raw('AVG(bookings.platform_earnings) as avg_platform_earnings'),
+            ])
+            ->join('concierges', 'bookings.concierge_id', '=', 'concierges.id')
+            ->join('users', 'concierges.user_id', '=', 'users.id')
+            ->whereBetween($this->getDateColumn(), [$startDate, $endDate])
+            ->whereIn('bookings.status', [BookingStatus::CONFIRMED, BookingStatus::VENUE_CONFIRMED])
+            ->groupBy('concierges.id', 'concierges.hotel_name', 'users.first_name', 'users.last_name', 'bookings.currency')
+            ->orderByDesc('booking_count')
+            ->limit(5)
+            ->get()
+            ->groupBy('id')
+            ->map(function ($group) use ($currencyService, $total) {
+                $first = $group->first();
+                $totalCount = $group->sum('booking_count');
+                $avgFees = $group->mapWithKeys(fn ($item) => [$item->currency => $item->avg_fee])->toArray();
+                $avgPlatformEarnings = $group->mapWithKeys(fn ($item) => [$item->currency => $item->avg_platform_earnings])->toArray();
+
+                return [
+                    'name' => $first->first_name.' '.$first->last_name,
+                    'booking_count' => $totalCount,
+                    'percentage' => $total > 0 ? round(($totalCount / $total) * 100, 1) : 0,
+                    'avg_fee_usd' => $currencyService->convertToUSD($avgFees),
+                    'avg_platform_earnings_usd' => $currencyService->convertToUSD($avgPlatformEarnings),
+                ];
+            })
+            ->values()
+            ->toArray();
+    }
+
+    protected function getBookingTypeAnalysis(Carbon $startDate, Carbon $endDate): array
+    {
+        $dateColumn = $this->getDateColumn();
+        $currencyService = app(CurrencyConversionService::class);
+
+        $results = Booking::query()
+            ->select(
+                DB::raw('CASE WHEN vip_code_id IS NOT NULL THEN true ELSE false END as is_vip'),
+                'bookings.currency',
+                DB::raw('COUNT(*) as count'),
+                DB::raw('AVG(bookings.total_fee) as avg_fee'),
+                DB::raw('AVG(bookings.platform_earnings) as avg_platform_earnings')
+            )
+            ->whereBetween($dateColumn, [$startDate, $endDate])
+            ->whereIn('bookings.status', [BookingStatus::CONFIRMED, BookingStatus::VENUE_CONFIRMED])
+            ->groupBy('is_vip', 'bookings.currency')
+            ->get()
+            ->groupBy('is_vip');
+
+        return $results->map(function ($group) use ($currencyService) {
+            $totalCount = $group->sum('count');
+            $avgFees = $group->mapWithKeys(fn ($item) => [$item->currency => $item->avg_fee])->toArray();
+            $avgPlatformEarnings = $group->mapWithKeys(fn ($item) => [$item->currency => $item->avg_platform_earnings])->toArray();
+
+            return [
+                'count' => $totalCount,
+                'avg_fee_usd' => $currencyService->convertToUSD($avgFees),
+                'avg_platform_earnings_usd' => $currencyService->convertToUSD($avgPlatformEarnings),
+            ];
+        })->toArray();
     }
 }

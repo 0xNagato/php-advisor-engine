@@ -30,6 +30,10 @@ class DateRangeFilterWidget extends Widget
     public function mount(): void
     {
         $this->ranges = [
+            'today' => [
+                'start' => now()->startOfDay()->toDateString(),
+                'end' => now()->endOfDay()->toDateString(),
+            ],
             'past_30_days' => [
                 'start' => now()->subDays(30)->toDateString(),
                 'end' => now()->toDateString(),
@@ -42,10 +46,10 @@ class DateRangeFilterWidget extends Widget
                 'start' => now()->startOfMonth()->toDateString(),
                 'end' => now()->endOfMonth()->toDateString(),
             ],
-            'quarter' => [
-                'start' => now()->startOfQuarter()->toDateString(),
-                'end' => now()->endOfQuarter()->toDateString(),
-            ],
+            // 'quarter' => [
+            //     'start' => now()->startOfQuarter()->toDateString(),
+            //     'end' => now()->endOfQuarter()->toDateString(),
+            // ],
             'year' => [
                 'start' => now()->startOfYear()->toDateString(),
                 'end' => now()->endOfYear()->toDateString(),

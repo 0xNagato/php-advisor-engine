@@ -2,7 +2,7 @@
     <div x-data="{
         activeRange: @entangle('range')
     }" class="flex space-x-2">
-        @foreach (['past_30_days', 'past_week', 'month', 'quarter', 'year'] as $rangeOption)
+        @foreach (['today', 'past_30_days', 'past_week', 'month', 'year'] as $rangeOption)
             @if (isPrimaApp() && isAndroid())
                 <a href="?range={{ $rangeOption }}&filters[startDate]={{ $ranges[$rangeOption]['start'] }}&filters[endDate]={{ $ranges[$rangeOption]['end'] }}"
                     :class="{

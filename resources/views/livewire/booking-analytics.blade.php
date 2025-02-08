@@ -162,4 +162,61 @@
             </div>
         </div>
     </div>
+
+    <!-- Booking Status Analysis -->
+    <div class="bg-white rounded-lg shadow">
+        <div class="p-4 border-b border-gray-200">
+            <h3 class="text-base font-semibold text-gray-900">Booking Status</h3>
+        </div>
+        <div class="p-4 space-y-3">
+            @foreach ($this->getAnalytics()['statusAnalysis'] as $status)
+                <div class="flex items-center justify-between">
+                    <span class="text-sm text-gray-600">{{ $status['status'] }}</span>
+                    <div class="text-right">
+                        <span class="font-medium text-gray-900">{{ $status['count'] }} bookings</span>
+                        <span class="ml-2 text-sm text-gray-500">({{ $status['percentage'] }}%)</span>
+                    </div>
+                </div>
+            @endforeach
+        </div>
+    </div>
+
+    <!-- Top Concierges -->
+    <div class="bg-white rounded-lg shadow">
+        <div class="p-4 border-b border-gray-200">
+            <h3 class="text-base font-semibold text-gray-900">Top Concierges</h3>
+        </div>
+        <div class="p-4 space-y-3">
+            @foreach ($this->getAnalytics()['topConcierges'] as $concierge)
+                <div class="flex items-center justify-between">
+                    <span class="text-sm text-gray-600">{{ $concierge['name'] }}</span>
+                    <div class="text-right">
+                        <span class="font-medium text-gray-900">{{ $concierge['booking_count'] }} bookings</span>
+                        <span class="ml-2 text-sm text-gray-500">({{ $concierge['percentage'] }}%)</span>
+                    </div>
+                </div>
+            @endforeach
+        </div>
+    </div>
+
+    <!-- Direct vs VIP Bookings -->
+    <div class="bg-white rounded-lg shadow">
+        <div class="p-4 border-b border-gray-200">
+            <h3 class="text-base font-semibold text-gray-900">Direct vs VIP Bookings</h3>
+        </div>
+        <div class="p-4 space-y-3">
+            @foreach ($this->getAnalytics()['bookingTypeAnalysis'] as $isVip => $data)
+                <div class="flex items-center justify-between">
+                    <span class="text-sm text-gray-600">{{ $isVip ? 'VIP' : 'Direct' }}</span>
+                    <div class="text-right">
+                        <div class="font-medium text-gray-900">{{ $data['count'] }} bookings</div>
+                        <div class="text-sm text-gray-500">
+                            Avg Fee: ${{ number_format($data['avg_fee_usd'], 2) }}<br>
+                            Avg Platform: ${{ number_format($data['avg_platform_earnings_usd'], 2) }}
+                        </div>
+                    </div>
+                </div>
+            @endforeach
+        </div>
+    </div>
 </div>
