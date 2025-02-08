@@ -5,10 +5,12 @@
 <div class="grid w-full grid-cols-1 gap-6 col-span-full md:grid-cols-2 xl:grid-cols-3">
     <div class="flex items-center justify-end gap-3 col-span-full">
         <span class="text-sm text-gray-600">Viewing analytics based on:</span>
-        <button wire:click="toggleDateType"
-            class="inline-flex items-center px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-primary-500">
-            {{ $showBookingTime ? 'Booking Time' : 'Creation Time' }}
-        </button>
+        <x-filament::input.wrapper>
+            <x-filament::input.select wire:model.live="dateType" class="w-40">
+                <option value="booking">Booking Time</option>
+                <option value="creation">Creation Time</option>
+            </x-filament::input.select>
+        </x-filament::input.wrapper>
     </div>
 
     <!-- Top Venues -->
@@ -21,7 +23,7 @@
                 <a href="{{ route('filament.admin.pages.booking-search', [
                     'filters' => [
                         'venue_search' => $venue['name'],
-                        'show_booking_time' => $showBookingTime,
+                        'show_booking_time' => $this->getShowBookingTimeProperty(),
                         'start_date' => $this->filters['startDate'],
                         'end_date' => $this->filters['endDate'],
                         'status' => [BookingStatus::CONFIRMED->value, BookingStatus::VENUE_CONFIRMED->value],
@@ -145,7 +147,7 @@
                         'filters' => [
                             'start_date' => \Carbon\Carbon::parse($day['date'])->format('Y-m-d'),
                             'end_date' => \Carbon\Carbon::parse($day['date'])->format('Y-m-d'),
-                            'show_booking_time' => $showBookingTime,
+                            'show_booking_time' => $this->getShowBookingTimeProperty(),
                             'status' => [BookingStatus::CONFIRMED->value, BookingStatus::VENUE_CONFIRMED->value],
                         ],
                     ]) }}"

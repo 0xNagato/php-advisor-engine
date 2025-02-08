@@ -20,17 +20,11 @@ class BookingAnalyticsWidget extends Widget
 
     protected static ?string $pollingInterval = null;
 
-    public bool $showBookingTime;
+    public string $dateType = 'booking';
 
-    public function mount(): void
+    public function getShowBookingTimeProperty(): bool
     {
-        $this->showBookingTime = session()->get('analytics_show_booking_time', true);
-    }
-
-    public function toggleDateType(): void
-    {
-        $this->showBookingTime = ! $this->showBookingTime;
-        session()->put('analytics_show_booking_time', $this->showBookingTime);
+        return $this->dateType === 'booking';
     }
 
     public function getColumnSpan(): int|string|array
@@ -54,9 +48,14 @@ class BookingAnalyticsWidget extends Widget
         ];
     }
 
+    protected function getDateColumn(): string
+    {
+        return $this->getShowBookingTimeProperty() ? 'bookings.booking_at' : 'bookings.created_at';
+    }
+
     protected function getTopVenues(Carbon $startDate, Carbon $endDate): array
     {
-        $dateColumn = $this->showBookingTime ? 'bookings.booking_at' : 'bookings.created_at';
+        $dateColumn = $this->getDateColumn();
 
         // Get total bookings first
         $total = Booking::query()
@@ -88,10 +87,7 @@ class BookingAnalyticsWidget extends Widget
     {
         // Get total bookings first
         $total = Booking::query()
-            ->whereBetween(
-                $this->showBookingTime ? 'bookings.booking_at' : 'bookings.created_at',
-                [$startDate, $endDate]
-            )
+            ->whereBetween($this->getDateColumn(), [$startDate, $endDate])
             ->whereIn('bookings.status', [BookingStatus::CONFIRMED, BookingStatus::VENUE_CONFIRMED])
             ->count();
 
@@ -100,10 +96,7 @@ class BookingAnalyticsWidget extends Widget
                 DB::raw("TIME_FORMAT(bookings.booking_at, '%l:%i %p') as time_slot"),
                 DB::raw('COUNT(*) as booking_count')
             )
-            ->whereBetween(
-                $this->showBookingTime ? 'bookings.booking_at' : 'bookings.created_at',
-                [$startDate, $endDate]
-            )
+            ->whereBetween($this->getDateColumn(), [$startDate, $endDate])
             ->whereIn('bookings.status', [BookingStatus::CONFIRMED, BookingStatus::VENUE_CONFIRMED])
             ->groupBy('time_slot')
             ->orderByDesc('booking_count')
@@ -121,7 +114,7 @@ class BookingAnalyticsWidget extends Widget
 
     protected function getPartySizes(Carbon $startDate, Carbon $endDate): array
     {
-        $dateColumn = $this->showBookingTime ? 'bookings.booking_at' : 'bookings.created_at';
+        $dateColumn = $this->getDateColumn();
 
         $results = Booking::query()
             ->select('bookings.guest_count', DB::raw('COUNT(*) as count'))
@@ -144,7 +137,7 @@ class BookingAnalyticsWidget extends Widget
 
     protected function getPrimeAnalysis(Carbon $startDate, Carbon $endDate): array
     {
-        $dateColumn = $this->showBookingTime ? 'bookings.booking_at' : 'bookings.created_at';
+        $dateColumn = $this->getDateColumn();
         $currencyService = app(CurrencyConversionService::class);
 
         return Booking::query()
@@ -176,7 +169,7 @@ class BookingAnalyticsWidget extends Widget
 
     protected function getLeadTimeAnalysis(Carbon $startDate, Carbon $endDate): array
     {
-        $dateColumn = $this->showBookingTime ? 'bookings.booking_at' : 'bookings.created_at';
+        $dateColumn = $this->getDateColumn();
 
         $results = Booking::query()
             ->select(
@@ -220,7 +213,7 @@ class BookingAnalyticsWidget extends Widget
 
     protected function getDayAnalysis(Carbon $startDate, Carbon $endDate): array
     {
-        $dateColumn = $this->showBookingTime ? 'bookings.booking_at' : 'bookings.created_at';
+        $dateColumn = $this->getDateColumn();
 
         $results = Booking::query()
             ->select(
@@ -246,7 +239,7 @@ class BookingAnalyticsWidget extends Widget
 
     protected function getCalendarDayAnalysis(Carbon $startDate, Carbon $endDate): array
     {
-        $dateColumn = $this->showBookingTime ? 'bookings.booking_at' : 'bookings.created_at';
+        $dateColumn = $this->getDateColumn();
 
         return Booking::query()
             ->select(
