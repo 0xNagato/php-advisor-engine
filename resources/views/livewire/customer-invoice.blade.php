@@ -151,7 +151,7 @@
                 <div>
                     <span class="block text-xs text-gray-500 uppercase">Concierge:</span>
                     <span class="block text-xs font-medium text-gray-800 sm:text-sm dark:text-gray-200">
-                        @if ($booking->concierge && auth()->check() && auth()->user()->hasActiveRole('super_admin'))
+                        @if (!$download && $booking->concierge && auth()->check() && auth()->user()->hasActiveRole('super_admin'))
                             {{ $this->viewConciergeAction }}
                         @elseif ($booking->concierge)
                             {{ $booking->concierge->user->name }}
@@ -313,7 +313,7 @@
                     </div>
                 </div>
             @endif
-            @if (auth()->check() && auth()->user()->hasActiveRole('super_admin'))
+            @if (!$download && auth()->check() && auth()->user()->hasActiveRole('super_admin'))
                 <x-filament::actions :actions="[
                     $this->resendInvoiceAction,
                     $this->refundBookingAction,
@@ -326,7 +326,7 @@
                 ]" class="w-full mt-4" />
             @endif
 
-            @if ($this->canModifyBooking)
+            @if (!$download && auth()->check() && $this->canModifyBooking)
                 <x-filament::actions :actions="[$this->cancelBookingAction, $this->modifyGuestInfoAction]" class="w-full mt-4" />
 
                 <x-filament::button wire:click="$dispatch('open-modal', { id: 'modify-booking-{{ $booking->id }}' })"
