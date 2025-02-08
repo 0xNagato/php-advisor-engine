@@ -32,6 +32,16 @@ class VenueOnboarding extends Component
     use FormatsPhoneNumber;
     use WithFileUploads;
 
+    private const DEFAULT_BOOKING_HOURS = [
+        'monday' => ['start' => '11:00:00', 'end' => '22:00:00', 'closed' => false],
+        'tuesday' => ['start' => '11:00:00', 'end' => '22:00:00', 'closed' => false],
+        'wednesday' => ['start' => '11:00:00', 'end' => '22:00:00', 'closed' => false],
+        'thursday' => ['start' => '11:00:00', 'end' => '22:00:00', 'closed' => false],
+        'friday' => ['start' => '11:00:00', 'end' => '22:00:00', 'closed' => false],
+        'saturday' => ['start' => '11:00:00', 'end' => '22:00:00', 'closed' => false],
+        'sunday' => ['start' => '11:00:00', 'end' => '22:00:00', 'closed' => false],
+    ];
+
     /** @var array<string,string> */
     public array $steps = [
         'company' => 'Company',
@@ -119,14 +129,12 @@ class VenueOnboarding extends Component
             foreach ($savedState as $key => $value) {
                 if (property_exists($this, $key)) {
                     if ($key === 'phone') {
-                        // Format phone number when loading from session
                         $this->phone = $this->getInternationalFormattedPhoneNumber($value);
                     } else {
                         $this->$key = $value;
                     }
                 }
             }
-            // Explicitly set the step from session
             $this->step = $savedState['step'] ?? 'company';
         } else {
             $this->venue_names = array_fill(0, $this->venue_count, '');
@@ -136,16 +144,9 @@ class VenueOnboarding extends Component
             $this->logo_files = array_fill(0, $this->venue_count, null);
             $this->venue_regions = array_fill(0, $this->venue_count, 'miami');
             $this->step = 'company';
-            $this->venue_booking_hours = array_fill(0, $this->venue_count, [
-                'monday' => ['start' => '11:00:00', 'end' => '22:00:00', 'closed' => false],
-                'tuesday' => ['start' => '11:00:00', 'end' => '22:00:00', 'closed' => false],
-                'wednesday' => ['start' => '11:00:00', 'end' => '22:00:00', 'closed' => false],
-                'thursday' => ['start' => '11:00:00', 'end' => '22:00:00', 'closed' => false],
-                'friday' => ['start' => '11:00:00', 'end' => '22:00:00', 'closed' => false],
-                'saturday' => ['start' => '11:00:00', 'end' => '22:00:00', 'closed' => false],
-                'sunday' => ['start' => '11:00:00', 'end' => '22:00:00', 'closed' => false],
-            ]);
         }
+
+        $this->initializeBookingHours();
 
         // Generate time slots in 30-minute increments from 11 AM to 11 PM
         $this->timeSlots = collect()
@@ -163,6 +164,31 @@ class VenueOnboarding extends Component
             })
             ->values()
             ->toArray();
+    }
+
+    private function initializeBookingHours(): void
+    {
+        if (empty($this->venue_booking_hours)) {
+            $this->venue_booking_hours = array_fill(0, $this->venue_count, self::DEFAULT_BOOKING_HOURS);
+
+            return;
+        }
+
+        // Ensure all venues have booking hours
+        for ($i = 0; $i < $this->venue_count; $i++) {
+            if (! isset($this->venue_booking_hours[$i])) {
+                $this->venue_booking_hours[$i] = self::DEFAULT_BOOKING_HOURS;
+
+                continue;
+            }
+
+            // Ensure all days are set for each venue
+            foreach (array_keys(self::DEFAULT_BOOKING_HOURS) as $day) {
+                if (! isset($this->venue_booking_hours[$i][$day])) {
+                    $this->venue_booking_hours[$i][$day] = self::DEFAULT_BOOKING_HOURS[$day];
+                }
+            }
+        }
     }
 
     public function updated($property): void
@@ -201,12 +227,14 @@ class VenueOnboarding extends Component
             $this->venue_use_non_prime_incentive = array_pad($this->venue_use_non_prime_incentive, $this->venue_count, true);
             $this->venue_non_prime_per_diem = array_pad($this->venue_non_prime_per_diem, $this->venue_count, 10.0);
             $this->venue_regions = array_pad($this->venue_regions, $this->venue_count, 'miami');
+            $this->venue_booking_hours = array_pad($this->venue_booking_hours, $this->venue_count, self::DEFAULT_BOOKING_HOURS);
         } else {
             $this->venue_names = array_slice($this->venue_names, 0, $this->venue_count);
             $this->venue_prime_hours = array_slice($this->venue_prime_hours, 0, $this->venue_count);
             $this->venue_use_non_prime_incentive = array_slice($this->venue_use_non_prime_incentive, 0, $this->venue_count);
             $this->venue_non_prime_per_diem = array_slice($this->venue_non_prime_per_diem, 0, $this->venue_count);
             $this->venue_regions = array_slice($this->venue_regions, 0, $this->venue_count);
+            $this->venue_booking_hours = array_slice($this->venue_booking_hours, 0, $this->venue_count);
         }
 
         $this->logo_files = array_fill(0, $this->venue_count, null);
@@ -331,7 +359,7 @@ class VenueOnboarding extends Component
         $this->submitted = true;
     }
 
-    private function validateStep(): void
+    protected function validateStep(): void
     {
         match ($this->step) {
             'company' => $this->validate([
@@ -385,27 +413,34 @@ class VenueOnboarding extends Component
                 'venue_booking_hours.*.*.start' => [
                     'required_if:venue_booking_hours.*.*.closed,false',
                     function ($attribute, $value, $fail) {
-                        if ($value && ! preg_match('/^\d{2}:\d{2}:\d{2}$/', $value)) {
-                            $value = $this->formatTimeToHis($value);
-                            $parts = explode('.', $attribute);
-                            $this->venue_booking_hours[$parts[1]][$parts[2]]['start'] = $value;
+                        try {
+                            if ($value && ! preg_match('/^\d{2}:\d{2}:\d{2}$/', $value)) {
+                                $parts = explode('.', $attribute);
+                                $this->venue_booking_hours[$parts[1]][$parts[2]]['start'] =
+                                    $this->formatTimeToHis($value);
+                            }
+                        } catch (Exception $e) {
+                            $fail('Invalid time format');
                         }
                     },
                 ],
                 'venue_booking_hours.*.*.end' => [
                     'required_if:venue_booking_hours.*.*.closed,false',
                     function ($attribute, $value, $fail) {
-                        if ($value && ! preg_match('/^\d{2}:\d{2}:\d{2}$/', $value)) {
-                            $value = $this->formatTimeToHis($value);
-                            $parts = explode('.', $attribute);
-                            $this->venue_booking_hours[$parts[1]][$parts[2]]['end'] = $value;
+                        try {
+                            if ($value && ! preg_match('/^\d{2}:\d{2}:\d{2}$/', $value)) {
+                                $parts = explode('.', $attribute);
+                                $this->venue_booking_hours[$parts[1]][$parts[2]]['end'] =
+                                    $this->formatTimeToHis($value);
+                            }
+                        } catch (Exception $e) {
+                            $fail('Invalid time format');
                         }
                     },
                 ],
             ], [
                 'venue_booking_hours.*.*.start.required_if' => 'Opening time is required when venue is open',
                 'venue_booking_hours.*.*.end.required_if' => 'Closing time is required when venue is open',
-                'venue_booking_hours.*.*.end.after' => 'Closing time must be after opening time',
             ]),
             default => null,
         };
