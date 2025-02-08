@@ -6,6 +6,7 @@ use App\Actions\Booking\SendConfirmationToVenueContacts;
 use App\Enums\BookingStatus;
 use App\Models\Booking;
 use AshAllenDesign\ShortURL\Exceptions\ShortURLException;
+use Carbon\Carbon;
 use Illuminate\Console\Command;
 
 class SendVenueBookingReminder extends Command
@@ -37,8 +38,16 @@ class SendVenueBookingReminder extends Command
             ->whereNull('resent_venue_confirmation_at')
             ->where('booking_at', '=', now()->addMinutes(30))
             ->each(function ($booking) {
-                SendConfirmationToVenueContacts::run($booking);
-                $booking->update(['resent_venue_confirmation_at' => now()]);
+                $timezone = $booking->venue->timezone;
+                $currentLocalTime = now($timezone);
+
+                $allowedStart = Carbon::createFromFormat('H:i:s', '11:00:00', $timezone);
+                $allowedEnd = Carbon::createFromFormat('H:i:s', '20:00:00', $timezone);
+
+                if ($currentLocalTime->between($allowedStart, $allowedEnd)) {
+                    SendConfirmationToVenueContacts::run($booking);
+                    $booking->update(['resent_venue_confirmation_at' => now()]);
+                }
             });
     }
 }
