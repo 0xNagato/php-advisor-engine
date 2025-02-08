@@ -38,6 +38,7 @@ class BookingSearch extends Page implements HasTable
         'end_date' => '',
         'status' => [],
         'user_id' => '',
+        'show_booking_time' => true,
     ];
 
     protected static ?string $navigationIcon = 'heroicon-o-magnifying-glass';
@@ -69,6 +70,7 @@ class BookingSearch extends Page implements HasTable
                 'end_date' => '',
                 'status' => [],
                 'user_id' => '',
+                'show_booking_time' => true,
             ]);
         }
     }
@@ -79,7 +81,7 @@ class BookingSearch extends Page implements HasTable
             ->schema([
                 Section::make()
                     ->schema([
-                        Grid::make(2)
+                        Grid::make(3)
                             ->schema([
                                 DatePicker::make('start_date')
                                     ->label('Start Date')
@@ -90,6 +92,18 @@ class BookingSearch extends Page implements HasTable
                                 DatePicker::make('end_date')
                                     ->label('End Date')
                                     ->live()
+                                    ->afterStateUpdated(function () {
+                                        $this->resetTable();
+                                    }),
+                                Select::make('show_booking_time')
+                                    ->label('Date Type')
+                                    ->options([
+                                        true => 'Booking Time',
+                                        false => 'Creation Time',
+                                    ])
+                                    ->default(true)
+                                    ->live()
+                                    ->selectablePlaceholder(false)
                                     ->afterStateUpdated(function () {
                                         $this->resetTable();
                                     }),
@@ -180,12 +194,14 @@ class BookingSearch extends Page implements HasTable
         }
 
         if ($this->data['start_date'] ?? null) {
-            $query->where('booking_at', '>=',
+            $dateColumn = $this->data['show_booking_time'] ? 'booking_at' : 'created_at';
+            $query->where($dateColumn, '>=',
                 Carbon::parse($this->data['start_date'])->startOfDay());
         }
 
         if ($this->data['end_date'] ?? null) {
-            $query->where('booking_at', '<=',
+            $dateColumn = $this->data['show_booking_time'] ? 'booking_at' : 'created_at';
+            $query->where($dateColumn, '<=',
                 Carbon::parse($this->data['end_date'])->endOfDay());
         }
 

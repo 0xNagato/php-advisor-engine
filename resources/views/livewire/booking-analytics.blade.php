@@ -1,3 +1,7 @@
+@php
+    use App\Enums\BookingStatus;
+@endphp
+
 <div class="grid w-full grid-cols-1 gap-6 col-span-full md:grid-cols-2 xl:grid-cols-3">
     <div class="flex items-center justify-end gap-3 col-span-full">
         <span class="text-sm text-gray-600">Viewing analytics based on:</span>
@@ -14,10 +18,19 @@
         </div>
         <div class="p-4 space-y-3">
             @foreach ($this->getAnalytics()['topVenues'] as $venue)
-                <div class="flex items-center justify-between">
+                <a href="{{ route('filament.admin.pages.booking-search', [
+                    'filters' => [
+                        'venue_search' => $venue['name'],
+                        'show_booking_time' => $showBookingTime,
+                        'start_date' => $this->filters['startDate'],
+                        'end_date' => $this->filters['endDate'],
+                        'status' => [BookingStatus::CONFIRMED->value, BookingStatus::VENUE_CONFIRMED->value],
+                    ],
+                ]) }}"
+                    class="flex items-center justify-between p-1 rounded hover:bg-gray-50">
                     <span class="text-sm text-gray-600">{{ $venue['name'] }}</span>
                     <span class="font-medium text-gray-900">{{ $venue['booking_count'] }} bookings</span>
-                </div>
+                </a>
             @endforeach
         </div>
     </div>
@@ -115,13 +128,21 @@
         <div class="p-4">
             <div class="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
                 @foreach ($this->getAnalytics()['calendarDayAnalysis'] as $day)
-                    <div class="flex items-center justify-between p-3 rounded-lg bg-gray-50">
+                    <a href="{{ route('filament.admin.pages.booking-search', [
+                        'filters' => [
+                            'start_date' => \Carbon\Carbon::parse($day['date'])->format('Y-m-d'),
+                            'end_date' => \Carbon\Carbon::parse($day['date'])->format('Y-m-d'),
+                            'show_booking_time' => $showBookingTime,
+                            'status' => [BookingStatus::CONFIRMED->value, BookingStatus::VENUE_CONFIRMED->value],
+                        ],
+                    ]) }}"
+                        class="flex items-center justify-between p-3 rounded-lg bg-gray-50 hover:bg-gray-100">
                         <div>
                             <div class="text-sm font-medium text-gray-900">{{ $day['date'] }}</div>
                             <div class="text-xs text-gray-500">{{ $day['day_name'] }}</div>
                         </div>
                         <div class="text-lg font-semibold text-gray-900">{{ $day['booking_count'] }}</div>
-                    </div>
+                    </a>
                 @endforeach
             </div>
         </div>
