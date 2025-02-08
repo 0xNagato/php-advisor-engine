@@ -10,7 +10,6 @@ use Exception;
 use Filament\Forms\Form;
 use Filament\Pages\Page;
 use Illuminate\Database\Eloquent\Collection;
-use Illuminate\Support\HtmlString;
 use Livewire\Attributes\On;
 
 /**
@@ -40,11 +39,6 @@ class AvailabilityCalendar extends Page
     public array $timeslotHeaders = [];
 
     public ?Region $region;
-
-    public function getSubheading(): string|\Illuminate\Contracts\Support\Htmlable|null
-    {
-        return new HtmlString('<span class="text-xs text-gray-500">'.$this->region?->name.'</span>');
-    }
 
     public function mount(): void
     {
