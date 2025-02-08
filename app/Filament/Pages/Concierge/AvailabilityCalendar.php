@@ -38,12 +38,16 @@ class AvailabilityCalendar extends Page
 
     public array $timeslotHeaders = [];
 
-    public ?Region $region;
+    public ?Region $region = null;
 
     public function mount(): void
     {
-        $region = auth()->user()->region ?? Region::default()->id;
+        $region = auth()->user()->region;
 
+        if (! $region) {
+            $region = Region::default()->id;
+            auth()->user()->update(['region' => $region]);
+        }
         /** @var Region $this->region */
         $this->region = Region::query()->find($region);
         $this->timezone = $this->region?->timezone;
