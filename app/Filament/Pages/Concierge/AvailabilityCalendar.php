@@ -42,7 +42,7 @@ class AvailabilityCalendar extends Page
 
     public function mount(): void
     {
-        $region = auth()->user()->region;
+        $region = auth()->user()->region ?? Region::default()->id;
 
         /** @var Region $this->region */
         $this->region = Region::query()->find($region);
