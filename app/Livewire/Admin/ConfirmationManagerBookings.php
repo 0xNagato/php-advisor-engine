@@ -44,7 +44,7 @@ class ConfirmationManagerBookings extends BaseWidget
                         ->requiresConfirmation()
                         ->hidden(fn (Booking $record) => ! is_null($record->venue_confirmed_at))
                         ->action(function (Booking $record) {
-                            SendConfirmationToVenueContacts::run($record);
+                            SendConfirmationToVenueContacts::run(booking: $record, reminder: true);
                             $record->update(['resent_venue_confirmation_at' => now()]);
                         }),
                 ]),
