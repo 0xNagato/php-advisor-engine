@@ -10,6 +10,7 @@ use Exception;
 use Filament\Forms\Form;
 use Filament\Pages\Page;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Support\HtmlString;
 use Livewire\Attributes\On;
 
 /**
@@ -38,11 +39,21 @@ class AvailabilityCalendar extends Page
 
     public array $timeslotHeaders = [];
 
+    public ?Region $region;
+
+    public function getSubheading(): string|\Illuminate\Contracts\Support\Htmlable|null
+    {
+        return new HtmlString('<span class="text-xs text-gray-500">'.$this->region?->name.'</span>');
+    }
+
     public function mount(): void
     {
-        $region = Region::query()->find(session('region', 'miami'));
-        $this->timezone = $region?->timezone;
-        $this->currency = $region?->currency;
+        $region = auth()->user()->region;
+
+        /** @var Region $this->region */
+        $this->region = Region::query()->find($region);
+        $this->timezone = $this->region?->timezone;
+        $this->currency = $this->region?->currency;
         $this->form->fill();
     }
 
@@ -70,6 +81,15 @@ class AvailabilityCalendar extends Page
 
     public function updatedData($data, $key): void
     {
+        // Check if user's region has changed and update accordingly
+        $currentUserRegion = auth()->user()->region;
+        if ($this->region?->id !== $currentUserRegion) {
+            /** @var Region $this->region */
+            $this->region = Region::query()->find($currentUserRegion);
+            $this->timezone = $this->region?->timezone;
+            $this->currency = $this->region?->currency;
+        }
+
         if ($key === 'guest_count' && blank($data)) {
             $this->data['guest_count'] = 2;
         }
@@ -91,10 +111,13 @@ class AvailabilityCalendar extends Page
     #[On('region-changed')]
     public function regionChanged(): void
     {
-        $region = Region::query()->find(session('region', 'miami'));
+        $region = auth()->user()->region;
 
-        $this->timezone = $region?->timezone;
-        $this->currency = $region?->currency;
+        /** @var Region $this->region */
+        $this->region = Region::query()->find($region);
+
+        $this->timezone = $this->region?->timezone;
+        $this->currency = $this->region?->currency;
 
         $this->venues = null;
         $this->form->fill();

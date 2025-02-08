@@ -61,9 +61,9 @@ class ConciergeUserMenu extends Widget implements HasForms
                     $user->save();
                     $this->dispatch('region-changed', $get('region'));
                 })
-                ->default(session('region', ''))
                 ->selectablePlaceholder(false)
                 ->searchable()
+                ->default(auth()->user()->region)
                 ->visible(fn () => count(config('app.active_regions', [])) > 1),
         ])
             ->statePath('data')
