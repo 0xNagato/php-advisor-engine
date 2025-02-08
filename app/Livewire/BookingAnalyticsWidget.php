@@ -37,6 +37,7 @@ class BookingAnalyticsWidget extends Widget
             'primeAnalysis' => $this->getPrimeAnalysis($startDate, $endDate),
             'leadTimeAnalysis' => $this->getLeadTimeAnalysis($startDate, $endDate),
             'dayAnalysis' => $this->getDayAnalysis($startDate, $endDate),
+            'calendarDayAnalysis' => $this->getCalendarDayAnalysis($startDate, $endDate),
         ];
     }
 
@@ -156,6 +157,29 @@ class BookingAnalyticsWidget extends Widget
             ->groupBy('day_name')
             ->orderByRaw('FIELD(day_name, "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday")')
             ->get()
+            ->toArray();
+    }
+
+    protected function getCalendarDayAnalysis(Carbon $startDate, Carbon $endDate): array
+    {
+        return Booking::query()
+            ->select(
+                DB::raw('DATE(bookings.booking_at) as calendar_date'),
+                DB::raw('COUNT(*) as booking_count'),
+                DB::raw('DAYNAME(bookings.booking_at) as day_name')
+            )
+            ->whereBetween('bookings.booking_at', [$startDate, $endDate])
+            ->whereIn('bookings.status', [BookingStatus::CONFIRMED, BookingStatus::VENUE_CONFIRMED])
+            ->groupBy('calendar_date', 'day_name')
+            ->orderBy('calendar_date')
+            ->get()
+            ->map(function ($item) {
+                return [
+                    'date' => Carbon::parse($item->calendar_date)->format('M j'),
+                    'day_name' => $item->day_name,
+                    'booking_count' => $item->booking_count,
+                ];
+            })
             ->toArray();
     }
 }

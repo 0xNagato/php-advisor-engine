@@ -98,4 +98,24 @@
             </div>
         </div>
     </div>
+
+    <!-- Calendar Day Analysis -->
+    <div class="bg-white rounded-lg shadow col-span-full">
+        <div class="p-4 border-b border-gray-200">
+            <h3 class="text-base font-semibold text-gray-900">Calendar Day</h3>
+        </div>
+        <div class="p-4">
+            <div class="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
+                @foreach ($this->getAnalytics()['calendarDayAnalysis'] as $day)
+                    <div class="flex items-center justify-between p-3 rounded-lg bg-gray-50">
+                        <div>
+                            <div class="text-sm font-medium text-gray-900">{{ $day['date'] }}</div>
+                            <div class="text-xs text-gray-500">{{ $day['day_name'] }}</div>
+                        </div>
+                        <div class="text-lg font-semibold text-gray-900">{{ $day['booking_count'] }}</div>
+                    </div>
+                @endforeach
+            </div>
+        </div>
+    </div>
 </div>
