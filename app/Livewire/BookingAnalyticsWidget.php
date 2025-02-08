@@ -20,6 +20,19 @@ class BookingAnalyticsWidget extends Widget
 
     protected static ?string $pollingInterval = null;
 
+    public bool $showBookingTime;
+
+    public function mount(): void
+    {
+        $this->showBookingTime = session()->get('analytics_show_booking_time', true);
+    }
+
+    public function toggleDateType(): void
+    {
+        $this->showBookingTime = ! $this->showBookingTime;
+        session()->put('analytics_show_booking_time', $this->showBookingTime);
+    }
+
     public function getColumnSpan(): int|string|array
     {
         return $this->columnSpan;
@@ -43,11 +56,13 @@ class BookingAnalyticsWidget extends Widget
 
     protected function getTopVenues(Carbon $startDate, Carbon $endDate): array
     {
+        $dateColumn = $this->showBookingTime ? 'bookings.booking_at' : 'bookings.created_at';
+
         return Booking::query()
             ->select('v.name', DB::raw('COUNT(*) as booking_count'))
             ->join('schedule_templates as st', 'bookings.schedule_template_id', '=', 'st.id')
             ->join('venues as v', 'st.venue_id', '=', 'v.id')
-            ->whereBetween('bookings.booking_at', [$startDate, $endDate])
+            ->whereBetween($dateColumn, [$startDate, $endDate])
             ->whereIn('bookings.status', [BookingStatus::CONFIRMED, BookingStatus::VENUE_CONFIRMED])
             ->groupBy('v.id', 'v.name')
             ->orderByDesc('booking_count')
@@ -58,9 +73,11 @@ class BookingAnalyticsWidget extends Widget
 
     protected function getPopularTimes(Carbon $startDate, Carbon $endDate): array
     {
+        $dateColumn = $this->showBookingTime ? 'bookings.booking_at' : 'bookings.created_at';
+
         return Booking::query()
-            ->select(DB::raw('TIME_FORMAT(bookings.booking_at, "%l:%i %p") as time_slot'), DB::raw('COUNT(*) as booking_count'))
-            ->whereBetween('bookings.booking_at', [$startDate, $endDate])
+            ->select(DB::raw("TIME_FORMAT($dateColumn, '%l:%i %p') as time_slot"), DB::raw('COUNT(*) as booking_count'))
+            ->whereBetween($dateColumn, [$startDate, $endDate])
             ->whereIn('bookings.status', [BookingStatus::CONFIRMED, BookingStatus::VENUE_CONFIRMED])
             ->groupBy('time_slot')
             ->orderByDesc('booking_count')
@@ -71,9 +88,11 @@ class BookingAnalyticsWidget extends Widget
 
     protected function getPartySizes(Carbon $startDate, Carbon $endDate): array
     {
+        $dateColumn = $this->showBookingTime ? 'bookings.booking_at' : 'bookings.created_at';
+
         return Booking::query()
             ->select('bookings.guest_count', DB::raw('COUNT(*) as count'))
-            ->whereBetween('bookings.booking_at', [$startDate, $endDate])
+            ->whereBetween($dateColumn, [$startDate, $endDate])
             ->whereIn('bookings.status', [BookingStatus::CONFIRMED, BookingStatus::VENUE_CONFIRMED])
             ->groupBy('bookings.guest_count')
             ->orderBy('bookings.guest_count')
@@ -83,6 +102,7 @@ class BookingAnalyticsWidget extends Widget
 
     protected function getPrimeAnalysis(Carbon $startDate, Carbon $endDate): array
     {
+        $dateColumn = $this->showBookingTime ? 'bookings.booking_at' : 'bookings.created_at';
         $currencyService = app(CurrencyConversionService::class);
 
         return Booking::query()
@@ -93,7 +113,7 @@ class BookingAnalyticsWidget extends Widget
                 DB::raw('AVG(bookings.total_fee) as avg_fee'),
                 DB::raw('AVG(bookings.platform_earnings) as avg_platform_earnings')
             )
-            ->whereBetween('bookings.booking_at', [$startDate, $endDate])
+            ->whereBetween($dateColumn, [$startDate, $endDate])
             ->whereIn('bookings.status', [BookingStatus::CONFIRMED, BookingStatus::VENUE_CONFIRMED])
             ->groupBy('bookings.is_prime', 'bookings.currency')
             ->get()
@@ -114,6 +134,8 @@ class BookingAnalyticsWidget extends Widget
 
     protected function getLeadTimeAnalysis(Carbon $startDate, Carbon $endDate): array
     {
+        $dateColumn = $this->showBookingTime ? 'bookings.booking_at' : 'bookings.created_at';
+
         return Booking::query()
             ->select(
                 DB::raw('
@@ -128,7 +150,7 @@ class BookingAnalyticsWidget extends Widget
                 '),
                 DB::raw('COUNT(*) as count')
             )
-            ->whereBetween('bookings.booking_at', [$startDate, $endDate])
+            ->whereBetween($dateColumn, [$startDate, $endDate])
             ->whereIn('bookings.status', [BookingStatus::CONFIRMED, BookingStatus::VENUE_CONFIRMED])
             ->groupBy('lead_time')
             ->orderByRaw('
@@ -147,12 +169,14 @@ class BookingAnalyticsWidget extends Widget
 
     protected function getDayAnalysis(Carbon $startDate, Carbon $endDate): array
     {
+        $dateColumn = $this->showBookingTime ? 'bookings.booking_at' : 'bookings.created_at';
+
         return Booking::query()
             ->select(
-                DB::raw('DAYNAME(bookings.booking_at) as day_name'),
+                DB::raw("DAYNAME($dateColumn) as day_name"),
                 DB::raw('COUNT(*) as booking_count')
             )
-            ->whereBetween('bookings.booking_at', [$startDate, $endDate])
+            ->whereBetween($dateColumn, [$startDate, $endDate])
             ->whereIn('bookings.status', [BookingStatus::CONFIRMED, BookingStatus::VENUE_CONFIRMED])
             ->groupBy('day_name')
             ->orderByRaw('FIELD(day_name, "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday")')
@@ -162,13 +186,15 @@ class BookingAnalyticsWidget extends Widget
 
     protected function getCalendarDayAnalysis(Carbon $startDate, Carbon $endDate): array
     {
+        $dateColumn = $this->showBookingTime ? 'bookings.booking_at' : 'bookings.created_at';
+
         return Booking::query()
             ->select(
-                DB::raw('DATE(bookings.booking_at) as calendar_date'),
+                DB::raw("DATE($dateColumn) as calendar_date"),
                 DB::raw('COUNT(*) as booking_count'),
-                DB::raw('DAYNAME(bookings.booking_at) as day_name')
+                DB::raw("DAYNAME($dateColumn) as day_name")
             )
-            ->whereBetween('bookings.booking_at', [$startDate, $endDate])
+            ->whereBetween($dateColumn, [$startDate, $endDate])
             ->whereIn('bookings.status', [BookingStatus::CONFIRMED, BookingStatus::VENUE_CONFIRMED])
             ->groupBy('calendar_date', 'day_name')
             ->orderBy('calendar_date')

@@ -1,4 +1,12 @@
 <div class="grid w-full grid-cols-1 gap-6 col-span-full md:grid-cols-2 xl:grid-cols-3">
+    <div class="flex items-center justify-end gap-3 col-span-full">
+        <span class="text-sm text-gray-600">Viewing analytics based on:</span>
+        <button wire:click="toggleDateType"
+            class="inline-flex items-center px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-primary-500">
+            {{ $showBookingTime ? 'Booking Time' : 'Creation Time' }}
+        </button>
+    </div>
+
     <!-- Top Venues -->
     <div class="bg-white rounded-lg shadow">
         <div class="p-4 border-b border-gray-200">
@@ -100,7 +108,7 @@
     </div>
 
     <!-- Calendar Day Analysis -->
-    <div class="bg-white rounded-lg shadow col-span-full">
+    <div class="col-span-1 bg-white rounded-lg shadow md:col-span-2 xl:col-span-3">
         <div class="p-4 border-b border-gray-200">
             <h3 class="text-base font-semibold text-gray-900">Calendar Day</h3>
         </div>
