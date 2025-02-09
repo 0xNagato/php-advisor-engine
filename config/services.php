@@ -65,4 +65,14 @@ return [
     'manychat' => [
         'api_key' => env('MANYCHAT_API_KEY'),
     ],
+
+    'openai' => [
+        'api_key' => env('OPENAI_API_KEY'),
+    ],
+
+    'asana' => [
+        'token' => env('ASANA_TOKEN'),
+        'workspace_id' => env('ASANA_WORKSPACE_ID'),
+        'project_id' => env('ASANA_PROJECT_ID'),
+    ],
 ];
