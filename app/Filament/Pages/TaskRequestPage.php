@@ -30,6 +30,8 @@ class TaskRequestPage extends Page
 
     public ?array $originalTask = null;
 
+    public ?string $taskUrl = null;
+
     public static function canAccess(): bool
     {
         // only users with id of 1 or 2 can access this page
@@ -117,6 +119,7 @@ class TaskRequestPage extends Page
         $response = CreateAsanaTaskAction::run($this->parsedTask);
 
         if ($response['success']) {
+            $this->taskUrl = $response['task_url'];  // Store the task URL
             // Send notification email
             $notifyUsers = User::query()->whereIn('id', [1, 2])->get();
             foreach ($notifyUsers as $user) {

@@ -10,7 +10,7 @@
                     });
                 }
             }" x-init="scroll()" @chat-updated.window="scroll()" style="scrollbar-width: thin;"
-                class="min-w-full p-4 overflow-x-auto font-mono text-xs text-gray-700 whitespace-pre-wrap h-96">{{ $chatHistory }}</pre>
+                class="min-w-full p-4 overflow-x-auto font-mono text-xs text-gray-700 whitespace-pre-wrap h-96">{!! $chatHistory !!}</pre>
         </div>
 
         <form wire:submit.prevent="submitRequest" class="space-y-4">
@@ -34,5 +34,14 @@
                 </x-filament::button>
             </div>
         </form>
+
+        @if ($taskUrl)
+            <div class="mt-4">
+                <x-filament::button tag="a" href="{{ $taskUrl }}" target="_blank" rel="noopener noreferrer"
+                    icon="heroicon-m-arrow-top-right-on-square" color="success" class="justify-center w-full">
+                    Open Task in Asana
+                </x-filament::button>
+            </div>
+        @endif
     </div>
 </x-filament-panels::page>
