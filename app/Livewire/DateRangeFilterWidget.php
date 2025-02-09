@@ -27,32 +27,39 @@ class DateRangeFilterWidget extends Widget
 
     public array $ranges = [];
 
+    protected function getUserTimezone(): string
+    {
+        return auth()->user()?->timezone ?? config('app.default_timezone');
+    }
+
     public function mount(): void
     {
+        $timezone = $this->getUserTimezone();
+
         $this->ranges = [
             'today' => [
-                'start' => now()->startOfDay()->toDateString(),
-                'end' => now()->endOfDay()->toDateString(),
+                'start' => now($timezone)->startOfDay()->toDateString(),
+                'end' => now($timezone)->endOfDay()->toDateString(),
             ],
             'past_30_days' => [
-                'start' => now()->subDays(30)->toDateString(),
-                'end' => now()->toDateString(),
+                'start' => now($timezone)->subDays(30)->toDateString(),
+                'end' => now($timezone)->toDateString(),
             ],
             'past_week' => [
-                'start' => now()->subDays(6)->toDateString(),
-                'end' => now()->toDateString(),
+                'start' => now($timezone)->subDays(6)->toDateString(),
+                'end' => now($timezone)->toDateString(),
             ],
             'month' => [
-                'start' => now()->startOfMonth()->toDateString(),
-                'end' => now()->endOfMonth()->toDateString(),
+                'start' => now($timezone)->startOfMonth()->toDateString(),
+                'end' => now($timezone)->endOfMonth()->toDateString(),
             ],
             // 'quarter' => [
             //     'start' => now()->startOfQuarter()->toDateString(),
             //     'end' => now()->endOfQuarter()->toDateString(),
             // ],
             'year' => [
-                'start' => now()->startOfYear()->toDateString(),
-                'end' => now()->endOfYear()->toDateString(),
+                'start' => now($timezone)->startOfYear()->toDateString(),
+                'end' => now($timezone)->endOfYear()->toDateString(),
             ],
         ];
     }
@@ -72,12 +79,12 @@ class DateRangeFilterWidget extends Widget
     #[Computed]
     public function getStartDate(): ?Carbon
     {
-        return $this->startDate ? Carbon::parse($this->startDate) : null;
+        return $this->startDate ? Carbon::parse($this->startDate)->setTimezone($this->getUserTimezone()) : null;
     }
 
     #[Computed]
     public function getEndDate(): ?Carbon
     {
-        return $this->endDate ? Carbon::parse($this->endDate) : null;
+        return $this->endDate ? Carbon::parse($this->endDate)->setTimezone($this->getUserTimezone()) : null;
     }
 }
