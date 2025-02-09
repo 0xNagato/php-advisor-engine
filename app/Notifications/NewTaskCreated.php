@@ -13,7 +13,8 @@ class NewTaskCreated extends Notification
     public function __construct(
         public readonly string $taskName,
         public readonly string $taskNotes,
-        public readonly string $taskUrl
+        public readonly string $taskUrl,
+        public readonly string $creatorName,
     ) {}
 
     public function via(object $notifiable): array
@@ -27,7 +28,7 @@ class NewTaskCreated extends Notification
             ->from('tasks@primavip.co', 'PRIMA Task System')
             ->subject('New Task Created: '.$this->taskName)
             ->greeting('Hello '.$notifiable->first_name)
-            ->line('A new task has been created in Asana based on your request.')
+            ->line("A new task has been created in Asana by {$this->creatorName}.")
             ->line('Task Details:')
             ->line("Name: {$this->taskName}")
             ->line("Description: {$this->taskNotes}")

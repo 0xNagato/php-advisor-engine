@@ -126,7 +126,8 @@ class TaskRequestPage extends Page
                 $user->notify(new NewTaskCreated(
                     taskName: $this->parsedTask['name'],
                     taskNotes: $this->parsedTask['notes'],
-                    taskUrl: $response['task_url']
+                    taskUrl: $response['task_url'],
+                    creatorName: auth()->user()->name,
                 ));
             }
 
