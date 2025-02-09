@@ -77,13 +77,11 @@ class BookingAnalyticsWidget extends Widget
             ->limit(5)
             ->get();
 
-        return $results->map(function ($item) use ($total) {
-            return [
-                'name' => $item->name,
-                'booking_count' => $item->booking_count,
-                'percentage' => $total > 0 ? round(($item->booking_count / $total) * 100, 1) : 0,
-            ];
-        })->toArray();
+        return $results->map(fn ($item) => [
+            'name' => $item->name,
+            'booking_count' => $item->booking_count,
+            'percentage' => $total > 0 ? round(($item->booking_count / $total) * 100, 1) : 0,
+        ])->toArray();
     }
 
     protected function getPopularTimes(Carbon $startDate, Carbon $endDate): array
@@ -106,13 +104,11 @@ class BookingAnalyticsWidget extends Widget
             ->limit(5)
             ->get();
 
-        return $results->map(function ($item) use ($total) {
-            return [
-                'time_slot' => $item->time_slot,
-                'booking_count' => $item->booking_count,
-                'percentage' => $total > 0 ? round(($item->booking_count / $total) * 100, 1) : 0,
-            ];
-        })->toArray();
+        return $results->map(fn ($item) => [
+            'time_slot' => $item->time_slot,
+            'booking_count' => $item->booking_count,
+            'percentage' => $total > 0 ? round(($item->booking_count / $total) * 100, 1) : 0,
+        ])->toArray();
     }
 
     protected function getPartySizes(Carbon $startDate, Carbon $endDate): array
@@ -129,13 +125,11 @@ class BookingAnalyticsWidget extends Widget
 
         $total = $results->sum('count');
 
-        return $results->map(function ($item) use ($total) {
-            return [
-                'guest_count' => $item->guest_count,
-                'count' => $item->count,
-                'percentage' => $total > 0 ? round(($item->count / $total) * 100, 1) : 0,
-            ];
-        })->toArray();
+        return $results->map(fn ($item) => [
+            'guest_count' => $item->guest_count,
+            'count' => $item->count,
+            'percentage' => $total > 0 ? round(($item->count / $total) * 100, 1) : 0,
+        ])->toArray();
     }
 
     protected function getPrimeAnalysis(Carbon $startDate, Carbon $endDate): array
@@ -205,13 +199,11 @@ class BookingAnalyticsWidget extends Widget
 
         $total = $results->sum('count');
 
-        return $results->map(function ($item) use ($total) {
-            return [
-                'lead_time' => $item->lead_time,
-                'count' => $item->count,
-                'percentage' => $total > 0 ? round(($item->count / $total) * 100, 1) : 0,
-            ];
-        })->toArray();
+        return $results->map(fn ($item) => [
+            'lead_time' => $item->lead_time,
+            'count' => $item->count,
+            'percentage' => $total > 0 ? round(($item->count / $total) * 100, 1) : 0,
+        ])->toArray();
     }
 
     protected function getDayAnalysis(Carbon $startDate, Carbon $endDate): array
@@ -231,13 +223,11 @@ class BookingAnalyticsWidget extends Widget
 
         $total = $results->sum('booking_count');
 
-        return $results->map(function ($item) use ($total) {
-            return [
-                'day_name' => $item->day_name,
-                'booking_count' => $item->booking_count,
-                'percentage' => $total > 0 ? round(($item->booking_count / $total) * 100, 1) : 0,
-            ];
-        })->toArray();
+        return $results->map(fn ($item) => [
+            'day_name' => $item->day_name,
+            'booking_count' => $item->booking_count,
+            'percentage' => $total > 0 ? round(($item->booking_count / $total) * 100, 1) : 0,
+        ])->toArray();
     }
 
     protected function getCalendarDayAnalysis(Carbon $startDate, Carbon $endDate): array
@@ -255,13 +245,11 @@ class BookingAnalyticsWidget extends Widget
             ->groupBy('calendar_date', 'day_name')
             ->orderBy('calendar_date')
             ->get()
-            ->map(function ($item) {
-                return [
-                    'date' => Carbon::parse($item->calendar_date)->format('M j'),
-                    'day_name' => $item->day_name,
-                    'booking_count' => $item->booking_count,
-                ];
-            })
+            ->map(fn ($item) => [
+                'date' => Carbon::parse($item->calendar_date)->format('M j'),
+                'day_name' => $item->day_name,
+                'booking_count' => $item->booking_count,
+            ])
             ->toArray();
     }
 
@@ -277,13 +265,11 @@ class BookingAnalyticsWidget extends Widget
         $results = $query->get();
         $total = $results->sum('count');
 
-        return $results->map(function ($item) use ($total) {
-            return [
-                'status' => $item->status->label(),
-                'count' => $item->count,
-                'percentage' => $total > 0 ? round(($item->count / $total) * 100, 1) : 0,
-            ];
-        })->toArray();
+        return $results->map(fn ($item) => [
+            'status' => $item->status->label(),
+            'count' => $item->count,
+            'percentage' => $total > 0 ? round(($item->count / $total) * 100, 1) : 0,
+        ])->toArray();
     }
 
     protected function getTopConcierges(Carbon $startDate, Carbon $endDate): array

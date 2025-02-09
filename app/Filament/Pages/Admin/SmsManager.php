@@ -106,7 +106,7 @@ class SmsManager extends Page
         // Concierges with completed bookings
         $conciergesWithBookingsQuery = User::query()
             ->whereHas('roles', fn (Builder $query) => $query->where('name', 'concierge'))
-            ->whereHas('concierge.bookings', function ($query) {
+            ->whereHas('concierge.bookings', function (\Illuminate\Contracts\Database\Query\Builder $query) {
                 $query->whereNotNull('confirmed_at');
             })
             ->whereNotNull('secured_at')
@@ -115,10 +115,10 @@ class SmsManager extends Page
         // Active concierges without bookings
         $conciergesActiveNoBookingsQuery = User::query()
             ->whereHas('roles', fn (Builder $query) => $query->where('name', 'concierge'))
-            ->whereDoesntHave('concierge.bookings', function ($query) {
+            ->whereDoesntHave('concierge.bookings', function (\Illuminate\Contracts\Database\Query\Builder $query) {
                 $query->whereNotNull('confirmed_at');
             })
-            ->whereHas('authentications', function ($query) use ($sevenDaysAgo) {
+            ->whereHas('authentications', function (\Illuminate\Contracts\Database\Query\Builder $query) use ($sevenDaysAgo) {
                 $query->where('login_at', '>=', $sevenDaysAgo);
             })
             ->whereNotNull('secured_at')
@@ -127,7 +127,7 @@ class SmsManager extends Page
         // Inactive concierges
         $conciergesInactiveQuery = User::query()
             ->whereHas('roles', fn (Builder $query) => $query->where('name', 'concierge'))
-            ->whereDoesntHave('authentications', function ($query) use ($sevenDaysAgo) {
+            ->whereDoesntHave('authentications', function (\Illuminate\Contracts\Database\Query\Builder $query) use ($sevenDaysAgo) {
                 $query->where('login_at', '>=', $sevenDaysAgo);
             })
             ->whereNotNull('secured_at')
@@ -224,7 +224,7 @@ class SmsManager extends Page
         if ($recipients->contains('concierges_with_bookings')) {
             $query = User::query()
                 ->whereHas('roles', fn (Builder $query) => $query->where('name', 'concierge'))
-                ->whereHas('concierge.bookings', function ($query) {
+                ->whereHas('concierge.bookings', function (\Illuminate\Contracts\Database\Query\Builder $query) {
                     $query->whereNotNull('confirmed_at');
                 })
                 ->whereNotNull('secured_at')
@@ -239,10 +239,10 @@ class SmsManager extends Page
         if ($recipients->contains('concierges_active_no_bookings')) {
             $activeNoBookingsQuery = User::query()
                 ->whereHas('roles', fn (Builder $query) => $query->where('name', 'concierge'))
-                ->whereDoesntHave('concierge.bookings', function ($query) {
+                ->whereDoesntHave('concierge.bookings', function (\Illuminate\Contracts\Database\Query\Builder $query) {
                     $query->whereNotNull('confirmed_at');
                 })
-                ->whereHas('authentications', function ($query) use ($sevenDaysAgo) {
+                ->whereHas('authentications', function (\Illuminate\Contracts\Database\Query\Builder $query) use ($sevenDaysAgo) {
                     $query->where('login_at', '>=', $sevenDaysAgo);
                 })
                 ->whereNotNull('secured_at')
@@ -259,7 +259,7 @@ class SmsManager extends Page
         if ($recipients->contains('concierges_inactive')) {
             $inactiveQuery = User::query()
                 ->whereHas('roles', fn (Builder $query) => $query->where('name', 'concierge'))
-                ->whereDoesntHave('authentications', function ($query) use ($sevenDaysAgo) {
+                ->whereDoesntHave('authentications', function (\Illuminate\Contracts\Database\Query\Builder $query) use ($sevenDaysAgo) {
                     $query->where('login_at', '>=', $sevenDaysAgo);
                 })
                 ->whereNotNull('secured_at')

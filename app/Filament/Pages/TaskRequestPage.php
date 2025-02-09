@@ -4,6 +4,7 @@ namespace App\Filament\Pages;
 
 use App\Actions\CreateAsanaTaskAction;
 use App\Actions\ParseTaskRequestAction;
+use App\Models\User;
 use App\Notifications\NewTaskCreated;
 use Filament\Notifications\Notification;
 use Filament\Pages\Page;
@@ -117,12 +118,14 @@ class TaskRequestPage extends Page
 
         if ($response['success']) {
             // Send notification email
-            $user = auth()->user();
-            $user->notify(new NewTaskCreated(
-                taskName: $this->parsedTask['name'],
-                taskNotes: $this->parsedTask['notes'],
-                taskUrl: $response['task_url']
-            ));
+            $notifyUsers = User::query()->whereIn('id', [1, 2])->get();
+            foreach ($notifyUsers as $user) {
+                $user->notify(new NewTaskCreated(
+                    taskName: $this->parsedTask['name'],
+                    taskNotes: $this->parsedTask['notes'],
+                    taskUrl: $response['task_url']
+                ));
+            }
 
             $this->chatHistory .= "\n\n✅ System: Task created successfully in Asana!";
 

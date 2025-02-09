@@ -48,10 +48,10 @@ trait FormatsPhoneNumber
 
     public function getInternationalFormattedPhoneNumber($value): string
     {
-        $value = preg_replace('/\s+/', '', $value);
+        $value = preg_replace('/\s+/', '', (string) $value);
 
         $formatted = $this->getFormattedPhoneNumber($value, PhoneNumberFormat::E164);
 
-        return str_starts_with($formatted, '+') ? $formatted : '+'.$formatted;
+        return str_starts_with((string) $formatted, '+') ? $formatted : '+'.$formatted;
     }
 }

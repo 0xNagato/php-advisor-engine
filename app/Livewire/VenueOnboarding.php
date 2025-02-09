@@ -32,7 +32,7 @@ class VenueOnboarding extends Component
     use FormatsPhoneNumber;
     use WithFileUploads;
 
-    private const DEFAULT_BOOKING_HOURS = [
+    private const array DEFAULT_BOOKING_HOURS = [
         'monday' => ['start' => '11:00:00', 'end' => '22:00:00', 'closed' => false],
         'tuesday' => ['start' => '11:00:00', 'end' => '22:00:00', 'closed' => false],
         'wednesday' => ['start' => '11:00:00', 'end' => '22:00:00', 'closed' => false],
@@ -168,7 +168,7 @@ class VenueOnboarding extends Component
 
     private function initializeBookingHours(): void
     {
-        if (empty($this->venue_booking_hours)) {
+        if (blank($this->venue_booking_hours)) {
             $this->venue_booking_hours = array_fill(0, $this->venue_count, self::DEFAULT_BOOKING_HOURS);
 
             return;
@@ -419,7 +419,7 @@ class VenueOnboarding extends Component
                                 $this->venue_booking_hours[$parts[1]][$parts[2]]['start'] =
                                     $this->formatTimeToHis($value);
                             }
-                        } catch (Exception $e) {
+                        } catch (Exception) {
                             $fail('Invalid time format');
                         }
                     },
@@ -433,7 +433,7 @@ class VenueOnboarding extends Component
                                 $this->venue_booking_hours[$parts[1]][$parts[2]]['end'] =
                                     $this->formatTimeToHis($value);
                             }
-                        } catch (Exception $e) {
+                        } catch (Exception) {
                             $fail('Invalid time format');
                         }
                     },

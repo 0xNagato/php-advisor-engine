@@ -384,7 +384,7 @@ class User extends Authenticatable implements FilamentUser, HasAvatar
 
             // Update timezone when region changes
             if ($user->isDirty('region') && $user->region) {
-                $user->timezone = Region::find($user->region)?->timezone;
+                $user->timezone = Region::query()->find($user->region)?->timezone;
             }
         });
     }

@@ -50,11 +50,11 @@ Extract the task name and description from the following message:
 
             if ($assistantReply) {
                 // Clean up the response by removing newlines and extra whitespace
-                $cleanedReply = preg_replace('/\s+/', ' ', trim($assistantReply));
+                $cleanedReply = preg_replace('/\s+/', ' ', trim((string) $assistantReply));
                 // Remove any JSON code block markers if present
-                $cleanedReply = preg_replace('/```json\s*|\s*```/', '', $cleanedReply);
+                $cleanedReply = preg_replace('/```json\s*|\s*```/', '', (string) $cleanedReply);
 
-                $parsed = json_decode($cleanedReply, true);
+                $parsed = json_decode((string) $cleanedReply, true);
                 if (json_last_error() === JSON_ERROR_NONE) {
                     Log::info('Successfully parsed task', ['parsed_data' => $parsed]);
 

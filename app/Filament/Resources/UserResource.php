@@ -90,14 +90,12 @@ class UserResource extends Resource
                 TextColumn::make('name')
                     ->sortable(['first_name', 'last_name'])
                     ->size('sm')
-                    ->searchable(query: function (Builder $query, string $search): Builder {
-                        return $query->where(function ($query) use ($search) {
-                            $query->where('first_name', 'like', "%{$search}%")
-                                ->orWhere('last_name', 'like', "%{$search}%")
-                                ->orWhere('email', 'like', "%{$search}%")
-                                ->orWhere('phone', 'like', "%{$search}%");
-                        });
-                    })
+                    ->searchable(query: fn (Builder $query, string $search): Builder => $query->where(function ($query) use ($search) {
+                        $query->where('first_name', 'like', "%{$search}%")
+                            ->orWhere('last_name', 'like', "%{$search}%")
+                            ->orWhere('email', 'like', "%{$search}%")
+                            ->orWhere('phone', 'like', "%{$search}%");
+                    }))
                     ->formatStateUsing(fn (User $record): string => new HtmlString(<<<HTML
                         <div class="space-y-0.5">
                             <div class="text-xs font-semibold">{$record->name}</div>

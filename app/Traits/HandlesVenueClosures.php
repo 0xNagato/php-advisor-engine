@@ -26,9 +26,9 @@ trait HandlesVenueClosures
         }
 
         $closureVenues = $this->getClosureVenues();
-        
+
         // If no specific venues are configured, apply to all venues
-        $applyToAll = empty($closureVenues);
+        $applyToAll = blank($closureVenues);
 
         $venues->each(function ($venue) use ($closureVenues, $applyToAll) {
             // Check both ID and slug to support both formats
@@ -67,7 +67,7 @@ trait HandlesVenueClosures
     protected function getClosureVenues(): array
     {
         $envClosures = config('app.closure_venues');
-        
+
         // If numeric values are provided, convert them to strings for comparison
         return array_map('strval', array_filter(explode(',', (string) $envClosures)));
     }
@@ -85,9 +85,9 @@ trait HandlesVenueClosures
         }
 
         $closureVenues = $this->getClosureVenues();
-        
+
         // If no specific venues are configured, apply to all venues
-        $applyToAll = empty($closureVenues);
+        $applyToAll = blank($closureVenues);
 
         if ($applyToAll || in_array($venueSlug, $closureVenues, true)) {
             $schedules->each(function ($schedule) {

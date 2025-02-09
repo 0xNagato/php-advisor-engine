@@ -38,7 +38,7 @@ class DateRangeFilterWidget extends Widget
 
         $this->ranges = [
             'today' => [
-                'start' => now($timezone)->startOfDay()->toDateString(),
+                'start' => today()->toDateString(),
                 'end' => now($timezone)->endOfDay()->toDateString(),
             ],
             'past_30_days' => [
