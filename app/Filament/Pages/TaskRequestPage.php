@@ -22,7 +22,7 @@ class TaskRequestPage extends Page
 
     public $chatHistory = "System: Hi! Type your task request below.\n";
 
-    public $parsedTask = null;
+    public ?array $parsedTask = null;
 
     public $confirmationStep = false;
 
@@ -149,5 +149,15 @@ class TaskRequestPage extends Page
 
         // Dispatch event for auto-scrolling
         $this->dispatch('chat-updated');
+    }
+
+    protected function rules(): array
+    {
+        return [
+            'parsedTask.name' => ['required', 'string'],
+            'parsedTask.category' => ['required', 'string'],
+            'parsedTask.notes' => ['required', 'string'],
+            'parsedTask.technical_context' => ['nullable', 'string'],
+        ];
     }
 }

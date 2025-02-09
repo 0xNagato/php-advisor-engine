@@ -18,8 +18,8 @@ class CreateAsanaTaskAction extends Action
         Log::info('Starting Asana task creation', ['task_data' => $taskData]);
 
         $asanaToken = config('services.asana.token');
-        $workspaceId = config('services.asana.workspace_id'); // 1209142958028718
-        $projectId = config('services.asana.project_id');     // 1209152660457936
+        $workspaceId = config('services.asana.workspace_id');
+        $projectId = config('services.asana.project_id');
 
         if (! $asanaToken || ! $workspaceId || ! $projectId) {
             Log::error('Missing required Asana configuration', [
@@ -34,10 +34,21 @@ class CreateAsanaTaskAction extends Action
             ];
         }
 
+        // Build a formatted task description
+        $formattedNotes = "🎯 Description:\n{$taskData['notes']}\n\n";
+
+        if (! empty($taskData['category'])) {
+            $formattedNotes .= "📂 Category:\n{$taskData['category']}\n\n";
+        }
+
+        if (! empty($taskData['technical_context'])) {
+            $formattedNotes .= "🔧 Technical Context:\n{$taskData['technical_context']}\n\n";
+        }
+
         $payload = [
             'data' => [
                 'name' => $taskData['name'] ?? 'New Task',
-                'notes' => $taskData['notes'] ?? '',
+                'notes' => $formattedNotes,
                 'assignee' => 'me',
                 'projects' => [$projectId],
                 'workspace' => $workspaceId,

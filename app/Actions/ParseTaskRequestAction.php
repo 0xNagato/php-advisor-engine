@@ -139,7 +139,8 @@ class ParseTaskRequestAction extends Action
 
             Log::info('OpenAI API response received', [
                 'status' => $response->status(),
-                'response' => $assistantReply,
+                'raw_response' => $data,
+                'assistant_reply' => $assistantReply,
             ]);
 
             if ($assistantReply) {
@@ -147,6 +148,11 @@ class ParseTaskRequestAction extends Action
                 $cleanedReply = preg_replace('/\s+/', ' ', trim((string) $assistantReply));
                 // Remove any JSON code block markers if present
                 $cleanedReply = preg_replace('/```json\s*|\s*```/', '', (string) $cleanedReply);
+
+                Log::info('Cleaned response', [
+                    'original' => $assistantReply,
+                    'cleaned' => $cleanedReply,
+                ]);
 
                 $parsed = json_decode((string) $cleanedReply, true);
                 if (json_last_error() === JSON_ERROR_NONE) {
