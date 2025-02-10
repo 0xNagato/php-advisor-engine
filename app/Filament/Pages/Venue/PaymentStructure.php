@@ -111,6 +111,7 @@ class PaymentStructure extends Page
                 ->mask(RawJs::make('$money($input)'))
                 ->stripCharacters(',')
                 ->numeric()
+                ->disabled(true)
                 ->prefix(fn () => $this->region->currency_symbol)
                 ->required(),
             TextInput::make('increment_fee')
@@ -118,6 +119,7 @@ class PaymentStructure extends Page
                 ->helperText('The base reservation is for 2 people. For each additional diner, this fee will apply.')
                 ->mask(RawJs::make('$money($input)'))
                 ->stripCharacters(',')
+                ->disabled(true)
                 ->numeric()
                 ->prefix(fn () => $this->region->currency_symbol),
         ])
