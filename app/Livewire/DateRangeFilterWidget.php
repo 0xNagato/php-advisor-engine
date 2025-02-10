@@ -41,10 +41,6 @@ class DateRangeFilterWidget extends Widget
                 'start' => today()->toDateString(),
                 'end' => now($timezone)->endOfDay()->toDateString(),
             ],
-            'past_30_days' => [
-                'start' => now($timezone)->subDays(30)->toDateString(),
-                'end' => now($timezone)->toDateString(),
-            ],
             'past_week' => [
                 'start' => now($timezone)->subDays(6)->toDateString(),
                 'end' => now($timezone)->toDateString(),
@@ -53,10 +49,10 @@ class DateRangeFilterWidget extends Widget
                 'start' => now($timezone)->startOfMonth()->toDateString(),
                 'end' => now($timezone)->endOfMonth()->toDateString(),
             ],
-            // 'quarter' => [
-            //     'start' => now()->startOfQuarter()->toDateString(),
-            //     'end' => now()->endOfQuarter()->toDateString(),
-            // ],
+            'past_30_days' => [
+                'start' => now($timezone)->subDays(30)->toDateString(),
+                'end' => now($timezone)->toDateString(),
+            ],
             'year' => [
                 'start' => now($timezone)->startOfYear()->toDateString(),
                 'end' => now($timezone)->endOfYear()->toDateString(),

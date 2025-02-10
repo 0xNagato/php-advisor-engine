@@ -52,7 +52,7 @@
                 class="max-w-full pl-[30px] pr-[30px] mx-[auto] w-full md:max-w-[1035px]  md:my-[0] md:pl-[50px] md:pr-[50px]">
                 <p
                     class="text-[15px] px-[0] py-[10px] not-italic font-semibold text-center text-white leading-[normal] md:py-[7px]">
-                    PRIMA is LIVE in Miami!
+                    PRIMA is LIVE in Miami and Los Angeles!
                 </p>
             </div>
         </div>
