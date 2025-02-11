@@ -37,11 +37,11 @@ class CreateAsanaTaskAction extends Action
         // Build a formatted task description
         $formattedNotes = "🎯 Description:\n{$taskData['notes']}\n\n";
 
-        if (! empty($taskData['category'])) {
+        if (filled($taskData['category'])) {
             $formattedNotes .= "📂 Category:\n{$taskData['category']}\n\n";
         }
 
-        if (! empty($taskData['technical_context'])) {
+        if (filled($taskData['technical_context'])) {
             $formattedNotes .= "🔧 Technical Context:\n{$taskData['technical_context']}\n\n";
         }
 

@@ -10,6 +10,7 @@ use App\Models\Region;
 use App\Notifications\Booking\ConciergeFirstBooking;
 use App\Notifications\Booking\CustomerBookingConfirmed;
 use App\Traits\FormatsPhoneNumber;
+use Exception;
 use Illuminate\Support\Facades\Activity;
 use Illuminate\Support\Facades\DB;
 use Stripe\Charge;
@@ -71,7 +72,10 @@ class BookingService
             $booking->is_prime = 0;
             $booking->total_fee = 0;
             $booking->total_with_tax_in_cents = 0;
-            $booking->meta['converted_to_non_prime_at'] = now();
+
+            $meta = $booking->meta ?? [];
+            $meta['converted_to_non_prime_at'] = now();
+            $booking->meta = $meta;
 
             $booking->save();
 
@@ -90,7 +94,7 @@ class BookingService
                 ->log('Booking converted from Prime to Non-Prime');
 
             DB::commit();
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             DB::rollBack();
             throw $e;
         }
@@ -119,7 +123,11 @@ class BookingService
 
             // Update booking prime property
             $booking->is_prime = 1;
-            $booking->meta['converted_to_prime_at'] = now();
+
+            $meta = $booking->meta ?? [];
+            $meta['converted_to_prime_at'] = now();
+            $booking->meta = $meta;
+
             $booking->save();
 
             $booking->total_fee = $this->getPrimeTotalFee($booking);
@@ -168,7 +176,7 @@ class BookingService
                 ->log('Booking converted from Non-Prime to Prime');
 
             DB::commit();
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             DB::rollBack();
             throw $e;
         }

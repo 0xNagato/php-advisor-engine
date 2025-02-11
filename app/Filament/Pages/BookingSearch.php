@@ -193,7 +193,7 @@ class BookingSearch extends Page implements HasTable
                 $query = Booking::query()
                     ->when(
                         filled($this->data['start_date']) && filled($this->data['end_date']),
-                        fn ($query) => $query->whereBetween($dateColumn, [$startDate, $endDate])
+                        fn (\Illuminate\Contracts\Database\Query\Builder $query) => $query->whereBetween($dateColumn, [$startDate, $endDate])
                     );
 
                 // Apply filters

@@ -5,6 +5,7 @@ namespace App\Services\Booking;
 use App\Constants\BookingPercentages;
 use App\Models\Booking;
 use App\Models\ScheduleTemplate;
+use Exception;
 use Illuminate\Support\Facades\Log;
 
 readonly class NonPrimeEarningsCalculationService
@@ -20,7 +21,7 @@ readonly class NonPrimeEarningsCalculationService
 
         // If we have a schedule template, check for price override
         if ($booking->schedule_template_id) {
-            $scheduleTemplate = ScheduleTemplate::find($booking->schedule_template_id);
+            $scheduleTemplate = ScheduleTemplate::query()->find($booking->schedule_template_id);
             if ($scheduleTemplate && $scheduleTemplate->price_per_head) {
                 $pricePerHead = $scheduleTemplate->price_per_head;
             }
@@ -41,7 +42,7 @@ readonly class NonPrimeEarningsCalculationService
                 'venue_earnings' => $venue_earnings * 100,
                 'platform_earnings' => $platform_earnings * 100,
             ]);
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Log::error('Failed to save earnings', [
                 'booking_id' => $booking->id,
                 'error' => $e->getMessage(),
@@ -69,7 +70,7 @@ readonly class NonPrimeEarningsCalculationService
                 BookingPercentages::NON_PRIME_CONCIERGE_PERCENTAGE,
                 'concierge_bounty'
             );
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Log::error('Failed to create earnings records', [
                 'booking_id' => $booking->id,
                 'error' => $e->getMessage(),

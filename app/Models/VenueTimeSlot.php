@@ -30,16 +30,6 @@ class VenueTimeSlot extends Model
         'minimum_spend_per_guest',
     ];
 
-    protected $casts = [
-        'is_available' => 'boolean',
-        'prime_time' => 'boolean',
-        'prime_time_fee' => 'integer',
-        'price_per_head' => 'integer',
-        'minimum_spend_per_guest' => 'integer',
-        'available_tables' => 'integer',
-        'booking_date' => 'date',
-    ];
-
     /**
      * @return BelongsTo<ScheduleTemplate, $this>
      */
@@ -51,5 +41,18 @@ class VenueTimeSlot extends Model
     public function venue(): BelongsToThrough
     {
         return $this->belongsToThrough(Venue::class, ScheduleTemplate::class);
+    }
+
+    protected function casts(): array
+    {
+        return [
+            'is_available' => 'boolean',
+            'prime_time' => 'boolean',
+            'prime_time_fee' => 'integer',
+            'price_per_head' => 'integer',
+            'minimum_spend_per_guest' => 'integer',
+            'available_tables' => 'integer',
+            'booking_date' => 'date',
+        ];
     }
 }

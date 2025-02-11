@@ -6,7 +6,9 @@ use App\Models\ScheduleTemplate;
 use App\Models\Venue;
 use App\Models\VenueTimeSlot;
 use Carbon\Carbon;
+use Exception;
 use Filament\Notifications\Notification;
+use Illuminate\Contracts\Database\Query\Builder;
 use Illuminate\Support\Facades\Log;
 use Livewire\Component;
 
@@ -199,7 +201,7 @@ class ScheduleManager extends Component
             $this->venue->scheduleTemplates()
                 ->where('day_of_week', $this->selectedDay)
                 ->where('start_time', $this->editingSlot['time'])
-                ->when($this->editingSlot['size'] !== '*', function ($query) {
+                ->when($this->editingSlot['size'] !== '*', function (Builder $query) {
                     $query->where('party_size', $this->editingSlot['size']);
                 })
                 ->update([
@@ -211,7 +213,7 @@ class ScheduleManager extends Component
                     'updated_at' => now(),
                 ]);
 
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Log::error('Error saving schedule template', [
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
@@ -341,7 +343,7 @@ class ScheduleManager extends Component
 
             $this->closeEditModal();
 
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Log::error('Error saving schedule', [
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
@@ -363,7 +365,7 @@ class ScheduleManager extends Component
             $bookingDate = Carbon::parse($this->editingSlot['date'])->format('Y-m-d');
 
             // First find if an override exists
-            $override = VenueTimeSlot::where('schedule_template_id', $template->id)
+            $override = VenueTimeSlot::query()->where('schedule_template_id', $template->id)
                 ->where('booking_date', $bookingDate)
                 ->first();
 
@@ -376,7 +378,7 @@ class ScheduleManager extends Component
                     'price_per_head' => $this->editingSlot['price_per_head'],
                 ]);
             } else {
-                VenueTimeSlot::create([
+                VenueTimeSlot::query()->create([
                     'schedule_template_id' => $template->id,
                     'booking_date' => $bookingDate,
                     'is_available' => $this->editingSlot['is_available'],
@@ -386,7 +388,7 @@ class ScheduleManager extends Component
                     'price_per_head' => $this->editingSlot['price_per_head'],
                 ]);
             }
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Log::error('Error in saveOverride', [
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
@@ -450,13 +452,13 @@ class ScheduleManager extends Component
 
     protected function getFormattedTime(): string
     {
-        if (empty($this->editingSlot['time'])) {
+        if (blank($this->editingSlot['time'])) {
             return '';
         }
 
         try {
             return Carbon::parse($this->editingSlot['time'])->format('g:i A');
-        } catch (\Exception $e) {
+        } catch (Exception) {
             return $this->editingSlot['time'];
         }
     }
@@ -478,9 +480,7 @@ class ScheduleManager extends Component
             ->get();
 
         // Group templates and overrides for easier lookup
-        $groupedTemplates = $templates->groupBy(function ($template) {
-            return $template->start_time.'|'.$template->party_size;
-        });
+        $groupedTemplates = $templates->groupBy(fn ($template) => $template->start_time.'|'.$template->party_size);
 
         $groupedOverrides = $overrides->groupBy('schedule_template_id');
 
@@ -528,16 +528,13 @@ class ScheduleManager extends Component
 
             // Create overrides for each template setting is_available to false
             foreach ($templates as $template) {
-                VenueTimeSlot::updateOrCreate(
-                    [
-                        'schedule_template_id' => $template->id,
-                        'booking_date' => $this->selectedDate,
-                    ],
-                    [
-                        'is_available' => false,
-                        'prime_time' => false,
-                    ]
-                );
+                VenueTimeSlot::query()->updateOrCreate([
+                    'schedule_template_id' => $template->id,
+                    'booking_date' => $this->selectedDate,
+                ], [
+                    'is_available' => false,
+                    'prime_time' => false,
+                ]);
             }
 
             // Refresh the calendar schedules
@@ -548,7 +545,7 @@ class ScheduleManager extends Component
                 ->success()
                 ->send();
 
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Log::error('Error closing day', [
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
@@ -575,18 +572,15 @@ class ScheduleManager extends Component
 
             // Create overrides for each template setting prime_time to true
             foreach ($templates as $template) {
-                VenueTimeSlot::updateOrCreate(
-                    [
-                        'schedule_template_id' => $template->id,
-                        'booking_date' => $this->selectedDate,
-                    ],
-                    [
-                        'is_available' => true,
-                        'prime_time' => true,
-                        'available_tables' => $template->available_tables,
-                        'minimum_spend_per_guest' => $template->minimum_spend_per_guest,
-                    ]
-                );
+                VenueTimeSlot::query()->updateOrCreate([
+                    'schedule_template_id' => $template->id,
+                    'booking_date' => $this->selectedDate,
+                ], [
+                    'is_available' => true,
+                    'prime_time' => true,
+                    'available_tables' => $template->available_tables,
+                    'minimum_spend_per_guest' => $template->minimum_spend_per_guest,
+                ]);
             }
 
             // Refresh the calendar schedules
@@ -597,7 +591,7 @@ class ScheduleManager extends Component
                 ->success()
                 ->send();
 
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Log::error('Error setting prime time', [
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),

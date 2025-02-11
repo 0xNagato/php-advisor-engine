@@ -69,7 +69,7 @@ class DateRangeFilterWidget extends Widget
             $startDate = $this->ranges[$range]['start'];
             $endDate = $this->ranges[$range]['end'];
 
-            if (strtotime($startDate) <= strtotime($endDate)) {
+            if (strtotime((string) $startDate) <= strtotime((string) $endDate)) {
                 $this->startDate = $startDate;
                 $this->endDate = $endDate;
             } else {

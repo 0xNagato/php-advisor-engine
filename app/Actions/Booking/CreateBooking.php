@@ -41,7 +41,7 @@ class CreateBooking
         $scheduleTemplate = ScheduleTemplate::query()->findOrFail($scheduleTemplateId);
 
         // Get the schedule with override data
-        $schedule = ScheduleWithBooking::where('schedule_template_id', $scheduleTemplateId)
+        $schedule = ScheduleWithBooking::query()->where('schedule_template_id', $scheduleTemplateId)
             ->where('booking_date', Carbon::parse($data['date'])->format('Y-m-d'))
             ->first();
 

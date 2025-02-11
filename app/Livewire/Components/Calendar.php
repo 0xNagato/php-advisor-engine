@@ -13,7 +13,7 @@ class Calendar extends Component
 
     public string $currentMonth;
 
-    public ?string $timezone;
+    public ?string $timezone = null;
 
     public array $datesWithOverrides = [];
 
