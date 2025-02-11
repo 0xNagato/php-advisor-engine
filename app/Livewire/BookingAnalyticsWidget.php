@@ -34,20 +34,29 @@ class BookingAnalyticsWidget extends Widget
 
     public function getAnalytics(): array
     {
-        $startDate = Carbon::parse($this->filters['startDate'] ?? now()->subDays(30))->startOfDay();
-        $endDate = Carbon::parse($this->filters['endDate'] ?? now())->endOfDay();
+        $userTimezone = auth()->user()?->timezone ?? config('app.default_timezone');
+
+        $startDateUTC = Carbon::parse(
+            $this->filters['startDate'] ?? now($userTimezone)->subDays(30)->format('Y-m-d'),
+            $userTimezone
+        )->startOfDay()->setTimezone('UTC');
+
+        $endDateUTC = Carbon::parse(
+            $this->filters['endDate'] ?? now($userTimezone)->format('Y-m-d'),
+            $userTimezone
+        )->endOfDay()->setTimezone('UTC');
 
         return [
-            'topVenues' => $this->getTopVenues($startDate, $endDate),
-            'popularTimes' => $this->getPopularTimes($startDate, $endDate),
-            'partySizes' => $this->getPartySizes($startDate, $endDate),
-            'primeAnalysis' => $this->getPrimeAnalysis($startDate, $endDate),
-            'leadTimeAnalysis' => $this->getLeadTimeAnalysis($startDate, $endDate),
-            'dayAnalysis' => $this->getDayAnalysis($startDate, $endDate),
-            'calendarDayAnalysis' => $this->getCalendarDayAnalysis($startDate, $endDate),
-            'statusAnalysis' => $this->getStatusAnalysis($startDate, $endDate),
-            'topConcierges' => $this->getTopConcierges($startDate, $endDate),
-            'bookingTypeAnalysis' => $this->getBookingTypeAnalysis($startDate, $endDate),
+            'topVenues' => $this->getTopVenues($startDateUTC, $endDateUTC),
+            'popularTimes' => $this->getPopularTimes($startDateUTC, $endDateUTC),
+            'partySizes' => $this->getPartySizes($startDateUTC, $endDateUTC),
+            'primeAnalysis' => $this->getPrimeAnalysis($startDateUTC, $endDateUTC),
+            'leadTimeAnalysis' => $this->getLeadTimeAnalysis($startDateUTC, $endDateUTC),
+            'dayAnalysis' => $this->getDayAnalysis($startDateUTC, $endDateUTC),
+            'calendarDayAnalysis' => $this->getCalendarDayAnalysis($startDateUTC, $endDateUTC),
+            'statusAnalysis' => $this->getStatusAnalysis($startDateUTC, $endDateUTC),
+            'topConcierges' => $this->getTopConcierges($startDateUTC, $endDateUTC),
+            'bookingTypeAnalysis' => $this->getBookingTypeAnalysis($startDateUTC, $endDateUTC),
         ];
     }
 
@@ -60,7 +69,6 @@ class BookingAnalyticsWidget extends Widget
     {
         $dateColumn = $this->getDateColumn();
 
-        // Get total bookings first
         $total = Booking::query()
             ->whereBetween($dateColumn, [$startDate, $endDate])
             ->whereIn('bookings.status', [BookingStatus::CONFIRMED, BookingStatus::VENUE_CONFIRMED])
@@ -86,7 +94,6 @@ class BookingAnalyticsWidget extends Widget
 
     protected function getPopularTimes(Carbon $startDate, Carbon $endDate): array
     {
-        // Get total bookings first
         $total = Booking::query()
             ->whereBetween($this->getDateColumn(), [$startDate, $endDate])
             ->whereIn('bookings.status', [BookingStatus::CONFIRMED, BookingStatus::VENUE_CONFIRMED])
@@ -94,7 +101,7 @@ class BookingAnalyticsWidget extends Widget
 
         $results = Booking::query()
             ->select(
-                DB::raw("TIME_FORMAT(bookings.booking_at, '%l:%i %p') as time_slot"),
+                DB::raw("TIME_FORMAT({$this->getDateColumn()}, '%l:%i %p') as time_slot"),
                 DB::raw('COUNT(*) as booking_count')
             )
             ->whereBetween($this->getDateColumn(), [$startDate, $endDate])
@@ -276,7 +283,6 @@ class BookingAnalyticsWidget extends Widget
     {
         $currencyService = app(CurrencyConversionService::class);
 
-        // Get total bookings first for percentage calculation
         $total = Booking::query()
             ->whereBetween($this->getDateColumn(), [$startDate, $endDate])
             ->whereIn('bookings.status', [BookingStatus::CONFIRMED, BookingStatus::VENUE_CONFIRMED])
@@ -302,7 +308,7 @@ class BookingAnalyticsWidget extends Widget
             ->limit(5)
             ->get()
             ->groupBy('id')
-            ->map(function ($group) use ($currencyService, $total) {
+            ->map(function ($group) use ($currencyService, $total): array {
                 $first = $group->first();
                 $totalCount = $group->sum('booking_count');
                 $avgFees = $group->mapWithKeys(fn ($item) => [$item->currency => $item->avg_fee])->toArray();
@@ -339,7 +345,7 @@ class BookingAnalyticsWidget extends Widget
             ->get()
             ->groupBy('is_vip');
 
-        return $results->map(function ($group) use ($currencyService) {
+        return $results->map(function ($group) use ($currencyService): array {
             $totalCount = $group->sum('count');
             $avgFees = $group->mapWithKeys(fn ($item) => [$item->currency => $item->avg_fee])->toArray();
             $avgPlatformEarnings = $group->mapWithKeys(fn ($item) => [$item->currency => $item->avg_platform_earnings])->toArray();
