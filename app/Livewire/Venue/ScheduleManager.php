@@ -57,7 +57,7 @@ class ScheduleManager extends Component
 
         // Set today's date using the venue's timezone
         $timezone = $this->venue->timezone ?? config('app.timezone');
-        $today = now()->setTimezone($timezone);
+        $today = now($timezone);  // Create Carbon instance directly in venue timezone
 
         $this->todayDate = $today->format('Y-m-d');
         $this->selectedDate = $this->todayDate;
