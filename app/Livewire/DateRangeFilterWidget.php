@@ -35,38 +35,48 @@ class DateRangeFilterWidget extends Widget
     public function mount(): void
     {
         $timezone = $this->getUserTimezone();
+        $today = now($timezone);
 
         $this->ranges = [
             'today' => [
-                'start' => today()->toDateString(),
-                'end' => now($timezone)->endOfDay()->toDateString(),
+                'start' => $today->toDateString(),
+                'end' => $today->toDateString(),
             ],
             'past_week' => [
-                'start' => now($timezone)->subDays(6)->toDateString(),
-                'end' => now($timezone)->toDateString(),
+                'start' => $today->copy()->subDays(6)->toDateString(),
+                'end' => $today->toDateString(),
             ],
             'month' => [
-                'start' => now($timezone)->startOfMonth()->toDateString(),
-                'end' => now($timezone)->endOfMonth()->toDateString(),
+                'start' => $today->copy()->startOfMonth()->toDateString(),
+                'end' => $today->copy()->endOfMonth()->toDateString(),
             ],
             'past_30_days' => [
-                'start' => now($timezone)->subDays(30)->toDateString(),
-                'end' => now($timezone)->toDateString(),
+                'start' => $today->copy()->subDays(30)->toDateString(),
+                'end' => $today->toDateString(),
             ],
             'year' => [
-                'start' => now($timezone)->startOfYear()->toDateString(),
-                'end' => now($timezone)->endOfYear()->toDateString(),
+                'start' => $today->copy()->startOfYear()->toDateString(),
+                'end' => $today->copy()->endOfYear()->toDateString(),
             ],
         ];
     }
 
     public function setDateRange(string $range): void
     {
-        $this->range = $range;
         if (isset($this->ranges[$range])) {
             $this->range = $range;
-            $this->startDate = $this->ranges[$range]['start'];
-            $this->endDate = $this->ranges[$range]['end'];
+            // Add validation to ensure start date is never after end date
+            $startDate = $this->ranges[$range]['start'];
+            $endDate = $this->ranges[$range]['end'];
+
+            if (strtotime($startDate) <= strtotime($endDate)) {
+                $this->startDate = $startDate;
+                $this->endDate = $endDate;
+            } else {
+                // If dates are somehow reversed, swap them
+                $this->startDate = $endDate;
+                $this->endDate = $startDate;
+            }
         }
 
         $this->dispatch('dateRangeUpdated', startDate: $this->startDate, endDate: $this->endDate);
