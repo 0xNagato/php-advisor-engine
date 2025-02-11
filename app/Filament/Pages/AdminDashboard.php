@@ -78,12 +78,12 @@ class AdminDashboard extends Dashboard
             AdminRecentBookings::make([
                 'columnSpan' => '1',
             ]),
-            VenueOverallLeaderboard::make([
+            ConciergeOverallLeaderboard::make([
                 'columnSpan' => '1',
                 'startDate' => Carbon::parse($this->filters['startDate']),
                 'endDate' => Carbon::parse($this->filters['endDate']),
             ]),
-            ConciergeOverallLeaderboard::make([
+            VenueOverallLeaderboard::make([
                 'columnSpan' => '1',
                 'startDate' => Carbon::parse($this->filters['startDate']),
                 'endDate' => Carbon::parse($this->filters['endDate']),
