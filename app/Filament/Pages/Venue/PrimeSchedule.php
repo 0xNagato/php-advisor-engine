@@ -16,6 +16,8 @@ class PrimeSchedule extends Page
 
     protected static string $view = 'filament.pages.venue.prime-schedule';
 
+    protected static bool $shouldRegisterNavigation = false;
+
     public Venue $venue;
 
     public static function getNavigationGroup(): ?string
