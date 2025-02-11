@@ -20,6 +20,8 @@ class ScheduleTemplate extends Model
         'prime_time',
         'prime_time_fee',
         'party_size',
+        'price_per_head',
+        'minimum_spend_per_guest',
     ];
 
     /**

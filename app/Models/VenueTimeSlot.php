@@ -24,6 +24,20 @@ class VenueTimeSlot extends Model
         'booking_date',
         'prime_time',
         'prime_time_fee',
+        'is_available',
+        'available_tables',
+        'price_per_head',
+        'minimum_spend_per_guest',
+    ];
+
+    protected $casts = [
+        'is_available' => 'boolean',
+        'prime_time' => 'boolean',
+        'prime_time_fee' => 'integer',
+        'price_per_head' => 'integer',
+        'minimum_spend_per_guest' => 'integer',
+        'available_tables' => 'integer',
+        'booking_date' => 'date',
     ];
 
     /**

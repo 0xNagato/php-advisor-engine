@@ -8,6 +8,7 @@ use App\Events\BookingCreated;
 use App\Models\Booking;
 use App\Models\Concierge;
 use App\Models\ScheduleTemplate;
+use App\Models\ScheduleWithBooking;
 use App\Models\VipCode;
 use App\Services\SalesTaxService;
 use AshAllenDesign\ShortURL\Facades\ShortURL;
@@ -38,6 +39,18 @@ class CreateBooking
         ?VipCode $vipCode = null
     ): CreateBookingReturnData {
         $scheduleTemplate = ScheduleTemplate::query()->findOrFail($scheduleTemplateId);
+
+        // Get the schedule with override data
+        $schedule = ScheduleWithBooking::where('schedule_template_id', $scheduleTemplateId)
+            ->where('booking_date', Carbon::parse($data['date'])->format('Y-m-d'))
+            ->first();
+
+        if (! $schedule) {
+            // If no schedule view record exists, fall back to template
+            $isPrime = $scheduleTemplate->prime_time;
+        } else {
+            $isPrime = $schedule->prime_time;
+        }
 
         /**
          * @var Carbon $bookingAt
@@ -86,7 +99,7 @@ class CreateBooking
             'status' => BookingStatus::PENDING,
             'booking_at' => $bookingAt,
             'currency' => $currency,
-            'is_prime' => $scheduleTemplate?->prime_time,
+            'is_prime' => $isPrime,
             'vip_code_id' => $vipCode?->id,
             'meta' => $meta,
         ]);

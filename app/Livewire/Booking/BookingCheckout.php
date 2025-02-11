@@ -36,6 +36,12 @@ class BookingCheckout extends Component implements HasMingles
     public function mount(Booking $booking): void
     {
         $this->booking = $booking;
+
+        // Load schedule with explicit booking date condition
+        $this->booking->load(['schedule' => function ($query) {
+            $query->where('booking_date', $this->booking->booking_at->format('Y-m-d'));
+        }, 'venue']);
+
         if ($this->booking->vip_code_id) {
             $this->booking->load('vipCode');
         }
