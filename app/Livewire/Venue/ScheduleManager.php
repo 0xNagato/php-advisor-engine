@@ -579,7 +579,7 @@ class ScheduleManager extends Component
                     'is_available' => true,
                     'prime_time' => true,
                     'available_tables' => $template->available_tables,
-                    'minimum_spend_per_guest' => $template->minimum_spend_per_guest,
+                    'minimum_spend_per_guest' => $template->minimum_spend_per_guest ?? 0,
                 ]);
             }
 
@@ -653,6 +653,19 @@ class ScheduleManager extends Component
             ->pluck('booking_date')
             ->map(fn ($date) => $date->format('Y-m-d'))
             ->toArray();
+    }
+
+    protected function getFormattedDate(?string $date): string
+    {
+        if (blank($date)) {
+            return '';
+        }
+
+        try {
+            return Carbon::parse($date)->format('l, F j, Y');
+        } catch (Exception) {
+            return $date;
+        }
     }
 
     public function render()

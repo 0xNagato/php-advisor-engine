@@ -127,15 +127,32 @@
                 <div>
                     @if ($selectedDate)
                         <div class="overflow-x-auto">
-                            <h3 class="pl-2 mb-4 text-sm font-semibold text-center">
-                                Schedule for {{ Carbon::parse($selectedDate)->format('l, F j, Y') }}
-                                @if ($venue->open_days[strtolower(Carbon::parse($selectedDate)->format('l'))] === 'closed')
-                                    <div class="text-sm text-gray-500">(Venue Closed)</div>
-                                @endif
-                                @if ($holidayInfo = $this->getHolidayInfo($selectedDate))
-                                    {{ $holidayInfo['emoji'] }}
-                                    <div class="text-xs text-gray-500">({{ $holidayInfo['name'] }})</div>
-                                @endif
+                            <h3 class="pl-2 mb-4">
+                                <div class="sm:flex sm:items-center sm:justify-between">
+                                    <div class="text-center sm:text-left">
+                                        <div class="text-sm font-semibold">
+                                            Schedule for {{ Carbon::parse($selectedDate)->format('l, F j, Y') }}
+                                        </div>
+                                        @if ($venue->open_days[strtolower(Carbon::parse($selectedDate)->format('l'))] === 'closed')
+                                            <div class="text-sm text-gray-500">(Venue Closed)</div>
+                                        @endif
+                                        @if ($holidayInfo = $this->getHolidayInfo($selectedDate))
+                                            <span class="text-lg">{{ $holidayInfo['emoji'] }}</span>
+                                            <div class="text-xs text-gray-500">({{ $holidayInfo['name'] }})</div>
+                                        @endif
+                                    </div>
+
+                                    <div class="grid grid-cols-2 gap-2 mt-2 sm:mt-0 sm:flex sm:gap-3">
+                                        <x-filament::button wire:click="makeDayPrime" color="success"
+                                            class="justify-center">
+                                            Make Day Prime
+                                        </x-filament::button>
+
+                                        <x-filament::button wire:click="closeDay" color="danger" class="justify-center">
+                                            Close Day
+                                        </x-filament::button>
+                                    </div>
+                                </div>
                             </h3>
 
                             @if ($venue->open_days[strtolower(Carbon::parse($selectedDate)->format('l'))] === 'closed')
@@ -146,13 +163,13 @@
                                 <table class="w-full">
                                     <thead>
                                         <tr>
-                                            <th class="w-16 px-1 py-1 text-xs font-semibold text-left text-gray-900">
+                                            <th class="w-20 px-1 py-1 text-xs font-semibold text-left text-gray-900">
                                                 Time
                                             </th>
                                             @foreach ($venue->party_sizes as $size => $label)
                                                 @unless ($size === 'Special Request')
                                                     <th
-                                                        class="w-16 px-1 py-1 text-xs font-semibold text-center text-gray-900">
+                                                        class="px-1 py-1 text-xs font-semibold text-center text-gray-900 w-14">
                                                         {{ $size }}
                                                     </th>
                                                 @endunless
@@ -223,9 +240,11 @@
         <x-slot name="header">
             <div class="flex items-center justify-between w-full">
                 <span class="text-sm text-gray-600">
-                    <span class="text-[13px] font-semibold">{{ ucfirst($editingSlot['day']) }}</span>
-                    {{ $editingSlot['size'] }} Guests:
-                    {{ $formattedTime }}
+                    @if ($activeView === 'calendar' && isset($editingSlot['date']))
+                        {{ $this->getFormattedDate($editingSlot['date']) }} at {{ $this->getFormattedTime() }}
+                    @else
+                        {{ ucfirst($editingSlot['day']) }} at {{ $this->getFormattedTime() }}
+                    @endif
                 </span>
             </div>
         </x-slot>
