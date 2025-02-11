@@ -6,37 +6,21 @@ use App\Models\Concierge;
 use App\Models\Earning;
 use App\Models\ScheduleTemplate;
 use App\Models\Venue;
-use App\Services\SalesTaxService;
 
 const MAX_PARTNER_PERCENTAGE = 0.20;
 
 if (! function_exists('createBooking')) {
-    function createBooking($venue, $concierge, $amount = 20000)
+    function createBooking(Venue $venue, Concierge $concierge, int $amount = 20000): Booking
     {
-        $booking = Booking::factory()->create([
-            'schedule_template_id' => ScheduleTemplate::factory()->create(['venue_id' => $venue->id])->id,
-            'concierge_id' => $concierge->id,
+        return Booking::factory()->create([
             'uuid' => Str::uuid(),
             'is_prime' => true,
+            'guest_count' => 2,
+            'concierge_id' => $concierge->id,
+            'schedule_template_id' => ScheduleTemplate::factory()->create(['venue_id' => $venue->id])->id,
             'total_fee' => $amount,
+            'booking_at' => now()->addDays(2),
         ]);
-
-        $taxData = app(SalesTaxService::class)->calculateTax(
-            $booking->venue->region,
-            $booking->total_fee,
-            noTax: config('app.no_tax')
-        );
-
-        $totalWithTaxInCents = $booking->total_fee + $taxData->amountInCents;
-
-        $booking->update([
-            'tax' => $taxData->tax,
-            'tax_amount_in_cents' => $taxData->amountInCents,
-            'city' => $taxData->region,
-            'total_with_tax_in_cents' => $totalWithTaxInCents,
-        ]);
-
-        return $booking;
     }
 }
 
@@ -50,6 +34,7 @@ if (! function_exists('createNonPrimeBooking')) {
             'concierge_id' => $concierge->id,
             'schedule_template_id' => ScheduleTemplate::factory()->create(['venue_id' => $venue->id])->id,
             'total_fee' => $venue->non_prime_fee_per_head * $guestCount * 100,
+            'booking_at' => now()->addDays(2),
         ]);
     }
 }
