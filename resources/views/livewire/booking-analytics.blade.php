@@ -145,8 +145,14 @@
                 @foreach ($this->getAnalytics()['calendarDayAnalysis'] as $day)
                     <a href="{{ route('filament.admin.pages.booking-search', [
                         'filters' => [
-                            'start_date' => \Carbon\Carbon::parse($day['date'])->format('Y-m-d'),
-                            'end_date' => \Carbon\Carbon::parse($day['date'])->format('Y-m-d'),
+                            'start_date' => \Carbon\Carbon::parse(
+                                $day['calendar_date'],
+                                auth()->user()?->timezone ?? config('app.default_timezone'),
+                            )->format('Y-m-d'),
+                            'end_date' => \Carbon\Carbon::parse(
+                                $day['calendar_date'],
+                                auth()->user()?->timezone ?? config('app.default_timezone'),
+                            )->format('Y-m-d'),
                             'show_booking_time' => $this->getShowBookingTimeProperty(),
                             'status' => [BookingStatus::CONFIRMED->value, BookingStatus::VENUE_CONFIRMED->value],
                         ],

@@ -16,7 +16,7 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Concerns\InteractsWithTable;
 use Filament\Tables\Contracts\HasTable;
 use Filament\Tables\Table;
-use Illuminate\Contracts\Database\Query\Builder;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\HtmlString;
 use Livewire\Attributes\Url;
@@ -176,80 +176,85 @@ class BookingSearch extends Page implements HasTable
 
     public function table(Table $table): Table
     {
-        $query = Booking::query()
-            ->with(['venue', 'concierge.user', 'schedule.venue']);
-
-        // Apply filters
-        if ($this->data['booking_id'] ?? null) {
-            $query->where('id', $this->data['booking_id']);
-        }
-
-        if ($this->data['user_id'] ?? null) {
-            $query->where(function ($query) {
-                $query->whereHas('venue.user', fn (Builder $q) => $q->where('id', $this->data['user_id']))
-                    ->orWhereHas('concierge.user', fn (Builder $q) => $q->where('id', $this->data['user_id']))
-                    ->orWhereHas('partnerVenue.user', fn (Builder $q) => $q->where('id', $this->data['user_id']))
-                    ->orWhereHas('partnerConcierge.user', fn (Builder $q) => $q->where('id', $this->data['user_id']));
-            });
-        }
-
-        if ($this->data['start_date'] ?? null) {
-            $dateColumn = $this->data['show_booking_time'] ? 'booking_at' : 'created_at';
-            $query->where($dateColumn, '>=',
-                Carbon::parse($this->data['start_date'])->startOfDay());
-        }
-
-        if ($this->data['end_date'] ?? null) {
-            $dateColumn = $this->data['show_booking_time'] ? 'booking_at' : 'created_at';
-            $query->where($dateColumn, '<=',
-                Carbon::parse($this->data['end_date'])->endOfDay());
-        }
-
-        if ($this->data['customer_search'] ?? null) {
-            $search = $this->data['customer_search'];
-            $terms = explode(' ', (string) $search);
-
-            $query->where(function ($query) use ($terms) {
-                foreach ($terms as $term) {
-                    $query->orWhere('guest_first_name', 'like', "%{$term}%")
-                        ->orWhere('guest_last_name', 'like', "%{$term}%")
-                        ->orWhere('guest_email', 'like', "%{$term}%")
-                        ->orWhere('guest_phone', 'like', "%{$term}%");
-                }
-            });
-        }
-
-        if ($this->data['venue_search'] ?? null) {
-            $search = $this->data['venue_search'];
-            $query->whereHas('venue', fn (Builder $q) => $q->where('name', 'like', "%{$search}%"));
-        }
-
-        if ($this->data['concierge_search'] ?? null) {
-            $search = $this->data['concierge_search'];
-            $terms = explode(' ', (string) $search);
-
-            $query->whereHas('concierge.user', function (Builder $q) use ($terms) {
-                foreach ($terms as $term) {
-                    $q->where(function ($q) use ($term) {
-                        $q->where('first_name', 'like', "%{$term}%")
-                            ->orWhere('last_name', 'like', "%{$term}%");
-                    });
-                }
-            });
-        }
-
-        if ($this->data['status'] ?? null) {
-            $statuses = is_array($this->data['status']) ? $this->data['status'] : [$this->data['status']];
-            $query->whereIn('status', $statuses);
-        }
-
-        $startDate = $this->data['start_date'] ? Carbon::parse($this->data['start_date'])->format('M j, Y') : 'All Time';
-        $endDate = $this->data['end_date'] ? Carbon::parse($this->data['end_date'])->format('M j, Y') : 'Present';
-        $dateRange = "{$startDate}-{$endDate}";
+        $userTimezone = auth()->user()?->timezone ?? config('app.default_timezone');
 
         return $table
-            ->query($query)
-            ->heading('Bookings: '.$startDate.' to '.$endDate)
+            ->query(function (Builder $query) use ($userTimezone) {
+                $dateColumn = $this->data['show_booking_time'] ? 'bookings.booking_at' : 'bookings.created_at';
+
+                $startDate = Carbon::parse($this->data['start_date'], $userTimezone)
+                    ->startOfDay()
+                    ->setTimezone('UTC');
+
+                $endDate = Carbon::parse($this->data['end_date'], $userTimezone)
+                    ->endOfDay()
+                    ->setTimezone('UTC');
+
+                $query = Booking::query()
+                    ->when(
+                        filled($this->data['start_date']) && filled($this->data['end_date']),
+                        fn ($query) => $query->whereBetween($dateColumn, [$startDate, $endDate])
+                    );
+
+                // Apply filters
+                if ($this->data['booking_id'] ?? null) {
+                    $query->where('id', $this->data['booking_id']);
+                }
+
+                if ($this->data['user_id'] ?? null) {
+                    $query->where(function ($query) {
+                        $query->whereHas('venue.user', fn (Builder $q) => $q->where('id', $this->data['user_id']))
+                            ->orWhereHas('concierge.user', fn (Builder $q) => $q->where('id', $this->data['user_id']))
+                            ->orWhereHas('partnerVenue.user', fn (Builder $q) => $q->where('id', $this->data['user_id']))
+                            ->orWhereHas('partnerConcierge.user', fn (Builder $q) => $q->where('id', $this->data['user_id']));
+                    });
+                }
+
+                if ($this->data['customer_search'] ?? null) {
+                    $search = $this->data['customer_search'];
+                    $terms = explode(' ', (string) $search);
+
+                    $query->where(function ($query) use ($terms) {
+                        foreach ($terms as $term) {
+                            $query->orWhere('guest_first_name', 'like', "%{$term}%")
+                                ->orWhere('guest_last_name', 'like', "%{$term}%")
+                                ->orWhere('guest_email', 'like', "%{$term}%")
+                                ->orWhere('guest_phone', 'like', "%{$term}%");
+                        }
+                    });
+                }
+
+                if ($this->data['venue_search'] ?? null) {
+                    $search = $this->data['venue_search'];
+                    $query->whereHas('venue', fn (Builder $q) => $q->where('name', 'like', "%{$search}%"));
+                }
+
+                if ($this->data['concierge_search'] ?? null) {
+                    $search = $this->data['concierge_search'];
+                    $terms = explode(' ', (string) $search);
+
+                    $query->whereHas('concierge.user', function (Builder $q) use ($terms) {
+                        foreach ($terms as $term) {
+                            $q->where(function ($q) use ($term) {
+                                $q->where('first_name', 'like', "%{$term}%")
+                                    ->orWhere('last_name', 'like', "%{$term}%");
+                            });
+                        }
+                    });
+                }
+
+                if ($this->data['status'] ?? null) {
+                    $statuses = is_array($this->data['status']) ? $this->data['status'] : [$this->data['status']];
+                    $query->whereIn('status', $statuses);
+                }
+
+                return $query;
+            })
+            ->heading('Bookings: '.($this->data['start_date']
+                ? Carbon::parse($this->data['start_date'])->format('M j, Y')
+                : 'All Time').' to '.($this->data['end_date']
+                ? Carbon::parse($this->data['end_date'])->format('M j, Y')
+                : 'Present'))
             ->headerActions([
                 ExportAction::make('export')
                     ->label('Export Results')
@@ -259,7 +264,7 @@ class BookingSearch extends Page implements HasTable
                             ->fromTable()
                             ->except(['no_show'])
                             ->withWriterType(Excel::CSV)
-                            ->withFilename("Bookings-Export-{$dateRange}"),
+                            ->withFilename('Bookings-Export-'.($this->data['start_date'] ? Carbon::parse($this->data['start_date'])->format('M j, Y').'-'.Carbon::parse($this->data['end_date'])->format('M j, Y') : 'All Time to Present')),
                     ]),
             ])
             ->recordUrl(fn (Booking $record) => route('filament.admin.resources.bookings.view', ['record' => $record]))
@@ -278,7 +283,9 @@ class BookingSearch extends Page implements HasTable
                 TextColumn::make('booking_at')
                     ->label('Booking Date')
                     ->size('xs')
-                    ->formatStateUsing(fn (Booking $record): string => $record->booking_at->format('M j, Y g:ia'))
+                    ->formatStateUsing(fn (Booking $record): string => Carbon::parse($record->booking_at)
+                        ->timezone(auth()->user()?->timezone ?? config('app.default_timezone'))
+                        ->format('M j, Y g:ia'))
                     ->sortable(),
                 TextColumn::make('is_prime')
                     ->label('Prime')

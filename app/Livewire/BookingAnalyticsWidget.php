@@ -240,20 +240,28 @@ class BookingAnalyticsWidget extends Widget
     protected function getCalendarDayAnalysis(Carbon $startDate, Carbon $endDate): array
     {
         $dateColumn = $this->getDateColumn();
+        $userTimezone = auth()->user()?->timezone ?? config('app.default_timezone');
+
+        $dateExpr = "DATE_FORMAT(CONVERT_TZ($dateColumn, 'UTC', '$userTimezone'), '%Y-%m-%d')";
+        $dayNameExpr = "DAYNAME(CONVERT_TZ($dateColumn, 'UTC', '$userTimezone'))";
 
         return Booking::query()
-            ->select(
-                DB::raw("DATE($dateColumn) as calendar_date"),
+            ->select([
+                DB::raw("$dateExpr as calendar_date"),
                 DB::raw('COUNT(*) as booking_count'),
-                DB::raw("DAYNAME($dateColumn) as day_name")
-            )
+                DB::raw("$dayNameExpr as day_name"),
+            ])
             ->whereBetween($dateColumn, [$startDate, $endDate])
             ->whereIn('bookings.status', [BookingStatus::CONFIRMED, BookingStatus::VENUE_CONFIRMED])
-            ->groupBy('calendar_date', 'day_name')
+            ->groupBy(
+                DB::raw($dateExpr),
+                DB::raw($dayNameExpr)
+            )
             ->orderBy('calendar_date')
             ->get()
             ->map(fn ($item) => [
                 'date' => Carbon::parse($item->calendar_date)->format('M j'),
+                'calendar_date' => $item->calendar_date,
                 'day_name' => $item->day_name,
                 'booking_count' => $item->booking_count,
             ])
