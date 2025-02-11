@@ -19,6 +19,7 @@ use App\Models\Concierge;
 use App\Models\Earning;
 use App\Models\Region;
 use App\Notifications\Booking\CustomerBookingConfirmed;
+use App\Notifications\Booking\VenueBookingCancelled;
 use App\Services\Booking\BookingCalculationService;
 use App\Traits\FormatsPhoneNumber;
 use Carbon\Carbon;
@@ -347,6 +348,11 @@ class ViewBooking extends ViewRecord
         $this->record->update([
             'status' => BookingStatus::CANCELLED,
         ]);
+
+        // Send cancellation notification to venue contacts
+        $this->record->venue->contacts->each(function ($contact) {
+            $this->record->notify(new VenueBookingCancelled($contact));
+        });
 
         // Delete any existing earnings
         $this->record->earnings()->delete();
