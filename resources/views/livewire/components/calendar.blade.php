@@ -28,13 +28,18 @@
             @foreach ($week as $date)
                 <button type="button" wire:click="selectDate('{{ $date->format('Y-m-d') }}')"
                     @class([
-                        'p-2 bg-white hover:bg-gray-50 focus:z-10',
+                        'p-2 bg-white hover:bg-gray-50 focus:z-10 relative',
                         'bg-indigo-50 font-semibold text-indigo-600' =>
                             $selectedDate === $date->format('Y-m-d'),
                         'text-gray-400' => !$date->isSameMonth($currentMonthCarbon),
                         'font-semibold' => $date->isToday(),
                     ])>
                     {{ $date->format('j') }}
+                    @if (in_array($date->format('Y-m-d'), $datesWithOverrides))
+                        <div
+                            class="absolute w-1 h-1 transform -translate-x-1/2 bg-green-500 rounded-full bottom-1 left-1/2">
+                        </div>
+                    @endif
                 </button>
             @endforeach
         @endforeach

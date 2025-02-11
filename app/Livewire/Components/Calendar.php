@@ -15,11 +15,18 @@ class Calendar extends Component
 
     public ?string $timezone;
 
-    public function mount(?string $selectedDate = null, ?string $todayDate = null, ?string $timezone = null): void
-    {
+    public array $datesWithOverrides = [];
+
+    public function mount(
+        ?string $selectedDate = null,
+        ?string $todayDate = null,
+        ?string $timezone = null,
+        array $datesWithOverrides = []
+    ): void {
         $this->timezone = $timezone ?? config('app.timezone');
         $this->selectedDate = $selectedDate;
         $this->todayDate = $todayDate;
+        $this->datesWithOverrides = $datesWithOverrides;
 
         // Set current month based on selected date or today
         if ($selectedDate) {

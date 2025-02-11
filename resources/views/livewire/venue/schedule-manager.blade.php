@@ -120,7 +120,7 @@
                 <!-- Calendar Component -->
                 <div>
                     <livewire:components.calendar :selected-date="$selectedDate" :today-date="$todayDate" :timezone="$venue->timezone ?? config('app.timezone')"
-                        wire:key="calendar-{{ $selectedDate }}" />
+                        :dates-with-overrides="$this->getDatesWithOverrides()" wire:key="calendar-{{ $selectedDate }}" />
                 </div>
 
                 <!-- Schedule Grid -->

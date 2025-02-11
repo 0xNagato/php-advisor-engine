@@ -650,6 +650,17 @@ class ScheduleManager extends Component
         return $holidays[$key] ?? null;
     }
 
+    protected function getDatesWithOverrides(): array
+    {
+        return VenueTimeSlot::query()
+            ->select('booking_date')
+            ->whereIn('schedule_template_id', $this->venue->scheduleTemplates()->pluck('id'))
+            ->distinct()
+            ->pluck('booking_date')
+            ->map(fn ($date) => $date->format('Y-m-d'))
+            ->toArray();
+    }
+
     public function render()
     {
         return view('livewire.venue.schedule-manager', [
