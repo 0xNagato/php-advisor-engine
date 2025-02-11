@@ -6,7 +6,7 @@
         </button>
 
         <h2 class="text-sm font-semibold text-gray-900">
-            {{ $currentMonth->format('F Y') }}
+            {{ $currentMonthCarbon->format('F Y') }}
         </h2>
 
         <button type="button" class="p-2 text-gray-400 hover:text-gray-500" wire:click="nextMonth">
@@ -31,7 +31,7 @@
                         'p-2 bg-white hover:bg-gray-50 focus:z-10',
                         'bg-indigo-50 font-semibold text-indigo-600' =>
                             $selectedDate === $date->format('Y-m-d'),
-                        'text-gray-400' => !$date->isSameMonth($currentMonth),
+                        'text-gray-400' => !$date->isSameMonth($currentMonthCarbon),
                         'font-semibold' => $date->isToday(),
                     ])>
                     {{ $date->format('j') }}

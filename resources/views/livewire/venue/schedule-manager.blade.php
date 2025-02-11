@@ -119,7 +119,7 @@
             <div class="space-y-4">
                 <!-- Calendar Component -->
                 <div>
-                    <livewire:components.calendar :selected-date="$selectedDate" :today-date="$todayDate"
+                    <livewire:components.calendar :selected-date="$selectedDate" :today-date="$todayDate" :timezone="$venue->timezone ?? config('app.timezone')"
                         wire:key="calendar-{{ $selectedDate }}" />
                 </div>
 
@@ -129,73 +129,85 @@
                         <div class="overflow-x-auto">
                             <h3 class="pl-2 mb-4 text-sm font-semibold text-center">
                                 Schedule for {{ Carbon::parse($selectedDate)->format('l, F j, Y') }}
+                                @if ($venue->open_days[strtolower(Carbon::parse($selectedDate)->format('l'))] === 'closed')
+                                    <div class="text-sm text-gray-500">(Venue Closed)</div>
+                                @endif
                                 @if ($holidayInfo = $this->getHolidayInfo($selectedDate))
                                     {{ $holidayInfo['emoji'] }}
                                     <div class="text-xs text-gray-500">({{ $holidayInfo['name'] }})</div>
                                 @endif
                             </h3>
-                            <table class="w-full">
-                                <thead>
-                                    <tr>
-                                        <th class="w-16 px-1 py-1 text-xs font-semibold text-left text-gray-900">Time
-                                        </th>
-                                        @foreach ($venue->party_sizes as $size => $label)
-                                            @unless ($size === 'Special Request')
-                                                <th class="w-16 px-1 py-1 text-xs font-semibold text-center text-gray-900">
-                                                    {{ $size }}
-                                                </th>
-                                            @endunless
+
+                            @if ($venue->open_days[strtolower(Carbon::parse($selectedDate)->format('l'))] === 'closed')
+                                <div class="p-4 text-center text-gray-500">
+                                    This venue is closed on {{ Carbon::parse($selectedDate)->format('l') }}s
+                                </div>
+                            @else
+                                <table class="w-full">
+                                    <thead>
+                                        <tr>
+                                            <th class="w-16 px-1 py-1 text-xs font-semibold text-left text-gray-900">
+                                                Time
+                                            </th>
+                                            @foreach ($venue->party_sizes as $size => $label)
+                                                @unless ($size === 'Special Request')
+                                                    <th
+                                                        class="w-16 px-1 py-1 text-xs font-semibold text-center text-gray-900">
+                                                        {{ $size }}
+                                                    </th>
+                                                @endunless
+                                            @endforeach
+                                        </tr>
+                                    </thead>
+                                    <tbody class="divide-y divide-gray-100">
+                                        @foreach ($timeSlots as $slot)
+                                            @if (isset($calendarSchedules[$slot['time']]))
+                                                <tr>
+                                                    <td class="px-1 py-1 text-xs text-gray-500">
+                                                        <button
+                                                            wire:click="openBulkEditModal('{{ Carbon::parse($selectedDate)->format('l') }}', '{{ $slot['time'] }}')"
+                                                            class="w-full text-left underline transition-colors hover:text-primary-600"
+                                                            title="Edit all party sizes for this time slot">
+                                                            {{ $slot['formatted_time'] }}
+                                                        </button>
+                                                    </td>
+                                                    @foreach ($venue->party_sizes as $size => $label)
+                                                        @unless ($size === 'Special Request')
+                                                            <td class="px-1 py-1">
+                                                                <button type="button"
+                                                                    wire:click="openEditModal('{{ $selectedDate }}', '{{ $slot['time'] }}', '{{ $size }}')"
+                                                                    @class([
+                                                                        'w-full px-2 py-1 text-xs font-medium rounded',
+                                                                        'bg-green-50 hover:bg-green-100 text-green-700' =>
+                                                                            $calendarSchedules[$slot['time']][$size]['is_prime'] &&
+                                                                            $calendarSchedules[$slot['time']][$size]['is_available'],
+                                                                        'bg-blue-50 hover:bg-blue-100 text-blue-700' =>
+                                                                            !$calendarSchedules[$slot['time']][$size]['is_prime'] &&
+                                                                            $calendarSchedules[$slot['time']][$size]['is_available'],
+                                                                        'bg-red-50 hover:bg-red-100 text-red-700' => !$calendarSchedules[
+                                                                            $slot['time']
+                                                                        ][$size]['is_available'],
+                                                                        'ring-2 ring-indigo-500 ring-opacity-50' =>
+                                                                            $calendarSchedules[$slot['time']][$size]['has_override'],
+                                                                    ])>
+                                                                    {{ $calendarSchedules[$slot['time']][$size]['is_available']
+                                                                        ? $calendarSchedules[$slot['time']][$size]['available_tables']
+                                                                        : '--' }}
+                                                                </button>
+                                                            </td>
+                                                        @endunless
+                                                    @endforeach
+                                                </tr>
+                                            @else
+                                                <tr>
+                                                    <td class="px-1 py-1 text-red-500">Missing schedule for
+                                                        {{ $slot['time'] }}</td>
+                                                </tr>
+                                            @endif
                                         @endforeach
-                                    </tr>
-                                </thead>
-                                <tbody class="divide-y divide-gray-100">
-                                    @foreach ($timeSlots as $slot)
-                                        @if (isset($calendarSchedules[$slot['time']]))
-                                            <tr>
-                                                <td class="px-1 py-1 text-xs text-gray-500">
-                                                    <button
-                                                        wire:click="openBulkEditModal('{{ Carbon::parse($selectedDate)->format('l') }}', '{{ $slot['time'] }}')"
-                                                        class="w-full text-left underline transition-colors hover:text-primary-600"
-                                                        title="Edit all party sizes for this time slot">
-                                                        {{ $slot['formatted_time'] }}
-                                                    </button>
-                                                </td>
-                                                @foreach ($venue->party_sizes as $size => $label)
-                                                    @unless ($size === 'Special Request')
-                                                        <td class="px-1 py-1">
-                                                            <button type="button"
-                                                                wire:click="openEditModal('{{ $selectedDate }}', '{{ $slot['time'] }}', '{{ $size }}')"
-                                                                @class([
-                                                                    'w-full px-2 py-1 text-xs font-medium rounded',
-                                                                    'bg-green-50 hover:bg-green-100 text-green-700' =>
-                                                                        $calendarSchedules[$slot['time']][$size]['is_prime'] &&
-                                                                        $calendarSchedules[$slot['time']][$size]['is_available'],
-                                                                    'bg-blue-50 hover:bg-blue-100 text-blue-700' =>
-                                                                        !$calendarSchedules[$slot['time']][$size]['is_prime'] &&
-                                                                        $calendarSchedules[$slot['time']][$size]['is_available'],
-                                                                    'bg-red-50 hover:bg-red-100 text-red-700' => !$calendarSchedules[
-                                                                        $slot['time']
-                                                                    ][$size]['is_available'],
-                                                                    'ring-2 ring-indigo-500 ring-opacity-50' =>
-                                                                        $calendarSchedules[$slot['time']][$size]['has_override'],
-                                                                ])>
-                                                                {{ $calendarSchedules[$slot['time']][$size]['is_available']
-                                                                    ? $calendarSchedules[$slot['time']][$size]['available_tables']
-                                                                    : '--' }}
-                                                            </button>
-                                                        </td>
-                                                    @endunless
-                                                @endforeach
-                                            </tr>
-                                        @else
-                                            <tr>
-                                                <td class="px-1 py-1 text-red-500">Missing schedule for
-                                                    {{ $slot['time'] }}</td>
-                                            </tr>
-                                        @endif
-                                    @endforeach
-                                </tbody>
-                            </table>
+                                    </tbody>
+                                </table>
+                            @endif
                         </div>
                     @else
                         <div class="flex items-center justify-center h-full text-gray-500">

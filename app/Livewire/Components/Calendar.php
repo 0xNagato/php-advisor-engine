@@ -9,39 +9,55 @@ class Calendar extends Component
 {
     public ?string $selectedDate = null;
 
-    public Carbon $currentMonth;
+    public ?string $todayDate = null;
 
-    public function mount(): void
+    public string $currentMonth;
+
+    public ?string $timezone;
+
+    public function mount(?string $selectedDate = null, ?string $todayDate = null, ?string $timezone = null): void
     {
-        $this->currentMonth = Carbon::now()->startOfMonth();
+        $this->timezone = $timezone ?? config('app.timezone');
+        $this->selectedDate = $selectedDate;
+        $this->todayDate = $todayDate;
+
+        // Set current month based on selected date or today
+        if ($selectedDate) {
+            $this->currentMonth = Carbon::parse($selectedDate, $this->timezone)->format('Y-m');
+        } else {
+            $this->currentMonth = now($this->timezone)->format('Y-m');
+        }
     }
 
     public function previousMonth(): void
     {
-        $this->currentMonth->subMonth()->startOfMonth();
+        $current = Carbon::createFromFormat('Y-m', $this->currentMonth, $this->timezone);
+        $this->currentMonth = $current->subMonth()->format('Y-m');
     }
 
     public function nextMonth(): void
     {
-        $this->currentMonth->addMonth()->startOfMonth();
+        $current = Carbon::createFromFormat('Y-m', $this->currentMonth, $this->timezone);
+        $this->currentMonth = $current->addMonth()->format('Y-m');
     }
 
     public function selectDate(string $date): void
     {
         $this->selectedDate = $date;
+        $this->currentMonth = Carbon::parse($date, $this->timezone)->format('Y-m');
         $this->dispatch('calendar-date-selected', date: $date);
     }
 
     protected function getWeeks(): array
     {
-        $start = $this->currentMonth->copy()->startOfMonth();
-        // Get to the first Sunday before or on the start of the month
+        $current = Carbon::createFromFormat('Y-m', $this->currentMonth, $this->timezone);
+        $start = $current->copy()->startOfMonth();
+
         if ($start->dayOfWeek !== Carbon::SUNDAY) {
             $start->previous(Carbon::SUNDAY);
         }
 
-        $end = $this->currentMonth->copy()->endOfMonth();
-        // Get to the last Saturday after or on the end of the month
+        $end = $current->copy()->endOfMonth();
         if ($end->dayOfWeek !== Carbon::SATURDAY) {
             $end->next(Carbon::SATURDAY);
         }
@@ -61,6 +77,7 @@ class Calendar extends Component
     {
         return view('livewire.components.calendar', [
             'weeks' => $this->getWeeks(),
+            'currentMonthCarbon' => Carbon::createFromFormat('Y-m', $this->currentMonth, $this->timezone),
         ]);
     }
 }

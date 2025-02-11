@@ -66,11 +66,26 @@ class ScheduleManager extends Component
     public function updatedActiveView(string $value): void
     {
         if ($value === 'calendar') {
+            $timezone = $this->venue->timezone ?? config('app.timezone');
+
             if (! $this->selectedDate) {
-                // Set today's date using the venue's timezone
-                $this->selectedDate = now()
-                    ->setTimezone($this->venue->timezone ?? config('app.timezone'))
-                    ->format('Y-m-d');
+                $today = now($timezone);
+
+                // If venue is closed today, find the next open day
+                $dayOfWeek = strtolower($today->format('l'));
+                if ($this->venue->open_days[$dayOfWeek] === 'closed') {
+                    // Check next 7 days for an open day
+                    for ($i = 1; $i <= 7; $i++) {
+                        $nextDay = $today->copy()->addDays($i);
+                        $nextDayOfWeek = strtolower($nextDay->format('l'));
+                        if ($this->venue->open_days[$nextDayOfWeek] === 'open') {
+                            $today = $nextDay;
+                            break;
+                        }
+                    }
+                }
+
+                $this->selectedDate = $today->format('Y-m-d');
             }
 
             // Load the schedules for the selected date
