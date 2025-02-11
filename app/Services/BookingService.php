@@ -10,6 +10,8 @@ use App\Models\Region;
 use App\Notifications\Booking\ConciergeFirstBooking;
 use App\Notifications\Booking\CustomerBookingConfirmed;
 use App\Traits\FormatsPhoneNumber;
+use Illuminate\Support\Facades\Activity;
+use Illuminate\Support\Facades\DB;
 use Stripe\Charge;
 use Stripe\Customer;
 use Stripe\Exception\ApiErrorException;
@@ -43,24 +45,55 @@ class BookingService
             return;
         }
 
-        // Delete earnings
-        $booking->earnings()->delete();
-        // Update booking
-        $booking->venue_earnings = 0;
-        $booking->concierge_earnings = 0;
-        $booking->platform_earnings = 0;
-        $booking->partner_concierge_id = null;
-        $booking->partner_venue_id = null;
-        $booking->partner_concierge_fee = 0;
-        $booking->partner_venue_fee = 0;
-        $booking->is_prime = 0;
-        $booking->total_fee = 0;
-        $booking->total_with_tax_in_cents = 0;
-        $booking->meta = array_merge(
-            $booking->meta ?? [],
-            ['converted_to_non_prime_at' => now()]
-        );
-        $booking->save();
+        // Log the state before conversion
+        $oldState = [
+            'is_prime' => $booking->is_prime,
+            'venue_earnings' => $booking->venue_earnings,
+            'concierge_earnings' => $booking->concierge_earnings,
+            'platform_earnings' => $booking->platform_earnings,
+            'total_fee' => $booking->total_fee,
+            'total_with_tax_in_cents' => $booking->total_with_tax_in_cents,
+        ];
+
+        DB::beginTransaction();
+        try {
+            // Delete earnings
+            $booking->earnings()->delete();
+
+            // Update booking
+            $booking->venue_earnings = 0;
+            $booking->concierge_earnings = 0;
+            $booking->platform_earnings = 0;
+            $booking->partner_concierge_id = null;
+            $booking->partner_venue_id = null;
+            $booking->partner_concierge_fee = 0;
+            $booking->partner_venue_fee = 0;
+            $booking->is_prime = 0;
+            $booking->total_fee = 0;
+            $booking->total_with_tax_in_cents = 0;
+            $booking->meta['converted_to_non_prime_at'] = now();
+
+            $booking->save();
+
+            // Log the conversion activity
+            activity()
+                ->performedOn($booking)
+                ->withProperties([
+                    'guest_name' => $booking->guest_name,
+                    'venue_name' => $booking->venue->name,
+                    'booking_time' => $booking->booking_at->format('M d, Y h:i A'),
+                    'guest_count' => $booking->guest_count,
+                    'previous_state' => $oldState,
+                    'converted_by' => auth()->user()?->name ?? 'System',
+                    'converted_by_id' => auth()->id(),
+                ])
+                ->log('Booking converted from Prime to Non-Prime');
+
+            DB::commit();
+        } catch (\Exception $e) {
+            DB::rollBack();
+            throw $e;
+        }
     }
 
     public function convertToPrime(Booking $booking): void
@@ -69,40 +102,76 @@ class BookingService
             return;
         }
 
-        // Delete earnings
-        $booking->earnings()->delete();
+        // Log the state before conversion
+        $oldState = [
+            'is_prime' => $booking->is_prime,
+            'venue_earnings' => $booking->venue_earnings,
+            'concierge_earnings' => $booking->concierge_earnings,
+            'platform_earnings' => $booking->platform_earnings,
+            'total_fee' => $booking->total_fee,
+            'total_with_tax_in_cents' => $booking->total_with_tax_in_cents,
+        ];
 
-        // Update booking prime property
-        $booking->is_prime = 1;
-        $booking->meta = array_merge(
-            $booking->meta ?? [],
-            ['converted_to_prime_at' => now()]
-        );
-        $booking->save();
+        DB::beginTransaction();
+        try {
+            // Delete earnings
+            $booking->earnings()->delete();
 
-        $booking->total_fee = $this->getPrimeTotalFee($booking);
-        $booking->venue_earnings =
-            $booking->total_fee *
-            ($booking->venue->payout_venue / 100);
-        $booking->concierge_earnings =
-            $booking->total_fee *
-            ($booking->concierge->payout_percentage / 100);
-        $booking->save();
+            // Update booking prime property
+            $booking->is_prime = 1;
+            $booking->meta['converted_to_prime_at'] = now();
+            $booking->save();
 
-        $taxData = app(SalesTaxService::class)->calculateTax(
-            $booking->venue->region,
-            $booking->total_fee,
-            noTax: config('app.no_tax')
-        );
+            $booking->total_fee = $this->getPrimeTotalFee($booking);
+            $booking->venue_earnings =
+                $booking->total_fee *
+                ($booking->venue->payout_venue / 100);
+            $booking->concierge_earnings =
+                $booking->total_fee *
+                ($booking->concierge->payout_percentage / 100);
+            $booking->save();
 
-        $totalWithTaxInCents = $booking->total_fee + $taxData->amountInCents;
+            $taxData = app(SalesTaxService::class)->calculateTax(
+                $booking->venue->region,
+                $booking->total_fee,
+                noTax: config('app.no_tax')
+            );
 
-        $booking->update([
-            'tax' => $taxData->tax,
-            'tax_amount_in_cents' => $taxData->amountInCents,
-            'city' => $taxData->region,
-            'total_with_tax_in_cents' => $totalWithTaxInCents,
-        ]);
+            $totalWithTaxInCents = $booking->total_fee + $taxData->amountInCents;
+
+            $booking->update([
+                'tax' => $taxData->tax,
+                'tax_amount_in_cents' => $taxData->amountInCents,
+                'city' => $taxData->region,
+                'total_with_tax_in_cents' => $totalWithTaxInCents,
+            ]);
+
+            // Log the conversion activity
+            activity()
+                ->performedOn($booking)
+                ->withProperties([
+                    'guest_name' => $booking->guest_name,
+                    'venue_name' => $booking->venue->name,
+                    'booking_time' => $booking->booking_at->format('M d, Y h:i A'),
+                    'guest_count' => $booking->guest_count,
+                    'previous_state' => $oldState,
+                    'new_state' => [
+                        'total_fee' => $booking->total_fee,
+                        'venue_earnings' => $booking->venue_earnings,
+                        'concierge_earnings' => $booking->concierge_earnings,
+                        'total_with_tax_in_cents' => $totalWithTaxInCents,
+                        'tax_amount' => $taxData->amountInCents,
+                    ],
+                    'converted_by' => auth()->user()?->name ?? 'System',
+                    'converted_by_id' => auth()->id(),
+                ])
+                ->log('Booking converted from Non-Prime to Prime');
+
+            DB::commit();
+        } catch (\Exception $e) {
+            DB::rollBack();
+            throw $e;
+        }
     }
 
     private function getPrimeTotalFee(Booking $booking): int
