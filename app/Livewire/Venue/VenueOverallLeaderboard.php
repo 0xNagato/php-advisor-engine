@@ -39,10 +39,28 @@ class VenueOverallLeaderboard extends Widget
         }
     }
 
+    protected function getUserTimezone(): string
+    {
+        return auth()->user()?->timezone ?? config('app.default_timezone');
+    }
+
     public function getLeaderboardData(): Collection
     {
-        $tempStartDate = $this->startDate ? Carbon::parse($this->startDate)->startOfDay() : now()->subDays(30)->startOfDay();
-        $tempEndDate = $this->endDate ? Carbon::parse($this->endDate)->endOfDay() : now()->endOfDay();
+        $userTimezone = $this->getUserTimezone();
+        $startDateString = $this->startDate
+            ? $this->startDate->format('Y-m-d')
+            : now($userTimezone)->subDays(30)->format('Y-m-d');
+        $endDateString = $this->endDate
+            ? $this->endDate->format('Y-m-d')
+            : now($userTimezone)->format('Y-m-d');
+
+        // Parse the dates as in the user's timezone and then convert to UTC
+        $tempStartDate = Carbon::parse($startDateString, $userTimezone)
+            ->startOfDay()
+            ->setTimezone('UTC');
+        $tempEndDate = Carbon::parse($endDateString, $userTimezone)
+            ->endOfDay()
+            ->setTimezone('UTC');
 
         $cacheKey = "venue_leaderboard_{$tempStartDate->toDateTimeString()}_{$tempEndDate->toDateTimeString()}_{$this->selectedRegion}";
 

@@ -37,8 +37,9 @@ class AdminDashboard extends Dashboard
 
     public function mount(): void
     {
-        $this->filters['startDate'] ??= now()->subDays(30)->format('Y-m-d');
-        $this->filters['endDate'] ??= now()->format('Y-m-d');
+        $timezone = auth()->user()?->timezone ?? config('app.default_timezone');
+        $this->filters['startDate'] ??= now($timezone)->subDays(30)->format('Y-m-d');
+        $this->filters['endDate'] ??= now($timezone)->format('Y-m-d');
     }
 
     public function getHeading(): string|Htmlable

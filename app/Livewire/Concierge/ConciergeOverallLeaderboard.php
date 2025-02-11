@@ -30,14 +30,39 @@ class ConciergeOverallLeaderboard extends Widget
 
     public function mount(): void {}
 
+    /**
+     * Returns the authenticated user's timezone or the default.
+     */
+    protected function getUserTimezone(): string
+    {
+        return auth()->user()?->timezone ?? config('app.default_timezone');
+    }
+
     public function getLeaderboardData(): Collection
     {
-        $tempStartDate = $this->startDate ? Carbon::parse($this->startDate)->startOfDay() : now()->subDays(30)->startOfDay();
-        $tempEndDate = $this->endDate ? Carbon::parse($this->endDate)->endOfDay() : now()->endOfDay();
+        $userTimezone = $this->getUserTimezone();
+
+        // Format the date as a Y-m-d string using the user's timezone.
+        $startDateString = $this->startDate
+            ? $this->startDate->format('Y-m-d')
+            : now($userTimezone)->subDays(30)->format('Y-m-d');
+        $endDateString = $this->endDate
+            ? $this->endDate->format('Y-m-d')
+            : now($userTimezone)->format('Y-m-d');
+
+        // Parse the dates using the user's timezone, set the boundaries, then convert to UTC.
+        $tempStartDate = Carbon::parse($startDateString, $userTimezone)
+            ->startOfDay()
+            ->setTimezone('UTC');
+        $tempEndDate = Carbon::parse($endDateString, $userTimezone)
+            ->endOfDay()
+            ->setTimezone('UTC');
 
         $cacheKey = "concierge_leaderboard_{$tempStartDate->toDateTimeString()}_{$tempEndDate->toDateTimeString()}";
 
-        return Cache::remember($cacheKey, now()->addMinutes(config('app.widget_cache_timeout_minutes')),
+        return Cache::remember(
+            $cacheKey,
+            now()->addMinutes(config('app.widget_cache_timeout_minutes')),
             function () use ($tempStartDate, $tempEndDate) {
                 $currencyService = app(CurrencyConversionService::class);
 
@@ -63,17 +88,19 @@ class ConciergeOverallLeaderboard extends Widget
                     ->join('bookings', 'earnings.booking_id', '=', 'bookings.id')
                     ->whereNotNull('bookings.confirmed_at')
                     ->whereBetween('bookings.confirmed_at', [$tempStartDate, $tempEndDate])
-                    ->whereIn('bookings.status',
-                        [BookingStatus::CONFIRMED, BookingStatus::VENUE_CONFIRMED, BookingStatus::PARTIALLY_REFUNDED])
+                    ->whereIn('bookings.status', [
+                        BookingStatus::CONFIRMED,
+                        BookingStatus::VENUE_CONFIRMED,
+                        BookingStatus::PARTIALLY_REFUNDED,
+                    ])
                     ->whereIn('earnings.type', $conciergeEarningTypes)
                     ->groupBy('earnings.user_id', 'concierges.id', 'earnings.currency')
-                    ->get()->filter(fn ($row) => $row->total_earned > 0);
+                    ->get()
+                    ->filter(fn ($row) => $row->total_earned > 0);
 
-                $conciergeTotals = $earnings->groupBy('user_id')->map(function ($conciergeEarnings) use (
-                    $currencyService
-                ) {
-                    $totalUSD = $conciergeEarnings->sum(fn ($earning
-                    ) => $currencyService->convertToUSD([$earning->currency => $earning->total_earned]));
+                $conciergeTotals = $earnings->groupBy('user_id')->map(function ($conciergeEarnings) use ($currencyService) {
+                    $totalUSD = $conciergeEarnings->sum(fn ($earning) => $currencyService->convertToUSD([$earning->currency => $earning->total_earned])
+                    );
 
                     return [
                         'user_id' => $conciergeEarnings->first()->user_id,
@@ -91,7 +118,8 @@ class ConciergeOverallLeaderboard extends Widget
                 })->sortByDesc('total_usd')->take($this->limit)->values();
 
                 return collect($conciergeTotals);
-            });
+            }
+        );
     }
 
     public function viewConcierge($conciergeId): void

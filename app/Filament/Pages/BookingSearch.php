@@ -60,14 +60,16 @@ class BookingSearch extends Page implements HasTable
 
     public function mount(): void
     {
+        $timezone = auth()->user()?->timezone ?? config('app.default_timezone');
+
         if (blank($this->data)) {
             $this->form->fill([
                 'booking_id' => '',
                 'customer_search' => '',
                 'venue_search' => '',
                 'concierge_search' => '',
-                'start_date' => '',
-                'end_date' => '',
+                'start_date' => now($timezone)->subDays(30)->format('Y-m-d'),
+                'end_date' => now($timezone)->format('Y-m-d'),
                 'status' => [],
                 'user_id' => '',
                 'show_booking_time' => true,
@@ -101,9 +103,7 @@ class BookingSearch extends Page implements HasTable
                                         true => 'Booking Time',
                                         false => 'Creation Time',
                                     ])
-                                    ->default(true)
                                     ->live()
-                                    ->selectablePlaceholder(false)
                                     ->afterStateUpdated(function () {
                                         $this->resetTable();
                                     }),

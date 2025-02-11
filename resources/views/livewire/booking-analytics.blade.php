@@ -8,7 +8,7 @@
         <x-filament::input.wrapper>
             <x-filament::input.select wire:model.live="dateType" class="w-40">
                 <option value="booking">Booking Time</option>
-                <option value="creation">Creation Time</option>
+                <option value="created">Creation Time</option>
             </x-filament::input.select>
         </x-filament::input.wrapper>
     </div>

@@ -19,13 +19,27 @@ class BookingsOverview extends BaseWidget
 
     protected function getStats(): array
     {
-        $startDate = Carbon::parse($this->filters['startDate'] ?? now()->subDays(30))->startOfDay();
-        $endDate = Carbon::parse($this->filters['endDate'] ?? now())->endOfDay();
+        // Get the user's timezone from auth (or a default)
+        $userTimezone = auth()->user()?->timezone ?? config('app.default_timezone');
+
+        // Parse date filters as in the user's timezone then convert to UTC for the query
+        $startDateUTC = Carbon::parse(
+            $this->filters['startDate'] ?? now($userTimezone)->subDays(30)->format('Y-m-d'),
+            $userTimezone
+        )->startOfDay()->setTimezone('UTC');
+
+        $endDateUTC = Carbon::parse(
+            $this->filters['endDate'] ?? now($userTimezone)->format('Y-m-d'),
+            $userTimezone
+        )->endOfDay()->setTimezone('UTC');
 
         $bookings = Booking::query()
-            ->whereBetween('confirmed_at', [$startDate, $endDate])
-            ->whereIn('status',
-                [BookingStatus::CONFIRMED, BookingStatus::VENUE_CONFIRMED, BookingStatus::PARTIALLY_REFUNDED])
+            ->whereBetween('confirmed_at', [$startDateUTC, $endDateUTC])
+            ->whereIn('status', [
+                BookingStatus::CONFIRMED,
+                BookingStatus::VENUE_CONFIRMED,
+                BookingStatus::PARTIALLY_REFUNDED,
+            ])
             ->select(
                 DB::raw('COUNT(*) as count'),
                 DB::raw('SUM(total_fee - total_refunded) as total_amount'),
@@ -39,10 +53,10 @@ class BookingsOverview extends BaseWidget
 
         $currencyService = app(CurrencyConversionService::class);
         $totalAmountUSD = $currencyService->convertToUSD($bookings->pluck('total_amount', 'currency')->toArray());
-        $platformEarningsUSD = $currencyService->convertToUSD($bookings->pluck('platform_earnings',
-            'currency')->toArray());
+        $platformEarningsUSD = $currencyService->convertToUSD($bookings->pluck('platform_earnings', 'currency')->toArray());
 
-        $chartData = $this->getChartData($startDate, $endDate);
+        // Pass the converted UTC dates into the chart data query
+        $chartData = $this->getChartData($startDateUTC, $endDateUTC);
 
         return [
             $this->createStat('Bookings', $totalBookings)
@@ -59,11 +73,11 @@ class BookingsOverview extends BaseWidget
         ];
     }
 
-    protected function getChartData($startDate, $endDate): array
+    protected function getChartData(Carbon $startDateUTC, Carbon $endDateUTC): array
     {
         $dailyData = Booking::query()
             ->confirmed()
-            ->whereBetween('confirmed_at', [$startDate, $endDate])
+            ->whereBetween('confirmed_at', [$startDateUTC, $endDateUTC])
             ->selectRaw('DATE(confirmed_at) as date, COUNT(*) as bookings, SUM(total_fee) as total_amount, SUM(platform_earnings) as platform_earnings, currency')
             ->groupBy('date', 'currency')
             ->orderBy('date')

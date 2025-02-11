@@ -65,7 +65,7 @@ class DateRangeFilterWidget extends Widget
     {
         if (isset($this->ranges[$range])) {
             $this->range = $range;
-            // Add validation to ensure start date is never after end date
+            // Ensure start date is never after end date
             $startDate = $this->ranges[$range]['start'];
             $endDate = $this->ranges[$range]['end'];
 
@@ -73,7 +73,7 @@ class DateRangeFilterWidget extends Widget
                 $this->startDate = $startDate;
                 $this->endDate = $endDate;
             } else {
-                // If dates are somehow reversed, swap them
+                // Swap if reversed
                 $this->startDate = $endDate;
                 $this->endDate = $startDate;
             }
@@ -85,12 +85,16 @@ class DateRangeFilterWidget extends Widget
     #[Computed]
     public function getStartDate(): ?Carbon
     {
-        return $this->startDate ? Carbon::parse($this->startDate)->setTimezone($this->getUserTimezone()) : null;
+        return $this->startDate
+            ? Carbon::parse($this->startDate)->setTimezone($this->getUserTimezone())
+            : null;
     }
 
     #[Computed]
     public function getEndDate(): ?Carbon
     {
-        return $this->endDate ? Carbon::parse($this->endDate)->setTimezone($this->getUserTimezone()) : null;
+        return $this->endDate
+            ? Carbon::parse($this->endDate)->setTimezone($this->getUserTimezone())
+            : null;
     }
 }

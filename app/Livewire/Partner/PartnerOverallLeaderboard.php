@@ -30,10 +30,22 @@ class PartnerOverallLeaderboard extends Widget
 
     public function getLeaderboardData(): Collection
     {
-        $tempStartDate = $this->startDate ? Carbon::parse($this->startDate)->startOfDay() : now()->subDays(30)->startOfDay();
-        $tempEndDate = $this->endDate ? Carbon::parse($this->endDate)->endOfDay() : now()->endOfDay();
+        $userTimezone = auth()->user()?->timezone ?? config('app.default_timezone');
+        $startDateString = $this->startDate
+            ? $this->startDate->format('Y-m-d')
+            : now($userTimezone)->subDays(30)->format('Y-m-d');
+        $endDateString = $this->endDate
+            ? $this->endDate->format('Y-m-d')
+            : now($userTimezone)->format('Y-m-d');
 
-        $cacheKey = "partner_leaderboard_{$tempStartDate->toDateString()}_{$tempEndDate->toDateString()}";
+        $tempStartDate = Carbon::parse($startDateString, $userTimezone)
+            ->startOfDay()
+            ->setTimezone('UTC');
+        $tempEndDate = Carbon::parse($endDateString, $userTimezone)
+            ->endOfDay()
+            ->setTimezone('UTC');
+
+        $cacheKey = "partner_leaderboard_{$tempStartDate->toDateTimeString()}_{$tempEndDate->toDateTimeString()}";
 
         return Cache::remember(
             $cacheKey,
@@ -46,28 +58,27 @@ class PartnerOverallLeaderboard extends Widget
 
                 $allEarnings = $conciergeEarnings->union($venueEarnings)->get();
 
-                $partnerTotals = $allEarnings->filter(fn ($row
-                ) => $row->total_amount > 0)->groupBy('partner_id')->map(function (Collection $partnerEarnings) use (
-                    $currencyService
-                ): array {
-                    $totalEarned = $partnerEarnings->sum('total_amount');
-                    $totalUSD = $currencyService->convertToUSD([$partnerEarnings->first()->currency => $totalEarned]);
+                $partnerTotals = $allEarnings->filter(fn ($row) => $row->total_amount > 0)
+                    ->groupBy('partner_id')
+                    ->map(function (Collection $partnerEarnings) use ($currencyService): array {
+                        $totalEarned = $partnerEarnings->sum('total_amount');
+                        $totalUSD = $currencyService->convertToUSD([$partnerEarnings->first()->currency => $totalEarned]);
 
-                    return [
-                        'partner_id' => $partnerEarnings->first()->partner_id,
-                        'user_id' => $partnerEarnings->first()->user_id,
-                        'user_name' => $partnerEarnings->first()->user_name,
-                        'total_usd' => $totalUSD,
-                        'booking_count' => $partnerEarnings->sum('booking_count'),
-                        'earnings_breakdown' => [
-                            [
-                                'amount' => $totalEarned,
-                                'currency' => $partnerEarnings->first()->currency,
-                                'usd_equivalent' => $totalUSD,
+                        return [
+                            'partner_id' => $partnerEarnings->first()->partner_id,
+                            'user_id' => $partnerEarnings->first()->user_id,
+                            'user_name' => $partnerEarnings->first()->user_name,
+                            'total_usd' => $totalUSD,
+                            'booking_count' => $partnerEarnings->sum('booking_count'),
+                            'earnings_breakdown' => [
+                                [
+                                    'amount' => $totalEarned,
+                                    'currency' => $partnerEarnings->first()->currency,
+                                    'usd_equivalent' => $totalUSD,
+                                ],
                             ],
-                        ],
-                    ];
-                })->sortByDesc('total_usd')->take($this->limit)->values();
+                        ];
+                    })->sortByDesc('total_usd')->take($this->limit)->values();
 
                 return collect($partnerTotals);
             }
@@ -85,8 +96,11 @@ class PartnerOverallLeaderboard extends Widget
             ->join('earnings', 'earnings.booking_id', '=', 'bookings.id')
             ->whereNotNull('bookings.confirmed_at')
             ->whereBetween('bookings.confirmed_at', [$startDate, $endDate])
-            ->whereIn('bookings.status',
-                [BookingStatus::CONFIRMED, BookingStatus::VENUE_CONFIRMED, BookingStatus::PARTIALLY_REFUNDED])
+            ->whereIn('bookings.status', [
+                BookingStatus::CONFIRMED,
+                BookingStatus::VENUE_CONFIRMED,
+                BookingStatus::PARTIALLY_REFUNDED,
+            ])
             ->whereIn('earnings.type', ['partner_concierge', 'partner_venue'])
             ->select(
                 'partners.id as partner_id',

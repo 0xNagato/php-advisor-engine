@@ -20,7 +20,7 @@ class BookingAnalyticsWidget extends Widget
 
     protected static ?string $pollingInterval = null;
 
-    public string $dateType = 'booking';
+    public string $dateType = 'created';
 
     public function getShowBookingTimeProperty(): bool
     {
