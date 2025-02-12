@@ -131,6 +131,7 @@ class AvailabilityCalendar extends Page
         $this->redirectRoute('filament.admin.pages.concierge.reservation-hub', [
             'scheduleTemplateId' => $scheduleTemplateId,
             'date' => $date,
+            'guestCount' => $this->data['guest_count'],
         ]);
     }
 }

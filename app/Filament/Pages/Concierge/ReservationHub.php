@@ -79,6 +79,9 @@ class ReservationHub extends Page
     #[Url]
     public ?string $date = null;
 
+    #[Url]
+    public ?int $guestCount = null;
+
     public static function canAccess(): bool
     {
         return auth()->user()->hasActiveRole(['concierge', 'partner']);
@@ -114,7 +117,7 @@ class ReservationHub extends Page
 
             $this->form->fill([
                 'date' => $this->date,
-                'guest_count' => $schedule->party_size,
+                'guest_count' => $this->guestCount ?? $schedule->party_size,
                 'reservation_time' => $schedule->start_time,
                 'venue' => $schedule->venue_id,
                 'select_date' => now($this->timezone)->format('Y-m-d'),
