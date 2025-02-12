@@ -88,7 +88,7 @@ class ConciergeIncentive extends Page
     #[Computed]
     public function conciergeIncentivePercentage(): int
     {
-        return BookingPercentages::PLATFORM_PERCENTAGE_CONCIERGE;
+        return BookingPercentages::PLATFORM_PERCENTAGE_VENUE;
     }
 
     public function form(Form $form): Form
