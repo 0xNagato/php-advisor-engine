@@ -33,6 +33,7 @@ use Filament\Forms\Get;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\ViewRecord;
 use Illuminate\Contracts\Database\Query\Builder;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\HtmlString;
 use InvalidArgumentException;
@@ -849,5 +850,93 @@ class ViewBooking extends ViewRecord
             ->button()
             ->size('lg')
             ->extraAttributes(['class' => 'w-full']);
+    }
+
+    public function restoreConciergeEarningsAction(): Action
+    {
+        return Action::make('restoreConciergeEarnings')
+            ->label('Restore Concierge Earnings')
+            ->icon('heroicon-o-currency-dollar')
+            ->color('success')
+            ->requiresConfirmation()
+            ->modalIcon('heroicon-o-exclamation-triangle')
+            ->modalIconColor('warning')
+            ->modalHeading('Restore Concierge Earnings')
+            ->modalDescription(fn () => new HtmlString(
+                'Are you sure you want to restore the concierge earnings for this booking?<br><br>'.
+                "<div class='text-sm'>".
+                "<p class='p-1 mb-2 text-xs font-semibold border rounded-md text-amber-600 bg-amber-100 border-amber-300'>This will recreate the original earnings for the concierge.</p>".
+                "<p class='text-lg font-semibold'>{$this->record->guest_name}</p>".
+                "<p><strong>Concierge:</strong> {$this->record->concierge->user->name}</p>".
+                '<p><strong>Original Amount:</strong> '.money($this->record->concierge_earnings, $this->record->currency).'</p>'.
+                '</div>'
+            ))
+            ->visible(fn () => auth()->user()->hasActiveRole('super_admin') &&
+                $this->record->is_refunded_or_partially_refunded
+            )
+            ->button()
+            ->size('lg')
+            ->extraAttributes(['class' => 'w-full'])
+            ->action(function () {
+                $this->restoreConciergeEarnings();
+            });
+    }
+
+    private function restoreConciergeEarnings(): void
+    {
+        DB::transaction(function () {
+            // Delete the refund earning
+            Earning::query()
+                ->where('booking_id', $this->record->id)
+                ->where('user_id', $this->record->concierge->user_id)
+                ->where('type', EarningType::CONCIERGE->value)
+                ->where('percentage_of', 'refund')
+                ->delete();
+
+            // Check for existing concierge earning and update or create
+            $existingEarning = Earning::query()
+                ->where('booking_id', $this->record->id)
+                ->where('user_id', $this->record->concierge->user_id)
+                ->where('type', EarningType::CONCIERGE->value)
+                ->where('percentage_of', 'total_fee')
+                ->first();
+
+            if ($existingEarning) {
+                $existingEarning->update([
+                    'amount' => $this->record->concierge_earnings,
+                    'confirmed_at' => now(),
+                ]);
+            } else {
+                Earning::query()->create([
+                    'user_id' => $this->record->concierge->user_id,
+                    'booking_id' => $this->record->id,
+                    'type' => EarningType::CONCIERGE->value,
+                    'amount' => $this->record->concierge_earnings,
+                    'currency' => $this->record->currency,
+                    'percentage' => $this->record->concierge->payout_percentage,
+                    'percentage_of' => 'total_fee',
+                    'confirmed_at' => now(),
+                ]);
+            }
+
+            activity()
+                ->performedOn($this->record)
+                ->withProperties([
+                    'guest_name' => $this->record->guest_name,
+                    'venue_name' => $this->record->venue->name,
+                    'booking_time' => $this->record->booking_at->format('M d, Y h:i A'),
+                    'concierge_name' => $this->record->concierge->user->name,
+                    'amount_restored' => $this->record->concierge_earnings,
+                    'currency' => $this->record->currency,
+                    'restored_by' => auth()->user()->name,
+                ])
+                ->log('Concierge earnings restored after refund');
+
+            Notification::make()
+                ->success()
+                ->title('Concierge Earnings Restored')
+                ->body('The concierge earnings have been successfully restored.')
+                ->send();
+        });
     }
 }

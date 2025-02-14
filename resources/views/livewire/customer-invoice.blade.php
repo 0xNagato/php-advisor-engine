@@ -325,6 +325,7 @@
                     $this->uncancelBookingAction,
                     $this->markAsNoShowAction,
                     $this->transferBookingAction,
+                    $this->restoreConciergeEarningsAction,
                 ]" class="w-full mt-4" />
             @endif
 
