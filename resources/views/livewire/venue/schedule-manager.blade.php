@@ -142,14 +142,20 @@
                                         @endif
                                     </div>
 
-                                    <div class="grid grid-cols-2 gap-2 mt-2 sm:mt-0 sm:flex sm:gap-3">
-                                        <x-filament::button wire:click="makeDayPrime" color="success"
+                                    <div class="grid grid-cols-3 gap-2 mt-2 sm:mt-0 sm:flex sm:gap-3">
+                                        <x-filament::button wire:click="makeDayPrime" size="xs" color="success"
                                             class="justify-center">
                                             Make Day Prime
                                         </x-filament::button>
 
-                                        <x-filament::button wire:click="closeDay" color="danger" class="justify-center">
+                                        <x-filament::button wire:click="closeDay" size="xs" color="danger"
+                                            class="justify-center">
                                             Close Day
+                                        </x-filament::button>
+
+                                        <x-filament::button wire:click="markDaySoldOut" size="xs" color="info"
+                                            class="justify-center">
+                                            Mark Day Sold Out
                                         </x-filament::button>
                                     </div>
                                 </div>

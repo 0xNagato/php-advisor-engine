@@ -605,6 +605,53 @@ class ScheduleManager extends Component
         }
     }
 
+    public function markDaySoldOut(): void
+    {
+        try {
+            $dayOfWeek = strtolower(Carbon::parse($this->selectedDate)->format('l'));
+
+            // Get all templates for this day
+            $templates = $this->venue->scheduleTemplates()
+                ->where('day_of_week', $dayOfWeek)
+                ->where('is_available', true)
+                ->get();
+
+            // Create overrides for each template setting available_tables to 0
+            foreach ($templates as $template) {
+                VenueTimeSlot::query()->updateOrCreate([
+                    'schedule_template_id' => $template->id,
+                    'booking_date' => $this->selectedDate,
+                ], [
+                    'is_available' => true,
+                    'prime_time' => $template->prime_time,
+                    'available_tables' => 0,
+                    'minimum_spend_per_guest' => $template->minimum_spend_per_guest ?? 0,
+                    'price_per_head' => $template->price_per_head,
+                ]);
+            }
+
+            // Refresh the calendar schedules
+            $this->handleDateSelection($this->selectedDate);
+
+            Notification::make()
+                ->title('All time slots have been marked as sold out')
+                ->success()
+                ->send();
+
+        } catch (Exception $e) {
+            Log::error('Error marking day as sold out', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+            ]);
+
+            Notification::make()
+                ->title('Error marking day as sold out')
+                ->body('Please try again or contact support if the problem persists.')
+                ->danger()
+                ->send();
+        }
+    }
+
     protected function getHolidayInfo(string $date): ?array
     {
         $holidays = [
