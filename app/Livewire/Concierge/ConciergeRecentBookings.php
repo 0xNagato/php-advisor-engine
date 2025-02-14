@@ -2,6 +2,8 @@
 
 namespace App\Livewire\Concierge;
 
+use App\Enums\BookingStatus;
+use App\Enums\EarningType;
 use App\Models\Booking;
 use App\Models\Concierge;
 use Filament\Tables\Columns\TextColumn;
@@ -39,11 +41,18 @@ class ConciergeRecentBookings extends BaseWidget
         $startDate = $this->filters['startDate'] ?? now()->subDays(30);
         $endDate = $this->filters['endDate'] ?? now();
 
-        $query = Booking::confirmed()
+        $query = Booking::query()
+            ->whereIn('status', [
+                BookingStatus::CONFIRMED,
+                BookingStatus::VENUE_CONFIRMED,
+                BookingStatus::REFUNDED,
+                BookingStatus::PARTIALLY_REFUNDED,
+            ])
             ->limit(10)
             ->orderByDesc('booking_at')
             ->with('earnings', function ($query) {
-                $query->where('user_id', $this->concierge->user_id);
+                $query->where('user_id', $this->concierge->user_id)
+                    ->where('type', EarningType::CONCIERGE->value);
             })
             ->whereBetween('created_at', [$startDate, $endDate])
             ->where('concierge_id', $this->concierge->id);
@@ -69,7 +78,9 @@ class ConciergeRecentBookings extends BaseWidget
                     ->size('xs')
                     ->label('Earned')
                     ->formatStateUsing(function (Booking $booking) {
-                        $total = $booking->earnings->sum('amount');
+                        $total = $booking->earnings
+                            ->where('type', EarningType::CONCIERGE->value)
+                            ->sum('amount');
 
                         return $total > 0
                             ? money($total, $booking->currency)
