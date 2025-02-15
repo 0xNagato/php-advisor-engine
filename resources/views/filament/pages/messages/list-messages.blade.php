@@ -57,7 +57,7 @@
         <x-slot name="headerEnd">
             @if (!$isDemo)
                 <div class="text-xs text-gray-500">
-                    {{ auth()->user()->created_at->format('M j h:ia') }}
+                    {{ auth()->user()->created_at->setTimezone(auth()->user()->timezone)->format('M j g:ia') }}
                 </div>
             @endif
         </x-slot>
@@ -95,8 +95,7 @@
                         The entire list of restaurants can be seen in the
                         <a class="font-semibold text-indigo-600 underline"
                             href="{{ route('filament.admin.pages.availability-calendar') }}">
-                            Availability Calendar
-                        </a>.
+                            Availability Calendar</a>.
                     @endnonmobileapp
                     @mobileapp
                         The entire list of restaurants can be seen in the Availability Calendar.
@@ -110,8 +109,7 @@
                     We welcome your feedback as PRIMA continues to grow and evolve, please do not hesitate to contact us
                     at
                     <a href="mailto:prima@primavip.co" class="font-semibold text-indigo-600 underline">
-                        prima@primavip.co
-                    </a>
+                        prima@primavip.co</a>
                     if you have any questions.
                 </p>
             @endif
@@ -129,36 +127,30 @@
     </x-filament::section>
 
     @if ($messages->isNotEmpty())
-        <div class="flex flex-col gap-0 -mt-4 bg-white divide-y rounded-lg shadow-lg">
+        <div class="flex flex-col gap-4 -mt-4">
             @foreach ($this->messages as $message)
-                <div class="p-4">
-                    <a href="{{ route('filament.admin.resources.messages.view', ['record' => $message->id]) }}">
-                        <div class="flex flex-row items-center">
-                            <div class="w-2/12 mr-2 sm:w-1/12">
-                                <x-filament::avatar src="{{ $message->announcement->sender->getFilamentAvatarUrl() }}"
-                                    alt="User Avatar" size="w-12 h-12" />
-                            </div>
+                <x-filament::section>
+                    <x-slot name="heading">
+                        {{ $message->announcement->title }}
+                    </x-slot>
 
-                            <div class="w-10/12">
-                                <div class="flex flex-row items-center">
-                                    <span class="mr-1 font-semibold">
-                                        {{ $message->announcement->sender->name }}
-                                    </span>
-                                    @if (is_null($message->read_at))
-                                        <x-heroicon-s-information-circle
-                                            class="h-4 w-4 -mt-0.5 text-xs text-green-600" />
-                                    @endif
-                                    <span class="self-start text-xs text-right grow">
-                                        {{ $message->created_at->format('M j h:i A') }}
-                                    </span>
-                                </div>
-                                <p class="text-xs truncate">
-                                    {{ $message->announcement->message }}
-                                </p>
-                            </div>
+                    <x-slot name="headerEnd">
+                        <div class="text-xs text-gray-500">
+                            {{ $message->created_at->setTimezone(auth()->user()->timezone)->format('M j g:ia') }}
                         </div>
-                    </a>
-                </div>
+                    </x-slot>
+
+                    <div
+                        class="flex flex-col gap-4 [&_a]:text-indigo-600 [&_a]:underline [&_a]:font-semibold text-xs sm:text-base">
+                        {!! Illuminate\Mail\Markdown::parse($message->announcement->message) !!}
+
+                        @if (isset($message->announcement->call_to_action_title, $message->announcement->call_to_action_url))
+                            <x-filament::button tag="a" :href="$message->announcement->call_to_action_url" target="_blank">
+                                {{ $message->announcement->call_to_action_title }}
+                            </x-filament::button>
+                        @endif
+                    </div>
+                </x-filament::section>
             @endforeach
         </div>
     @endif
