@@ -43,8 +43,8 @@ class CustomerBookingConfirmed extends Notification
     public function toSMS(Booking $notifiable): SmsData
     {
         $templateKey = match (true) {
-            $notifiable->prime_time && $notifiable->venue->is_omakase => 'customer_booking_confirmed_prime_omakase',
-            $notifiable->prime_time => 'customer_booking_confirmed_prime',
+            (bool) $notifiable->is_prime && (bool) $notifiable->venue->is_omakase => 'customer_booking_confirmed_prime_omakase',
+            (bool) $notifiable->is_prime => 'customer_booking_confirmed_prime',
             default => 'customer_booking_confirmed_non_prime',
         };
 
