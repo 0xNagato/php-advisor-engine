@@ -139,6 +139,7 @@ class ReservationHub extends Page
                         fn () => Venue::available()
                             ->where('status', VenueStatus::ACTIVE)
                             ->where('region', session('region', 'miami'))
+                            ->orderBy('name')
                             ->pluck('name', 'id')
                     )
                     ->placeholder('Select Venue')

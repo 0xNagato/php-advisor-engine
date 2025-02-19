@@ -18,6 +18,7 @@ class VenueController extends Controller
         $venues = Venue::available()
             ->where('region', $region->id)
             ->where('status', VenueStatus::ACTIVE)
+            ->orderBy('name')
             ->get(['id', 'name']);
 
         return response()->json([
