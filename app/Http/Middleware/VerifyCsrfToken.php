@@ -23,4 +23,39 @@ class VerifyCsrfToken extends Middleware
         '/story',
         '/',
     ];
+
+    /**
+     * Livewire components that should be excluded from CSRF verification.
+     *
+     * @var array<int, string>
+     */
+    protected $excludedComponents = [
+        'talk-to-prima',
+    ];
+
+    /**
+     * Get Livewire component path from the request.
+     */
+    protected function getLivewireComponentPath(mixed $request): ?string
+    {
+        $components = $request->input('components')[0] ?? [];
+        $snapshot = json_decode($components['snapshot'] ?? '{}', true);
+        $memo = $snapshot['memo'] ?? [];
+
+        return $memo['name'] ?? null;
+    }
+
+    /**
+     * Check if the CSRF tokens match for the given request.
+     */
+    protected function tokensMatch($request): bool
+    {
+        $componentPath = $this->getLivewireComponentPath($request);
+
+        if (in_array($componentPath, $this->excludedComponents, true)) {
+            return true;
+        }
+
+        return parent::tokensMatch($request);
+    }
 }
