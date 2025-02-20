@@ -245,8 +245,13 @@
         </div>
     </section>
 
-    <x-marketing.how-it-work-steps title="Effortless Reservation Management with PRIMA"
-        description="Maximize your revenue by filling prime-time slots and reducing no-shows. PRIMA connects your restaurant with trusted concierges, ensuring reliable bookings and high-value clientele." />
+    <x-marketing.how-it-work-steps>
+        <x-slot:title>Effortless Reservation Management with PRIMA</x-slot:title>
+        <x-slot:description>
+            Maximize your revenue by filling prime-time slots and reducing no-shows.
+            PRIMA connects your restaurant with trusted concierges, ensuring reliable bookings and high-value clientele.
+        </x-slot:description>
+    </x-marketing.how-it-work-steps>
 
     <section class="fade-in px-[16px]">
         <div class="container">

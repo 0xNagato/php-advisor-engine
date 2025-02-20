@@ -233,8 +233,15 @@
         </div>
     </section>
 
-    <x-marketing.how-it-work-steps title="Simplify Bookings and Boost Earnings with PRIMA"
-        description="Effortlessly book exclusive, prime-time reservations for your clients. Earn commissions while providing unparalleled dining experiences through the PRIMA network." />
+    <x-marketing.how-it-work-steps>
+        <x-slot:title>
+            Simplify Bookings and Boost Earnings with PRIMA
+        </x-slot>
+        <x-slot:description>
+            Effortlessly book exclusive, prime-time reservations for your clients.
+            Earn commissions while providing unparalleled dining experiences through the PRIMA network.
+        </x-slot>
+    </x-marketing.how-it-work-steps>
 
     <section style="display: none; opacity: 0" class="fade-in">
         <div class="container">
