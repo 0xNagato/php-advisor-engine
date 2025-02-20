@@ -45,9 +45,12 @@
             </div>
         @endif
     @endnonmobileapp
-
+    {{-- <div class="flex justify-center -mx-6 -mt-6 sm:hidden">
+        <img src="{{ asset('images/concierge-earnings-infographic-new.png') }}" alt="Concierge Earnings Infographic"
+            class="w-full">
+    </div> --}}
     @if ($messages->isNotEmpty())
-        <div class="flex flex-col gap-4 -mt-4">
+        <div class="flex flex-col gap-4 mt-2">
             @foreach ($this->messages as $message)
                 <x-filament::section>
                     <x-slot name="heading">
