@@ -2,6 +2,7 @@
 
 namespace App\Livewire;
 
+use App\Enums\BookingStatus;
 use App\Enums\EarningType;
 use App\Models\Concierge;
 use App\Models\Earning;
@@ -90,12 +91,12 @@ class ConciergeOverview extends BaseWidget
             ->where('earnings.user_id', $this->concierge->user_id)
             ->whereBetween('bookings.confirmed_at', [$startDate, $endDate])
             ->whereIn('earnings.type', values: $earningTypes)
+            ->whereNotIn('bookings.status', [BookingStatus::REFUNDED, BookingStatus::PARTIALLY_REFUNDED])
             ->select(
                 DB::raw('COUNT(
                     DISTINCT CASE WHEN
                         earnings.type IN ("'.EarningType::CONCIERGE->value.'", "'.EarningType::CONCIERGE_BOUNTY->value.'")
                         and earnings.type NOT IN ("'.EarningType::REFUND->value.'")
-                        and earnings.percentage_of = "total_fee"
                     THEN bookings.id END
                     )
                 as number_of_direct_bookings'),

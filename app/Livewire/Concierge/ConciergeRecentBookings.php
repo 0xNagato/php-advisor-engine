@@ -2,15 +2,12 @@
 
 namespace App\Livewire\Concierge;
 
-use App\Enums\BookingStatus;
-use App\Enums\EarningType;
 use App\Models\Booking;
 use App\Models\Concierge;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Filament\Widgets\Concerns\InteractsWithPageFilters;
 use Filament\Widgets\TableWidget as BaseWidget;
-use Illuminate\Contracts\Database\Query\Builder;
 use Illuminate\Contracts\Support\Htmlable;
 
 class ConciergeRecentBookings extends BaseWidget
@@ -42,18 +39,11 @@ class ConciergeRecentBookings extends BaseWidget
         $startDate = $this->filters['startDate'] ?? now()->subDays(30);
         $endDate = $this->filters['endDate'] ?? now();
 
-        $query = Booking::query()
-            ->whereIn('status', [
-                BookingStatus::CONFIRMED,
-                BookingStatus::VENUE_CONFIRMED,
-                BookingStatus::REFUNDED,
-                BookingStatus::PARTIALLY_REFUNDED,
-            ])
+        $query = Booking::confirmed()
             ->limit(10)
             ->orderByDesc('booking_at')
-            ->with('earnings', function (Builder $query) {
-                $query->where('user_id', $this->concierge->user_id)
-                    ->where('type', EarningType::CONCIERGE->value);
+            ->with('earnings', function ($query) {
+                $query->where('user_id', $this->concierge->user_id);
             })
             ->whereBetween('created_at', [$startDate, $endDate])
             ->where('concierge_id', $this->concierge->id);
@@ -79,9 +69,7 @@ class ConciergeRecentBookings extends BaseWidget
                     ->size('xs')
                     ->label('Earned')
                     ->formatStateUsing(function (Booking $booking) {
-                        $total = $booking->earnings
-                            ->where('type', EarningType::CONCIERGE->value)
-                            ->sum('amount');
+                        $total = $booking->earnings->sum('amount');
 
                         return $total > 0
                             ? money($total, $booking->currency)
