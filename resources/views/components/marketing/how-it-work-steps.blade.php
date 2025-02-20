@@ -95,10 +95,11 @@
             </p>
 
             <div class="w-full">
-                <!-- Slides Container -->
-                <div class="relative overflow-hidden box_grid md:grid md:grid-cols-3 md:gap-4"
+                <!-- Slides Container - Added padding to prevent shadow clipping -->
+                <div class="relative px-4 py-4 overflow-visible box_grid md:grid md:grid-cols-3 md:gap-4"
                     :style="isMobile ? { height: containerHeight } : {}" @touchstart.prevent="handleTouchStart($event)"
                     @touchend.prevent="handleTouchEnd($event)" @touchmove.prevent="handleTouchMove($event)">
+
                     <div class="absolute w-full transition-all duration-300 ease-out box_grid-item md:relative"
                         :class="{ 'opacity-0': isMobile && currentSlide !== 0 }"
                         :style="isMobile ? {
