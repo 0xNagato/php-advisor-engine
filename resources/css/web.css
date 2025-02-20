@@ -432,7 +432,7 @@
 
   /* footer */
   .footer {
-    @apply w-full pt-[50px] md:px-[40px] sm:pt-[130px] sm:px-[25px] border-t border-zinc-300 p-[16px];
+    @apply w-full pt-[25px] md:px-[40px] sm:pt-[50px] sm:px-[25px] border-t border-zinc-300 p-[16px];
   }
   .footer_copyright {
     @apply pt-[35px] pb-[23px] mt-[50px] border-t border-zinc-300 flex flex-col justify-between text-center gap-2 font-walsheim sm:flex-row sm:text-left text-dark text-[16px];
