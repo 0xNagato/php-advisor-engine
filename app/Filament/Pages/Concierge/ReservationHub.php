@@ -145,6 +145,24 @@ class ReservationHub extends Page
             session(['booking' => $this->booking]);
         }
 
+        // Handle initial form fill from AvailabilityCalendar
+        if (! $this->booking && $this->scheduleTemplateId && $this->date) {
+            $schedule = ScheduleTemplate::query()->find($this->scheduleTemplateId);
+
+            $this->form->fill([
+                'date' => $this->date,
+                'guest_count' => $this->guestCount ?? $schedule->party_size,
+                'reservation_time' => $schedule->start_time,
+                'venue' => $schedule->venue_id,
+                'select_date' => now($this->timezone)->format('Y-m-d'),
+                'radio_date' => now($this->timezone)->format('Y-m-d'),
+            ]);
+
+            $this->createBooking($this->scheduleTemplateId, $this->date);
+
+            return;
+        }
+
         $this->form->fill();
     }
 
