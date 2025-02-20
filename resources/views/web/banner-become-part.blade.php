@@ -27,7 +27,7 @@
                 Talk to PRIMA
             </button>
             <!-- Book Your Dining Experience Button -->
-            <a href="{{ route('v.booking', ['code' => $vipCode->code]) }}"
+            <a href="{{ config('app.primary_domain') . '/' . ltrim(route('v.booking', ['code' => $vipCode->code], false), '/') }}"
                 class="bg-gradient-to-b from-[#34AFF1] to-[#3954C7] text-white px-6 py-3 rounded-md border-[3px] border-white hover:bg-opacity-90 w-full sm:w-auto">
                 Book Your Dining Experience
             </a>

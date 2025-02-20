@@ -1,7 +1,9 @@
 @php
     use App\Models\VipCode;
-        $vipCode = Cache::remember('available_calendar_button_vip_code_1', 60,
-        fn () => VipCode::query()->where('concierge_id', 1)->active()->first()
+    $vipCode = Cache::remember(
+        'available_calendar_button_vip_code_1',
+        60,
+        fn() => VipCode::query()->where('concierge_id', 1)->active()->first(),
     );
 @endphp
 <x-layouts.web>
@@ -22,8 +24,8 @@
                                 <span class="text-intro">Anytime, Anywhere</span>
                             </h1>
                             <span class="intro_hero-btn_container">
-                                <a href="{{ route('v.booking', ['code' => $vipCode->code]) }}"
-                                   class="intro_hero-btn bg-gradient-to-b from-primary to-purple">
+                                <a href="{{ config('app.primary_domain') . '/' . ltrim(route('v.booking', ['code' => $vipCode->code], false), '/') }}"
+                                    class="intro_hero-btn bg-gradient-to-b from-primary to-purple">
                                     Talk to PRIMA Concierge
                                 </a>
                             </span>
@@ -32,35 +34,35 @@
                     <div class="intro_hero-img_container">
                         <div class="intro_hero-img">
                             <img src="{{ asset('images/marketing/city.png') }}" alt=""
-                                 class="intro_hero-img_trans">
+                                class="intro_hero-img_trans">
                         </div>
                         <div class="intro_hero-img">
                             <img src="{{ asset('images/marketing/consumers.jpeg') }}" alt=""
-                                 class="intro_hero-img_trans">
+                                class="intro_hero-img_trans">
                         </div>
                     </div>
                 </div>
 
                 <!-- mission vision -->
-                <div class="flex flex-col gap-4 md:gap-6 lg:flex-row relative">
+                <div class="relative flex flex-col gap-4 md:gap-6 lg:flex-row">
                     <div
-                            class="box p-6 flex flex-col gap-4 flex-1 items-start bg-gradient-to-b from-secondary to-primary">
-                        <span class="tag gap-2 pl-2 bg-white">
+                        class="flex flex-col items-start flex-1 gap-4 p-6 box bg-gradient-to-b from-secondary to-primary">
+                        <span class="gap-2 pl-2 bg-white tag">
                             <img src="{{ asset('images/marketing/shield_icon.svg') }}" alt="shield-icon">
                             Our Mission
                         </span>
-                        <p class="font-bricolage text-white font-semibold text-xl_1 antialiased tracking-normal">
+                        <p class="antialiased font-semibold tracking-normal text-white font-bricolage text-xl_1">
                             To empower diners by offering access to exclusive, premium dining reservations while
                             enhancing the dining experience through seamless booking processes.
                         </p>
                     </div>
                     <div
-                            class="box p-6 flex flex-col gap-4 flex-1 items-start bg-gradient-to-b from-green_dark to-green">
-                        <span class="tag gap-2 pl-2 bg-white">
+                        class="flex flex-col items-start flex-1 gap-4 p-6 box bg-gradient-to-b from-green_dark to-green">
+                        <span class="gap-2 pl-2 bg-white tag">
                             <img src="{{ asset('images/marketing/eye_icon.svg') }}" alt="eye-icon">
                             Our Vision
                         </span>
-                        <p class="font-bricolage text-white font-semibold text-xl_1 antialiased tracking-normal">
+                        <p class="antialiased font-semibold tracking-normal text-white font-bricolage text-xl_1">
                             To create a world where every dining reservation feels like a VIP experience, offering
                             consumers effortless access to their favorite restaurants and exceptional customer service.
                         </p>
@@ -78,9 +80,9 @@
                 <div class="flex gap-4 md:gap-[32px] flex-col lg:flex-row">
                     <div class="flex-1 lg:max-w-[537px] mb-[25px] lg:mb-[0px]">
                         <img src="{{ asset('images/marketing/consumers-1.png') }}" alt="app-image"
-                             class="img_full rounded-[20px]">
+                            class="img_full rounded-[20px]">
                     </div>
-                    <div class="flex-1 flex flex-col gap-4 items-start ">
+                    <div class="flex flex-col items-start flex-1 gap-4 ">
                         <span class="tag gap-2 pl-2 font-[600]">
                             <img src="{{ asset('images/marketing/stats_icon.svg') }}" alt="stats_icon">
                             The Problem
@@ -97,14 +99,14 @@
                                 <div class="flex gap-[12px] items-start justify-start">
                                     <div class="btn_icon btn_icon--sm btn bg-gradient-to-tl from-red to-red_light">
                                         <img src="{{ asset('images/marketing/date_time.svg') }}" alt="date_time"
-                                             width="30">
+                                            width="30">
                                     </div>
                                     <div class="flex-1">
                                         <p class="card_lg-title md:text-[18px] font-500 antialiased tracking-normal">
                                             <span
-                                                    class="btn_icon btn_icon--sm btn bg-gradient-to-tl from-red to-red_light">
+                                                class="btn_icon btn_icon--sm btn bg-gradient-to-tl from-red to-red_light">
                                                 <img src="{{ asset('images/marketing/date_time.svg') }}" alt="date_time"
-                                                     width="30">
+                                                    width="30">
                                             </span>
                                             Long Waitlists​
                                         </p>
@@ -120,14 +122,14 @@
                                 <div class="flex gap-[12px] items-start justify-start">
                                     <div class="btn_icon btn_icon--sm btn bg-gradient-to-tl from-red to-red_light">
                                         <img src="{{ asset('images/marketing/cancel_icon.svg') }}" alt="cancel-icon"
-                                             width="30">
+                                            width="30">
                                     </div>
                                     <div class="flex-1">
                                         <p class="card_lg-title md:text-[18px] font-500 antialiased tracking-normal">
                                             <span
-                                                    class="btn_icon btn_icon--sm btn bg-gradient-to-tl from-red to-red_light">
+                                                class="btn_icon btn_icon--sm btn bg-gradient-to-tl from-red to-red_light">
                                                 <img src="{{ asset('images/marketing/cancel_icon.svg') }}"
-                                                     alt="cancel-icon" width="30">
+                                                    alt="cancel-icon" width="30">
                                             </span>
                                             Third-Party Reservation Hoarding
                                         </p>
@@ -143,14 +145,14 @@
                                 <div class="flex gap-[12px] items-start justify-start">
                                     <div class="btn_icon btn_icon--sm btn bg-gradient-to-tl from-red to-red_light">
                                         <img src="{{ asset('images/marketing/cutlery_icon--outline.svg') }}"
-                                             alt="cutlery-icon" width="30">
+                                            alt="cutlery-icon" width="30">
                                     </div>
                                     <div class="flex-1">
                                         <p class="card_lg-title md:text-[18px] font-500 antialiased tracking-normal">
                                             <span
-                                                    class="btn_icon btn_icon--sm btn bg-gradient-to-tl from-red to-red_light">
+                                                class="btn_icon btn_icon--sm btn bg-gradient-to-tl from-red to-red_light">
                                                 <img src="{{ asset('images/marketing/cutlery_icon--outline.svg') }}"
-                                                     alt="cutlery-icon" width="30">
+                                                    alt="cutlery-icon" width="30">
                                             </span>
                                             Unreliable Reservation Systems
                                         </p>
@@ -165,14 +167,14 @@
                                 <div class="flex gap-[12px] items-start justify-start">
                                     <div class="btn_icon btn_icon--sm btn bg-gradient-to-tl from-red to-red_light">
                                         <img src="{{ asset('images/marketing/vip_icon.svg') }}" alt="vip-icon"
-                                             width="30">
+                                            width="30">
                                     </div>
                                     <div class="flex-1">
                                         <p class="card_lg-title md:text-[18px] font-500 antialiased tracking-normal">
                                             <span
-                                                    class="btn_icon btn_icon--sm btn bg-gradient-to-tl from-red to-red_light">
+                                                class="btn_icon btn_icon--sm btn bg-gradient-to-tl from-red to-red_light">
                                                 <img src="{{ asset('images/marketing/vip_icon.svg') }}" alt="vip-icon"
-                                                     width="30">
+                                                    width="30">
                                             </span>
                                             Lack of VIP Access
                                         </p>
@@ -197,13 +199,13 @@
             <div class="flex flex-col gap-6">
 
                 <!-- Consumers -->
-                <div class="flex gap-4 md:gap-10 flex-col md:flex-row">
+                <div class="flex flex-col gap-4 md:gap-10 md:flex-row">
                     <div class="flex-1">
                         <div class="sticky top-[110px]">
                             <img src="{{ asset('images/marketing/vip-access.png') }}" alt="app-image">
                         </div>
                     </div>
-                    <div class="flex-1 flex flex-col gap-4 items-start">
+                    <div class="flex flex-col items-start flex-1 gap-4">
                         <span class="tag gap-2 pl-2 font-[600] text-dark font-instrument">
                             <img src="{{ asset('images/marketing/cutlery_icon.svg') }}" alt="cutlery-icon">
                             Welcome to PRIMA
@@ -231,8 +233,8 @@
                                 Enjoy VIP treatment at top-tier dining spots worldwide.
                             </li>
                         </ul>
-                        <a href="{{ route('v.booking', ['code' => $vipCode->code]) }}"
-                           class="btn bg-gradient-to-b from-purple to-primary text-white text-center w-full md:w-auto">
+                        <a href="{{ config('app.primary_domain') . '/' . ltrim(route('v.booking', ['code' => $vipCode->code], false), '/') }}"
+                            class="w-full text-center text-white btn bg-gradient-to-b from-purple to-primary md:w-auto">
                             Book Your Dream Dining Experience
                         </a>
                     </div>
@@ -244,12 +246,12 @@
 
     <section class="fade-in mt-[60px] md:mt-[80px]">
         <div class="container">
-            <div class="flex flex-col gap-4 md:text-center items-start md:items-center">
-                <span class="tag gap-2 pl-2">
+            <div class="flex flex-col items-start gap-4 md:text-center md:items-center">
+                <span class="gap-2 pl-2 tag">
                     <img src="{{ asset('images/marketing/play_icon.svg') }}" alt="play-icon">
                     How It Works
                 </span>
-                <h2 class="text-dark m-auto">
+                <h2 class="m-auto text-dark">
                     Easy Access to Exclusive Dining Experiences with PRIMA
                 </h2>
                 <p class="mb-6 max-w-[1090px]">
@@ -271,9 +273,9 @@
                 <div class="flex gap-[16px] lg:gap-10 flex-col lg:flex-row">
                     <div class="flex-1">
                         <img src="{{ asset('images/marketing/access-exclusive-dinning.png') }}"
-                             alt="access-exclusive-dinning" class="img_full rounded-[20px]">
+                            alt="access-exclusive-dinning" class="img_full rounded-[20px]">
                     </div>
-                    <div class="flex-1 flex flex-col gap-4 items-start justify-center lg:py-8">
+                    <div class="flex flex-col items-start justify-center flex-1 gap-4 lg:py-8">
                         <span class="tag gap-2 pl-2 font-[600] text-dark font-instrument">
                             <img src="{{ asset('images/marketing/person_icon.svg') }}" alt="person-icon">
                             Consumers
@@ -286,8 +288,8 @@
                             communities in major cities. This guarantees you a seamless dining experience at top
                             restaurants, with reliable bookings and fewer cancellations.
                         </p>
-                        <a href="{{ route('v.booking', ['code' => $vipCode->code]) }}"
-                           class="btn bg-gradient-to-b from-purple to-primary text-white mt-[10px] md:mt-6 btn_full">
+                        <a href="{{ config('app.primary_domain') . '/' . ltrim(route('v.booking', ['code' => $vipCode->code], false), '/') }}"
+                            class="btn bg-gradient-to-b from-purple to-primary text-white mt-[10px] md:mt-6 btn_full">
                             Talk to PRIMA Concierge
                         </a>
                     </div>
@@ -299,7 +301,7 @@
 
     <section class="fade-in lg:mt-[80px] mt-[60px]">
         <div class="container">
-            <div class="flex flex-col gap-8 items-center">
+            <div class="flex flex-col items-center gap-8">
                 <div class="flex flex-col gap-[12px] items-start md:items-center md:text-center">
                     <span class="tag gap-2 pl-2 font-[600] text-dark font-instrument">
                         <img src="{{ asset('images/marketing/money_plus_icon.svg') }}" alt="money-icon">
@@ -314,19 +316,19 @@
                     </p>
                 </div>
 
-                <a href="{{ route('v.booking', ['code' => $vipCode->code]) }}"
-                   class="btn bg-gradient-to-b from-purple to-primary text-white btn_full">
+                <a href="{{ config('app.primary_domain') . '/' . ltrim(route('v.booking', ['code' => $vipCode->code], false), '/') }}"
+                    class="text-white btn bg-gradient-to-b from-purple to-primary btn_full">
                     Talk to PRIMA Concierge
                 </a>
 
-                <div class="grid grid-cols-1 gap-4 2 md:grid-cols-2 lg:grid-cols-3 w-full">
-                    <div class="box border-divider border p-6 shadow-2xl flex flex-col gap-4 text-left md:text-center">
-                        <div class="flex gap-4 items-center md:flex-col">
+                <div class="grid w-full grid-cols-1 gap-4 2 md:grid-cols-2 lg:grid-cols-3">
+                    <div class="flex flex-col gap-4 p-6 text-left border shadow-2xl box border-divider md:text-center">
+                        <div class="flex items-center gap-4 md:flex-col">
                             <div class="btn_icon btn bg-gradient-to-tl from-pink to-pink_accent rounded-[10px] md:p-4">
                                 <img src="{{ asset('images/marketing/vip_icon.svg') }}" alt="vip-icon"
-                                     class="w-[30px] md:w-[40px]">
+                                    class="w-[30px] md:w-[40px]">
                             </div>
-                            <p class="font-bricolage text-dark flex-1 text-xl">
+                            <p class="flex-1 text-xl font-bricolage text-dark">
                                 VIP Access
                             </p>
                         </div>
@@ -335,13 +337,14 @@
                         </p>
                     </div>
 
-                    <div class="box border-divider border p-6 shadow-2xl flex flex-col gap-4 text-left md:text-center">
-                        <div class="flex gap-4 items-center md:flex-col">
-                            <div class="btn_icon btn bg-gradient-to-l from-primary to-blue_light rounded-[10px] md:p-4">
-                                <img src="{{ asset('images/marketing/schedule_icon--light.svg') }}" alt="schedule-icon"
-                                     class="w-[30px] md:w-[40px]">
+                    <div class="flex flex-col gap-4 p-6 text-left border shadow-2xl box border-divider md:text-center">
+                        <div class="flex items-center gap-4 md:flex-col">
+                            <div
+                                class="btn_icon btn bg-gradient-to-l from-primary to-blue_light rounded-[10px] md:p-4">
+                                <img src="{{ asset('images/marketing/schedule_icon--light.svg') }}"
+                                    alt="schedule-icon" class="w-[30px] md:w-[40px]">
                             </div>
-                            <p class="font-bricolage text-dark flex-1 text-xl">
+                            <p class="flex-1 text-xl font-bricolage text-dark">
                                 Seamless Booking
                             </p>
                         </div>
@@ -350,14 +353,14 @@
                         </p>
                     </div>
 
-                    <div class="box border-divider border p-6 shadow-2xl flex flex-col gap-4 text-left md:text-center">
-                        <div class="flex gap-4 items-center md:flex-col">
+                    <div class="flex flex-col gap-4 p-6 text-left border shadow-2xl box border-divider md:text-center">
+                        <div class="flex items-center gap-4 md:flex-col">
                             <div
-                                    class="btn_icon btn bg-gradient-to-r from-purple_light to-purple rounded-[10px] md:p-4">
+                                class="btn_icon btn bg-gradient-to-r from-purple_light to-purple rounded-[10px] md:p-4">
                                 <img src="{{ asset('images/marketing/group-premium_icon.svg') }}"
-                                     alt="group-premium-icon" class="w-[30px] md:w-[40px]">
+                                    alt="group-premium-icon" class="w-[30px] md:w-[40px]">
                             </div>
-                            <p class="font-bricolage text-dark flex-1 text-xl">
+                            <p class="flex-1 text-xl font-bricolage text-dark">
                                 Trusted Network
                             </p>
                         </div>
@@ -366,14 +369,14 @@
                         </p>
                     </div>
 
-                    <div class="box border-divider border p-6 shadow-2xl flex flex-col gap-4 text-left md:text-center">
-                        <div class="flex gap-4 items-center md:flex-col">
+                    <div class="flex flex-col gap-4 p-6 text-left border shadow-2xl box border-divider md:text-center">
+                        <div class="flex items-center gap-4 md:flex-col">
                             <div
-                                    class="btn_icon btn bg-gradient-to-l from-pink_strong to-blue_accent rounded-[10px] md:p-4">
+                                class="btn_icon btn bg-gradient-to-l from-pink_strong to-blue_accent rounded-[10px] md:p-4">
                                 <img src="{{ asset('images/marketing/food-services_icon.svg') }}"
-                                     alt="food-services_icon-icon" class="w-[30px] md:w-[40px]">
+                                    alt="food-services_icon-icon" class="w-[30px] md:w-[40px]">
                             </div>
-                            <p class="font-bricolage text-dark flex-1 text-xl">
+                            <p class="flex-1 text-xl font-bricolage text-dark">
                                 Handpicked Venues
                             </p>
                         </div>
@@ -382,13 +385,13 @@
                         </p>
                     </div>
 
-                    <div class="box border-divider border p-6 shadow-2xl flex flex-col gap-4 text-left md:text-center">
-                        <div class="flex gap-4 items-center md:flex-col">
+                    <div class="flex flex-col gap-4 p-6 text-left border shadow-2xl box border-divider md:text-center">
+                        <div class="flex items-center gap-4 md:flex-col">
                             <div class="btn_icon btn bg-gradient-to-tl from-cyan to-primary rounded-[10px] md:p-4">
                                 <img src="{{ asset('images/marketing/chairs_icon.svg') }}" alt="chair-icon"
-                                     class="w-[30px] md:w-[40px]">
+                                    class="w-[30px] md:w-[40px]">
                             </div>
-                            <p class="font-bricolage text-dark flex-1 text-xl">
+                            <p class="flex-1 text-xl font-bricolage text-dark">
                                 Priority Reservations
                             </p>
                         </div>
@@ -397,13 +400,13 @@
                         </p>
                     </div>
 
-                    <div class="box border-divider border p-6 shadow-2xl flex flex-col gap-4 text-left md:text-center">
-                        <div class="flex gap-4 items-center md:flex-col">
+                    <div class="flex flex-col gap-4 p-6 text-left border shadow-2xl box border-divider md:text-center">
+                        <div class="flex items-center gap-4 md:flex-col">
                             <div class="btn_icon btn bg-gradient-to-b from-blue to-green rounded-[10px] md:p-4">
                                 <img src="{{ asset('images/marketing/vip_icon.svg') }}" alt="star-icon"
-                                     class="w-[30px] md:w-[40px]">
+                                    class="w-[30px] md:w-[40px]">
                             </div>
-                            <p class="font-bricolage text-dark flex-1 text-xl">
+                            <p class="flex-1 text-xl font-bricolage text-dark">
                                 Unmatched Service
                             </p>
                         </div>
@@ -439,8 +442,8 @@
                         No More Waiting, Just Enjoy!
                     </li>
                 </ul>
-                <a href="{{ route('v.booking', ['code' => $vipCode->code]) }}"
-                   class="btn bg-white text-primary mt-4 relative z-10 btn_full font-bricolage font-[600] antialiased">
+                <a href="{{ config('app.primary_domain') . '/' . ltrim(route('v.booking', ['code' => $vipCode->code], false), '/') }}"
+                    class="btn bg-white text-primary mt-4 relative z-10 btn_full font-bricolage font-[600] antialiased">
                     Reserve Your Table Now!
                 </a>
                 <div class="box_cta-deco">

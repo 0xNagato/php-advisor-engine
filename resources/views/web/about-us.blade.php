@@ -257,7 +257,7 @@
                         @click.prevent="$dispatch('prima-open-modal', { id: 'prima-contact' })">
                         Talk to PRIMA
                     </a>
-                    <a href="{{ route('v.booking', ['code' => $vipCode->code]) }}"
+                    <a href="{{ config('app.primary_domain') . '/' . ltrim(route('v.booking', ['code' => $vipCode->code], false), '/') }}"
                         class="relative z-10 text-white border border-white btn bg-gradient-to-b from-sky to-blue_royal">
                         Book Your Dining Experience
                     </a>
