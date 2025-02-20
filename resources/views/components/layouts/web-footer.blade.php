@@ -3,8 +3,7 @@
         <div class="footer_text">
             <div class="footer_text-logo">
                 <a href="{{ route('home') }}">
-                    <img src="{{ asset('images/prima-logo--color.png') }}" alt="prima-logo"
-                         class="footer_text-logo_img">
+                    <img src="{{ asset('images/logo-768x184.png') }}" alt="prima-logo" class="header_logo-img">
                 </a>
                 <p class="footer_text-description">
                     Unlock Prime Dining Reservations at the World’s Most Sought-After Restaurants
@@ -15,7 +14,6 @@
                     <div class="footer_text-links_cols-item">
                         <p class="footer_headline">Home</p>
                         <a href="{{ route('about-us') }}" class="footer_text-links-item">About</a>
-                        {{--                        <a href="contact-us.html" class="text-tiny text-neutral hover:underline">Contact</a>--}}
                     </div>
                     <div class="footer_text-links_cols-item sm:max-w-[160px]">
                         <p class="footer_headline">Available For</p>
@@ -33,5 +31,3 @@
         </div>
     </div>
 </footer>
-
-

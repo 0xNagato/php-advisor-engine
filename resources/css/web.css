@@ -382,7 +382,7 @@
     @apply inline-block align-middle;
   }
   .header_logo-img {
-    @apply w-[92px] md:w-[118px];
+    @apply w-16 md:w-20;
   }
 
   /* nav */

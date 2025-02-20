@@ -2,8 +2,7 @@
     <div class="header_container">
         <div class="header_logo">
             <a href="{{ route('home') }}">
-                {{-- <img src="{{ asset('images/logo-768x184.png') }}" alt="prima-logo" class="header_logo-img"> --}}
-                <x-filament-panels::logo />
+                <img src="{{ asset('images/logo-768x184.png') }}" alt="prima-logo" class="header_logo-img">
             </a>
         </div>
         <div class="order-last nav xl:order-2">
