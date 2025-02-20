@@ -244,8 +244,29 @@
         </div>
     </section>
 
-    <x-marketing.how-it-work-steps title="Easy Access to Exclusive Dining Experiences with PRIMA"
-        description="Enjoy seamless access to exclusive reservations at the world’s top restaurants. Skip the waitlists and secure prime dining experiences through PRIMA’s trusted concierge network." />
+    <x-marketing.how-it-work-steps :steps="[
+        [
+            'image' => 'images/marketing/reservation-1.png',
+            'title' => 'Browse & Select',
+            'description' => 'Select from exclusive prime-time slots and book your favorite restaurants in just a few clicks.',
+        ],
+        [
+            'image' => 'images/marketing/reservation-2.png',
+            'title' => 'Book Your Reservation',
+            'description' => 'Receive immediate confirmation for your reservation, guaranteeing your table without the wait.',
+        ],
+        [
+            'image' => 'images/marketing/fine-dining.png',
+            'title' => 'Enjoy Your Experience',
+            'description' => 'Gain entry to highly sought-after dining experiences, often unavailable through traditional channels.',
+        ],
+    ]">
+        <x-slot:title>Easy Access to Exclusive Dining Experiences with PRIMA</x-slot:title>
+        <x-slot:description>
+            Enjoy seamless access to exclusive reservations at the world’s top restaurants.
+            Skip the waitlists and secure prime dining experiences through PRIMA’s trusted concierge network.
+        </x-slot:description>
+    </x-marketing.how-it-work-steps>
 
     <section class="fade-in">
         <div class="container">
