@@ -137,7 +137,7 @@
                         Network
                         helps to fill dining rooms with the best customers at all times.</p>
                     <a class="rounded-[5.199px] bg-[#5046E5] w-full min-h-[45px] md:min-h-[57.953px] text-[14px] md:text-[18.196px] not-italic font-semibold leading-[normal] text-[#FFF] [transition:all_.5s_ease] hover:background: transparent hover:bg-transparent hover:text-[#5046E5] inline-flex items-center justify-center border-[1.3px] border-[solid] border-[#5046E5] mt-[26px] md:mt-[32px]"
-                        href="#" @click.prevent="$dispatch('open-modal', { id: 'contact' })">
+                        href="#" @click.prevent="$dispatch('prima-open-modal', { id: 'prima-contact' })">
                         Talk to PRIMA →
                     </a>
                 </div>
@@ -445,7 +445,8 @@
                         No more bots and no more last minute cancellations.
                     </h2>
                     <a class="rounded-[5.199px] bg-[#5046E5] w-full min-h-[45px] text-[14px] not-italic font-semibold leading-[normal] text-[#FFF] [transition:all_.5s_ease] hover:background: transparent hover:bg-transparent hover:text-[#5046E5] inline-flex items-center justify-center border-[1.3px] border-[solid] border-[#5046E5] md:mt-[26px] md:mt-[34px]"
-                        href="#" @click.prevent="$dispatch('open-modal', { id: 'contact' })">Talk to PRIMA →</a>
+                        href="#" @click.prevent="$dispatch('prima-open-modal', { id: 'prima-contact' })">Talk to
+                        PRIMA →</a>
                     <a class="rounded-[5.199px] bg-transparent w-full min-h-[45px] text-[14px]  not-italic font-semibold leading-[normal] text-[#000] [transition:all_.5s_ease] hover:background: transparent hover:bg-[#000] hover:text-[#fff] inline-flex items-center justify-center border-[1.3px] border-[solid] border-[#000] mt-[8px] underline [text-underline-offset:3px]"
                         href="#" @click.prevent="$dispatch('open-modal', { id: 'video' })">
                         Watch Our Explainer
@@ -535,7 +536,8 @@
             <div class="max-w-[630px] mx-[auto] my-[0] pt-[38px] md:pt-[82px] text-center">
                 <div class="flex flex-wrap md:flex-nowrap md:gap-x-[17px] md:flex-row-reverse">
                     <a class="rounded-[5.199px] bg-[#5046E5] w-full min-h-[45px] text-[14px] not-italic font-semibold leading-[normal] text-[#FFF] [transition:all_.5s_ease] hover:background: transparent hover:bg-transparent hover:text-[#5046E5] inline-flex items-center justify-center border-[1.3px] border-[solid] border-[#5046E5]"
-                        href="#" @click.prevent="$dispatch('open-modal', { id: 'contact' })">Talk to PRIMA →</a>
+                        href="#" @click.prevent="$dispatch('prima-open-modal', { id: 'prima-contact' })">Talk to
+                        PRIMA →</a>
                     <a class="rounded-[5.199px] bg-transparent w-full min-h-[45px] text-[14px]  not-italic font-semibold leading-[normal] text-[#000] [transition:all_.5s_ease] hover:background: transparent hover:bg-[#000] hover:text-[#fff] inline-flex items-center justify-center border-[1.3px] border-[solid] border-[#000] mt-[6px] md:mt-[0px] underline [text-underline-offset:3px]"
                         href="#" @click.prevent="$dispatch('open-modal', { id: 'video' })">Watch Our
                         Explainer</a>
@@ -629,7 +631,8 @@
                 </h2>
                 <div class="flex flex-wrap md:flex-nowrap md:gap-x-[17px] md:flex-row-reverse">
                     <a class="rounded-[5.199px] bg-[#5046E5] w-full min-h-[45px] text-[14px] not-italic font-semibold leading-[normal] text-[#FFF] [transition:all_.5s_ease] hover:background: transparent hover:bg-transparent hover:text-[#5046E5] inline-flex items-center justify-center border-[1.3px] border-[solid] border-[#5046E5]"
-                        href="#" @click.prevent="$dispatch('open-modal', { id: 'contact' })">Talk to PRIMA →</a>
+                        href="#" @click.prevent="$dispatch('prima-open-modal', { id: 'prima-contact' })">Talk to
+                        PRIMA →</a>
                     <a class="rounded-[5.199px] bg-transparent w-full min-h-[45px] text-[14px]  not-italic font-semibold leading-[normal] text-[#000] [transition:all_.5s_ease] hover:background: transparent hover:bg-[#000] hover:text-[#fff] inline-flex items-center justify-center border-[1.3px] border-[solid] border-[#000] mt-[6px] md:mt-[0px] underline [text-underline-offset:3px]"
                         href="#" @click.prevent="$dispatch('open-modal', { id: 'video' })">Watch Our
                         Explainer</a>
@@ -816,7 +819,8 @@
                             </div>
                             <div class="flex flex-col justify-center gap-4 mt-8 md:flex-row">
                                 <a class="w-full md:w-auto rounded-[5.199px] bg-[#5046E5] min-h-[45px] text-[14px] font-semibold text-white hover:bg-transparent hover:text-[#5046E5] flex items-center justify-center border-[1.3px] border-[#5046E5] px-12"
-                                    href="#" @click.prevent="$dispatch('open-modal', { id: 'contact' })">
+                                    href="#"
+                                    @click.prevent="$dispatch('prima-open-modal', { id: 'prima-contact' })">
                                     Talk to PRIMA →
                                 </a>
                                 <a class="w-full md:w-auto rounded-[5.199px] bg-transparent min-h-[45px] text-[14px] font-semibold text-[#000] hover:bg-[#000] hover:text-white flex items-center justify-center border-[1.3px] border-[#000] px-12 underline [text-underline-offset:3px]"

@@ -24,6 +24,22 @@ Route::get('/privacy', function () {
     return view('privacy');
 });
 
+Route::get('/about-us', static function () {
+    return view('web.about-us');
+})->name('about-us');
+Route::get('/contact', static function () {
+    return view('web.contact');
+})->name('contact');
+Route::get('/consumers', static function () {
+    return view('web.consumers');
+})->name('consumers');
+Route::get('/restaurants', static function () {
+    return view('web.restaurants');
+})->name('restaurants');
+Route::get('/concierges', static function () {
+    return view('web.concierges');
+})->name('concierges');
+
 Route::get('/story', Story::class)->name('story');
 
 Route::get('/onboarding', VenueOnboarding::class)->name('onboarding');
@@ -48,8 +64,8 @@ Route::domain(config('app.domain'))->group(function () {
 });
 
 Route::get('/', static function () {
-    return view('web.index');
-});
+    return view('web.home');
+})->name('home');
 
 Route::redirect('/login', '/platform/login');
 

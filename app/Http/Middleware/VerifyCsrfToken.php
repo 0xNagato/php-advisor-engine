@@ -14,5 +14,13 @@ class VerifyCsrfToken extends Middleware
     protected $except = [
         '/platform/app/login',
         '/platform/app/logout',
+        '/privacy',
+        '/about-us',
+        '/contact',
+        '/consumers',
+        '/restaurants',
+        '/concierges',
+        '/story',
+        '/',
     ];
 }

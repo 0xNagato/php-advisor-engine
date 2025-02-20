@@ -10,6 +10,7 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Filament\Widgets\Concerns\InteractsWithPageFilters;
 use Filament\Widgets\TableWidget as BaseWidget;
+use Illuminate\Contracts\Database\Query\Builder;
 use Illuminate\Contracts\Support\Htmlable;
 
 class ConciergeRecentBookings extends BaseWidget
@@ -50,7 +51,7 @@ class ConciergeRecentBookings extends BaseWidget
             ])
             ->limit(10)
             ->orderByDesc('booking_at')
-            ->with('earnings', function ($query) {
+            ->with('earnings', function (Builder $query) {
                 $query->where('user_id', $this->concierge->user_id)
                     ->where('type', EarningType::CONCIERGE->value);
             })

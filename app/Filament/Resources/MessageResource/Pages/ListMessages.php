@@ -28,7 +28,7 @@ class ListMessages extends ListRecords
             ->get();
 
         // Mark all unread messages as read
-        Message::where('user_id', auth()->id())
+        Message::query()->where('user_id', auth()->id())
             ->whereNull('read_at')
             ->update(['read_at' => now()]);
     }
