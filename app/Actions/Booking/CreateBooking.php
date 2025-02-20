@@ -36,7 +36,8 @@ class CreateBooking
         array $data,
         string $timezone,
         string $currency,
-        ?VipCode $vipCode = null
+        ?VipCode $vipCode = null,
+        ?string $source = null
     ): CreateBookingReturnData {
         $scheduleTemplate = ScheduleTemplate::query()->findOrFail($scheduleTemplateId);
 
@@ -75,6 +76,9 @@ class CreateBooking
 
         // Prepare meta data for non-prime bookings
         $meta = [];
+        if ($source) {
+            $meta['source'] = $source;
+        }
         $meta['venue'] = [
             'id' => $venue->id,
             'name' => $venue->name,

@@ -124,7 +124,7 @@ class ReservationHub extends Page
                 'radio_date' => now($this->timezone)->format('Y-m-d'),
             ]);
 
-            $this->createBooking($this->scheduleTemplateId, $this->date);
+            $this->createBooking($this->scheduleTemplateId, $this->date, 'availability_calendar');
         }
     }
 
@@ -306,14 +306,14 @@ class ReservationHub extends Page
         $this->schedulesThisWeek = new Collection;
     }
 
-    public function createBooking(int $scheduleTemplateId, ?string $date = null): void
+    public function createBooking(int $scheduleTemplateId, ?string $date = null, ?string $source = 'reservation_hub'): void
     {
         $userTimezone = $this->timezone;
         $data = $this->form->getState();
         $data['date'] = $date ?? $data['date'];
 
         try {
-            $result = CreateBooking::run($scheduleTemplateId, $data, $userTimezone, $this->currency);
+            $result = CreateBooking::run($scheduleTemplateId, $data, $userTimezone, $this->currency, null, $source);
 
             $this->booking = $result->booking;
             $this->bookingUrl = $result->bookingUrl;

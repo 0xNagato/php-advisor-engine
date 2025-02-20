@@ -75,15 +75,15 @@ class ConvertToPrime
 {
 }
 /**
- * @method static \Lorisleiva\Actions\Decorators\JobDecorator|\Lorisleiva\Actions\Decorators\UniqueJobDecorator makeJob(int $scheduleTemplateId, array $data, string $timezone, string $currency, ?\App\Models\VipCode $vipCode = null)
- * @method static \Lorisleiva\Actions\Decorators\UniqueJobDecorator makeUniqueJob(int $scheduleTemplateId, array $data, string $timezone, string $currency, ?\App\Models\VipCode $vipCode = null)
- * @method static \Illuminate\Foundation\Bus\PendingDispatch dispatch(int $scheduleTemplateId, array $data, string $timezone, string $currency, ?\App\Models\VipCode $vipCode = null)
- * @method static \Illuminate\Foundation\Bus\PendingDispatch|\Illuminate\Support\Fluent dispatchIf(bool $boolean, int $scheduleTemplateId, array $data, string $timezone, string $currency, ?\App\Models\VipCode $vipCode = null)
- * @method static \Illuminate\Foundation\Bus\PendingDispatch|\Illuminate\Support\Fluent dispatchUnless(bool $boolean, int $scheduleTemplateId, array $data, string $timezone, string $currency, ?\App\Models\VipCode $vipCode = null)
- * @method static dispatchSync(int $scheduleTemplateId, array $data, string $timezone, string $currency, ?\App\Models\VipCode $vipCode = null)
- * @method static dispatchNow(int $scheduleTemplateId, array $data, string $timezone, string $currency, ?\App\Models\VipCode $vipCode = null)
- * @method static dispatchAfterResponse(int $scheduleTemplateId, array $data, string $timezone, string $currency, ?\App\Models\VipCode $vipCode = null)
- * @method static \App\Data\Booking\CreateBookingReturnData run(int $scheduleTemplateId, array $data, string $timezone, string $currency, ?\App\Models\VipCode $vipCode = null)
+ * @method static \Lorisleiva\Actions\Decorators\JobDecorator|\Lorisleiva\Actions\Decorators\UniqueJobDecorator makeJob(int $scheduleTemplateId, array $data, string $timezone, string $currency, ?\App\Models\VipCode $vipCode = null, ?string $source = null)
+ * @method static \Lorisleiva\Actions\Decorators\UniqueJobDecorator makeUniqueJob(int $scheduleTemplateId, array $data, string $timezone, string $currency, ?\App\Models\VipCode $vipCode = null, ?string $source = null)
+ * @method static \Illuminate\Foundation\Bus\PendingDispatch dispatch(int $scheduleTemplateId, array $data, string $timezone, string $currency, ?\App\Models\VipCode $vipCode = null, ?string $source = null)
+ * @method static \Illuminate\Foundation\Bus\PendingDispatch|\Illuminate\Support\Fluent dispatchIf(bool $boolean, int $scheduleTemplateId, array $data, string $timezone, string $currency, ?\App\Models\VipCode $vipCode = null, ?string $source = null)
+ * @method static \Illuminate\Foundation\Bus\PendingDispatch|\Illuminate\Support\Fluent dispatchUnless(bool $boolean, int $scheduleTemplateId, array $data, string $timezone, string $currency, ?\App\Models\VipCode $vipCode = null, ?string $source = null)
+ * @method static dispatchSync(int $scheduleTemplateId, array $data, string $timezone, string $currency, ?\App\Models\VipCode $vipCode = null, ?string $source = null)
+ * @method static dispatchNow(int $scheduleTemplateId, array $data, string $timezone, string $currency, ?\App\Models\VipCode $vipCode = null, ?string $source = null)
+ * @method static dispatchAfterResponse(int $scheduleTemplateId, array $data, string $timezone, string $currency, ?\App\Models\VipCode $vipCode = null, ?string $source = null)
+ * @method static \App\Data\Booking\CreateBookingReturnData run(int $scheduleTemplateId, array $data, string $timezone, string $currency, ?\App\Models\VipCode $vipCode = null, ?string $source = null)
  */
 class CreateBooking
 {
@@ -177,6 +177,20 @@ class EnsureVipCodeExists
 namespace App\Actions;
 
 /**
+ * @method static \Lorisleiva\Actions\Decorators\JobDecorator|\Lorisleiva\Actions\Decorators\UniqueJobDecorator makeJob(array $taskData)
+ * @method static \Lorisleiva\Actions\Decorators\UniqueJobDecorator makeUniqueJob(array $taskData)
+ * @method static \Illuminate\Foundation\Bus\PendingDispatch dispatch(array $taskData)
+ * @method static \Illuminate\Foundation\Bus\PendingDispatch|\Illuminate\Support\Fluent dispatchIf(bool $boolean, array $taskData)
+ * @method static \Illuminate\Foundation\Bus\PendingDispatch|\Illuminate\Support\Fluent dispatchUnless(bool $boolean, array $taskData)
+ * @method static dispatchSync(array $taskData)
+ * @method static dispatchNow(array $taskData)
+ * @method static dispatchAfterResponse(array $taskData)
+ * @method static array run(array $taskData)
+ */
+class CreateAsanaTaskAction
+{
+}
+/**
  * @method static \Lorisleiva\Actions\Decorators\JobDecorator|\Lorisleiva\Actions\Decorators\UniqueJobDecorator makeJob(\App\Models\VenueOnboarding $onboarding)
  * @method static \Lorisleiva\Actions\Decorators\UniqueJobDecorator makeUniqueJob(\App\Models\VenueOnboarding $onboarding)
  * @method static \Illuminate\Foundation\Bus\PendingDispatch dispatch(\App\Models\VenueOnboarding $onboarding)
@@ -202,6 +216,20 @@ class GenerateVenueAgreement
  * @method static \App\Models\VenueInvoice run(\App\Models\User $user, string $startDate, string $endDate)
  */
 class GenerateVenueInvoice
+{
+}
+/**
+ * @method static \Lorisleiva\Actions\Decorators\JobDecorator|\Lorisleiva\Actions\Decorators\UniqueJobDecorator makeJob(string $requestMessage)
+ * @method static \Lorisleiva\Actions\Decorators\UniqueJobDecorator makeUniqueJob(string $requestMessage)
+ * @method static \Illuminate\Foundation\Bus\PendingDispatch dispatch(string $requestMessage)
+ * @method static \Illuminate\Foundation\Bus\PendingDispatch|\Illuminate\Support\Fluent dispatchIf(bool $boolean, string $requestMessage)
+ * @method static \Illuminate\Foundation\Bus\PendingDispatch|\Illuminate\Support\Fluent dispatchUnless(bool $boolean, string $requestMessage)
+ * @method static dispatchSync(string $requestMessage)
+ * @method static dispatchNow(string $requestMessage)
+ * @method static dispatchAfterResponse(string $requestMessage)
+ * @method static array|null run(string $requestMessage)
+ */
+class ParseTaskRequestAction
 {
 }
 /**
