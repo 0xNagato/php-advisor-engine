@@ -33,20 +33,22 @@
         const items = document.querySelectorAll('.box_grid-item');
         const currentItem = items[this.currentSlide];
         if (currentItem) {
-            this.containerHeight = `${currentItem.scrollHeight + 20}px`;
+            this.containerHeight = `${currentItem.scrollHeight}px`;
         }
     },
 
     next() {
         this.currentSlide = (this.currentSlide + 1) % 3;
         this.dragOffset = 0;
-        this.updateHeight();
+        this.$nextTick(() => this.updateHeight());
     },
+
     prev() {
         this.currentSlide = (this.currentSlide - 1 + 3) % 3;
         this.dragOffset = 0;
-        this.updateHeight();
+        this.$nextTick(() => this.updateHeight());
     },
+
     handleTouchStart(e) {
         if (!this.isMobile) return;
         if (!e.target.closest('.box_grid')) return;
@@ -55,6 +57,7 @@
         this.touchStartX = e.touches[0].clientX;
         e.preventDefault();
     },
+
     handleTouchMove(e) {
         if (!this.isSwiping) return;
 
@@ -62,6 +65,7 @@
         this.dragOffset = currentX - this.touchStartX;
         e.preventDefault();
     },
+
     handleTouchEnd(e) {
         if (!this.isSwiping) return;
 
@@ -95,9 +99,7 @@
             </p>
 
             <div class="w-full">
-                <!-- Outer container to maintain proper width -->
                 <div class="relative overflow-hidden">
-                    <!-- Slides Container -->
                     <div class="relative md:grid md:grid-cols-3 md:gap-4"
                         :style="isMobile ? { height: containerHeight } : {}"
                         @touchstart.prevent="handleTouchStart($event)" @touchend.prevent="handleTouchEnd($event)"
