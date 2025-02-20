@@ -422,7 +422,7 @@
     <section class="fade-in">
         <div class="container pt-0">
             <div class="box_cta bg-gradient-to-tl from-primary to-purple">
-                <h3 class="box_cta-title">
+                <h3 class="text-center box_cta-title">
                     Ready to transform the way you dine?
                 </h3>
                 <p>
