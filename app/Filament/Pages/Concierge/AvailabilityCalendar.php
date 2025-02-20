@@ -129,9 +129,6 @@ class AvailabilityCalendar extends Page
      */
     public function createBooking($scheduleTemplateId, $date): void
     {
-        // Clear any existing booking session
-        session()->forget(['booking', 'qrCode', 'bookingUrl']);
-
         $this->redirectRoute('filament.admin.pages.concierge.reservation-hub', [
             'scheduleTemplateId' => $scheduleTemplateId,
             'date' => $date,
