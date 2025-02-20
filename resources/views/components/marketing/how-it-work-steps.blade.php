@@ -51,17 +51,16 @@
 
     handleTouchStart(e) {
         if (!this.isMobile) return;
-        if (!e.target.closest('.box_grid')) return;
 
         this.isSwiping = true;
-        this.touchStartX = e.touches[0].clientX;
-        e.preventDefault();
+        this.touchStartX = e.touches ? e.touches[0].clientX : e.clientX;
+        this.dragOffset = 0;
     },
 
     handleTouchMove(e) {
         if (!this.isSwiping) return;
 
-        const currentX = e.touches[0].clientX;
+        const currentX = e.touches ? e.touches[0].clientX : e.clientX;
         this.dragOffset = currentX - this.touchStartX;
         e.preventDefault();
     },
@@ -69,8 +68,8 @@
     handleTouchEnd(e) {
         if (!this.isSwiping) return;
 
-        this.touchEndX = e.changedTouches[0].clientX;
-        const diff = this.touchStartX - this.touchEndX;
+        const endX = e.changedTouches ? e.changedTouches[0].clientX : e.clientX;
+        const diff = this.touchStartX - endX;
 
         if (Math.abs(diff) > 50) {
             if (diff > 0) {
@@ -78,11 +77,11 @@
             } else {
                 this.prev();
             }
+        } else {
+            this.dragOffset = 0;
         }
 
-        this.dragOffset = 0;
         this.isSwiping = false;
-        e.stopPropagation();
     }
 }">
     <div class="container">
@@ -99,104 +98,101 @@
             </p>
 
             <div class="w-full">
-                <div class="relative overflow-hidden">
-                    <div class="relative md:grid md:grid-cols-3 md:gap-4"
-                        :style="isMobile ? { height: containerHeight } : {}"
-                        @touchstart.prevent="handleTouchStart($event)" @touchend.prevent="handleTouchEnd($event)"
-                        @touchmove.prevent="handleTouchMove($event)">
+                <div class="relative overflow-hidden box_grid md:grid md:grid-cols-3 md:gap-4"
+                    :style="isMobile ? { height: containerHeight } : {}" @touchstart.prevent="handleTouchStart($event)"
+                    @touchend.prevent="handleTouchEnd($event)" @touchmove.prevent="handleTouchMove($event)"
+                    @mousedown="handleTouchStart($event)" @mousemove="handleTouchMove($event)"
+                    @mouseup="handleTouchEnd($event)" @mouseleave="handleTouchEnd($event)">
 
-                        <div class="absolute inset-0 w-full transition-all duration-300 ease-out box_grid-item md:relative md:inset-auto"
-                            :class="{ 'opacity-0': isMobile && currentSlide !== 0 }"
-                            :style="isMobile ? {
-                                transform: `translateX(${currentSlide === 0 ? dragOffset : currentSlide === 2 ? 100 : -100}%)`,
-                                visibility: currentSlide === 0 ? 'visible' : 'hidden'
-                            } : {}">
-                            <div class="flex flex-col items-center">
-                                <div class="flex flex-col items-center relative overflow-hidden max-h-[300px]">
-                                    <img src="{{ asset('images/marketing/dots_bg.png') }}" alt="dots"
-                                        class="absolute top-0 left-0 right-0 m-auto max-w-[400px] w-full">
-                                    <img src="{{ asset('images/marketing/reservation-1.png') }}"
-                                        alt="reservation-picture" class="relative z-[1] max-h-[100%] h-[auto]">
-                                </div>
-                                <div class="flex items-center justify-center box_grid-numering">
-                                    <img src="{{ asset('images/marketing/line-left.svg') }}" alt="line-left"
-                                        class="w-auto">
-                                    <div class="box_grid-numering_text">1</div>
-                                    <img src="{{ asset('images/marketing/line-right.svg') }}" alt="line-right"
-                                        class="w-auto">
-                                </div>
-                                <div class="flex flex-col items-center box_grid-info md:items-start">
-                                    <p class="box_grid-title">Book Reservation</p>
-                                    <p class="text-center box_grid-description md:text-left">
-                                        Concierges use the PRIMA Hub to book prime-time reservations for a fee.
-                                        Non-prime slots are
-                                        booked without fees.
-                                    </p>
-                                </div>
+                    <div class="absolute w-full transition-all duration-300 ease-out box_grid-item md:relative"
+                        :class="{ 'opacity-0': isMobile && currentSlide !== 0 }"
+                        :style="isMobile ? {
+                            transform: `translateX(calc(${currentSlide === 0 ? 0 : currentSlide === 2 ? 100 : -100}% + ${dragOffset}px))`,
+                            visibility: currentSlide === 0 ? 'visible' : 'hidden'
+                        } : {}">
+                        <div class="flex flex-col items-center">
+                            <div class="flex flex-col items-center relative overflow-hidden max-h-[300px]">
+                                <img src="{{ asset('images/marketing/dots_bg.png') }}" alt="dots"
+                                    class="absolute top-0 left-0 right-0 m-auto max-w-[400px] w-full">
+                                <img src="{{ asset('images/marketing/reservation-1.png') }}" alt="reservation-picture"
+                                    class="relative z-[1] max-h-[100%] h-[auto]">
+                            </div>
+                            <div class="flex items-center justify-center box_grid-numering">
+                                <img src="{{ asset('images/marketing/line-left.svg') }}" alt="line-left" class="w-auto">
+                                <div class="box_grid-numering_text">1</div>
+                                <img src="{{ asset('images/marketing/line-right.svg') }}" alt="line-right"
+                                    class="w-auto">
+                            </div>
+                            <div class="flex flex-col items-center box_grid-info md:items-start">
+                                <p class="box_grid-title">Book Reservation</p>
+                                <p class="text-center box_grid-description md:text-left">
+                                    Concierges use the PRIMA Hub to book prime-time reservations for a fee.
+                                    Non-prime slots are
+                                    booked without fees.
+                                </p>
                             </div>
                         </div>
+                    </div>
 
-                        <div class="absolute inset-0 w-full transition-all duration-300 ease-out box_grid-item md:relative md:inset-auto"
-                            :class="{ 'opacity-0': isMobile && currentSlide !== 1 }"
-                            :style="isMobile ? {
-                                transform: `translateX(${currentSlide === 1 ? dragOffset : currentSlide === 0 ? 100 : -100}%)`,
-                                visibility: currentSlide === 1 ? 'visible' : 'hidden'
-                            } : {}">
-                            <div class="flex flex-col items-center">
-                                <div class="flex flex-col items-center relative overflow-hidden max-h-[300px]">
-                                    <img src="{{ asset('images/marketing/dots_bg.png') }}" alt="dots"
-                                        class="absolute top-0 left-0 right-0 m-auto max-w-[400px] w-full">
-                                    <img src="{{ asset('images/marketing/reservation-2.png') }}"
-                                        alt="reservation-picture" class="relative z-[1] max-h-[100%] h-[auto]">
-                                </div>
-                                <div class="flex items-center justify-center box_grid-numering">
-                                    <img src="{{ asset('images/marketing/line-left.svg') }}" alt="line-left"
-                                        class="w-auto">
-                                    <div class="box_grid-numering_text">2</div>
-                                    <img src="{{ asset('images/marketing/line-right.svg') }}" alt="line-right"
-                                        class="w-auto">
-                                </div>
-                                <div class="flex flex-col items-center box_grid-info md:items-start">
-                                    <p class="box_grid-title">Restaurant Notification</p>
-                                    <p class="text-center box_grid-description md:text-left">
-                                        Once a reservation is successfully booked through PRIMA, we will notify the
-                                        restaurant
-                                        and
-                                        ensure the diner is granted access in a seamless way.
-                                    </p>
-                                </div>
+                    <div class="absolute w-full transition-all duration-300 ease-out box_grid-item md:relative"
+                        :class="{ 'opacity-0': isMobile && currentSlide !== 1 }"
+                        :style="isMobile ? {
+                            transform: `translateX(calc(${currentSlide === 1 ? 0 : currentSlide === 0 ? 100 : -100}% + ${dragOffset}px))`,
+                            visibility: currentSlide === 1 ? 'visible' : 'hidden'
+                        } : {}">
+                        <div class="flex flex-col items-center">
+                            <div class="flex flex-col items-center relative overflow-hidden max-h-[300px]">
+                                <img src="{{ asset('images/marketing/dots_bg.png') }}" alt="dots"
+                                    class="absolute top-0 left-0 right-0 m-auto max-w-[400px] w-full">
+                                <img src="{{ asset('images/marketing/reservation-2.png') }}" alt="reservation-picture"
+                                    class="relative z-[1] max-h-[100%] h-[auto]">
+                            </div>
+                            <div class="flex items-center justify-center box_grid-numering">
+                                <img src="{{ asset('images/marketing/line-left.svg') }}" alt="line-left" class="w-auto">
+                                <div class="box_grid-numering_text">2</div>
+                                <img src="{{ asset('images/marketing/line-right.svg') }}" alt="line-right"
+                                    class="w-auto">
+                            </div>
+                            <div class="flex flex-col items-center box_grid-info md:items-start">
+                                <p class="box_grid-title">Restaurant Notification</p>
+                                <p class="text-center box_grid-description md:text-left">
+                                    Once a reservation is successfully booked through PRIMA, we will notify the
+                                    restaurant
+                                    and
+                                    ensure the diner is granted access in a seamless way.
+                                </p>
                             </div>
                         </div>
+                    </div>
 
-                        <div class="absolute inset-0 w-full transition-all duration-300 ease-out box_grid-item md:relative md:inset-auto"
-                            :class="{ 'opacity-0': isMobile && currentSlide !== 2 }"
-                            :style="isMobile ? {
-                                transform: `translateX(${currentSlide === 2 ? dragOffset : currentSlide === 1 ? 100 : -100}%)`,
-                                visibility: currentSlide === 2 ? 'visible' : 'hidden'
-                            } : {}">
-                            <div class="flex flex-col items-center">
-                                <div class="flex flex-col items-center relative overflow-hidden max-h-[300px]">
-                                    <img src="{{ asset('images/marketing/dots_bg.png') }}" alt="dots"
-                                        class="absolute top-0 left-0 right-0 m-auto max-w-[400px] w-full">
-                                    <img src="{{ asset('images/marketing/analytics-2.png') }}"
-                                        alt="reservation-picture" class="relative z-[1] max-h-[100%] h-[auto]">
-                                </div>
-                                <div class="flex items-center justify-center box_grid-numering">
-                                    <img src="{{ asset('images/marketing/line-left.svg') }}" alt="line-left"
-                                        class="w-auto">
-                                    <div class="box_grid-numering_text">3</div>
-                                    <img src="{{ asset('images/marketing/line-right.svg') }}" alt="line-right"
-                                        class="w-auto">
-                                </div>
-                                <div class="flex flex-col items-center box_grid-info md:items-start">
-                                    <p class="box_grid-title">Live Analytics</p>
-                                    <p class="text-center box_grid-description md:text-left">
-                                        Track real-time reservations, earnings, and performance through the PRIMA
-                                        platform,
-                                        giving
-                                        you full transparency and control over your bookings.
-                                    </p>
-                                </div>
+                    <div class="absolute w-full transition-all duration-300 ease-out box_grid-item md:relative"
+                        :class="{ 'opacity-0': isMobile && currentSlide !== 2 }"
+                        :style="isMobile ? {
+                            transform: `translateX(calc(${currentSlide === 2 ? 0 : currentSlide === 1 ? 100 : -100}% + ${dragOffset}px))`,
+                            visibility: currentSlide === 2 ? 'visible' : 'hidden'
+                        } : {}">
+                        <div class="flex flex-col items-center">
+                            <div class="flex flex-col items-center relative overflow-hidden max-h-[300px]">
+                                <img src="{{ asset('images/marketing/dots_bg.png') }}" alt="dots"
+                                    class="absolute top-0 left-0 right-0 m-auto max-w-[400px] w-full">
+                                <img src="{{ asset('images/marketing/analytics-2.png') }}" alt="reservation-picture"
+                                    class="relative z-[1] max-h-[100%] h-[auto]">
+                            </div>
+                            <div class="flex items-center justify-center box_grid-numering">
+                                <img src="{{ asset('images/marketing/line-left.svg') }}" alt="line-left"
+                                    class="w-auto">
+                                <div class="box_grid-numering_text">3</div>
+                                <img src="{{ asset('images/marketing/line-right.svg') }}" alt="line-right"
+                                    class="w-auto">
+                            </div>
+                            <div class="flex flex-col items-center box_grid-info md:items-start">
+                                <p class="box_grid-title">Live Analytics</p>
+                                <p class="text-center box_grid-description md:text-left">
+                                    Track real-time reservations, earnings, and performance through the PRIMA
+                                    platform,
+                                    giving
+                                    you full transparency and control over your bookings.
+                                </p>
                             </div>
                         </div>
                     </div>
