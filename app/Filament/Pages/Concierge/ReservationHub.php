@@ -94,6 +94,10 @@ class ReservationHub extends Page
 
     public function mount(): void
     {
+        // Initialize collections first
+        $this->schedulesToday = new Collection;
+        $this->schedulesThisWeek = new Collection;
+
         $region = Region::query()->find(session('region', 'miami'));
         $this->timezone = $region->timezone;
         $this->currency = $region->currency;
