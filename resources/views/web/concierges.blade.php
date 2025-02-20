@@ -55,7 +55,7 @@
                             Concierges encounter several challenges when trying to secure prime-time restaurant
                             reservations for their clients:
                         </p>
-                        <div class="flex flex-col gap-3 mt-4">
+                        <div class="flex flex-col gap-3 mt-2">
                             <div
                                 class="box border-divider border shadow-2xl flex flex-col gap-4 bg-white md:sticky top-[110px]">
                                 <div class="flex items-start justify-start gap-4">
@@ -64,7 +64,7 @@
                                             alt="cutlery-icon">
                                     </div>
                                     <div class="flex-1">
-                                        <p class="flex-1 font-bricolage text-dark">
+                                        <p class="flex-1 font-semibold font-bricolage text-dark">
                                             Limited Access
                                         </p>
                                         <p class="text-tiny">
@@ -82,7 +82,7 @@
                                         <img src="{{ asset('images/marketing/network_icon.svg') }}" alt="network-icon">
                                     </div>
                                     <div class="flex-1">
-                                        <p class="flex-1 font-bricolage text-dark">
+                                        <p class="flex-1 font-semibold font-bricolage text-dark">
                                             Favor-Dependent Bookings
                                         </p>
                                         <p class="text-tiny">
@@ -101,7 +101,7 @@
                                             alt="money-in-icon">
                                     </div>
                                     <div class="flex-1">
-                                        <p class="flex-1 font-bricolage text-dark">
+                                        <p class="flex-1 font-semibold font-bricolage text-dark">
                                             Lack of Compensation
                                         </p>
                                         <p class="text-tiny">
@@ -120,7 +120,7 @@
                                             alt="calendar-icon">
                                     </div>
                                     <div class="flex-1">
-                                        <p class="flex-1 font-bricolage text-dark">
+                                        <p class="flex-1 font-semibold font-bricolage text-dark">
                                             Time-Consuming Process
                                         </p>
                                         <p class="text-tiny">
@@ -221,9 +221,10 @@
 
                         </div>
 
-                        <a href="#" class="mt-4 text-white btn bg-gradient-to-b from-blue to-green"
+                        <a href="#"
+                            class="w-full mt-4 text-center text-white md:w-auto btn bg-gradient-to-b from-blue to-green"
                             @click.prevent="$dispatch('prima-open-modal', { id: 'prima-contact' })">
-                            Talk to PRIMA
+                            Join PRIMA as a Concierge Today!
                         </a>
                     </div>
                 </div>
@@ -232,7 +233,8 @@
         </div>
     </section>
 
-    <x-marketing.how-it-work-steps />
+    <x-marketing.how-it-work-steps title="Simplify Bookings and Boost Earnings with PRIMA"
+        description="Effortlessly book exclusive, prime-time reservations for your clients. Earn commissions while providing unparalleled dining experiences through the PRIMA network." />
 
     <section style="display: none; opacity: 0" class="fade-in">
         <div class="container">

@@ -259,7 +259,8 @@
                     and secure prime dining experiences through PRIMA’s trusted concierge network.
                 </p>
 
-                <x-marketing.how-it-work-steps />
+                <x-marketing.how-it-work-steps title="Easy Access to Exclusive Dining Experiences with PRIMA"
+                    description="Enjoy seamless access to exclusive reservations at the world’s top restaurants. Skip the waitlists and secure prime dining experiences through PRIMA’s trusted concierge network." />
 
             </div>
         </div>

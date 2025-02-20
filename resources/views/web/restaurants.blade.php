@@ -25,7 +25,7 @@
                             </span>
                         </div>
                     </div>
-                    <div class="flex-1 flex gap-4  md:gap-6 md:flex-col">
+                    <div class="flex flex-1 gap-4 md:gap-6 md:flex-col">
                         <div class="flex-1 h-[200px] lg:min-h-[248px]">
                             <img src="{{ asset('images/marketing/city.png') }}" alt=""
                                 class="img_full hover:scale-[1.01] transition_03 rounded-[20px]">
@@ -40,7 +40,7 @@
                 <!-- mission vision -->
                 <div class="intro_cta intro_cta--2_col gap-[24px]">
                     <div class="box_gradient bg-gradient-to-b from-purple_vintage to-blue_deep">
-                        <span class="tag tag--strong pl-2 bg-white">
+                        <span class="pl-2 bg-white tag tag--strong">
                             <img src="{{ asset('images/marketing/shield_icon.svg') }}" alt="shield-icon">
                             Consumers
                         </span>
@@ -51,7 +51,7 @@
                         </p>
                     </div>
                     <div class="box_gradient bg-gradient-to-b from-blue to-green">
-                        <span class="tag tag--strong bg-white">
+                        <span class="bg-white tag tag--strong">
                             <img src="{{ asset('images/marketing/eye_icon.svg') }}" alt="eye-icon">
                             Our Vision
                         </span>
@@ -76,7 +76,7 @@
                         <img src="{{ asset('images/marketing/restaurant-problem.png') }}" alt="restaurant"
                             class="img_full rounded-[20px]">
                     </div>
-                    <div class="flex-1 flex flex-col gap-4 items-start ">
+                    <div class="flex flex-col items-start flex-1 gap-4 ">
                         <span class="tag gap-2 pl-2 font-[600]">
                             <img src="{{ asset('images/marketing/stats_icon.svg') }}" alt="cutlery-icon">
                             The Problem
@@ -205,7 +205,7 @@
                                 class="inline-block rounded-[20px] max-w-[640px] w-full">
                         </div>
                     </div>
-                    <div class="flex-1 flex flex-col gap-4 items-start">
+                    <div class="flex flex-col items-start flex-1 gap-4">
                         <span class="tag gap-2 pl-2 font-[600] text-dark font-instrument">
                             <img src="{{ asset('images/marketing/cutlery_icon.svg') }}" alt="cutlery-icon">
                             Welcome to PRIMA
@@ -234,7 +234,7 @@
                             </li>
                         </ul>
                         <a href="#"
-                            class="btn bg-gradient-to-b from-salmon to-salmon_accent text-white text-center w-full md:w-auto"
+                            class="w-full text-center text-white btn bg-gradient-to-b from-salmon to-salmon_accent md:w-auto"
                             @click.prevent="$dispatch('prima-open-modal', { id: 'prima-contact' })">
                             Talk To PRIMA
                         </a>
@@ -245,7 +245,8 @@
         </div>
     </section>
 
-    <x-marketing.how-it-work-steps />
+    <x-marketing.how-it-work-steps title="Effortless Reservation Management with PRIMA"
+        description="Maximize your revenue by filling prime-time slots and reducing no-shows. PRIMA connects your restaurant with trusted concierges, ensuring reliable bookings and high-value clientele." />
 
     <section class="fade-in px-[16px]">
         <div class="container">
@@ -257,7 +258,7 @@
                         <img src="{{ asset('images/marketing/restaurant-trusted-network.jpg') }}"
                             alt="access-exclusive-dinning" class="img_full rounded-[20px] lg:object-top">
                     </div>
-                    <div class="flex-1 flex flex-col gap-4 items-start justify-center md:py-8">
+                    <div class="flex flex-col items-start justify-center flex-1 gap-4 md:py-8">
                         <span class="tag gap-2 pl-2 font-[600] text-dark font-instrument">
                             <img src="{{ asset('images/marketing/group_icon.svg') }}" alt="group_icon">
                             Concierges
@@ -284,13 +285,13 @@
 
     <section style="display: none; opacity: 0" class="fade-in">
         <div class="container">
-            <div class="flex flex-col gap-8 items-center">
-                <div class="flex flex-col gap-4 items-center text-center">
-                    <span class="tag gap-2 pl-2">
+            <div class="flex flex-col items-center gap-8">
+                <div class="flex flex-col items-center gap-4 text-center">
+                    <span class="gap-2 pl-2 tag">
                         <img src="{{ asset('images/marketing/money_plus_icon.svg') }}" alt="money-icon">
                         Earnings and Profitability
                     </span>
-                    <h2 class="text-dark m-auto">
+                    <h2 class="m-auto text-dark">
                         Unlock New Revenue Streams
                     </h2>
                     <p class="max-w-[1100px]">
@@ -300,35 +301,35 @@
                     </p>
                 </div>
 
-                <a href="#" class="btn bg-gradient-to-b from-salmon to-salmon_accent text-white"
+                <a href="#" class="text-white btn bg-gradient-to-b from-salmon to-salmon_accent"
                     @click.prevent="$dispatch('prima-open-modal', { id: 'prima-contact' })">
                     Boost Your Business Today!
                 </a>
 
-                <div class="flex flex-col gap-6 mt-6 w-full">
-                    <div class="flex gap-4 md:gap-10 flex-col md:flex-row">
+                <div class="flex flex-col w-full gap-6 mt-6">
+                    <div class="flex flex-col gap-4 md:gap-10 md:flex-row">
                         <div class="flex-1 mb-6 md:mb-0">
-                            <div class="justify-center items-center flex flex-col relative">
+                            <div class="relative flex flex-col items-center justify-center">
                                 <img src="{{ asset('images/marketing/phone-5.png') }}" alt="phone"
                                     class="z-[1] xl:max-w-[520px]">
                                 <div
                                     class="box bg-gradient-to-tl from-green_accent to-green_light min-h-[250px] z-[-1] absolute bottom-0 w-full">
                                     <img src="{{ asset('images/marketing/particles.png') }}" alt="particles"
-                                        class="img_full absolute top-0 left-0">
+                                        class="absolute top-0 left-0 img_full">
                                 </div>
                             </div>
                         </div>
-                        <div class="flex-1 flex flex-col gap-4">
+                        <div class="flex flex-col flex-1 gap-4">
                             <div class="flex flex-col gap-3">
-                                <div class="box border-divider border shadow-2xl flex flex-col gap-4">
-                                    <div class="flex gap-4 items-start justify-start">
+                                <div class="flex flex-col gap-4 border shadow-2xl box border-divider">
+                                    <div class="flex items-start justify-start gap-4">
                                         <div
                                             class="btn_icon btn bg-gradient-to-b from-green_accent to-green_dark_2 md:p-3 rounded-[10px]">
                                             <img src="{{ asset('images/marketing/calendar_icon--light.svg') }}"
                                                 alt="calendar-icon" class="w-[30px]">
                                         </div>
                                         <div class="flex-1">
-                                            <p class="font-bricolage text-dark flex-1">
+                                            <p class="flex-1 font-bricolage text-dark">
                                                 At 3 reservations per day
                                             </p>
                                             <p class="text-tiny">
@@ -338,15 +339,15 @@
                                     </div>
                                 </div>
 
-                                <div class="box border-divider border shadow-2xl flex flex-col gap-4">
-                                    <div class="flex gap-4 items-start justify-start">
+                                <div class="flex flex-col gap-4 border shadow-2xl box border-divider">
+                                    <div class="flex items-start justify-start gap-4">
                                         <div
                                             class="btn_icon btn bg-gradient-to-b from-green_accent to-green_dark_2 md:p-3 rounded-[10px]">
                                             <img src="{{ asset('images/marketing/schedule_icon--light.svg') }}"
                                                 alt="schedule-icon" class="w-[30px]">
                                         </div>
                                         <div class="flex-1">
-                                            <p class="font-bricolage text-dark flex-1">
+                                            <p class="flex-1 font-bricolage text-dark">
                                                 Commission Rate: 12% of gross booking fees
                                             </p>
                                             <p class="text-tiny">
@@ -356,15 +357,15 @@
                                     </div>
                                 </div>
 
-                                <div class="box border-divider border shadow-2xl flex flex-col gap-4">
-                                    <div class="flex gap-4 items-start justify-start">
+                                <div class="flex flex-col gap-4 border shadow-2xl box border-divider">
+                                    <div class="flex items-start justify-start gap-4">
                                         <div
                                             class="btn_icon btn bg-gradient-to-b from-green_accent to-green_dark_2 md:p-3 rounded-[10px]">
                                             <img src="{{ asset('images/marketing/stats-calendar_icon.svg') }}"
                                                 alt="stats-calendar-icon" class="w-[30px]">
                                         </div>
                                         <div class="flex-1">
-                                            <p class="font-bricolage text-dark flex-1">
+                                            <p class="flex-1 font-bricolage text-dark">
                                                 Commission Rate: 15% of gross booking fees
                                             </p>
                                             <p class="text-tiny">
@@ -374,15 +375,15 @@
                                     </div>
                                 </div>
 
-                                <div class="box border-divider border shadow-2xl flex flex-col gap-4">
-                                    <div class="flex gap-4 items-start justify-start">
+                                <div class="flex flex-col gap-4 border shadow-2xl box border-divider">
+                                    <div class="flex items-start justify-start gap-4">
                                         <div
                                             class="btn_icon btn bg-gradient-to-b from-green_accent to-green_dark_2 md:p-3 rounded-[10px]">
                                             <img src="{{ asset('images/marketing/money-in_icon.svg') }}"
                                                 alt="money-in-icon" class="w-[30px]">
                                         </div>
                                         <div class="flex-1">
-                                            <p class="font-bricolage text-dark flex-1">
+                                            <p class="flex-1 font-bricolage text-dark">
                                                 At 30 reservations per day
                                             </p>
                                             <p class="text-tiny">
@@ -404,7 +405,7 @@
     <section class="fade-in px-[16px]">
         <div class="container pt-0">
             <div class="box_cta bg-gradient-to-t from-blue_deep to-purple_vintage py-[60px]">
-                <h3 class="box_cta-title text-center w-full mb-0">
+                <h3 class="w-full mb-0 text-center box_cta-title">
                     Don't Leave Money on the Table!
                 </h3>
                 <p class="text-center m-auto max-w-[824px]">

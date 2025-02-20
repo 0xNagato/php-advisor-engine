@@ -22,7 +22,7 @@
     @apply flex flex-col items-center pt-[90px] md:pt-[130px];
   }
   body section {
-    @apply px-[12px] w-full mt-[40px] lg:mt-[100px];
+    @apply px-[12px] w-full mt-[40px] lg:mt-[60px];
   }
   body section:last-of-type {
     @apply pb-[40px];
