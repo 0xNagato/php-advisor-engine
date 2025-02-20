@@ -244,27 +244,8 @@
         </div>
     </section>
 
-    <section class="fade-in mt-[60px] md:mt-[80px]">
-        <div class="container">
-            <div class="flex flex-col items-start gap-4 md:text-center md:items-center">
-                <span class="gap-2 pl-2 tag">
-                    <img src="{{ asset('images/marketing/play_icon.svg') }}" alt="play-icon">
-                    How It Works
-                </span>
-                <h2 class="m-auto text-dark">
-                    Easy Access to Exclusive Dining Experiences with PRIMA
-                </h2>
-                <p class="mb-6 max-w-[1090px]">
-                    Enjoy seamless access to exclusive reservations at the world’s top restaurants. Skip the waitlists
-                    and secure prime dining experiences through PRIMA’s trusted concierge network.
-                </p>
-
-                <x-marketing.how-it-work-steps title="Easy Access to Exclusive Dining Experiences with PRIMA"
-                    description="Enjoy seamless access to exclusive reservations at the world’s top restaurants. Skip the waitlists and secure prime dining experiences through PRIMA’s trusted concierge network." />
-
-            </div>
-        </div>
-    </section>
+    <x-marketing.how-it-work-steps title="Easy Access to Exclusive Dining Experiences with PRIMA"
+        description="Enjoy seamless access to exclusive reservations at the world’s top restaurants. Skip the waitlists and secure prime dining experiences through PRIMA’s trusted concierge network." />
 
     <section class="fade-in">
         <div class="container">
