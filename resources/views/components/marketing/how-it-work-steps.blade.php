@@ -98,14 +98,14 @@
             </p>
 
             <div class="w-full">
-                <div class="relative overflow-hidden box_grid md:grid md:grid-cols-3 md:gap-4"
-                    :style="isMobile ? { height: `calc(${containerHeight} + 40px)` } : { height: 'auto' }"
+                <div class="relative overflow-visible box_grid md:grid md:grid-cols-3 md:gap-8 md:px-4"
+                    :style="isMobile ? { height: `calc(${containerHeight} + 40px)` } : {}"
                     @touchstart.prevent="handleTouchStart($event)" @touchend.prevent="handleTouchEnd($event)"
                     @touchmove.prevent="handleTouchMove($event)" @mousedown="handleTouchStart($event)"
                     @mousemove="handleTouchMove($event)" @mouseup="handleTouchEnd($event)"
                     @mouseleave="handleTouchEnd($event)">
 
-                    <div class="absolute w-full transition-all duration-300 ease-out box_grid-item md:relative"
+                    <div class="absolute w-full transition-all duration-300 ease-out box_grid-item md:relative md:mb-8"
                         :class="{ 'opacity-0': isMobile && currentSlide !== 0 }"
                         :style="isMobile ? {
                             transform: `translateX(calc(${currentSlide === 0 ? 0 : currentSlide === 2 ? 100 : -100}% + ${dragOffset}px))`,
@@ -113,11 +113,11 @@
                         } : {}">
                         <div class="flex flex-col items-center">
                             <div
-                                class="flex flex-col items-center justify-center relative overflow-hidden h-[240px] w-full">
+                                class="flex flex-col items-center justify-center relative overflow-hidden h-[240px] md:h-[300px] w-full px-5 pt-4 pb-8 md:pb-12">
                                 <img src="{{ asset('images/marketing/dots_bg.png') }}" alt="dots"
                                     class="absolute top-0 left-0 right-0 m-auto max-w-[400px] w-full">
                                 <img src="{{ asset('images/marketing/reservation-1.png') }}" alt="reservation-picture"
-                                    class="relative z-[1] h-full w-auto object-contain py-4">
+                                    class="relative z-[1] h-full w-auto object-contain">
                             </div>
                             <div class="my-6 box_grid-numering">
                                 <img src="{{ asset('images/marketing/line-left.svg') }}" alt="line-left" class="w-auto">
@@ -126,7 +126,7 @@
                                     class="w-auto">
                             </div>
                             <div class="px-4 pb-6 box_grid-info md:px-6">
-                                <p class="mb-1 box_grid-title">Book Reservation</p>
+                                <p class="mb-3 box_grid-title">Book Reservation</p>
                                 <p class="box_grid-description">
                                     Concierges use the PRIMA Hub to book prime-time reservations for a fee. Non-prime
                                     slots are
@@ -136,7 +136,7 @@
                         </div>
                     </div>
 
-                    <div class="absolute w-full transition-all duration-300 ease-out box_grid-item md:relative"
+                    <div class="absolute w-full transition-all duration-300 ease-out box_grid-item md:relative md:mb-8"
                         :class="{ 'opacity-0': isMobile && currentSlide !== 1 }"
                         :style="isMobile ? {
                             transform: `translateX(calc(${currentSlide === 1 ? 0 : currentSlide === 0 ? 100 : -100}% + ${dragOffset}px))`,
@@ -144,11 +144,11 @@
                         } : {}">
                         <div class="flex flex-col items-center">
                             <div
-                                class="flex flex-col items-center justify-center relative overflow-hidden h-[240px] w-full">
+                                class="flex flex-col items-center justify-center relative overflow-hidden h-[240px] md:h-[300px] w-full px-5 pt-4 pb-8 md:pb-12">
                                 <img src="{{ asset('images/marketing/dots_bg.png') }}" alt="dots"
                                     class="absolute top-0 left-0 right-0 m-auto max-w-[400px] w-full">
                                 <img src="{{ asset('images/marketing/reservation-2.png') }}" alt="reservation-picture"
-                                    class="relative z-[1] h-full w-auto object-contain py-4">
+                                    class="relative z-[1] h-full w-auto object-contain">
                             </div>
                             <div class="my-6 box_grid-numering">
                                 <img src="{{ asset('images/marketing/line-left.svg') }}" alt="line-left" class="w-auto">
@@ -157,7 +157,7 @@
                                     class="w-auto">
                             </div>
                             <div class="px-4 pb-6 box_grid-info md:px-6">
-                                <p class="mb-1 box_grid-title">Restaurant Notification</p>
+                                <p class="mb-3 box_grid-title">Restaurant Notification</p>
                                 <p class="box_grid-description">
                                     Once a reservation is successfully booked through PRIMA, we will notify the
                                     restaurant
@@ -167,7 +167,7 @@
                         </div>
                     </div>
 
-                    <div class="absolute w-full transition-all duration-300 ease-out box_grid-item md:relative"
+                    <div class="absolute w-full transition-all duration-300 ease-out box_grid-item md:relative md:mb-8"
                         :class="{ 'opacity-0': isMobile && currentSlide !== 2 }"
                         :style="isMobile ? {
                             transform: `translateX(calc(${currentSlide === 2 ? 0 : currentSlide === 1 ? 100 : -100}% + ${dragOffset}px))`,
@@ -175,11 +175,11 @@
                         } : {}">
                         <div class="flex flex-col items-center">
                             <div
-                                class="flex flex-col items-center justify-center relative overflow-hidden h-[240px] w-full">
+                                class="flex flex-col items-center justify-center relative overflow-hidden h-[240px] md:h-[300px] w-full px-5 pt-4 pb-8 md:pb-12">
                                 <img src="{{ asset('images/marketing/dots_bg.png') }}" alt="dots"
                                     class="absolute top-0 left-0 right-0 m-auto max-w-[400px] w-full">
                                 <img src="{{ asset('images/marketing/analytics-2.png') }}" alt="reservation-picture"
-                                    class="relative z-[1] h-full w-auto object-contain py-4">
+                                    class="relative z-[1] h-full w-auto object-contain">
                             </div>
                             <div class="my-6 box_grid-numering">
                                 <img src="{{ asset('images/marketing/line-left.svg') }}" alt="line-left"
@@ -189,7 +189,7 @@
                                     class="w-auto">
                             </div>
                             <div class="px-4 pb-6 box_grid-info md:px-6">
-                                <p class="mb-1 box_grid-title">Live Analytics</p>
+                                <p class="mb-3 box_grid-title">Live Analytics</p>
                                 <p class="box_grid-description">
                                     Track real-time reservations, earnings, and performance through the PRIMA platform,
                                     giving you full transparency and control over your bookings.
