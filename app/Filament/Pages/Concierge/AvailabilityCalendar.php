@@ -2,6 +2,8 @@
 
 namespace App\Filament\Pages\Concierge;
 
+use App\Enums\BookingStatus;
+use App\Models\Booking;
 use App\Models\Region;
 use App\Models\Venue;
 use App\Services\ReservationService;
@@ -128,6 +130,30 @@ class AvailabilityCalendar extends Page
      */
     public function createBooking($scheduleTemplateId, $date): void
     {
+        // Find any bookings for this concierge that aren't already abandoned
+        $currentBookings = Booking::query()
+            ->where('concierge_id', auth()->user()->concierge->id)
+            ->whereNot('status', BookingStatus::ABANDONED)
+            ->get();
+
+        // Abandon any existing bookings
+        foreach ($currentBookings as $booking) {
+            activity()
+                ->performedOn($booking)
+                ->withProperties([
+                    'booking_id' => $booking->id,
+                    'previous_status' => $booking->status,
+                    'concierge_id' => auth()->user()->concierge->id,
+                    'concierge_name' => auth()->user()->name,
+                ])
+                ->log('Booking automatically abandoned - New search started');
+
+            $booking->update(['status' => BookingStatus::ABANDONED]);
+        }
+
+        // Clear any existing booking session
+        session()->forget(['booking', 'qrCode', 'bookingUrl']);
+
         $this->redirectRoute('filament.admin.pages.concierge.reservation-hub', [
             'scheduleTemplateId' => $scheduleTemplateId,
             'date' => $date,

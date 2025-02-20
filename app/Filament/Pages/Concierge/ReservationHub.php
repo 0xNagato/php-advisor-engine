@@ -99,33 +99,49 @@ class ReservationHub extends Page
         $this->currency = $region->currency;
 
         if ($this->booking !== null) {
-            $this->booking = Booking::with('schedule.venue')->find($this->booking->id);
-            if ($this->booking->is_refunded_or_partially_refunded) {
+            try {
+                $this->booking = Booking::with('schedule.venue')->findOrFail($this->booking->id);
+
+                // Check if booking is in a valid state
+                if (! in_array($this->booking->status, [BookingStatus::PENDING, BookingStatus::GUEST_ON_PAGE])) {
+                    // Abandon the existing booking if it's not already abandoned
+                    if ($this->booking->status !== BookingStatus::ABANDONED) {
+                        $this->booking->update(['status' => BookingStatus::ABANDONED]);
+                    }
+
+                    $this->resetBooking();
+
+                    if ($this->scheduleTemplateId && $this->date) {
+                        $schedule = ScheduleTemplate::query()->find($this->scheduleTemplateId);
+
+                        $this->form->fill([
+                            'date' => $this->date,
+                            'guest_count' => $this->guestCount ?? $schedule->party_size,
+                            'reservation_time' => $schedule->start_time,
+                            'venue' => $schedule->venue_id,
+                            'select_date' => now($this->timezone)->format('Y-m-d'),
+                            'radio_date' => now($this->timezone)->format('Y-m-d'),
+                        ]);
+
+                        $this->createBooking($this->scheduleTemplateId, $this->date);
+                    }
+
+                    return;
+                }
+
+                if ($this->booking->is_refunded_or_partially_refunded) {
+                    $this->resetBooking();
+                }
+            } catch (Exception $e) {
                 $this->resetBooking();
             }
         }
 
-        $this->form->fill();
-
-        $this->schedulesToday = new Collection;
-        $this->schedulesThisWeek = new Collection;
-
-        // This is used by the availability calendar to pre-fill the form
-        // this should eventually be refactored into its own service.
-        if (! $this->booking && $this->scheduleTemplateId && $this->date) {
-            $schedule = ScheduleTemplate::query()->find($this->scheduleTemplateId);
-
-            $this->form->fill([
-                'date' => $this->date,
-                'guest_count' => $this->guestCount ?? $schedule->party_size,
-                'reservation_time' => $schedule->start_time,
-                'venue' => $schedule->venue_id,
-                'select_date' => now($this->timezone)->format('Y-m-d'),
-                'radio_date' => now($this->timezone)->format('Y-m-d'),
-            ]);
-
-            $this->createBooking($this->scheduleTemplateId, $this->date);
+        if ($this->booking && ! session('booking')) {
+            session(['booking' => $this->booking]);
         }
+
+        $this->form->fill();
     }
 
     public function form(Form $form): Form
@@ -409,9 +425,7 @@ class ReservationHub extends Page
             ->log('ReservationHub - Booking marked as abandoned');
 
         $this->booking->update(['status' => BookingStatus::ABANDONED]);
-        $this->booking = null;
-        $this->qrCode = null;
-        $this->bookingUrl = null;
+        $this->resetBooking();
 
         if (isPrimaApp()) {
             $this->js("
@@ -438,6 +452,8 @@ class ReservationHub extends Page
         $this->bookingUrl = null;
         $this->paymentSuccess = false;
         $this->SMSSent = false;
+
+        session()->forget(['booking', 'qrCode', 'bookingUrl']);
 
         $this->form->fill();
     }
