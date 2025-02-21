@@ -62,16 +62,7 @@ class BookingService
             $booking->earnings()->delete();
 
             // Update booking
-            $booking->venue_earnings = 0;
-            $booking->concierge_earnings = 0;
-            $booking->platform_earnings = 0;
-            $booking->partner_concierge_id = null;
-            $booking->partner_venue_id = null;
-            $booking->partner_concierge_fee = 0;
-            $booking->partner_venue_fee = 0;
-            $booking->is_prime = 0;
-            $booking->total_fee = 0;
-            $booking->total_with_tax_in_cents = 0;
+            $booking->is_prime = false;
 
             $meta = $booking->meta ?? [];
             $meta['converted_to_non_prime_at'] = now();

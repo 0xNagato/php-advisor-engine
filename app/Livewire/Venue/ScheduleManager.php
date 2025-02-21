@@ -5,15 +5,19 @@ namespace App\Livewire\Venue;
 use App\Models\ScheduleTemplate;
 use App\Models\Venue;
 use App\Models\VenueTimeSlot;
+use App\Traits\LogsImpersonatedActivity;
 use Carbon\Carbon;
 use Exception;
 use Filament\Notifications\Notification;
 use Illuminate\Contracts\Database\Query\Builder;
+use Illuminate\Support\Facades\Activity;
 use Illuminate\Support\Facades\Log;
 use Livewire\Component;
 
 class ScheduleManager extends Component
 {
+    use LogsImpersonatedActivity;
+
     public Venue $venue;
 
     public string $activeView = 'template';
@@ -172,6 +176,25 @@ class ScheduleManager extends Component
     public function saveTemplate(): void
     {
         try {
+            // Store original data for logging
+            $originalData = $this->venue->scheduleTemplates()
+                ->where('day_of_week', $this->selectedDay)
+                ->where('start_time', $this->editingSlot['time'])
+                ->when($this->editingSlot['size'] !== '*', function (Builder $query) {
+                    $query->where('party_size', $this->editingSlot['size']);
+                })
+                ->get()
+                ->map(fn ($template) => [
+                    'id' => $template->id,
+                    'is_available' => $template->is_available,
+                    'prime_time' => $template->prime_time,
+                    'available_tables' => $template->available_tables,
+                    'price_per_head' => $template->price_per_head,
+                    'minimum_spend_per_guest' => $template->minimum_spend_per_guest,
+                ])
+                ->toArray();
+
+            // Existing save logic
             // Get only the time slots we're actually modifying
             $updates = [];
             if ($this->editingSlot['size'] === '*') {
@@ -213,12 +236,26 @@ class ScheduleManager extends Component
                     'updated_at' => now(),
                 ]);
 
+            // Log the activity
+            $this->getActivityLogger()
+                ->performedOn($this->venue)
+                ->withProperties([
+                    'action' => 'template_update',
+                    'day_of_week' => $this->selectedDay,
+                    'time' => $this->editingSlot['time'],
+                    'party_size' => $this->editingSlot['size'],
+                    'original_data' => $originalData,
+                    'new_data' => $updates,
+                    'bulk_edit' => $this->editingSlot['size'] === '*',
+                ])
+                ->log('Schedule template updated');
+
         } catch (Exception $e) {
             Log::error('Error saving schedule template', [
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
             ]);
-            throw $e; // Re-throw to be caught by saveEditingSlot
+            throw $e;
         }
     }
 
@@ -310,6 +347,10 @@ class ScheduleManager extends Component
                     ->success()
                     ->send();
             } else {
+                // Store all original data for logging
+                $originalData = [];
+                $newData = [];
+
                 if ($this->editingSlot['size'] === '*') {
                     // Bulk edit for all party sizes
                     $templates = $this->venue->scheduleTemplates()
@@ -318,7 +359,34 @@ class ScheduleManager extends Component
                         ->get();
 
                     foreach ($templates as $template) {
+                        $override = VenueTimeSlot::query()
+                            ->where('schedule_template_id', $template->id)
+                            ->where('booking_date', $this->editingSlot['date'])
+                            ->first();
+
+                        $originalData[$template->party_size] = $override ? [
+                            'is_available' => $override->is_available,
+                            'prime_time' => $override->prime_time,
+                            'available_tables' => $override->available_tables,
+                            'minimum_spend_per_guest' => $override->minimum_spend_per_guest,
+                            'price_per_head' => $override->price_per_head,
+                        ] : null;
+
                         $this->saveOverride($template);
+
+                        // Store new data for logging
+                        $newOverride = VenueTimeSlot::query()
+                            ->where('schedule_template_id', $template->id)
+                            ->where('booking_date', $this->editingSlot['date'])
+                            ->first();
+
+                        $newData[$template->party_size] = [
+                            'is_available' => $newOverride->is_available,
+                            'prime_time' => $newOverride->prime_time,
+                            'available_tables' => $newOverride->available_tables,
+                            'minimum_spend_per_guest' => $newOverride->minimum_spend_per_guest,
+                            'price_per_head' => $newOverride->price_per_head,
+                        ];
                     }
                 } else {
                     $template = $this->venue->scheduleTemplates()
@@ -328,9 +396,49 @@ class ScheduleManager extends Component
                         ->first();
 
                     if ($template) {
+                        $override = VenueTimeSlot::query()
+                            ->where('schedule_template_id', $template->id)
+                            ->where('booking_date', $this->editingSlot['date'])
+                            ->first();
+
+                        $originalData[$template->party_size] = $override ? [
+                            'is_available' => $override->is_available,
+                            'prime_time' => $override->prime_time,
+                            'available_tables' => $override->available_tables,
+                            'minimum_spend_per_guest' => $override->minimum_spend_per_guest,
+                            'price_per_head' => $override->price_per_head,
+                        ] : null;
+
                         $this->saveOverride($template);
+
+                        // Store new data for logging
+                        $newOverride = VenueTimeSlot::query()
+                            ->where('schedule_template_id', $template->id)
+                            ->where('booking_date', $this->editingSlot['date'])
+                            ->first();
+
+                        $newData[$template->party_size] = [
+                            'is_available' => $newOverride->is_available,
+                            'prime_time' => $newOverride->prime_time,
+                            'available_tables' => $newOverride->available_tables,
+                            'minimum_spend_per_guest' => $newOverride->minimum_spend_per_guest,
+                            'price_per_head' => $newOverride->price_per_head,
+                        ];
                     }
                 }
+
+                // Single activity log for all overrides
+                $this->getActivityLogger()
+                    ->performedOn($this->venue)
+                    ->withProperties([
+                        'action' => 'override_update',
+                        'booking_date' => $this->editingSlot['date'],
+                        'time' => $this->editingSlot['time'],
+                        'bulk_edit' => $this->editingSlot['size'] === '*',
+                        'original_data' => $originalData,
+                        'new_data' => $newData,
+                    ])
+                    ->log('Schedule override updated');
 
                 // Refresh the calendar schedules
                 $this->handleDateSelection($this->editingSlot['date']);
@@ -365,7 +473,8 @@ class ScheduleManager extends Component
             $bookingDate = Carbon::parse($this->editingSlot['date'])->format('Y-m-d');
 
             // First find if an override exists
-            $override = VenueTimeSlot::query()->where('schedule_template_id', $template->id)
+            $override = VenueTimeSlot::query()
+                ->where('schedule_template_id', $template->id)
                 ->where('booking_date', $bookingDate)
                 ->first();
 
@@ -526,6 +635,21 @@ class ScheduleManager extends Component
                 ->where('day_of_week', $dayOfWeek)
                 ->get();
 
+            // Store original data for logging
+            $originalData = $templates->mapWithKeys(function ($template) {
+                $override = VenueTimeSlot::query()
+                    ->where('schedule_template_id', $template->id)
+                    ->where('booking_date', $this->selectedDate)
+                    ->first();
+
+                return [$template->id => [
+                    'time' => $template->start_time,
+                    'party_size' => $template->party_size,
+                    'is_available' => $override?->is_available ?? $template->is_available,
+                    'prime_time' => $override?->prime_time ?? $template->prime_time,
+                ]];
+            })->toArray();
+
             // Create overrides for each template setting is_available to false
             foreach ($templates as $template) {
                 VenueTimeSlot::query()->updateOrCreate([
@@ -536,6 +660,17 @@ class ScheduleManager extends Component
                     'prime_time' => false,
                 ]);
             }
+
+            // Log the activity
+            $this->getActivityLogger()
+                ->performedOn($this->venue)
+                ->withProperties([
+                    'action' => 'close_day',
+                    'date' => $this->selectedDate,
+                    'day_of_week' => $dayOfWeek,
+                    'original_data' => $originalData,
+                ])
+                ->log('Venue day closed');
 
             // Refresh the calendar schedules
             $this->handleDateSelection($this->selectedDate);
@@ -570,6 +705,21 @@ class ScheduleManager extends Component
                 ->where('is_available', true)
                 ->get();
 
+            // Store original data for logging
+            $originalData = $templates->mapWithKeys(function ($template) {
+                $override = VenueTimeSlot::query()
+                    ->where('schedule_template_id', $template->id)
+                    ->where('booking_date', $this->selectedDate)
+                    ->first();
+
+                return [$template->id => [
+                    'time' => $template->start_time,
+                    'party_size' => $template->party_size,
+                    'is_available' => $override?->is_available ?? $template->is_available,
+                    'prime_time' => $override?->prime_time ?? $template->prime_time,
+                ]];
+            })->toArray();
+
             // Create overrides for each template setting prime_time to true
             foreach ($templates as $template) {
                 VenueTimeSlot::query()->updateOrCreate([
@@ -582,6 +732,17 @@ class ScheduleManager extends Component
                     'minimum_spend_per_guest' => $template->minimum_spend_per_guest ?? 0,
                 ]);
             }
+
+            // Log the activity
+            $this->getActivityLogger()
+                ->performedOn($this->venue)
+                ->withProperties([
+                    'action' => 'make_day_prime',
+                    'date' => $this->selectedDate,
+                    'day_of_week' => $dayOfWeek,
+                    'original_data' => $originalData,
+                ])
+                ->log('Venue day set to prime time');
 
             // Refresh the calendar schedules
             $this->handleDateSelection($this->selectedDate);
@@ -616,6 +777,21 @@ class ScheduleManager extends Component
                 ->where('is_available', true)
                 ->get();
 
+            // Store original data for logging
+            $originalData = $templates->mapWithKeys(function ($template) {
+                $override = VenueTimeSlot::query()
+                    ->where('schedule_template_id', $template->id)
+                    ->where('booking_date', $this->selectedDate)
+                    ->first();
+
+                return [$template->id => [
+                    'time' => $template->start_time,
+                    'party_size' => $template->party_size,
+                    'is_available' => $override?->is_available ?? $template->is_available,
+                    'available_tables' => $override?->available_tables ?? $template->available_tables,
+                ]];
+            })->toArray();
+
             // Create overrides for each template setting available_tables to 0
             foreach ($templates as $template) {
                 VenueTimeSlot::query()->updateOrCreate([
@@ -629,6 +805,17 @@ class ScheduleManager extends Component
                     'price_per_head' => $template->price_per_head,
                 ]);
             }
+
+            // Log the activity
+            $this->getActivityLogger()
+                ->performedOn($this->venue)
+                ->withProperties([
+                    'action' => 'mark_day_sold_out',
+                    'date' => $this->selectedDate,
+                    'day_of_week' => $dayOfWeek,
+                    'original_data' => $originalData,
+                ])
+                ->log('Venue day marked as sold out');
 
             // Refresh the calendar schedules
             $this->handleDateSelection($this->selectedDate);
