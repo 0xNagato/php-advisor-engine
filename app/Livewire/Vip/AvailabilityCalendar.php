@@ -95,7 +95,7 @@ class AvailabilityCalendar extends Page
                 timezone: $this->region->timezone,
                 currency: $this->region->currency,
                 vipCode: $vipCode,
-                source: 'availability_calendar',
+                source: 'vip',
                 device: $device
             );
 

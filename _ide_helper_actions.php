@@ -75,15 +75,15 @@ class ConvertToPrime
 {
 }
 /**
- * @method static \Lorisleiva\Actions\Decorators\JobDecorator|\Lorisleiva\Actions\Decorators\UniqueJobDecorator makeJob(int $scheduleTemplateId, array $data, string $timezone, string $currency, ?\App\Models\VipCode $vipCode = null, ?string $source = null)
- * @method static \Lorisleiva\Actions\Decorators\UniqueJobDecorator makeUniqueJob(int $scheduleTemplateId, array $data, string $timezone, string $currency, ?\App\Models\VipCode $vipCode = null, ?string $source = null)
- * @method static \Illuminate\Foundation\Bus\PendingDispatch dispatch(int $scheduleTemplateId, array $data, string $timezone, string $currency, ?\App\Models\VipCode $vipCode = null, ?string $source = null)
- * @method static \Illuminate\Foundation\Bus\PendingDispatch|\Illuminate\Support\Fluent dispatchIf(bool $boolean, int $scheduleTemplateId, array $data, string $timezone, string $currency, ?\App\Models\VipCode $vipCode = null, ?string $source = null)
- * @method static \Illuminate\Foundation\Bus\PendingDispatch|\Illuminate\Support\Fluent dispatchUnless(bool $boolean, int $scheduleTemplateId, array $data, string $timezone, string $currency, ?\App\Models\VipCode $vipCode = null, ?string $source = null)
- * @method static dispatchSync(int $scheduleTemplateId, array $data, string $timezone, string $currency, ?\App\Models\VipCode $vipCode = null, ?string $source = null)
- * @method static dispatchNow(int $scheduleTemplateId, array $data, string $timezone, string $currency, ?\App\Models\VipCode $vipCode = null, ?string $source = null)
- * @method static dispatchAfterResponse(int $scheduleTemplateId, array $data, string $timezone, string $currency, ?\App\Models\VipCode $vipCode = null, ?string $source = null)
- * @method static \App\Data\Booking\CreateBookingReturnData run(int $scheduleTemplateId, array $data, string $timezone, string $currency, ?\App\Models\VipCode $vipCode = null, ?string $source = null)
+ * @method static \Lorisleiva\Actions\Decorators\JobDecorator|\Lorisleiva\Actions\Decorators\UniqueJobDecorator makeJob(int $scheduleTemplateId, array $data, string $timezone, string $currency, ?\App\Models\VipCode $vipCode = null, ?string $source = null, ?string $device = null)
+ * @method static \Lorisleiva\Actions\Decorators\UniqueJobDecorator makeUniqueJob(int $scheduleTemplateId, array $data, string $timezone, string $currency, ?\App\Models\VipCode $vipCode = null, ?string $source = null, ?string $device = null)
+ * @method static \Illuminate\Foundation\Bus\PendingDispatch dispatch(int $scheduleTemplateId, array $data, string $timezone, string $currency, ?\App\Models\VipCode $vipCode = null, ?string $source = null, ?string $device = null)
+ * @method static \Illuminate\Foundation\Bus\PendingDispatch|\Illuminate\Support\Fluent dispatchIf(bool $boolean, int $scheduleTemplateId, array $data, string $timezone, string $currency, ?\App\Models\VipCode $vipCode = null, ?string $source = null, ?string $device = null)
+ * @method static \Illuminate\Foundation\Bus\PendingDispatch|\Illuminate\Support\Fluent dispatchUnless(bool $boolean, int $scheduleTemplateId, array $data, string $timezone, string $currency, ?\App\Models\VipCode $vipCode = null, ?string $source = null, ?string $device = null)
+ * @method static dispatchSync(int $scheduleTemplateId, array $data, string $timezone, string $currency, ?\App\Models\VipCode $vipCode = null, ?string $source = null, ?string $device = null)
+ * @method static dispatchNow(int $scheduleTemplateId, array $data, string $timezone, string $currency, ?\App\Models\VipCode $vipCode = null, ?string $source = null, ?string $device = null)
+ * @method static dispatchAfterResponse(int $scheduleTemplateId, array $data, string $timezone, string $currency, ?\App\Models\VipCode $vipCode = null, ?string $source = null, ?string $device = null)
+ * @method static \App\Data\Booking\CreateBookingReturnData run(int $scheduleTemplateId, array $data, string $timezone, string $currency, ?\App\Models\VipCode $vipCode = null, ?string $source = null, ?string $device = null)
  */
 class CreateBooking
 {
