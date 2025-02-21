@@ -17,9 +17,7 @@ class VenueLogosScroll extends Component
 
     public function __construct()
     {
-        $venues = cache()->remember('top_venues_scroll', now()->addHours(24), function () {
-            return $this->getTopVenues();
-        });
+        $venues = cache()->remember('top_venues_scroll', now()->addHours(24), fn () => $this->getTopVenues());
 
         $this->firstRow = $venues->take(10);
         $this->secondRow = $venues->skip(10)->take(10);

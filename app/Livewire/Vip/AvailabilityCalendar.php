@@ -88,12 +88,16 @@ class AvailabilityCalendar extends Page
 
         $vipCode = app(VipCodeService::class)->findByCode($this->code);
         try {
+            $device = isPrimaApp() ? 'mobile_app' : 'web';
             $result = CreateBooking::run(
                 scheduleTemplateId: $scheduleTemplateId,
                 data: $data,
                 timezone: $this->region->timezone,
                 currency: $this->region->currency,
-                vipCode: $vipCode);
+                vipCode: $vipCode,
+                source: 'availability_calendar',
+                device: $device
+            );
 
             activity()
                 ->performedOn($result->booking)

@@ -124,7 +124,7 @@ class ReservationHub extends Page
                 'radio_date' => now($this->timezone)->format('Y-m-d'),
             ]);
 
-            $this->createBooking($this->scheduleTemplateId, $this->date, 'availability_calendar');
+            $this->createBooking($this->scheduleTemplateId, $this->date);
         }
     }
 
@@ -306,14 +306,23 @@ class ReservationHub extends Page
         $this->schedulesThisWeek = new Collection;
     }
 
-    public function createBooking(int $scheduleTemplateId, ?string $date = null, ?string $source = 'reservation_hub'): void
+    public function createBooking(int $scheduleTemplateId, ?string $date = null): void
     {
         $userTimezone = $this->timezone;
         $data = $this->form->getState();
         $data['date'] = $date ?? $data['date'];
 
         try {
-            $result = CreateBooking::run($scheduleTemplateId, $data, $userTimezone, $this->currency, null, $source);
+            $device = isPrimaApp() ? 'mobile_app' : 'web';
+            $result = CreateBooking::run(
+                scheduleTemplateId: $scheduleTemplateId,
+                data: $data,
+                timezone: $userTimezone,
+                currency: $this->currency,
+                vipCode: null,
+                source: 'reservation_hub',
+                device: $device
+            );
 
             $this->booking = $result->booking;
             $this->bookingUrl = $result->bookingUrl;

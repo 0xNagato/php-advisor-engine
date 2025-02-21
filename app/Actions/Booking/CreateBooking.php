@@ -37,7 +37,8 @@ class CreateBooking
         string $timezone,
         string $currency,
         ?VipCode $vipCode = null,
-        ?string $source = null
+        ?string $source = null,
+        ?string $device = null
     ): CreateBookingReturnData {
         $scheduleTemplate = ScheduleTemplate::query()->findOrFail($scheduleTemplateId);
 
@@ -79,6 +80,9 @@ class CreateBooking
         if ($source) {
             $meta['source'] = $source;
         }
+        if ($device) {
+            $meta['device'] = $device;
+        }
         $meta['venue'] = [
             'id' => $venue->id,
             'name' => $venue->name,
@@ -106,6 +110,8 @@ class CreateBooking
             'is_prime' => $isPrime,
             'vip_code_id' => $vipCode?->id,
             'meta' => $meta,
+            'source' => $source,
+            'device' => $device,
         ]);
 
         $taxData = app(SalesTaxService::class)->calculateTax(

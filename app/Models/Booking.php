@@ -75,6 +75,8 @@ class Booking extends Model
         'total_refunded',
         'platform_earnings_refunded',
         'meta',
+        'source',
+        'device',
     ];
 
     protected $appends = ['guest_name', 'local_formatted_guest_phone'];

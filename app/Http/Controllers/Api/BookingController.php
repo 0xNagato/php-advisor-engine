@@ -55,12 +55,16 @@ class BookingController extends Controller
         $region = GetUserRegion::run();
 
         try {
+            $device = isPrimaApp() ? 'mobile_app' : 'web';
             /** @var CreateBookingReturnData $booking */
             $booking = CreateBooking::run(
                 $validatedData['schedule_template_id'],
                 $validatedData,
                 $region->timezone,
-                $region->currency
+                $region->currency,
+                null,
+                'api',
+                $device
             );
 
         } catch (Exception $e) {
