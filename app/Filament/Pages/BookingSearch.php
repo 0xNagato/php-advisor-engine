@@ -274,6 +274,7 @@ class BookingSearch extends Page implements HasTable
                     ->label('Booking ID')
                     ->hidden(),
                 TextColumn::make('created_at')
+                    ->tooltip(fn (Booking $record): ?string => $record->source && $record->device ? "Source: {$record->source} | Device: {$record->device}" : null)
                     ->label('Created')
                     ->size('xs')
                     ->formatStateUsing(fn (Booking $record): string => Carbon::parse($record->created_at)
@@ -284,10 +285,10 @@ class BookingSearch extends Page implements HasTable
                     ->label('Booking Date')
                     ->size('xs')
                     ->formatStateUsing(fn (Booking $record): string => Carbon::parse($record->booking_at)
-                        ->timezone(auth()->user()?->timezone ?? config('app.default_timezone'))
                         ->format('M j, Y g:ia'))
                     ->sortable(),
                 TextColumn::make('is_prime')
+                    ->hidden()
                     ->label('Prime')
                     ->alignCenter()
                     ->formatStateUsing(fn (Booking $record): string => $record->is_prime ? 'Yes' : 'No')
