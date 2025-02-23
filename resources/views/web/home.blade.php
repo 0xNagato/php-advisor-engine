@@ -233,9 +233,9 @@
                             </p>
                         </div>
                         <p>
-                            Offer your prime-time dining slots directly to committed diners through PRIMA and retain
-                            60% of the booking fees. This ensures that your peak hours are filled with reliable guests,
-                            boosting revenue while reducing cancellations.
+                            Our concierge team is ready to book reservations during off-peak hours, ensuring your dining
+                            room is full at all times. PRIMA shares 80% of the fees charges for non-prime bookings with
+                            our participating concierges.
                         </p>
                     </div>
                     <div class="box_md md:sticky top-[140px]">
@@ -248,9 +248,9 @@
                             </p>
                         </div>
                         <p>
-                            Offer your prime-time dining slots directly to committed diners through PRIMA and retain
-                            60% of the booking fees. This ensures that your peak hours are filled with reliable guests,
-                            boosting revenue while reducing cancellations.
+                            Reward concierges throughout the local and broader market with incentives for booking
+                            reservations at your venue without the need for additional staffing, technology or
+                            administration. Let PRIMA handle everything.
                         </p>
                     </div>
                     <div class="box_md md:sticky top-[155px]">
@@ -263,9 +263,8 @@
                             </p>
                         </div>
                         <p>
-                            Offer your prime-time dining slots directly to committed diners through PRIMA and retain
-                            60% of the booking fees. This ensures that your peak hours are filled with reliable guests,
-                            boosting revenue while reducing cancellations.
+                            All bookings made on PRIMA are made by real concierges throughout the hospitality sector.
+                            Zero bots and virtually no cancellations.
                         </p>
                     </div>
                     <div class="box_md md:sticky top-[175px]">
@@ -279,9 +278,9 @@
                             </p>
                         </div>
                         <p>
-                            Offer your prime-time dining slots directly to committed diners through PRIMA and retain
-                            60% of the booking fees. This ensures that your peak hours are filled with reliable guests,
-                            boosting revenue while reducing cancellations.
+                            At PRIMA, we value transparency. With PRIMA, you get access to all your data, including
+                            customer name, phone number as well as concierge data for all bookings is shared with each
+                            venue.
                         </p>
                     </div>
                 </div>

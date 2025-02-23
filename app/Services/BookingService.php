@@ -62,7 +62,9 @@ class BookingService
             $booking->earnings()->delete();
 
             // Update booking
-            $booking->is_prime = false;
+            $booking->is_prime = 0;
+            $booking->total_fee = 0;
+            $booking->total_with_tax_in_cents = 0;
 
             $meta = $booking->meta ?? [];
             $meta['converted_to_non_prime_at'] = now();

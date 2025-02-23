@@ -36,7 +36,7 @@ class BookingResource extends JsonResource
             'tax_amount' => $this->booking->tax > 0 ? money($this->booking->tax_amount_in_cents, $this->booking->currency) : null,
             'bookingUrl' => $this->bookingUrl,
             'qrCode' => $this->qrCode,
-            'is_prime' => $this->booking->is_prime,
+            'is_prime' => $this->booking->is_prime ? 'true' : 0,
             'booking_at' => $this->booking->booking_at,
         ];
     }

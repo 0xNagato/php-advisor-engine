@@ -22,7 +22,6 @@ use App\Notifications\Booking\CustomerBookingConfirmed;
 use App\Notifications\Booking\VenueBookingCancelled;
 use App\Services\Booking\BookingCalculationService;
 use App\Traits\FormatsPhoneNumber;
-use Carbon\Carbon;
 use Filament\Actions\Action;
 use Filament\Forms\Components\Grid;
 use Filament\Forms\Components\Select;
@@ -398,7 +397,6 @@ class ViewBooking extends ViewRecord
             ->extraAttributes(['class' => 'w-full'])
             ->visible(fn () => $this->record->is_prime &&
                 auth()->id() === 1 &&
-                ! $this->record->created_at->lt(Carbon::now()->subHours(24)) &&
                 in_array($this->record->status, [
                     BookingStatus::CONFIRMED,
                     BookingStatus::VENUE_CONFIRMED,
@@ -438,7 +436,6 @@ class ViewBooking extends ViewRecord
             ->extraAttributes(['class' => 'w-full'])
             ->visible(fn () => ! $this->record->is_prime &&
                 auth()->id() === 1 &&
-                ! $this->record->created_at->lt(Carbon::now()->subHours(24)) &&
                 in_array($this->record->status, [
                     BookingStatus::CONFIRMED,
                     BookingStatus::VENUE_CONFIRMED,
