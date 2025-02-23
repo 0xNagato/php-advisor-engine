@@ -1,5 +1,6 @@
 @php
     use App\Enums\BookingStatus;
+    use App\Enums\EarningType;
     use App\Filament\Resources\ConciergeResource;
     use App\Filament\Resources\PartnerResource;
     use App\Filament\Resources\VenueResource;
@@ -290,6 +291,56 @@
                     </div>
                 @endif
             </div>
+
+            @if (
+                !$download &&
+                    auth()->check() &&
+                    auth()->user()->hasActiveRole('concierge') &&
+                    $booking->concierge_id === auth()->user()->concierge->id)
+                <div class="p-4 mt-6 border border-gray-100 rounded-lg bg-gray-50/80">
+                    <h4 class="text-sm font-semibold text-gray-800 uppercase dark:text-gray-200">Your Earnings</h4>
+                    <div class="mt-3">
+                        <dl class="grid grid-cols-2 gap-4 text-sm">
+                            @php
+                                $directEarnings = $booking->earnings
+                                    ->whereIn('type', [
+                                        EarningType::CONCIERGE->value,
+                                        EarningType::CONCIERGE_BOUNTY->value,
+                                    ])
+                                    ->sum('amount');
+                                $referralEarnings = $booking->earnings
+                                    ->whereIn('type', [
+                                        EarningType::CONCIERGE_REFERRAL_1->value,
+                                        EarningType::CONCIERGE_REFERRAL_2->value,
+                                    ])
+                                    ->sum('amount');
+                            @endphp
+                            <div>
+                                <dt class="font-medium text-gray-600">Direct Earnings</dt>
+                                <dd
+                                    class="mt-1 font-semibold {{ $directEarnings > 0 ? 'text-emerald-600' : 'text-gray-400' }}">
+                                    {{ money($directEarnings, $booking->currency) }}
+                                </dd>
+                            </div>
+                            <div>
+                                <dt class="font-medium text-gray-600">Referral Earnings</dt>
+                                <dd
+                                    class="mt-1 font-semibold {{ $referralEarnings > 0 ? 'text-emerald-600' : 'text-gray-400' }}">
+                                    {{ money($referralEarnings, $booking->currency) }}
+                                </dd>
+                            </div>
+                        </dl>
+                        <div class="pt-3 mt-4 border-t border-gray-200">
+                            <dl class="text-sm">
+                                <dt class="font-medium text-gray-600">Total Earnings</dt>
+                                <dd class="mt-1 font-bold text-gray-900">
+                                    {{ money($directEarnings + $referralEarnings, $booking->currency) }}
+                                </dd>
+                            </dl>
+                        </div>
+                    </div>
+                </div>
+            @endif
 
             @if (
                 !$download &&
