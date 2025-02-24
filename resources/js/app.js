@@ -64,6 +64,9 @@ document.addEventListener('DOMContentLoaded', () => {
   const scrollSection = document.querySelector('.scroll-section');
   const imageContainers = document.querySelectorAll('.gallery_item');
 
+  // Add null check before proceeding
+  if (!scrollSection || !imageContainers.length) return;
+
   window.addEventListener('scroll', () => {
     const sectionTop = scrollSection.offsetTop;
     const sectionHeight = scrollSection.offsetHeight;

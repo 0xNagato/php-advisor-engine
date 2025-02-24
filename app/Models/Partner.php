@@ -44,7 +44,7 @@ class Partner extends Model
     }
 
     /**
-     * @return HasMany<Booking>
+     * @return HasMany<Booking, $this>
      */
     public function bookings(): HasMany
     {

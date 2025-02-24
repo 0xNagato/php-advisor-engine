@@ -44,7 +44,7 @@ class VipCode extends Model
     }
 
     /**
-     * @return HasMany<Booking>
+     * @return HasMany<Booking, $this>
      */
     public function bookings(): HasMany
     {
@@ -53,7 +53,7 @@ class VipCode extends Model
     }
 
     /**
-     * @return HasManyThrough<Earning>
+     * @return HasManyThrough<Earning, Booking, $this>
      */
     public function earnings(): HasManyThrough
     {

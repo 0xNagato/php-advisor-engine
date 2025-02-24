@@ -59,7 +59,7 @@ class CreateBooking
          */
         $bookingAt = Carbon::createFromFormat(
             'Y-m-d H:i:s',
-            $data['date'].' '.$scheduleTemplate?->start_time,
+            $data['date'].' '.$scheduleTemplate->start_time,
             $timezone
         );
         $currentDate = Carbon::now($timezone);
@@ -101,7 +101,7 @@ class CreateBooking
         }
 
         $booking = Booking::query()->create([
-            'schedule_template_id' => $scheduleTemplate?->id,
+            'schedule_template_id' => $scheduleTemplate->id,
             'guest_count' => $data['guest_count'],
             'concierge_id' => $conciergeId,
             'status' => BookingStatus::PENDING,
@@ -144,12 +144,10 @@ class CreateBooking
                 ])
             )->make();
 
-            $vipUrl = ShortURL::destinationUrl(
-                route('booking.checkout', [
-                    'booking' => $booking->uuid,
-                    'r' => 'vip',
-                ])
-            )->make();
+            $vipUrl = route('booking.checkout', [
+                'booking' => $booking->uuid,
+                'r' => 'vip',
+            ]);
         } catch (Exception $e) {
             Sentry::captureException($e);
 
@@ -162,7 +160,7 @@ class CreateBooking
         return CreateBookingReturnData::from([
             'booking' => $booking,
             'bookingUrl' => $shortUrl->default_short_url,
-            'bookingVipUrl' => $vipUrl->default_short_url,
+            'bookingVipUrl' => $vipUrl,
             'qrCode' => (new QRCode)->render($shortUrlQr->default_short_url),
         ]);
     }
@@ -178,8 +176,7 @@ class CreateBooking
         if (auth()->user()->hasActiveRole('partner')) {
             return config('app.house.concierge_id');
         }
-
         // Default: Regular concierge
-        return Auth::user()?->concierge?->id ?? config('app.house.concierge_id');
+        return Auth::user()->concierge->id ?? config('app.house.concierge_id');
     }
 }

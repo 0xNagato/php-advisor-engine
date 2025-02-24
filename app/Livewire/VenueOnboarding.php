@@ -323,7 +323,7 @@ class VenueOnboarding extends Component
                 'venue_booking_hours' => $this->venue_booking_hours,
             ]);
 
-            $onboarding = VenueOnboardingModel::create([
+            $onboarding = VenueOnboardingModel::query()->create([
                 ...$data->toArray(),
                 'status' => 'submitted',
             ]);

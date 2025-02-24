@@ -13,7 +13,7 @@ trait LogsImpersonatedActivity
 
         if (auth()->check() && session()->has('impersonated_by')) {
             $impersonatorId = session()->get('impersonated_by');
-            $impersonator = User::find($impersonatorId);
+            $impersonator = User::query()->find($impersonatorId);
 
             if ($impersonator) {
                 $logger->causedBy($impersonator)

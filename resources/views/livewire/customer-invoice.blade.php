@@ -58,7 +58,7 @@
             <!-- Icon -->
             <span
                 class="mx-auto flex justify-center items-center size-[62px] rounded-full border border-gray-200 bg-white text-gray-700 shadow-sm dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400">
-                <x-polaris-receipt-icon class="w-10 h-10 text-gray-700" />
+                <x-tabler-receipt class="w-10 h-10 text-gray-700" />
             </span>
             <!-- End Icon -->
         </div>

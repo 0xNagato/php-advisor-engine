@@ -64,7 +64,7 @@ class TwoFactorCode extends Page
     public function mount(): void
     {
         Filament::getPanel()->navigation(false);
-        $this->phoneNumberSuffix = substr(auth()->user()->phone, -4);
+        $this->phoneNumberSuffix = substr((string) auth()->user()->phone, -4);
         $this->redirectUrl = $this->request->query('redirect') ?? config('app.platform_url');
 
         $this->nextCodeAvailableAt = $this->twoFactorService->getNextCodeAvailableAt(auth()->user());

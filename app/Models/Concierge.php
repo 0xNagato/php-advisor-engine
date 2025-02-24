@@ -100,6 +100,9 @@ class Concierge extends Model
         return Attribute::make(get: fn () => money($this->referralEarningsInUSD, 'USD'));
     }
 
+    /**
+     * @return HasMany<Booking, $this>
+     */
     public function bookings(): HasMany
     {
         return $this->hasMany(Booking::class, 'concierge_id')

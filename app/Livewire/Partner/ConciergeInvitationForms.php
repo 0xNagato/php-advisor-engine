@@ -180,7 +180,7 @@ class ConciergeInvitationForms extends Widget implements HasForms
             'last_name' => $data['last_name'],
             'region_id' => $data['region_id'],
             'type' => 'concierge',
-            'referrer_type' => strtolower(auth()->user()->main_role),
+            'referrer_type' => strtolower((string) auth()->user()->main_role),
             'company_name' => $data['company_name'],
         ]);
 

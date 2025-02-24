@@ -150,6 +150,9 @@ class Booking extends Model
         return $query->whereIn('status', [BookingStatus::CONFIRMED, BookingStatus::NO_SHOW]);
     }
 
+    /**
+     * @return BelongsTo<ScheduleWithBooking, $this>
+     */
     public function schedule(): BelongsTo
     {
         return $this->belongsTo(ScheduleWithBooking::class, 'schedule_template_id', 'schedule_template_id')

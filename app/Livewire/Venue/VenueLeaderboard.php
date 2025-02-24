@@ -74,7 +74,7 @@ class VenueLeaderboard extends BaseWidget
                                 return 'Your Venue';
                             }
 
-                            return $record->name[0].str_repeat('*', strlen($record->name) - 1);
+                            return $record->name[0].str_repeat('*', strlen((string) $record->name) - 1);
                         }
 
                         return $state;

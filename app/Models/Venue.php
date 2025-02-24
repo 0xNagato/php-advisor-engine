@@ -259,7 +259,7 @@ class Venue extends Model
     }
 
     /**
-     * @return HasManyThrough<Booking>
+     * @return HasManyThrough<Booking, ScheduleTemplate, $this>
      */
     public function bookings(): HasManyThrough
     {
@@ -269,6 +269,9 @@ class Venue extends Model
         )->whereIn('status', [BookingStatus::CONFIRMED, BookingStatus::VENUE_CONFIRMED]);
     }
 
+    /**
+     * @return HasManyThrough<Booking, ScheduleTemplate, $this>
+     */
     public function confirmedBookings(): HasManyThrough
     {
         return $this->hasManyThrough(Booking::class, ScheduleTemplate::class)

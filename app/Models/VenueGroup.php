@@ -31,6 +31,9 @@ class VenueGroup extends Model
         return $this->hasMany(Venue::class);
     }
 
+    /**
+     * @return BelongsToMany<User, $this>
+     */
     public function managers(): BelongsToMany
     {
         return $this->belongsToMany(User::class, 'venue_group_managers')

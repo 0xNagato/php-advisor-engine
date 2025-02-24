@@ -23,7 +23,7 @@ class InviteConciergeViaSms
             'last_name' => $data['last_name'],
             'type' => 'concierge',
             'region_id' => $data['region_id'],
-            'referrer_type' => strtolower(auth()->user()->main_role),
+            'referrer_type' => strtolower((string) auth()->user()->main_role),
             'company_name' => $data['company_name'],
         ]);
 

@@ -84,6 +84,7 @@
 @filamentScripts
 <tallstackui:script />
 @livewireStyles
+@mingles
 @vite('resources/js/app.js')
 </body>
 </html>

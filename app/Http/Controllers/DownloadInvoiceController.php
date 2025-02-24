@@ -26,7 +26,7 @@ class DownloadInvoiceController extends Controller
         file_put_contents($temporaryFilePath, $fileContents);
 
         return response()
-            ->download($temporaryFilePath, basename($invoicePath))
+            ->download($temporaryFilePath, basename((string) $invoicePath))
             ->deleteFileAfterSend(true);
     }
 }

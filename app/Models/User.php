@@ -50,6 +50,7 @@ class User extends Authenticatable implements FilamentUser, HasAvatar
         'payout', 'charity_percentage', 'partner_referral_id', 'concierge_referral_id',
         'timezone', 'secured_at', 'address_1', 'address_2', 'city', 'state', 'zip',
         'country', 'preferences', 'region', 'suspended_at', 'expo_push_token', 'notification_regions',
+        'last_login_at', 'last_login_ip',
     ];
 
     protected $hidden = [
@@ -174,7 +175,7 @@ class User extends Authenticatable implements FilamentUser, HasAvatar
     }
 
     /**
-     * @return HasOne<RoleProfile>
+     * @return HasOne<RoleProfile, $this>
      */
     public function activeProfile(): HasOne
     {
@@ -389,6 +390,9 @@ class User extends Authenticatable implements FilamentUser, HasAvatar
         });
     }
 
+    /**
+     * @return BelongsToMany<VenueGroup, $this>
+     */
     public function managedVenueGroups(): BelongsToMany
     {
         return $this->belongsToMany(VenueGroup::class, 'venue_group_managers')

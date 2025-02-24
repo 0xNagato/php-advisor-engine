@@ -100,7 +100,7 @@ class ResetPassword extends \Filament\Pages\Auth\PasswordReset\ResetPassword
         }
 
         $role = $this->user->main_role;
-        $lowercaseRole = strtolower($role);
+        $lowercaseRole = strtolower((string) $role);
 
         $label = new HtmlString("
             <div class='font-bold text-center text-indigo-800 underline cursor-pointer' x-data='{}' @click='\$dispatch(\"open-modal\", { id: \"$lowercaseRole-modal\" })'>

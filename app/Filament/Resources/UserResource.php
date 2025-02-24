@@ -77,13 +77,7 @@ class UserResource extends Resource
             ->query(
                 static::getModel()::query()
                     ->with(['roleProfiles.role'])
-                    ->select('users.*')
-                    ->leftJoin('authentication_log', function ($join) {
-                        $join->on('users.id', '=', 'authentication_log.authenticatable_id')
-                            ->where('authentication_log.authenticatable_type', '=', User::class);
-                    })
-                    ->groupBy('users.id')
-                    ->orderByRaw('COALESCE(MAX(authentication_log.login_at), "1000-01-01") DESC')
+                    ->orderByRaw('COALESCE(last_login_at, "1000-01-01") DESC')
             )
             ->recordUrl(fn (User $record): string => EditUser::getUrl(['record' => $record]))
             ->columns([
@@ -127,26 +121,13 @@ class UserResource extends Resource
                         return "<span class='inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-$color-100 text-$color-800 $opacity'>$name$activeMarker</span>";
                     })->join(' '))
                     ->html(),
-                TextColumn::make('authentications.login_at')
+                TextColumn::make('last_login_at')
                     ->label('Last Login')
-                    ->sortable(query: fn ($query, $direction) => $query
-                        ->orderBy(
-                            DB::raw('(
-                                    SELECT login_at
-                                    FROM authentication_log
-                                    WHERE authentication_log.authenticatable_id = users.id
-                                    AND authentication_log.authenticatable_type = ?
-                                    ORDER BY login_at DESC
-                                    LIMIT 1
-                                )'),
-                            $direction
-                        )
-                        ->addBinding(User::class, 'select'))
+                    ->sortable()
                     ->grow(false)
                     ->tooltip(function ($state, User $record) {
-                        $lastLogin = $record->authentications()->orderByDesc('login_at')->first();
-                        if ($lastLogin && $lastLogin->login_at) {
-                            return Carbon::parse($lastLogin->login_at)
+                        if ($record->last_login_at) {
+                            return Carbon::parse($record->last_login_at)
                                 ->setTimezone(auth()->user()->timezone ?? config('app.timezone'))
                                 ->format('M j Y, g:ia');
                         }
@@ -155,9 +136,8 @@ class UserResource extends Resource
                     })
                     ->size('xs')
                     ->formatStateUsing(function ($state, User $record) {
-                        $lastLogin = $record->authentications()->orderByDesc('login_at')->first();
-                        if ($lastLogin && $lastLogin->login_at) {
-                            return Carbon::parse($lastLogin->login_at)
+                        if ($record->last_login_at) {
+                            return Carbon::parse($record->last_login_at)
                                 ->setTimezone(auth()->user()->timezone ?? config('app.timezone'))
                                 ->diffForHumans();
                         }
