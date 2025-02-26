@@ -71,6 +71,7 @@ class Booking extends Model
         'refunded_at',
         'refund_data',
         'refund_reason',
+        'refunded_guest_count',
         'original_total',
         'total_refunded',
         'platform_earnings_refunded',
