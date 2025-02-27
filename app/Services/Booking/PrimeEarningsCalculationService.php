@@ -10,8 +10,6 @@ use App\Models\Partner;
 
 readonly class PrimeEarningsCalculationService
 {
-    private const float MAX_PARTNER_EARNINGS_PERCENTAGE = 0.20;
-
     public function __construct(
         private EarningCreationService $earningCreationService
     ) {}
@@ -94,7 +92,7 @@ readonly class PrimeEarningsCalculationService
 
     private function calculateAndCreatePartnerEarnings(Booking $booking, float $remainder): float
     {
-        $maxPartnerEarnings = self::MAX_PARTNER_EARNINGS_PERCENTAGE * $remainder;
+        $maxPartnerEarnings = $remainder * (BookingPercentages::MAX_PARTNER_EARNINGS_PERCENTAGE / 100);
 
         $conciergePartnerEarnings = $this->calculatePartnerEarnings(
             booking: $booking,
@@ -123,8 +121,8 @@ readonly class PrimeEarningsCalculationService
 
         $partner = Partner::query()->find($user->partner_referral_id);
 
-        // Calculate the maximum allowed amount (20% of the booking's total fee)
-        $maxAllowedAmount = $remainder * 0.20;
+        // Calculate the maximum allowed amount (20% of the remainder)
+        $maxAllowedAmount = $remainder * (BookingPercentages::MAX_PARTNER_EARNINGS_PERCENTAGE / 100);
 
         // Calculate the amount based on the partner's percentage
         $calculatedAmount = $remainder * ($partner->percentage / 100);
