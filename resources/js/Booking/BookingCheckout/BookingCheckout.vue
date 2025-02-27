@@ -58,6 +58,7 @@ interface MingleData {
   totalWithTaxesInCents: number;
   isOmakase: boolean;
   omakaseDetails: string;
+  minimumSpendPerGuest?: number;
 }
 
 interface Props {
@@ -195,6 +196,7 @@ onMounted(async () => {
 
 const agreeToText = ref(true);
 const agreeToArrival = ref(true);
+const agreeToMinimumSpend = ref(true);
 
 const handleSubmit = async (event: Event) => {
   event.preventDefault();
@@ -365,6 +367,17 @@ const emailInvoice = async () => {
           {{ mingleData.omakaseDetails }}
         </p>
       </div>
+      <div v-if="mingleData.minimumSpendPerGuest" class="mb-4 text-center">
+        <p
+          class="rounded-lg border border-blue-200 bg-blue-50 p-2 text-sm font-semibold text-blue-700"
+        >
+          <strong>Important:</strong> This booking time requires a ${{
+            mingleData.minimumSpendPerGuest
+          }}
+          per diner minimum spend. Booking fees do not apply toward minimum
+          spend or restaurant bill.
+        </p>
+      </div>
       <form class="w-full" @submit.prevent="handleSubmit">
         <div class="mb-2 flex space-x-2">
           <div class="flex-1">
@@ -438,6 +451,23 @@ const emailInvoice = async () => {
             />
             <span class="ml-2 text-sm text-gray-700">
               I agree to receive my reservation confirmation via text message.
+            </span>
+          </label>
+        </div>
+        <div v-if="mingleData.minimumSpendPerGuest" class="mx-2 mt-2">
+          <label class="flex items-center">
+            <input
+              v-model="agreeToMinimumSpend"
+              type="checkbox"
+              required
+              class="form-checkbox size-4 rounded text-indigo-600"
+            />
+            <span class="ml-2 text-sm text-gray-700">
+              I understand that this restaurant will require a ${{
+                mingleData.minimumSpendPerGuest
+              }}
+              per diner minimum spend. Booking fees do not apply towards
+              restaurant bill.
             </span>
           </label>
         </div>

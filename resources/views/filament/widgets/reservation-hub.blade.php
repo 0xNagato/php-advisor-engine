@@ -147,10 +147,18 @@
 
                     </div>
                     <div class="w-full mt-2">
+                        @if ($booking->schedule->minimum_spend_per_guest > 0)
+                            <div
+                                class="p-3 mb-2 text-sm font-medium text-blue-700 border border-blue-200 rounded-lg bg-blue-50">
+                                <strong>Important:</strong> This booking time requires a
+                                ${{ $booking->schedule->minimum_spend_per_guest }} per diner minimum spend. Booking
+                                fees do not apply toward minimum spend or restaurant bill.
+                            </div>
+                        @endif
                         <livewire:booking.invoice-small :booking="$booking" />
                         @if ($booking->venue->is_omakase)
                             <div
-                                class="mt-2 p-3 text-sm font-medium text-indigo-600 bg-indigo-50 border border-indigo-200 rounded-lg">
+                                class="p-3 mt-2 text-sm font-medium text-indigo-600 border border-indigo-200 rounded-lg bg-indigo-50">
                                 {{ $booking->venue->omakase_details }}
                             </div>
                         @endif
@@ -221,6 +229,14 @@
 
                         @if ($booking && !$booking->schedule->prime_time)
                             <div class="w-full">
+                                @if ($booking->schedule->minimum_spend_per_guest > 0)
+                                    <div
+                                        class="p-3 mb-2 text-sm font-medium text-blue-700 border border-blue-200 rounded-lg bg-blue-50">
+                                        <strong>Important:</strong> This booking time requires a
+                                        ${{ $booking->schedule->minimum_spend_per_guest }} per diner minimum spend.
+                                        Booking fees do not apply toward minimum spend or restaurant bill.
+                                    </div>
+                                @endif
                                 <livewire:booking.invoice-small :booking="$booking" />
                             </div>
                         @endif

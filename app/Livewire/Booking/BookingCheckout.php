@@ -101,6 +101,7 @@ class BookingCheckout extends Component implements HasMingles
             'totalWithTaxesInCents' => (int) $this->booking->total_with_tax_in_cents,
             'isOmakase' => $this->booking->venue->is_omakase,
             'omakaseDetails' => $this->booking->venue->omakase_details,
+            'minimumSpendPerGuest' => $this->booking->schedule->minimum_spend_per_guest ?? 0,
         ];
     }
 
