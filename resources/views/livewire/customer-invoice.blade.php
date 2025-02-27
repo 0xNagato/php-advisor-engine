@@ -384,7 +384,7 @@
                 ]" class="w-full mt-4" />
             @endif
 
-            @if (!$download && auth()->check() && $this->canModifyBooking)
+            @if (!$download && auth()->check() && isset($this->canModifyBooking) && $this->canModifyBooking)
                 <x-filament::actions :actions="[$this->cancelBookingAction, $this->modifyGuestInfoAction]" class="w-full mt-4" />
 
                 <x-filament::button wire:click="$dispatch('open-modal', { id: 'modify-booking-{{ $booking->id }}' })"
