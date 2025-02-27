@@ -15,9 +15,14 @@ class VenueLogosScroll extends Component
 
     public Collection $secondRow;
 
+    /**
+     * Array of venue IDs to exclude from results
+     */
+    private array $excludedVenueIds = [73, 74, 71, 72];
+
     public function __construct()
     {
-        $venues = cache()->remember('top_venues_scroll', now()->addHours(24), fn () => $this->getTopVenues());
+        $venues = cache()->remember('top_venues_scroll_latest_feb_26', now()->addHours(24), fn () => $this->getTopVenues());
 
         $this->firstRow = $venues->take(10);
         $this->secondRow = $venues->skip(10)->take(10);
@@ -25,6 +30,7 @@ class VenueLogosScroll extends Component
 
     private function getTopVenues(): Collection
     {
+
         $bookedVenues = Booking::query()
             ->select('venues.id', 'venues.name', 'venues.logo_path')
             ->join('schedule_templates', 'bookings.schedule_template_id', '=', 'schedule_templates.id')
@@ -32,6 +38,7 @@ class VenueLogosScroll extends Component
             ->whereNotNull('bookings.confirmed_at')
             ->where('bookings.created_at', '>=', now()->subDays(30))
             ->where('venues.status', VenueStatus::ACTIVE)
+            ->whereNotIn('venues.id', $this->excludedVenueIds)
             ->groupBy('venues.id', 'venues.name', 'venues.logo_path')
             ->orderByDesc(DB::raw('COUNT(bookings.id)'))
             ->limit(20)
@@ -41,12 +48,15 @@ class VenueLogosScroll extends Component
             // Get IDs of venues we already have
             $existingIds = $bookedVenues->pluck('id');
 
+            // Combine existing IDs with excluded IDs
+            $idsToExclude = $existingIds->merge($this->excludedVenueIds)->unique();
+
             // Get additional random active venues excluding the ones we already have
             $additionalVenues = Venue::query()
                 ->select('id', 'name', 'logo_path')
                 ->where('status', VenueStatus::ACTIVE)
                 ->whereNotNull('logo_path')
-                ->whereNotIn('id', $existingIds)
+                ->whereNotIn('id', $idsToExclude)
                 ->inRandomOrder()
                 ->limit(20 - $bookedVenues->count())
                 ->get();

@@ -23,7 +23,7 @@
                         <div class="intro_hero-img">
                             <img src="{{ asset('/images/marketing/city.png') }}" alt=""
                                 class="hidden intro_hero-img_trans lg:block">
-                            <img src="{{ asset('/images/marketing/casadona.jpg') }}" alt=""
+                            <img src="{{ asset('/images/marketing/dining.jpg') }}" alt=""
                                 class="block intro_hero-img_trans lg:hidden">
                         </div>
                         <div class="intro_hero-img">
