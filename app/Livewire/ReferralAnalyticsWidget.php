@@ -81,10 +81,10 @@ class ReferralAnalyticsWidget extends ApexChartWidget
                 'type' => 'area',
                 'height' => 300,
                 'toolbar' => [
-                    'show' => true,
+                    'show' => false,
                 ],
                 'zoom' => [
-                    'enabled' => true,
+                    'enabled' => false,
                 ],
             ],
             'series' => [
