@@ -285,10 +285,10 @@
                     </div>
 
                     <div class="space-y-2">
-                        <span class="text-sm font-medium">Incentive Per Guest</span>
+                        <span class="text-sm font-medium">Min. Spend Per Guest</span>
                         <div class="relative">
                             <span class="absolute inset-y-0 flex items-center text-gray-500 left-3">$</span>
-                            <input type="number" wire:model="editingSlot.price_per_head" min="0"
+                            <input type="number" wire:model="editingSlot.minimum_spend_per_guest" min="0"
                                 class="block w-full text-sm border-gray-300 rounded-lg shadow-sm pl-7 focus:border-primary-500 focus:ring-1 focus:ring-primary-500" />
                         </div>
                     </div>
