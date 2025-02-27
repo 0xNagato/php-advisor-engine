@@ -449,4 +449,58 @@ class User extends Authenticatable implements FilamentUser, HasAvatar
 
         $this->load('managedVenueGroups');
     }
+
+    /**
+     * Remove one or more roles from the user and delete corresponding profiles.
+     */
+    public function removeRole(Role|string|int|array|Collection $roles): static
+    {
+        // Normalize input to array
+        $roles = is_array($roles) ? $roles : [$roles];
+
+        // Convert all inputs to Role models
+        $roleModels = collect($roles)
+            ->flatten()
+            ->map(function ($role) {
+                if ($role instanceof Role) {
+                    return $role;
+                }
+
+                return is_numeric($role)
+                    ? Role::query()->find($role)
+                    : Role::query()->where('name', $role)->first();
+            })
+            ->filter();
+
+        // Get role IDs
+        $roleIds = $roleModels->pluck('id')->toArray();
+
+        // Find profiles associated with these roles for this user
+        $profilesToDelete = $this->roleProfiles()->whereIn('role_id', $roleIds)->get();
+
+        // Check if we're deleting the active profile
+        $activeProfileDeleted = $profilesToDelete->contains(fn ($profile) => $profile->is_active);
+
+        // Begin transaction
+        DB::transaction(function () use ($roleIds, $profilesToDelete, $activeProfileDeleted) {
+            // Remove roles
+            $this->roles()->detach($roleIds);
+            $this->forgetCachedPermissions();
+
+            // Delete profiles
+            foreach ($profilesToDelete as $profile) {
+                $profile->delete();
+            }
+
+            // If we deleted the active profile, set another one as active
+            if ($activeProfileDeleted) {
+                $newActiveProfile = $this->roleProfiles()->first();
+                if ($newActiveProfile) {
+                    $newActiveProfile->update(['is_active' => true]);
+                }
+            }
+        });
+
+        return $this;
+    }
 }

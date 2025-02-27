@@ -1,6 +1,6 @@
 <div>
     @if ($venues?->count() > 0)
-        <x-filament::dropdown placement="bottom-end" class="filament-venue-switcher">
+        <x-filament::dropdown placement="bottom-end" class="filament-venue-switcher" teleport>
             <x-slot name="trigger">
                 <button type="button"
                     class="flex items-center whitespace-nowrap gap-2 pl-2 py-1.5 text-xs font-medium text-indigo-600 hover:bg-indigo-50 rounded-lg transition">

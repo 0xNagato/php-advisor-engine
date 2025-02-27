@@ -23,6 +23,7 @@ use Filament\Notifications\Notification;
 use Filament\Resources\Pages\EditRecord;
 use Filament\Support\Enums\ActionSize;
 use Illuminate\Contracts\Support\Htmlable;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 use RuntimeException;
@@ -45,8 +46,75 @@ class EditVenue extends EditRecord
 
     public function form(Form $form): Form
     {
+        $venue = $this->getRecord();
+
         return $form
             ->schema([
+                Section::make('Venue Group Information')
+                    ->icon('heroicon-m-building-office-2')
+                    ->schema([
+                        \Filament\Forms\Components\Grid::make()
+                            ->schema([
+                                \Filament\Forms\Components\Group::make()
+                                    ->schema([
+                                        \Filament\Forms\Components\Placeholder::make('venue_group_logo')
+                                            ->hiddenLabel()
+                                            ->content(function () use ($venue) {
+                                                if (! $venue->venueGroup || ! $venue->venueGroup->logo_path) {
+                                                    return new \Illuminate\Support\HtmlString(
+                                                        '<div class="flex items-center justify-center w-24 h-24 bg-gray-100 rounded-lg">
+                                                            <svg class="w-10 h-10 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                                                            </svg>
+                                                        </div>'
+                                                    );
+                                                }
+
+                                                return new \Illuminate\Support\HtmlString(
+                                                    '<div class="flex items-center justify-center h-full">
+                                                        <img src="'.$venue->venueGroup->logo.'" alt="'.$venue->venueGroup->name.'" class="object-contain w-auto h-24 max-w-full" />
+                                                    </div>'
+                                                );
+                                            })
+                                            ->visible(fn () => $venue->venue_group_id !== null),
+                                    ])
+                                    ->columnSpan(['lg' => 1, 'md' => 1, 'sm' => 4])
+                                    ->extraAttributes(['class' => 'flex items-center justify-center h-full']),
+                                \Filament\Forms\Components\Group::make()
+                                    ->schema([
+                                        \Filament\Forms\Components\Placeholder::make('venue_group_name')
+                                            ->label('Venue Group')
+                                            ->content(fn () => $venue->venueGroup?->name ?? 'Not part of a venue group')
+                                            ->extraAttributes(['class' => 'text-xl font-bold']),
+                                        \Filament\Forms\Components\Placeholder::make('primary_manager')
+                                            ->label('Primary Manager')
+                                            ->content(fn () => $venue->venueGroup?->primaryManager?->name ?? 'N/A')
+                                            ->extraAttributes(['class' => 'text-base'])
+                                            ->visible(fn () => $venue->venue_group_id !== null),
+                                    ])
+                                    ->columnSpan(['lg' => 3, 'md' => 3, 'sm' => 4])
+                                    ->extraAttributes(['class' => 'flex flex-col justify-center space-y-1']),
+                            ])
+                            ->columns([
+                                'sm' => 4,
+                                'md' => 4,
+                                'lg' => 4,
+                            ])
+                            ->extraAttributes(['class' => 'items-center min-h-[100px]']),
+                        \Filament\Forms\Components\ViewField::make('venues_in_group')
+                            ->label('Venues')
+                            ->view('filament.components.venues-in-group')
+                            ->visible(fn () => $venue->venue_group_id !== null),
+                        \Filament\Forms\Components\ViewField::make('managers_in_group')
+                            ->label('Managers')
+                            ->view('filament.components.managers-in-group')
+                            ->visible(fn () => $venue->venue_group_id !== null),
+                        \Filament\Forms\Components\ViewField::make('concierges_in_group')
+                            ->label('Concierges')
+                            ->view('filament.components.concierges-in-group')
+                            ->visible(fn () => $venue->venue_group_id !== null),
+                    ])
+                    ->visible(fn () => auth()->user()->hasRole(['super_admin', 'admin']) && $venue->venue_group_id !== null),
                 Section::make('Venue Information')
                     ->icon('heroicon-m-building-storefront')
                     ->schema([
@@ -187,88 +255,455 @@ class EditVenue extends EditRecord
     protected function getHeaderActions(): array
     {
         $currentPartnerName = $this->getRecord()->partnerReferral ? $this->getRecord()->partnerReferral->user->name : 'No Partner';
+        $venue = $this->getRecord();
 
         return [
-            Action::make('Change Partner')
-                ->form([
-                    Select::make('new_partner_id')
-                        ->label('New Partner')
-                        ->options(Partner::with('user')->get()->pluck('user.name', 'id'))
-                        ->default($this->getRecord()->user->partner_referral_id)
-                        ->required(),
-                ])
-                ->action(function (array $data) {
-                    try {
-                        $this->getRecord()->updateReferringPartner($data['new_partner_id']);
-                        Notification::make()
-                            ->title('Partner Changed Successfully')
-                            ->success()
-                            ->send();
-                    } catch (RuntimeException $e) {
-                        Notification::make()
-                            ->title('Error')
-                            ->body($e->getMessage())
-                            ->danger()
-                            ->send();
-                    }
-                })
-                ->requiresConfirmation()
-                ->icon('gmdi-business-center-o')
-                ->label($currentPartnerName)
-                ->modalDescription('Are you sure you want to change the partner for this venue?')
-                ->size(ActionSize::ExtraSmall)
-                ->button(),
             ActionGroup::make([
-                Action::make('Draft')
-                    ->action(function () {
-                        $this->getRecord()->update([
-                            'status' => VenueStatus::DRAFT,
-                        ]);
+                Action::make('convertToVenueGroup')
+                    ->label('Convert to Venue Group')
+                    ->icon('heroicon-o-building-office-2')
+                    ->color('success')
+                    ->visible(fn () => $venue->venue_group_id === null)
+                    ->form([
+                        TextInput::make('group_name')
+                            ->label('Venue Group Name')
+                            ->default(fn () => $venue->name.' Group')
+                            ->required(),
+                        FileUpload::make('logo_path')
+                            ->label('Venue Group Logo')
+                            ->disk('do')
+                            ->directory(app()->environment().'/venue-groups')
+                            ->moveFiles()
+                            ->imageEditor()
+                            ->acceptedFileTypes(['image/jpeg', 'image/png', 'image/webp'])
+                            ->maxSize(8192)
+                            ->imagePreviewHeight('254')
+                            ->getUploadedFileNameForStorageUsing(
+                                fn ($record, TemporaryUploadedFile $file): string => str($venue->name.' Group')->slug().'-'.time().'.'.$file->getClientOriginalExtension()
+                            ),
+                        Select::make('additional_venues')
+                            ->label('Additional Venues')
+                            ->multiple()
+                            ->options(
+                                Venue::query()
+                                    ->where('id', '!=', $venue->id)
+                                    ->where('venue_group_id', null)
+                                    ->pluck('name', 'id')
+                            )
+                            ->helperText('Select other venues to add to this venue group (optional)'),
+                    ])
+                    ->action(function (array $data) use ($venue) {
+                        try {
+                            DB::transaction(function () use ($data, $venue) {
+                                // Create the venue group
+                                $venueGroup = new \App\Models\VenueGroup;
+                                $venueGroup->name = $data['group_name'];
+                                $venueGroup->primary_manager_id = $venue->user_id;
+                                $venueGroup->logo_path = $data['logo_path'] ?? null;
+                                $venueGroup->save();
+
+                                // Make the logo public if it exists
+                                if (! empty($data['logo_path'])) {
+                                    Storage::disk('do')->setVisibility($data['logo_path'], 'public');
+                                }
+
+                                // Add the current venue to the venue group
+                                $venue->venue_group_id = $venueGroup->id;
+                                $venue->save();
+
+                                /** @var \App\Models\User $user */
+                                $user = $venue->user;
+                                $user->removeRole('venue');
+                                $user->assignRole('venue_manager');
+
+                                // Add the user as a manager in the venue group
+                                $venueGroup->managers()->attach($user->id, [
+                                    'current_venue_id' => $venue->id,
+                                    'allowed_venue_ids' => json_encode([$venue->id]),
+                                    'is_current' => true,
+                                ]);
+
+                                // Add additional venues if selected
+                                if (! empty($data['additional_venues'])) {
+                                    $allowedVenueIds = [$venue->id];
+
+                                    foreach ($data['additional_venues'] as $additionalVenueId) {
+                                        $additionalVenue = Venue::find($additionalVenueId);
+                                        if ($additionalVenue) {
+                                            // Update the venue's user_id to match the original venue's user_id
+                                            $additionalVenue->user_id = $venue->user_id;
+                                            $additionalVenue->venue_group_id = $venueGroup->id;
+                                            $additionalVenue->save();
+                                            $allowedVenueIds[] = $additionalVenue->id;
+                                        }
+                                    }
+
+                                    // Update allowed venues for the manager
+                                    $allVenueIds = $venueGroup->venues()->pluck('id')->toArray();
+                                    $venueGroup->managers()->updateExistingPivot($user->id, [
+                                        'allowed_venue_ids' => json_encode($allVenueIds),
+                                    ]);
+                                }
+                            });
+
+                            Notification::make()
+                                ->title('Venue Group Created')
+                                ->body('The venue has been successfully converted to a venue group.')
+                                ->success()
+                                ->send();
+
+                            // Redirect to refresh the page
+                            $this->redirect(VenueResource::getUrl('edit', ['record' => $venue->id]));
+
+                        } catch (\Exception $e) {
+                            Notification::make()
+                                ->title('Error')
+                                ->body('Failed to create venue group: '.$e->getMessage())
+                                ->danger()
+                                ->send();
+                        }
                     })
-                    ->requiresConfirmation(),
-                Action::make('Pending')
-                    ->action(function () {
-                        $this->getRecord()->update([
-                            'status' => VenueStatus::PENDING,
-                        ]);
+                    ->requiresConfirmation()
+                    ->modalHeading('Convert to Venue Group')
+                    ->modalDescription('This will convert the venue into a venue group and make the venue owner a venue manager. Any additional venues will be linked to the same user account.'),
+
+                Action::make('manageVenueGroup')
+                    ->label('Manage Venue Group')
+                    ->icon('heroicon-o-building-office-2')
+                    ->color('primary')
+                    ->visible(fn () => $venue->venue_group_id !== null)
+                    ->form([
+                        TextInput::make('group_name')
+                            ->label('Venue Group Name')
+                            ->default(fn () => $venue->venueGroup->name)
+                            ->required(),
+                        FileUpload::make('logo_path')
+                            ->label('Venue Group Logo')
+                            ->disk('do')
+                            ->directory(app()->environment().'/venue-groups')
+                            ->moveFiles()
+                            ->imageEditor()
+                            ->acceptedFileTypes(['image/jpeg', 'image/png', 'image/webp'])
+                            ->maxSize(8192)
+                            ->imagePreviewHeight('254')
+                            ->default(fn () => $venue->venueGroup->logo_path)
+                            ->getUploadedFileNameForStorageUsing(
+                                fn ($record, TemporaryUploadedFile $file): string => $venue->venueGroup->slug.'-'.time().'.'.$file->getClientOriginalExtension()
+                            ),
+                        Select::make('additional_venues')
+                            ->label('Add Venues to Group')
+                            ->multiple()
+                            ->options(
+                                fn () => Venue::query()
+                                    ->where('venue_group_id', null)
+                                    ->pluck('name', 'id')
+                            )
+                            ->helperText('Select venues to add to this venue group'),
+                    ])
+                    ->action(function (array $data) use ($venue) {
+                        try {
+                            DB::transaction(function () use ($data, $venue) {
+                                $venueGroup = $venue->venueGroup;
+
+                                // Update venue group name and logo
+                                $venueGroup->update([
+                                    'name' => $data['group_name'],
+                                    'logo_path' => $data['logo_path'],
+                                ]);
+
+                                // Make the logo public
+                                if ($data['logo_path']) {
+                                    Storage::disk('do')->setVisibility($data['logo_path'], 'public');
+                                }
+
+                                // Add additional venues if selected
+                                if (! empty($data['additional_venues'])) {
+                                    $allVenueIds = $venueGroup->venues()->pluck('id')->toArray();
+                                    $primaryManager = $venueGroup->primaryManager;
+
+                                    foreach ($data['additional_venues'] as $additionalVenueId) {
+                                        $additionalVenue = Venue::find($additionalVenueId);
+                                        if ($additionalVenue) {
+                                            // Update the venue's user_id to match the venue group's primary manager
+                                            $additionalVenue->user_id = $primaryManager->id;
+                                            $additionalVenue->venue_group_id = $venueGroup->id;
+                                            $additionalVenue->save();
+                                            $allVenueIds[] = $additionalVenue->id;
+                                        }
+                                    }
+
+                                    // Update allowed venues for all managers
+                                    foreach ($venueGroup->managers as $manager) {
+                                        $venueGroup->managers()->updateExistingPivot($manager->id, [
+                                            'allowed_venue_ids' => json_encode($allVenueIds),
+                                        ]);
+                                    }
+                                }
+                            });
+
+                            Notification::make()
+                                ->title('Venue Group Updated')
+                                ->body('The venue group name, logo, and venues have been successfully updated.')
+                                ->success()
+                                ->send();
+
+                            // Redirect to refresh the page
+                            $this->redirect(VenueResource::getUrl('edit', ['record' => $venue->id]));
+
+                        } catch (\Exception $e) {
+                            Notification::make()
+                                ->title('Error')
+                                ->body('Failed to update venue group: '.$e->getMessage())
+                                ->danger()
+                                ->send();
+                        }
                     })
-                    ->requiresConfirmation(),
-                Action::make('Active')
-                    ->action(function () {
+                    ->modalHeading('Manage Venue Group')
+                    ->modalDescription('Update the venue group name, logo, and add additional venues. Any new venues will be linked to the primary manager\'s user account.'),
+
+                Action::make('mergeVenueGroups')
+                    ->label('Merge Venue Groups')
+                    ->icon('heroicon-o-arrows-right-left')
+                    ->color('danger')
+                    ->visible(fn () => $venue->venue_group_id !== null && auth()->user()->hasRole('super_admin'))
+                    ->form([
+                        Select::make('target_venue_group_id')
+                            ->label('Venue Group to Merge')
+                            ->helperText('Select the venue group that will be merged into the current venue group. All venues and managers from the selected group will be transferred to the current group.')
+                            ->options(function () use ($venue) {
+                                return \App\Models\VenueGroup::query()
+                                    ->where('id', '!=', $venue->venue_group_id)
+                                    ->pluck('name', 'id');
+                            })
+                            ->required(),
+                        Toggle::make('transfer_primary_manager')
+                            ->label('Transfer Primary Manager')
+                            ->helperText('If enabled, the primary manager from the selected venue group will become the primary manager of the current venue group.')
+                            ->default(false),
+                    ])
+                    ->action(function (array $data) use ($venue) {
+                        try {
+                            DB::transaction(function () use ($data, $venue) {
+                                $currentVenueGroup = $venue->venueGroup;
+                                $targetVenueGroup = \App\Models\VenueGroup::findOrFail($data['target_venue_group_id']);
+
+                                // Get all venues from the target venue group
+                                $venues = $targetVenueGroup->venues;
+
+                                // Get all managers from the target venue group
+                                $managers = $targetVenueGroup->managers;
+
+                                // Update primary manager if requested
+                                if ($data['transfer_primary_manager'] && $targetVenueGroup->primary_manager_id) {
+                                    $currentVenueGroup->update([
+                                        'primary_manager_id' => $targetVenueGroup->primary_manager_id,
+                                    ]);
+                                }
+
+                                // Transfer all venues to the current venue group
+                                foreach ($venues as $venueToTransfer) {
+                                    $venueToTransfer->update([
+                                        'venue_group_id' => $currentVenueGroup->id,
+                                    ]);
+                                }
+
+                                // Transfer all managers to the current venue group
+                                foreach ($managers as $manager) {
+                                    // Check if manager already exists in current group
+                                    $existingManager = $currentVenueGroup->managers()->where('user_id', $manager->id)->first();
+
+                                    if ($existingManager) {
+                                        // Manager already exists in current group, merge allowed venues
+                                        $currentAllowedVenueIds = json_decode($existingManager->pivot->allowed_venue_ids ?? '[]', true);
+                                        $newAllowedVenueIds = json_decode($manager->pivot->allowed_venue_ids ?? '[]', true);
+                                        $mergedAllowedVenueIds = array_unique(array_merge($currentAllowedVenueIds, $newAllowedVenueIds));
+
+                                        $currentVenueGroup->managers()->updateExistingPivot($manager->id, [
+                                            'allowed_venue_ids' => json_encode($mergedAllowedVenueIds),
+                                        ]);
+                                    } else {
+                                        // Manager doesn't exist in current group, add them
+                                        $currentVenueGroup->managers()->attach($manager->id, [
+                                            'current_venue_id' => $manager->pivot->current_venue_id,
+                                            'allowed_venue_ids' => $manager->pivot->allowed_venue_ids,
+                                            'is_current' => $manager->pivot->is_current,
+                                        ]);
+                                    }
+                                }
+
+                                // Get all venue IDs from the combined group
+                                $allVenueIds = $currentVenueGroup->venues()->pluck('id')->toArray();
+
+                                // Ensure all managers from both groups have access to all venues
+                                foreach ($currentVenueGroup->managers as $manager) {
+                                    $currentVenueGroup->managers()->updateExistingPivot(
+                                        $manager->id,
+                                        ['allowed_venue_ids' => json_encode($allVenueIds)]
+                                    );
+                                }
+
+                                // Update concierges to point to the current venue group
+                                \App\Models\Concierge::where('venue_group_id', $targetVenueGroup->id)
+                                    ->update(['venue_group_id' => $currentVenueGroup->id]);
+
+                                // Delete the target venue group
+                                $targetVenueGroup->delete();
+                            });
+
+                            Notification::make()
+                                ->title('Venue Groups Merged')
+                                ->body('The selected venue group has been successfully merged into the current venue group.')
+                                ->success()
+                                ->send();
+
+                            // Redirect to refresh the page
+                            $this->redirect(VenueResource::getUrl('edit', ['record' => $venue->id]));
+
+                        } catch (\Exception $e) {
+                            Notification::make()
+                                ->title('Error')
+                                ->body('Failed to merge venue groups: '.$e->getMessage())
+                                ->danger()
+                                ->send();
+                        }
+                    })
+                    ->requiresConfirmation()
+                    ->modalHeading('Merge Venue Groups')
+                    ->modalDescription('This will merge the selected venue group into the current venue group. All venues and managers from the selected group will be transferred to the current venue group, and the selected venue group will be deleted. This action cannot be undone.'),
+
+                Action::make('setPrimaryManager')
+                    ->label('Set Primary Manager')
+                    ->icon('heroicon-o-user')
+                    ->color('warning')
+                    ->visible(fn () => $venue->venue_group_id !== null && auth()->user()->hasRole(['super_admin', 'admin']))
+                    ->form([
+                        Select::make('primary_manager_id')
+                            ->label('Primary Manager')
+                            ->options(function () use ($venue) {
+                                return $venue->venueGroup->managers->pluck('name', 'id');
+                            })
+                            ->default(fn () => $venue->venueGroup->primary_manager_id)
+                            ->required(),
+                    ])
+                    ->action(function (array $data) use ($venue) {
+                        try {
+                            DB::transaction(function () use ($data, $venue) {
+                                $venueGroup = $venue->venueGroup;
+
+                                // Update the primary manager
+                                $venueGroup->update([
+                                    'primary_manager_id' => $data['primary_manager_id'],
+                                ]);
+
+                                // Update all venues in the group to have the same user_id
+                                $venueGroup->venues()->update([
+                                    'user_id' => $data['primary_manager_id'],
+                                ]);
+                            });
+
+                            Notification::make()
+                                ->title('Primary Manager Updated')
+                                ->body('The primary manager has been successfully updated and all venues have been assigned to this user.')
+                                ->success()
+                                ->send();
+
+                            // Redirect to refresh the page
+                            $this->redirect(VenueResource::getUrl('edit', ['record' => $venue->id]));
+
+                        } catch (\Exception $e) {
+                            Notification::make()
+                                ->title('Error')
+                                ->body('Failed to update primary manager: '.$e->getMessage())
+                                ->danger()
+                                ->send();
+                        }
+                    })
+                    ->requiresConfirmation()
+                    ->modalHeading('Set Primary Manager')
+                    ->modalDescription('Choose the primary manager for this venue group. This user will become the owner of all venues in the group.'),
+
+                Action::make('changePartner')
+                    ->label('Change Partner ('.$currentPartnerName.')')
+                    ->icon('heroicon-o-briefcase')
+                    ->form([
+                        Select::make('new_partner_id')
+                            ->label('New Partner')
+                            ->options(Partner::with('user')->get()->pluck('user.name', 'id'))
+                            ->default($this->getRecord()->user->partner_referral_id)
+                            ->required(),
+                    ])
+                    ->action(function (array $data) {
+                        try {
+                            $this->getRecord()->updateReferringPartner($data['new_partner_id']);
+                            Notification::make()
+                                ->title('Partner Changed Successfully')
+                                ->success()
+                                ->send();
+                        } catch (RuntimeException $e) {
+                            Notification::make()
+                                ->title('Error')
+                                ->body($e->getMessage())
+                                ->danger()
+                                ->send();
+                        }
+                    })
+                    ->requiresConfirmation()
+                    ->modalDescription('Are you sure you want to change the partner for this venue?'),
+
+                Action::make('changeStatus')
+                    ->label(fn () => 'Set Status ('.$this->getRecord()->status->getLabel().')')
+                    ->icon(fn () => match ($this->getRecord()->status->value) {
+                        VenueStatus::DRAFT->value => 'heroicon-o-document',
+                        VenueStatus::PENDING->value => 'heroicon-o-clock',
+                        VenueStatus::ACTIVE->value => 'heroicon-o-check-circle',
+                        VenueStatus::SUSPENDED->value => 'heroicon-o-x-circle',
+                        VenueStatus::HIDDEN->value => 'heroicon-o-eye-slash',
+                        VenueStatus::UPCOMING->value => 'heroicon-o-calendar',
+                    })
+                    ->color(fn () => match ($this->getRecord()->status->value) {
+                        VenueStatus::DRAFT->value => 'gray',
+                        VenueStatus::PENDING->value => 'warning',
+                        VenueStatus::ACTIVE->value => 'success',
+                        VenueStatus::SUSPENDED->value => 'danger',
+                        VenueStatus::HIDDEN->value => 'gray',
+                        VenueStatus::UPCOMING->value => 'info',
+                    })
+                    ->form([
+                        Select::make('status')
+                            ->label('Status')
+                            ->options(VenueStatus::class)
+                            ->default(fn () => $this->getRecord()->status->value)
+                            ->required(),
+                    ])
+                    ->action(function (array $data) {
                         $venue = $this->getRecord();
+                        $newStatus = VenueStatus::from($data['status']);
+
                         $venue->update([
-                            'status' => VenueStatus::ACTIVE,
+                            'status' => $newStatus,
                         ]);
 
-                        // Set secured_at for venue's user if not already set
-                        if (! $venue->user->secured_at) {
+                        // Set secured_at for venue's user if not already set and status is Active
+                        if ($newStatus === VenueStatus::ACTIVE && ! $venue->user->secured_at) {
                             $venue->user->update([
                                 'secured_at' => now(),
                             ]);
                         }
-                    })
-                    ->requiresConfirmation(),
-                Action::make('Suspended')
-                    ->action(function () {
-                        $this->getRecord()->update([
-                            'status' => VenueStatus::SUSPENDED,
-                        ]);
-                    })
-                    ->requiresConfirmation(),
-                Action::make('Hidden')
-                    ->action(function () {
-                        $this->getRecord()->update([
-                            'status' => VenueStatus::HIDDEN,
-                        ]);
+
+                        Notification::make()
+                            ->title('Status Updated')
+                            ->body('Venue status has been set to '.$newStatus->getLabel())
+                            ->success()
+                            ->send();
                     })
                     ->requiresConfirmation()
-                    ->visible(fn () => auth()->user()->hasRole('super_admin')),
+                    ->modalHeading('Change Venue Status')
+                    ->modalDescription('Are you sure you want to change the status of this venue?'),
             ])
-                ->label($this->getRecord()->status->getLabel())
-                ->icon('polaris-status-icon')
+                ->icon('heroicon-o-ellipsis-vertical')
                 ->color('primary')
-                ->size(ActionSize::ExtraSmall)
-                ->button(),
+                ->size(ActionSize::Small)
+                ->iconButton(),
         ];
     }
 

@@ -75,6 +75,18 @@ class CreateBooking
         // Get venue for non-prime incentive data
         $venue = $scheduleTemplate->venue;
 
+        // Check if concierge is restricted to specific venues
+        if ($concierge && $concierge->venue_group_id && ! empty($concierge->allowed_venue_ids)) {
+            if (! in_array($venue->id, $concierge->allowed_venue_ids)) {
+                throw new RuntimeException('You are not authorized to book at this venue.');
+            }
+
+            // Check if venue belongs to the concierge's venue group
+            if ($venue->venue_group_id !== $concierge->venue_group_id) {
+                throw new RuntimeException('You are not authorized to book at venues outside your venue group.');
+            }
+        }
+
         // Prepare meta data for non-prime bookings
         $meta = [];
         if ($source) {
@@ -176,6 +188,7 @@ class CreateBooking
         if (auth()->user()->hasActiveRole('partner')) {
             return config('app.house.concierge_id');
         }
+
         // Default: Regular concierge
         return Auth::user()->concierge->id ?? config('app.house.concierge_id');
     }

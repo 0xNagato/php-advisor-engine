@@ -15,11 +15,23 @@ class VenueController extends Controller
         $region = GetUserRegion::run();
 
         // Get all available venues in the region
-        $venues = Venue::available()
+        $query = Venue::available()
             ->where('region', $region->id)
-            ->where('status', VenueStatus::ACTIVE)
-            ->orderBy('name')
-            ->get(['id', 'name']);
+            ->where('status', VenueStatus::ACTIVE);
+
+        // Filter by concierge's allowed venues if applicable
+        if (auth()->check() && auth()->user()->hasActiveRole('concierge') && auth()->user()->concierge) {
+            $allowedVenueIds = auth()->user()->concierge->allowed_venue_ids ?? [];
+
+            // Only apply the filter if there are allowed venues
+            if (! empty($allowedVenueIds)) {
+                // Ensure all IDs are integers
+                $allowedVenueIds = array_map('intval', $allowedVenueIds);
+                $query->whereIn('id', $allowedVenueIds);
+            }
+        }
+
+        $venues = $query->orderBy('name')->get(['id', 'name']);
 
         return response()->json([
             'data' => $venues,

@@ -14,6 +14,7 @@ class VenueGroup extends Model
         'name',
         'primary_manager_id',
         'slug',
+        'logo_path',
     ];
 
     protected static function booted()
@@ -72,5 +73,15 @@ class VenueGroup extends Model
             $user->id,
             ['current_venue_id' => $venue->id]
         );
+    }
+
+    /**
+     * Get the logo URL for the venue group.
+     */
+    public function getLogoAttribute(): string
+    {
+        return $this->logo_path
+            ? \Illuminate\Support\Facades\Storage::disk('do')->url($this->logo_path)
+            : 'https://ui-avatars.com/api/?background=312596&color=fff&name='.urlencode($this->name);
     }
 }

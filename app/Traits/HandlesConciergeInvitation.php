@@ -18,6 +18,8 @@ use Filament\Forms\Form;
 use Filament\Notifications\Notification;
 use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\HtmlString;
 use Illuminate\Validation\Rules\Password as PasswordRule;
 use Ysfkaya\FilamentPhoneInput\Forms\PhoneInput;
@@ -171,71 +173,109 @@ trait HandlesConciergeInvitation
                 ->danger()
                 ->send();
             $this->redirect(config('app.platform_url'));
+
+            return;
         }
 
         $data = $this->form->getState();
 
-        if (! $this->referral) {
-            $this->referral = Referral::query()->create([
-                'referrer_id' => $this->invitingPartner?->user_id ?? $this->invitingConcierge->user_id,
+        try {
+            DB::beginTransaction();
+
+            if (! $this->referral) {
+                $this->referral = Referral::query()->create([
+                    'referrer_id' => $this->invitingPartner?->user_id ?? $this->invitingConcierge->user_id,
+                    'email' => $data['email'],
+                    'phone' => $data['phone'],
+                    'first_name' => $data['first_name'],
+                    'last_name' => $data['last_name'],
+                    'type' => 'concierge',
+                    'referrer_type' => $this->invitingPartner ? 'partner' : 'concierge',
+                ]);
+            }
+
+            $userData = [
+                'first_name' => $data['first_name'],
+                'last_name' => $data['last_name'],
                 'email' => $data['email'],
                 'phone' => $data['phone'],
-                'first_name' => $data['first_name'],
-                'last_name' => $data['last_name'],
-                'type' => 'concierge',
-                'referrer_type' => $this->invitingPartner ? 'partner' : 'concierge',
+                'password' => bcrypt($data['password']),
+                'secured_at' => now(),
+                'notification_regions' => $data['notification_regions'],
+            ];
+
+            // Set the appropriate referral ID based on referrer type
+            if ($this->referral->referrer_type === 'partner') {
+                $userData['partner_referral_id'] = $this->referral->referrer->partner->id;
+            } elseif ($this->referral->referrer_type === 'concierge') {
+                $userData['concierge_referral_id'] = $this->referral->referrer->concierge->id;
+            }
+            // No need to set a referral ID for venue_manager referrals
+
+            $user = User::query()->create($userData);
+
+            $this->referral->update([
+                'user_id' => $user->id,
+                'secured_at' => now(),
             ]);
+
+            // Delete any other referrals with the same email or phone
+            Referral::query()
+                ->where('id', '!=', $this->referral->id)
+                ->where(function ($query) use ($data) {
+                    $query->where('email', $data['email'])
+                        ->orWhere('phone', $data['phone']);
+                })
+                ->delete();
+
+            $user->assignRole('concierge');
+
+            $conciergeData = [
+                'hotel_name' => $data['hotel_name'],
+            ];
+
+            // Handle venue restrictions if this is a venue manager referral
+            if ($this->referral->referrer_type === 'venue_manager' && isset($this->referral->meta['venue_group_id'])) {
+                $conciergeData['venue_group_id'] = $this->referral->meta['venue_group_id'];
+
+                if (isset($this->referral->meta['allowed_venue_ids'])) {
+                    // Cast allowed_venue_ids to integers to ensure proper comparison in venue checks
+                    $conciergeData['allowed_venue_ids'] = array_map('intval', $this->referral->meta['allowed_venue_ids']);
+                }
+            }
+
+            $user->concierge()->create($conciergeData);
+
+            $user->notify(new ConciergeRegisteredEmail(
+                sendAgreementCopy: $data['send_agreement_copy'] ?? false,
+                userData: [
+                    'first_name' => $data['first_name'],
+                    'last_name' => $data['last_name'],
+                    'date' => now()->format('F j, Y'),
+                ]
+            ));
+
+            $user->notify(new ConciergeCreated($user));
+
+            DB::commit();
+
+            Auth::login($user);
+            $this->redirect(config('app.platform_url'));
+        } catch (\Exception $e) {
+            DB::rollBack();
+
+            Log::error('Failed to secure concierge account', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+                'referral_id' => $this->referral->id ?? null,
+            ]);
+
+            Notification::make()
+                ->title('Failed to create your account')
+                ->body('There was an unexpected error. Please try again or contact support.')
+                ->danger()
+                ->send();
         }
-
-        $userData = [
-            'first_name' => $data['first_name'],
-            'last_name' => $data['last_name'],
-            'email' => $data['email'],
-            'phone' => $data['phone'],
-            'password' => bcrypt($data['password']),
-            'secured_at' => now(),
-            'notification_regions' => $data['notification_regions'],
-        ];
-
-        if ($this->referral->referrer_type === 'partner') {
-            $userData['partner_referral_id'] = $this->referral->referrer->partner->id;
-        } else {
-            $userData['concierge_referral_id'] = $this->referral->referrer->concierge->id;
-        }
-
-        $user = User::query()->create($userData);
-
-        $this->referral->update([
-            'user_id' => $user->id,
-            'secured_at' => now(),
-        ]);
-
-        Referral::query()
-            ->where('id', '!=', $this->referral->id)
-            ->where(function ($query) use ($data) {
-                $query->where('email', $data['email'])
-                    ->orWhere('phone', $data['phone']);
-            })
-            ->delete();
-
-        $user->assignRole('concierge');
-        $user->concierge()->create([
-            'hotel_name' => $data['hotel_name'],
-        ]);
-
-        $user->notify(new ConciergeRegisteredEmail(
-            sendAgreementCopy: $data['send_agreement_copy'] ?? false,
-            userData: [
-                'first_name' => $data['first_name'],
-                'last_name' => $data['last_name'],
-                'date' => now()->format('F j, Y'),
-            ]
-        ));
-
-        $user->notify(new ConciergeCreated($user));
-
-        Auth::login($user);
-        $this->redirect(config('app.platform_url'));
     }
 
     protected function getTermsAndConditionsFormComponent(): Placeholder

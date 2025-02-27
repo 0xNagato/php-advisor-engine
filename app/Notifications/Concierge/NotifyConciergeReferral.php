@@ -67,7 +67,7 @@ class NotifyConciergeReferral extends Notification
     {
         return (new MailMessage)
             ->from('welcome@primavip.co', 'PRIMA')
-            ->subject('Welcome to PRIMA!')
+            ->subject("{$this->referrer->name} has invited you to join PRIMA")
             ->markdown('mail.concierge-referral-mail', ['passwordResetUrl' => $this->shortURL, 'referrer' => $this->referrer->name]);
     }
 }

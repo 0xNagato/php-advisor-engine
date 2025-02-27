@@ -35,7 +35,7 @@ class ListVenues extends ListRecords
             ->recordUrl(fn (Venue $record) => ViewVenue::getUrl(['record' => $record]))
             ->query(
                 Venue::query()
-                    ->with(['partnerReferral.user.partner', 'user.authentications'])
+                    ->with(['partnerReferral.user.partner', 'user.authentications', 'venueGroup'])
                     ->withCount(['confirmedBookings'])
                     ->leftJoin('users', 'venues.user_id', '=', 'users.id')
                     ->orderByDesc('users.updated_at')
@@ -50,6 +50,12 @@ class ListVenues extends ListRecords
                     ->grow(false)
                     ->size('xs')
                     ->visibleFrom('lg'),
+                TextColumn::make('venueGroup.name')
+                    ->label('Venue Group')
+                    ->grow(false)
+                    ->size('xs')
+                    ->formatStateUsing(fn ($state, Venue $record) => $record->venueGroup ? $record->venueGroup->name : '-')
+                    ->visibleFrom('md'),
                 TextColumn::make('partnerReferral.user.name')->label('Partner')
                     ->url(fn (Venue $record) => $record->partnerReferral?->user?->partner
                         ? ViewPartner::getUrl(['record' => $record->partnerReferral->user->partner])

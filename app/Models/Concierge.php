@@ -26,7 +26,41 @@ class Concierge extends Model
     protected $fillable = [
         'user_id',
         'hotel_name',
+        'allowed_venue_ids',
+        'venue_group_id',
     ];
+
+    /**
+     * The attributes that should be cast.
+     *
+     * @var array<string, string>
+     */
+    protected $casts = [
+        'allowed_venue_ids' => 'array',
+    ];
+
+    /**
+     * Ensure allowed_venue_ids are always cast to integers.
+     *
+     * @return Attribute<array<int, int>, array<int, int|string>>
+     */
+    protected function allowedVenueIds(): Attribute
+    {
+        return Attribute::make(
+            get: function ($value) {
+                $ids = json_decode($value, true) ?? [];
+
+                return array_map('intval', $ids);
+            },
+            set: function ($value) {
+                if (is_string($value)) {
+                    $value = json_decode($value, true) ?? [];
+                }
+
+                return json_encode(array_map('intval', $value));
+            }
+        );
+    }
 
     /**
      * @return BelongsTo<User, $this>
@@ -159,5 +193,13 @@ class Concierge extends Model
     public function vipCodes(): HasMany
     {
         return $this->hasMany(VipCode::class);
+    }
+
+    /**
+     * @return BelongsTo<VenueGroup, $this>
+     */
+    public function venueGroup(): BelongsTo
+    {
+        return $this->belongsTo(VenueGroup::class);
     }
 }

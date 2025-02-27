@@ -88,6 +88,17 @@ class ReservationService
 
                 $query->whereIn('status', $statuses);
             })
+            // Filter by concierge's allowed venues if applicable
+            ->when(auth()->check() && auth()->user()->hasActiveRole('concierge') && auth()->user()->concierge, function ($query) {
+                $allowedVenueIds = auth()->user()->concierge->allowed_venue_ids ?? [];
+
+                // Only apply the filter if there are allowed venues
+                if (! empty($allowedVenueIds)) {
+                    // Ensure all IDs are integers
+                    $allowedVenueIds = array_map('intval', $allowedVenueIds);
+                    $query->whereIn('id', $allowedVenueIds);
+                }
+            })
             ->withSchedulesForDate(
                 date: $this->date,
                 partySize: $this->getGuestCount(),

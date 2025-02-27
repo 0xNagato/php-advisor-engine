@@ -136,11 +136,26 @@ class ReservationHub extends Page
                 Select::make('venue')
                     ->prefixIcon('heroicon-m-building-storefront')
                     ->options(
-                        fn () => Venue::available()
-                            ->where('status', VenueStatus::ACTIVE)
-                            ->where('region', session('region', 'miami'))
-                            ->orderBy('name')
-                            ->pluck('name', 'id')
+                        function () {
+                            $query = Venue::available()
+                                ->where('status', VenueStatus::ACTIVE)
+                                ->where('region', session('region', 'miami'));
+
+                            // Filter by concierge's allowed venues if applicable
+                            if (auth()->user()->hasActiveRole('concierge') && auth()->user()->concierge) {
+                                $allowedVenueIds = auth()->user()->concierge->allowed_venue_ids ?? [];
+
+                                // Only apply the filter if there are allowed venues
+                                if (! empty($allowedVenueIds)) {
+                                    // Ensure all IDs are integers
+                                    $allowedVenueIds = array_map('intval', $allowedVenueIds);
+
+                                    $query->whereIn('id', $allowedVenueIds);
+                                }
+                            }
+
+                            return $query->orderBy('name')->pluck('name', 'id');
+                        }
                     )
                     ->placeholder('Select Venue')
                     ->required()
