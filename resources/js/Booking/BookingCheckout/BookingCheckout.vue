@@ -371,7 +371,7 @@ const emailInvoice = async () => {
         <p
           class="rounded-lg border border-blue-200 bg-blue-50 p-2 text-sm font-semibold text-blue-700"
         >
-          <strong>Important:</strong> This booking time requires a ${{
+          <strong>Important:</strong> This reservation requires a ${{
             mingleData.minimumSpendPerGuest
           }}
           per diner minimum spend. Booking fees do not apply toward minimum

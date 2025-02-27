@@ -150,7 +150,7 @@
                         @if ($booking->schedule->minimum_spend_per_guest > 0)
                             <div
                                 class="p-3 mb-2 text-sm font-medium text-blue-700 border border-blue-200 rounded-lg bg-blue-50">
-                                <strong>Important:</strong> This booking time requires a
+                                <strong>Important:</strong> This reservation requires a
                                 ${{ $booking->schedule->minimum_spend_per_guest }} per diner minimum spend. Booking
                                 fees do not apply toward minimum spend or restaurant bill.
                             </div>
