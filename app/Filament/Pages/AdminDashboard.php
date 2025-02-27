@@ -9,6 +9,8 @@ use App\Livewire\BookingsOverview;
 use App\Livewire\Concierge\ConciergeOverallLeaderboard;
 use App\Livewire\DateRangeFilterWidget;
 use App\Livewire\Partner\PartnerOverallLeaderboard;
+use App\Livewire\ReferralAnalyticsWidget;
+use App\Livewire\ReferralSourcesWidget;
 use App\Livewire\Venue\VenueOverallLeaderboard;
 use Carbon\Carbon;
 use Filament\Forms\Form;
@@ -92,6 +94,13 @@ class AdminDashboard extends Dashboard
                 'columnSpan' => '1',
                 'startDate' => Carbon::parse($this->filters['startDate']),
                 'endDate' => Carbon::parse($this->filters['endDate']),
+            ]),
+            ReferralAnalyticsWidget::make([
+                'filters' => [
+                    'startDate' => $this->filters['startDate'] ?? null,
+                    'endDate' => $this->filters['endDate'] ?? null,
+                ],
+                'columnSpan' => 'full',
             ]),
             BookingAnalyticsWidget::make([
                 'filters' => [

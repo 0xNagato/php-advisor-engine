@@ -3,8 +3,10 @@
 namespace App\Data;
 
 use InvalidArgumentException;
+use Spatie\LaravelData\Attributes\Validation\StringType;
 use Spatie\LaravelData\Attributes\Validation\Max;
 use Spatie\LaravelData\Data;
+use Illuminate\Validation\Rules\MaxDigits;
 
 class PushNotificationData extends Data
 {
@@ -15,10 +17,12 @@ class PushNotificationData extends Data
     public const TOTAL_PAYLOAD_MAX_SIZE = 4096;
 
     public function __construct(
-        #[Max(self::TITLE_MAX_LENGTH, message: 'Push notification title cannot exceed '.self::TITLE_MAX_LENGTH.' characters')]
+        #[Max(self::TITLE_MAX_LENGTH)]
+        #[StringType]
         public string $title,
 
-        #[Max(self::BODY_MAX_LENGTH, message: 'Push notification body cannot exceed '.self::BODY_MAX_LENGTH.' characters')]
+        #[Max(self::BODY_MAX_LENGTH)]
+        #[StringType]
         public string $body,
 
         public ?array $data = [],
