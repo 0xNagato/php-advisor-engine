@@ -22,7 +22,12 @@ class AdminTopReferralDays extends BaseWidget
     protected static bool $isLazy = true;
 
     public int|string|array $columnSpan;
-    
+
+    public function mount(): void
+    {
+        $this->bootedInteractsWithTable();
+    }
+
     public function getColumnSpan(): int|string|array
     {
         return $this->columnSpan ?? 'full';
@@ -51,18 +56,18 @@ class AdminTopReferralDays extends BaseWidget
         $timezone = auth()->user()->timezone ?? config('app.default_timezone');
         $startDate = $this->startDate ?? now()->subDays(30)->startOfDay();
         $endDate = $this->endDate ?? now()->endOfDay();
-        
+
         // Convert to UTC for database query
         $startDateUTC = $startDate->copy()->setTimezone('UTC')->startOfDay();
         $endDateUTC = $endDate->copy()->setTimezone('UTC')->endOfDay();
-        
+
         // Simple, straightforward Eloquent query
         return Referral::query()
             ->select([
-                DB::raw("DATE(created_at) as date"),
+                DB::raw('DATE(created_at) as date'),
                 DB::raw('COUNT(*) as invites'),
                 DB::raw('SUM(CASE WHEN secured_at IS NOT NULL THEN 1 ELSE 0 END) as signups'),
-                DB::raw('ROUND((SUM(CASE WHEN secured_at IS NOT NULL THEN 1 ELSE 0 END) / COUNT(*)) * 100, 1) as rate')
+                DB::raw('ROUND((SUM(CASE WHEN secured_at IS NOT NULL THEN 1 ELSE 0 END) / COUNT(*)) * 100, 1) as rate'),
             ])
             ->whereBetween('created_at', [$startDateUTC, $endDateUTC])
             ->groupBy(DB::raw('DATE(created_at)'))
@@ -105,4 +110,4 @@ class AdminTopReferralDays extends BaseWidget
             ])
             ->defaultSort('invites', 'desc');
     }
-} 
+}
