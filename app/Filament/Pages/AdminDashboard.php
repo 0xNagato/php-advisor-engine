@@ -103,16 +103,20 @@ class AdminDashboard extends Dashboard
                 ],
                 'columnSpan' => 'full',
             ]),
-            // AdminTopReferrersTable::make([
-            //     'startDate' => Carbon::parse($this->filters['startDate']),
-            //     'endDate' => Carbon::parse($this->filters['endDate']),
-            //     'columnSpan' => '1',
-            // ]),
-            // AdminTopReferralDays::make([
-            //     'startDate' => Carbon::parse($this->filters['startDate']),
-            //     'endDate' => Carbon::parse($this->filters['endDate']),
-            //     'columnSpan' => 'full',
-            // ]),
+            AdminTopReferrersTable::make([
+                'filters' => [
+                    'startDate' => $this->filters['startDate'] ?? null,
+                    'endDate' => $this->filters['endDate'] ?? null,
+                ],
+                'columnSpan' => '1',
+            ]),
+            AdminTopReferralDays::make([
+                'filters' => [
+                    'startDate' => $this->filters['startDate'] ?? null,
+                    'endDate' => $this->filters['endDate'] ?? null,
+                ],
+                'columnSpan' => '1',
+            ]),
             BookingAnalyticsWidget::make([
                 'filters' => [
                     'startDate' => $this->filters['startDate'] ?? null,

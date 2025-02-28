@@ -21,7 +21,7 @@ class VenueContactsForm
                 ->required(),
             PhoneInput::make('contact_phone')
                 ->label('Contact Phone')
-                ->required()
+                ->required(fn (Get $get): bool => $get('preferences.sms') ?? true)
                 ->onlyCountries(config('app.countries'))
                 ->displayNumberFormat(PhoneInputNumberType::E164)
                 ->disallowDropdown()
@@ -34,7 +34,8 @@ class VenueContactsForm
                 ->label('Contact Email')
                 ->placeholder('name@domain.com')
                 ->autocomplete(false)
-                ->email()->required(),
+                ->email()
+                ->required(fn (Get $get): bool => $get('preferences.mail') ?? true),
             Checkbox::make('use_for_reservations')
                 ->label('Use for Reservations')
                 ->extraAttributes(['class' => 'text-indigo-600'])
@@ -46,6 +47,7 @@ class VenueContactsForm
                 ->schema([
                     Toggle::make('sms')
                         ->label('SMS')
+                        ->default(true)
                         ->rules([
                             fn (Get $get): Closure => static function (string $attribute, $value, Closure $fail) use (
                                 $get
@@ -55,9 +57,11 @@ class VenueContactsForm
                                 }
                             },
                         ])
+                        ->reactive()
                         ->inline(),
                     Toggle::make('mail')
                         ->label('Email')
+                        ->default(true)
                         ->rules([
                             fn (Get $get): Closure => static function (string $attribute, $value, Closure $fail) use (
                                 $get
@@ -67,6 +71,7 @@ class VenueContactsForm
                                 }
                             },
                         ])
+                        ->reactive()
                         ->inline(),
                 ]),
         ];
