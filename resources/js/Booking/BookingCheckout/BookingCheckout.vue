@@ -411,7 +411,6 @@ const emailInvoice = async () => {
             type="email"
             placeholder="Email"
             class="focus:ring-opacity/50 w-full rounded-md border-gray-300 shadow-sm transition duration-200 ease-in-out focus:border-[#A7A4F2] focus:ring focus:ring-[#D1CFF5] sm:text-sm"
-            required
           />
         </div>
         <div class="mb-2">
