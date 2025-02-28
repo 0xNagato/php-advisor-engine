@@ -8,7 +8,7 @@
                 <div class="intro_hero">
                     <div class="intro_hero-img_hero">
                         <img src="{{ asset('/images/marketing/image-1.png') }}" alt=""
-                            class="intro_hero-img_trans">
+                             class="intro_hero-img_trans">
                     </div>
                     <div class="intro_hero-text">
                         <div class="intro_hero-text_container">
@@ -22,15 +22,15 @@
                     <div class="intro_hero-img_container">
                         <div class="intro_hero-img">
                             <img src="{{ asset('/images/marketing/city.png') }}" alt=""
-                                class="hidden intro_hero-img_trans lg:block">
+                                 class="hidden intro_hero-img_trans lg:block">
                             <img src="{{ asset('/images/marketing/dining.jpg') }}" alt=""
-                                class="block intro_hero-img_trans lg:hidden">
+                                 class="block intro_hero-img_trans lg:hidden">
                         </div>
                         <div class="intro_hero-img">
                             <img src="{{ asset('/images/marketing/restaurant.png') }}" alt=""
-                                class="hidden intro_hero-img_trans lg:block">
+                                 class="hidden intro_hero-img_trans lg:block">
                             <img src="{{ asset('/images/marketing/sparow.jpg') }}" alt=""
-                                class="block intro_hero-img_trans lg:hidden">
+                                 class="block intro_hero-img_trans lg:hidden">
                         </div>
                     </div>
                 </div>
@@ -81,7 +81,7 @@
                                 </p>
                             </div>
                             <a href="#" class="intro_cta-box_btn"
-                                @click.prevent="$dispatch('prima-open-modal', { id: 'prima-contact' })">
+                               @click.prevent="$dispatch('prima-open-modal', { id: 'prima-contact' })">
                                 Talk to PRIMA Concierge
                             </a>
                         </div>
@@ -99,7 +99,7 @@
                 <div class="flex gap-4 md:gap-[40px] flex-col md:flex-row">
                     <div class="flex-1">
                         <img src="{{ asset('/images/marketing/consumers.png') }}" alt="app-image"
-                            class="img_full rounded-[20px]">
+                             class="img_full rounded-[20px]">
                     </div>
                     <div class="flex flex-col items-start flex-1 gap-4">
                         <span class="gap-2 pl-2 tag">
@@ -129,7 +129,7 @@
                             </li>
                         </ul>
                         <a href="#" class="text-white btn bg-gradient-to-b from-primary to-primary_light btn_full"
-                            @click.prevent="$dispatch('prima-open-modal', { id: 'prima-contact' })">
+                           @click.prevent="$dispatch('prima-open-modal', { id: 'prima-contact' })">
                             Talk to PRIMA Concierge
                         </a>
                     </div>
@@ -140,7 +140,7 @@
                     <div class="box_outline">
                         <p class="box_outline-title text-[16px] md:text-[18px]">
                             <img src="{{ asset('/images/marketing/calendar_icon.svg') }}" alt="calendar-icon"
-                                width="24">
+                                 width="24">
                             Select Your City and Check Availability
                         </p>
                         <p class="text-tiny">
@@ -150,7 +150,7 @@
                     <div class="box_outline">
                         <p class="box_outline-title">
                             <img src="{{ asset('/images/marketing/schedule_icon.svg') }}" alt="schedule-icon"
-                                width="24">
+                                 width="24">
                             Book Your Table Instantly with Confidence
                         </p>
                         <p class="text-tiny">
@@ -190,17 +190,17 @@
                             Cancellations.
                         </p>
                         <a href="#"
-                            class="text-white btn bg-gradient-to-b from-primary to-primary_light btn_full"
-                            @click.prevent="$dispatch('prima-open-modal', { id: 'prima-contact' })">
+                           class="text-white btn bg-gradient-to-b from-primary to-primary_light btn_full"
+                           @click.prevent="$dispatch('prima-open-modal', { id: 'prima-contact' })">
                             Talk to PRIMA
                         </a>
                         <div class="bg-gradient-to-b from-salmon to-salmon_accent w-full box p-0 mt-[24px] ">
                             <div
                                 class="pr-8 pl-8 justify-center flex pt-[130px] lg:pt-[50px] bg_cove bg_particle relative">
                                 <img src="{{ asset('/images/marketing/particles.png') }}" alt="particles"
-                                    class="absolute top-0 left-0 img_full">
+                                     class="absolute top-0 left-0 img_full">
                                 <img src="{{ asset('/images/marketing/phone-3.png') }}" alt="phone"
-                                    class="z-[1]">
+                                     class="z-[1]">
                             </div>
                         </div>
                     </div>
@@ -233,9 +233,8 @@
                             </p>
                         </div>
                         <p>
-                            Our concierge team is ready to book reservations during off-peak hours, ensuring your dining
-                            room is full at all times. PRIMA shares 80% of the fees charges for non-prime bookings with
-                            our participating concierges.
+                            PRIMA's Concierge Network is ready to fill your dining room during off peak times, providing
+                            a steady stream of high value customers.
                         </p>
                     </div>
                     <div class="box_md md:sticky top-[140px]">
@@ -271,7 +270,7 @@
                         <div class="box_md-header">
                             <div class="btn_icon btn bg-gradient-to-r from-purple_light to-purple_dark rounded-[12px]">
                                 <img src="{{ asset('/images/marketing/reservation_icon.svg') }}"
-                                    alt="reservation-icon">
+                                     alt="reservation-icon">
                             </div>
                             <p class="box_md-title">
                                 Real-Time Reservation Management
@@ -296,9 +295,9 @@
                     <div class="bg-gradient-to-b from-blue to-green w-full box p-0 sticky top-[110px]">
                         <div class="pr-8 pl-8 justify-center flex pt-[20px] md:pt-14 bg_cover bg_particle relative">
                             <img src="{{ asset('images/marketing/particles.png') }}" alt="particles"
-                                class="absolute top-0 left-0 img_full">
+                                 class="absolute top-0 left-0 img_full">
                             <img src="{{ asset('images/marketing/phone-5.png') }}" alt="phone"
-                                class="z-[1] max-h-[520px]">
+                                 class="z-[1] max-h-[520px]">
                         </div>
                     </div>
                 </div>
@@ -324,13 +323,13 @@
                             <div class="flex items-start justify-start gap-4">
                                 <div class="btn_icon btn bg-gradient-to-tl from-cyan to-blue_dark">
                                     <img src="{{ asset('images/marketing/vip_icon.svg') }}" alt="vip_icon"
-                                        width="30">
+                                         width="30">
                                 </div>
                                 <div class="flex-1">
                                     <p class="card_lg-title">
                                         <span class="btn_icon btn bg-gradient-to-tl from-cyan to-blue_dark">
                                             <img src="{{ asset('images/marketing/vip_icon.svg') }}" alt="vip_icon"
-                                                width="30">
+                                                 width="30">
                                         </span>
                                         Concierge Services
                                     </p>
@@ -349,12 +348,13 @@
                                     <p class="card_lg-title">
                                         <span class="btn_icon btn bg-gradient-to-r from-pink to-pink_accent">
                                             <img src="{{ asset('images/marketing/money_icon.svg') }}"
-                                                alt="money_icon">
+                                                 alt="money_icon">
                                         </span>
-                                        Earn Commissions
+                                        Concierge Rewards
                                     </p>
                                     <p class="card_lg-text">
-                                        Earn up to 15% commission on premium reservation bookings.
+                                        PRIMA rewards concierges who use our systems to provide bookings to
+                                        participating restaurants.
                                     </p>
                                 </div>
                             </div>
@@ -363,13 +363,13 @@
                             <div class="flex items-start justify-start gap-4">
                                 <div class="btn_icon btn bg-gradient-to-r from-purple_light to-purple_dark">
                                     <img src="{{ asset('images/marketing/date_icon.svg') }}" alt="money-icon"
-                                        width="30">
+                                         width="30">
                                 </div>
                                 <div class="flex-1">
                                     <p class="card_lg-title">
                                         <span class="btn_icon btn bg-gradient-to-r from-purple_light to-purple_dark">
                                             <img src="{{ asset('images/marketing/date_icon.svg') }}" alt="money-icon"
-                                                width="30">
+                                                 width="30">
                                         </span>
                                         Exclusive Access
                                     </p>
@@ -383,13 +383,13 @@
                             <div class="flex items-start justify-start gap-4">
                                 <div class="btn_icon btn bg-gradient-to-r from-blue_accent to-pink_strong">
                                     <img src="{{ asset('images/marketing/champ_icon.svg') }}" alt="robot-icon"
-                                        width="30">
+                                         width="30">
                                 </div>
                                 <div class="flex-1">
                                     <p class="card_lg-title">
                                         <span class="btn_icon btn bg-gradient-to-r from-blue_accent to-pink_strong">
                                             <img src="{{ asset('images/marketing/champ_icon.svg') }}"
-                                                alt="robot-icon" width="30">
+                                                 alt="robot-icon" width="30">
                                         </span>
                                         Enhanced Prestige
                                     </p>
@@ -401,8 +401,8 @@
                         </div>
                     </div>
                     <a href="#"
-                        class="flex-auto mt-4 text-white btn bg-gradient-to-b from-primary to-primary_light btn_full"
-                        @click.prevent="$dispatch('prima-open-modal', { id: 'prima-contact' })">
+                       class="flex-auto mt-4 text-white btn bg-gradient-to-b from-primary to-primary_light btn_full"
+                       @click.prevent="$dispatch('prima-open-modal', { id: 'prima-contact' })">
                         Talk to PRIMA
                     </a>
                 </div>
@@ -425,9 +425,9 @@
                     real-time. Enjoy guaranteed bookings without the usual hassle of waiting lists.
                 </p>
                 <iframe src="https://www.youtube.com/embed/pxyHz-RjHW0?si=ez97HMpU4Bf2-LCp"
-                    title="YouTube video player" frameborder="0"
-                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                    referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+                        title="YouTube video player"
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                        referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
             </div>
         </div>
     </section>
@@ -437,11 +437,11 @@
             <div class="gallery">
                 <div class="gallery_bg">
                     <img src="{{ asset('images/marketing/bg_pulse.png') }}" alt="pulse-background"
-                        class="gallery_bg-img">
+                         class="gallery_bg-img">
                 </div>
                 <div class="gallery_container">
                     <img src="{{ asset('images/marketing/smile_icon.svg') }}" alt="smile-icon"
-                        class="inline-block ml-10">
+                         class="inline-block ml-10">
                     <h2 class="mt-2 text-center text-white text-gigant">
                         With PRIMA
                         <span class="block text-yellow">
@@ -450,23 +450,23 @@
                     </h2>
                     <div class="gallery_item-tc gallery_item">
                         <img src="{{ asset('images/marketing/everyone-2.png') }}" alt="people-dinner"
-                            class="gallery_item-image">
+                             class="gallery_item-image">
                     </div>
                     <div class="gallery_item-tl gallery_item">
                         <img src="{{ asset('images/marketing/everyone-1.png') }}" alt="chef"
-                            class="gallery_item-image">
+                             class="gallery_item-image">
                     </div>
                     <div class="gallery_item-tr gallery_item">
                         <img src="{{ asset('images/marketing/everyone-3.png') }}" alt="woman-eating"
-                            class="gallery_item-image">
+                             class="gallery_item-image">
                     </div>
                     <div class="gallery_item-bl gallery_item">
                         <img src="{{ asset('images/marketing/everyone-4.png') }}" alt="woman-eating"
-                            class="gallery_item-image">
+                             class="gallery_item-image">
                     </div>
                     <div class="gallery_item-br gallery_item">
                         <img src="{{ asset('images/marketing/everyone-5.png') }}" alt="chef"
-                            class="gallery_item-image">
+                             class="gallery_item-image">
                     </div>
                 </div>
                 <div></div>

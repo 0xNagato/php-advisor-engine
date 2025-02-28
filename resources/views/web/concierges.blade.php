@@ -8,7 +8,7 @@
                 <div class="intro_hero">
                     <div class="intro_hero-img_hero">
                         <img src="{{ asset('images/marketing/banner-1.png') }}" alt="business-man"
-                            class="object-top intro_hero-img_trans md:object-left">
+                             class="object-top intro_hero-img_trans md:object-left">
                     </div>
                     <div class="intro_hero-text">
                         <div class="intro_hero-text_container md:py-[35px]">
@@ -21,11 +21,11 @@
                     <div class="intro_hero-img_container">
                         <div class="intro_hero-img">
                             <img src="{{ asset('images/marketing/banner-2.png') }}" alt="business-man"
-                                class="intro_hero-img_trans">
+                                 class="intro_hero-img_trans">
                         </div>
                         <div class="intro_hero-img">
                             <img src="{{ asset('images/marketing/banner-3.png') }}" alt="restaurant"
-                                class="object-center intro_hero-img_trans">
+                                 class="object-center intro_hero-img_trans">
                         </div>
                     </div>
                 </div>
@@ -41,7 +41,7 @@
                 <div class="flex flex-col gap-4 md:gap-10 md:flex-row">
                     <div class="flex-1 md:max-w-[500px]">
                         <img src="{{ asset('images/marketing/the-problem.png') }}" alt="the-problem"
-                            class="img_full rounded-[20px]">
+                             class="img_full rounded-[20px]">
                     </div>
                     <div class="flex flex-col items-start flex-1 gap-4 ">
                         <span class="gap-2 pl-2 tag">
@@ -61,7 +61,7 @@
                                 <div class="flex items-start justify-start gap-4">
                                     <div class="btn_icon btn bg-gradient-to-tl from-red to-red_light">
                                         <img src="{{ asset('images/marketing/cutlery_icon--outline.svg') }}"
-                                            alt="cutlery-icon">
+                                             alt="cutlery-icon">
                                     </div>
                                     <div class="flex-1">
                                         <p class="flex-1 font-semibold font-bricolage text-dark">
@@ -98,15 +98,16 @@
                                 <div class="flex items-start justify-start gap-4">
                                     <div class="btn_icon btn bg-gradient-to-tl from-red to-red_light">
                                         <img src="{{ asset('images/marketing/money-in_icon.svg') }}"
-                                            alt="money-in-icon">
+                                             alt="money-in-icon">
                                     </div>
                                     <div class="flex-1">
                                         <p class="flex-1 font-semibold font-bricolage text-dark">
-                                            Lack of Compensation
+                                            Lack of Recognition
                                         </p>
                                         <p class="text-tiny">
-                                            Many concierges receive little to no compensation for their efforts in
-                                            securing these exclusive bookings.
+                                            Concierges must often battle the same difficulties in booking experiences
+                                            for high value clients as the customers do themselves, leading to
+                                            frustration and significant time waste.
                                         </p>
                                     </div>
                                 </div>
@@ -117,7 +118,7 @@
                                 <div class="flex items-start justify-start gap-4">
                                     <div class="btn_icon btn bg-gradient-to-tl from-red to-red_light">
                                         <img src="{{ asset('images/marketing/calendar_icon--light.svg') }}"
-                                            alt="calendar-icon">
+                                             alt="calendar-icon">
                                     </div>
                                     <div class="flex-1">
                                         <p class="flex-1 font-semibold font-bricolage text-dark">
@@ -147,7 +148,7 @@
                 <div class="flex flex-col gap-4 md:gap-10 md:flex-row">
                     <div class="flex-1">
                         <img src="{{ asset('images/marketing/vip-access.png') }}" alt="app-image"
-                            class="rounded-[20px] md:sticky top-[110px]">
+                             class="rounded-[20px] md:sticky top-[110px]">
                     </div>
                     <div class="flex flex-col items-start flex-1 gap-4">
                         <span class="gap-2 pl-2 tag">
@@ -155,11 +156,11 @@
                             Welcome to PRIMA
                         </span>
                         <h2 class="text-dark">
-                            Unlock Profitable Reservation Opportunities with PRIMA
+                            Unlock In Demand Reservation Opportunities with PRIMA
                         </h2>
                         <p>
-                            Access exclusive prime-time restaurant reservations and earn more with every booking. Enjoy
-                            seamless processes and higher revenue potential.
+                            Access exclusive prime-time restaurant reservations and be rewarded and recognized for
+                            utilizing PRIMA to book reservations.
                         </p>
 
                         <div class="flex flex-col gap-3 mt-4">
@@ -170,7 +171,7 @@
                                     <div
                                         class="btn_icon btn bg-gradient-to-tl from-salmon to-salmon_accent rounded-[10px]">
                                         <img src="{{ asset('images/marketing/food-services-premium_icon.svg') }}"
-                                            alt="food-services-premium-icon" class="w-[30px]">
+                                             alt="food-services-premium-icon" class="w-[30px]">
                                     </div>
                                     <div class="flex-1">
                                         <p class="flex-1 font-bricolage text-dark">
@@ -188,14 +189,15 @@
                                 <div class="flex items-start justify-start gap-2">
                                     <div class="btn_icon btn bg-gradient-to-tl from-purple to-primary rounded-[10px]">
                                         <img src="{{ asset('images/marketing/money_icon.svg') }}" alt="money-icon"
-                                            class="w-[30px]">
+                                             class="w-[30px]">
                                     </div>
                                     <div class="flex-1">
                                         <p class="flex-1 font-bricolage text-dark">
-                                            Earn Commissions
+                                            Recognition
                                         </p>
                                         <p class="mt-1 text-sm">
-                                            Get rewarded for each booking without relying on favors.
+                                            PRIMA both rewards and highlights the value of concierge bookings at all of
+                                            our participating venue partners.
                                         </p>
                                     </div>
                                 </div>
@@ -206,7 +208,7 @@
                                 <div class="flex items-start justify-start gap-2">
                                     <div class="btn_icon btn bg-gradient-to-tl from-aqua to-blue rounded-[10px]">
                                         <img src="{{ asset('images/marketing/list_icon.svg') }}" alt="list-icon"
-                                            class="w-[30px]">
+                                             class="w-[30px]">
                                     </div>
                                     <div class="flex-1">
                                         <p class="flex-1 font-bricolage text-dark">
@@ -222,8 +224,8 @@
                         </div>
 
                         <a href="#"
-                            class="w-full mt-4 text-center text-white md:w-auto btn bg-gradient-to-b from-blue to-green"
-                            @click.prevent="$dispatch('prima-open-modal', { id: 'prima-contact' })">
+                           class="w-full mt-4 text-center text-white md:w-auto btn bg-gradient-to-b from-blue to-green"
+                           @click.prevent="$dispatch('prima-open-modal', { id: 'prima-contact' })">
                             Join PRIMA as a Concierge Today!
                         </a>
                     </div>
@@ -233,9 +235,25 @@
         </div>
     </section>
 
-    <x-marketing.how-it-work-steps>
+    <x-marketing.how-it-work-steps :steps="[
+        [
+            'image' => 'images/marketing/reservation-1.png',
+            'title' => 'Book Reservation',
+            'description' => 'Concierges use the PRIMA Hub to book prime-time reservations for a fee. Non-prime slots are booked without fees.',
+        ],
+        [
+            'image' => 'images/marketing/reservation-2.png',
+            'title' => 'Restaurant Notification',
+            'description' => 'Once a reservation is successfully booked through PRIMA, we will notify the restaurant and ensure the diner is granted access in a seamless way.',
+        ],
+        [
+            'image' => 'images/marketing/analytics-2-concierge.png',
+            'title' => 'Live Analytics',
+            'description' => 'Concierges may track and modify all of reservations in real time with full transparency and peace of mind.',
+        ],
+    ]">
         <x-slot:title>
-            Simplify Bookings and Boost Earnings with PRIMA
+            Simplify Bookings and Save Time with PRIMA
         </x-slot>
         <x-slot:description>
             Effortlessly book exclusive, prime-time reservations for your clients.
@@ -265,11 +283,11 @@
                         <div class="flex-1 mb-6 md:mb-0">
                             <div class="justify-center items-center flex flex-col relative md:sticky top-[110px]">
                                 <img src="{{ asset('images/marketing/phone-5.png') }}" alt="phone"
-                                    class="z-[1]">
+                                     class="z-[1]">
                                 <div
                                     class="box bg-gradient-to-tl from-green_accent to-green_light min-h-[250px] z-[-1] absolute bottom-0 w-full">
                                     <img src="{{ asset('images/marketing/particles.png') }}" alt="particles"
-                                        class="absolute top-0 left-0 img_full">
+                                         class="absolute top-0 left-0 img_full">
                                 </div>
                             </div>
                         </div>
@@ -288,7 +306,7 @@
                                         <div
                                             class="btn_icon btn bg-gradient-to-b from-green_accent to-green_dark_2 md:p-3 rounded-[10px]">
                                             <img src="{{ asset('images/marketing/calendar_icon--light.svg') }}"
-                                                alt="calendar-icon" class="w-[30px]">
+                                                 alt="calendar-icon" class="w-[30px]">
                                         </div>
                                         <div class="flex-1">
                                             <p class="flex-1 font-bricolage text-dark">
@@ -310,7 +328,7 @@
                                         <div
                                             class="btn_icon btn bg-gradient-to-b from-green_accent to-green_dark_2 md:p-3 rounded-[10px]">
                                             <img src="{{ asset('images/marketing/schedule_icon--light.svg') }}"
-                                                alt="schedule-icon" class="w-[30px]">
+                                                 alt="schedule-icon" class="w-[30px]">
                                         </div>
                                         <div class="flex-1">
                                             <p class="flex-1 font-bricolage text-dark">
@@ -333,7 +351,7 @@
                                         <div
                                             class="btn_icon btn bg-gradient-to-b from-green_accent to-green_dark_2 md:p-3 rounded-[10px]">
                                             <img src="{{ asset('images/marketing/stats-calendar_icon.svg') }}"
-                                                alt="stats-calendar-icon" class="w-[30px]">
+                                                 alt="stats-calendar-icon" class="w-[30px]">
                                         </div>
                                         <div class="flex-1">
                                             <p class="flex-1 font-bricolage text-dark">
@@ -358,19 +376,10 @@
     <section class="fade-in">
         <div class="container">
             <div class="flex flex-col gap-8">
-                <div class="flex flex-col gap-3 text-center">
-                    <h2 class="text-dark">
-                        Potential Monthly Earnings $$$
-                    </h2>
-                    <p>
-                        Restaurants pay a fee to PRIMA for bookings made through the PRIMA marketplace. We share up to
-                        80% of this fee with our participating concierges.
-                    </p>
-                </div>
                 <div class="flex flex-col gap-4 md:gap-10 md:flex-row">
                     <div class="flex-1">
                         <img src="{{ asset('images/marketing/image-50.png') }}" alt="couple-talking"
-                            class="img_full rounded-[20px]">
+                             class="img_full rounded-[20px]">
                     </div>
                     <div class="flex flex-col items-start justify-center flex-1 gap-4 md:py-8">
                         <span class="gap-2 pl-2 tag">
@@ -378,12 +387,12 @@
                             Referral Program
                         </span>
                         <h2 class="text-dark">
-                            Unlock Additional Income with Our Referral Program!
+                            Help PRIMA grow and see the benefits!
                         </h2>
                         <p>
-                            PRIMA offers a referral program where you can earn up to an extra 15% in revenue by
-                            referring other concierges to the platform. PRIMA will pay you 10% of platform fees for any
-                            concierge you refer, plus an additional 5% for any concierge they may refer.
+                            As a PRIMA Concierge, you are able to invite other hospitality professionals to our network.
+                            As more concierges join, we will be able to offer greater value to all of our venue partners
+                            and in turn benefit all of our participating concierges. You are part of our team!
                         </p>
                     </div>
                 </div>
@@ -399,8 +408,8 @@
                     Take Your Concierge Services to the Next Level!
                 </h3>
                 <p class="text-center m-auto max-w-[824px]">
-                    Unlock exclusive access to prime-time reservations and maximize your earnings with PRIMA. Join us
-                    today and start enjoying the benefits of a streamlined booking process!
+                    Unlock exclusive access to prime-time reservations at the top venues throughout the world and start
+                    enjoying the benefits of a streamlined booking process!
                 </p>
                 <div class="box_cta-deco">
                     <img src="{{ asset('images/marketing/background-left.png') }}" alt="background-left">
