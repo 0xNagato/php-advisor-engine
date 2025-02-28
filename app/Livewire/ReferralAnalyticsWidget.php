@@ -6,8 +6,10 @@ use App\Models\Referral;
 use Carbon\Carbon;
 use Carbon\CarbonPeriod;
 use Filament\Widgets\Concerns\InteractsWithPageFilters;
+use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\HtmlString;
 use Leandrocfe\FilamentApexCharts\Widgets\ApexChartWidget;
 
 class ReferralAnalyticsWidget extends ApexChartWidget
@@ -29,10 +31,19 @@ class ReferralAnalyticsWidget extends ApexChartWidget
      */
     protected static ?int $contentHeight = 300;
 
+    protected int|string|array $columnSpan = 'full';
+
+    protected static ?string $pollingInterval = null;
+
+    public function getColumnSpan(): int|string|array
+    {
+        return $this->columnSpan;
+    }
+
     /**
      * Get the widget subheading.
      */
-    protected function getSubheading(): ?string
+    protected function getSubheading(): string|Htmlable|null
     {
         $userTimezone = auth()->user()->timezone ?? config('app.default_timezone');
 
@@ -52,7 +63,13 @@ class ReferralAnalyticsWidget extends ApexChartWidget
             ? number_format(($totalConversions / $totalInvitations) * 100, 1) 
             : '0.0';
         
-        return "Total Invitations: {$totalInvitations} | Accounts Created: {$totalConversions} | Conversion Rate: {$conversionRate}%";
+        return new HtmlString(
+            '<span class="text-xs md:text-base sm:text-sm">
+                Total Invitations: ' . $totalInvitations . ' | 
+                Accounts Created: ' . $totalConversions . ' | 
+                Conversion Rate: ' . $conversionRate . '%
+            </span>'
+        );
     }
 
     /**
@@ -104,7 +121,9 @@ class ReferralAnalyticsWidget extends ApexChartWidget
                         'fontFamily' => 'inherit',
                         'fontWeight' => 600,
                     ],
+                    'rotate' => -45,
                 ],
+                'tickPlacement' => 'on',
             ],
             'yaxis' => [
                 'labels' => [
@@ -141,6 +160,46 @@ class ReferralAnalyticsWidget extends ApexChartWidget
                     'stops' => [0, 100],
                 ],
             ],
+            'legend' => [
+                'position' => 'top',
+                'horizontalAlign' => 'right',
+            ],
+            'responsive' => [
+                [
+                    'breakpoint' => 768, // Tablet breakpoint
+                    'options' => [
+                        'legend' => [
+                            'position' => 'bottom',
+                            'horizontalAlign' => 'center',
+                        ],
+                        'xaxis' => [
+                            'tickAmount' => 8,
+                            'labels' => [
+                                'rotate' => -45,
+                                'offsetY' => 5,
+                            ]
+                        ]
+                    ]
+                ],
+                [
+                    'breakpoint' => 480, // Mobile breakpoint
+                    'options' => [
+                        'chart' => [
+                            'height' => 250,
+                        ],
+                        'xaxis' => [
+                            'tickAmount' => 4, // Show fewer labels on mobile
+                            'labels' => [
+                                'rotate' => -90,
+                                'offsetY' => 5,
+                                'style' => [
+                                    'fontSize' => '10px'
+                                ]
+                            ]
+                        ]
+                    ]
+                ]
+            ]
         ];
     }
 
@@ -327,14 +386,5 @@ class ReferralAnalyticsWidget extends ApexChartWidget
             ->whereNotNull('secured_at')
             ->whereBetween('secured_at', [$startDate, $endDate])
             ->count();
-    }
-
-    protected int|string|array $columnSpan = 'full';
-
-    protected static ?string $pollingInterval = null;
-
-    public function getColumnSpan(): int|string|array
-    {
-        return $this->columnSpan;
     }
 } 
