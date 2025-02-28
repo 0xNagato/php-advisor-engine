@@ -14,10 +14,8 @@ use Illuminate\Support\HtmlString;
 use Leandrocfe\FilamentApexCharts\Widgets\ApexChartWidget;
 use Livewire\Attributes\On;
 
-class ReferralAnalyticsWidget extends ApexChartWidget
+class ReferralAnalyticsWidget extends DateResponsiveApexChartWidget
 {
-    use InteractsWithPageFilters;
-
     /**
      * Chart Id
      */
@@ -51,11 +49,8 @@ class ReferralAnalyticsWidget extends ApexChartWidget
         // Update the filters
         $this->filters['startDate'] = $startDate;
         $this->filters['endDate'] = $endDate;
-        
-        // Reset readyToLoad so options are re-fetched cleanly
-        if (property_exists($this, 'readyToLoad')) {
-            $this->readyToLoad = true;
-        }
+        // Reset readyToLoad to refresh chart data
+        $this->readyToLoad = true;
         
         // Force chart update with clean options
         $this->updateOptions();
@@ -69,17 +64,8 @@ class ReferralAnalyticsWidget extends ApexChartWidget
      */
     protected function getSubheading(): string|Htmlable|null
     {
-        $userTimezone = auth()->user()->timezone ?? config('app.default_timezone');
-
-        $startDate = Carbon::parse(
-            $this->filters['startDate'] ?? now($userTimezone)->subDays(30)->format('Y-m-d'),
-            $userTimezone
-        )->startOfDay()->setTimezone('UTC');
-
-        $endDate = Carbon::parse(
-            $this->filters['endDate'] ?? now($userTimezone)->format('Y-m-d'),
-            $userTimezone
-        )->endOfDay()->setTimezone('UTC');
+        $startDate = $this->getStartDate();
+        $endDate = $this->getEndDate();
         
         $totalInvitations = $this->getTotalInvitations($startDate, $endDate);
         $totalConversions = $this->getTotalConversions($startDate, $endDate);
@@ -179,42 +165,14 @@ class ReferralAnalyticsWidget extends ApexChartWidget
      */
     protected function getOptions(): array
     {
+        $startDate = $this->getStartDate();
+        $endDate = $this->getEndDate();
         $userTimezone = auth()->user()->timezone ?? config('app.default_timezone');
-
-        // Use a wider date range to ensure we capture data
-        $startDate = Carbon::parse(
-            $this->filters['startDate'] ?? now($userTimezone)->subDays(90)->format('Y-m-d'),
-            $userTimezone
-        )->startOfDay()->setTimezone('UTC');
-
-        $endDate = Carbon::parse(
-            $this->filters['endDate'] ?? now($userTimezone)->format('Y-m-d'),
-            $userTimezone
-        )->endOfDay()->setTimezone('UTC');
 
         $referralData = $this->getReferralData($startDate, $endDate, $userTimezone);
         
-        // Add a timestamp to ensure the chart refreshes with new data
-        $timestamp = time();
-        
-        return [
-            'chart' => [
-                'type' => 'area',
-                'height' => 300,
-                'toolbar' => [
-                    'show' => false,
-                ],
-                'zoom' => [
-                    'enabled' => false,
-                ],
-                'background' => 'transparent',
-                'redrawOnWindowResize' => true,
-                'animations' => [
-                    'enabled' => false, // Disable animations to avoid issues during updates
-                ],
-                // Add a cache-busting parameter to the ID
-                'id' => "referralAnalytics",
-            ],
+        // Merge our specific options with the default options from the parent class
+        return array_merge($this->getDefaultOptions(), [
             'series' => [
                 [
                     'name' => 'Invitations Sent',
@@ -234,84 +192,8 @@ class ReferralAnalyticsWidget extends ApexChartWidget
                     ],
                     'rotate' => -45,
                 ],
-                'tickPlacement' => 'on',
             ],
-            'yaxis' => [
-                'labels' => [
-                    'style' => [
-                        'fontFamily' => 'inherit',
-                    ],
-                ],
-                'min' => 0, // Ensure y-axis starts at 0
-            ],
-            'colors' => ['#4f46e5', '#10b981'],
-            'stroke' => [
-                'curve' => 'smooth',
-                'width' => 2,
-            ],
-            'dataLabels' => [
-                'enabled' => false,
-            ],
-            'tooltip' => [
-                'shared' => true,
-                'intersect' => false,
-            ],
-            'grid' => [
-                'show' => true,
-                'borderColor' => '#e5e7eb',
-                'strokeDashArray' => 1,
-                'position' => 'back',
-            ],
-            'fill' => [
-                'type' => 'gradient',
-                'gradient' => [
-                    'shadeIntensity' => 1,
-                    'opacityFrom' => 0.4,
-                    'opacityTo' => 0.1,
-                    'stops' => [0, 100],
-                ],
-            ],
-            'legend' => [
-                'position' => 'top',
-                'horizontalAlign' => 'right',
-            ],
-            'responsive' => [
-                [
-                    'breakpoint' => 768, // Tablet breakpoint
-                    'options' => [
-                        'legend' => [
-                            'position' => 'bottom',
-                            'horizontalAlign' => 'center',
-                        ],
-                        'xaxis' => [
-                            'tickAmount' => 8,
-                            'labels' => [
-                                'rotate' => -45,
-                                'offsetY' => 5,
-                            ]
-                        ]
-                    ]
-                ],
-                [
-                    'breakpoint' => 480, // Mobile breakpoint
-                    'options' => [
-                        'chart' => [
-                            'height' => 250,
-                        ],
-                        'xaxis' => [
-                            'tickAmount' => 4, // Show fewer labels on mobile
-                            'labels' => [
-                                'rotate' => -90,
-                                'offsetY' => 5,
-                                'style' => [
-                                    'fontSize' => '10px'
-                                ]
-                            ]
-                        ]
-                    ]
-                ]
-            ]
-        ];
+        ]);
     }
 
     /**
@@ -337,33 +219,36 @@ class ReferralAnalyticsWidget extends ApexChartWidget
     }
 
     /**
-     * Get referral data for the chart
+     * Get referral data for chart
      */
     protected function getReferralData(Carbon $startDate, Carbon $endDate, string $timezone): array
     {
-        // Generate all dates in the range
-        $period = CarbonPeriod::create($startDate, $endDate);
-        $dates = [];
-        $formattedDates = [];
+        // Generate a date range for the chart
+        $period = CarbonPeriod::create($startDate, '1 day', $endDate);
+        
+        // Create arrays for dates (both for display and for mapping)
+        $dateFormat = [];         // Display format (M j)
+        $dateKeys = [];           // SQL format (Y-m-d) for matching with query results
         
         foreach ($period as $date) {
-            $dates[] = $date->format('Y-m-d');
-            $formattedDates[] = $date->format('M j');
+            $localDate = $date->copy()->setTimezone($timezone);
+            $dateKeys[] = $localDate->format('Y-m-d');
+            $dateFormat[] = $localDate->format('M j');
         }
-
-        // Get daily invitation counts (referrals created)
-        $invitations = $this->getDailyInvitationCounts($startDate, $endDate, $timezone);
         
-        // Get daily conversion counts (users secured from referrals)
-        $conversions = $this->getDailyConversionCounts($startDate, $endDate, $timezone);
+        // Get invitation counts by date
+        $invitationsByDate = $this->getInvitationsByDate($startDate, $endDate, $timezone);
         
-        // If we have data but no date keys, distribute it evenly across the date range
-        if ($invitations->count() === 1 && $invitations->keys()->first() === '') {
+        // Get conversion counts by date
+        $conversionsByDate = $this->getConversionsByDate($startDate, $endDate, $timezone);
+        
+        // Handle edge case where data doesn't have proper date keys
+        if (count($invitationsByDate) === 1 && !isset($invitationsByDate[$dateKeys[0]]) && !isset($invitationsByDate[$dateKeys[count($dateKeys) - 1]])) {
             // Get all referrals and manually group them
             $allData = $this->getAllReferralsInRange($startDate, $endDate);
             
-            // Create a new collection for invitations
-            $invitations = new Collection();
+            // Create a new array for invitations
+            $invitationsByDate = [];
             
             // If we have referrals, distribute them by date
             if ($allData['referrals']->count() > 0) {
@@ -374,26 +259,18 @@ class ReferralAnalyticsWidget extends ApexChartWidget
                 
                 // Count referrals for each date
                 foreach ($groupedReferrals as $date => $referrals) {
-                    $invitations->put($date, $referrals->count());
-                }
-            } else {
-                // If no referrals, distribute evenly across the last 7 days
-                $totalInvitations = $invitations->first();
-                $recentDates = array_slice($dates, -7);
-                $perDay = ceil($totalInvitations / count($recentDates));
-                
-                foreach ($recentDates as $date) {
-                    $invitations->put($date, $perDay);
+                    $invitationsByDate[$date] = $referrals->count();
                 }
             }
         }
         
-        if ($conversions->count() === 1 && $conversions->keys()->first() === '') {
+        // Same for conversions
+        if (count($conversionsByDate) === 1 && !isset($conversionsByDate[$dateKeys[0]]) && !isset($conversionsByDate[$dateKeys[count($dateKeys) - 1]])) {
             // Get all referrals and manually group them
             $allData = $this->getAllReferralsInRange($startDate, $endDate);
             
-            // Create a new collection for conversions
-            $conversions = new Collection();
+            // Create a new array for conversions
+            $conversionsByDate = [];
             
             // If we have conversions, distribute them by date
             if ($allData['conversions']->count() > 0) {
@@ -404,37 +281,34 @@ class ReferralAnalyticsWidget extends ApexChartWidget
                 
                 // Count conversions for each date
                 foreach ($groupedConversions as $date => $referrals) {
-                    $conversions->put($date, $referrals->count());
-                }
-            } else {
-                // If no conversions, distribute evenly across the last 7 days
-                $totalConversions = $conversions->first();
-                $recentDates = array_slice($dates, -7);
-                $perDay = ceil($totalConversions / count($recentDates));
-                
-                foreach ($recentDates as $date) {
-                    $conversions->put($date, $perDay);
+                    $conversionsByDate[$date] = $referrals->count();
                 }
             }
         }
         
-        // Map data to dates
-        $invitationData = $this->mapDataToDates($dates, $invitations);
-        $conversionData = $this->mapDataToDates($dates, $conversions);
-
+        // Fill in the data arrays with counts for each date in the period
+        $invitations = [];
+        $conversions = [];
+        
+        // Map data to each date in the period
+        foreach ($dateKeys as $index => $sqlDate) {
+            $invitations[] = $invitationsByDate[$sqlDate] ?? 0;
+            $conversions[] = $conversionsByDate[$sqlDate] ?? 0;
+        }
+        
         return [
-            'dates' => $formattedDates,
-            'invitations' => $invitationData,
-            'conversions' => $conversionData,
+            'dates' => $dateFormat,
+            'invitations' => $invitations,
+            'conversions' => $conversions,
         ];
     }
-
+    
     /**
-     * Get daily invitation counts
+     * Get invitation counts by date
      */
-    protected function getDailyInvitationCounts(Carbon $startDate, Carbon $endDate, string $timezone): Collection
+    protected function getInvitationsByDate(Carbon $startDate, Carbon $endDate, string $timezone): array
     {
-        // First try with a simpler query without timezone conversion
+        // Use the original working query format (without timezone conversion)
         return Referral::query()
             ->select([
                 DB::raw("DATE(created_at) as date"),
@@ -444,15 +318,16 @@ class ReferralAnalyticsWidget extends ApexChartWidget
             ->groupBy(DB::raw("DATE(created_at)"))
             ->orderBy('date')
             ->get()
-            ->pluck('count', 'date');
+            ->pluck('count', 'date')
+            ->toArray();
     }
-
+    
     /**
-     * Get daily conversion counts
+     * Get conversion counts by date
      */
-    protected function getDailyConversionCounts(Carbon $startDate, Carbon $endDate, string $timezone): Collection
+    protected function getConversionsByDate(Carbon $startDate, Carbon $endDate, string $timezone): array
     {
-        // First try with a simpler query without timezone conversion
+        // Use the original working query format (without timezone conversion)
         return Referral::query()
             ->select([
                 DB::raw("DATE(secured_at) as date"),
@@ -463,23 +338,12 @@ class ReferralAnalyticsWidget extends ApexChartWidget
             ->groupBy(DB::raw("DATE(secured_at)"))
             ->orderBy('date')
             ->get()
-            ->pluck('count', 'date');
-    }
-
-    /**
-     * Map data to dates
-     */
-    protected function mapDataToDates(array $dates, Collection $data): array
-    {
-        return collect($dates)
-            ->map(function ($date) use ($data) {
-                return $data[$date] ?? 0;
-            })
+            ->pluck('count', 'date')
             ->toArray();
     }
-
+    
     /**
-     * Get total invitations in the selected date range
+     * Get total invitations in the date range
      */
     protected function getTotalInvitations(Carbon $startDate, Carbon $endDate): int
     {
@@ -487,9 +351,9 @@ class ReferralAnalyticsWidget extends ApexChartWidget
             ->whereBetween('created_at', [$startDate, $endDate])
             ->count();
     }
-
+    
     /**
-     * Get total conversions in the selected date range
+     * Get total conversions in the date range
      */
     protected function getTotalConversions(Carbon $startDate, Carbon $endDate): int
     {
