@@ -13,15 +13,9 @@ class VenueContactData extends Data
         public string $contact_name,
         public string $contact_phone,
         public bool $use_for_reservations,
+        public string $email = '',
         public ?NotificationPreferencesData $preferences = null,
-    ) {
-        $this->preferences = NotificationPreferencesData::from([
-            'mail' => false,
-            'sms' => true,
-            'whatsapp' => false,
-            'database' => false,
-        ]);
-    }
+    ) {}
 
     public function toChannel(): array
     {

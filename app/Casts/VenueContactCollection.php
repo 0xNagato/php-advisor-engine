@@ -29,6 +29,7 @@ class VenueContactCollection implements CastsAttributes
                     'contact_name' => 'Additional Contact',
                     'contact_phone' => $phone,
                     'use_for_reservations' => true,
+                    'email' => '',
                 ];
             }
         }

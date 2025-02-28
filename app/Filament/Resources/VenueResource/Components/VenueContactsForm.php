@@ -30,6 +30,11 @@ class VenueContactsForm
                     lenient: true,
                 )
                 ->initialCountry('US'),
+            TextInput::make('email')
+                ->label('Contact Email')
+                ->placeholder('name@domain.com')
+                ->autocomplete(false)
+                ->email()->required(),
             Checkbox::make('use_for_reservations')
                 ->label('Use for Reservations')
                 ->extraAttributes(['class' => 'text-indigo-600'])
@@ -42,19 +47,23 @@ class VenueContactsForm
                     Toggle::make('sms')
                         ->label('SMS')
                         ->rules([
-                            fn (Get $get): Closure => static function (string $attribute, $value, Closure $fail) use ($get) {
-                                if ($get('whatsapp') === false && $value === false) {
-                                    $fail('SMS is required if Whatsapp is disabled.');
+                            fn (Get $get): Closure => static function (string $attribute, $value, Closure $fail) use (
+                                $get
+                            ) {
+                                if ($get('mail') === false && $value === false) {
+                                    $fail('SMS is required if Email is disabled.');
                                 }
                             },
                         ])
                         ->inline(),
-                    Toggle::make('whatsapp')
-                        ->label('Whatsapp')
+                    Toggle::make('mail')
+                        ->label('Email')
                         ->rules([
-                            fn (Get $get): Closure => static function (string $attribute, $value, Closure $fail) use ($get) {
+                            fn (Get $get): Closure => static function (string $attribute, $value, Closure $fail) use (
+                                $get
+                            ) {
                                 if ($get('sms') === false && $value === false) {
-                                    $fail('Whatsapp is required if SMS is disabled.');
+                                    $fail('Email is required if SMS is disabled.');
                                 }
                             },
                         ])
