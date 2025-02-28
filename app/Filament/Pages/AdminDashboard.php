@@ -108,11 +108,11 @@ class AdminDashboard extends Dashboard
             //     'endDate' => Carbon::parse($this->filters['endDate']),
             //     'columnSpan' => '1',
             // ]),
-            AdminTopReferralDays::make([
-                'startDate' => Carbon::parse($this->filters['startDate']),
-                'endDate' => Carbon::parse($this->filters['endDate']),
-                'columnSpan' => 'full',
-            ]),
+            // AdminTopReferralDays::make([
+            //     'startDate' => Carbon::parse($this->filters['startDate']),
+            //     'endDate' => Carbon::parse($this->filters['endDate']),
+            //     'columnSpan' => 'full',
+            // ]),
             BookingAnalyticsWidget::make([
                 'filters' => [
                     'startDate' => $this->filters['startDate'] ?? null,
