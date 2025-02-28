@@ -36,11 +36,6 @@ class AdminTopReferrersTable extends BaseWidget
     #[Reactive]
     public ?Carbon $endDate = null;
 
-    public function mount(): void
-    {
-        $this->bootedInteractsWithTable();
-    }
-
     #[On('dateRangeUpdated')]
     public function updateDateRange(string $startDate, string $endDate): void
     {

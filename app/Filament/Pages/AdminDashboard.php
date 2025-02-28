@@ -12,7 +12,6 @@ use App\Livewire\Concierge\ConciergeOverallLeaderboard;
 use App\Livewire\DateRangeFilterWidget;
 use App\Livewire\Partner\PartnerOverallLeaderboard;
 use App\Livewire\ReferralAnalyticsWidget;
-use App\Livewire\ReferralSourcesWidget;
 use App\Livewire\Venue\VenueOverallLeaderboard;
 use Carbon\Carbon;
 use Filament\Forms\Form;
@@ -104,15 +103,15 @@ class AdminDashboard extends Dashboard
                 ],
                 'columnSpan' => 'full',
             ]),
-            AdminTopReferrersTable::make([
-                'startDate' => Carbon::parse($this->filters['startDate']),
-                'endDate' => Carbon::parse($this->filters['endDate']),
-                'columnSpan' => '1',
-            ]),
+            // AdminTopReferrersTable::make([
+            //     'startDate' => Carbon::parse($this->filters['startDate']),
+            //     'endDate' => Carbon::parse($this->filters['endDate']),
+            //     'columnSpan' => '1',
+            // ]),
             AdminTopReferralDays::make([
                 'startDate' => Carbon::parse($this->filters['startDate']),
                 'endDate' => Carbon::parse($this->filters['endDate']),
-                'columnSpan' => '1',
+                'columnSpan' => 'full',
             ]),
             BookingAnalyticsWidget::make([
                 'filters' => [

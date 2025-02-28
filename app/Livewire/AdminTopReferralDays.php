@@ -23,11 +23,6 @@ class AdminTopReferralDays extends BaseWidget
 
     public int|string|array $columnSpan;
 
-    public function mount(): void
-    {
-        $this->bootedInteractsWithTable();
-    }
-
     public function getColumnSpan(): int|string|array
     {
         return $this->columnSpan ?? 'full';
