@@ -247,7 +247,7 @@
                             </p>
                         </div>
                         <p>
-                            Reward concierges throughout the local and broader market with incentives for booking
+                            Reward hospitality professionals throughout the local and broader market with incentives for booking
                             reservations at your venue without the need for additional staffing, technology or
                             administration. Let PRIMA handle everything.
                         </p>
