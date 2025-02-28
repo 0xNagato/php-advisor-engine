@@ -13,7 +13,7 @@ class VenueContactData extends Data
         public string $contact_name,
         public string $contact_phone,
         public bool $use_for_reservations,
-        public string $email = '',
+        public ?string $email = '',
         public ?NotificationPreferencesData $preferences = null,
     ) {}
 

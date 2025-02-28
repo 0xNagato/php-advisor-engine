@@ -100,6 +100,7 @@ class VenueContactBookingConfirmed extends Notification implements ShouldQueue
         $notes = $this->booking->notes ?? 'NA';
 
         return (new MailMessage)
+            ->from('prima@primavip.co', 'PRIMA Reservation Platform')
             ->subject("New Booking Confirmation - {$this->booking->venue->name}")
             ->greeting('New Booking Confirmation')
             ->line("A new booking has been confirmed at {$this->booking->venue->name}.")
