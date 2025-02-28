@@ -101,7 +101,7 @@ class BookingAnalyticsWidget extends Widget
 
         $results = Booking::query()
             ->select(
-                DB::raw("TIME_FORMAT({$this->getDateColumn()}, '%l:%i %p') as time_slot"),
+                DB::raw("TIME_FORMAT(bookings.booking_at, '%l:%i %p') as time_slot"),
                 DB::raw('COUNT(*) as booking_count')
             )
             ->whereBetween($this->getDateColumn(), [$startDate, $endDate])
