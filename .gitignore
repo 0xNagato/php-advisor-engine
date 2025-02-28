@@ -29,3 +29,4 @@ frankenphp
 frankenphp-worker.php
 .codiumai
 /database/migrations/2024_08_25_211700_modify_schedule_with_bookings_view.php
+.cursorrules

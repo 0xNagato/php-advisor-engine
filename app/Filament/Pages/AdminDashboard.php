@@ -4,6 +4,8 @@ namespace App\Filament\Pages;
 
 use App\Filament\DateRangeFilterAction;
 use App\Livewire\Admin\AdminRecentBookings;
+use App\Livewire\AdminTopReferralDays;
+use App\Livewire\AdminTopReferrersTable;
 use App\Livewire\BookingAnalyticsWidget;
 use App\Livewire\BookingsOverview;
 use App\Livewire\Concierge\ConciergeOverallLeaderboard;
@@ -39,7 +41,7 @@ class AdminDashboard extends Dashboard
 
     public function mount(): void
     {
-        $timezone = auth()->user()?->timezone ?? config('app.default_timezone');
+        $timezone = auth()->user()->timezone ?? config('app.default_timezone');
         $this->filters['startDate'] ??= now($timezone)->subDays(30)->format('Y-m-d');
         $this->filters['endDate'] ??= now($timezone)->format('Y-m-d');
     }
@@ -102,16 +104,22 @@ class AdminDashboard extends Dashboard
                 ],
                 'columnSpan' => 'full',
             ]),
+            AdminTopReferrersTable::make([
+                'startDate' => Carbon::parse($this->filters['startDate']),
+                'endDate' => Carbon::parse($this->filters['endDate']),
+                'columnSpan' => '1',
+            ]),
+            AdminTopReferralDays::make([
+                'startDate' => Carbon::parse($this->filters['startDate']),
+                'endDate' => Carbon::parse($this->filters['endDate']),
+                'columnSpan' => '1',
+            ]),
             BookingAnalyticsWidget::make([
                 'filters' => [
                     'startDate' => $this->filters['startDate'] ?? null,
                     'endDate' => $this->filters['endDate'] ?? null,
                 ],
             ]),
-            // AdminTopReferrersTable::make([
-            //     'startDate' => Carbon::parse($this->filters['startDate']),
-            //     'endDate' => Carbon::parse($this->filters['endDate']),
-            // ]),
         ];
     }
 

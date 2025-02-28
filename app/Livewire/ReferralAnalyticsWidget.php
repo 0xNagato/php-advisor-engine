@@ -31,13 +31,13 @@ class ReferralAnalyticsWidget extends DateResponsiveApexChartWidget
      */
     protected static ?int $contentHeight = 300;
 
-    protected int|string|array $columnSpan = 'full';
+    public int|string|array $columnSpan;
 
     protected static ?string $pollingInterval = null;
 
     public function getColumnSpan(): int|string|array
     {
-        return $this->columnSpan;
+        return $this->columnSpan ?? 'full';
     }
 
     /**
