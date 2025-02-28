@@ -128,7 +128,10 @@ class EditVenue extends EditRecord
                             ->maxSize(8192)
                             ->imagePreviewHeight('254')
                             ->getUploadedFileNameForStorageUsing(
-                                fn (Venue $record, TemporaryUploadedFile $file): string => $record->slug.'-'.time().'.'.$file->getClientOriginalExtension()
+                                fn (
+                                    Venue $record,
+                                    TemporaryUploadedFile $file
+                                ): string => $record->slug.'-'.time().'.'.$file->getClientOriginalExtension()
                             ),
                         TextInput::make('name')
                             ->label('Venue Name')

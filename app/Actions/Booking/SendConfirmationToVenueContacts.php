@@ -33,15 +33,12 @@ class SendConfirmationToVenueContacts extends Action
         $url = route('venues.confirm', ['booking' => $booking]);
         $confirmationUrl = ShortURL::destinationUrl($url)->make()->default_short_url;
 
-        foreach ($contacts as $contact) {
-            if ($contact->use_for_reservations) {
-                $booking->notify(new VenueContactBookingConfirmed(
-                    contact: $contact,
-                    confirmationUrl: $confirmationUrl,
-                    reminder: $reminder,
-                ));
-            }
-        }
+        $contacts->filter(fn ($contact) => $contact->use_for_reservations)
+            ->each(fn ($contact) => $contact->notify(new VenueContactBookingConfirmed(
+                booking: $booking,
+                confirmationUrl: $confirmationUrl,
+                reminder: $reminder
+            )));
 
         $admin = User::query()->where('email', 'andru.weir@gmail.com')->first();
         if ($admin) {
