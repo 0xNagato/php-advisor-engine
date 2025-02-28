@@ -11,7 +11,7 @@ class VenueContactData extends Data
 
     public function __construct(
         public string $contact_name,
-        public string $contact_phone,
+        public ?string $contact_phone,
         public bool $use_for_reservations,
         public ?string $email = '',
         public ?NotificationPreferencesData $preferences = null,

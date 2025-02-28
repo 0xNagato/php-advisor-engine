@@ -2,34 +2,38 @@
 
 namespace App\Filament\Resources\VenueResource\Components;
 
+use App\Traits\FormatsPhoneNumber;
 use Closure;
 use Filament\Forms\Components\Checkbox;
 use Filament\Forms\Components\Fieldset;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Forms\Get;
-use Ysfkaya\FilamentPhoneInput\Forms\PhoneInput;
-use Ysfkaya\FilamentPhoneInput\PhoneInputNumberType;
+use Filament\Forms\Set;
 
 class VenueContactsForm
 {
+    use FormatsPhoneNumber;
+
     public static function schema(): array
     {
         return [
             TextInput::make('contact_name')
                 ->label('Contact Name')
                 ->required(),
-            PhoneInput::make('contact_phone')
+            TextInput::make('contact_phone')
                 ->label('Contact Phone')
                 ->required(fn (Get $get): bool => $get('preferences.sms') ?? true)
-                ->onlyCountries(config('app.countries'))
-                ->displayNumberFormat(PhoneInputNumberType::E164)
-                ->disallowDropdown()
-                ->validateFor(
-                    country: config('app.countries'),
-                    lenient: true,
-                )
-                ->initialCountry('US'),
+                ->tel()
+                ->live()
+                ->afterStateUpdated(function (?string $state, Set $set) {
+                    if (empty($state)) {
+                        return;
+                    }
+
+                    $formatted = (new self)->getInternationalFormattedPhoneNumber($state);
+                    $set('contact_phone', $formatted);
+                }),
             TextInput::make('email')
                 ->label('Contact Email')
                 ->placeholder('name@domain.com')
