@@ -12,6 +12,7 @@ use Filament\Widgets\Concerns\InteractsWithPageFilters;
 use Filament\Widgets\TableWidget as BaseWidget;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\DB;
+use Livewire\Attributes\On;
 use Livewire\Attributes\Reactive;
 
 class AdminTopReferrersTable extends BaseWidget
@@ -22,13 +23,25 @@ class AdminTopReferrersTable extends BaseWidget
 
     protected static bool $isLazy = true;
 
-    protected int|string|array $columnSpan = 'full';
+    public int|string|array $columnSpan;
+
+    public function getColumnSpan(): int|string|array
+    {
+        return $this->columnSpan ?? 'full';
+    }
 
     #[Reactive]
     public ?Carbon $startDate = null;
 
     #[Reactive]
     public ?Carbon $endDate = null;
+
+    #[On('dateRangeUpdated')]
+    public function updateDateRange(string $startDate, string $endDate): void
+    {
+        $this->startDate = Carbon::parse($startDate);
+        $this->endDate = Carbon::parse($endDate);
+    }
 
     protected function getTableQuery(): Builder
     {
@@ -89,7 +102,7 @@ class AdminTopReferrersTable extends BaseWidget
                     ->sortable(),
                 TextColumn::make('secured_referrals')
                     ->size('xs')
-                    ->label('Secured')
+                    ->label('Signups')
                     ->sortable(),
                 TextColumn::make('conversion_rate')
                     ->size('xs')

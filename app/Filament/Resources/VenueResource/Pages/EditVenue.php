@@ -218,16 +218,17 @@ class EditVenue extends EditRecord
                             ->default(200)
                             ->numeric()
                             ->required(),
+                        TextInput::make('increment_fee')
+                            ->label('Increment Fee')
+                            ->prefix('$')
+                            ->default(0)
+                            ->numeric(),
                         TextInput::make('payout_venue')
                             ->label('Payout Venue')
                             ->default(60)
                             ->numeric()
                             ->suffix('%')
                             ->required(),
-                        TextInput::make('minimum_spend')
-                            ->label('Minimum Spend')
-                            ->prefix('$')
-                            ->numeric(),
                     ]),
                 Section::make('Special Pricing')
                     ->icon('heroicon-m-currency-dollar')

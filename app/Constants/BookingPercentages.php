@@ -39,4 +39,9 @@ class BookingPercentages
      * The percentage of the remainder that goes to the second-level referral for prime bookings.
      */
     public const int PRIME_REFERRAL_LEVEL_2_PERCENTAGE = 5;
+
+    /**
+     * The maximum percentage a partner can earn from the remainder after paying out the venue and concierge.
+     */
+    public const int MAX_PARTNER_EARNINGS_PERCENTAGE = 20;
 }
