@@ -5,12 +5,14 @@ namespace App\Livewire;
 use App\Models\Referral;
 use Carbon\Carbon;
 use Carbon\CarbonPeriod;
+use Filament\Support\RawJs;
 use Filament\Widgets\Concerns\InteractsWithPageFilters;
 use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\HtmlString;
 use Leandrocfe\FilamentApexCharts\Widgets\ApexChartWidget;
+use Livewire\Attributes\On;
 
 class ReferralAnalyticsWidget extends ApexChartWidget
 {
@@ -41,6 +43,28 @@ class ReferralAnalyticsWidget extends ApexChartWidget
     }
 
     /**
+     * Listen for dateRangeUpdated event and update the widget
+     */
+    #[On('dateRangeUpdated')]
+    public function updateDateRange(string $startDate, string $endDate): void
+    {
+        // Update the filters
+        $this->filters['startDate'] = $startDate;
+        $this->filters['endDate'] = $endDate;
+        
+        // Reset readyToLoad so options are re-fetched cleanly
+        if (property_exists($this, 'readyToLoad')) {
+            $this->readyToLoad = true;
+        }
+        
+        // Force chart update with clean options
+        $this->updateOptions();
+        
+        // Dispatch an event to ensure the chart is refreshed in the DOM
+        $this->dispatch('chartUpdated', chartId: $this->getChartId());
+    }
+
+    /**
      * Get the widget subheading.
      */
     protected function getSubheading(): string|Htmlable|null
@@ -64,7 +88,7 @@ class ReferralAnalyticsWidget extends ApexChartWidget
             : '0.0';
         
         return new HtmlString(
-            '<span class="text-xs md:text-base sm:text-sm">
+            '<span class="text-xs sm:text-sm">
                 Total Invitations: ' . $totalInvitations . ' | 
                 Accounts Created: ' . $totalConversions . ' | 
                 Conversion Rate: ' . $conversionRate . '%
@@ -73,8 +97,85 @@ class ReferralAnalyticsWidget extends ApexChartWidget
     }
 
     /**
+     * Get the chart ID for the current instance
+     */
+    protected function getChartId(): string
+    {
+        return static::$chartId ?? 'referralAnalytics';
+    }
+
+    /**
+     * Add custom JavaScript to handle mobile responsiveness and prevent duplicate charts
+     */
+    protected function extraJsOptions(): ?\Filament\Support\RawJs
+    {
+        // Get the ID directly from the static property to ensure consistency
+        $chartId = static::$chartId;
+        
+        return RawJs::make(<<<JS
+        {
+            chart: {
+                events: {
+                    mounted: function(chart) {
+                        // Handle duplicate charts
+                        setTimeout(function() {
+                            const chartId = "{$chartId}-chart";
+                            const charts = document.querySelectorAll('[id="' + chartId + '"]');
+                            
+                            if (charts.length > 1) {
+                                console.log('Found duplicate charts, cleaning up...');
+                                // Keep only the last chart (most recently created)
+                                const keepChart = charts[charts.length - 1];
+                                
+                                charts.forEach(function(el) {
+                                    if (el !== keepChart && el.parentNode) {
+                                        el.parentNode.removeChild(el);
+                                    }
+                                });
+                            }
+                        }, 100);
+                    }
+                }
+            },
+            responsive: [
+                {
+                    breakpoint: 768,
+                    options: {
+                        xaxis: {
+                            tickAmount: 8,
+                            labels: {
+                                rotate: -45,
+                                offsetY: 5
+                            }
+                        },
+                        legend: {
+                            position: 'bottom',
+                            horizontalAlign: 'center'
+                        }
+                    }
+                },
+                {
+                    breakpoint: 480,
+                    options: {
+                        xaxis: {
+                            tickAmount: 4,
+                            labels: {
+                                rotate: -90,
+                                offsetY: 5,
+                                style: {
+                                    fontSize: '10px'
+                                }
+                            }
+                        }
+                    }
+                }
+            ]
+        }
+        JS);
+    }
+
+    /**
      * Chart options (series, labels, types, size, animations...)
-     * https://apexcharts.com/docs/options
      */
     protected function getOptions(): array
     {
@@ -93,6 +194,9 @@ class ReferralAnalyticsWidget extends ApexChartWidget
 
         $referralData = $this->getReferralData($startDate, $endDate, $userTimezone);
         
+        // Add a timestamp to ensure the chart refreshes with new data
+        $timestamp = time();
+        
         return [
             'chart' => [
                 'type' => 'area',
@@ -103,6 +207,13 @@ class ReferralAnalyticsWidget extends ApexChartWidget
                 'zoom' => [
                     'enabled' => false,
                 ],
+                'background' => 'transparent',
+                'redrawOnWindowResize' => true,
+                'animations' => [
+                    'enabled' => false, // Disable animations to avoid issues during updates
+                ],
+                // Add a cache-busting parameter to the ID
+                'id' => "referralAnalytics",
             ],
             'series' => [
                 [
