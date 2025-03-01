@@ -74,7 +74,7 @@ class VenueOverallLeaderboard extends Widget
                     ->select([
                         'earnings.user_id',
                         'venues.id as venue_id',
-                        DB::raw('SUM(CASE WHEN earnings.type = "venue" THEN earnings.amount ELSE 0 END) as total_earned'),
+                        DB::raw('SUM(earnings.amount) as total_earned'),
                         'venues.name as venue_name',
                         'venues.region',
                         'earnings.currency',
@@ -85,8 +85,7 @@ class VenueOverallLeaderboard extends Widget
                         $join->on('earnings.booking_id', '=', 'bookings.id')
                             ->whereNotNull('bookings.confirmed_at')
                             ->whereBetween('bookings.confirmed_at', [$tempStartDate, $tempEndDate]);
-                    })
-                    ->where('earnings.type', 'venue');
+                    });
 
                 if ($this->selectedRegion) {
                     $query->where('venues.region', $this->selectedRegion);
