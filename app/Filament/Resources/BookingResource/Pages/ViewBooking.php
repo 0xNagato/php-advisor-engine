@@ -22,6 +22,7 @@ use App\Notifications\Booking\CustomerBookingConfirmed;
 use App\Notifications\Booking\VenueBookingCancelled;
 use App\Services\Booking\BookingCalculationService;
 use App\Traits\FormatsPhoneNumber;
+use Carbon\Carbon;
 use Filament\Actions\Action;
 use Filament\Forms\Components\Grid;
 use Filament\Forms\Components\Select;
@@ -316,7 +317,26 @@ class ViewBooking extends ViewRecord
             ->button()
             ->size('lg')
             ->extraAttributes(['class' => 'w-full'])
-            ->visible(fn () => $this->canModifyBooking || auth()->user()->hasActiveRole('super_admin'))
+            ->visible(function () {
+                // Non-cancellable statuses for everyone
+                $nonCancellableStatuses = [
+                    BookingStatus::CANCELLED,
+                    BookingStatus::REFUNDED,
+                    BookingStatus::PARTIALLY_REFUNDED,
+                ];
+
+                if (in_array($this->record->status, $nonCancellableStatuses)) {
+                    return false;
+                }
+
+                // Super admin can cancel any booking that's not in a non-cancellable status
+                if (auth()->user()->hasActiveRole('super_admin')) {
+                    return true;
+                }
+
+                // Regular users need to use canModifyBooking
+                return $this->canModifyBooking;
+            })
             ->disabled(fn () => $this->record->status === BookingStatus::CANCELLED)
             ->action(function () {
                 $this->cancelNonPrimeBooking();
@@ -325,12 +345,41 @@ class ViewBooking extends ViewRecord
 
     private function cancelNonPrimeBooking(): void
     {
-        // For super admins, bypass the canModifyBooking check
-        if (! auth()->user()->hasActiveRole('super_admin') && ! $this->canModifyBooking) {
+        // Only super admins can cancel past the booking time
+        $isSuperAdmin = auth()->user()->hasActiveRole('super_admin');
+        $pastTimeCheck = true;
+
+        if (! $isSuperAdmin) {
+            // For non-super admins, check if booking time has passed
+            $bookingTime = Carbon::createFromFormat(
+                'Y-m-d H:i:s',
+                $this->record->booking_at,
+                $this->record->venue->timezone
+            );
+            $now = now($this->record->venue->timezone);
+
+            // Cannot cancel within 30 minutes before booking or after booking has started
+            $pastTimeCheck = $now->diffInMinutes($bookingTime, false) > CanModifyBooking::MINUTES_BEFORE_BOOKING_TO_MODIFY
+                && $now <= $bookingTime;
+        }
+
+        // Check permissions
+        if ((! $isSuperAdmin && ! $this->canModifyBooking) || (! $isSuperAdmin && ! $pastTimeCheck)) {
             Notification::make()
                 ->danger()
                 ->title('Unauthorized')
                 ->body('You do not have permission to cancel this booking.')
+                ->send();
+
+            return;
+        }
+
+        // Check for cancelled status regardless of user role
+        if ($this->record->status === BookingStatus::CANCELLED) {
+            Notification::make()
+                ->danger()
+                ->title('Cannot Cancel Booking')
+                ->body('This booking is already cancelled.')
                 ->send();
 
             return;
