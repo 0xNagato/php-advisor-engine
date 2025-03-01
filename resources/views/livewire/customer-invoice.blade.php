@@ -388,17 +388,34 @@
                     $this->markAsNoShowAction,
                     $this->transferBookingAction,
                     $this->restoreConciergeEarningsAction,
+                    $this->cancelBookingAction,
+                    $this->modifyGuestInfoAction,
                 ]" class="w-full mt-4" />
+
+                @if (isset($this->canModifyBooking) && $this->canModifyBooking)
+                    <x-filament::button
+                        wire:click="$dispatch('open-modal', { id: 'modify-booking-{{ $booking->id }}' })"
+                        class="w-full mt-3" icon="heroicon-m-pencil-square" :disabled="$booking->hasActiveModificationRequest()">
+                        {{ $booking->hasActiveModificationRequest() ? 'Modification Request Pending' : 'Modify Booking' }}
+                    </x-filament::button>
+                @endif
             @endif
 
-            @if (!$download && auth()->check() && isset($this->canModifyBooking) && $this->canModifyBooking)
+            @if (
+                !$download &&
+                    auth()->check() &&
+                    isset($this->canModifyBooking) &&
+                    $this->canModifyBooking &&
+                    !auth()->user()->hasActiveRole('super_admin'))
                 <x-filament::actions :actions="[$this->cancelBookingAction, $this->modifyGuestInfoAction]" class="w-full mt-4" />
 
                 <x-filament::button wire:click="$dispatch('open-modal', { id: 'modify-booking-{{ $booking->id }}' })"
                     class="w-full mt-3" icon="heroicon-m-pencil-square" :disabled="$booking->hasActiveModificationRequest()">
                     {{ $booking->hasActiveModificationRequest() ? 'Modification Request Pending' : 'Modify Booking' }}
                 </x-filament::button>
+            @endif
 
+            @if (!$download && auth()->check() && isset($this->canModifyBooking) && $this->canModifyBooking)
                 <x-filament::modal id="modify-booking-{{ $booking->id }}" width="md">
                     <x-slot name="heading">
                         Modify Booking

@@ -16,6 +16,12 @@ class CanModifyBooking
 
     public function handle(Booking $booking, User $user): bool
     {
+        // Super admin can always modify
+        $isSuperAdmin = $user->hasActiveRole('super_admin');
+        if ($isSuperAdmin) {
+            return true;
+        }
+
         // Basic conditions: non-prime and correct status
         if ($booking->is_prime ||
             ! in_array($booking->status, [
@@ -25,16 +31,15 @@ class CanModifyBooking
             return false;
         }
 
-        $isSuperAdmin = $user->hasActiveRole('super_admin');
         $isBookingConcierge = $user->hasActiveRole('concierge') &&
                              $user->id === $booking->concierge?->user_id;
 
-        // Must be super admin or the booking's concierge
-        if (! $isSuperAdmin && ! $isBookingConcierge) {
+        // Must be the booking's concierge
+        if (! $isBookingConcierge) {
             return false;
         }
 
-        // Check 30-minute restriction for all users
+        // Check time restrictions for non-super admins
         $bookingTime = Carbon::createFromFormat(
             'Y-m-d H:i:s',
             $booking->booking_at,
@@ -42,7 +47,13 @@ class CanModifyBooking
         );
         $now = now($booking->venue->timezone);
 
+        // Cannot modify within 30 minutes before booking
         if ($now->diffInMinutes($bookingTime, false) <= self::MINUTES_BEFORE_BOOKING_TO_MODIFY) {
+            return false;
+        }
+
+        // Cannot modify after booking has started
+        if ($now > $bookingTime) {
             return false;
         }
 

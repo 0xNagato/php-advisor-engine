@@ -316,7 +316,7 @@ class ViewBooking extends ViewRecord
             ->button()
             ->size('lg')
             ->extraAttributes(['class' => 'w-full'])
-            ->visible(fn () => $this->canModifyBooking)
+            ->visible(fn () => $this->canModifyBooking || auth()->user()->hasActiveRole('super_admin'))
             ->disabled(fn () => $this->record->status === BookingStatus::CANCELLED)
             ->action(function () {
                 $this->cancelNonPrimeBooking();
@@ -325,7 +325,8 @@ class ViewBooking extends ViewRecord
 
     private function cancelNonPrimeBooking(): void
     {
-        if (! $this->canModifyBooking) {
+        // For super admins, bypass the canModifyBooking check
+        if (! auth()->user()->hasActiveRole('super_admin') && ! $this->canModifyBooking) {
             Notification::make()
                 ->danger()
                 ->title('Unauthorized')
