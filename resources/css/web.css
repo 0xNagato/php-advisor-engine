@@ -577,6 +577,10 @@
     @apply w-full aspect-video rounded-xl;
   }
 
+  video {
+    @apply w-full aspect-video rounded-xl;
+  }
+
   /* form */
   textarea,
   input {

@@ -424,10 +424,10 @@
                     With PRIMA, you can effortlessly browse available dining options and secure your reservations in
                     real-time. Enjoy guaranteed bookings without the usual hassle of waiting lists.
                 </p>
-                <iframe src="https://www.youtube.com/embed/pxyHz-RjHW0?si=ez97HMpU4Bf2-LCp"
-                        title="YouTube video player"
-                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                        referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+                <video controls playsinline>
+                    <source src="https://prima-bucket.nyc3.digitaloceanspaces.com/production/PrimaVIPUpdate280225.mp4" type="video/mp4">
+                    Your browser does not support the video tag.
+                </video>
             </div>
         </div>
     </section>
