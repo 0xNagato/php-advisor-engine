@@ -323,13 +323,19 @@ class ViewBooking extends ViewRecord
                     BookingStatus::CANCELLED,
                     BookingStatus::REFUNDED,
                     BookingStatus::PARTIALLY_REFUNDED,
+                    BookingStatus::ABANDONED,
                 ];
 
                 if (in_array($this->record->status, $nonCancellableStatuses)) {
                     return false;
                 }
 
-                // Super admin can cancel any booking that's not in a non-cancellable status
+                // Cannot cancel prime bookings
+                if ($this->record->is_prime) {
+                    return false;
+                }
+
+                // Super admin can cancel any non-prime booking that's not in a non-cancellable status
                 if (auth()->user()->hasActiveRole('super_admin')) {
                     return true;
                 }

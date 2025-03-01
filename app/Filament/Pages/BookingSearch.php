@@ -4,6 +4,7 @@ namespace App\Filament\Pages;
 
 use App\Enums\BookingStatus;
 use App\Models\Booking;
+use App\Models\Region;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Grid;
 use Filament\Forms\Components\Section;
@@ -36,8 +37,9 @@ class BookingSearch extends Page implements HasTable
         'concierge_search' => '',
         'start_date' => '',
         'end_date' => '',
-        'status' => [],
-        'user_id' => '',
+        'status' => [BookingStatus::CONFIRMED->value],
+        'is_prime' => '',
+        'region' => '',
         'show_booking_time' => true,
     ];
 
@@ -70,8 +72,9 @@ class BookingSearch extends Page implements HasTable
                 'concierge_search' => '',
                 'start_date' => now($timezone)->subDays(30)->format('Y-m-d'),
                 'end_date' => now($timezone)->format('Y-m-d'),
-                'status' => [],
-                'user_id' => '',
+                'status' => [BookingStatus::CONFIRMED->value],
+                'is_prime' => '',
+                'region' => '',
                 'show_booking_time' => true,
             ]);
         }
@@ -126,15 +129,19 @@ class BookingSearch extends Page implements HasTable
                                     ->afterStateUpdated(function () {
                                         $this->resetTable();
                                     }),
-                                TextInput::make('user_id')
-                                    ->label('User ID')
-                                    ->numeric()
-                                    ->live(debounce: 300)
+                                Select::make('is_prime')
+                                    ->label('Prime Status')
+                                    ->options([
+                                        '1' => 'Prime Only',
+                                        '0' => 'Non-Prime Only',
+                                    ])
+                                    ->placeholder('All Bookings')
+                                    ->live()
                                     ->afterStateUpdated(function () {
                                         $this->resetTable();
                                     }),
                             ]),
-                        Grid::make(3)
+                        Grid::make(4)
                             ->schema([
                                 TextInput::make('venue_search')
                                     ->label('Venue Search')
@@ -144,9 +151,23 @@ class BookingSearch extends Page implements HasTable
                                     ->afterStateUpdated(function () {
                                         $this->resetTable();
                                     }),
+                                Select::make('region')
+                                    ->label('Region')
+                                    ->options(function () {
+                                        return Region::query()
+                                            ->active()
+                                            ->get()
+                                            ->pluck('name', 'id')
+                                            ->toArray();
+                                    })
+                                    ->placeholder('All Regions')
+                                    ->live()
+                                    ->afterStateUpdated(function () {
+                                        $this->resetTable();
+                                    }),
                                 TextInput::make('concierge_search')
                                     ->label('Concierge Search')
-                                    ->placeholder('Concierge Name')
+                                    ->placeholder('Concierge Name or Hotel')
                                     ->live(debounce: 500)
                                     ->minLength(3)
                                     ->afterStateUpdated(function () {
@@ -201,15 +222,6 @@ class BookingSearch extends Page implements HasTable
                     $query->where('id', $this->data['booking_id']);
                 }
 
-                if ($this->data['user_id'] ?? null) {
-                    $query->where(function ($query) {
-                        $query->whereHas('venue.user', fn (Builder $q) => $q->where('id', $this->data['user_id']))
-                            ->orWhereHas('concierge.user', fn (Builder $q) => $q->where('id', $this->data['user_id']))
-                            ->orWhereHas('partnerVenue.user', fn (Builder $q) => $q->where('id', $this->data['user_id']))
-                            ->orWhereHas('partnerConcierge.user', fn (Builder $q) => $q->where('id', $this->data['user_id']));
-                    });
-                }
-
                 if ($this->data['customer_search'] ?? null) {
                     $search = $this->data['customer_search'];
                     $terms = explode(' ', (string) $search);
@@ -224,22 +236,38 @@ class BookingSearch extends Page implements HasTable
                     });
                 }
 
+                if (isset($this->data['is_prime']) && $this->data['is_prime'] !== '') {
+                    $query->where('is_prime', $this->data['is_prime']);
+                }
+
                 if ($this->data['venue_search'] ?? null) {
                     $search = $this->data['venue_search'];
                     $query->whereHas('venue', fn (Builder $q) => $q->where('name', 'like', "%{$search}%"));
+                }
+
+                if ($this->data['region'] ?? null) {
+                    $query->whereHas('venue', fn (Builder $q) => $q->where('region', $this->data['region']));
                 }
 
                 if ($this->data['concierge_search'] ?? null) {
                     $search = $this->data['concierge_search'];
                     $terms = explode(' ', (string) $search);
 
-                    $query->whereHas('concierge.user', function (Builder $q) use ($terms) {
-                        foreach ($terms as $term) {
-                            $q->where(function ($q) use ($term) {
-                                $q->where('first_name', 'like', "%{$term}%")
-                                    ->orWhere('last_name', 'like', "%{$term}%");
-                            });
-                        }
+                    $query->where(function ($query) use ($terms, $search) {
+                        // Search for hotel name directly
+                        $query->whereHas('concierge', function (Builder $q) use ($search) {
+                            $q->where('hotel_name', 'like', "%{$search}%");
+                        });
+
+                        // Or search for concierge name
+                        $query->orWhereHas('concierge.user', function (Builder $q) use ($terms) {
+                            foreach ($terms as $term) {
+                                $q->where(function ($q) use ($term) {
+                                    $q->where('first_name', 'like', "%{$term}%")
+                                        ->orWhere('last_name', 'like', "%{$term}%");
+                                });
+                            }
+                        });
                     });
                 }
 
@@ -274,7 +302,7 @@ class BookingSearch extends Page implements HasTable
                     ->label('Booking ID')
                     ->hidden(),
                 TextColumn::make('created_at')
-                    ->tooltip(fn (Booking $record): ?string => $record->source && $record->device ? "Source: {$record->source} | Device: {$record->device}" : null)
+                    ->tooltip(fn (Booking $record): string => "ID: {$record->id}".($record->source && $record->device ? " | Source: {$record->source} | Device: {$record->device}" : ''))
                     ->label('Created')
                     ->size('xs')
                     ->formatStateUsing(fn (Booking $record): string => Carbon::parse($record->created_at)
@@ -287,31 +315,16 @@ class BookingSearch extends Page implements HasTable
                     ->formatStateUsing(fn (Booking $record): string => Carbon::parse($record->booking_at)
                         ->format('M j, Y g:ia'))
                     ->sortable(),
-                TextColumn::make('is_prime')
-                    ->hidden()
-                    ->label('Prime')
-                    ->alignCenter()
-                    ->formatStateUsing(fn (Booking $record): string => $record->is_prime ? 'Yes' : 'No')
-                    ->size('xs'),
                 TextColumn::make('no_show')
                     ->label('Guest Information')
                     ->size('xs')
-                    ->formatStateUsing(function (Booking $record): string {
-                        $parts = [];
-
-                        if ($record->guest_name) {
-                            $parts[] = $record->guest_name;
-                        }
-                        if ($record->guest_phone) {
-                            $parts[] = $record->guest_phone;
-                        }
-                        if ($record->guest_email) {
-                            $parts[] = $record->guest_email;
-                        }
-
-                        return implode('<br>', $parts);
-                    })
-                    ->html(),
+                    ->state(function (Booking $record): HtmlString {
+                        return new HtmlString(<<<HTML
+                            <span class="truncate block max-w-[150px]" title="{$record->guest_name}">{$record->guest_name}</span>
+                            <span class="truncate block max-w-[150px]" title="{$record->guest_phone}">{$record->guest_phone}</span>
+                            <span class="truncate block max-w-[150px]" title="{$record->guest_email}">{$record->guest_email}</span>
+                        HTML);
+                    }),
                 TextColumn::make('guest_name')
                     ->hidden(),
                 TextColumn::make('guest_email')
@@ -323,35 +336,115 @@ class BookingSearch extends Page implements HasTable
                 TextColumn::make('venue.name')
                     ->label('Venue')
                     ->size('xs')
-                    ->sortable(),
+                    ->color('primary')
+                    ->extraAttributes(['class' => 'font-semibold'])
+                    ->state(function (Booking $record): HtmlString {
+                        $regionName = '';
+                        if ($record->venue && $record->venue->region) {
+                            $region = Region::find($record->venue->region);
+                            $regionName = $region ? $region->name : $record->venue->region;
+                        }
+
+                        return new HtmlString(<<<HTML
+                            <span class="font-semibold text-primary">{$record->venue?->name}</span>
+                            <br><span class="text-xs text-gray-500">{$regionName}</span>
+                        HTML);
+                    })
+                    ->action(
+                        Action::make('viewVenue')
+                            ->modalHeading(fn (Booking $record): string => $record->venue?->name ?? 'No Venue')
+                            ->modalContent(function (Booking $record): HtmlString {
+                                $regionName = '';
+                                if ($record->venue && $record->venue->region) {
+                                    $region = Region::find($record->venue->region);
+                                    $regionName = $region ? $region->name : $record->venue->region;
+                                }
+
+                                return new HtmlString(<<<HTML
+                                    <div class='space-y-4'>
+                                    <div class='grid grid-cols-2 gap-4 text-sm'>
+                                        <div>
+                                            <span class='block font-medium text-gray-500'>Region</span>
+                                            <span class='block'>{$regionName}</span>
+                                        </div>
+                                        <div>
+                                            <span class='block font-medium text-gray-500'>Contact Phone</span>
+                                            <span class='block'>{$record->venue?->contact_phone}</span>
+                                        </div>
+                                        <div>
+                                            <span class='block font-medium text-gray-500'>Primary Contact</span>
+                                            <span class='block'>{$record->venue?->primary_contact_name}</span>
+                                        </div>
+                                        <div>
+                                            <span class='block font-medium text-gray-500'>Payout %</span>
+                                            <span class='block'>{$record->venue?->payout_venue}%</span>
+                                        </div>
+                                    </div>
+                                    </div>
+                                HTML);
+                            })
+                            ->modalActions([
+                                Action::make('edit')
+                                    ->label('Edit')
+                                    ->url(fn (Booking $record) => route('filament.admin.resources.venues.edit', ['record' => $record->venue?->id]))
+                                    ->openUrlInNewTab()
+                                    ->icon('heroicon-m-pencil-square')
+                                    ->color('warning'),
+                                Action::make('overview')
+                                    ->label('Overview')
+                                    ->url(fn (Booking $record) => route('filament.admin.resources.venues.view', ['record' => $record->venue?->id]))
+                                    ->openUrlInNewTab()
+                                    ->icon('heroicon-m-document-text')
+                                    ->color('info'),
+                                Action::make('bookings')
+                                    ->label('Bookings')
+                                    ->url(fn (Booking $record) => route('filament.admin.pages.booking-search', ['filters' => ['venue_search' => $record->venue?->name]]))
+                                    ->openUrlInNewTab()
+                                    ->icon('heroicon-m-calendar')
+                                    ->color('success'),
+                            ])
+                            ->modalWidth('md')
+                    ),
                 TextColumn::make('venue.region')
-                    ->hidden(),
+                    ->label('Region')
+                    ->formatStateUsing(fn (string $state): string => Region::find($state)?->name ?? $state)
+                    ->size('xs')
+                    ->hidden()
+                    ->sortable(),
                 TextColumn::make('concierge.user.name')
                     ->label('Concierge')
                     ->size('xs')
                     ->color('primary')
                     ->extraAttributes(['class' => 'font-semibold'])
+                    ->state(function (Booking $record): HtmlString {
+                        return new HtmlString(<<<HTML
+                            <span class="font-semibold text-primary">{$record->concierge?->user?->name}</span>
+                            <br><span class="text-xs text-gray-500">{$record->concierge?->hotel_name}</span>
+                        HTML);
+                    })
                     ->action(
                         Action::make('viewConcierge')
                             ->modalHeading(fn (Booking $record): string => $record->concierge?->user?->name ?? 'No Concierge')
-                            ->modalContent(fn (Booking $record): HtmlString => new HtmlString(
-                                "<div class='space-y-4'>".
-                                "<div class='grid grid-cols-2 gap-4 text-sm'>".
-                                    '<div>'.
-                                        "<span class='block font-medium text-gray-500'>Hotel/Company</span>".
-                                        "<span class='block'>{$record->concierge?->hotel_name}</span>".
-                                    '</div>'.
-                                    '<div>'.
-                                        "<span class='block font-medium text-gray-500'>Phone</span>".
-                                        "<span class='block'>{$record->concierge?->user?->phone}</span>".
-                                    '</div>'.
-                                    '<div>'.
-                                        "<span class='block font-medium text-gray-500'>Email</span>".
-                                        "<span class='block'>{$record->concierge?->user?->email}</span>".
-                                    '</div>'.
-                                '</div>'.
-                                '</div>'
-                            ))
+                            ->modalContent(function (Booking $record): HtmlString {
+                                return new HtmlString(<<<HTML
+                                    <div class='space-y-4'>
+                                        <div class='grid grid-cols-2 gap-4 text-sm'>
+                                            <div>
+                                                <span class='block font-medium text-gray-500'>Hotel/Company</span>
+                                                <span class='block'>{$record->concierge?->hotel_name}</span>
+                                            </div>
+                                            <div>
+                                                <span class='block font-medium text-gray-500'>Phone</span>
+                                                <span class='block'>{$record->concierge?->user?->phone}</span>
+                                            </div>
+                                            <div>
+                                                <span class='block font-medium text-gray-500'>Email</span>
+                                                <span class='block'>{$record->concierge?->user?->email}</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                HTML);
+                            })
                             ->modalActions([
                                 Action::make('edit')
                                     ->label('Edit')
@@ -393,7 +486,15 @@ class BookingSearch extends Page implements HasTable
                 TextColumn::make('total_fee')
                     ->money(fn ($record) => $record->currency, 100)
                     ->size('xs')
+                    ->hidden()
                     ->sortable(),
+                TextColumn::make('is_prime')
+                    ->label('Prime Status')
+                    ->badge()
+                    ->alignCenter()
+                    ->size('xs')
+                    ->formatStateUsing(fn (Booking $record): string => $record->is_prime ? 'Prime' : 'Non-Prime')
+                    ->color(fn (Booking $record): string => $record->is_prime ? 'success' : 'info'),
             ])
             ->paginated([25, 50, 100, 250]);
     }
