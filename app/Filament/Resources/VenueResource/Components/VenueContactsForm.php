@@ -25,7 +25,7 @@ class VenueContactsForm
                 ->label('Contact Phone')
                 ->required(fn (Get $get): bool => $get('preferences.sms') ?? true)
                 ->tel()
-                ->live()
+                ->live(onBlur: true)
                 ->afterStateUpdated(function (?string $state, Set $set) {
                     if (empty($state)) {
                         return;

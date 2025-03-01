@@ -90,10 +90,6 @@ class FilamentRenderHookProvider extends ServiceProvider
 
                   gtag('config', 'G-Z8HQ7BTL4F');
                 </script>
-                <script
-                    src='https://js.sentry-cdn.com/13f74541d55ad7fbd95d3eefa72399c9.min.js'
-                    crossorigin='anonymous'
-                ></script>
             "));
         }
 

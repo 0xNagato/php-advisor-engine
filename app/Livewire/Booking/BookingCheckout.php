@@ -186,4 +186,34 @@ class BookingCheckout extends Component implements HasMingles
             'message' => 'Thank you for letting us know. Our team will review your request.',
         ];
     }
+
+    /**
+     * Format a phone number using the server-side formatter
+     *
+     * @param  string  $phoneNumber  The phone number to format
+     */
+    public function formatPhoneNumber(string $phoneNumber): array
+    {
+        try {
+            $formattedNumber = $this->getInternationalFormattedPhoneNumber($phoneNumber);
+
+            // If the formatter returned an empty string, the number is invalid
+            if (empty($formattedNumber)) {
+                return [
+                    'success' => false,
+                    'message' => 'Please enter a valid phone number that can receive SMS',
+                ];
+            }
+
+            return [
+                'success' => true,
+                'formattedNumber' => $formattedNumber,
+            ];
+        } catch (\Exception $e) {
+            return [
+                'success' => false,
+                'message' => 'Invalid phone number format. Please enter a valid phone number.',
+            ];
+        }
+    }
 }
