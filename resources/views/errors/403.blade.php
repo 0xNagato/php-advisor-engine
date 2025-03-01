@@ -13,10 +13,6 @@
             <div class="w-full max-w-md">
                 <x-filament::section>
                     <div class="text-center">
-                        <h2 class="text-2xl font-bold text-gray-900">
-                            403 Error
-                        </h2>
-
                         @auth
                             @php
                                 $activeProfile = auth()
@@ -41,18 +37,24 @@
                                 }));
                             </script>
 
-                            <p class="mt-2 text-base font-semibold text-black">
-                                You do not have permission to access this page.
-                            </p>
-
-                            <div class="my-4">
-                                <div
-                                    class="inline-flex items-center px-3 py-1.5 text-sm font-medium text-gray-700 bg-gray-100 rounded-full border">
-                                    Current Role: {{ formatRoleName($activeProfile?->role?->name ?? 'None') }}
-                                </div>
-                            </div>
-
                             @if ($profiles->count() > 0)
+                                <!-- Role Selection for users with multiple roles -->
+                                <h2 class="text-2xl font-bold text-gray-900">
+                                    Role Selection Required
+                                </h2>
+
+                                <div class="my-4">
+                                    <div
+                                        class="inline-flex items-center px-3 py-1.5 text-sm font-medium text-gray-700 bg-gray-100 rounded-full border">
+                                        Current Role: {{ formatRoleName($activeProfile?->role?->name ?? 'None') }}
+                                    </div>
+                                </div>
+
+                                <p class="mt-2 text-base text-gray-700">
+                                    Your current role doesn't have permission for this page, but you have other roles that
+                                    might.
+                                </p>
+
                                 <p class="mt-2 text-sm text-gray-500">
                                     This can happen if you've recently switched roles in a different browser or in the
                                     mobile app.
@@ -75,12 +77,44 @@
                                         </form>
                                     @endforeach
                                 </div>
+                            @else
+                                <!-- True 403 error for users with no access -->
+                                <h2 class="text-2xl font-bold text-gray-900">
+                                    403 Error
+                                </h2>
+
+                                <p class="mt-2 text-base font-semibold text-black">
+                                    You do not have permission to access this page.
+                                </p>
+
+                                <div class="my-4">
+                                    <div
+                                        class="inline-flex items-center px-3 py-1.5 text-sm font-medium text-gray-700 bg-gray-100 rounded-full border">
+                                        Current Role: {{ formatRoleName($activeProfile?->role?->name ?? 'None') }}
+                                    </div>
+                                </div>
                             @endif
 
                             <div class="mt-6">
                                 <a href="{{ config('app.platform_url') }}"
                                     class="inline-flex items-center justify-center w-full px-4 py-2 text-sm font-medium text-white transition bg-indigo-600 border border-transparent rounded-lg shadow-sm hover:bg-indigo-500">
                                     Return to Dashboard
+                                </a>
+                            </div>
+                        @else
+                            <!-- Not authenticated users -->
+                            <h2 class="text-2xl font-bold text-gray-900">
+                                403 Error
+                            </h2>
+
+                            <p class="mt-2 text-base font-semibold text-black">
+                                You do not have permission to access this page.
+                            </p>
+
+                            <div class="mt-6">
+                                <a href="{{ route('filament.app.auth.login') }}"
+                                    class="inline-flex items-center justify-center w-full px-4 py-2 text-sm font-medium text-white transition bg-indigo-600 border border-transparent rounded-lg shadow-sm hover:bg-indigo-500">
+                                    Log In
                                 </a>
                             </div>
                         @endauth
