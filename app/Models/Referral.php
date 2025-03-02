@@ -13,6 +13,9 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Notifications\Notifiable;
 
+/**
+ * @mixin IdeHelperReferral
+ */
 class Referral extends Model
 {
     use FormatsPhoneNumber;

@@ -30,3 +30,7 @@ frankenphp-worker.php
 .codiumai
 /database/migrations/2024_08_25_211700_modify_schedule_with_bookings_view.php
 .cursorrules
+_ide_helper.php
+_ide_helper_models.php
+.phpstorm.meta.php
+_ide_helper_actions.php

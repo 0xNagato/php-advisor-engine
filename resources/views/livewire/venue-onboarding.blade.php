@@ -46,8 +46,19 @@
                                 @enderror
                             </div>
 
-                            <x-type-ahead label="Name of PRIMA Partner" placeholder="Search for a partner..."
-                                :items="$partners" wire-model="partner_id" :error="$errors->first('partner_id')" />
+                            @if ($partnerId && $partnerName)
+                                <div>
+                                    <label class="block mb-2 text-sm text-gray-700">PRIMA Partner</label>
+                                    <div class="flex items-center p-3 bg-gray-50 border border-gray-300 rounded-lg">
+                                        <span class="text-sm font-medium text-gray-800">{{ $partnerName }}</span>
+                                        <span class="ml-2 text-xs text-gray-500">(Referring Partner)</span>
+                                    </div>
+                                    <input type="hidden" wire:model="partner_id">
+                                </div>
+                            @else
+                                <x-type-ahead label="Name of PRIMA Partner" placeholder="Search for a partner..."
+                                    :items="$partners" wire-model="partner_id" :error="$errors->first('partner_id')" />
+                            @endif
 
                             <div class="grid grid-cols-2 gap-4">
                                 <div>

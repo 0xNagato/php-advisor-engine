@@ -31,10 +31,18 @@ class VenueReferralsTable extends BaseWidget
     public function table(Table $table): Table
     {
         return $table
-            ->query(fn () => User::query()->whereHas('referral', static function (Builder $query) {
-                $query->where('type', 'venue')
-                    ->where('referrer_id', auth()->id());
-            }))
+            ->query(function () {
+                return User::query()
+                    ->whereHas('referral', static function (Builder $query) {
+                        $query->where('type', 'venue')
+                            ->where('referrer_id', auth()->id());
+                    })
+                    ->where(function (Builder $query) {
+                        $query->whereDoesntHave('venue')
+                            ->whereNull('secured_at')
+                            ->orWhereHas('venue');
+                    });
+            })
             ->recordUrl(function (User $record) {
                 if ($record->has_secured) {
                     return VenueEarnings::getUrl([$record->venue->id]);

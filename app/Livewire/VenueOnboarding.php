@@ -16,6 +16,7 @@ use Carbon\Carbon;
 use Exception;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Session;
@@ -109,10 +110,13 @@ class VenueOnboarding extends Component
     #[Validate('required|exists:users,id')]
     public ?string $partner_id = null;
 
+    /** Partner name for display */
+    public ?string $partner_name = null;
+
     /** @var array<int, array<string, array<string, array{start: string, end: string, closed: bool}>>> */
     public array $venue_booking_hours = [];
 
-    public function mount(): void
+    public function mount(?string $token = null): void
     {
         // Initialize available regions
         $this->availableRegions = Region::active()
@@ -122,6 +126,23 @@ class VenueOnboarding extends Component
                 'label' => $region->name,
             ])
             ->toArray();
+
+        // Check if a token was provided in the route
+        if ($token) {
+            try {
+                // Decrypt the token to get the partner ID
+                $partnerId = Crypt::decrypt($token);
+                $this->validatePartnerById($partnerId);
+            } catch (\Exception $e) {
+                // If decryption fails, log it but continue without a partner
+                Log::warning('Failed to decrypt partner token: '.$e->getMessage());
+            }
+        }
+        // For backward compatibility, also check query params
+        elseif (request()->has('partner_id')) {
+            $partnerId = request()->get('partner_id');
+            $this->validatePartnerById($partnerId);
+        }
 
         // Load saved state from session if it exists
         if (Session::has('venue_onboarding')) {
@@ -164,6 +185,25 @@ class VenueOnboarding extends Component
             })
             ->values()
             ->toArray();
+    }
+
+    /**
+     * Validate a partner ID and set partner properties if valid
+     */
+    private function validatePartnerById(string $partnerId): void
+    {
+        // Verify this is a valid partner
+        $partner = User::query()
+            ->whereHas('roles', function (\Illuminate\Contracts\Database\Query\Builder $query) {
+                $query->where('name', 'partner');
+            })
+            ->where('id', $partnerId)
+            ->first();
+
+        if ($partner) {
+            $this->partner_id = (string) $partner->id; // Cast to string to avoid type issues
+            $this->partner_name = "{$partner->first_name} {$partner->last_name}";
+        }
     }
 
     private function initializeBookingHours(): void
@@ -379,7 +419,7 @@ class VenueOnboarding extends Component
                     },
                 ],
             ], [
-                'partner_id.required' => 'Please select a PRIMA Partner',
+                'partner_id.required' => 'The partner reference is missing. Please use the link provided by your PRIMA Partner.',
             ]),
             'partner' => $this->validate([
                 'partner_id' => 'required|exists:users,id',
@@ -465,15 +505,22 @@ class VenueOnboarding extends Component
 
     public function render(): View
     {
-        $partners = User::query()
-            ->select(['id', 'first_name', 'last_name'])
-            ->whereHas('roles', fn (\Illuminate\Contracts\Database\Query\Builder $query) => $query->where('name', 'partner'))
-            ->orderBy('first_name')
-            ->get()
-            ->map(fn ($user) => [
-                'id' => $user->id,
-                'name' => "{$user->first_name} {$user->last_name}",
-            ]);
+        $partners = null;
+        $partnerId = $this->partner_id;
+        $partnerName = $this->partner_name;
+
+        // Only load partners if needed (for admin/direct access)
+        if (! $partnerId) {
+            $partners = User::query()
+                ->select(['id', 'first_name', 'last_name'])
+                ->whereHas('roles', fn (\Illuminate\Contracts\Database\Query\Builder $query) => $query->where('name', 'partner'))
+                ->orderBy('first_name')
+                ->get()
+                ->map(fn ($user) => [
+                    'id' => $user->id,
+                    'name' => "{$user->first_name} {$user->last_name}",
+                ]);
+        }
 
         $timeSlots = [];
         if ($this->step === 'prime-hours') {
@@ -484,6 +531,8 @@ class VenueOnboarding extends Component
 
         return view('livewire.venue-onboarding', [
             'partners' => $partners,
+            'partnerId' => $partnerId,
+            'partnerName' => $partnerName,
             'availableTimeSlots' => $timeSlots,
         ])->layout('components.layouts.app', [
             'title' => $this->submitted ? 'Onboarding Submitted' : 'Venue Onboarding',

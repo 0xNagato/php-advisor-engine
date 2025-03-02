@@ -21,6 +21,9 @@ use InvalidArgumentException;
 use Spatie\Activitylog\LogOptions;
 use Spatie\Activitylog\Traits\LogsActivity;
 
+/**
+ * @mixin IdeHelperBooking
+ */
 class Booking extends Model
 {
     use FormatsPhoneNumber;

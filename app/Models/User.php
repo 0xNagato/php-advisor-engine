@@ -32,6 +32,9 @@ use Spatie\Permission\Models\Role;
 use Spatie\Permission\Traits\HasRoles;
 use Throwable;
 
+/**
+ * @mixin IdeHelperUser
+ */
 class User extends Authenticatable implements FilamentUser, HasAvatar
 {
     use AuthenticationLoggable;
