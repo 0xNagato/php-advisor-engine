@@ -203,7 +203,15 @@ class EditVenue extends EditRecord
                             ->label('Cutoff Time')
                             ->type('time')
                             ->helperText('Time after which same-day reservations cannot be made. Leave empty to allow same-day bookings until closing.')
-                            ->nullable(),
+                            ->nullable()
+                            ->dehydrateStateUsing(function ($state) {
+                                if (empty($state)) return null;
+                                return now()->setTimeFromTimeString($state);
+                            })
+                            ->formatStateUsing(function ($state) {
+                                if (empty($state)) return null;
+                                return $state instanceof \Carbon\Carbon ? $state->format('H:i') : date('H:i', strtotime($state));
+                            }),
                         Toggle::make('no_wait')
                             ->label('No Wait')
                             ->helperText('When enabled, guests will be seated immediately upon arrival')
