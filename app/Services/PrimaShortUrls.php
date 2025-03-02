@@ -86,8 +86,6 @@ class PrimaShortUrls
                     ->trackIPAddress()
                     ->make();
 
-                Log::info("Created new onboarding URL for partner {$partnerId}");
-
                 return $shortUrl->default_short_url;
             } catch (ShortURLException $e) {
                 // If there's an error, log it and return the original URL as fallback

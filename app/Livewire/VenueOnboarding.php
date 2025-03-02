@@ -133,7 +133,7 @@ class VenueOnboarding extends Component
                 // Decrypt the token to get the partner ID
                 $partnerId = Crypt::decrypt($token);
                 $this->validatePartnerById($partnerId);
-            } catch (\Exception $e) {
+            } catch (Exception $e) {
                 // If decryption fails, log it but continue without a partner
                 Log::warning('Failed to decrypt partner token: '.$e->getMessage());
             }

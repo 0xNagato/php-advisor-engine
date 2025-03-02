@@ -153,13 +153,11 @@ class BookingSearch extends Page implements HasTable
                                     }),
                                 Select::make('region')
                                     ->label('Region')
-                                    ->options(function () {
-                                        return Region::query()
-                                            ->active()
-                                            ->get()
-                                            ->pluck('name', 'id')
-                                            ->toArray();
-                                    })
+                                    ->options(fn () => Region::query()
+                                        ->active()
+                                        ->get()
+                                        ->pluck('name', 'id')
+                                        ->toArray())
                                     ->placeholder('All Regions')
                                     ->live()
                                     ->afterStateUpdated(function () {
@@ -318,13 +316,11 @@ class BookingSearch extends Page implements HasTable
                 TextColumn::make('no_show')
                     ->label('Guest Information')
                     ->size('xs')
-                    ->state(function (Booking $record): HtmlString {
-                        return new HtmlString(<<<HTML
+                    ->state(fn (Booking $record): HtmlString => new HtmlString(<<<HTML
                             <span class="truncate block max-w-[150px]" title="{$record->guest_name}">{$record->guest_name}</span>
                             <span class="truncate block max-w-[150px]" title="{$record->guest_phone}">{$record->guest_phone}</span>
                             <span class="truncate block max-w-[150px]" title="{$record->guest_email}">{$record->guest_email}</span>
-                        HTML);
-                    }),
+                        HTML)),
                 TextColumn::make('guest_name')
                     ->hidden(),
                 TextColumn::make('guest_email')
@@ -341,7 +337,7 @@ class BookingSearch extends Page implements HasTable
                     ->state(function (Booking $record): HtmlString {
                         $regionName = '';
                         if ($record->venue && $record->venue->region) {
-                            $region = Region::find($record->venue->region);
+                            $region = Region::query()->find($record->venue->region);
                             $regionName = $region ? $region->name : $record->venue->region;
                         }
 
@@ -356,7 +352,7 @@ class BookingSearch extends Page implements HasTable
                             ->modalContent(function (Booking $record): HtmlString {
                                 $regionName = '';
                                 if ($record->venue && $record->venue->region) {
-                                    $region = Region::find($record->venue->region);
+                                    $region = Region::query()->find($record->venue->region);
                                     $regionName = $region ? $region->name : $record->venue->region;
                                 }
 
@@ -407,7 +403,7 @@ class BookingSearch extends Page implements HasTable
                     ),
                 TextColumn::make('venue.region')
                     ->label('Region')
-                    ->formatStateUsing(fn (string $state): string => Region::find($state)?->name ?? $state)
+                    ->formatStateUsing(fn (string $state): string => Region::query()->find($state)?->name ?? $state)
                     ->size('xs')
                     ->hidden()
                     ->sortable(),
@@ -416,17 +412,14 @@ class BookingSearch extends Page implements HasTable
                     ->size('xs')
                     ->color('primary')
                     ->extraAttributes(['class' => 'font-semibold'])
-                    ->state(function (Booking $record): HtmlString {
-                        return new HtmlString(<<<HTML
+                    ->state(fn (Booking $record): HtmlString => new HtmlString(<<<HTML
                             <span class="font-semibold text-primary">{$record->concierge?->user?->name}</span>
                             <br><span class="text-xs text-gray-500">{$record->concierge?->hotel_name}</span>
-                        HTML);
-                    })
+                        HTML))
                     ->action(
                         Action::make('viewConcierge')
                             ->modalHeading(fn (Booking $record): string => $record->concierge?->user?->name ?? 'No Concierge')
-                            ->modalContent(function (Booking $record): HtmlString {
-                                return new HtmlString(<<<HTML
+                            ->modalContent(fn (Booking $record): HtmlString => new HtmlString(<<<HTML
                                     <div class='space-y-4'>
                                         <div class='grid grid-cols-2 gap-4 text-sm'>
                                             <div>
@@ -443,8 +436,7 @@ class BookingSearch extends Page implements HasTable
                                             </div>
                                         </div>
                                     </div>
-                                HTML);
-                            })
+                                HTML))
                             ->modalActions([
                                 Action::make('edit')
                                     ->label('Edit')
