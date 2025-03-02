@@ -27,7 +27,7 @@ class VenueContactsForm
                 ->tel()
                 ->live(onBlur: true)
                 ->afterStateUpdated(function (?string $state, Set $set) {
-                    if (empty($state)) {
+                    if (blank($state)) {
                         return;
                     }
 

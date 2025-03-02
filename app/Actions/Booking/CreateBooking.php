@@ -76,15 +76,10 @@ class CreateBooking
         $venue = $scheduleTemplate->venue;
 
         // Check if concierge is restricted to specific venues
-        if ($concierge && $concierge->venue_group_id && ! empty($concierge->allowed_venue_ids)) {
-            if (! in_array($venue->id, $concierge->allowed_venue_ids)) {
-                throw new RuntimeException('You are not authorized to book at this venue.');
-            }
+        if ($concierge && $concierge->venue_group_id && filled($concierge->allowed_venue_ids)) {
+            throw_unless(in_array($venue->id, $concierge->allowed_venue_ids), new RuntimeException('You are not authorized to book at this venue.'));
 
-            // Check if venue belongs to the concierge's venue group
-            if ($venue->venue_group_id !== $concierge->venue_group_id) {
-                throw new RuntimeException('You are not authorized to book at venues outside your venue group.');
-            }
+            throw_if($venue->venue_group_id !== $concierge->venue_group_id, new RuntimeException('You are not authorized to book at venues outside your venue group.'));
         }
 
         // Prepare meta data for non-prime bookings

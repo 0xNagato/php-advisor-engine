@@ -246,6 +246,8 @@ return [
     'widget_cache_timeout_minutes' => (int) env('WIDGET_CACHE_TIMEOUT_MINUTES', 5),
     'override_venues' => env('OVERRIDE_VENUES', ''),
     'closure_venues' => env('CLOSURE_VENUES', '73,76,95,112,129'),
+    'allow_advanced_toggle' => env('ALLOW_ADVANCED_TOGGLE', false),
+
     /*
     |--------------------------------------------------------------------------
     | Booking Status

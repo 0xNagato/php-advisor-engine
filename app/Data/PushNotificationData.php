@@ -3,10 +3,9 @@
 namespace App\Data;
 
 use InvalidArgumentException;
-use Spatie\LaravelData\Attributes\Validation\StringType;
 use Spatie\LaravelData\Attributes\Validation\Max;
+use Spatie\LaravelData\Attributes\Validation\StringType;
 use Spatie\LaravelData\Data;
-use Illuminate\Validation\Rules\MaxDigits;
 
 class PushNotificationData extends Data
 {

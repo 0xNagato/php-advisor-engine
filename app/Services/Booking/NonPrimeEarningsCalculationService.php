@@ -5,9 +5,9 @@ namespace App\Services\Booking;
 use App\Constants\BookingPercentages;
 use App\Enums\EarningType;
 use App\Models\Booking;
+use App\Models\Concierge;
 use App\Models\Partner;
 use App\Models\ScheduleTemplate;
-use App\Models\Concierge;
 use Exception;
 use Illuminate\Support\Facades\Log;
 
@@ -35,16 +35,16 @@ readonly class NonPrimeEarningsCalculationService
         $platform_concierge = $fee * (BookingPercentages::PLATFORM_PERCENTAGE_CONCIERGE / 100);
         $platform_venue = $fee * (BookingPercentages::PLATFORM_PERCENTAGE_VENUE / 100);
         $platform_earnings = $platform_concierge + $platform_venue;
-        
+
         // Calculate partner earnings from the platform earnings
         $partnerEarnings = $this->calculateAndCreatePartnerEarnings($booking, $platform_earnings);
-        
+
         // Calculate concierge referral earnings from the platform earnings
         $referralEarnings = $this->calculateAndCreateReferralEarnings($booking, $platform_earnings);
-        
+
         // Adjust platform earnings after partner and referral payments
         $platform_earnings -= ($partnerEarnings + $referralEarnings);
-        
+
         // Venue pays for everything (concierge earnings + platform earnings + partner earnings + referral earnings)
         $venue_earnings = ($concierge_earnings + $platform_earnings + $partnerEarnings + $referralEarnings) * -1;
 
@@ -93,7 +93,7 @@ readonly class NonPrimeEarningsCalculationService
             throw $e;
         }
     }
-    
+
     private function calculateAndCreateReferralEarnings(Booking $booking, float $remainder): float
     {
         $totalReferralEarnings = 0;
@@ -109,7 +109,7 @@ readonly class NonPrimeEarningsCalculationService
                 percentageOf: 'platform'
             );
             $totalReferralEarnings += $amount;
-            
+
             // Check for second level referral
             $referringConcierge = Concierge::query()->find($booking->concierge->user->concierge_referral_id);
             if ($referringConcierge && $referringConcierge->user->concierge_referral_id) {
@@ -198,16 +198,16 @@ readonly class NonPrimeEarningsCalculationService
         $adjustmentFactor = $maxPartnerEarnings / $totalPartnerEarnings;
         $booking->partner_concierge_fee *= $adjustmentFactor;
         $booking->partner_venue_fee *= $adjustmentFactor;
-        
+
         // Update the earnings records
         $booking->earnings()
             ->where('type', EarningType::PARTNER_CONCIERGE->value)
             ->update(['amount' => $booking->partner_concierge_fee]);
-            
+
         $booking->earnings()
             ->where('type', EarningType::PARTNER_VENUE->value)
             ->update(['amount' => $booking->partner_venue_fee]);
-            
+
         // Save the booking to persist the changes
         $booking->save();
     }

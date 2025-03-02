@@ -9,6 +9,7 @@ use App\Mail\CustomerInvoice;
 use App\Models\Booking;
 use App\Notifications\MultipleNonPrimeBookingAttemptNotification;
 use App\Traits\FormatsPhoneNumber;
+use Exception;
 use Filament\Notifications\Notification as FilamentNotification;
 use Ijpatricio\Mingle\Concerns\InteractsWithMingles;
 use Ijpatricio\Mingle\Contracts\HasMingles;
@@ -198,7 +199,7 @@ class BookingCheckout extends Component implements HasMingles
             $formattedNumber = $this->getInternationalFormattedPhoneNumber($phoneNumber);
 
             // If the formatter returned an empty string, the number is invalid
-            if (empty($formattedNumber)) {
+            if (blank($formattedNumber)) {
                 return [
                     'success' => false,
                     'message' => 'Please enter a valid phone number that can receive SMS',
@@ -209,7 +210,7 @@ class BookingCheckout extends Component implements HasMingles
                 'success' => true,
                 'formattedNumber' => $formattedNumber,
             ];
-        } catch (\Exception $e) {
+        } catch (Exception) {
             return [
                 'success' => false,
                 'message' => 'Invalid phone number format. Please enter a valid phone number.',

@@ -9,6 +9,9 @@ use App\Traits\ManagesBookingForms;
 use Exception;
 use Filament\Forms\Form;
 use Filament\Pages\Page;
+use Filament\Support\Facades\FilamentView;
+use Filament\View\PanelsRenderHook;
+use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Collection;
 use Livewire\Attributes\On;
 
@@ -48,11 +51,25 @@ class AvailabilityCalendar extends Page
             $region = Region::default()->id;
             auth()->user()->update(['region' => $region]);
         }
-        /** @var Region $this->region */
-        $this->region = Region::query()->find($region);
-        $this->timezone = $this->region?->timezone;
-        $this->currency = $this->region?->currency;
+
+        $this->region = Region::query()->where('id', $region)->first();
+        $this->neighborhoods = $this->region->neighborhoods->pluck('name', 'id');
+        $this->timezone = $this->region->timezone;
+        $this->currency = $this->region->currency;
+        $this->toggleAdvance(session('advanceFilters', false));
         $this->form->fill();
+    }
+
+    public function render(): View
+    {
+        if (config('app.allow_advanced_toggle')) {
+            FilamentView::registerRenderHook(
+                PanelsRenderHook::PAGE_HEADER_ACTIONS_BEFORE,
+                static fn () => view('partials.availability-advance-filters-toggle')
+            );
+        }
+
+        return parent::render();
     }
 
     public static function canAccess(): bool
@@ -79,11 +96,10 @@ class AvailabilityCalendar extends Page
 
     public function updatedData($data, $key): void
     {
-        // Check if user's region has changed and update accordingly
         $currentUserRegion = auth()->user()->region;
         if ($this->region?->id !== $currentUserRegion) {
-            /** @var Region $this->region */
-            $this->region = Region::query()->find($currentUserRegion);
+            $this->region = Region::query()->where('id', $currentUserRegion)->first();
+            $this->neighborhoods = $this->region->neighborhoods->pluck('name', 'id');
             $this->timezone = $this->region?->timezone;
             $this->currency = $this->region?->currency;
         }
@@ -98,7 +114,9 @@ class AvailabilityCalendar extends Page
                 guestCount: $this->data['guest_count'],
                 reservationTime: $this->data['reservation_time'],
                 timeslotCount: $this->data['timeslot_count'] ?? 5,
-                timeSlotOffset: 2
+                timeSlotOffset: 2,
+                cuisines: $this->data['cuisine'],
+                neighborhood: $this->data['neighborhood'],
             );
 
             $this->venues = $reservation->getAvailableVenues();
@@ -110,14 +128,12 @@ class AvailabilityCalendar extends Page
     public function regionChanged(): void
     {
         $region = auth()->user()->region;
-
-        /** @var Region $this->region */
-        $this->region = Region::query()->find($region);
-
-        $this->timezone = $this->region?->timezone;
-        $this->currency = $this->region?->currency;
-
+        $this->region = Region::query()->where('id', $region)->first();
+        $this->neighborhoods = $this->region->neighborhoods->pluck('name', 'id');
+        $this->timezone = $this->region->timezone;
+        $this->currency = $this->region->currency;
         $this->venues = null;
+
         $this->form->fill();
     }
 
@@ -133,5 +149,13 @@ class AvailabilityCalendar extends Page
             'date' => $date,
             'guestCount' => $this->data['guest_count'],
         ]);
+    }
+
+    #[On('advanceToggled')]
+    public function toggleAdvance(bool $value): void
+    {
+        $this->advanced = $value;
+        $this->venues = null;
+        $this->form->fill();
     }
 }

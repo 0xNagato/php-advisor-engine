@@ -5,18 +5,29 @@ namespace App\Filament\Resources\VenueResource\Pages;
 use App\Enums\VenueStatus;
 use App\Filament\Resources\VenueResource;
 use App\Filament\Resources\VenueResource\Components\VenueContactsForm;
+use App\Models\Concierge;
+use App\Models\Cuisine;
+use App\Models\Neighborhood;
 use App\Models\Partner;
 use App\Models\Region;
+use App\Models\User;
 use App\Models\Venue;
+use App\Models\VenueGroup;
+use Exception;
 use Filament\Actions\Action;
 use Filament\Actions\ActionGroup;
+use Filament\Forms\Components\CheckboxList;
 use Filament\Forms\Components\FileUpload;
+use Filament\Forms\Components\Grid;
+use Filament\Forms\Components\Group;
+use Filament\Forms\Components\Placeholder;
 use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
+use Filament\Forms\Components\ViewField;
 use Filament\Forms\Form;
 use Filament\Forms\Get;
 use Filament\Notifications\Notification;
@@ -25,6 +36,7 @@ use Filament\Support\Enums\ActionSize;
 use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\HtmlString;
 use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 use RuntimeException;
 use Ysfkaya\FilamentPhoneInput\Forms\PhoneInput;
@@ -53,15 +65,15 @@ class EditVenue extends EditRecord
                 Section::make('Venue Group Information')
                     ->icon('heroicon-m-building-office-2')
                     ->schema([
-                        \Filament\Forms\Components\Grid::make()
+                        Grid::make()
                             ->schema([
-                                \Filament\Forms\Components\Group::make()
+                                Group::make()
                                     ->schema([
-                                        \Filament\Forms\Components\Placeholder::make('venue_group_logo')
+                                        Placeholder::make('venue_group_logo')
                                             ->hiddenLabel()
                                             ->content(function () use ($venue) {
                                                 if (! $venue->venueGroup || ! $venue->venueGroup->logo_path) {
-                                                    return new \Illuminate\Support\HtmlString(
+                                                    return new HtmlString(
                                                         '<div class="flex items-center justify-center w-24 h-24 bg-gray-100 rounded-lg">
                                                             <svg class="w-10 h-10 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
@@ -70,7 +82,7 @@ class EditVenue extends EditRecord
                                                     );
                                                 }
 
-                                                return new \Illuminate\Support\HtmlString(
+                                                return new HtmlString(
                                                     '<div class="flex items-center justify-center h-full">
                                                         <img src="'.$venue->venueGroup->logo.'" alt="'.$venue->venueGroup->name.'" class="object-contain w-auto h-24 max-w-full" />
                                                     </div>'
@@ -80,13 +92,13 @@ class EditVenue extends EditRecord
                                     ])
                                     ->columnSpan(['lg' => 1, 'md' => 1, 'sm' => 4])
                                     ->extraAttributes(['class' => 'flex items-center justify-center h-full']),
-                                \Filament\Forms\Components\Group::make()
+                                Group::make()
                                     ->schema([
-                                        \Filament\Forms\Components\Placeholder::make('venue_group_name')
+                                        Placeholder::make('venue_group_name')
                                             ->label('Venue Group')
                                             ->content(fn () => $venue->venueGroup?->name ?? 'Not part of a venue group')
                                             ->extraAttributes(['class' => 'text-xl font-bold']),
-                                        \Filament\Forms\Components\Placeholder::make('primary_manager')
+                                        Placeholder::make('primary_manager')
                                             ->label('Primary Manager')
                                             ->content(fn () => $venue->venueGroup?->primaryManager?->name ?? 'N/A')
                                             ->extraAttributes(['class' => 'text-base'])
@@ -101,20 +113,22 @@ class EditVenue extends EditRecord
                                 'lg' => 4,
                             ])
                             ->extraAttributes(['class' => 'items-center min-h-[100px]']),
-                        \Filament\Forms\Components\ViewField::make('venues_in_group')
+                        ViewField::make('venues_in_group')
                             ->label('Venues')
                             ->view('filament.components.venues-in-group')
                             ->visible(fn () => $venue->venue_group_id !== null),
-                        \Filament\Forms\Components\ViewField::make('managers_in_group')
+                        ViewField::make('managers_in_group')
                             ->label('Managers')
                             ->view('filament.components.managers-in-group')
                             ->visible(fn () => $venue->venue_group_id !== null),
-                        \Filament\Forms\Components\ViewField::make('concierges_in_group')
+                        ViewField::make('concierges_in_group')
                             ->label('Concierges')
                             ->view('filament.components.concierges-in-group')
                             ->visible(fn () => $venue->venue_group_id !== null),
                     ])
-                    ->visible(fn () => auth()->user()->hasRole(['super_admin', 'admin']) && $venue->venue_group_id !== null),
+                    ->visible(fn () => auth()->user()->hasRole([
+                        'super_admin', 'admin',
+                    ]) && $venue->venue_group_id !== null),
                 Section::make('Venue Information')
                     ->icon('heroicon-m-building-storefront')
                     ->schema([
@@ -141,13 +155,22 @@ class EditVenue extends EditRecord
                             ->placeholder('Select Region')
                             ->options(Region::all()->sortBy('id')->pluck('name', 'id'))
                             ->required()
-                            ->afterStateUpdated(function ($state, Venue $record) {
+                            ->reactive()
+                            ->afterStateUpdated(function ($state, callable $set, Venue $record) {
                                 $region = Region::query()->find($state);
                                 if ($region) {
                                     $record->timezone = $region->timezone;
                                     $record->save();
                                 }
+                                $neighborhoods = Neighborhood::query()->where('region', $state)
+                                    ->orderBy('name')->pluck('name', 'id');
+                                $set('neighborhood', null);
+                                $set('neighborhoodOptions', $neighborhoods);
                             }),
+                        Select::make('neighborhood')
+                            ->placeholder('Select Neighborhood')
+                            ->options(fn (callable $get) => $get('neighborhoodOptions') ?? [])
+                            ->reactive(),
                         TextInput::make('primary_contact_name')
                             ->label('Primary Contact Name')
                             ->required(),
@@ -204,6 +227,19 @@ class EditVenue extends EditRecord
                             ->dehydrateStateUsing(fn ($state) => $state * 100)
                             ->formatStateUsing(fn ($state) => $state ? $state / 100 : null),
                     ]),
+                Section::make('Cuisine Information')
+                    ->icon('phosphor-bowl-steam-bold')
+                    ->schema([
+                        CheckboxList::make('cuisines')
+                            ->hiddenLabel()
+                            ->options(Cuisine::query()->pluck('name', 'id'))
+                            ->descriptions(Cuisine::query()->pluck('description', 'id'))
+                            ->searchable()->live()
+                            ->gridDirection('row')
+                            ->columns(3)
+                            ->columnSpanFull(),
+                    ])
+                    ->collapsible(),
                 Repeater::make('contacts')
                     ->columnSpanFull()
                     ->addActionLabel('Add Contact')
@@ -283,7 +319,10 @@ class EditVenue extends EditRecord
                             ->maxSize(8192)
                             ->imagePreviewHeight('254')
                             ->getUploadedFileNameForStorageUsing(
-                                fn ($record, TemporaryUploadedFile $file): string => str($venue->name.' Group')->slug().'-'.time().'.'.$file->getClientOriginalExtension()
+                                fn (
+                                    $record,
+                                    TemporaryUploadedFile $file
+                                ): string => str($venue->name.' Group')->slug().'-'.time().'.'.$file->getClientOriginalExtension()
                             ),
                         Select::make('additional_venues')
                             ->label('Additional Venues')
@@ -300,14 +339,14 @@ class EditVenue extends EditRecord
                         try {
                             DB::transaction(function () use ($data, $venue) {
                                 // Create the venue group
-                                $venueGroup = new \App\Models\VenueGroup;
+                                $venueGroup = new VenueGroup;
                                 $venueGroup->name = $data['group_name'];
                                 $venueGroup->primary_manager_id = $venue->user_id;
                                 $venueGroup->logo_path = $data['logo_path'] ?? null;
                                 $venueGroup->save();
 
                                 // Make the logo public if it exists
-                                if (! empty($data['logo_path'])) {
+                                if (filled($data['logo_path'])) {
                                     Storage::disk('do')->setVisibility($data['logo_path'], 'public');
                                 }
 
@@ -315,7 +354,7 @@ class EditVenue extends EditRecord
                                 $venue->venue_group_id = $venueGroup->id;
                                 $venue->save();
 
-                                /** @var \App\Models\User $user */
+                                /** @var User $user */
                                 $user = $venue->user;
                                 $user->removeRole('venue');
                                 $user->assignRole('venue_manager');
@@ -328,11 +367,11 @@ class EditVenue extends EditRecord
                                 ]);
 
                                 // Add additional venues if selected
-                                if (! empty($data['additional_venues'])) {
+                                if (filled($data['additional_venues'])) {
                                     $allowedVenueIds = [$venue->id];
 
                                     foreach ($data['additional_venues'] as $additionalVenueId) {
-                                        $additionalVenue = Venue::find($additionalVenueId);
+                                        $additionalVenue = Venue::query()->find($additionalVenueId);
                                         if ($additionalVenue) {
                                             // Update the venue's user_id to match the original venue's user_id
                                             $additionalVenue->user_id = $venue->user_id;
@@ -359,7 +398,7 @@ class EditVenue extends EditRecord
                             // Redirect to refresh the page
                             $this->redirect(VenueResource::getUrl('edit', ['record' => $venue->id]));
 
-                        } catch (\Exception $e) {
+                        } catch (Exception $e) {
                             Notification::make()
                                 ->title('Error')
                                 ->body('Failed to create venue group: '.$e->getMessage())
@@ -392,7 +431,10 @@ class EditVenue extends EditRecord
                             ->imagePreviewHeight('254')
                             ->default(fn () => $venue->venueGroup->logo_path)
                             ->getUploadedFileNameForStorageUsing(
-                                fn ($record, TemporaryUploadedFile $file): string => $venue->venueGroup->slug.'-'.time().'.'.$file->getClientOriginalExtension()
+                                fn (
+                                    $record,
+                                    TemporaryUploadedFile $file
+                                ): string => $venue->venueGroup->slug.'-'.time().'.'.$file->getClientOriginalExtension()
                             ),
                         Select::make('additional_venues')
                             ->label('Add Venues to Group')
@@ -421,12 +463,12 @@ class EditVenue extends EditRecord
                                 }
 
                                 // Add additional venues if selected
-                                if (! empty($data['additional_venues'])) {
+                                if (filled($data['additional_venues'])) {
                                     $allVenueIds = $venueGroup->venues()->pluck('id')->toArray();
                                     $primaryManager = $venueGroup->primaryManager;
 
                                     foreach ($data['additional_venues'] as $additionalVenueId) {
-                                        $additionalVenue = Venue::find($additionalVenueId);
+                                        $additionalVenue = Venue::query()->find($additionalVenueId);
                                         if ($additionalVenue) {
                                             // Update the venue's user_id to match the venue group's primary manager
                                             $additionalVenue->user_id = $primaryManager->id;
@@ -454,7 +496,7 @@ class EditVenue extends EditRecord
                             // Redirect to refresh the page
                             $this->redirect(VenueResource::getUrl('edit', ['record' => $venue->id]));
 
-                        } catch (\Exception $e) {
+                        } catch (Exception $e) {
                             Notification::make()
                                 ->title('Error')
                                 ->body('Failed to update venue group: '.$e->getMessage())
@@ -474,11 +516,9 @@ class EditVenue extends EditRecord
                         Select::make('target_venue_group_id')
                             ->label('Venue Group to Merge')
                             ->helperText('Select the venue group that will be merged into the current venue group. All venues and managers from the selected group will be transferred to the current group.')
-                            ->options(function () use ($venue) {
-                                return \App\Models\VenueGroup::query()
-                                    ->where('id', '!=', $venue->venue_group_id)
-                                    ->pluck('name', 'id');
-                            })
+                            ->options(fn () => VenueGroup::query()
+                                ->where('id', '!=', $venue->venue_group_id)
+                                ->pluck('name', 'id'))
                             ->required(),
                         Toggle::make('transfer_primary_manager')
                             ->label('Transfer Primary Manager')
@@ -489,7 +529,7 @@ class EditVenue extends EditRecord
                         try {
                             DB::transaction(function () use ($data, $venue) {
                                 $currentVenueGroup = $venue->venueGroup;
-                                $targetVenueGroup = \App\Models\VenueGroup::findOrFail($data['target_venue_group_id']);
+                                $targetVenueGroup = VenueGroup::query()->findOrFail($data['target_venue_group_id']);
 
                                 // Get all venues from the target venue group
                                 $venues = $targetVenueGroup->venues;
@@ -514,13 +554,17 @@ class EditVenue extends EditRecord
                                 // Transfer all managers to the current venue group
                                 foreach ($managers as $manager) {
                                     // Check if manager already exists in current group
-                                    $existingManager = $currentVenueGroup->managers()->where('user_id', $manager->id)->first();
+                                    $existingManager = $currentVenueGroup->managers()->where('user_id',
+                                        $manager->id)->first();
 
                                     if ($existingManager) {
                                         // Manager already exists in current group, merge allowed venues
-                                        $currentAllowedVenueIds = json_decode($existingManager->pivot->allowed_venue_ids ?? '[]', true);
-                                        $newAllowedVenueIds = json_decode($manager->pivot->allowed_venue_ids ?? '[]', true);
-                                        $mergedAllowedVenueIds = array_unique(array_merge($currentAllowedVenueIds, $newAllowedVenueIds));
+                                        $currentAllowedVenueIds = json_decode($existingManager->pivot->allowed_venue_ids ?? '[]',
+                                            true);
+                                        $newAllowedVenueIds = json_decode($manager->pivot->allowed_venue_ids ?? '[]',
+                                            true);
+                                        $mergedAllowedVenueIds = array_unique(array_merge($currentAllowedVenueIds,
+                                            $newAllowedVenueIds));
 
                                         $currentVenueGroup->managers()->updateExistingPivot($manager->id, [
                                             'allowed_venue_ids' => json_encode($mergedAllowedVenueIds),
@@ -547,7 +591,7 @@ class EditVenue extends EditRecord
                                 }
 
                                 // Update concierges to point to the current venue group
-                                \App\Models\Concierge::where('venue_group_id', $targetVenueGroup->id)
+                                Concierge::query()->where('venue_group_id', $targetVenueGroup->id)
                                     ->update(['venue_group_id' => $currentVenueGroup->id]);
 
                                 // Delete the target venue group
@@ -563,7 +607,7 @@ class EditVenue extends EditRecord
                             // Redirect to refresh the page
                             $this->redirect(VenueResource::getUrl('edit', ['record' => $venue->id]));
 
-                        } catch (\Exception $e) {
+                        } catch (Exception $e) {
                             Notification::make()
                                 ->title('Error')
                                 ->body('Failed to merge venue groups: '.$e->getMessage())
@@ -579,13 +623,13 @@ class EditVenue extends EditRecord
                     ->label('Set Primary Manager')
                     ->icon('heroicon-o-user')
                     ->color('warning')
-                    ->visible(fn () => $venue->venue_group_id !== null && auth()->user()->hasRole(['super_admin', 'admin']))
+                    ->visible(fn () => $venue->venue_group_id !== null && auth()->user()->hasRole([
+                        'super_admin', 'admin',
+                    ]))
                     ->form([
                         Select::make('primary_manager_id')
                             ->label('Primary Manager')
-                            ->options(function () use ($venue) {
-                                return $venue->venueGroup->managers->pluck('name', 'id');
-                            })
+                            ->options(fn () => $venue->venueGroup->managers->pluck('name', 'id'))
                             ->default(fn () => $venue->venueGroup->primary_manager_id)
                             ->required(),
                     ])
@@ -614,7 +658,7 @@ class EditVenue extends EditRecord
                             // Redirect to refresh the page
                             $this->redirect(VenueResource::getUrl('edit', ['record' => $venue->id]));
 
-                        } catch (\Exception $e) {
+                        } catch (Exception $e) {
                             Notification::make()
                                 ->title('Error')
                                 ->body('Failed to update primary manager: '.$e->getMessage())
@@ -713,6 +757,11 @@ class EditVenue extends EditRecord
 
     protected function mutateFormDataBeforeFill(array $data): array
     {
+        if (isset($data['region'])) {
+            $data['neighborhoodOptions'] = Neighborhood::query()->where('region', $data['region'])
+                ->orderBy('name')->pluck('name', 'id');
+        }
+
         if (! isset($data['contacts'])) {
             return $data;
         }

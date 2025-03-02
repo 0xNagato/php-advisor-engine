@@ -2,10 +2,12 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Facades\Storage;
 use InvalidArgumentException;
 
 class VenueGroup extends Model
@@ -78,10 +80,10 @@ class VenueGroup extends Model
     /**
      * Get the logo URL for the venue group.
      */
-    public function getLogoAttribute(): string
+    protected function logo(): Attribute
     {
-        return $this->logo_path
-            ? \Illuminate\Support\Facades\Storage::disk('do')->url($this->logo_path)
-            : 'https://ui-avatars.com/api/?background=312596&color=fff&name='.urlencode($this->name);
+        return Attribute::make(get: fn () => $this->logo_path
+            ? Storage::disk('do')->url($this->logo_path)
+            : 'https://ui-avatars.com/api/?background=312596&color=fff&name='.urlencode($this->name));
     }
 }

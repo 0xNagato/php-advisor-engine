@@ -6,6 +6,7 @@ use App\Models\Concierge;
 use App\Models\User;
 use App\Models\Venue;
 use App\Models\VenueGroup;
+use Exception;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
@@ -51,7 +52,7 @@ class CreateDemoConcierge extends Command
         // Prepare venue group choices with concierge status
         $choices = [];
         foreach ($venueGroups as $venueGroup) {
-            $hasConcierge = Concierge::where('venue_group_id', $venueGroup->id)->exists();
+            $hasConcierge = Concierge::query()->where('venue_group_id', $venueGroup->id)->exists();
             $status = $hasConcierge ? ' [Has concierge]' : ' [No concierge]';
             $choices[$venueGroup->id] = $venueGroup->name.$status;
         }
@@ -63,10 +64,10 @@ class CreateDemoConcierge extends Command
         );
 
         // Get the selected venue group
-        $venueGroup = VenueGroup::find($selectedGroupId);
+        $venueGroup = VenueGroup::query()->find($selectedGroupId);
 
         // Check if this venue group already has a concierge
-        $existingConcierge = Concierge::where('venue_group_id', $venueGroup->id)->first();
+        $existingConcierge = Concierge::query()->where('venue_group_id', $venueGroup->id)->first();
         if ($existingConcierge) {
             if (! confirm(
                 label: 'This venue group already has a concierge. Do you want to create another one?',
@@ -97,7 +98,7 @@ class CreateDemoConcierge extends Command
         ) ?: $defaultPassword;
 
         // Get venue IDs for this venue group
-        $venueIds = Venue::where('venue_group_id', $venueGroup->id)
+        $venueIds = Venue::query()->where('venue_group_id', $venueGroup->id)
             ->pluck('id')
             ->toArray();
 
@@ -136,7 +137,7 @@ class CreateDemoConcierge extends Command
             );
 
             return 0;
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             error('Failed to create concierge: '.$e->getMessage());
 
             return 1;

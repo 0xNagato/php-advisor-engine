@@ -31,15 +31,6 @@ class Concierge extends Model
     ];
 
     /**
-     * The attributes that should be cast.
-     *
-     * @var array<string, string>
-     */
-    protected $casts = [
-        'allowed_venue_ids' => 'array',
-    ];
-
-    /**
      * Ensure allowed_venue_ids are always cast to integers.
      *
      * @return Attribute<array<int, int>, array<int, int|string>>
@@ -201,5 +192,17 @@ class Concierge extends Model
     public function venueGroup(): BelongsTo
     {
         return $this->belongsTo(VenueGroup::class);
+    }
+
+    /**
+     * The attributes that should be cast.
+     *
+     * @return array<string, string>
+     */
+    protected function casts(): array
+    {
+        return [
+            'allowed_venue_ids' => 'array',
+        ];
     }
 }

@@ -10,6 +10,7 @@ use App\Models\User;
 use App\Notifications\Concierge\ConciergeCreated;
 use App\Notifications\Concierge\ConciergeRegisteredEmail;
 use DanHarrin\LivewireRateLimiting\Exceptions\TooManyRequestsException;
+use Exception;
 use Filament\Forms\Components\Checkbox;
 use Filament\Forms\Components\CheckboxList;
 use Filament\Forms\Components\Placeholder;
@@ -261,7 +262,7 @@ trait HandlesConciergeInvitation
 
             Auth::login($user);
             $this->redirect(config('app.platform_url'));
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             DB::rollBack();
 
             Log::error('Failed to secure concierge account', [

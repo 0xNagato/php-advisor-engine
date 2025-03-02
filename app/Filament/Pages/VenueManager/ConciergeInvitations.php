@@ -2,7 +2,6 @@
 
 namespace App\Filament\Pages\VenueManager;
 
-use App\Models\Concierge;
 use App\Models\Referral;
 use App\Models\User;
 use App\Models\Venue;
@@ -155,9 +154,7 @@ class ConciergeInvitations extends Page implements HasTable
                     ->searchable(),
                 TextColumn::make('company_name')
                     ->label('Hotel/Company')
-                    ->formatStateUsing(function (Referral $record) {
-                        return $record->user?->concierge?->hotel_name ?? $record->company_name;
-                    })
+                    ->formatStateUsing(fn (Referral $record) => $record->user?->concierge?->hotel_name ?? $record->company_name)
                     ->searchable(),
                 TextColumn::make('created_at')
                     ->label('Invited At')

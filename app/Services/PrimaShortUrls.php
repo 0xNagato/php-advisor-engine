@@ -4,7 +4,6 @@ namespace App\Services;
 
 use AshAllenDesign\ShortURL\Exceptions\ShortURLException;
 use AshAllenDesign\ShortURL\Facades\ShortURL;
-use AshAllenDesign\ShortURL\Models\ShortURL as ShortURLModel;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
 
@@ -20,7 +19,7 @@ class PrimaShortUrls
         return Cache::rememberForever("prima_short_url_{$key}", function () use ($key) {
             try {
                 // First check if the URL already exists with this key
-                $existingUrl = ShortURLModel::where('url_key', $key)->first();
+                $existingUrl = \AshAllenDesign\ShortURL\Models\ShortURL::query()->where('url_key', $key)->first();
 
                 if ($existingUrl) {
                     return $existingUrl->default_short_url;
@@ -35,7 +34,7 @@ class PrimaShortUrls
                 // If there's an error (like duplicate key), log it and try to retrieve the existing URL
                 Log::warning("Error creating short URL for key {$key}: ".$e->getMessage());
 
-                $existingUrl = ShortURLModel::where('url_key', $key)->first();
+                $existingUrl = \AshAllenDesign\ShortURL\Models\ShortURL::query()->where('url_key', $key)->first();
 
                 if ($existingUrl) {
                     return $existingUrl->default_short_url;

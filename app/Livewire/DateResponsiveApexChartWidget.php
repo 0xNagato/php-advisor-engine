@@ -5,7 +5,6 @@ namespace App\Livewire;
 use Carbon\Carbon;
 use Filament\Support\RawJs;
 use Filament\Widgets\Concerns\InteractsWithPageFilters;
-use Illuminate\Contracts\Support\Htmlable;
 use Leandrocfe\FilamentApexCharts\Widgets\ApexChartWidget;
 use Livewire\Attributes\On;
 
@@ -37,16 +36,16 @@ abstract class DateResponsiveApexChartWidget extends ApexChartWidget
     protected static ?string $pollingInterval = null;
 
     /**
-     * Set to true to enable automatic loading when mounted 
+     * Set to true to enable automatic loading when mounted
      * Set to false if you want to defer loading
      */
     protected bool $autoLoad = true;
-    
+
     /**
      * Set to true to make the widget lazy-loaded
      */
     protected static bool $isLazy = false;
-    
+
     /**
      * Set to false initially and true after mounting
      */
@@ -58,9 +57,9 @@ abstract class DateResponsiveApexChartWidget extends ApexChartWidget
     public function mount(): void
     {
         parent::mount();
-        
+
         $this->isMounted = true;
-        
+
         if ($this->autoLoad) {
             $this->readyToLoad = true;
         }
@@ -83,13 +82,13 @@ abstract class DateResponsiveApexChartWidget extends ApexChartWidget
         // Update the filters
         $this->filters['startDate'] = $startDate;
         $this->filters['endDate'] = $endDate;
-        
+
         // Reset readyToLoad to refresh chart data
         $this->readyToLoad = true;
-        
+
         // Force chart update with clean options
         $this->updateOptions();
-        
+
         // Dispatch an event to ensure the chart is refreshed in the DOM
         $this->dispatch('chartUpdated', chartId: $this->getChartId());
     }
@@ -105,32 +104,31 @@ abstract class DateResponsiveApexChartWidget extends ApexChartWidget
 
     /**
      * Parse date from filters with timezone handling
-     * 
-     * @param string $key The filter key to get
-     * @param string|null $default The default date if not found (can be a relative date string like '-30 days')
-     * @param bool $endOfDay Whether to set to end of day or start of day
-     * @return Carbon
+     *
+     * @param  string  $key  The filter key to get
+     * @param  string|null  $default  The default date if not found (can be a relative date string like '-30 days')
+     * @param  bool  $endOfDay  Whether to set to end of day or start of day
      */
     protected function getDateFromFilters(string $key, ?string $default = null, bool $endOfDay = false): Carbon
     {
         $userTimezone = auth()->user()->timezone ?? config('app.default_timezone');
-        
+
         $dateString = $this->filters[$key] ?? null;
-        
-        if (!$dateString && $default) {
-            $dateString = $default[0] === '-' || $default[0] === '+' 
+
+        if (! $dateString && $default) {
+            $dateString = $default[0] === '-' || $default[0] === '+'
                 ? now($userTimezone)->modify($default)->format('Y-m-d')
                 : $default;
         }
-        
+
         $date = Carbon::parse($dateString, $userTimezone);
-        
+
         if ($endOfDay) {
             $date->endOfDay();
         } else {
             $date->startOfDay();
         }
-        
+
         return $date->setTimezone('UTC');
     }
 
@@ -151,7 +149,7 @@ abstract class DateResponsiveApexChartWidget extends ApexChartWidget
     {
         return $this->getDateFromFilters('endDate', 'today', true);
     }
-    
+
     /**
      * Add custom JavaScript to be included before the chart initialization
      * Override this method in your subclass to add custom JavaScript
@@ -160,7 +158,7 @@ abstract class DateResponsiveApexChartWidget extends ApexChartWidget
     {
         return null;
     }
-    
+
     /**
      * Add custom JavaScript to be included after the chart initialization
      * Override this method in your subclass to add custom JavaScript
@@ -179,7 +177,7 @@ abstract class DateResponsiveApexChartWidget extends ApexChartWidget
         $chartId = $this->getChartId();
         $beforeJs = $this->getCustomJsBeforeChart();
         $afterJs = $this->getCustomJsAfterChart();
-        
+
         return RawJs::make(<<<JS
         {
             chart: {
@@ -273,7 +271,7 @@ abstract class DateResponsiveApexChartWidget extends ApexChartWidget
         }
         JS);
     }
-    
+
     /**
      * Get default chart options that can be extended by child classes
      */
@@ -346,4 +344,4 @@ abstract class DateResponsiveApexChartWidget extends ApexChartWidget
             ],
         ];
     }
-} 
+}

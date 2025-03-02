@@ -37,7 +37,7 @@ trait FormatsPhoneNumber
                     $parsedProto = $numberProto;
                     break;
                 }
-            } catch (NumberParseException $e) {
+            } catch (NumberParseException) {
                 // Parsing failed, continue with next strategy
             }
 
@@ -55,7 +55,7 @@ trait FormatsPhoneNumber
                             $parsedProto = $numberProto;
                             break 2; // Break out of both loops
                         }
-                    } catch (NumberParseException $e) {
+                    } catch (NumberParseException) {
                         // Continue to next prefix
                     }
                 }
@@ -83,7 +83,7 @@ trait FormatsPhoneNumber
         $formatted = $this->getFormattedPhoneNumber($value, PhoneNumberFormat::E164);
 
         // If formatting failed (returns empty string), return empty to indicate failure
-        if (empty($formatted)) {
+        if (blank($formatted)) {
             return '';
         }
 

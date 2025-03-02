@@ -146,7 +146,7 @@ class ReservationHub extends Page
                                 $allowedVenueIds = auth()->user()->concierge->allowed_venue_ids ?? [];
 
                                 // Only apply the filter if there are allowed venues
-                                if (! empty($allowedVenueIds)) {
+                                if (filled($allowedVenueIds)) {
                                     // Ensure all IDs are integers
                                     $allowedVenueIds = array_map('intval', $allowedVenueIds);
 

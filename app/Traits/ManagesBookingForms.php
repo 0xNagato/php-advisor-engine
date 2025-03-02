@@ -3,6 +3,7 @@
 namespace App\Traits;
 
 use App\Actions\Reservations\GetReservationTimeOptions;
+use App\Models\Cuisine;
 use App\Services\ReservationService;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Hidden;
@@ -10,6 +11,7 @@ use Filament\Forms\Components\Select;
 use Filament\Forms\Components\ToggleButtons;
 use Filament\Forms\Get;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Collection;
 
 trait ManagesBookingForms
 {
@@ -22,6 +24,10 @@ trait ManagesBookingForms
     public const int MAX_DAYS_IN_ADVANCE = 14;
 
     public string $timezone;
+
+    public bool $advanced = false;
+
+    public ?Collection $neighborhoods = null;
 
     protected function commonFormComponents(): array
     {
@@ -47,6 +53,16 @@ trait ManagesBookingForms
                 ->live()
                 ->columnSpanFull()
                 ->required(),
+            Select::make('neighborhood')
+                ->prefixIcon('ri-community-line')
+                ->searchable()
+                ->options(fn () => $this->neighborhoods)
+                ->placeholder('Neighborhood')
+                ->hiddenLabel()
+                ->columnSpanFull()
+                ->live()
+                ->visible($this->advanced),
+            $this->getCuisineInput(),
             DatePicker::make('select_date')
                 ->hiddenLabel()
                 ->live()
@@ -102,5 +118,24 @@ trait ManagesBookingForms
             ->hiddenLabel()
             ->columnSpan(1)
             ->required();
+    }
+
+    protected function getCuisineInput(): Select
+    {
+        $cuisines = Cuisine::all()->groupBy('group')
+            ->mapWithKeys(fn ($items, $group) => [$group => $items->pluck('name', 'id')->toArray()]
+            )->toArray();
+
+        return Select::make('cuisine')
+            ->prefixIcon('phosphor-bowl-steam-bold')
+            ->label('Cuisine')
+            ->options($cuisines)
+            ->searchable()
+            ->placeholder('Cuisine')
+            ->hiddenLabel()
+            ->multiple()
+            ->columnSpanFull()
+            ->live()
+            ->visible($this->advanced);
     }
 }

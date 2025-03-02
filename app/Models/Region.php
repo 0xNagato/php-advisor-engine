@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Sushi\Sushi;
@@ -18,6 +19,8 @@ use Sushi\Sushi;
  * @property string $tax_rate_term
  * @property string $country
  * @property string $timezone
+ * @property-read Collection<int, Neighborhood> $neighborhoods
+ * @property-read Collection<int, Venue> $venues
  */
 class Region extends Model
 {
@@ -146,6 +149,16 @@ class Region extends Model
     public static function default(): Region
     {
         return self::query()->firstWhere('id', config('app.default_region'));
+    }
+
+    /**
+     * Get the neighborhoods in this region
+     *
+     * @return HasMany<Neighborhood, $this>
+     */
+    public function neighborhoods(): HasMany
+    {
+        return $this->hasMany(Neighborhood::class, 'region', 'id');
     }
 
     /**

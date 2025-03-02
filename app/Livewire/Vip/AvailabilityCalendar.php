@@ -54,7 +54,7 @@ class AvailabilityCalendar extends Page
 
         $region_id = $vipCode->concierge->user->region ?? config('app.default_region');
 
-        $this->region = Region::query()->find($region_id);
+        $this->region = Region::query()->where('id', $region_id)->first();
         $this->timezone = $this->region->timezone;
         $this->currency = $this->region->currency;
         $this->form->fill();

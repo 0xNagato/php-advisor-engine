@@ -77,6 +77,8 @@ class Venue extends Model
         'is_omakase',
         'omakase_details',
         'omakase_concierge_fee',
+        'cuisines',
+        'neighborhood',
     ];
 
     protected function casts(): array
@@ -90,6 +92,7 @@ class Venue extends Model
             'status' => VenueStatus::class,
             'cutoff_time' => 'datetime',
             'daily_booking_cap' => 'integer',
+            'cuisines' => 'array',
         ];
     }
 
@@ -276,7 +279,8 @@ class Venue extends Model
     {
         return $this->hasManyThrough(Booking::class, ScheduleTemplate::class)
             ->whereNotNull('confirmed_at')
-            ->whereIn('status', [BookingStatus::CONFIRMED, BookingStatus::VENUE_CONFIRMED, BookingStatus::PARTIALLY_REFUNDED]);
+            ->whereIn('status',
+                [BookingStatus::CONFIRMED, BookingStatus::VENUE_CONFIRMED, BookingStatus::PARTIALLY_REFUNDED]);
     }
 
     /**

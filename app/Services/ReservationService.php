@@ -52,7 +52,9 @@ class ReservationService
         public int $guestCount,
         public string $reservationTime,
         public int $timeslotCount = 5,
-        public int $timeSlotOffset = 0
+        public int $timeSlotOffset = 0,
+        public array $cuisines = [],
+        public ?string $neighborhood = '',
     ) {
         // Set the user's region using the GetUserRegion action
         $this->region = GetUserRegion::run();
@@ -93,11 +95,17 @@ class ReservationService
                 $allowedVenueIds = auth()->user()->concierge->allowed_venue_ids ?? [];
 
                 // Only apply the filter if there are allowed venues
-                if (! empty($allowedVenueIds)) {
+                if (filled($allowedVenueIds)) {
                     // Ensure all IDs are integers
                     $allowedVenueIds = array_map('intval', $allowedVenueIds);
                     $query->whereIn('id', $allowedVenueIds);
                 }
+            })
+            ->when($this->cuisines, function ($query) {
+                $query->whereJsonContains('cuisines', $this->cuisines);
+            })
+            ->when($this->neighborhood, function ($query) {
+                $query->where('neighborhood', $this->neighborhood);
             })
             ->withSchedulesForDate(
                 date: $this->date,
@@ -113,7 +121,8 @@ class ReservationService
         $venues->each(function ($venue) use ($currentTime) {
             if ($venue->cutoff_time) {
                 $currentTimeCarbon = Carbon::createFromFormat('H:i:s', $currentTime, $this->region->timezone);
-                $cutoffTimeCarbon = Carbon::createFromFormat('H:i:s', $venue->cutoff_time->format('H:i:s'), $this->region->timezone);
+                $cutoffTimeCarbon = Carbon::createFromFormat('H:i:s', $venue->cutoff_time->format('H:i:s'),
+                    $this->region->timezone);
 
                 // Only apply cutoff time check if the reservation is for today
                 $isToday = Carbon::parse($this->date, $this->region->timezone)->isToday();
@@ -154,9 +163,8 @@ class ReservationService
                         : 'closed'
                 );
             })
-            ->map(fn ($group) =>
-                // Sort each group alphabetically A-Z
-                $group->sortBy(fn ($venue) => strtolower($venue->name)))
+            ->map(fn ($group) => // Sort each group alphabetically A-Z
+            $group->sortBy(fn ($venue) => strtolower($venue->name)))
             // Combine groups in desired order
             ->pipe(function ($groups) {
                 return collect([])
