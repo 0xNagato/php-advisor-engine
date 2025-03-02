@@ -21,6 +21,13 @@ class BookingAnalyticsWidget extends Widget
 
     public string $dateType = 'created';
 
+    protected string $userTimezone = 'America/New_York';
+
+    public function mount(): void
+    {
+        $this->userTimezone = auth()->user()?->timezone ?? config('app.default_timezone');
+    }
+
     public function getShowBookingTimeProperty(): bool
     {
         return $this->dateType === 'booking';
@@ -33,17 +40,15 @@ class BookingAnalyticsWidget extends Widget
 
     public function getAnalytics(): array
     {
-        $userTimezone = auth()->user()?->timezone ?? config('app.default_timezone');
-
         // Parse dates in user timezone then convert to UTC for database queries
         $startDateUTC = Carbon::parse(
-            $this->filters['startDate'] ?? now($userTimezone)->subDays(30)->format('Y-m-d'),
-            $userTimezone
+            $this->filters['startDate'] ?? now($this->userTimezone)->subDays(30)->format('Y-m-d'),
+            $this->userTimezone
         )->startOfDay()->setTimezone('UTC');
 
         $endDateUTC = Carbon::parse(
-            $this->filters['endDate'] ?? now($userTimezone)->format('Y-m-d'),
-            $userTimezone
+            $this->filters['endDate'] ?? now($this->userTimezone)->format('Y-m-d'),
+            $this->userTimezone
         )->endOfDay()->setTimezone('UTC');
 
         return [
@@ -70,7 +75,7 @@ class BookingAnalyticsWidget extends Widget
         $dateColumn = $this->getDateColumn();
 
         // Join directly to the venue table via the schedule template
-        $bookings = Booking::select(['bookings.id', 'bookings.schedule_template_id'])
+        $bookings = Booking::query()->select(['bookings.id', 'bookings.schedule_template_id'])
             ->with(['venue']) // Use the venue relationship from the Booking model
             ->whereBetween($dateColumn, [$startDate, $endDate])
             ->whereIn('status', [BookingStatus::CONFIRMED, BookingStatus::VENUE_CONFIRMED])
@@ -79,9 +84,7 @@ class BookingAnalyticsWidget extends Widget
         $total = $bookings->count();
 
         // Group by venue
-        $venueGroups = $bookings->groupBy(function ($booking) {
-            return $booking->venue->id;
-        });
+        $venueGroups = $bookings->groupBy(fn ($booking) => $booking->venue->id);
 
         // Count bookings for each venue
         $venueCounts = [];
@@ -97,13 +100,11 @@ class BookingAnalyticsWidget extends Widget
         $venueCounts = collect($venueCounts)->sortByDesc('count')->take(5);
 
         // Format results
-        return $venueCounts->map(function ($venue) use ($total) {
-            return [
-                'name' => $venue['name'],
-                'booking_count' => $venue['count'],
-                'percentage' => $total > 0 ? round(($venue['count'] / $total) * 100, 1) : 0,
-            ];
-        })->values()->toArray();
+        return $venueCounts->map(fn ($venue) => [
+            'name' => $venue['name'],
+            'booking_count' => $venue['count'],
+            'percentage' => $total > 0 ? round(($venue['count'] / $total) * 100, 1) : 0,
+        ])->values()->toArray();
     }
 
     protected function getPopularTimes(Carbon $startDate, Carbon $endDate): array
@@ -111,14 +112,15 @@ class BookingAnalyticsWidget extends Widget
         $dateColumn = $this->getDateColumn();
 
         // Get all bookings within the date range
-        $bookings = Booking::select('booking_at')
+        $bookings = Booking::query()->select('booking_at')
             ->whereBetween($dateColumn, [$startDate, $endDate])
             ->whereIn('status', [BookingStatus::CONFIRMED, BookingStatus::VENUE_CONFIRMED])
             ->get();
 
         // Group by hour using Carbon
         $timeGroups = $bookings->groupBy(function ($booking) {
-            $time = Carbon::parse($booking->booking_at);
+            // Convert from UTC to user timezone before formatting
+            $time = Carbon::parse($booking->booking_at)->setTimezone($this->userTimezone);
 
             // Format as "7:00 PM" - group by hour
             return $time->format('g:i A');
@@ -150,7 +152,7 @@ class BookingAnalyticsWidget extends Widget
         $dateColumn = $this->getDateColumn();
 
         // Get all confirmed bookings
-        $bookings = Booking::select('guest_count')
+        $bookings = Booking::query()->select('guest_count')
             ->whereBetween($dateColumn, [$startDate, $endDate])
             ->whereIn('status', [BookingStatus::CONFIRMED, BookingStatus::VENUE_CONFIRMED])
             ->get();
@@ -183,7 +185,7 @@ class BookingAnalyticsWidget extends Widget
         $currencyService = app(CurrencyConversionService::class);
 
         // Get all confirmed bookings
-        $bookings = Booking::whereBetween($dateColumn, [$startDate, $endDate])
+        $bookings = Booking::query()->whereBetween($dateColumn, [$startDate, $endDate])
             ->whereIn('status', [BookingStatus::CONFIRMED, BookingStatus::VENUE_CONFIRMED])
             ->get();
 
@@ -236,9 +238,9 @@ class BookingAnalyticsWidget extends Widget
         ];
 
         foreach ($bookings as $booking) {
-            // Extract date portions and ensure they're Carbon instances
-            $bookingDate = Carbon::parse($booking->booking_at)->startOfDay();
-            $createdDate = Carbon::parse($booking->created_at)->startOfDay();
+            // Extract date portions and ensure they're Carbon instances, converted to user timezone
+            $bookingDate = Carbon::parse($booking->booking_at)->setTimezone($this->userTimezone)->startOfDay();
+            $createdDate = Carbon::parse($booking->created_at)->setTimezone($this->userTimezone)->startOfDay();
 
             // Correct order: $createdDate->diffInDays($bookingDate, false)
             // This returns positive days when booking is after creation
@@ -286,7 +288,7 @@ class BookingAnalyticsWidget extends Widget
         $dateColumn = $this->getDateColumn();
 
         // Get bookings within date range
-        $bookings = Booking::select($dateColumn)
+        $bookings = Booking::query()->select($dateColumn)
             ->whereBetween($dateColumn, [$startDate, $endDate])
             ->whereIn('status', [BookingStatus::CONFIRMED, BookingStatus::VENUE_CONFIRMED])
             ->get();
@@ -296,8 +298,8 @@ class BookingAnalyticsWidget extends Widget
             // Get the appropriate date field
             $date = $booking->{$this->getShowBookingTimeProperty() ? 'booking_at' : 'created_at'};
 
-            // Return the day name (Monday, Tuesday, etc.)
-            return $date->format('l');
+            // Convert from UTC to user timezone before getting day name
+            return Carbon::parse($date)->setTimezone($this->userTimezone)->format('l');
         });
 
         // Count by day name
@@ -327,7 +329,7 @@ class BookingAnalyticsWidget extends Widget
         $dateColumn = $this->getDateColumn();
 
         // Get bookings within date range
-        $bookings = Booking::select($dateColumn)
+        $bookings = Booking::query()->select($dateColumn)
             ->whereBetween($dateColumn, [$startDate, $endDate])
             ->whereIn('status', [BookingStatus::CONFIRMED, BookingStatus::VENUE_CONFIRMED])
             ->get();
@@ -336,7 +338,8 @@ class BookingAnalyticsWidget extends Widget
         $dateGroups = $bookings->groupBy(function ($booking) {
             $date = $booking->{$this->getShowBookingTimeProperty() ? 'booking_at' : 'created_at'};
 
-            return Carbon::parse($date)->format('Y-m-d');
+            // Convert from UTC to user timezone before formatting
+            return Carbon::parse($date)->setTimezone($this->userTimezone)->format('Y-m-d');
         });
 
         // Count occurrences of each calendar date and build formatted results
@@ -364,14 +367,12 @@ class BookingAnalyticsWidget extends Widget
         $dateColumn = $this->getDateColumn();
 
         // Get all bookings within the date range with status
-        $bookings = Booking::select('status')
+        $bookings = Booking::query()->select('status')
             ->whereBetween($dateColumn, [$startDate, $endDate])
             ->get();
 
         // Group by status and count
-        $statusGroups = $bookings->groupBy(function ($booking) {
-            return $booking->status->value;
-        });
+        $statusGroups = $bookings->groupBy(fn ($booking) => $booking->status->value);
 
         // Count the number of each status
         $statusCounts = $statusGroups->map->count();
@@ -446,14 +447,12 @@ class BookingAnalyticsWidget extends Widget
         $currencyService = app(CurrencyConversionService::class);
 
         // Get all confirmed bookings
-        $bookings = Booking::whereBetween($dateColumn, [$startDate, $endDate])
+        $bookings = Booking::query()->whereBetween($dateColumn, [$startDate, $endDate])
             ->whereIn('status', [BookingStatus::CONFIRMED, BookingStatus::VENUE_CONFIRMED])
             ->get();
 
         // Group by VIP status (has vip_code_id or not)
-        $vipGroups = $bookings->groupBy(function ($booking) {
-            return $booking->vip_code_id !== null;
-        });
+        $vipGroups = $bookings->groupBy(fn ($booking) => $booking->vip_code_id !== null);
 
         // Process each VIP status group
         $results = [];
