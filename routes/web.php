@@ -42,7 +42,7 @@ Route::get('/concierges', static function () {
 
 Route::get('/story', Story::class)->name('story');
 
-Route::get('/onboarding/token/{token?}', VenueOnboarding::class)->name('onboarding');
+Route::get('/onboarding/{token?}', VenueOnboarding::class)->name('onboarding');
 
 Route::redirect('/app', config('app.apple_app_store_url'));
 Route::redirect('/iphone', config('app.apple_app_store_url'));
