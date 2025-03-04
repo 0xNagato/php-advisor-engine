@@ -18,14 +18,16 @@ class SpecialRequestList extends Widget
      */
     public Collection $specialRequests;
 
-    public int $conciergeId;
+    public ?int $conciergeId = null;
 
     #[On('special-request-created')]
     public function mount(): void
     {
         $this->specialRequests = SpecialRequest::query()
             ->with('venue')
-            ->where('concierge_id', $this->conciergeId)
+            ->when($this->conciergeId, function ($query) {
+                $query->where('concierge_id', $this->conciergeId);
+            })
             ->orderBy('booking_date', 'desc')
             ->get();
     }

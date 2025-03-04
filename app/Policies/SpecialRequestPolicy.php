@@ -20,10 +20,8 @@ class SpecialRequestPolicy
 
     /**
      * Determine whether the user can view the special request.
-     *
-     * @return mixed
      */
-    public function view(User $user, SpecialRequest $specialRequest)
+    public function view(User $user, SpecialRequest $specialRequest): bool
     {
         if ($user->hasActiveRole('concierge')) {
             return $specialRequest->concierge_id === $user->concierge->id;
@@ -31,7 +29,7 @@ class SpecialRequestPolicy
             return $specialRequest->venue_id === $user->venue->id;
         }
 
-        return false;
+        return $user->hasActiveRole('super_admin');
     }
 
     /**
