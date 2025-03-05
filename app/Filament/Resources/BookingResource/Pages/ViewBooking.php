@@ -697,6 +697,19 @@ class ViewBooking extends ViewRecord
 
     public function transferBookingAction(): Action
     {
+        $conciergeOptions = Concierge::query()
+            ->where('id', '!=', $this->record->concierge_id)
+            ->whereHas('user', fn (Builder $query) => $query->whereHas('roles', fn (Builder $q) => $q->where('name', 'concierge')
+            )
+                ->whereNull('suspended_at')
+            )
+            ->with('user')
+            ->get()
+            ->mapWithKeys(fn ($concierge) => [$concierge->id => $concierge->user->name.
+                 ($concierge->hotel_name ? " ({$concierge->hotel_name})" : '')]
+            )
+            ->toArray();
+
         return Action::make('transferBooking')
             ->label('Transfer Booking')
             ->icon('heroicon-o-arrow-path-rounded-square')
@@ -709,17 +722,7 @@ class ViewBooking extends ViewRecord
                     ->required()
                     ->searchable()
                     ->preload()
-                    ->options(fn () => Concierge::query()
-                        ->where('id', '!=', $this->record->concierge_id)
-                        ->whereHas('user', fn (Builder $query) => $query->whereHas('roles', fn (Builder $q) => $q->where('name', 'concierge')
-                        )
-                            ->whereNull('suspended_at')
-                        )
-                        ->with('user')
-                        ->get()
-                        ->mapWithKeys(fn ($concierge) => [$concierge->id => $concierge->user->name.
-                             ($concierge->hotel_name ? " ({$concierge->hotel_name})" : '')]
-                        )),
+                    ->options($conciergeOptions),
             ])
             ->requiresConfirmation()
             ->modalIcon('heroicon-o-exclamation-triangle')
