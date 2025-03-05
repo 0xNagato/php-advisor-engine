@@ -116,6 +116,13 @@ class ReferralAnalyticsWidget extends DateResponsiveApexChartWidget
                                     }
                                 });
                             }
+                            
+                            // Add slight chart offset to prevent first label cutoff
+                            chart.updateOptions({
+                                chart: {
+                                    offsetX: 5
+                                }
+                            });
                         }, 100);
                     }
                 }
@@ -131,6 +138,10 @@ class ReferralAnalyticsWidget extends DateResponsiveApexChartWidget
                                 offsetY: 5
                             }
                         },
+                        chart: {
+                            offsetX: 5,
+                            offsetY: 0
+                        },
                         legend: {
                             position: 'bottom',
                             horizontalAlign: 'center'
@@ -141,14 +152,22 @@ class ReferralAnalyticsWidget extends DateResponsiveApexChartWidget
                     breakpoint: 480,
                     options: {
                         xaxis: {
-                            tickAmount: 4,
+                            tickAmount: 5,
                             labels: {
-                                rotate: -90,
+                                rotate: -45,
                                 offsetY: 5,
+                                offsetX: 0,
                                 style: {
                                     fontSize: '10px'
                                 }
                             }
+                        },
+                        chart: {
+                            width: '95%',
+                            offsetX: 0
+                        },
+                        margin: {
+                            right: 15
                         }
                     }
                 }
@@ -167,6 +186,10 @@ class ReferralAnalyticsWidget extends DateResponsiveApexChartWidget
         $userTimezone = auth()->user()->timezone ?? config('app.default_timezone');
 
         $referralData = $this->getReferralData($startDate, $endDate, $userTimezone);
+
+        // Calculate appropriate number of ticks based on date range
+        $dayCount = $startDate->diffInDays($endDate) + 1;
+        $tickAmount = min(15, max(5, intval($dayCount / 4)));
 
         // Merge our specific options with the default options from the parent class
         return array_merge($this->getDefaultOptions(), [
@@ -188,7 +211,10 @@ class ReferralAnalyticsWidget extends DateResponsiveApexChartWidget
                         'fontWeight' => 600,
                     ],
                     'rotate' => -45,
+                    'offsetX' => 5,
                 ],
+                'tickAmount' => $tickAmount,
+                'tickPlacement' => 'on',
             ],
         ]);
     }
@@ -224,13 +250,17 @@ class ReferralAnalyticsWidget extends DateResponsiveApexChartWidget
         $period = CarbonPeriod::create($startDate, '1 day', $endDate);
 
         // Create arrays for dates (both for display and for mapping)
-        $dateFormat = [];         // Display format (M j)
+        $dateFormat = [];         // Display format
         $dateKeys = [];           // SQL format (Y-m-d) for matching with query results
+
+        // Determine if year should be shown (when spanning multiple years)
+        $spanMultipleYears = $startDate->year !== $endDate->year;
+        $dateFormatPattern = $spanMultipleYears ? 'M j, Y' : 'M j';
 
         foreach ($period as $date) {
             $localDate = $date->copy()->setTimezone($timezone);
             $dateKeys[] = $localDate->format('Y-m-d');
-            $dateFormat[] = $localDate->format('M j');
+            $dateFormat[] = $localDate->format($dateFormatPattern);
         }
 
         // Get invitation counts by date
