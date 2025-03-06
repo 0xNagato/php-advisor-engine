@@ -23,10 +23,9 @@ class SendModificationRequestToVenueContacts extends Action
         /** @var Collection<VenueContactData> $contacts */
         $contacts = $modificationRequest->booking->venue->contacts ?? collect();
 
-        // Generate a signed URL that expires in 24 hours
         $url = URL::signedRoute('venue.modification-request', [
             'modificationRequest' => $modificationRequest,
-        ], now()->addDay());
+        ]);
 
         $confirmationUrl = ShortURL::destinationUrl($url)->make()->default_short_url;
 
