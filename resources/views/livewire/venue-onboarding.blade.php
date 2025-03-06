@@ -49,7 +49,7 @@
                             @if ($partnerId && $partnerName)
                                 <div>
                                     <label class="block mb-2 text-sm text-gray-700">PRIMA Partner</label>
-                                    <div class="flex items-center p-3 bg-gray-50 border border-gray-300 rounded-lg">
+                                    <div class="flex items-center p-3 border border-gray-300 rounded-lg bg-gray-50">
                                         <span class="text-sm font-medium text-gray-800">{{ $partnerName }}</span>
                                         <span class="ml-2 text-xs text-gray-500">(Referring Partner)</span>
                                     </div>

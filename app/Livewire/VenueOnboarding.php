@@ -509,18 +509,15 @@ class VenueOnboarding extends Component
         $partnerId = $this->partner_id;
         $partnerName = $this->partner_name;
 
-        // Only load partners if needed (for admin/direct access)
-        if (! $partnerId) {
-            $partners = User::query()
-                ->select(['id', 'first_name', 'last_name'])
-                ->whereHas('roles', fn (\Illuminate\Contracts\Database\Query\Builder $query) => $query->where('name', 'partner'))
-                ->orderBy('first_name')
-                ->get()
-                ->map(fn ($user) => [
-                    'id' => $user->id,
-                    'name' => "{$user->first_name} {$user->last_name}",
-                ]);
-        }
+        $partners = User::query()
+            ->select(['id', 'first_name', 'last_name'])
+            ->whereHas('roles', fn (\Illuminate\Contracts\Database\Query\Builder $query) => $query->where('name', 'partner'))
+            ->orderBy('first_name')
+            ->get()
+            ->map(fn ($user) => [
+                'id' => $user->id,
+                'name' => "{$user->first_name} {$user->last_name}",
+            ]);
 
         $timeSlots = [];
         if ($this->step === 'prime-hours') {
