@@ -282,6 +282,27 @@ class ReservationService
                 ?->schedules ?? $schedulesByDate;
         }
 
+        // Check for cutoff time
+        $venue = Venue::query()->find($venueId);
+        if ($venue && $venue->cutoff_time) {
+            $currentTime = Carbon::now($this->region->timezone);
+            $cutoffTime = Carbon::parse($venue->cutoff_time, $this->region->timezone);
+
+            // Only apply cutoff time check if the reservation is for today
+            $isToday = Carbon::parse($this->date, $this->region->timezone)->isToday();
+
+            if ($isToday && $currentTime->gt($cutoffTime)) {
+                // Mark all schedules as unavailable if past cutoff time
+                $schedulesByDate = $schedulesByDate->map(function ($schedule) {
+                    $schedule->is_available = true;
+                    $schedule->remaining_tables = 0;
+                    $schedule->is_bookable = false;
+
+                    return $schedule;
+                });
+            }
+        }
+
         return [
             'schedulesByDate' => $this->transformSchedules($schedulesByDate),
             'schedulesThisWeek' => $this->transformSchedules($schedulesThisWeek),
