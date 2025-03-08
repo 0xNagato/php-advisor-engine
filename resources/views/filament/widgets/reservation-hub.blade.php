@@ -193,6 +193,30 @@
                         
                                 form.addEventListener('submit', async (e) => {
                                     e.preventDefault();
+                        
+                                    // Phone validation
+                                    const phoneInput = document.getElementById('phone');
+                                    const phoneError = document.getElementById('phone-error');
+                        
+                                    // Reset the error
+                                    phoneError.classList.add('hidden');
+                                    phoneError.textContent = '';
+                        
+                                    // Check if the international telephone input has been initialized
+                                    if (phoneInput.getAttribute('data-intl-tel-input-id')) {
+                                        const iti = window.intlTelInputGlobals.getInstance(phoneInput);
+                        
+                                        if (!iti.isValidNumber()) {
+                                            phoneError.textContent = 'Please enter a valid phone number';
+                                            phoneError.classList.remove('hidden');
+                                            $wire.$set('isLoading', false);
+                                            return;
+                                        }
+                        
+                                        // Set the phone number in E.164 format for submission
+                                        phoneInput.value = iti.getNumber();
+                                    }
+                        
                                     $wire.$set('isLoading', true);
                         
                                     @if($booking->prime_time)
@@ -258,11 +282,14 @@
 
                                 </div>
 
-                                <label class="w-full">
-                                    <input name="phone" type="text"
-                                        class="w-full rounded-lg border border-gray-300 text-sm h-[40px] focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
-                                        placeholder="Cell Phone Number" required>
-                                </label>
+                                <div class="w-full phone-input-container">
+                                    <label class="w-full">
+                                        <input name="phone" type="tel" id="phone"
+                                            class="w-full rounded-lg border border-gray-300 text-sm h-[40px] focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
+                                            placeholder="Cell Phone Number" required>
+                                    </label>
+                                    <div id="phone-error" class="hidden mt-1 text-sm text-red-500"></div>
+                                </div>
 
                                 <label class="w-full">
                                     <input name="email" type="email"
@@ -379,3 +406,136 @@
 
     @include('partials.bookings-disabled-modal')
 </x-filament-panels::page>
+
+@push('scripts')
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/18.3.3/js/intlTelInput.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/18.3.3/css/intlTelInput.css">
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initialize the phone input
+            const phoneInput = document.getElementById('phone');
+            if (phoneInput) {
+                const iti = window.intlTelInput(phoneInput, {
+                    utilsScript: "https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/18.3.3/js/utils.js",
+                    initialCountry: "us",
+                    preferredCountries: ["us", "ca"],
+                    separateDialCode: true,
+                    nationalMode: false,
+                    formatOnDisplay: true,
+                    autoPlaceholder: "polite",
+                    placeholderNumberType: "MOBILE",
+                    customPlaceholder: function(selectedCountryPlaceholder, selectedCountryData) {
+                        return "Cell Phone Number";
+                    }
+                });
+
+                // Apply custom styling to match the design
+                const phoneContainer = phoneInput.closest('.phone-input-container');
+                if (phoneContainer) {
+                    // Remove any inline styles we added before since we have CSS now
+                    const flagContainer = phoneContainer.querySelector('.iti');
+                    const selectedFlag = phoneContainer.querySelector('.iti__selected-flag');
+
+                    // Clean up any inline styles
+                    if (flagContainer) {
+                        flagContainer.style.width = '';
+                        flagContainer.style.display = '';
+                    }
+
+                    if (selectedFlag) {
+                        selectedFlag.style.borderTopLeftRadius = '';
+                        selectedFlag.style.borderBottomLeftRadius = '';
+                        selectedFlag.style.backgroundColor = '';
+                        selectedFlag.style.paddingLeft = '';
+                    }
+
+                    // Clean up input inline styles
+                    phoneInput.style.paddingLeft = '';
+                }
+
+                // Validate the phone number on form submit
+                const form = phoneInput.closest('form');
+                const phoneError = document.getElementById('phone-error');
+
+                if (form) {
+                    form.addEventListener('submit', function(e) {
+                        // Reset error messages
+                        phoneError.classList.add('hidden');
+                        phoneError.textContent = '';
+
+                        if (!iti.isValidNumber()) {
+                            e.preventDefault();
+                            phoneError.textContent = 'Please enter a valid phone number';
+                            phoneError.classList.remove('hidden');
+                            return false;
+                        }
+
+                        // Set the phone number in E.164 format
+                        phoneInput.value = iti.getNumber();
+                        return true;
+                    });
+                }
+            }
+        });
+    </script>
+
+    <style>
+        /* Custom styling for the intl-tel-input to match other inputs */
+        .iti {
+            width: 100%;
+            display: block;
+        }
+
+        .iti__flag-container {
+            z-index: 10;
+        }
+
+        .iti__selected-flag {
+            background-color: transparent !important;
+        }
+
+        .iti--separate-dial-code .iti__selected-dial-code {
+            color: #4b5563;
+            font-size: 0.875rem;
+        }
+
+        .iti--separate-dial-code .iti__selected-flag {
+            background-color: #f3f4f6;
+            border-right: 1px solid #e5e7eb;
+            width: 68px;
+        }
+
+        .iti--separate-dial-code input {
+            padding-left: 80px !important;
+        }
+
+        .iti input {
+            border-radius: 0.5rem !important;
+            height: 2.5rem !important;
+        }
+
+        .iti__country-list {
+            border-radius: 0.5rem;
+            border-color: #e5e7eb;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            max-height: 200px;
+        }
+
+        .iti__country {
+            padding: 8px 10px;
+            font-size: 0.875rem;
+        }
+
+        /* Reset the background and hover styles */
+        .iti__selected-flag:hover,
+        .iti__selected-flag:focus {
+            background-color: #f3f4f6 !important;
+        }
+
+        /* Style for the dropdown arrow */
+        .iti__arrow {
+            border-top: 4px solid #6b7280;
+            margin-left: 3px;
+        }
+    </style>
+@endpush

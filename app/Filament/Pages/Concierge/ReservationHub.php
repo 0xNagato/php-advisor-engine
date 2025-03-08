@@ -12,6 +12,7 @@ use App\Models\ScheduleTemplate;
 use App\Models\ScheduleWithBooking;
 use App\Models\Venue;
 use App\Services\BookingService;
+use App\Traits\FormatsPhoneNumber;
 use App\Traits\HandlesVenueClosures;
 use App\Traits\ManagesBookingForms;
 use Exception;
@@ -31,6 +32,7 @@ use Stripe\Exception\ApiErrorException;
  */
 class ReservationHub extends Page
 {
+    use FormatsPhoneNumber;
     use HandlesVenueClosures;
     use ManagesBookingForms;
 
@@ -362,6 +364,24 @@ class ReservationHub extends Page
 
             return;
         }
+
+        // Validate the phone number
+        $phone = $form['phone'] ?? '';
+        $formattedPhone = $this->getInternationalFormattedPhoneNumber($phone);
+
+        if (empty($formattedPhone)) {
+            Notification::make()
+                ->title('Invalid Phone Number')
+                ->body('Please enter a valid phone number.')
+                ->danger()
+                ->send();
+            $this->isLoading = false;
+
+            return;
+        }
+
+        // Update the form with the formatted phone number
+        $form['phone'] = $formattedPhone;
 
         if (! $this->booking->prime_time) {
             // Check for real customer confirmation

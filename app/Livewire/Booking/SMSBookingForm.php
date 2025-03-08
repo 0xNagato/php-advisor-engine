@@ -58,7 +58,6 @@ class SMSBookingForm extends Widget implements HasForms
                 ->disallowDropdown()
                 ->validateFor(
                     country: config('app.countries'),
-                    lenient: true,
                 )
                 ->columnSpan(2)
                 ->required(),
