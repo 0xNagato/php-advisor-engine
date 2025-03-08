@@ -112,7 +112,7 @@
                             </p>
 
                             <div class="mt-6">
-                                <a href="{{ route('filament.app.auth.login') }}"
+                                <a href="{{ route('filament.admin.auth.login') }}"
                                     class="inline-flex items-center justify-center w-full px-4 py-2 text-sm font-medium text-white transition bg-indigo-600 border border-transparent rounded-lg shadow-sm hover:bg-indigo-500">
                                     Log In
                                 </a>

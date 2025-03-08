@@ -5,6 +5,7 @@ namespace App\Filament\Pages;
 use App\Models\User;
 use DanHarrin\LivewireRateLimiting\Exceptions\TooManyRequestsException;
 use DanHarrin\LivewireRateLimiting\WithRateLimiting;
+use Exception;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Form;
 use Filament\Pages\Concerns\InteractsWithFormActions;
@@ -35,10 +36,38 @@ class CreatePassword extends SimplePage
             return redirect(config('app.platform_url'));
         }
 
-        $this->user = User::query()
-            ->whereNull('secured_at')
-            ->where('id', decrypt($token))
-            ->firstOrFail();
+        try {
+            $userId = decrypt($token);
+
+            // First check if user exists
+            $user = User::query()
+                ->where('id', $userId)
+                ->first();
+
+            abort_unless($user, 404, 'User not found');
+
+            // Now check if they've already secured their account
+            if ($user->secured_at !== null) {
+                // For Filament v3, we need to use a special version of notifications
+                // that works with non-Livewire redirects
+                session()->flash('filament.notifications', [
+                    [
+                        'id' => uniqid(),
+                        'type' => 'info',
+                        'title' => 'Account Already Secured',
+                        'body' => 'Your account has already been secured. Please log in with your email and password.',
+                        'duration' => 5000,
+                    ],
+                ]);
+
+                return redirect()->route('filament.admin.auth.login');
+            }
+
+            // Only assign to $this->user if they haven't secured their account
+            $this->user = $user;
+        } catch (Exception) {
+            abort(401, 'Invalid token');
+        }
     }
 
     public function getHeading(): string

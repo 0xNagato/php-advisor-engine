@@ -8,6 +8,7 @@ use App\Filament\Resources\VenueOnboardingResource;
 use App\Models\User;
 use App\Models\Venue;
 use App\Notifications\VenueAgreementCopy;
+use App\Notifications\WelcomeVenueManager;
 use Filament\Actions\Action;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
@@ -108,6 +109,46 @@ class ViewVenueOnboarding extends ViewRecord
                 ->visible(fn (): bool => $this->record->status === 'submitted')
                 ->color('success')
                 ->icon('heroicon-o-check'),
+
+            Action::make('resend_welcome')
+                ->label('Resend Welcome Email')
+                ->icon('heroicon-o-envelope')
+                ->action(function () {
+                    // Find the venue manager user associated with this onboarding
+                    /** @var User|null $managerUser */
+                    $managerUser = User::query()
+                        ->where('email', $this->record->email)
+                        ->first();
+
+                    if (! $managerUser) {
+                        Notification::make()
+                            ->title('Venue manager not found')
+                            ->danger()
+                            ->send();
+
+                        return;
+                    }
+
+                    // Get the venue data for the notification
+                    $venueData = $this->record->locations
+                        ->map(fn ($location) => [
+                            'name' => $location->name,
+                        ])
+                        ->toArray();
+
+                    // Send the welcome notification
+                    $managerUser->notify(new WelcomeVenueManager($managerUser, $venueData));
+
+                    Notification::make()
+                        ->title('Welcome email resent successfully')
+                        ->success()
+                        ->send();
+                })
+                ->requiresConfirmation()
+                ->modalHeading('Resend Welcome Email')
+                ->modalDescription('Are you sure you want to resend the welcome email to '.$this->record->email.'?')
+                ->visible(fn (): bool => $this->record->status === 'completed')
+                ->color('gray'),
         ];
     }
 }

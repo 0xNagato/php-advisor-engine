@@ -13,6 +13,7 @@ use App\Models\Region;
 use App\Models\User;
 use App\Models\Venue;
 use App\Models\VenueGroup;
+use Carbon\Carbon;
 use Exception;
 use Filament\Actions\Action;
 use Filament\Actions\ActionGroup;
@@ -205,12 +206,18 @@ class EditVenue extends EditRecord
                             ->helperText('Time after which same-day reservations cannot be made. Leave empty to allow same-day bookings until closing.')
                             ->nullable()
                             ->dehydrateStateUsing(function ($state) {
-                                if (empty($state)) return null;
+                                if (blank($state)) {
+                                    return null;
+                                }
+
                                 return now()->setTimeFromTimeString($state);
                             })
                             ->formatStateUsing(function ($state) {
-                                if (empty($state)) return null;
-                                return $state instanceof \Carbon\Carbon ? $state->format('H:i') : date('H:i', strtotime($state));
+                                if (blank($state)) {
+                                    return null;
+                                }
+
+                                return $state instanceof Carbon ? $state->format('H:i') : date('H:i', strtotime($state));
                             }),
                         Toggle::make('no_wait')
                             ->label('No Wait')
@@ -738,13 +745,6 @@ class EditVenue extends EditRecord
                         $venue->update([
                             'status' => $newStatus,
                         ]);
-
-                        // Set secured_at for venue's user if not already set and status is Active
-                        if ($newStatus === VenueStatus::ACTIVE && ! $venue->user->secured_at) {
-                            $venue->user->update([
-                                'secured_at' => now(),
-                            ]);
-                        }
 
                         Notification::make()
                             ->title('Status Updated')

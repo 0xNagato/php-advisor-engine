@@ -179,9 +179,7 @@ class Venue extends Model
 
     public function scopeAvailable(Builder $query): Builder
     {
-        return $query->whereHas('user', function (Builder $query) {
-            $query->whereNotNull('secured_at');
-        });
+        return $query;
     }
 
     protected function logo(): Attribute
