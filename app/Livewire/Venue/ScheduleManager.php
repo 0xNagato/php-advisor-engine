@@ -920,14 +920,12 @@ class ScheduleManager extends Component
                 ->get();
 
             // Store original data for logging
-            $originalData = $templates->mapWithKeys(function ($template) {
-                return [$template->id => [
-                    'time' => $template->start_time,
-                    'party_size' => $template->party_size,
-                    'is_available' => $template->is_available,
-                    'prime_time' => $template->prime_time,
-                ]];
-            })->toArray();
+            $originalData = $templates->mapWithKeys(fn ($template) => [$template->id => [
+                'time' => $template->start_time,
+                'party_size' => $template->party_size,
+                'is_available' => $template->is_available,
+                'prime_time' => $template->prime_time,
+            ]])->toArray();
 
             // Update all templates to set prime_time to false
             foreach ($templates as $template) {

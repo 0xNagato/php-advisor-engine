@@ -5,6 +5,7 @@ namespace App\Livewire\Admin;
 use App\Actions\Booking\SendConfirmationToVenueContacts;
 use App\Filament\Resources\BookingResource\Pages\ViewBooking;
 use App\Models\Booking;
+use Filament\Notifications\Notification;
 use Filament\Tables\Actions\Action;
 use Filament\Tables\Actions\ActionGroup;
 use Filament\Tables\Columns\TextColumn;
@@ -54,7 +55,7 @@ class ConfirmationManagerBookings extends BaseWidget
                         ->color('success')
                         ->action(function (Booking $record) {
                             $record->update(['venue_confirmed_at' => now()]);
-                            \Filament\Notifications\Notification::make()
+                            Notification::make()
                                 ->title('Booking marked as confirmed')
                                 ->success()
                                 ->send();
