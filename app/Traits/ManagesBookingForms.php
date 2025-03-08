@@ -21,7 +21,7 @@ trait ManagesBookingForms
 
     public const int MINUTES_FUTURE = 120;
 
-    public const int MAX_DAYS_IN_ADVANCE = 14;
+    public const int MAX_DAYS_IN_ADVANCE = 30;
 
     public string $timezone;
 
@@ -74,7 +74,7 @@ trait ManagesBookingForms
                 ->hidden(fn (Get $get) => $get('radio_date') !== 'select_date')
                 ->afterStateUpdated(fn ($state, $set) => $set('date', Carbon::parse($state)->format('Y-m-d')))
                 ->prefixIcon('heroicon-m-calendar')
-                ->native(true)
+                ->native(isPrimaApp())
                 ->closeOnDateSelection(),
             $this->getGuestCountInput(),
             Select::make('reservation_time')

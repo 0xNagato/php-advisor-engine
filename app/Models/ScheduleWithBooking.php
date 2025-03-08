@@ -131,34 +131,4 @@ class ScheduleWithBooking extends Model
             }
         );
     }
-
-    protected function allowedForBookings(): Attribute
-    {
-        return Attribute::make(
-            get: function () {
-                // If within buffer time, booking not allowed
-                if ($this->is_within_buffer) {
-                    return false;
-                }
-
-                // If venue has cutoff time and today's reservation is past cutoff
-                if ($this->venue->cutoff_time) {
-                    $venueTimezone = $this->venue->timezone;
-                    $bookingDate = new Carbon($this->booking_date, $venueTimezone);
-
-                    // Only check cutoff time if booking is for today
-                    if ($bookingDate->isToday() &&
-                        now($venueTimezone)->gt(
-                            Carbon::createFromFormat('H:i:s', $this->venue->cutoff_time->format('H:i:s'), $venueTimezone)
-                        )
-                    ) {
-                        return false;
-                    }
-                }
-
-                // If passes both time checks, use regular bookable status
-                return $this->is_bookable;
-            }
-        );
-    }
 }
