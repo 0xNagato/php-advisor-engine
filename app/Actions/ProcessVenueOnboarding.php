@@ -70,7 +70,7 @@ class ProcessVenueOnboarding
                     'use_non_prime_incentive' => $location->use_non_prime_incentive,
                     'non_prime_per_diem' => $location->non_prime_per_diem,
                     'logo_path' => $location->logo_path,
-                    'status' => VenueStatus::PENDING,
+                    'status' => VenueStatus::DRAFT,
                     'payout_venue' => $venueDefaults['payout_venue'] ?? 60,
                     'booking_fee' => $venueDefaults['booking_fee'] ?? 200,
                     'contact_phone' => $onboarding->phone,

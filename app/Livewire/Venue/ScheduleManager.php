@@ -838,6 +838,136 @@ class ScheduleManager extends Component
         }
     }
 
+    public function makeDayNonPrime(): void
+    {
+        try {
+            $dayOfWeek = strtolower(Carbon::parse($this->selectedDate)->format('l'));
+
+            // Get all templates for this day
+            $templates = $this->venue->scheduleTemplates()
+                ->where('day_of_week', $dayOfWeek)
+                ->where('is_available', true)
+                ->get();
+
+            // Store original data for logging
+            $originalData = $templates->mapWithKeys(function ($template) {
+                $override = VenueTimeSlot::query()
+                    ->where('schedule_template_id', $template->id)
+                    ->where('booking_date', $this->selectedDate)
+                    ->first();
+
+                return [$template->id => [
+                    'time' => $template->start_time,
+                    'party_size' => $template->party_size,
+                    'is_available' => $override?->is_available ?? $template->is_available,
+                    'prime_time' => $override?->prime_time ?? $template->prime_time,
+                ]];
+            })->toArray();
+
+            // Create overrides for each template setting prime_time to false
+            foreach ($templates as $template) {
+                VenueTimeSlot::query()->updateOrCreate([
+                    'schedule_template_id' => $template->id,
+                    'booking_date' => $this->selectedDate,
+                ], [
+                    'is_available' => true,
+                    'prime_time' => false,
+                    'available_tables' => $template->available_tables,
+                    'minimum_spend_per_guest' => $template->minimum_spend_per_guest ?? 0,
+                ]);
+            }
+
+            // Log the activity
+            $this->getActivityLogger()
+                ->performedOn($this->venue)
+                ->withProperties([
+                    'action' => 'make_day_non_prime',
+                    'date' => $this->selectedDate,
+                    'day_of_week' => $dayOfWeek,
+                    'original_data' => $originalData,
+                ])
+                ->log('Venue day set to non-prime time');
+
+            // Refresh the calendar schedules
+            $this->handleDateSelection($this->selectedDate);
+
+            Notification::make()
+                ->title('All available time slots have been set to non-prime time')
+                ->success()
+                ->send();
+
+        } catch (Exception $e) {
+            Log::error('Error setting non-prime time', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+            ]);
+
+            Notification::make()
+                ->title('Error setting non-prime time')
+                ->body('Please try again or contact support if the problem persists.')
+                ->danger()
+                ->send();
+        }
+    }
+
+    public function makeTemplateNonPrime(): void
+    {
+        try {
+            // Get all templates for the selected day
+            $templates = $this->venue->scheduleTemplates()
+                ->where('day_of_week', $this->selectedDay)
+                ->where('is_available', true)
+                ->get();
+
+            // Store original data for logging
+            $originalData = $templates->mapWithKeys(function ($template) {
+                return [$template->id => [
+                    'time' => $template->start_time,
+                    'party_size' => $template->party_size,
+                    'is_available' => $template->is_available,
+                    'prime_time' => $template->prime_time,
+                ]];
+            })->toArray();
+
+            // Update all templates to set prime_time to false
+            foreach ($templates as $template) {
+                $template->update([
+                    'prime_time' => false,
+                ]);
+            }
+
+            // Log the activity
+            $this->getActivityLogger()
+                ->performedOn($this->venue)
+                ->withProperties([
+                    'action' => 'make_template_non_prime',
+                    'day_of_week' => $this->selectedDay,
+                    'original_data' => $originalData,
+                ])
+                ->log('Weekly template day set to non-prime time');
+
+            // Refresh the schedule
+            $this->initializeSchedules();
+
+            Notification::make()
+                ->title('All available time slots in weekly template have been set to non-prime time')
+                ->success()
+                ->send();
+
+        } catch (Exception $e) {
+            Log::error('Error setting weekly template to non-prime time', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+            ]);
+
+            Notification::make()
+                ->title('Error setting weekly template to non-prime time')
+                ->body('Please try again or contact support if the problem persists.')
+                ->danger()
+                ->send();
+        }
+    }
+
     protected function getHolidayInfo(string $date): ?array
     {
         $holidays = [

@@ -49,6 +49,12 @@
                     Venue is closed on {{ ucfirst($selectedDay) }}s
                 </div>
             @else
+                <div class="flex justify-end mt-4 mb-3">
+                    <x-filament::button wire:click="makeTemplateNonPrime" size="xs" color="info">
+                        Make Day Non-Prime
+                    </x-filament::button>
+                </div>
+
                 <div class="overflow-x-auto">
                     <table class="w-full">
                         <thead>
@@ -106,7 +112,7 @@
                 </div>
 
                 <x-slot:footer>
-                    <div class="flex justify-end">
+                    <div class="flex justify-end space-x-2">
                         <x-filament::button wire:click="saveTemplate" size="sm">
                             Save Template
                         </x-filament::button>
@@ -148,12 +154,17 @@
                                             Make Day Prime
                                         </x-filament::button>
 
+                                        <x-filament::button wire:click="makeDayNonPrime" size="xs" color="info"
+                                            class="justify-center">
+                                            Make Day Non-Prime
+                                        </x-filament::button>
+
                                         <x-filament::button wire:click="closeDay" size="xs" color="danger"
                                             class="justify-center">
                                             Close Day
                                         </x-filament::button>
 
-                                        <x-filament::button wire:click="markDaySoldOut" size="xs" color="info"
+                                        <x-filament::button wire:click="markDaySoldOut" size="xs" color="warning"
                                             class="justify-center">
                                             Mark Day Sold Out
                                         </x-filament::button>
