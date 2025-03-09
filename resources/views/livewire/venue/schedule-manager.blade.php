@@ -161,7 +161,7 @@
 
                                         <x-filament::button wire:click="openPricePerHeadModal" size="xs"
                                             color="primary" class="justify-center">
-                                            Set Price Per Head
+                                            Set Concierge Incentive
                                         </x-filament::button>
 
                                         <x-filament::button wire:click="closeDay" size="xs" color="danger"
@@ -311,7 +311,7 @@
 
                     @if ($activeView === 'calendar')
                         <div class="col-span-2 mt-2 space-y-2" x-show="!isPrime">
-                            <span class="text-sm font-medium">Price Per Head</span>
+                            <span class="text-sm font-medium">Concierge Incentive Per Customer</span>
                             <div class="relative">
                                 <span class="absolute inset-y-0 flex items-center text-gray-500 left-3">$</span>
                                 <input type="number" wire:model="editingSlot.price_per_head" min="0"
@@ -358,22 +358,22 @@
         <x-slot name="header">
             <div class="flex items-center justify-between w-full">
                 <span class="text-sm text-gray-600">
-                    Set Price Per Head for {{ $this->getFormattedDate($selectedDate) }}
+                    Set Concierge Incentive for {{ $this->getFormattedDate($selectedDate) }}
                 </span>
             </div>
         </x-slot>
 
         <div class="space-y-4">
             <div class="space-y-2">
-                <span class="text-sm font-medium">Price Per Head</span>
+                <span class="text-sm font-medium">Concierge Incentive Per Customer</span>
                 <div class="relative">
                     <span class="absolute inset-y-0 flex items-center text-gray-500 left-3">$</span>
                     <input type="number" wire:model="dayPricePerHead" min="0" step="0.01"
                         class="block w-full text-sm border-gray-300 rounded-lg shadow-sm pl-7 focus:border-primary-500 focus:ring-1 focus:ring-primary-500" />
                 </div>
                 <p class="text-xs text-gray-500">
-                    This will set the price per head for all non-prime time slots on this day. Prime time slots will
-                    remain unchanged.
+                    This will set the concierge incentive per customer for all non-prime time slots on this day. Prime
+                    time slots will remain unchanged.
                 </p>
             </div>
         </div>

@@ -1112,7 +1112,7 @@ class ScheduleManager extends Component
                     'price_per_head' => $this->dayPricePerHead,
                     'original_data' => $originalData,
                 ])
-                ->log('Price per head set for non-prime timeslots on '.$this->getFormattedDate($this->selectedDate));
+                ->log('Concierge incentive set for non-prime timeslots on '.$this->getFormattedDate($this->selectedDate));
 
             // Reset the price per head input
             $this->dayPricePerHead = null;
@@ -1124,7 +1124,7 @@ class ScheduleManager extends Component
             $this->loadCalendarData();
 
             Notification::make()
-                ->title('Price per head updated for non-prime time slots')
+                ->title('Concierge incentive updated for non-prime time slots')
                 ->success()
                 ->send();
         } catch (Exception $e) {
@@ -1135,7 +1135,7 @@ class ScheduleManager extends Component
             ]);
 
             Notification::make()
-                ->title('Error setting price per head')
+                ->title('Error setting concierge incentive')
                 ->danger()
                 ->send();
         }
