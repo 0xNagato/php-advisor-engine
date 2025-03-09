@@ -48,16 +48,14 @@ class ConciergePerformance extends Page
 
     public function mount(): void
     {
-        // Clear the cache to ensure we get the latest data with the updated fields
-        $this->clearCache();
-
+        // Don't clear the cache on every page load
         $this->weekRanges = $this->getWeekRanges();
         $this->conciergeData = $this->getConciergePerformanceData();
     }
 
     public static function canAccess(): bool
     {
-        return auth()->user()->hasActiveRole('super_admin');
+        return auth()->user()->hasActiveRole(['super_admin', 'admin']);
     }
 
     public function getWeekRanges(): array
