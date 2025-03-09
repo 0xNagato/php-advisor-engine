@@ -47,6 +47,8 @@ class ScheduleManager extends Component
         'template_id' => null,
     ];
 
+    public ?float $dayPricePerHead = null;
+
     protected $listeners = [
         'calendar-date-selected' => 'handleDateSelection',
     ];
@@ -874,6 +876,7 @@ class ScheduleManager extends Component
                     'prime_time' => false,
                     'available_tables' => $template->available_tables,
                     'minimum_spend_per_guest' => $template->minimum_spend_per_guest ?? 0,
+                    'price_per_head' => $template->price_per_head ?? 0,
                 ]);
             }
 
@@ -1029,10 +1032,121 @@ class ScheduleManager extends Component
         }
     }
 
+    protected function loadCalendarData(): void
+    {
+        if ($this->selectedDate) {
+            $this->handleDateSelection($this->selectedDate);
+        }
+    }
+
     public function render()
     {
         return view('livewire.venue.schedule-manager', [
             'formattedTime' => $this->getFormattedTime(),
         ]);
+    }
+
+    public function setPricePerHeadForDay(): void
+    {
+        try {
+            // Get all templates for this day
+            $dayOfWeek = strtolower(Carbon::parse($this->selectedDate)->format('l'));
+            $templates = $this->venue->scheduleTemplates()
+                ->where('day_of_week', $dayOfWeek)
+                ->where('is_available', true)
+                ->get();
+
+            // Store original data for logging
+            $originalData = $templates->mapWithKeys(function ($template) {
+                $override = VenueTimeSlot::query()
+                    ->where('schedule_template_id', $template->id)
+                    ->where('booking_date', $this->selectedDate)
+                    ->first();
+
+                return [$template->id => [
+                    'time' => $template->start_time,
+                    'party_size' => $template->party_size,
+                    'price_per_head' => $override?->price_per_head ?? $template->price_per_head,
+                    'prime_time' => $override?->prime_time ?? $template->prime_time,
+                ]];
+            })->toArray();
+
+            // Create overrides for each template setting price_per_head only for non-prime slots
+            foreach ($templates as $template) {
+                // Check if slot is prime or has an override already
+                $override = VenueTimeSlot::query()
+                    ->where('schedule_template_id', $template->id)
+                    ->where('booking_date', $this->selectedDate)
+                    ->first();
+
+                $isPrime = $override?->prime_time ?? $template->prime_time;
+
+                // Only update if slot is not prime
+                if (! $isPrime) {
+                    // If override exists, just update price_per_head
+                    if ($override) {
+                        $override->update([
+                            'price_per_head' => $this->dayPricePerHead ?? 0,
+                        ]);
+                    } else {
+                        // Create a new override with existing values plus price_per_head
+                        VenueTimeSlot::query()->create([
+                            'schedule_template_id' => $template->id,
+                            'booking_date' => $this->selectedDate,
+                            'is_available' => $template->is_available,
+                            'prime_time' => $template->prime_time, // Keep existing prime status
+                            'available_tables' => $template->available_tables,
+                            'minimum_spend_per_guest' => $template->minimum_spend_per_guest ?? 0,
+                            'price_per_head' => $this->dayPricePerHead ?? 0,
+                        ]);
+                    }
+                }
+            }
+
+            // Log the activity
+            $this->getActivityLogger()
+                ->performedOn($this->venue)
+                ->withProperties([
+                    'action' => 'set_price_per_head_for_day',
+                    'date' => $this->selectedDate,
+                    'price_per_head' => $this->dayPricePerHead,
+                    'original_data' => $originalData,
+                ])
+                ->log('Price per head set for non-prime timeslots on '.$this->getFormattedDate($this->selectedDate));
+
+            // Reset the price per head input
+            $this->dayPricePerHead = null;
+
+            // Close the modal
+            $this->dispatch('close-modal', id: 'set-price-per-head-modal');
+
+            // Reload calendar data
+            $this->loadCalendarData();
+
+            Notification::make()
+                ->title('Price per head updated for non-prime time slots')
+                ->success()
+                ->send();
+        } catch (Exception $e) {
+            Log::error('Error in setPricePerHeadForDay', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+                'date' => $this->selectedDate,
+            ]);
+
+            Notification::make()
+                ->title('Error setting price per head')
+                ->danger()
+                ->send();
+        }
+    }
+
+    public function openPricePerHeadModal(): void
+    {
+        // Reset the price per head value before opening the modal
+        $this->dayPricePerHead = null;
+
+        // Open the modal
+        $this->dispatch('open-modal', id: 'set-price-per-head-modal');
     }
 }

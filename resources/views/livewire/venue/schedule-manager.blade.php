@@ -148,7 +148,7 @@
                                         @endif
                                     </div>
 
-                                    <div class="grid grid-cols-3 gap-2 mt-2 sm:mt-0 sm:flex sm:gap-3">
+                                    <div class="grid grid-cols-2 gap-2 mt-2 sm:mt-0 sm:flex sm:gap-3">
                                         <x-filament::button wire:click="makeDayPrime" size="xs" color="success"
                                             class="justify-center">
                                             Make Day Prime
@@ -157,6 +157,11 @@
                                         <x-filament::button wire:click="makeDayNonPrime" size="xs" color="info"
                                             class="justify-center">
                                             Make Day Non-Prime
+                                        </x-filament::button>
+
+                                        <x-filament::button wire:click="openPricePerHeadModal" size="xs"
+                                            color="primary" class="justify-center">
+                                            Set Price Per Head
                                         </x-filament::button>
 
                                         <x-filament::button wire:click="closeDay" size="xs" color="danger"
@@ -303,6 +308,17 @@
                                 class="block w-full text-sm border-gray-300 rounded-lg shadow-sm pl-7 focus:border-primary-500 focus:ring-1 focus:ring-primary-500" />
                         </div>
                     </div>
+
+                    @if ($activeView === 'calendar')
+                        <div class="col-span-2 mt-2 space-y-2" x-show="!isPrime">
+                            <span class="text-sm font-medium">Price Per Head</span>
+                            <div class="relative">
+                                <span class="absolute inset-y-0 flex items-center text-gray-500 left-3">$</span>
+                                <input type="number" wire:model="editingSlot.price_per_head" min="0"
+                                    class="block w-full text-sm border-gray-300 rounded-lg shadow-sm pl-7 focus:border-primary-500 focus:ring-1 focus:ring-primary-500" />
+                            </div>
+                        </div>
+                    @endif
                 </div>
             </div>
             <div x-show="isPrime">
@@ -333,6 +349,43 @@
                 </x-filament::button>
                 <x-filament::button wire:click="saveEditingSlot" size="sm">
                     Save
+                </x-filament::button>
+            </div>
+        </x-slot>
+    </x-filament::modal>
+
+    <x-filament::modal id="set-price-per-head-modal" width="sm">
+        <x-slot name="header">
+            <div class="flex items-center justify-between w-full">
+                <span class="text-sm text-gray-600">
+                    Set Price Per Head for {{ $this->getFormattedDate($selectedDate) }}
+                </span>
+            </div>
+        </x-slot>
+
+        <div class="space-y-4">
+            <div class="space-y-2">
+                <span class="text-sm font-medium">Price Per Head</span>
+                <div class="relative">
+                    <span class="absolute inset-y-0 flex items-center text-gray-500 left-3">$</span>
+                    <input type="number" wire:model="dayPricePerHead" min="0" step="0.01"
+                        class="block w-full text-sm border-gray-300 rounded-lg shadow-sm pl-7 focus:border-primary-500 focus:ring-1 focus:ring-primary-500" />
+                </div>
+                <p class="text-xs text-gray-500">
+                    This will set the price per head for all non-prime time slots on this day. Prime time slots will
+                    remain unchanged.
+                </p>
+            </div>
+        </div>
+
+        <x-slot name="footer">
+            <div class="flex justify-end gap-2">
+                <x-filament::button color="gray"
+                    wire:click="$dispatch('close-modal', { id: 'set-price-per-head-modal' })" size="sm">
+                    Cancel
+                </x-filament::button>
+                <x-filament::button wire:click="setPricePerHeadForDay" size="sm">
+                    Apply
                 </x-filament::button>
             </div>
         </x-slot>
