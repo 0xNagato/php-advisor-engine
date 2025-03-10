@@ -32,7 +32,7 @@ class ConciergePerformance extends Page
 
     public function getTitle(): string
     {
-        if (empty($this->weekRanges)) {
+        if (blank($this->weekRanges)) {
             return static::$title;
         }
 
@@ -117,9 +117,7 @@ class ConciergePerformance extends Page
             }
 
             // Sort by total bookings descending
-            usort($conciergeData, function ($a, $b) {
-                return $b['totalBookings'] <=> $a['totalBookings'];
-            });
+            usort($conciergeData, fn ($a, $b) => $b['totalBookings'] <=> $a['totalBookings']);
 
             return $conciergeData;
         });

@@ -6,7 +6,9 @@
 
 namespace App\Providers;
 
+use App\Models\Concierge;
 use App\Models\User;
+use App\Observers\ConciergeObserver;
 use App\Observers\UserManyChatObserver;
 use App\Services\Booking\BookingCalculationService;
 use App\Services\Booking\EarningCreationService;
@@ -123,6 +125,7 @@ class AppServiceProvider extends ServiceProvider
         JsonResource::withoutWrapping();
         Model::preventLazyLoading(! $this->app->isProduction());
         User::observe(UserManyChatObserver::class);
+        Concierge::observe(ConciergeObserver::class);
     }
 
     /**

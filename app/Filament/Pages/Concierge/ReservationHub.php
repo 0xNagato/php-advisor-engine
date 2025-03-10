@@ -369,7 +369,7 @@ class ReservationHub extends Page
         $phone = $form['phone'] ?? '';
         $formattedPhone = $this->getInternationalFormattedPhoneNumber($phone);
 
-        if (empty($formattedPhone)) {
+        if (blank($formattedPhone)) {
             Notification::make()
                 ->title('Invalid Phone Number')
                 ->body('Please enter a valid phone number.')
