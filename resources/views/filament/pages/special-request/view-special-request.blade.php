@@ -83,6 +83,20 @@
                     </div>
                 </div>
 
+                <div>
+                    <div class="font-medium text-gray-700">
+                        <span class="font-semibold">Concierge:</span>
+                        <a href="{{ route('filament.admin.resources.concierges.view', ['record' => $specialRequest->concierge_id]) }}"
+                           class="text-primary-600 hover:text-primary-500">
+                            {{ $specialRequest->concierge->user->name }}
+                        </a>
+                        <div class="mt-1 text-xs">
+                            {{ $specialRequest->concierge->user->phone }}<br>
+                            {{ $specialRequest->concierge->user->email }}
+                        </div>
+                    </div>
+                </div>
+
                 <div class="relative">
                     <div class="absolute inset-0 flex items-center" aria-hidden="true">
                         <div class="w-full border-t border-gray-300"></div>
