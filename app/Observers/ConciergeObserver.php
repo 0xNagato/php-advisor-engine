@@ -7,6 +7,7 @@ use App\Models\Concierge;
 use App\Models\Message;
 use Illuminate\Support\Facades\Log;
 use Spatie\Permission\Models\Role;
+use Throwable;
 
 class ConciergeObserver
 {
@@ -22,7 +23,7 @@ class ConciergeObserver
 
         try {
             // Get the concierge role ID
-            $conciergeRole = Role::where('name', 'concierge')->first();
+            $conciergeRole = Role::query()->where('name', 'concierge')->first();
 
             if (! $conciergeRole) {
                 Log::warning('ConciergeObserver: Concierge role not found when trying to populate inbox');
@@ -42,7 +43,7 @@ class ConciergeObserver
 
             // If we found no announcements specifically for concierges, try a broader approach
             if ($announcements->isEmpty()) {
-                $announcements = Announcement::whereNull('recipient_roles')
+                $announcements = Announcement::query()->whereNull('recipient_roles')
                     ->orWhere('recipient_roles', '[]')
                     ->where('published_at', '<=', now())
                     ->get();
@@ -54,7 +55,7 @@ class ConciergeObserver
 
             foreach ($announcements as $announcement) {
                 // Check if a message already exists for this user and announcement
-                $exists = Message::where('user_id', $concierge->user_id)
+                $exists = Message::query()->where('user_id', $concierge->user_id)
                     ->where('announcement_id', $announcement->id)
                     ->exists();
 
@@ -70,15 +71,15 @@ class ConciergeObserver
             }
 
             // Bulk insert if we have messages to create
-            if (! empty($messagesToInsert)) {
+            if (filled($messagesToInsert)) {
                 // Break into chunks to avoid too large queries
                 foreach (array_chunk($messagesToInsert, 100) as $chunk) {
-                    Message::insert($chunk);
+                    Message::query()->insert($chunk);
                 }
 
                 Log::info('ConciergeObserver: Created '.count($messagesToInsert)." inbox messages for concierge user ID: {$concierge->user_id}");
             }
-        } catch (\Throwable $e) {
+        } catch (Throwable $e) {
             Log::error('ConciergeObserver: Error populating concierge inbox: '.$e->getMessage(), [
                 'concierge_id' => $concierge->id,
                 'user_id' => $concierge->user_id,

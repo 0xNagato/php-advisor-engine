@@ -11,6 +11,7 @@ use App\Models\Venue;
 use App\Models\VenueGroup;
 use App\Notifications\VenueAgreementCopy;
 use App\Notifications\WelcomeVenueManager;
+use Exception;
 use Filament\Actions\Action;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
@@ -88,7 +89,7 @@ class ViewVenueOnboarding extends ViewRecord
                 ->action(function (array $data) {
                     /** @var User $user */
                     $user = auth()->user();
-                    $venueGroup = VenueGroup::findOrFail($data['venue_group_id']);
+                    $venueGroup = VenueGroup::query()->findOrFail($data['venue_group_id']);
 
                     try {
                         app(MergeVenueOnboardingWithGroup::class)->execute(
@@ -113,7 +114,7 @@ class ViewVenueOnboarding extends ViewRecord
                                 ->danger()
                                 ->send();
                         }
-                    } catch (\Exception $e) {
+                    } catch (Exception $e) {
                         Notification::make()
                             ->title('Error merging with venue group: '.$e->getMessage())
                             ->danger()

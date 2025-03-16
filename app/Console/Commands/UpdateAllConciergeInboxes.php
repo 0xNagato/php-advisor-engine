@@ -46,7 +46,7 @@ class UpdateAllConciergeInboxes extends Command
         $this->info('Starting inbox update...');
 
         // Get all concierge users
-        $conciergeRole = Role::where('name', 'concierge')->first();
+        $conciergeRole = Role::query()->where('name', 'concierge')->first();
         if (! $conciergeRole) {
             $this->error('Concierge role not found');
 
@@ -60,7 +60,7 @@ class UpdateAllConciergeInboxes extends Command
         $this->info("Found {$concierges->count()} concierge records");
 
         // Get all published announcements
-        $query = Announcement::select('id')
+        $query = Announcement::query()->select('id')
             ->where('published_at', '<=', now());
 
         // If only-concierge-announcements flag is set, only include announcements targeted at concierges
@@ -120,7 +120,7 @@ class UpdateAllConciergeInboxes extends Command
 
             // Insert in batches
             foreach (array_chunk($messagesToInsert, 500) as $chunk) {
-                if (! empty($chunk)) {
+                if (filled($chunk)) {
                     DB::table('messages')->insert($chunk);
                     $messagesCreated += count($chunk);
                 }

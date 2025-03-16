@@ -34,20 +34,15 @@ class MergeVenueOnboardingWithGroup
         string $notes,
         array $venueDefaults = []
     ): void {
-        // Verify the venue group has a primary manager
-        if (! $venueGroup->primary_manager_id) {
-            throw ValidationException::withMessages([
-                'venue_group_id' => 'Selected venue group has no primary manager',
-            ]);
-        }
+        throw_unless($venueGroup->primary_manager_id, ValidationException::withMessages([
+            'venue_group_id' => 'Selected venue group has no primary manager',
+        ]));
 
         // Get the primary manager
         $manager = $venueGroup->primaryManager;
-        if (! $manager) {
-            throw ValidationException::withMessages([
-                'venue_group_id' => 'Primary manager not found',
-            ]);
-        }
+        throw_unless($manager, ValidationException::withMessages([
+            'venue_group_id' => 'Primary manager not found',
+        ]));
 
         DB::transaction(function () use ($onboarding, $venueGroup, $manager, $processedBy, $notes, $venueDefaults) {
             // Create venues for each location in the onboarding
@@ -55,7 +50,7 @@ class MergeVenueOnboardingWithGroup
             $venueData = [];
 
             foreach ($onboarding->locations as $location) {
-                $venue = Venue::create([
+                $venue = Venue::query()->create([
                     'name' => $location->name,
                     'venue_group_id' => $venueGroup->id,
                     'user_id' => $manager->id,
