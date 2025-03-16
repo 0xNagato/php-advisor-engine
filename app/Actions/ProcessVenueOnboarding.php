@@ -67,6 +67,7 @@ class ProcessVenueOnboarding
                     'region' => $location->region,
                     'timezone' => Region::getTimezoneForRegion($location->region),
                     'prime_hours' => $location->prime_hours ?? [],
+                    'business_hours' => $location->booking_hours ?? [],
                     'use_non_prime_incentive' => $location->use_non_prime_incentive,
                     'non_prime_per_diem' => $location->non_prime_per_diem,
                     'logo_path' => $location->logo_path,
