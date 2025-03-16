@@ -16,6 +16,7 @@ use Carbon\Carbon;
 use Exception;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -32,6 +33,16 @@ class VenueOnboarding extends Component
 {
     use FormatsPhoneNumber;
     use WithFileUploads;
+
+    // Add properties to track existing account detection
+    public bool $existingAccountDetected = false;
+
+    public string $existingAccountType = '';
+
+    public string $existingAccountIdentifier = '';
+
+    // Flag to determine if this is an existing venue manager adding a new venue
+    public bool $isExistingVenueManager = false;
 
     private const array DEFAULT_BOOKING_HOURS = [
         'monday' => ['start' => '11:00:00', 'end' => '22:00:00', 'closed' => false],
@@ -127,21 +138,29 @@ class VenueOnboarding extends Component
             ])
             ->toArray();
 
-        // Check if a token was provided in the route
-        if ($token) {
-            try {
-                // Decrypt the token to get the partner ID
-                $partnerId = Crypt::decrypt($token);
-                $this->validatePartnerById($partnerId);
-            } catch (Exception $e) {
-                // If decryption fails, log it but continue without a partner
-                Log::warning('Failed to decrypt partner token: '.$e->getMessage());
-            }
+        // Check if the user is a logged-in venue manager
+        if (Auth::check() && Auth::user()->hasActiveRole('venue_manager')) {
+            $this->isExistingVenueManager = true;
+            $this->handleExistingVenueManager();
         }
-        // For backward compatibility, also check query params
-        elseif (request()->has('partner_id')) {
-            $partnerId = request()->get('partner_id');
-            $this->validatePartnerById($partnerId);
+        // Otherwise, continue with normal onboarding flow
+        else {
+            // Check if a token was provided in the route
+            if ($token) {
+                try {
+                    // Decrypt the token to get the partner ID
+                    $partnerId = Crypt::decrypt($token);
+                    $this->validatePartnerById($partnerId);
+                } catch (Exception $e) {
+                    // If decryption fails, log it but continue without a partner
+                    Log::warning('Failed to decrypt partner token: '.$e->getMessage());
+                }
+            }
+            // For backward compatibility, also check query params
+            elseif (request()->has('partner_id')) {
+                $partnerId = request()->get('partner_id');
+                $this->validatePartnerById($partnerId);
+            }
         }
 
         // Load saved state from session if it exists
@@ -164,7 +183,9 @@ class VenueOnboarding extends Component
             $this->venue_non_prime_per_diem = array_fill(0, $this->venue_count, 10.0);
             $this->logo_files = array_fill(0, $this->venue_count, null);
             $this->venue_regions = array_fill(0, $this->venue_count, 'miami');
-            $this->step = 'company';
+
+            // Skip directly to venues step for existing venue managers
+            $this->step = $this->isExistingVenueManager ? 'venues' : 'company';
         }
 
         $this->initializeBookingHours();
@@ -235,6 +256,19 @@ class VenueOnboarding extends Component
     {
         if ($property === 'phone') {
             $this->phone = $this->getInternationalFormattedPhoneNumber($this->phone);
+
+            // Clear the existing account detection if the phone is changed
+            if ($this->existingAccountDetected && $this->existingAccountType === 'phone') {
+                $this->existingAccountDetected = false;
+                $this->existingAccountType = '';
+                $this->existingAccountIdentifier = '';
+            }
+        }
+
+        if ($property === 'email' && $this->existingAccountDetected && $this->existingAccountType === 'email') {
+            $this->existingAccountDetected = false;
+            $this->existingAccountType = '';
+            $this->existingAccountIdentifier = '';
         }
 
         // Save state to session whenever a property is updated
@@ -256,6 +290,9 @@ class VenueOnboarding extends Component
             'phone' => $this->phone,
             'partner_id' => $this->partner_id,
             'venue_booking_hours' => $this->venue_booking_hours,
+            'existingAccountDetected' => $this->existingAccountDetected,
+            'existingAccountType' => $this->existingAccountType,
+            'existingAccountIdentifier' => $this->existingAccountIdentifier,
         ]);
     }
 
@@ -282,6 +319,11 @@ class VenueOnboarding extends Component
 
     public function nextStep(): void
     {
+        // If an existing account is detected, don't validate or proceed
+        if ($this->existingAccountDetected) {
+            return;
+        }
+
         $this->validateStep();
 
         if ($this->step === 'booking-hours' || $this->step === 'prime-hours' || $this->step === 'incentive') {
@@ -347,56 +389,133 @@ class VenueOnboarding extends Component
         $this->validateStep();
 
         DB::transaction(function (): void {
-            $data = VenueOnboardingData::from([
-                'company_name' => $this->company_name,
-                'first_name' => $this->first_name,
-                'last_name' => $this->last_name,
-                'email' => $this->email,
-                'phone' => $this->phone,
-                'venue_count' => $this->venue_count,
-                'venue_names' => $this->venue_names,
-                'has_logos' => $this->has_logos,
-                'logo_files' => null,
-                'agreement_accepted' => $this->agreement_accepted,
-                'send_agreement_copy' => $this->send_agreement_copy,
-                'partner_id' => $this->partner_id,
-                'venue_booking_hours' => $this->venue_booking_hours,
-            ]);
-
-            $onboarding = VenueOnboardingModel::query()->create([
-                ...$data->toArray(),
-                'status' => 'submitted',
-            ]);
-
-            foreach ($this->venue_names as $index => $name) {
-                $location = $onboarding->locations()->create([
-                    'name' => $name,
-                    'region' => $this->venue_regions[$index],
-                    'prime_hours' => $this->venue_prime_hours[$index] ?? [],
-                    'booking_hours' => $this->venue_booking_hours[$index] ?? [],
-                    'use_non_prime_incentive' => $this->venue_use_non_prime_incentive[$index] ?? false,
-                    'non_prime_per_diem' => $this->venue_use_non_prime_incentive[$index] ?
-                        $this->venue_non_prime_per_diem[$index] :
-                        null,
-                    'logo_path' => $this->has_logos ? $this->storeLogo($index, $name) : null,
-                ]);
+            if ($this->isExistingVenueManager) {
+                $this->submitAsExistingVenueManager();
+            } else {
+                $this->submitAsNewVenueOwner();
             }
-
-            if ($this->send_agreement_copy) {
-                Notification::route('mail', $this->email)
-                    ->notify(new VenueAgreementCopy($onboarding));
-            }
-
-            User::query()->whereHas('roles', function (Builder $query) {
-                $query->where('name', 'super_admin');
-            })->each(function ($admin) use ($onboarding) {
-                $admin->notify(new VenueOnboardingSubmitted($onboarding));
-            });
         });
 
         // Clear the session after successful submission
         Session::forget('venue_onboarding');
         $this->submitted = true;
+    }
+
+    /**
+     * Handle submission for a new venue owner (original flow)
+     */
+    private function submitAsNewVenueOwner(): void
+    {
+        $data = VenueOnboardingData::from([
+            'company_name' => $this->company_name,
+            'first_name' => $this->first_name,
+            'last_name' => $this->last_name,
+            'email' => $this->email,
+            'phone' => $this->phone,
+            'venue_count' => $this->venue_count,
+            'venue_names' => $this->venue_names,
+            'has_logos' => $this->has_logos,
+            'logo_files' => null,
+            'agreement_accepted' => $this->agreement_accepted,
+            'send_agreement_copy' => $this->send_agreement_copy,
+            'partner_id' => $this->partner_id,
+            'venue_booking_hours' => $this->venue_booking_hours,
+        ]);
+
+        $onboarding = VenueOnboardingModel::query()->create([
+            ...$data->toArray(),
+            'status' => 'submitted',
+        ]);
+
+        foreach ($this->venue_names as $index => $name) {
+            $location = $onboarding->locations()->create([
+                'name' => $name,
+                'region' => $this->venue_regions[$index],
+                'prime_hours' => $this->venue_prime_hours[$index] ?? [],
+                'booking_hours' => $this->venue_booking_hours[$index] ?? [],
+                'use_non_prime_incentive' => $this->venue_use_non_prime_incentive[$index] ?? false,
+                'non_prime_per_diem' => $this->venue_use_non_prime_incentive[$index] ?
+                    $this->venue_non_prime_per_diem[$index] :
+                    null,
+                'logo_path' => $this->has_logos ? $this->storeLogo($index, $name) : null,
+            ]);
+        }
+
+        if ($this->send_agreement_copy) {
+            Notification::route('mail', $this->email)
+                ->notify(new VenueAgreementCopy($onboarding));
+        }
+
+        User::query()->whereHas('roles', function (Builder $query) {
+            $query->where('name', 'super_admin');
+        })->each(function ($admin) use ($onboarding) {
+            $admin->notify(new VenueOnboardingSubmitted($onboarding));
+        });
+    }
+
+    /**
+     * Handle submission for an existing venue manager adding a new venue
+     */
+    private function submitAsExistingVenueManager(): void
+    {
+        /** @var User $user */
+        $user = Auth::user();
+        $venueGroup = $user->currentVenueGroup();
+
+        throw_unless($venueGroup, new Exception('No venue group found for the current user'));
+
+        $data = VenueOnboardingData::from([
+            'company_name' => $this->company_name,
+            'first_name' => $this->first_name,
+            'last_name' => $this->last_name,
+            'email' => $this->email,
+            'phone' => $this->phone,
+            'venue_count' => $this->venue_count,
+            'venue_names' => $this->venue_names,
+            'has_logos' => $this->has_logos,
+            'logo_files' => null,
+            'agreement_accepted' => $this->agreement_accepted,
+            'send_agreement_copy' => $this->send_agreement_copy,
+            'partner_id' => $this->partner_id,
+            'venue_booking_hours' => $this->venue_booking_hours,
+            // Add a note that this was submitted by an existing venue manager
+            'additional_notes' => 'Submitted by existing venue manager (ID: '.$user->id.') for venue group (ID: '.$venueGroup->id.')',
+            'venue_group_id' => $venueGroup->id,
+        ]);
+
+        $onboarding = VenueOnboardingModel::query()->create([
+            ...$data->toArray(),
+            'status' => 'submitted',
+            'venue_group_id' => $venueGroup->id,
+        ]);
+
+        foreach ($this->venue_names as $index => $name) {
+            $location = $onboarding->locations()->create([
+                'name' => $name,
+                'region' => $this->venue_regions[$index],
+                'prime_hours' => $this->venue_prime_hours[$index] ?? [],
+                'booking_hours' => $this->venue_booking_hours[$index] ?? [],
+                'use_non_prime_incentive' => $this->venue_use_non_prime_incentive[$index] ?? false,
+                'non_prime_per_diem' => $this->venue_use_non_prime_incentive[$index] ?
+                    $this->venue_non_prime_per_diem[$index] :
+                    null,
+                'logo_path' => $this->has_logos ? $this->storeLogo($index, $name) : null,
+                'venue_group_id' => $venueGroup->id,
+            ]);
+        }
+
+        // Send notification to the venue manager confirming their submission
+        if ($this->send_agreement_copy) {
+            Notification::route('mail', $this->email)
+                ->notify(new VenueAgreementCopy($onboarding));
+        }
+
+        // Always notify admins
+        User::query()->whereHas('roles', function (Builder $query) {
+            $query->where('name', 'super_admin');
+        })->each(function ($admin) use ($onboarding) {
+            $admin->notify(new VenueOnboardingSubmitted($onboarding));
+        });
     }
 
     protected function validateStep(): void
@@ -406,8 +525,35 @@ class VenueOnboarding extends Component
                 'company_name' => 'required|string|max:255',
                 'first_name' => 'required|string|max:255',
                 'last_name' => 'required|string|max:255',
-                'email' => 'required|email|max:255|unique:users,email',
-                'partner_id' => ['required', 'exists:users,id'],
+                'email' => [
+                    'required',
+                    'email',
+                    'max:255',
+                    function ($attribute, $value, $fail) {
+                        // Skip uniqueness check for existing venue managers
+                        if ($this->isExistingVenueManager) {
+                            return;
+                        }
+
+                        $exists = User::query()->where('email', $value)->exists();
+                        if ($exists) {
+                            $this->existingAccountDetected = true;
+                            $this->existingAccountType = 'email';
+                            $this->existingAccountIdentifier = $value;
+                            $fail('The email address is already registered with another account.');
+                        }
+                    },
+                ],
+                'partner_id' => [
+                    'required',
+                    'exists:users,id',
+                    function ($attribute, $value, $fail) {
+                        // Skip partner validation for existing venue managers who may not need to reselect a partner
+                        if ($this->isExistingVenueManager) {
+                            return;
+                        }
+                    },
+                ],
                 'phone' => [
                     'required',
                     'string',
@@ -415,6 +561,21 @@ class VenueOnboarding extends Component
                         $phone = phone($value, config('app.countries')[0]);
                         if (! $phone->isValid()) {
                             $fail('The phone number is invalid.');
+                        }
+
+                        // Skip uniqueness check for existing venue managers
+                        if ($this->isExistingVenueManager) {
+                            return;
+                        }
+
+                        // Check for uniqueness of the phone number in the users table
+                        $phoneE164 = $phone->formatE164();
+                        $exists = User::query()->where('phone', $phoneE164)->exists();
+                        if ($exists) {
+                            $this->existingAccountDetected = true;
+                            $this->existingAccountType = 'phone';
+                            $this->existingAccountIdentifier = $phoneE164;
+                            $fail('The phone number is already registered with another account.');
                         }
                     },
                 ],
@@ -628,5 +789,34 @@ class VenueOnboarding extends Component
             })
             ->values()
             ->toArray();
+    }
+
+    /**
+     * Handle pre-filling data for existing venue managers
+     */
+    private function handleExistingVenueManager(): void
+    {
+        /** @var User $user */
+        $user = Auth::user();
+        $venueGroup = $user->currentVenueGroup();
+
+        if ($venueGroup) {
+            $this->company_name = $venueGroup->name;
+            $this->agreement_accepted = true; // They've already accepted agreement previously
+        }
+
+        $this->first_name = $user->first_name;
+        $this->last_name = $user->last_name;
+        $this->email = $user->email;
+        $this->phone = $user->phone ?? '';
+
+        // Find their partner if it exists
+        if ($user->partner_id) {
+            $this->partner_id = $user->partner_id;
+            $partner = User::query()->find($user->partner_id);
+            if ($partner) {
+                $this->partner_name = "{$partner->first_name} {$partner->last_name}";
+            }
+        }
     }
 }

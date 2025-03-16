@@ -134,15 +134,30 @@ class ViewVenueOnboarding extends ViewRecord
                     $user = auth()->user();
 
                     try {
-                        app(ProcessVenueOnboarding::class)->execute(
-                            onboarding: $this->record,
-                            processedBy: $user,
-                            notes: $data['notes'],
-                            venueDefaults: [
-                                'payout_venue' => $data['payout_venue'],
-                                'booking_fee' => $data['booking_fee'],
-                            ]
-                        );
+                        // Check if this onboarding is from an existing venue manager
+                        if ($this->record->venue_group_id) {
+                            // Use the same process for existing venue groups
+                            app(ProcessVenueOnboarding::class)->execute(
+                                onboarding: $this->record,
+                                processedBy: $user,
+                                notes: $data['notes'],
+                                venueDefaults: [
+                                    'payout_venue' => $data['payout_venue'],
+                                    'booking_fee' => $data['booking_fee'],
+                                ]
+                            );
+                        } else {
+                            // Standard processing for new venue managers
+                            app(ProcessVenueOnboarding::class)->execute(
+                                onboarding: $this->record,
+                                processedBy: $user,
+                                notes: $data['notes'],
+                                venueDefaults: [
+                                    'payout_venue' => $data['payout_venue'],
+                                    'booking_fee' => $data['booking_fee'],
+                                ]
+                            );
+                        }
 
                         Notification::make()
                             ->title('Venue onboarding processed successfully')

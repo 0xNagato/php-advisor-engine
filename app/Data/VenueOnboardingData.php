@@ -50,5 +50,11 @@ class VenueOnboardingData extends Data
 
         #[Required]
         public ?int $partner_id,
+
+        public ?array $venue_booking_hours = null,
+
+        public ?string $additional_notes = null,
+
+        public ?int $venue_group_id = null,
     ) {}
 }

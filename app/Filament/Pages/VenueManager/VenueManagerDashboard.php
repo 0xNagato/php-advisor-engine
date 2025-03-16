@@ -10,6 +10,7 @@ use App\Models\User;
 use App\Models\Venue;
 use App\Models\VenueGroup;
 use Carbon\Carbon;
+use Filament\Actions\Action;
 use Filament\Pages\Dashboard;
 use Filament\Pages\Dashboard\Concerns\HasFiltersAction;
 use Illuminate\Contracts\Support\Htmlable;
@@ -88,6 +89,12 @@ class VenueManagerDashboard extends Dashboard
     protected function getHeaderActions(): array
     {
         return [
+            Action::make('add_venue')
+                ->label('Add New Venue')
+                ->icon('heroicon-o-plus-circle')
+                ->color('primary')
+                ->url(route('venue-manager.add-venue'))
+                ->visible(fn () => auth()->user()->hasActiveRole('venue_manager')),
             DateRangeFilterAction::make(),
         ];
     }
