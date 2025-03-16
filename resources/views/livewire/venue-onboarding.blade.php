@@ -480,7 +480,7 @@ try {
                     <div class="fixed inset-x-0 bottom-0 z-10 px-4 py-4 bg-white border-t sm:px-6">
                         <div class="flex justify-between max-w-xl mx-auto">
                             <div class="flex gap-2">
-                                @if ($step !== 'company')
+                                @if ($step !== 'company' && !($isExistingVenueManager && $step === 'venues'))
                                     <button type="button" wire:click="previousStep"
                                         class="px-6 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50">
                                         Back

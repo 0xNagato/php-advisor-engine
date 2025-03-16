@@ -364,6 +364,12 @@ class VenueOnboarding extends Component
 
         if ($currentIndex > 0) {
             $previousStep = $steps[$currentIndex - 1];
+
+            // Prevent existing venue managers from going back to the company step
+            if ($this->isExistingVenueManager && $previousStep === 'company') {
+                return;
+            }
+
             $this->step = $previousStep;
 
             // Reset venue index when moving back
