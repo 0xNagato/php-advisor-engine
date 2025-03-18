@@ -106,13 +106,24 @@ class BusinessIntelligence extends Page implements HasTable
                         },
                     ], 'guest_count')
             )
+            ->recordUrl(function (Concierge $record) {
+                return route('filament.admin.pages.booking-search', [
+                    'filters' => [
+                        'concierge_search' => $record->user->name,
+                        'start_date' => $this->filters['startDate'] ?? null,
+                        'end_date' => $this->filters['endDate'] ?? null,
+                    ],
+                ]);
+            })
             ->columns([
                 TextColumn::make('user.name')
                     ->label('Concierge Name')
-                    ->searchable(query: fn (Builder $query, string $search): Builder => $query->whereHas('user', function (Builder $query) use ($search) {
-                        $query->where('users.first_name', 'like', "%{$search}%")
-                            ->orWhere('users.last_name', 'like', "%{$search}%");
-                    }))
+                    ->searchable(query: function (Builder $query, string $search): Builder {
+                        return $query->whereHas('user', function (Builder $query) use ($search) {
+                            $query->where('users.first_name', 'like', "%{$search}%")
+                                ->orWhere('users.last_name', 'like', "%{$search}%");
+                        });
+                    })
                     ->sortable(),
                 TextColumn::make('hotel_name')
                     ->label('Hotel Name')
@@ -120,10 +131,12 @@ class BusinessIntelligence extends Page implements HasTable
                     ->sortable(),
                 TextColumn::make('user.referrer.name')
                     ->label('Referrer')
-                    ->searchable(query: fn (Builder $query, string $search): Builder => $query->whereHas('user.referrer', function (Builder $query) use ($search) {
-                        $query->where('users.first_name', 'like', "%{$search}%")
-                            ->orWhere('users.last_name', 'like', "%{$search}%");
-                    }))
+                    ->searchable(query: function (Builder $query, string $search): Builder {
+                        return $query->whereHas('user.referrer', function (Builder $query) use ($search) {
+                            $query->where('users.first_name', 'like', "%{$search}%")
+                                ->orWhere('users.last_name', 'like', "%{$search}%");
+                        });
+                    })
                     ->sortable(),
                 TextColumn::make('total_bookings')
                     ->label('# of Bookings')
