@@ -33,9 +33,9 @@ class Kernel extends ConsoleKernel
                 ->withoutOverlapping();
 
             // Check every minute for bookings happening in 30 minutes and notify admins if venue hasn't confirmed
-            $schedule->command('app:notify-admins-venue-has-not-confirmed')
-                ->everyMinute()
-                ->withoutOverlapping();
+            // $schedule->command('app:notify-admins-venue-has-not-confirmed')
+            //     ->everyMinute()
+            //     ->withoutOverlapping();
 
             // Abandon stale bookings that have been pending for too long
             $schedule->command('bookings:abandon-stale')
