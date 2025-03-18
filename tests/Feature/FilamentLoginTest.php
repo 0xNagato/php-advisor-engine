@@ -24,6 +24,6 @@ test('user can access platform vip code page', function () {
 });
 
 test('user cannot access admin panel when not authenticated', function () {
-get('/platform/messages')
-->assertRedirect('/platform/login');
-    });
+    get('/platform/messages')
+        ->assertRedirect('/platform/login');
+});
