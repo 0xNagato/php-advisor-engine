@@ -86,25 +86,19 @@ class BusinessIntelligence extends Page implements HasTable
             ->query(
                 Concierge::query()
                     ->with(['user', 'user.referrer'])
-                    ->withCount([
-                        'bookings as total_bookings' => function (Builder $query) {
-                            $this->applyDateRangeToQuery($query);
-                        },
-                        'bookings as cancelled_bookings' => function (Builder $query) {
-                            $this->applyDateRangeToQuery($query);
-                            $query->where('status', 'cancelled');
-                        },
-                        'bookings as no_show_bookings' => function (Builder $query) {
-                            $this->applyDateRangeToQuery($query);
-                            $query->where('status', 'no_show');
-                        },
-                    ])
-                    ->withAvg([
-                        'bookings as average_diners' => function (Builder $query) {
-                            $this->applyDateRangeToQuery($query);
-                            $query->whereIn('status', ['confirmed', 'venue_confirmed']);
-                        },
-                    ], 'guest_count')
+                    ->select('concierges.*')
+                    ->selectRaw('COUNT(CASE WHEN bookings.status = ? THEN 1 END) as cancelled_bookings', ['cancelled'])
+                    ->selectRaw('COUNT(CASE WHEN bookings.status = ? THEN 1 END) as no_show_bookings', ['no_show'])
+                    ->selectRaw('COUNT(CASE WHEN bookings.status = ? THEN 1 END) as total_bookings', ['confirmed'])
+                    ->selectRaw('AVG(CASE WHEN bookings.status = ? THEN bookings.guest_count END) as average_diners', ['confirmed'])
+                    ->leftJoin('bookings', 'concierges.id', '=', 'bookings.concierge_id')
+                    ->when(isset($this->filters['startDate'], $this->filters['endDate']), function ($query) {
+                        $query->whereBetween('bookings.booking_at', [
+                            Carbon::parse($this->filters['startDate'])->startOfDay(),
+                            Carbon::parse($this->filters['endDate'])->endOfDay(),
+                        ]);
+                    })
+                    ->groupBy('concierges.id')
             )
             ->recordUrl(function (Concierge $record) {
                 return route('filament.admin.pages.booking-search', [
@@ -149,7 +143,7 @@ class BusinessIntelligence extends Page implements HasTable
                     ->sortable(),
                 TextColumn::make('average_diners')
                     ->label('Avg. Number of Diners')
-                    ->formatStateUsing(fn ($state) => number_format($state, 1))
+                    ->formatStateUsing(fn ($state) => number_format((float) $state, 1))
                     ->sortable(),
             ])
             ->defaultSort('total_bookings', 'desc')
@@ -159,7 +153,7 @@ class BusinessIntelligence extends Page implements HasTable
     private function applyDateRangeToQuery(Builder $query): void
     {
         if (isset($this->filters['startDate'], $this->filters['endDate'])) {
-            $query->whereBetween('booking_at', [
+            $query->whereBetween('bookings.booking_at', [
                 Carbon::parse($this->filters['startDate'])->startOfDay(),
                 Carbon::parse($this->filters['endDate'])->endOfDay(),
             ]);
