@@ -29,6 +29,7 @@ class VenueOnboardingLocation extends Model
         'booking_hours',
         'use_non_prime_incentive',
         'non_prime_per_diem',
+        'venue_group_id',
     ];
 
     /**
@@ -45,6 +46,14 @@ class VenueOnboardingLocation extends Model
     public function venue(): BelongsTo
     {
         return $this->belongsTo(Venue::class, 'created_venue_id');
+    }
+
+    /**
+     * @return BelongsTo<VenueGroup, $this>
+     */
+    public function venueGroup(): BelongsTo
+    {
+        return $this->belongsTo(VenueGroup::class);
     }
 
     protected function casts(): array

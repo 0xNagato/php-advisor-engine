@@ -44,6 +44,7 @@ class BookingsOverview extends BaseWidget
                 DB::raw('COUNT(*) as count'),
                 DB::raw('SUM(total_fee - total_refunded) as total_amount'),
                 DB::raw('SUM(platform_earnings - platform_earnings_refunded) as platform_earnings'),
+                DB::raw('SUM(CASE WHEN is_prime = 1 THEN total_fee - concierge_earnings - venue_earnings ELSE platform_earnings + partner_venue_fee END) as platform_revenue'),
                 'currency'
             )
             ->groupBy('currency')
@@ -53,7 +54,10 @@ class BookingsOverview extends BaseWidget
 
         $currencyService = app(CurrencyConversionService::class);
         $totalAmountUSD = $currencyService->convertToUSD($bookings->pluck('total_amount', 'currency')->toArray());
-        $platformEarningsUSD = $currencyService->convertToUSD($bookings->pluck('platform_earnings', 'currency')->toArray());
+        $platformEarningsUSD = $currencyService->convertToUSD($bookings->pluck('platform_earnings',
+            'currency')->toArray());
+        $platformRevenueUSD = $currencyService->convertToUSD($bookings->pluck('platform_revenue',
+            'currency')->toArray());
 
         // Pass the converted UTC dates into the chart data query
         $chartData = $this->getChartData($startDateUTC, $endDateUTC);
@@ -66,8 +70,8 @@ class BookingsOverview extends BaseWidget
                 $bookings->pluck('total_amount', 'currency')->toArray())
                 ->chart($chartData['amounts'])
                 ->color('success'),
-            $this->createStat('Platform Earnings', $platformEarningsUSD, 'USD',
-                $bookings->pluck('platform_earnings', 'currency')->toArray())
+            $this->createStat('Platform Revenue', $platformRevenueUSD, 'USD',
+                $bookings->pluck('platform_revenue', 'currency')->toArray())
                 ->chart($chartData['earnings'])
                 ->color('success'),
         ];
@@ -78,7 +82,14 @@ class BookingsOverview extends BaseWidget
         $dailyData = Booking::query()
             ->confirmed()
             ->whereBetween('confirmed_at', [$startDateUTC, $endDateUTC])
-            ->selectRaw('DATE(confirmed_at) as date, COUNT(*) as bookings, SUM(total_fee) as total_amount, SUM(platform_earnings) as platform_earnings, currency')
+            ->select(
+                DB::raw('DATE(confirmed_at) as date'),
+                DB::raw('COUNT(*) as bookings'),
+                DB::raw('SUM(total_fee) as total_amount'),
+                DB::raw('SUM(platform_earnings) as platform_earnings'),
+                DB::raw('SUM(CASE WHEN is_prime = 1 THEN total_fee - concierge_earnings - venue_earnings ELSE platform_earnings + partner_venue_fee END) as platform_revenue'),
+                'currency'
+            )
             ->groupBy('date', 'currency')
             ->orderBy('date')
             ->get();
@@ -89,11 +100,13 @@ class BookingsOverview extends BaseWidget
             $bookings = $dayData->sum('bookings');
             $amounts = $currencyService->convertToUSD($dayData->pluck('total_amount', 'currency')->toArray());
             $earnings = $currencyService->convertToUSD($dayData->pluck('platform_earnings', 'currency')->toArray());
+            $revenue = $currencyService->convertToUSD($dayData->pluck('platform_revenue', 'currency')->toArray());
 
             return [
                 'bookings' => $bookings,
                 'amounts' => $amounts,
                 'earnings' => $earnings,
+                'revenue' => $revenue,
             ];
         });
 

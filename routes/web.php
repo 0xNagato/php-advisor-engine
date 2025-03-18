@@ -134,4 +134,9 @@ Route::get('venue-invoice/{user}/{startDate}/{endDate}', DownloadVenueInvoiceCon
     ->name('venue.invoice.download')
     ->middleware('auth');
 
+Route::middleware(['auth', 'verified'])->group(function () {
+    // Venue manager routes
+    Route::get('/venue-manager/add-venue', VenueOnboarding::class)->name('venue-manager.add-venue');
+});
+
 require __DIR__.'/auth.php';

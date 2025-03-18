@@ -37,6 +37,8 @@ class VenueOnboarding extends Model
         'processed_at',
         'notes',
         'partner_id',
+        'venue_group_id',
+        'additional_notes',
     ];
 
     /**
@@ -61,6 +63,14 @@ class VenueOnboarding extends Model
     public function partnerUser(): BelongsTo
     {
         return $this->belongsTo(User::class, 'partner_id');
+    }
+
+    /**
+     * @return BelongsTo<VenueGroup, $this>
+     */
+    public function venueGroup(): BelongsTo
+    {
+        return $this->belongsTo(VenueGroup::class);
     }
 
     public function markAsProcessed(User $user, ?string $notes = null): void

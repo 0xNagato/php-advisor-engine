@@ -25,6 +25,14 @@ class ProcessVenueOnboarding
         string $notes,
         array $venueDefaults = []
     ): void {
+        // If venue_group_id is set, this is an existing venue manager adding a venue to their group
+        if ($onboarding->venue_group_id) {
+            $this->processForExistingVenueGroup($onboarding, $processedBy, $notes, $venueDefaults);
+
+            return;
+        }
+
+        // Otherwise, this is a new venue manager onboarding
         throw_if(User::query()->where('email', $onboarding->email)->exists(), ValidationException::withMessages([
             'email' => "A user with the email {$onboarding->email} already exists.",
         ]));
@@ -67,6 +75,7 @@ class ProcessVenueOnboarding
                     'region' => $location->region,
                     'timezone' => Region::getTimezoneForRegion($location->region),
                     'prime_hours' => $location->prime_hours ?? [],
+                    'business_hours' => $location->booking_hours ?? [],
                     'use_non_prime_incentive' => $location->use_non_prime_incentive,
                     'non_prime_per_diem' => $location->non_prime_per_diem,
                     'logo_path' => $location->logo_path,
@@ -110,6 +119,92 @@ class ProcessVenueOnboarding
             // Send welcome email to venue manager
             $managerUser->notify(new WelcomeVenueManager($managerUser, $venueData));
 
+            $onboarding->markAsProcessed($processedBy, $notes);
+        });
+    }
+
+    /**
+     * Process venue onboarding for an existing venue group
+     */
+    private function processForExistingVenueGroup(
+        VenueOnboarding $onboarding,
+        User $processedBy,
+        string $notes,
+        array $venueDefaults = []
+    ): void {
+        DB::transaction(function () use ($onboarding, $processedBy, $notes, $venueDefaults) {
+            // Get the existing venue group
+            $venueGroup = VenueGroup::query()->findOrFail($onboarding->venue_group_id);
+
+            // Find the primary manager for this venue group
+            $managerUser = User::query()->findOrFail($venueGroup->primary_manager_id);
+
+            // Add venues to the existing group
+            $venues = [];
+            $venueData = [];
+
+            foreach ($onboarding->locations as $location) {
+                $venue = Venue::query()->create([
+                    'name' => $location->name,
+                    'venue_group_id' => $venueGroup->id,
+                    'user_id' => $managerUser->id,
+                    'region' => $location->region,
+                    'timezone' => Region::getTimezoneForRegion($location->region),
+                    'prime_hours' => $location->prime_hours ?? [],
+                    'business_hours' => $location->booking_hours ?? [],
+                    'use_non_prime_incentive' => $location->use_non_prime_incentive,
+                    'non_prime_per_diem' => $location->non_prime_per_diem,
+                    'logo_path' => $location->logo_path,
+                    'status' => VenueStatus::DRAFT,
+                    'payout_venue' => $venueDefaults['payout_venue'] ?? 60,
+                    'booking_fee' => $venueDefaults['booking_fee'] ?? 200,
+                    'contact_phone' => $onboarding->phone,
+                    'primary_contact_name' => $managerUser->name,
+                    'contacts' => [
+                        VenueContactData::from([
+                            'contact_name' => $managerUser->name,
+                            'contact_phone' => $onboarding->phone,
+                            'use_for_reservations' => true,
+                        ])->toArray(),
+                    ],
+                ]);
+
+                // Update the onboarding location with the created venue ID
+                $location->update([
+                    'created_venue_id' => $venue->id,
+                ]);
+
+                // Set up booking hours first (this affects available slots)
+                $this->setupBookingHours($venue, $location);
+
+                // Then set up prime time slots
+                $this->setupPrimeTimeSlots($venue, $location);
+
+                $venues[] = $venue->id;
+                $venueData[] = [
+                    'name' => $venue->name,
+                ];
+            }
+
+            // Update the manager's allowed venues
+            $existingAllowedVenues = $venueGroup->managers()
+                ->where('user_id', $managerUser->id)
+                ->first()
+                ->pivot
+                ->allowed_venue_ids ?? '[]';
+
+            $existingVenueIds = json_decode($existingAllowedVenues, true) ?? [];
+            $allVenueIds = array_merge($existingVenueIds, $venues);
+
+            // Update the allowed venues for all managers in this group
+            $venueGroup->managers()->updateExistingPivot($managerUser->id, [
+                'allowed_venue_ids' => json_encode($allVenueIds),
+            ]);
+
+            // Send confirmation to the venue manager
+            $managerUser->notify(new WelcomeVenueManager($managerUser, $venueData, true));
+
+            // Mark the onboarding as processed
             $onboarding->markAsProcessed($processedBy, $notes);
         });
     }

@@ -56,10 +56,15 @@
                 {{ money($earning['amount'], $currency) }}
             </div>
         @endforeach
-
+        {{--
         <div class="col-span-2">PRIMA Earnings:</div>
         <div class="text-right">
             {{ money($platformEarnings, $currency) }}
+        </div>
+        --}}
+        <div class="col-span-2">PRIMA Revenue:</div>
+        <div class="text-right">
+            {{ money($grossAmount, $currency) }}
         </div>
     </div>
 
