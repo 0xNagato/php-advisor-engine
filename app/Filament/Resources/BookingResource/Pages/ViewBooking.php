@@ -386,8 +386,10 @@ class ViewBooking extends ViewRecord
             $now = now($this->record->venue->timezone);
 
             // Cannot cancel within 30 minutes before booking or after booking has started
-            $pastTimeCheck = $now->diffInMinutes($bookingTime,
-                false) > CanModifyBooking::MINUTES_BEFORE_BOOKING_TO_MODIFY
+            $pastTimeCheck = $now->diffInMinutes(
+                $bookingTime,
+                false
+            ) > CanModifyBooking::MINUTES_BEFORE_BOOKING_TO_MODIFY
                 && $now <= $bookingTime;
         }
 
@@ -946,6 +948,11 @@ class ViewBooking extends ViewRecord
         return Action::make('modifyBooking')
             ->label($label)
             ->icon($icon ? 'heroicon-m-pencil-square' : null)
+            ->button()->size('lg')
+            ->requiresConfirmation()
+            ->modalWidth(MaxWidth::Medium)
+            ->modalIcon('heroicon-o-exclamation-triangle')
+            ->modalIconColor('warning')
             ->modalHeading('Modify Booking')
             ->modalIcon('heroicon-o-exclamation-triangle')
             ->modalIconColor('indigo')
