@@ -8,6 +8,7 @@ use App\Models\Booking;
 use App\Models\Concierge;
 use App\Models\Partner;
 use App\Models\ScheduleTemplate;
+use App\Models\VenueTimeSlot;
 use Exception;
 use Illuminate\Support\Facades\Log;
 
@@ -21,6 +22,7 @@ readonly class NonPrimeEarningsCalculationService
     {
         // Always use venue's default price for non-prime bookings if no specific override
         $pricePerHead = $booking->venue->non_prime_fee_per_head;
+        $conciergePercentage = BookingPercentages::PLATFORM_PERCENTAGE_CONCIERGE;
 
         // If we have a schedule template, check for price override
         if ($booking->schedule_template_id) {
@@ -28,10 +30,14 @@ readonly class NonPrimeEarningsCalculationService
             if ($scheduleTemplate && $scheduleTemplate->price_per_head) {
                 $pricePerHead = $scheduleTemplate->price_per_head;
             }
+            // Check for Overrides
+            if ($override = $this->getOverride($booking)) {
+                $pricePerHead = $override->price_per_head;
+            }
         }
 
         $fee = $pricePerHead * $booking->guest_count;
-        $concierge_earnings = $fee - ($fee * (BookingPercentages::PLATFORM_PERCENTAGE_CONCIERGE / 100));
+        $concierge_earnings = $fee - ($fee * ($conciergePercentage / 100));
         $platform_concierge = $fee * (BookingPercentages::PLATFORM_PERCENTAGE_CONCIERGE / 100);
         $platform_venue = $fee * (BookingPercentages::PLATFORM_PERCENTAGE_VENUE / 100);
         $platform_earnings = $platform_concierge + $platform_venue;
@@ -210,5 +216,13 @@ readonly class NonPrimeEarningsCalculationService
 
         // Save the booking to persist the changes
         $booking->save();
+    }
+
+    private function getOverride(Booking $booking): ?VenueTimeSlot
+    {
+        return VenueTimeSlot::query()
+            ->where('schedule_template_id', $booking->schedule_template_id)
+            ->where('booking_date', $booking->booking_at->format('Y-m-d'))
+            ->first();
     }
 }
