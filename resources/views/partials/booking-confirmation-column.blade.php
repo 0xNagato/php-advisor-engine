@@ -7,13 +7,9 @@
         </div>
 
         @if ($record->venue_confirmed_at)
-            <x-heroicon-s-check-circle class="h-4 w-4 -mt-0.5 text-green-600"/>
+            <x-heroicon-s-check-circle class="h-4 w-4 -mt-0.5 text-green-600" />
         @else
-            <x-heroicon-s-clock class="h-4 w-4 -mt-0.5 text-gray-400"/>
-        @endif
-
-        @if ($record->hasActiveModificationRequest())
-            <x-heroicon-s-clock class="h-4 w-4 -mt-0.5 text-yellow-600" title="Pending Modification Request"/>
+            <x-heroicon-s-clock class="h-4 w-4 -mt-0.5 text-gray-400" />
         @endif
 
     </div>
