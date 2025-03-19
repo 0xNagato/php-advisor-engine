@@ -5,6 +5,7 @@ namespace App\Jobs;
 use App\Http\Integrations\SimpleTexting\SimpleTexting;
 use App\Models\User;
 use App\Notifications\Admin\SimpleTextingDownNotification;
+use GuzzleHttp\Exception\ConnectException;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -31,35 +32,59 @@ class SendSimpleTextingSmsJob implements ShouldQueue
         private readonly string $text
     ) {}
 
+    private function notifyAdminsOnFinalAttempt(string $error): void
+    {
+        if ($this->attempts() === $this->tries) {
+            User::role('super_admin')->each(function ($admin) use ($error) {
+                $admin->notify(new SimpleTextingDownNotification(
+                    error: $error,
+                    recipientPhone: $this->phone,
+                    messageText: $this->text
+                ));
+            });
+        }
+    }
+
     public function handle(): void
     {
-        $response = (new SimpleTexting)->sms(
-            phone: $this->phone,
-            text: $this->text
-        );
+        try {
+            $response = app(SimpleTexting::class)->sms(
+                phone: $this->phone,
+                text: $this->text
+            );
 
-        if ($response->failed()) {
-            Log::error('SimpleTexting API failed', [
+            if ($response->failed()) {
+                $body = $response->json();
+                $status = $response->status();
+
+                Log::info('SimpleTexting Failed - API response', [
+                    'phone' => $this->phone,
+                    'status' => $status,
+                    'body' => $body,
+                    'attempt' => $this->attempts(),
+                ]);
+
+                $this->fail($response->body());
+            }
+        } catch (ConnectException $e) {
+            // Only retry on connection timeouts
+            Log::error('SimpleTexting network connectivity error', [
                 'phone' => $this->phone,
-                'text' => $this->text,
-                'status' => $response->status(),
-                'body' => $response->body(),
+                'error' => $e->getMessage(),
                 'attempt' => $this->attempts(),
             ]);
 
-            // If this was the last attempt, notify admins
-            if ($this->attempts() === $this->tries) {
-                User::role('super_admin')->each(function ($admin) use ($response) {
-                    $admin->notify(new SimpleTextingDownNotification(
-                        error: $response->body(),
-                        recipientPhone: $this->phone,
-                        messageText: $this->text
-                    ));
-                });
-            }
+            $this->notifyAdminsOnFinalAttempt($e->getMessage());
+            throw $e;
+        } catch (\Exception $e) {
+            // Log and fail immediately for all other errors
+            Log::error('SimpleTexting error', [
+                'phone' => $this->phone,
+                'error' => $e->getMessage(),
+                'attempt' => $this->attempts(),
+            ]);
 
-            // Throw exception to trigger retry
-            $this->fail($response->toException());
+            $this->fail($e);
         }
     }
 }
