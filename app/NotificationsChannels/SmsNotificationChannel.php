@@ -59,6 +59,11 @@ class SmsNotificationChannel
             text: $data->text,
         );
 
+        // For US numbers, the response will be null as it's handled by a queued job
+        if ($response === null) {
+            return;
+        }
+
         if ($response->failed()) {
             event(new NotificationFailed(
                 $notifiable,
