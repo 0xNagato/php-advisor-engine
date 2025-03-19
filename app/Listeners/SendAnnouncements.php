@@ -25,12 +25,13 @@ class SendAnnouncements implements ShouldQueue
     {
         $recipient_roles = $event->announcement->recipient_roles ?? [];
         $recipient_user_ids = $event->announcement->recipient_user_ids ?? [];
-        $region = $event->announcement->region;
+        $regions = $event->announcement->region;
 
         $recipients = collect($recipient_roles)
-            ->flatMap(fn ($role) => User::query()->when($region !== null, function (Builder $query) use ($region) {
-                $query->where('region', $region);
-            })
+            ->flatMap(fn ($role) => User::query()
+                ->when(!empty($regions), function (Builder $query) use ($regions) {
+                    $query->whereIn('region', $regions);
+                })
                 ->role((int) $role)->pluck('id')->all())
             ->concat($recipient_user_ids)
             ->map('intval')

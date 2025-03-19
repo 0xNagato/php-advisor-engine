@@ -44,19 +44,21 @@ class AnnouncementResource extends Resource
 
         return $form
             ->schema([
-                Section::make('New Annoucement')
+                Section::make('New Announcement')
                     ->icon('heroicon-o-newspaper')
                     ->schema([
                         TextInput::make('title'),
-                        MarkdownEditor::make('message'),
+                        MarkdownEditor::make('message')->required(),
                         TextInput::make('call_to_action_title'),
                         TextInput::make('call_to_action_url'),
                         Select::make('region')
                             ->label('Region')
+                            ->multiple()
                             ->options(Region::all()->pluck('name', 'id')),
                         Select::make('recipient_roles')
                             ->label('Recipient Roles')
                             ->options($roles)
+                            ->required()
                             ->multiple(),
                         Select::make('recipient_user_ids')
                             ->label('Recipient Users')
