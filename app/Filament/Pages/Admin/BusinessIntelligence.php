@@ -91,6 +91,7 @@ class BusinessIntelligence extends Page implements HasTable
                     ->selectRaw('COUNT(CASE WHEN bookings.status = ? THEN 1 END) as no_show_bookings', ['no_show'])
                     ->selectRaw('COUNT(CASE WHEN bookings.status = ? THEN 1 END) as total_bookings', ['confirmed'])
                     ->selectRaw('AVG(CASE WHEN bookings.status = ? THEN bookings.guest_count END) as average_diners', ['confirmed'])
+                    ->selectRaw('ROUND(CAST((COUNT(CASE WHEN bookings.status IN (?, ?) THEN 1 END) * 100.0) / NULLIF(COUNT(bookings.id), 0) AS DECIMAL(5,1)), 1) as problem_percentage', ['cancelled', 'no_show'])
                     ->leftJoin('bookings', 'concierges.id', '=', 'bookings.concierge_id')
                     ->when(isset($this->filters['startDate'], $this->filters['endDate']), function ($query) {
                         $query->whereBetween('bookings.booking_at', [
@@ -111,7 +112,16 @@ class BusinessIntelligence extends Page implements HasTable
             })
             ->columns([
                 TextColumn::make('user.name')
-                    ->label('Concierge Name')
+                    ->label('Concierge')
+                    ->formatStateUsing(function ($record) {
+                        return new \Illuminate\Support\HtmlString(<<<HTML
+                            <div class="space-y-0 text-xs">
+                                <div class="font-medium">{$record->user->name}</div>
+                                <div class="text-gray-500">{$record->hotel_name}</div>
+                                <div class="text-gray-500">{$record->user->referrer?->name}</div>
+                            </div>
+                        HTML);
+                    })
                     ->searchable(query: function (Builder $query, string $search): Builder {
                         return $query->whereHas('user', function (Builder $query) use ($search) {
                             $query->where('users.first_name', 'like', "%{$search}%")
@@ -119,31 +129,32 @@ class BusinessIntelligence extends Page implements HasTable
                         });
                     })
                     ->sortable(),
-                TextColumn::make('hotel_name')
-                    ->label('Hotel Name')
-                    ->searchable()
-                    ->sortable(),
-                TextColumn::make('user.referrer.name')
-                    ->label('Referrer')
-                    ->searchable(query: function (Builder $query, string $search): Builder {
-                        return $query->whereHas('user.referrer', function (Builder $query) use ($search) {
-                            $query->where('users.first_name', 'like', "%{$search}%")
-                                ->orWhere('users.last_name', 'like', "%{$search}%");
-                        });
-                    })
-                    ->sortable(),
                 TextColumn::make('total_bookings')
-                    ->label('# of Bookings')
+                    ->label('Bookings')
+                    ->size('xs')
+                    ->alignCenter()
                     ->sortable(),
                 TextColumn::make('cancelled_bookings')
-                    ->label('# of Cancellations')
+                    ->label('Cancellations')
+                    ->size('xs')
+                    ->alignCenter()
                     ->sortable(),
                 TextColumn::make('no_show_bookings')
-                    ->label('# of No Shows')
+                    ->label('No Shows')
+                    ->size('xs')
+                    ->alignCenter()
                     ->sortable(),
                 TextColumn::make('average_diners')
-                    ->label('Avg. Number of Diners')
+                    ->label('Avg. Diners')
                     ->formatStateUsing(fn ($state) => number_format((float) $state, 1))
+                    ->size('xs')
+                    ->alignCenter()
+                    ->sortable(),
+                TextColumn::make('problem_percentage')
+                    ->label('Problem %')
+                    ->formatStateUsing(fn ($state) => $state ? $state.'%' : '0%')
+                    ->size('xs')
+                    ->alignCenter()
                     ->sortable(),
             ])
             ->defaultSort('total_bookings', 'desc')
