@@ -234,8 +234,7 @@ class ViewBooking extends ViewRecord
         string $internalReason,
         string $refundType,
         ?int $guestCount
-    ): void
-    {
+    ): void {
         $refundAmount = app(BookingCalculationService::class)->calculateRefundAmount(
             $this->record,
             $refundType,
@@ -765,8 +764,8 @@ class ViewBooking extends ViewRecord
             ->action(function (array $data): void {
                 try {
                     /**
- * @var Concierge $newConcierge
-*/
+                     * @var Concierge $newConcierge
+                     */
                     $newConcierge = Concierge::query()->findOrFail($data['concierge_id']);
 
                     $this->record->transferToConcierge($newConcierge);
@@ -948,6 +947,8 @@ class ViewBooking extends ViewRecord
             ->label($label)
             ->icon($icon ? 'heroicon-m-pencil-square' : null)
             ->modalHeading('Modify Booking')
+            ->modalIcon('heroicon-o-exclamation-triangle')
+            ->modalIconColor('indigo')
             ->modalDescription(fn () => new HtmlString(
                 '<div class="text-sm text-gray-500">'.
                 'We must confirm all reservations with the participating venue. '.
@@ -961,7 +962,6 @@ class ViewBooking extends ViewRecord
             ->modalWidth('md')
             ->visible(! $this->download && auth()->check() && isset($this->canModifyBooking) && $this->canModifyBooking)
             ->disabled($this->booking->hasActiveModificationRequest())
-            ->hidden(! $this->canModifyBooking)
             ->modalSubmitAction(false)
             ->modalCancelAction(false)
             ->extraAttributes(['class' => 'w-full']);
