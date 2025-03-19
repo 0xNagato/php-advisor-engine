@@ -3,7 +3,9 @@
 namespace App\Actions\User;
 
 use App\Enums\BookingStatus;
+use App\Models\Announcement;
 use App\Models\Booking;
+use App\Models\Message;
 use App\Models\Partner;
 use App\Models\Referral;
 use App\Models\User;
@@ -114,6 +116,12 @@ class DeleteOrSuspendUser
 
             // Delete role profiles
             $user->roleProfiles()->delete();
+
+            // Delete associated messages
+            Message::query()->where('user_id', $user->id)->delete();
+
+            // Delete announcements sent by this user
+            Announcement::query()->where('sender_id', $user->id)->delete();
 
             // Log before actual user deletion
             activity()
