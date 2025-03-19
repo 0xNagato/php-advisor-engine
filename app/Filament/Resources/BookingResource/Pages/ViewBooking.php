@@ -1,6 +1,7 @@
 <?php
 
-/** @noinspection PhpDynamicFieldDeclarationInspection
+/**
+ * @noinspection PhpDynamicFieldDeclarationInspection
  * @noinspection UnknownInspectionInspection
  */
 
@@ -32,7 +33,10 @@ use Filament\Forms\Components\Toggle;
 use Filament\Forms\Get;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\ViewRecord;
+use Filament\Support\Enums\ActionSize;
+use Filament\Support\Enums\MaxWidth;
 use Illuminate\Contracts\Database\Query\Builder;
+use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\HtmlString;
@@ -210,8 +214,10 @@ class ViewBooking extends ViewRecord
             ))
             ->modalSubmitActionLabel('Refund')
             ->modalCancelActionLabel('Cancel')
-            ->disabled(fn () => in_array($this->record->status,
-                [BookingStatus::REFUNDED, BookingStatus::PARTIALLY_REFUNDED]))
+            ->disabled(fn () => in_array(
+                $this->record->status,
+                [BookingStatus::REFUNDED, BookingStatus::PARTIALLY_REFUNDED]
+            ))
             ->extraAttributes(['class' => 'w-full'])
             ->action(function (array $data) {
                 $this->processRefund(
@@ -228,9 +234,13 @@ class ViewBooking extends ViewRecord
         string $internalReason,
         string $refundType,
         ?int $guestCount
-    ): void {
-        $refundAmount = app(BookingCalculationService::class)->calculateRefundAmount($this->record, $refundType,
-            $guestCount);
+    ): void
+    {
+        $refundAmount = app(BookingCalculationService::class)->calculateRefundAmount(
+            $this->record,
+            $refundType,
+            $guestCount
+        );
         $result = RefundBooking::run($this->record, $stripeReason, $refundAmount);
 
         if ($result['success']) {
@@ -284,7 +294,6 @@ class ViewBooking extends ViewRecord
                 ->title('Refund Processed')
                 ->body('The refund has been successfully processed.')
                 ->send();
-
         } else {
             Notification::make()
                 ->danger()
@@ -296,27 +305,43 @@ class ViewBooking extends ViewRecord
 
     public function cancelBookingAction(): Action
     {
+        $modalDescription = 'Are you sure you want to cancel this booking?<br><br>';
+        if ($this->canModifyBooking) {
+            $modalDescription = 'Do you want to change this reservation to another day?<br>
+            Or proceed to Abandon Cancellation?';
+        }
+
         return Action::make('cancelBooking')
             ->label('Cancel Booking')
             ->color('danger')
             ->icon('heroicon-o-x-circle')
+            ->button()->size('lg')
             ->requiresConfirmation()
+            ->modalWidth(MaxWidth::Medium)
             ->modalIcon('heroicon-o-exclamation-triangle')
             ->modalIconColor('danger')
             ->modalHeading('Cancel Booking')
-            ->modalDescription(fn () => new HtmlString(
-                'Are you sure you want to cancel this booking?<br><br>'.
-                "<div class='text-sm'>".
-                "<p class='p-1 mb-2 text-xs font-semibold text-red-600 bg-red-100 border border-red-300 rounded-md'>This action will be logged and cannot be undone.</p>".
-                "<p class='text-lg font-semibold'>{$this->record->guest_name}</p>".
-                "<p><strong>Venue:</strong> {$this->record->venue->name}</p>".
-                "<p><strong>Guest Count:</strong> {$this->record->guest_count}</p>".
-                "<p><strong>Booking Time:</strong> {$this->record->booking_at->format('M d, Y h:i A')}</p>".
-                '</div>'
+            ->modalDescription(fn () => new HtmlString($modalDescription))
+            ->modalContent(fn (Action $action): View => view(
+                'partials.cancel-booking-action-modal',
+                ['action' => $action, 'canModifyBooking' => $this->canModifyBooking]
             ))
-            ->button()
-            ->size('lg')
             ->extraAttributes(['class' => 'w-full'])
+            ->modalSubmitAction(false)
+            ->modalCancelActionLabel('Abandon Cancellation')
+            ->registerModalActions([
+                Action::make('cancelThisBooking')
+                    ->label('Cancel Booking')
+                    ->color('danger')
+                    ->size(ActionSize::ExtraLarge)
+                    ->extraAttributes(['class' => 'w-full'])
+                    ->action(fn () => $this->cancelNonPrimeBooking()),
+                $this->modifyBookingAction(null, false),
+            ])
+            ->modalContentFooter(fn (Action $action) => view(
+                'partials.cancel-booking-action-footer-modal',
+                ['canModifyBooking' => $this->canModifyBooking, 'action' => $action]
+            ))
             ->visible(function () {
                 // Non-cancellable statuses for everyone
                 $nonCancellableStatuses = [
@@ -343,10 +368,7 @@ class ViewBooking extends ViewRecord
                 // Regular users need to use canModifyBooking
                 return $this->canModifyBooking;
             })
-            ->disabled(fn () => $this->record->status === BookingStatus::CANCELLED)
-            ->action(function () {
-                $this->cancelNonPrimeBooking();
-            });
+            ->disabled(fn () => $this->record->status === BookingStatus::CANCELLED);
     }
 
     private function cancelNonPrimeBooking(): void
@@ -365,7 +387,8 @@ class ViewBooking extends ViewRecord
             $now = now($this->record->venue->timezone);
 
             // Cannot cancel within 30 minutes before booking or after booking has started
-            $pastTimeCheck = $now->diffInMinutes($bookingTime, false) > CanModifyBooking::MINUTES_BEFORE_BOOKING_TO_MODIFY
+            $pastTimeCheck = $now->diffInMinutes($bookingTime,
+                false) > CanModifyBooking::MINUTES_BEFORE_BOOKING_TO_MODIFY
                 && $now <= $bookingTime;
         }
 
@@ -456,8 +479,7 @@ class ViewBooking extends ViewRecord
                 in_array($this->record->status, [
                     BookingStatus::CONFIRMED,
                     BookingStatus::VENUE_CONFIRMED,
-                ])
-            )
+                ]))
             ->action(function () {
                 $result = ConvertToNonPrime::run($this->record);
 
@@ -495,8 +517,7 @@ class ViewBooking extends ViewRecord
                 in_array($this->record->status, [
                     BookingStatus::CONFIRMED,
                     BookingStatus::VENUE_CONFIRMED,
-                ])
-            )
+                ]))
             ->action(function () {
                 $result = ConvertToPrime::run($this->record);
 
@@ -654,8 +675,7 @@ class ViewBooking extends ViewRecord
                 in_array($this->record->status, [
                     BookingStatus::CONFIRMED,
                     BookingStatus::VENUE_CONFIRMED,
-                ])
-            )
+                ]))
             ->action(function () {
                 $this->markAsNoShow();
             });
@@ -699,23 +719,24 @@ class ViewBooking extends ViewRecord
     {
         $conciergeOptions = Concierge::query()
             ->where('id', '!=', $this->record->concierge_id)
-            ->whereHas('user', fn (Builder $query) => $query->whereHas('roles', fn (Builder $q) => $q->where('name', 'concierge')
-            )
-                ->whereNull('suspended_at')
+            ->whereHas(
+                'user',
+                fn (Builder $query) => $query->whereHas('roles', fn (Builder $q) => $q->where('name', 'concierge'))
+                    ->whereNull('suspended_at')
             )
             ->with('user')
             ->get()
-            ->mapWithKeys(fn ($concierge) => [$concierge->id => $concierge->user->name.
-                 ($concierge->hotel_name ? " ({$concierge->hotel_name})" : '')]
-            )
+            ->mapWithKeys(fn ($concierge) => [
+                $concierge->id => $concierge->user->name.
+                    ($concierge->hotel_name ? " ({$concierge->hotel_name})" : ''),
+            ])
             ->toArray();
 
         return Action::make('transferBooking')
             ->label('Transfer Booking')
             ->icon('heroicon-o-arrow-path-rounded-square')
             ->hidden(fn () => ! auth()->user()->hasActiveRole('super_admin') ||
-                ! in_array($this->record->status, [BookingStatus::CONFIRMED, BookingStatus::VENUE_CONFIRMED])
-            )
+                ! in_array($this->record->status, [BookingStatus::CONFIRMED, BookingStatus::VENUE_CONFIRMED]))
             ->form([
                 Select::make('concierge_id')
                     ->label('New Concierge')
@@ -743,7 +764,9 @@ class ViewBooking extends ViewRecord
             ->extraAttributes(['class' => 'w-full'])
             ->action(function (array $data): void {
                 try {
-                    /** @var Concierge $newConcierge */
+                    /**
+ * @var Concierge $newConcierge
+*/
                     $newConcierge = Concierge::query()->findOrFail($data['concierge_id']);
 
                     $this->record->transferToConcierge($newConcierge);
@@ -773,37 +796,46 @@ class ViewBooking extends ViewRecord
             ->modalContent(fn () => new HtmlString(
                 "<div class='space-y-4'>".
                 "<div class='grid grid-cols-2 gap-4 text-sm'>".
-                    '<div>'.
-                        "<span class='block font-medium text-gray-500'>Hotel/Company</span>".
-                        "<span class='block'>{$this->record->concierge?->hotel_name}</span>".
-                    '</div>'.
-                    '<div>'.
-                        "<span class='block font-medium text-gray-500'>Phone</span>".
-                        "<span class='block'>{$this->getFormattedPhoneNumber($this->record->concierge?->user->phone)}</span>".
-                    '</div>'.
-                    '<div>'.
-                        "<span class='block font-medium text-gray-500'>Email</span>".
-                        "<span class='block'>{$this->record->concierge?->user->email}</span>".
-                    '</div>'.
+                '<div>'.
+                "<span class='block font-medium text-gray-500'>Hotel/Company</span>".
+                "<span class='block'>{$this->record->concierge?->hotel_name}</span>".
+                '</div>'.
+                '<div>'.
+                "<span class='block font-medium text-gray-500'>Phone</span>".
+                "<span class='block'>{$this->getFormattedPhoneNumber($this->record->concierge?->user->phone)}</span>".
+                '</div>'.
+                '<div>'.
+                "<span class='block font-medium text-gray-500'>Email</span>".
+                "<span class='block'>{$this->record->concierge?->user->email}</span>".
+                '</div>'.
                 '</div>'.
                 '</div>'
             ))
             ->modalActions([
                 Action::make('edit')
                     ->label('Edit')
-                    ->url(fn () => route('filament.admin.resources.users.edit', ['record' => $this->record->concierge?->user_id]))
+                    ->url(fn () => route(
+                        'filament.admin.resources.users.edit',
+                        ['record' => $this->record->concierge?->user_id]
+                    ))
                     ->openUrlInNewTab()
                     ->icon('heroicon-m-pencil-square')
                     ->color('warning'),
                 Action::make('overview')
                     ->label('Overview')
-                    ->url(fn () => route('filament.admin.resources.concierges.view', ['record' => $this->record->concierge?->id]))
+                    ->url(fn () => route(
+                        'filament.admin.resources.concierges.view',
+                        ['record' => $this->record->concierge?->id]
+                    ))
                     ->openUrlInNewTab()
                     ->icon('heroicon-m-document-text')
                     ->color('info'),
                 Action::make('bookings')
                     ->label('Bookings')
-                    ->url(fn () => route('filament.admin.pages.booking-search', ['filters' => ['concierge_search' => $this->record->concierge?->user->name]]))
+                    ->url(fn () => route(
+                        'filament.admin.pages.booking-search',
+                        ['filters' => ['concierge_search' => $this->record->concierge?->user->name]]
+                    ))
                     ->openUrlInNewTab()
                     ->icon('heroicon-m-calendar')
                     ->color('success'),
@@ -908,6 +940,33 @@ class ViewBooking extends ViewRecord
             ->extraAttributes(['class' => 'w-full']);
     }
 
+    public function modifyBookingAction($label = null, $icon = true): Action
+    {
+        $label ??= $this->record->hasActiveModificationRequest() ? 'Modification Request Pending' : 'Modify Booking';
+
+        return Action::make('modifyBooking')
+            ->label($label)
+            ->icon($icon ? 'heroicon-m-pencil-square' : null)
+            ->modalHeading('Modify Booking')
+            ->modalDescription(fn () => new HtmlString(
+                '<div class="text-sm text-gray-500">'.
+                'We must confirm all reservations with the participating venue. '.
+                'Please submit any change requests needed here. '.
+                'We will confirm the changes requested within 15-30 minutes and notify both '.
+                'you and the customer.</div>'
+            ))
+            ->modalContent(view('partials.modify-booking-action-modal', [
+                'booking' => $this->booking,
+            ]))
+            ->modalWidth('md')
+            ->visible(! $this->download && auth()->check() && isset($this->canModifyBooking) && $this->canModifyBooking)
+            ->disabled($this->booking->hasActiveModificationRequest())
+            ->hidden(! $this->canModifyBooking)
+            ->modalSubmitAction(false)
+            ->modalCancelAction(false)
+            ->extraAttributes(['class' => 'w-full']);
+    }
+
     public function restoreConciergeEarningsAction(): Action
     {
         return Action::make('restoreConciergeEarnings')
@@ -924,12 +983,14 @@ class ViewBooking extends ViewRecord
                 "<p class='p-1 mb-2 text-xs font-semibold border rounded-md text-amber-600 bg-amber-100 border-amber-300'>This will recreate the original earnings for the concierge.</p>".
                 "<p class='text-lg font-semibold'>{$this->record->guest_name}</p>".
                 "<p><strong>Concierge:</strong> {$this->record->concierge->user->name}</p>".
-                '<p><strong>Original Amount:</strong> '.money($this->record->concierge_earnings, $this->record->currency).'</p>'.
+                '<p><strong>Original Amount:</strong> '.money(
+                    $this->record->concierge_earnings,
+                    $this->record->currency
+                ).'</p>'.
                 '</div>'
             ))
             ->visible(fn () => auth()->user()->hasActiveRole('super_admin') &&
-                $this->record->is_refunded_or_partially_refunded
-            )
+                $this->record->is_refunded_or_partially_refunded)
             ->button()
             ->size('lg')
             ->extraAttributes(['class' => 'w-full'])
