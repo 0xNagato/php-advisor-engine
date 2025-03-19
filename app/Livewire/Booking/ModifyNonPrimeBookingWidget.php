@@ -91,6 +91,7 @@ class ModifyNonPrimeBookingWidget extends Widget implements HasForms
                             ->live()
                             ->afterStateUpdated(function ($state) {
                                 $this->pendingGuestCount = $state;
+                                $this->selectedTimeSlotId = null;
                                 $this->loadAvailableSlots();
                             })
                             ->columnSpan($this->showDetails ? 1 : 'full'),
@@ -115,8 +116,8 @@ class ModifyNonPrimeBookingWidget extends Widget implements HasForms
         $formState = $this->form->getState();
         $guestCount = $this->pendingGuestCount ?? intval($formState['guest_count']);
 
-        return ($guestCount !== $this->booking?->guest_count) ||
-            ($this->selectedTimeSlotId !== null && $this->selectedTimeSlotId !== $this->booking?->schedule_template_id);
+        return ! empty($this->selectedTimeSlotId) && $guestCount !== $this->booking?->guest_count &&
+            $this->selectedTimeSlotId !== $this->booking?->schedule_template_id;
     }
 
     protected function loadAvailableSlots(): void
@@ -126,7 +127,8 @@ class ModifyNonPrimeBookingWidget extends Widget implements HasForms
         }
 
         // Use form state for guest count, fallback to original booking guest count
-        $guestCount = $this->pendingGuestCount ?? $this->booking->guest_count;
+        $formState = $this->form->getState();
+        $guestCount = $this->pendingGuestCount ?? intval($formState['guest_count']) ?? $this->booking->guest_count;
 
         // Round up guest count to nearest table size (2,4,6,8)
         $tableSize = match (true) {
@@ -232,7 +234,6 @@ class ModifyNonPrimeBookingWidget extends Widget implements HasForms
             // Reset form
             $this->selectedTimeSlotId = null;
             $this->loadAvailableSlots();
-
         } catch (Exception $e) {
             Notification::make()
                 ->danger()
