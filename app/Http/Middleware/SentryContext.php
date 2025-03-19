@@ -22,6 +22,7 @@ class SentryContext
                 $user = auth()->user();
 
                 $scope->setUser([
+                    'id' => $user->id,
                     'email' => $user->email,
                     'username' => $user->name,
                 ]);

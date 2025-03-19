@@ -13,6 +13,7 @@ use Filament\Tables\Contracts\HasTable;
 use Filament\Tables\Table;
 use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\HtmlString;
 use Livewire\Attributes\On;
 
 class BusinessIntelligence extends Page implements HasTable
@@ -101,33 +102,27 @@ class BusinessIntelligence extends Page implements HasTable
                     })
                     ->groupBy('concierges.id')
             )
-            ->recordUrl(function (Concierge $record) {
-                return route('filament.admin.pages.booking-search', [
-                    'filters' => [
-                        'concierge_search' => $record->user->name,
-                        'start_date' => $this->filters['startDate'] ?? null,
-                        'end_date' => $this->filters['endDate'] ?? null,
-                    ],
-                ]);
-            })
+            ->recordUrl(fn (Concierge $record) => route('filament.admin.pages.booking-search', [
+                'filters' => [
+                    'concierge_search' => $record->user->name,
+                    'start_date' => $this->filters['startDate'] ?? null,
+                    'end_date' => $this->filters['endDate'] ?? null,
+                ],
+            ]))
             ->columns([
                 TextColumn::make('user.name')
                     ->label('Concierge')
-                    ->formatStateUsing(function ($record) {
-                        return new \Illuminate\Support\HtmlString(<<<HTML
+                    ->formatStateUsing(fn ($record) => new HtmlString(<<<HTML
                             <div class="space-y-0 text-xs">
                                 <div class="font-medium">{$record->user->name}</div>
                                 <div class="text-gray-500">{$record->hotel_name}</div>
                                 <div class="text-gray-500">{$record->user->referrer?->name}</div>
                             </div>
-                        HTML);
-                    })
-                    ->searchable(query: function (Builder $query, string $search): Builder {
-                        return $query->whereHas('user', function (Builder $query) use ($search) {
-                            $query->where('users.first_name', 'like', "%{$search}%")
-                                ->orWhere('users.last_name', 'like', "%{$search}%");
-                        });
-                    })
+                        HTML))
+                    ->searchable(query: fn (Builder $query, string $search): Builder => $query->whereHas('user', function (Builder $query) use ($search) {
+                        $query->where('users.first_name', 'like', "%{$search}%")
+                            ->orWhere('users.last_name', 'like', "%{$search}%");
+                    }))
                     ->sortable(),
                 TextColumn::make('total_bookings')
                     ->label('Bookings')

@@ -116,7 +116,7 @@ class ModifyNonPrimeBookingWidget extends Widget implements HasForms
         $formState = $this->form->getState();
         $guestCount = $this->pendingGuestCount ?? intval($formState['guest_count']);
 
-        return ! empty($this->selectedTimeSlotId) && $guestCount !== $this->booking?->guest_count &&
+        return filled($this->selectedTimeSlotId) && $guestCount !== $this->booking?->guest_count &&
             $this->selectedTimeSlotId !== $this->booking?->schedule_template_id;
     }
 
