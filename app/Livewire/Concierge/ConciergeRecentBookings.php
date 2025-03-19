@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Concierge;
 
+use App\Enums\BookingStatus;
 use App\Models\Booking;
 use App\Models\Concierge;
 use Filament\Tables\Columns\TextColumn;
@@ -39,14 +40,20 @@ class ConciergeRecentBookings extends BaseWidget
         $startDate = $this->filters['startDate'] ?? now()->subDays(30);
         $endDate = $this->filters['endDate'] ?? now();
 
-        $query = Booking::confirmed()
+        $query = Booking::query()
             ->limit(10)
             ->orderByDesc('booking_at')
             ->with('earnings', function ($query) {
                 $query->where('user_id', $this->concierge->user_id);
             })
             ->whereBetween('created_at', [$startDate, $endDate])
-            ->where('concierge_id', $this->concierge->id);
+            ->where('concierge_id', $this->concierge->id)
+            ->whereIn('status', [
+                BookingStatus::CONFIRMED,
+                BookingStatus::VENUE_CONFIRMED,
+                BookingStatus::CANCELLED,
+                BookingStatus::NO_SHOW,
+            ]);
 
         return $table
             ->recordUrl(fn (Booking $booking) => route('filament.admin.resources.bookings.view', $booking))
@@ -74,6 +81,14 @@ class ConciergeRecentBookings extends BaseWidget
                         return $total > 0
                             ? money($total, $booking->currency)
                             : '-';
+                    }),
+                TextColumn::make('status')
+                    ->badge()
+                    ->size('xs')
+                    ->color(fn (BookingStatus $state): string => match ($state) {
+                        BookingStatus::CONFIRMED, BookingStatus::VENUE_CONFIRMED => 'success',
+                        BookingStatus::CANCELLED => 'danger',
+                        default => 'gray',
                     }),
             ]);
     }

@@ -92,6 +92,8 @@ class ConciergeOverallLeaderboard extends Widget
                         BookingStatus::CONFIRMED,
                         BookingStatus::VENUE_CONFIRMED,
                         BookingStatus::PARTIALLY_REFUNDED,
+                        BookingStatus::NO_SHOW,
+                        BookingStatus::CANCELLED,
                     ])
                     ->whereIn('earnings.type', $conciergeEarningTypes)
                     ->groupBy('earnings.user_id', 'concierges.id', 'earnings.currency')

@@ -112,7 +112,10 @@ class ModifyNonPrimeBookingWidget extends Widget implements HasForms
 
     public function getHasChangesProperty(): bool
     {
-        return ($this->pendingGuestCount !== $this->booking?->guest_count) ||
+        $formState = $this->form->getState();
+        $guestCount = $this->pendingGuestCount ?? intval($formState['guest_count']);
+
+        return ($guestCount !== $this->booking?->guest_count) ||
             ($this->selectedTimeSlotId !== null && $this->selectedTimeSlotId !== $this->booking?->schedule_template_id);
     }
 
@@ -159,6 +162,12 @@ class ModifyNonPrimeBookingWidget extends Widget implements HasForms
     public function submitModificationRequest(): void
     {
         if (! $this->hasChanges) {
+            Notification::make()
+                ->warning()
+                ->title('No Changes Detected')
+                ->body('Please make changes to submit a modification request.')
+                ->send();
+
             return;
         }
 

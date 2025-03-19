@@ -18,7 +18,7 @@
                 Email Invoice
             </x-filament::button>
             <x-filament::button color="indigo" class="w-1/2" size="sm" icon="gmdi-file-download-o" tag="a"
-                :href="route('customer.invoice.download', ['uuid' => $booking->uuid])">
+                                :href="route('customer.invoice.download', ['uuid' => $booking->uuid])">
                 Download PDF
             </x-filament::button>
         </div>
@@ -27,7 +27,7 @@
             <form wire:submit="emailInvoice" class="max-w-3xl p-4 mx-auto my-4 bg-gray-100 border rounded-lg">
                 {{ $this->form }}
                 <button type="submit"
-                    class="w-full px-4 py-2 mt-4 text-xs font-semibold text-white bg-indigo-600 rounded-lg sm:text-xs">
+                        class="w-full px-4 py-2 mt-4 text-xs font-semibold text-white bg-indigo-600 rounded-lg sm:text-xs">
                     Send Email
                 </button>
             </form>
@@ -47,7 +47,7 @@
             <!-- SVG Background Element -->
             <figure class="absolute inset-x-0 bottom-0 -mb-px ">
                 <svg preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg" x="0px" y="0px"
-                    viewBox="0 0 1920 100.1">
+                     viewBox="0 0 1920 100.1">
                     <path fill="currentColor" class="fill-white" d="M0,0c0,0,934.4,93.4,1920,0v100.1H0L0,0z"></path>
                 </svg>
             </figure>
@@ -395,7 +395,8 @@
                 @if (isset($this->canModifyBooking) && $this->canModifyBooking)
                     <x-filament::button
                         wire:click="$dispatch('open-modal', { id: 'modify-booking-{{ $booking->id }}' })"
-                        class="w-full mt-3" icon="heroicon-m-pencil-square" :disabled="$booking->hasActiveModificationRequest()">
+                        class="w-full mt-3" icon="heroicon-m-pencil-square"
+                        :disabled="$booking->hasActiveModificationRequest()">
                         {{ $booking->hasActiveModificationRequest() ? 'Modification Request Pending' : 'Modify Booking' }}
                     </x-filament::button>
                 @endif
@@ -407,32 +408,10 @@
                     isset($this->canModifyBooking) &&
                     $this->canModifyBooking &&
                     !auth()->user()->hasActiveRole('super_admin'))
-                <x-filament::actions :actions="[$this->cancelBookingAction, $this->modifyGuestInfoAction]" class="w-full mt-4" />
-
-                <x-filament::button wire:click="$dispatch('open-modal', { id: 'modify-booking-{{ $booking->id }}' })"
-                    class="w-full mt-3" icon="heroicon-m-pencil-square" :disabled="$booking->hasActiveModificationRequest()">
-                    {{ $booking->hasActiveModificationRequest() ? 'Modification Request Pending' : 'Modify Booking' }}
-                </x-filament::button>
-            @endif
-
-            @if (!$download && auth()->check() && isset($this->canModifyBooking) && $this->canModifyBooking)
-                <x-filament::modal id="modify-booking-{{ $booking->id }}" width="md">
-                    <x-slot name="heading">
-                        Modify Booking
-                    </x-slot>
-
-                    <x-slot name="description">
-                        <div class="text-sm text-gray-500">
-                            We must confirm all reservations with the participating venue. Please submit any change
-                            requests needed here. We will confirm the changes requested within 15-30 minutes and notify
-                            both you and the customer.
-                        </div>
-                    </x-slot>
-
-                    <div>
-                        <livewire:booking.modify-non-prime-booking-widget :booking="$booking" :show-details="false" />
-                    </div>
-                </x-filament::modal>
+                <x-filament::actions class="w-full mt-4"
+                                     :actions="[$this->cancelBookingAction,
+                                                $this->modifyGuestInfoAction,
+                                                $this->modifyBookingAction]" />
             @endif
         </div>
         <!-- End Body -->
