@@ -7,6 +7,7 @@ use App\Notifications\Booking\ConciergeModificationApproved;
 use App\Notifications\Booking\ConciergeModificationRejected;
 use App\Notifications\Booking\CustomerModificationApproved;
 use App\Notifications\Booking\CustomerModificationRejected;
+use App\Services\Booking\BookingCalculationService;
 use Filament\Actions\Action;
 use Filament\Forms\Components\Textarea;
 use Filament\Notifications\Notification;
@@ -28,29 +29,37 @@ class VenueModificationRequestConfirmation extends Page
 
     public function approveModification(): void
     {
-        $this->modificationRequest->markAsApproved();
+        DB::transaction(function () {
+            $this->modificationRequest->markAsApproved();
 
-        // Update the booking with new details using DB facade
-        DB::table('bookings')
-            ->where('id', $this->modificationRequest->booking->id)
-            ->update([
-                'guest_count' => $this->modificationRequest->requested_guest_count,
-                'schedule_template_id' => $this->modificationRequest->requested_schedule_template_id,
-                'booking_at' => $this->modificationRequest->booking->booking_at->format('Y-m-d').' '.
-                    $this->modificationRequest->requested_time,
-            ]);
+            // Delete existing earnings before updating booking
+            $this->modificationRequest->booking->earnings()->delete();
 
-        // Send notifications
-        $this->modificationRequest->notify(new CustomerModificationApproved);
-        $this->modificationRequest->notify(new ConciergeModificationApproved);
+            // Update the booking with new details using DB facade
+            DB::table('bookings')
+                ->where('id', $this->modificationRequest->booking->id)
+                ->update([
+                    'guest_count' => $this->modificationRequest->requested_guest_count,
+                    'schedule_template_id' => $this->modificationRequest->requested_schedule_template_id,
+                    'booking_at' => $this->modificationRequest->booking->booking_at->format('Y-m-d').' '.
+                        $this->modificationRequest->requested_time,
+                ]);
 
-        activity()
-            ->performedOn($this->modificationRequest->booking)
-            ->withProperties([
-                'modification_request_id' => $this->modificationRequest->id,
-                'status' => 'approved',
-            ])
-            ->log('Venue approved booking modification request');
+            // Recalculate earnings with the new booking details
+            app(BookingCalculationService::class)->calculateEarnings($this->modificationRequest->booking);
+
+            // Send notifications
+            $this->modificationRequest->notify(new CustomerModificationApproved);
+            $this->modificationRequest->notify(new ConciergeModificationApproved);
+
+            activity()
+                ->performedOn($this->modificationRequest->booking)
+                ->withProperties([
+                    'modification_request_id' => $this->modificationRequest->id,
+                    'status' => 'approved',
+                ])
+                ->log('Venue approved booking modification request');
+        });
 
         Notification::make()
             ->success()

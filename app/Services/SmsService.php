@@ -2,8 +2,8 @@
 
 namespace App\Services;
 
-use App\Http\Integrations\SimpleTexting\SimpleTexting;
 use App\Http\Integrations\Twilio\Twilio;
+use App\Jobs\SendSimpleTextingSmsJob;
 use Saloon\Http\Response;
 
 class SmsService
@@ -15,10 +15,12 @@ class SmsService
         $phoneNumber = PhoneNumberParser::make($contactPhone)->parse();
 
         if ($phoneNumber->country === 'US') {
-            return (new SimpleTexting)->sms(
+            SendSimpleTextingSmsJob::dispatch(
                 phone: $phoneNumber->phone,
-                text: $text,
+                text: $text
             );
+
+            return null;
         }
 
         return (new Twilio)->sms(
