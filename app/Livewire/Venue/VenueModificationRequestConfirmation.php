@@ -46,7 +46,7 @@ class VenueModificationRequestConfirmation extends Page
                 ]);
 
             // Recalculate earnings with the new booking details
-            app(BookingCalculationService::class)->calculateEarnings($this->modificationRequest->booking);
+            app(BookingCalculationService::class)->calculateEarnings($this->modificationRequest->booking->refresh());
 
             // Send notifications
             $this->modificationRequest->notify(new CustomerModificationApproved);
