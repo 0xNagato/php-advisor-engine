@@ -14,7 +14,7 @@ class FixBookingModificationScheduleTemplates extends Command
      *
      * @var string
      */
-    protected $signature = 'booking-mods:fix-schedule-templates
+    protected $signature = 'prima:fix-schedule-templates
         {--recalculate : Recalculate earnings for affected bookings}
         {--dry-run : Show what would be updated without making any changes}';
 
