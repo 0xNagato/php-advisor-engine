@@ -16,9 +16,8 @@ return new class extends Migration
             $table->datetime('booking_at_utc')->nullable()->after('booking_at');
         });
 
-        // Directly populate booking_at_utc using proper timezone conversion
-        // First ensure MySQL timezone tables are loaded (required for named timezones)
-        DB::unprepared('SET GLOBAL time_zone = "+00:00"');
+        // Set session timezone to UTC instead of global
+        DB::statement('SET time_zone = "+00:00"');
 
         // Convert booking_at to UTC based on venue timezone
         DB::statement('
@@ -28,7 +27,7 @@ return new class extends Migration
             SET b.booking_at_utc =
                 CASE
                     WHEN v.timezone = "UTC" OR v.timezone = "+00:00" THEN b.booking_at
-                    ELSE CONVERT_TZ(b.booking_at, v.timezone, "+00:00")
+                    ELSE CONVERT_TZ(b.booking_at, COALESCE(v.timezone, "+00:00"), "+00:00")
                 END
             WHERE b.booking_at IS NOT NULL
         ');
