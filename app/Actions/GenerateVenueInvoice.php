@@ -204,9 +204,7 @@ class GenerateVenueInvoice
             ->orderBy('booking_at')
             ->get();
 
-        if ($bookings->isEmpty()) {
-            throw new RuntimeException('No bookings found for the specified date range.');
-        }
+        throw_if($bookings->isEmpty(), new RuntimeException('No bookings found for the specified date range.'));
 
         // Split bookings into prime and non-prime
         $primeBookings = $bookings->where('is_prime', true);

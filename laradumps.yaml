@@ -9,15 +9,15 @@ config:
   sleep: 0
 observers:
   auto_invoke_app: true
-  enabled_in_testing: true
+  enabled_in_testing: false
   dump: true
   original_dump: true
   queries: false
-  slow_queries: false
+  slow_queries: true
   mail: true
   logs: true
   http: false
-  jobs: false
+  jobs: true
   commands: false
   scheduled_commands: false
   gate: false

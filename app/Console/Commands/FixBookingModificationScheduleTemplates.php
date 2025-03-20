@@ -6,6 +6,7 @@ use App\Models\BookingModificationRequest;
 use App\Models\ScheduleTemplate;
 use App\Services\Booking\BookingCalculationService;
 use Illuminate\Console\Command;
+use Illuminate\Support\Collection;
 
 class FixBookingModificationScheduleTemplates extends Command
 {
@@ -74,7 +75,7 @@ class FixBookingModificationScheduleTemplates extends Command
 
         $this->info("Found {$requests->count()} approved requests with potential mismatches.");
 
-        /** @var \Illuminate\Support\Collection<BookingModificationRequest> $updatedRequests */
+        /** @var Collection<BookingModificationRequest> $updatedRequests */
         $updatedRequests = collect();
 
         /** @var BookingModificationRequest $request */
@@ -96,9 +97,7 @@ class FixBookingModificationScheduleTemplates extends Command
                     $this->newLine();
 
                     // Store current earnings for comparison
-                    $currentEarnings = $request->booking->earnings->mapWithKeys(function ($earning) {
-                        return [$earning->type => $earning->amount];
-                    })->all();
+                    $currentEarnings = $request->booking->earnings->mapWithKeys(fn ($earning) => [$earning->type => $earning->amount])->all();
 
                     if (! $this->option('dry-run')) {
                         // Delete existing earnings
@@ -111,9 +110,7 @@ class FixBookingModificationScheduleTemplates extends Command
                         $request->booking->refresh();
 
                         // Get new earnings for comparison
-                        $newEarnings = $request->booking->earnings->mapWithKeys(function ($earning) {
-                            return [$earning->type => $earning->amount];
-                        })->all();
+                        $newEarnings = $request->booking->earnings->mapWithKeys(fn ($earning) => [$earning->type => $earning->amount])->all();
 
                         $rows = collect($currentEarnings)->keys()
                             ->merge(collect($newEarnings)->keys())
@@ -169,7 +166,7 @@ class FixBookingModificationScheduleTemplates extends Command
      */
     protected function processRequest(BookingModificationRequest $request): bool
     {
-        $originalTemplate = ScheduleTemplate::find($request->original_schedule_template_id);
+        $originalTemplate = ScheduleTemplate::query()->find($request->original_schedule_template_id);
 
         if (! $originalTemplate) {
             $this->warn("Original schedule template not found for request ID: {$request->id}");

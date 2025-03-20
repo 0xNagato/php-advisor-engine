@@ -44,12 +44,12 @@ class UpdateVenueGroupEarnings
             // Get all bookings for this venue
             $bookingIds = $venue->bookings()->pluck('bookings.id')->toArray();
 
-            if (empty($bookingIds)) {
+            if (blank($bookingIds)) {
                 continue;
             }
 
             // Get earnings for these bookings of the specified types
-            $venueEarnings = Earning::whereIn('type', $earningTypes)
+            $venueEarnings = Earning::query()->whereIn('type', $earningTypes)
                 ->whereIn('booking_id', $bookingIds)
                 ->get();
 

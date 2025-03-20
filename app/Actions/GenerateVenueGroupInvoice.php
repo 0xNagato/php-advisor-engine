@@ -253,15 +253,11 @@ class GenerateVenueGroupInvoice
         // Get all venues in the group
         $venues = $venueGroup->venues;
 
-        if ($venues->isEmpty()) {
-            throw new RuntimeException('No venues found in this venue group.');
-        }
+        throw_if($venues->isEmpty(), new RuntimeException('No venues found in this venue group.'));
 
         /** @var User $primaryManager */
         $primaryManager = $venueGroup->primaryManager;
-        if (! $primaryManager) {
-            throw new RuntimeException('Venue group does not have a primary manager.');
-        }
+        throw_unless($primaryManager, new RuntimeException('Venue group does not have a primary manager.'));
 
         // Get the first venue to use as a reference venue
         $referenceVenue = $venues->first();

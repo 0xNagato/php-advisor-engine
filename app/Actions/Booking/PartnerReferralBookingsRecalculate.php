@@ -5,6 +5,7 @@ namespace App\Actions\Booking;
 use App\Models\Booking;
 use App\Services\Booking\BookingCalculationService;
 use Exception;
+use Illuminate\Contracts\Database\Query\Builder;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Lorisleiva\Actions\Concerns\AsAction;
@@ -28,7 +29,7 @@ class PartnerReferralBookingsRecalculate
             ])
             ->where('is_prime', 1)
             ->whereIn('status', ['confirmed', 'venue_confirmed'])
-            ->whereHas('concierge.user', function ($query) {
+            ->whereHas('concierge.user', function (Builder $query) {
                 $query->where(function ($query) {
                     $query
                         ->whereColumn('partner_concierge_id', '<>', 'partner_referral_id')

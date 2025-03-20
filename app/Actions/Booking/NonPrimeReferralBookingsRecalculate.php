@@ -6,6 +6,7 @@ use App\Enums\EarningType;
 use App\Models\Booking;
 use App\Services\Booking\BookingCalculationService;
 use Exception;
+use Illuminate\Contracts\Database\Query\Builder;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Lorisleiva\Actions\Concerns\AsAction;
@@ -32,7 +33,7 @@ class NonPrimeReferralBookingsRecalculate
                 $query->where('partner_concierge_fee', 0)
                     ->where('partner_venue_fee', 0);
             })
-            ->whereDoesntHave('earnings', function ($query) {
+            ->whereDoesntHave('earnings', function (Builder $query) {
                 $query->where('type', EarningType::PARTNER_VENUE->value);
             })
             ->confirmed()

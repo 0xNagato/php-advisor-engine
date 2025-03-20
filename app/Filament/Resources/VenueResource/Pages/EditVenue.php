@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\VenueResource\Pages;
 
+use App\Actions\Venue\UpdateVenueGroupEarnings;
 use App\Enums\VenueStatus;
 use App\Filament\Resources\VenueResource;
 use App\Filament\Resources\VenueResource\Components\VenueContactsForm;
@@ -405,10 +406,10 @@ class EditVenue extends EditRecord
                                     ]);
 
                                     // Update earnings for all venues in the group to assign them to the primary manager
-                                    \App\Actions\Venue\UpdateVenueGroupEarnings::run($venueGroup, $addedVenues);
+                                    UpdateVenueGroupEarnings::run($venueGroup, $addedVenues);
                                 } else {
                                     // Just update earnings for the original venue
-                                    \App\Actions\Venue\UpdateVenueGroupEarnings::run($venueGroup, [$venue]);
+                                    UpdateVenueGroupEarnings::run($venueGroup, [$venue]);
                                 }
                             });
 
@@ -513,8 +514,8 @@ class EditVenue extends EditRecord
                                     }
 
                                     // Update earnings for added venues
-                                    if (! empty($addedVenues)) {
-                                        $earningsUpdated = \App\Actions\Venue\UpdateVenueGroupEarnings::run($venueGroup, $addedVenues);
+                                    if (filled($addedVenues)) {
+                                        $earningsUpdated = UpdateVenueGroupEarnings::run($venueGroup, $addedVenues);
                                     }
                                 }
                             });
@@ -630,7 +631,7 @@ class EditVenue extends EditRecord
                                 $targetVenueGroup->delete();
 
                                 // Update earnings for transferred venues
-                                $earningsUpdated = \App\Actions\Venue\UpdateVenueGroupEarnings::run($currentVenueGroup, $venues);
+                                $earningsUpdated = UpdateVenueGroupEarnings::run($currentVenueGroup, $venues);
                             });
 
                             Notification::make()

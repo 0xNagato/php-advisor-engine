@@ -31,8 +31,7 @@ class FixUserReferralsAndRecalculateBookingsEarnings extends Command
         ConciergeReferralBookingsRecalculate $conciergeReferralBookingsRecalculate,
         PartnerReferralBookingsRecalculate $partnerReferralBookingsRecalculate,
         NonPrimeReferralBookingsRecalculate $nonPrimeReferralBookingsRecalculate
-    )
-    {
+    ) {
         parent::__construct();
         $this->fixUserPartnerReferrals = $fixUserPartnerReferrals;
         $this->fixUserConciergeReferrals = $fixUserConciergeReferrals;

@@ -7,7 +7,6 @@ use App\Providers\Filament\AdminPanelProvider;
 use App\Providers\FilamentRenderHookProvider;
 use App\Providers\HorizonServiceProvider;
 use App\Providers\RouteServiceProvider;
-use App\Providers\VoltServiceProvider;
 use Illuminate\Support\Facades\Facade;
 use Illuminate\Support\ServiceProvider;
 
@@ -210,7 +209,6 @@ return [
         HorizonServiceProvider::class,
         AdminPanelProvider::class,
         RouteServiceProvider::class,
-        VoltServiceProvider::class,
         FilamentRenderHookProvider::class,
     ])->toArray(),
 

@@ -8,6 +8,7 @@ use App\Models\Earning;
 use App\Models\User;
 use App\Models\Venue;
 use App\Models\VenueGroup;
+use Exception;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
 
@@ -51,7 +52,7 @@ class AssignVenueGroupManagersToEarnings extends Command
 
         try {
             // Get all venue groups with primary managers
-            $venueGroupsCount = VenueGroup::count();
+            $venueGroupsCount = VenueGroup::query()->count();
             $this->info("Found {$venueGroupsCount} venue groups to process");
 
             $venueGroups = VenueGroup::with('primaryManager')->get();
@@ -74,7 +75,7 @@ class AssignVenueGroupManagersToEarnings extends Command
                 }
 
                 // Get all venues in this group
-                $venues = Venue::where('venue_group_id', $venueGroup->id)->get();
+                $venues = Venue::query()->where('venue_group_id', $venueGroup->id)->get();
 
                 if ($venues->isEmpty()) {
                     $errors[] = "Venue group {$venueGroup->id}: {$venueGroup->name} has no venues. Skipping.";
@@ -125,9 +126,9 @@ class AssignVenueGroupManagersToEarnings extends Command
                         foreach ($venues as $venue) {
                             $bookingIds = $venue->bookings()->pluck('bookings.id')->toArray();
 
-                            if (! empty($bookingIds)) {
+                            if (filled($bookingIds)) {
                                 $earningTypes = [EarningType::VENUE->value, EarningType::VENUE_PAID->value];
-                                $venueEarnings = Earning::whereIn('type', $earningTypes)
+                                $venueEarnings = Earning::query()->whereIn('type', $earningTypes)
                                     ->whereIn('booking_id', $bookingIds)
                                     ->get();
 
@@ -142,7 +143,7 @@ class AssignVenueGroupManagersToEarnings extends Command
 
                                         // Get the old user info for logging
                                         $oldUserId = $earning->user_id;
-                                        $oldUser = User::find($oldUserId);
+                                        $oldUser = User::query()->find($oldUserId);
                                         $oldUserName = $oldUser ? "{$oldUser->first_name} {$oldUser->last_name}" : "User ID: {$oldUserId}";
 
                                         if ($verbose) {
@@ -192,7 +193,7 @@ class AssignVenueGroupManagersToEarnings extends Command
                 $this->info('Transaction committed. All changes have been saved.');
             }
 
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             DB::rollBack();
             $this->error('ERROR: '.$e->getMessage());
             $this->error('Transaction rolled back. No changes were made.');
