@@ -32,4 +32,32 @@ class EarningCollection extends Collection
                 return $result;
             });
     }
+
+    /**
+     * Get the sum of 'amount' for earnings where 'percentage_of' is 'refund'.
+     */
+    public function sumRefundedAmount(): float
+    {
+        return $this->where('percentage_of', 'refund')->sum('amount');
+    }
+
+    /**
+     * Get the sum of 'amount' for earnings where 'percentage_of' is 'total_fee'.
+     */
+    public function sumTotalFeeAmount(): float
+    {
+        return $this->where('percentage_of', 'total_fee')->sum('amount');
+    }
+
+    /**
+     * Calculate the remaining amount, which is the sum of
+     * 'total_fee' and 'refund'.
+     */
+    public function calculateRemaining(): float
+    {
+        $totalFee = $this->sumTotalFeeAmount();
+        $refunded = $this->sumRefundedAmount();
+
+        return $totalFee + $refunded;
+    }
 }

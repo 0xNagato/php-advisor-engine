@@ -10,6 +10,7 @@ use Filament\Tables\Table;
 use Filament\Widgets\Concerns\InteractsWithPageFilters;
 use Filament\Widgets\TableWidget as BaseWidget;
 use Illuminate\Contracts\Support\Htmlable;
+use Illuminate\Support\HtmlString;
 
 class ConciergeRecentBookings extends BaseWidget
 {
@@ -46,13 +47,15 @@ class ConciergeRecentBookings extends BaseWidget
             ->with('earnings', function ($query) {
                 $query->where('user_id', $this->concierge->user_id);
             })
-            ->whereBetween('created_at', [$startDate, $endDate])
+//            ->whereBetween('created_at', [$startDate, $endDate])
             ->where('concierge_id', $this->concierge->id)
             ->whereIn('status', [
                 BookingStatus::CONFIRMED,
                 BookingStatus::VENUE_CONFIRMED,
                 BookingStatus::CANCELLED,
                 BookingStatus::NO_SHOW,
+                BookingStatus::REFUNDED,
+                BookingStatus::PARTIALLY_REFUNDED,
             ]);
 
         return $table
@@ -76,19 +79,21 @@ class ConciergeRecentBookings extends BaseWidget
                     ->size('xs')
                     ->label('Earned')
                     ->formatStateUsing(function (Booking $booking) {
-                        $total = $booking->earnings->sum('amount');
+                        $labelStatus = [BookingStatus::CANCELLED, BookingStatus::NO_SHOW, BookingStatus::REFUNDED];
+                        if (in_array($booking->status, $labelStatus)) {
+                            return new HtmlString('<span class="text-xs italic text-gray-500">'.
+                                $booking->status->label().
+                                '</span>');
+                        }
+
+                        $total = $booking->earnings->sum('amount') ?? 0;
+                        if ($booking->status === BookingStatus::PARTIALLY_REFUNDED) {
+                            $total = $booking->earnings->calculateRemaining() ?? 0;
+                        }
 
                         return $total > 0
                             ? money($total, $booking->currency)
                             : '-';
-                    }),
-                TextColumn::make('status')
-                    ->badge()
-                    ->size('xs')
-                    ->color(fn (BookingStatus $state): string => match ($state) {
-                        BookingStatus::CONFIRMED, BookingStatus::VENUE_CONFIRMED => 'success',
-                        BookingStatus::CANCELLED => 'danger',
-                        default => 'gray',
                     }),
             ]);
     }
