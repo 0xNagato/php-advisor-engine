@@ -3,6 +3,7 @@
 namespace App\Livewire\Admin;
 
 use App\Actions\Booking\SendModificationRequestToVenueContacts;
+use App\Filament\Resources\BookingResource\Pages\ViewBooking;
 use App\Models\BookingModificationRequest;
 use App\Notifications\Booking\ConciergeModificationApproved;
 use App\Notifications\Booking\ConciergeModificationRejected;
@@ -34,6 +35,7 @@ class ConfirmationManagerModifications extends BaseWidget
                     ->orderBy('created_at', 'desc')
                     ->with('booking.venue')
             )
+            ->recordUrl(fn (BookingModificationRequest $record) => ViewBooking::getUrl(['record' => $record->booking]))
             ->columns([
                 TextColumn::make('id')
                     ->label('Venue')
@@ -47,7 +49,8 @@ class ConfirmationManagerModifications extends BaseWidget
             ->actions([
                 ActionGroup::make([
                     Action::make('resendConfirmation')
-                        ->hidden(fn (BookingModificationRequest $record) => ! auth()->user()->hasActiveRole('super_admin') ||
+                        ->hidden(fn (BookingModificationRequest $record
+                        ) => ! auth()->user()->hasActiveRole('super_admin') ||
                             $record->status !== BookingModificationRequest::STATUS_PENDING)
                         ->label('Resend Confirmation')
                         ->requiresConfirmation()
@@ -56,11 +59,13 @@ class ConfirmationManagerModifications extends BaseWidget
                         ->color(fn (BookingModificationRequest $record
                         ) => is_null($record->responded_at) ? 'indigo' : 'success')
                         ->requiresConfirmation()
+                        ->visible(fn (BookingModificationRequest $record) => $record->booking->booking_at_utc < now())
                         ->action(function (BookingModificationRequest $record) {
                             SendModificationRequestToVenueContacts::run($record);
                         }),
                     Action::make('markAsApproved')
-                        ->hidden(fn (BookingModificationRequest $record) => ! auth()->user()->hasActiveRole('super_admin') ||
+                        ->hidden(fn (BookingModificationRequest $record
+                        ) => ! auth()->user()->hasActiveRole('super_admin') ||
                             $record->status !== BookingModificationRequest::STATUS_PENDING)
                         ->label('Mark as Approved')
                         ->requiresConfirmation()
@@ -68,7 +73,8 @@ class ConfirmationManagerModifications extends BaseWidget
                         ->color('success')
                         ->action(fn (BookingModificationRequest $record) => $this->approveModification($record)),
                     Action::make('markAsRejected')
-                        ->hidden(fn (BookingModificationRequest $record) => ! auth()->user()->hasActiveRole('super_admin') ||
+                        ->hidden(fn (BookingModificationRequest $record
+                        ) => ! auth()->user()->hasActiveRole('super_admin') ||
                             $record->status !== BookingModificationRequest::STATUS_PENDING)
                         ->label('Mark as Rejected')
                         ->requiresConfirmation()

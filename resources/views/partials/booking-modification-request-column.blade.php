@@ -36,7 +36,7 @@
     </div>
 
     <div class="flex items-center gap-1">
-        <div class="font-semibold">Requested Changes</div>
+        <div class="font-semibold">Requested Changes:</div>
         <div class="text-xm text-gray-900">
             <span class="font-semibold hidden md:inline">Time:</span>
             <span class="{{ $record->original_time !== $record->requested_time ? 'text-red-600 font-semibold' : '' }}">
