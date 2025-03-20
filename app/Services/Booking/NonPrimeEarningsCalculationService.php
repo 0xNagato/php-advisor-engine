@@ -22,7 +22,6 @@ readonly class NonPrimeEarningsCalculationService
     {
         // Always use venue's default price for non-prime bookings if no specific override
         $pricePerHead = $booking->venue->non_prime_fee_per_head;
-        $conciergePercentage = BookingPercentages::PLATFORM_PERCENTAGE_CONCIERGE;
 
         // If we have a schedule template, check for price override
         if ($booking->schedule_template_id) {
@@ -37,7 +36,7 @@ readonly class NonPrimeEarningsCalculationService
         }
 
         $fee = $pricePerHead * $booking->guest_count;
-        $concierge_earnings = $fee - ($fee * ($conciergePercentage / 100));
+        $concierge_earnings = $fee - ($fee * (BookingPercentages::PLATFORM_PERCENTAGE_CONCIERGE / 100));
         $platform_concierge = $fee * (BookingPercentages::PLATFORM_PERCENTAGE_CONCIERGE / 100);
         $platform_venue = $fee * (BookingPercentages::PLATFORM_PERCENTAGE_VENUE / 100);
         $platform_earnings = $platform_concierge + $platform_venue;
