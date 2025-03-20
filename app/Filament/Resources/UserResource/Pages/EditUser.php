@@ -58,10 +58,11 @@ class EditUser extends EditRecord
                             ->label('Current Roles')
                             ->content(function () {
                                 $coreRoles = $this->record->roles()
-                                    ->whereIn('name', ['partner', 'concierge', 'super_admin', 'venue'])
+                                    ->whereIn('name', ['partner', 'concierge', 'super_admin', 'venue', 'venue_manager'])
                                     ->pluck('name')
                                     ->map(fn ($role) => match ($role) {
                                         'super_admin' => 'Super Admin',
+                                        'venue_manager' => 'Venue Manager',
                                         default => ucfirst($role)
                                     })
                                     ->join(', ');

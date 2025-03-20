@@ -384,6 +384,7 @@ class EditVenue extends EditRecord
                                 // Add additional venues if selected
                                 if (filled($data['additional_venues'])) {
                                     $allowedVenueIds = [$venue->id];
+                                    $addedVenues = [$venue]; // Include the original venue
 
                                     foreach ($data['additional_venues'] as $additionalVenueId) {
                                         $additionalVenue = Venue::query()->find($additionalVenueId);
@@ -393,6 +394,7 @@ class EditVenue extends EditRecord
                                             $additionalVenue->venue_group_id = $venueGroup->id;
                                             $additionalVenue->save();
                                             $allowedVenueIds[] = $additionalVenue->id;
+                                            $addedVenues[] = $additionalVenue;
                                         }
                                     }
 
@@ -401,6 +403,12 @@ class EditVenue extends EditRecord
                                     $venueGroup->managers()->updateExistingPivot($user->id, [
                                         'allowed_venue_ids' => json_encode($allVenueIds),
                                     ]);
+
+                                    // Update earnings for all venues in the group to assign them to the primary manager
+                                    \App\Actions\Venue\UpdateVenueGroupEarnings::run($venueGroup, $addedVenues);
+                                } else {
+                                    // Just update earnings for the original venue
+                                    \App\Actions\Venue\UpdateVenueGroupEarnings::run($venueGroup, [$venue]);
                                 }
                             });
 
@@ -481,6 +489,7 @@ class EditVenue extends EditRecord
                                 if (filled($data['additional_venues'])) {
                                     $allVenueIds = $venueGroup->venues()->pluck('id')->toArray();
                                     $primaryManager = $venueGroup->primaryManager;
+                                    $addedVenues = [];
 
                                     foreach ($data['additional_venues'] as $additionalVenueId) {
                                         $additionalVenue = Venue::query()->find($additionalVenueId);
@@ -490,6 +499,9 @@ class EditVenue extends EditRecord
                                             $additionalVenue->venue_group_id = $venueGroup->id;
                                             $additionalVenue->save();
                                             $allVenueIds[] = $additionalVenue->id;
+
+                                            // Store the venue for earnings update
+                                            $addedVenues[] = $additionalVenue;
                                         }
                                     }
 
@@ -498,6 +510,11 @@ class EditVenue extends EditRecord
                                         $venueGroup->managers()->updateExistingPivot($manager->id, [
                                             'allowed_venue_ids' => json_encode($allVenueIds),
                                         ]);
+                                    }
+
+                                    // Update earnings for added venues
+                                    if (! empty($addedVenues)) {
+                                        $earningsUpdated = \App\Actions\Venue\UpdateVenueGroupEarnings::run($venueGroup, $addedVenues);
                                     }
                                 }
                             });
@@ -611,6 +628,9 @@ class EditVenue extends EditRecord
 
                                 // Delete the target venue group
                                 $targetVenueGroup->delete();
+
+                                // Update earnings for transferred venues
+                                $earningsUpdated = \App\Actions\Venue\UpdateVenueGroupEarnings::run($currentVenueGroup, $venues);
                             });
 
                             Notification::make()

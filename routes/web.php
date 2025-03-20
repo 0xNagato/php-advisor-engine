@@ -4,6 +4,7 @@ use App\Filament\Pages\CreatePassword;
 use App\Http\Controllers\Booking\BookingCheckoutController;
 use App\Http\Controllers\DemoAuthController;
 use App\Http\Controllers\DownloadInvoiceController;
+use App\Http\Controllers\DownloadVenueGroupInvoiceController;
 use App\Http\Controllers\DownloadVenueInvoiceController;
 use App\Http\Controllers\ExceptionFormController;
 use App\Livewire\Booking\CreateBooking;
@@ -132,6 +133,10 @@ Route::get('venue-manager/invitation/{referral}', App\Filament\Pages\VenueManage
 
 Route::get('venue-invoice/{user}/{startDate}/{endDate}', DownloadVenueInvoiceController::class)
     ->name('venue.invoice.download')
+    ->middleware('auth');
+
+Route::get('/venue-group-invoice/{venueGroup}/{startDate}/{endDate}', DownloadVenueGroupInvoiceController::class)
+    ->name('venue-group.invoice.download')
     ->middleware('auth');
 
 Route::middleware(['auth', 'verified'])->group(function () {

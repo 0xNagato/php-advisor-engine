@@ -247,6 +247,7 @@ return [
     'override_venues' => env('OVERRIDE_VENUES', ''),
     'closure_venues' => env('CLOSURE_VENUES', '73,76,95,112,129'),
     'allow_advanced_toggle' => env('ALLOW_ADVANCED_TOGGLE', false),
+    'test_stripe_email' => env('TEST_STRIPE_EMAIL', 'test@primavip.co'),
 
     /*
     |--------------------------------------------------------------------------
@@ -278,5 +279,17 @@ return [
         'background_image' => env('LOGIN_BACKGROUND_IMAGE'),
         'text_color' => env('LOGIN_TEXT_COLOR'),
     ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Invoice Preview Mode
+    |--------------------------------------------------------------------------
+    |
+    | This flag enables returning HTML instead of generating PDFs for invoices
+    | during development. Set to true to enable HTML preview mode.
+    |
+    */
+
+    'invoice_html_preview' => env('INVOICE_HTML_PREVIEW', false),
 
 ];

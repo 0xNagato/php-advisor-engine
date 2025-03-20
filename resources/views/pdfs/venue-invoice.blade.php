@@ -104,9 +104,6 @@
                                                 {{ $booking->guest_first_name }} {{ $booking->guest_last_name }}
                                                 <br>
                                                 {{ $booking->guest_phone }}
-                                                @if ($booking->guest_email)
-                                                    | {{ $booking->guest_email }}
-                                                @endif
                                             </div>
                                         </td>
                                         <td class="px-3 py-2 text-center">{{ $booking->guest_count }}</td>
@@ -207,12 +204,12 @@
                 <div class="p-6 text-right rounded-lg bg-indigo-50">
                     <h3 class="text-xl font-semibold text-indigo-900">
                         @if ($balance > 0)
-                            PRIMA Owes Venue:
+                            PRIMA Owes {{ $venue->name }}:
                             <span class="text-indigo-600">
                                 {{ money($balance, $primeBookings->first()?->currency ?? ($nonPrimeBookings->first()?->currency ?? 'USD')) }}
                             </span>
                         @else
-                            Venue Owes PRIMA:
+                            {{ $venue->name }} Owes PRIMA:
                             <span class="text-indigo-600">
                                 {{ money(abs($balance), $primeBookings->first()?->currency ?? ($nonPrimeBookings->first()?->currency ?? 'USD')) }}
                             </span>
@@ -225,6 +222,18 @@
             <div class="pt-6 mt-8 border-t border-gray-200">
                 <div class="text-sm text-gray-600">
                     <p class="mb-4">Please remit payment within 15 days of receipt of invoice.</p>
+
+                    @if (isset($invoice) && $invoice->stripe_invoice_url)
+                        <div class="p-3 mb-4 border border-indigo-200 rounded-lg bg-indigo-50">
+                            <h5 class="mb-2 font-medium text-indigo-700">Pay Online</h5>
+                            <p class="mb-2 text-xs">For your convenience, you can pay this invoice online using the
+                                secure payment link below:</p>
+                            <a href="{{ $invoice->stripe_invoice_url }}"
+                                class="block text-xs text-indigo-600 underline break-all">
+                                {{ $invoice->stripe_invoice_url }}
+                            </a>
+                        </div>
+                    @endif
 
                     <div class="p-6 border border-gray-200 rounded-lg bg-gray-50">
                         <h4 class="mb-3 font-medium">Payment Information</h4>

@@ -1,0 +1,4703 @@
+[
+  {
+    "table": "activity_log",
+    "columns": [
+      {
+        "name": "id",
+        "type": "bigint unsigned",
+        "extra": "auto_increment",
+        "default": null,
+        "nullable": "NO"
+      },
+      {
+        "name": "log_name",
+        "type": "varchar(255)",
+        "extra": "",
+        "default": null,
+        "nullable": "YES"
+      },
+      {
+        "name": "description",
+        "type": "text",
+        "extra": "",
+        "default": null,
+        "nullable": "NO"
+      },
+      {
+        "name": "subject_type",
+        "type": "varchar(255)",
+        "extra": "",
+        "default": null,
+        "nullable": "YES"
+      },
+      {
+        "name": "event",
+        "type": "varchar(255)",
+        "extra": "",
+        "default": null,
+        "nullable": "YES"
+      },
+      {
+        "name": "subject_id",
+        "type": "bigint unsigned",
+        "extra": "",
+        "default": null,
+        "nullable": "YES"
+      },
+      {
+        "name": "causer_type",
+        "type": "varchar(255)",
+        "extra": "",
+        "default": null,
+        "nullable": "YES"
+      },
+      {
+        "name": "causer_id",
+        "type": "bigint unsigned",
+        "extra": "",
+        "default": null,
+        "nullable": "YES"
+      },
+      {
+        "name": "properties",
+        "type": "json",
+        "extra": "",
+        "default": null,
+        "nullable": "YES"
+      },
+      {
+        "name": "batch_uuid",
+        "type": "char(36)",
+        "extra": "",
+        "default": null,
+        "nullable": "YES"
+      },
+      {
+        "name": "created_at",
+        "type": "timestamp",
+        "extra": "",
+        "default": null,
+        "nullable": "YES"
+      },
+      {
+        "name": "updated_at",
+        "type": "timestamp",
+        "extra": "",
+        "default": null,
+        "nullable": "YES"
+      }
+    ]
+  },
+  {
+    "table": "announcements",
+    "columns": [
+      {
+        "name": "id",
+        "type": "bigint unsigned",
+        "extra": "auto_increment",
+        "default": null,
+        "nullable": "NO"
+      },
+      {
+        "name": "sender_id",
+        "type": "bigint unsigned",
+        "extra": "",
+        "default": null,
+        "nullable": "NO"
+      },
+      {
+        "name": "title",
+        "type": "varchar(255)",
+        "extra": "",
+        "default": null,
+        "nullable": "NO"
+      },
+      {
+        "name": "message",
+        "type": "text",
+        "extra": "",
+        "default": null,
+        "nullable": "NO"
+      },
+      {
+        "name": "region",
+        "type": "varchar(255)",
+        "extra": "",
+        "default": null,
+        "nullable": "YES"
+      },
+      {
+        "name": "recipient_roles",
+        "type": "json",
+        "extra": "",
+        "default": null,
+        "nullable": "YES"
+      },
+      {
+        "name": "recipient_user_ids",
+        "type": "json",
+        "extra": "",
+        "default": null,
+        "nullable": "YES"
+      },
+      {
+        "name": "call_to_action_title",
+        "type": "varchar(255)",
+        "extra": "",
+        "default": null,
+        "nullable": "YES"
+      },
+      {
+        "name": "call_to_action_url",
+        "type": "varchar(255)",
+        "extra": "",
+        "default": null,
+        "nullable": "YES"
+      },
+      {
+        "name": "created_at",
+        "type": "timestamp",
+        "extra": "",
+        "default": null,
+        "nullable": "YES"
+      },
+      {
+        "name": "updated_at",
+        "type": "timestamp",
+        "extra": "",
+        "default": null,
+        "nullable": "YES"
+      },
+      {
+        "name": "published_at",
+        "type": "datetime",
+        "extra": "",
+        "default": null,
+        "nullable": "YES"
+      }
+    ]
+  },
+  {
+    "table": "authentication_log",
+    "columns": [
+      {
+        "name": "id",
+        "type": "bigint unsigned",
+        "extra": "auto_increment",
+        "default": null,
+        "nullable": "NO"
+      },
+      {
+        "name": "authenticatable_type",
+        "type": "varchar(255)",
+        "extra": "",
+        "default": null,
+        "nullable": "NO"
+      },
+      {
+        "name": "authenticatable_id",
+        "type": "bigint unsigned",
+        "extra": "",
+        "default": null,
+        "nullable": "NO"
+      },
+      {
+        "name": "ip_address",
+        "type": "varchar(45)",
+        "extra": "",
+        "default": null,
+        "nullable": "YES"
+      },
+      {
+        "name": "user_agent",
+        "type": "text",
+        "extra": "",
+        "default": null,
+        "nullable": "YES"
+      },
+      {
+        "name": "login_at",
+        "type": "timestamp",
+        "extra": "",
+        "default": null,
+        "nullable": "YES"
+      },
+      {
+        "name": "login_successful",
+        "type": "tinyint(1)",
+        "extra": "",
+        "default": "0",
+        "nullable": "NO"
+      },
+      {
+        "name": "logout_at",
+        "type": "timestamp",
+        "extra": "",
+        "default": null,
+        "nullable": "YES"
+      },
+      {
+        "name": "cleared_by_user",
+        "type": "tinyint(1)",
+        "extra": "",
+        "default": "0",
+        "nullable": "NO"
+      },
+      {
+        "name": "location",
+        "type": "json",
+        "extra": "",
+        "default": null,
+        "nullable": "YES"
+      }
+    ]
+  },
+  {
+    "table": "bank_accounts",
+    "columns": [
+      {
+        "name": "id",
+        "type": "bigint unsigned",
+        "extra": "auto_increment",
+        "default": null,
+        "nullable": "NO"
+      },
+      {
+        "name": "user_id",
+        "type": "bigint unsigned",
+        "extra": "",
+        "default": null,
+        "nullable": "NO"
+      },
+      {
+        "name": "currency",
+        "type": "varchar(255)",
+        "extra": "",
+        "default": null,
+        "nullable": "NO"
+      },
+      {
+        "name": "transfer_type",
+        "type": "varchar(255)",
+        "extra": "",
+        "default": null,
+        "nullable": "NO"
+      },
+      {
+        "name": "legal_type",
+        "type": "varchar(255)",
+        "extra": "",
+        "default": null,
+        "nullable": "NO"
+      },
+      {
+        "name": "account_holder_name",
+        "type": "varchar(255)",
+        "extra": "",
+        "default": null,
+        "nullable": "YES"
+      },
+      {
+        "name": "bic_or_swift",
+        "type": "varchar(255)",
+        "extra": "",
+        "default": null,
+        "nullable": "YES"
+      },
+      {
+        "name": "sort_code",
+        "type": "varchar(255)",
+        "extra": "",
+        "default": null,
+        "nullable": "YES"
+      },
+      {
+        "name": "iban",
+        "type": "varchar(255)",
+        "extra": "",
+        "default": null,
+        "nullable": "YES"
+      },
+      {
+        "name": "iban_account_number",
+        "type": "varchar(255)",
+        "extra": "",
+        "default": null,
+        "nullable": "YES"
+      },
+      {
+        "name": "bank_account_number",
+        "type": "varchar(255)",
+        "extra": "",
+        "default": null,
+        "nullable": "YES"
+      },
+      {
+        "name": "routing_number",
+        "type": "varchar(255)",
+        "extra": "",
+        "default": null,
+        "nullable": "YES"
+      },
+      {
+        "name": "account_type",
+        "type": "varchar(255)",
+        "extra": "",
+        "default": null,
+        "nullable": "YES"
+      },
+      {
+        "name": "wise_recipient_id",
+        "type": "varchar(255)",
+        "extra": "",
+        "default": null,
+        "nullable": "YES"
+      },
+      {
+        "name": "created_at",
+        "type": "timestamp",
+        "extra": "",
+        "default": null,
+        "nullable": "YES"
+      },
+      {
+        "name": "updated_at",
+        "type": "timestamp",
+        "extra": "",
+        "default": null,
+        "nullable": "YES"
+      }
+    ]
+  },
+  {
+    "table": "booking_discrepancies",
+    "columns": [
+      {
+        "name": "id",
+        "type": "bigint unsigned",
+        "extra": "auto_increment",
+        "default": null,
+        "nullable": "NO"
+      },
+      {
+        "name": "booking_id",
+        "type": "bigint unsigned",
+        "extra": "",
+        "default": null,
+        "nullable": "NO"
+      },
+      {
+        "name": "reported_by_id",
+        "type": "bigint unsigned",
+        "extra": "",
+        "default": null,
+        "nullable": "NO"
+      },
+      {
+        "name": "resolved_by_id",
+        "type": "bigint unsigned",
+        "extra": "",
+        "default": null,
+        "nullable": "YES"
+      },
+      {
+        "name": "description",
+        "type": "text",
+        "extra": "",
+        "default": null,
+        "nullable": "NO"
+      },
+      {
+        "name": "internal_notes",
+        "type": "text",
+        "extra": "",
+        "default": null,
+        "nullable": "YES"
+      },
+      {
+        "name": "status",
+        "type": "varchar(255)",
+        "extra": "",
+        "default": "pending",
+        "nullable": "NO"
+      },
+      {
+        "name": "resolved_at",
+        "type": "timestamp",
+        "extra": "",
+        "default": null,
+        "nullable": "YES"
+      },
+      {
+        "name": "created_at",
+        "type": "timestamp",
+        "extra": "",
+        "default": null,
+        "nullable": "YES"
+      },
+      {
+        "name": "updated_at",
+        "type": "timestamp",
+        "extra": "",
+        "default": null,
+        "nullable": "YES"
+      },
+      {
+        "name": "deleted_at",
+        "type": "timestamp",
+        "extra": "",
+        "default": null,
+        "nullable": "YES"
+      }
+    ]
+  },
+  {
+    "table": "booking_modification_requests",
+    "columns": [
+      {
+        "name": "id",
+        "type": "bigint unsigned",
+        "extra": "auto_increment",
+        "default": null,
+        "nullable": "NO"
+      },
+      {
+        "name": "booking_id",
+        "type": "bigint unsigned",
+        "extra": "",
+        "default": null,
+        "nullable": "NO"
+      },
+      {
+        "name": "requested_by_id",
+        "type": "bigint unsigned",
+        "extra": "",
+        "default": null,
+        "nullable": "NO"
+      },
+      {
+        "name": "original_guest_count",
+        "type": "int",
+        "extra": "",
+        "default": null,
+        "nullable": "NO"
+      },
+      {
+        "name": "requested_guest_count",
+        "type": "int",
+        "extra": "",
+        "default": null,
+        "nullable": "NO"
+      },
+      {
+        "name": "original_time",
+        "type": "time",
+        "extra": "",
+        "default": null,
+        "nullable": "NO"
+      },
+      {
+        "name": "requested_time",
+        "type": "time",
+        "extra": "",
+        "default": null,
+        "nullable": "NO"
+      },
+      {
+        "name": "original_schedule_template_id",
+        "type": "bigint unsigned",
+        "extra": "",
+        "default": null,
+        "nullable": "YES"
+      },
+      {
+        "name": "requested_schedule_template_id",
+        "type": "bigint unsigned",
+        "extra": "",
+        "default": null,
+        "nullable": "YES"
+      },
+      {
+        "name": "status",
+        "type": "varchar(255)",
+        "extra": "",
+        "default": null,
+        "nullable": "NO"
+      },
+      {
+        "name": "rejection_reason",
+        "type": "text",
+        "extra": "",
+        "default": null,
+        "nullable": "YES"
+      },
+      {
+        "name": "responded_at",
+        "type": "timestamp",
+        "extra": "",
+        "default": null,
+        "nullable": "YES"
+      },
+      {
+        "name": "meta",
+        "type": "json",
+        "extra": "",
+        "default": null,
+        "nullable": "YES"
+      },
+      {
+        "name": "created_at",
+        "type": "timestamp",
+        "extra": "",
+        "default": null,
+        "nullable": "YES"
+      },
+      {
+        "name": "updated_at",
+        "type": "timestamp",
+        "extra": "",
+        "default": null,
+        "nullable": "YES"
+      }
+    ]
+  },
+  {
+    "table": "bookings",
+    "columns": [
+      {
+        "name": "id",
+        "type": "bigint unsigned",
+        "extra": "auto_increment",
+        "default": null,
+        "nullable": "NO"
+      },
+      {
+        "name": "schedule_template_id",
+        "type": "bigint unsigned",
+        "extra": "",
+        "default": null,
+        "nullable": "YES"
+      },
+      {
+        "name": "uuid",
+        "type": "char(36)",
+        "extra": "",
+        "default": null,
+        "nullable": "NO"
+      },
+      {
+        "name": "concierge_id",
+        "type": "bigint unsigned",
+        "extra": "",
+        "default": null,
+        "nullable": "NO"
+      },
+      {
+        "name": "partner_concierge_id",
+        "type": "bigint unsigned",
+        "extra": "",
+        "default": null,
+        "nullable": "YES"
+      },
+      {
+        "name": "partner_venue_id",
+        "type": "bigint unsigned",
+        "extra": "",
+        "default": null,
+        "nullable": "YES"
+      },
+      {
+        "name": "guest_first_name",
+        "type": "varchar(255)",
+        "extra": "",
+        "default": null,
+        "nullable": "YES"
+      },
+      {
+        "name": "guest_last_name",
+        "type": "varchar(255)",
+        "extra": "",
+        "default": null,
+        "nullable": "YES"
+      },
+      {
+        "name": "guest_email",
+        "type": "varchar(255)",
+        "extra": "",
+        "default": null,
+        "nullable": "YES"
+      },
+      {
+        "name": "guest_phone",
+        "type": "varchar(255)",
+        "extra": "",
+        "default": null,
+        "nullable": "YES"
+      },
+      {
+        "name": "booking_at",
+        "type": "datetime",
+        "extra": "",
+        "default": "2024-03-21 14:55:47",
+        "nullable": "NO"
+      },
+      {
+        "name": "guest_count",
+        "type": "int",
+        "extra": "",
+        "default": null,
+        "nullable": "NO"
+      },
+      {
+        "name": "total_fee",
+        "type": "int",
+        "extra": "",
+        "default": null,
+        "nullable": "NO"
+      },
+      {
+        "name": "currency",
+        "type": "varchar(255)",
+        "extra": "",
+        "default": "USD",
+        "nullable": "NO"
+      },
+      {
+        "name": "status",
+        "type": "varchar(255)",
+        "extra": "",
+        "default": "confirmed",
+        "nullable": "NO"
+      },
+      {
+        "name": "is_prime",
+        "type": "tinyint(1)",
+        "extra": "",
+        "default": "0",
+        "nullable": "NO"
+      },
+      {
+        "name": "no_show",
+        "type": "tinyint(1)",
+        "extra": "",
+        "default": "0",
+        "nullable": "NO"
+      },
+      {
+        "name": "created_at",
+        "type": "timestamp",
+        "extra": "",
+        "default": null,
+        "nullable": "YES"
+      },
+      {
+        "name": "updated_at",
+        "type": "timestamp",
+        "extra": "",
+        "default": null,
+        "nullable": "YES"
+      },
+      {
+        "name": "stripe_charge_id",
+        "type": "varchar(255)",
+        "extra": "",
+        "default": null,
+        "nullable": "YES"
+      },
+      {
+        "name": "stripe_payment_intent_id",
+        "type": "varchar(255)",
+        "extra": "",
+        "default": null,
+        "nullable": "YES"
+      },
+      {
+        "name": "stripe_charge",
+        "type": "json",
+        "extra": "",
+        "default": null,
+        "nullable": "YES"
+      },
+      {
+        "name": "venue_earnings",
+        "type": "int",
+        "extra": "",
+        "default": "0",
+        "nullable": "NO"
+      },
+      {
+        "name": "concierge_earnings",
+        "type": "int",
+        "extra": "",
+        "default": "0",
+        "nullable": "NO"
+      },
+      {
+        "name": "charity_earnings",
+        "type": "int",
+        "extra": "",
+        "default": "0",
+        "nullable": "NO"
+      },
+      {
+        "name": "platform_earnings",
+        "type": "int",
+        "extra": "",
+        "default": "0",
+        "nullable": "NO"
+      },
+      {
+        "name": "partner_concierge_fee",
+        "type": "int unsigned",
+        "extra": "",
+        "default": "0",
+        "nullable": "NO"
+      },
+      {
+        "name": "partner_venue_fee",
+        "type": "int unsigned",
+        "extra": "",
+        "default": "0",
+        "nullable": "NO"
+      },
+      {
+        "name": "clicked_at",
+        "type": "datetime",
+        "extra": "",
+        "default": null,
+        "nullable": "YES"
+      },
+      {
+        "name": "confirmed_at",
+        "type": "datetime",
+        "extra": "",
+        "default": null,
+        "nullable": "YES"
+      },
+      {
+        "name": "concierge_referral_type",
+        "type": "varchar(255)",
+        "extra": "",
+        "default": null,
+        "nullable": "YES"
+      },
+      {
+        "name": "venue_confirmed_at",
+        "type": "timestamp",
+        "extra": "",
+        "default": null,
+        "nullable": "YES"
+      },
+      {
+        "name": "resent_venue_confirmation_at",
+        "type": "timestamp",
+        "extra": "",
+        "default": null,
+        "nullable": "YES"
+      },
+      {
+        "name": "tax_amount_in_cents",
+        "type": "int",
+        "extra": "",
+        "default": null,
+        "nullable": "YES"
+      },
+      {
+        "name": "tax",
+        "type": "double(8,2)",
+        "extra": "",
+        "default": null,
+        "nullable": "YES"
+      },
+      {
+        "name": "total_with_tax_in_cents",
+        "type": "int",
+        "extra": "",
+        "default": null,
+        "nullable": "YES"
+      },
+      {
+        "name": "city",
+        "type": "varchar(255)",
+        "extra": "",
+        "default": null,
+        "nullable": "YES"
+      },
+      {
+        "name": "invoice_path",
+        "type": "varchar(255)",
+        "extra": "",
+        "default": null,
+        "nullable": "YES"
+      },
+      {
+        "name": "notes",
+        "type": "text",
+        "extra": "",
+        "default": null,
+        "nullable": "YES"
+      },
+      {
+        "name": "vip_code_id",
+        "type": "bigint unsigned",
+        "extra": "",
+        "default": null,
+        "nullable": "YES"
+      },
+      {
+        "name": "refund_data",
+        "type": "json",
+        "extra": "",
+        "default": null,
+        "nullable": "YES"
+      },
+      {
+        "name": "refunded_at",
+        "type": "timestamp",
+        "extra": "",
+        "default": null,
+        "nullable": "YES"
+      },
+      {
+        "name": "refund_reason",
+        "type": "text",
+        "extra": "",
+        "default": null,
+        "nullable": "YES"
+      },
+      {
+        "name": "refunded_guest_count",
+        "type": "int",
+        "extra": "",
+        "default": null,
+        "nullable": "YES"
+      },
+      {
+        "name": "platform_earnings_refunded",
+        "type": "int",
+        "extra": "",
+        "default": "0",
+        "nullable": "NO"
+      },
+      {
+        "name": "total_refunded",
+        "type": "int",
+        "extra": "",
+        "default": "0",
+        "nullable": "NO"
+      },
+      {
+        "name": "original_total",
+        "type": "int",
+        "extra": "",
+        "default": "0",
+        "nullable": "NO"
+      },
+      {
+        "name": "meta",
+        "type": "json",
+        "extra": "",
+        "default": null,
+        "nullable": "YES"
+      },
+      {
+        "name": "source",
+        "type": "char(25)",
+        "extra": "",
+        "default": null,
+        "nullable": "YES"
+      },
+      {
+        "name": "device",
+        "type": "char(25)",
+        "extra": "",
+        "default": null,
+        "nullable": "YES"
+      }
+    ]
+  },
+  {
+    "table": "breezy_sessions",
+    "columns": [
+      {
+        "name": "id",
+        "type": "bigint unsigned",
+        "extra": "auto_increment",
+        "default": null,
+        "nullable": "NO"
+      },
+      {
+        "name": "authenticatable_type",
+        "type": "varchar(255)",
+        "extra": "",
+        "default": null,
+        "nullable": "NO"
+      },
+      {
+        "name": "authenticatable_id",
+        "type": "bigint unsigned",
+        "extra": "",
+        "default": null,
+        "nullable": "NO"
+      },
+      {
+        "name": "panel_id",
+        "type": "varchar(255)",
+        "extra": "",
+        "default": null,
+        "nullable": "YES"
+      },
+      {
+        "name": "guard",
+        "type": "varchar(255)",
+        "extra": "",
+        "default": null,
+        "nullable": "YES"
+      },
+      {
+        "name": "ip_address",
+        "type": "varchar(45)",
+        "extra": "",
+        "default": null,
+        "nullable": "YES"
+      },
+      {
+        "name": "user_agent",
+        "type": "text",
+        "extra": "",
+        "default": null,
+        "nullable": "YES"
+      },
+      {
+        "name": "expires_at",
+        "type": "timestamp",
+        "extra": "",
+        "default": null,
+        "nullable": "YES"
+      },
+      {
+        "name": "two_factor_secret",
+        "type": "text",
+        "extra": "",
+        "default": null,
+        "nullable": "YES"
+      },
+      {
+        "name": "two_factor_recovery_codes",
+        "type": "text",
+        "extra": "",
+        "default": null,
+        "nullable": "YES"
+      },
+      {
+        "name": "two_factor_confirmed_at",
+        "type": "timestamp",
+        "extra": "",
+        "default": null,
+        "nullable": "YES"
+      },
+      {
+        "name": "created_at",
+        "type": "timestamp",
+        "extra": "",
+        "default": null,
+        "nullable": "YES"
+      },
+      {
+        "name": "updated_at",
+        "type": "timestamp",
+        "extra": "",
+        "default": null,
+        "nullable": "YES"
+      }
+    ]
+  },
+  {
+    "table": "cache",
+    "columns": [
+      {
+        "name": "key",
+        "type": "varchar(255)",
+        "extra": "",
+        "default": null,
+        "nullable": "NO"
+      },
+      {
+        "name": "value",
+        "type": "mediumtext",
+        "extra": "",
+        "default": null,
+        "nullable": "NO"
+      },
+      {
+        "name": "expiration",
+        "type": "int",
+        "extra": "",
+        "default": null,
+        "nullable": "NO"
+      }
+    ]
+  },
+  {
+    "table": "cache_locks",
+    "columns": [
+      {
+        "name": "key",
+        "type": "varchar(255)",
+        "extra": "",
+        "default": null,
+        "nullable": "NO"
+      },
+      {
+        "name": "owner",
+        "type": "varchar(255)",
+        "extra": "",
+        "default": null,
+        "nullable": "NO"
+      },
+      {
+        "name": "expiration",
+        "type": "int",
+        "extra": "",
+        "default": null,
+        "nullable": "NO"
+      }
+    ]
+  },
+  {
+    "table": "concierges",
+    "columns": [
+      {
+        "name": "id",
+        "type": "bigint unsigned",
+        "extra": "auto_increment",
+        "default": null,
+        "nullable": "NO"
+      },
+      {
+        "name": "user_id",
+        "type": "bigint unsigned",
+        "extra": "",
+        "default": null,
+        "nullable": "NO"
+      },
+      {
+        "name": "hotel_name",
+        "type": "varchar(255)",
+        "extra": "",
+        "default": null,
+        "nullable": "NO"
+      },
+      {
+        "name": "allowed_venue_ids",
+        "type": "json",
+        "extra": "",
+        "default": null,
+        "nullable": "YES"
+      },
+      {
+        "name": "venue_group_id",
+        "type": "bigint unsigned",
+        "extra": "",
+        "default": null,
+        "nullable": "YES"
+      },
+      {
+        "name": "hotel_phone",
+        "type": "varchar(255)",
+        "extra": "",
+        "default": null,
+        "nullable": "YES"
+      },
+      {
+        "name": "created_at",
+        "type": "timestamp",
+        "extra": "",
+        "default": null,
+        "nullable": "YES"
+      },
+      {
+        "name": "updated_at",
+        "type": "timestamp",
+        "extra": "",
+        "default": null,
+        "nullable": "YES"
+      }
+    ]
+  },
+  {
+    "table": "devices",
+    "columns": [
+      {
+        "name": "id",
+        "type": "bigint unsigned",
+        "extra": "auto_increment",
+        "default": null,
+        "nullable": "NO"
+      },
+      {
+        "name": "user_id",
+        "type": "bigint unsigned",
+        "extra": "",
+        "default": null,
+        "nullable": "NO"
+      },
+      {
+        "name": "key",
+        "type": "varchar(255)",
+        "extra": "",
+        "default": null,
+        "nullable": "NO"
+      },
+      {
+        "name": "verified",
+        "type": "tinyint(1)",
+        "extra": "",
+        "default": "0",
+        "nullable": "NO"
+      },
+      {
+        "name": "created_at",
+        "type": "timestamp",
+        "extra": "",
+        "default": null,
+        "nullable": "YES"
+      },
+      {
+        "name": "updated_at",
+        "type": "timestamp",
+        "extra": "",
+        "default": null,
+        "nullable": "YES"
+      }
+    ]
+  },
+  {
+    "table": "earnings",
+    "columns": [
+      {
+        "name": "id",
+        "type": "bigint unsigned",
+        "extra": "auto_increment",
+        "default": null,
+        "nullable": "NO"
+      },
+      {
+        "name": "user_id",
+        "type": "bigint unsigned",
+        "extra": "",
+        "default": null,
+        "nullable": "NO"
+      },
+      {
+        "name": "booking_id",
+        "type": "bigint unsigned",
+        "extra": "",
+        "default": null,
+        "nullable": "NO"
+      },
+      {
+        "name": "payment_id",
+        "type": "bigint unsigned",
+        "extra": "",
+        "default": null,
+        "nullable": "YES"
+      },
+      {
+        "name": "type",
+        "type": "varchar(255)",
+        "extra": "",
+        "default": null,
+        "nullable": "NO"
+      },
+      {
+        "name": "amount",
+        "type": "int",
+        "extra": "",
+        "default": null,
+        "nullable": "NO"
+      },
+      {
+        "name": "currency",
+        "type": "varchar(255)",
+        "extra": "",
+        "default": "USD",
+        "nullable": "NO"
+      },
+      {
+        "name": "created_at",
+        "type": "timestamp",
+        "extra": "",
+        "default": null,
+        "nullable": "YES"
+      },
+      {
+        "name": "updated_at",
+        "type": "timestamp",
+        "extra": "",
+        "default": null,
+        "nullable": "YES"
+      },
+      {
+        "name": "confirmed_at",
+        "type": "timestamp",
+        "extra": "",
+        "default": null,
+        "nullable": "YES"
+      },
+      {
+        "name": "percentage",
+        "type": "int",
+        "extra": "",
+        "default": null,
+        "nullable": "NO"
+      },
+      {
+        "name": "percentage_of",
+        "type": "varchar(255)",
+        "extra": "",
+        "default": null,
+        "nullable": "NO"
+      }
+    ]
+  },
+  {
+    "table": "exports",
+    "columns": [
+      {
+        "name": "id",
+        "type": "bigint unsigned",
+        "extra": "auto_increment",
+        "default": null,
+        "nullable": "NO"
+      },
+      {
+        "name": "completed_at",
+        "type": "timestamp",
+        "extra": "",
+        "default": null,
+        "nullable": "YES"
+      },
+      {
+        "name": "file_disk",
+        "type": "varchar(255)",
+        "extra": "",
+        "default": null,
+        "nullable": "NO"
+      },
+      {
+        "name": "file_name",
+        "type": "varchar(255)",
+        "extra": "",
+        "default": null,
+        "nullable": "YES"
+      },
+      {
+        "name": "exporter",
+        "type": "varchar(255)",
+        "extra": "",
+        "default": null,
+        "nullable": "NO"
+      },
+      {
+        "name": "processed_rows",
+        "type": "int unsigned",
+        "extra": "",
+        "default": "0",
+        "nullable": "NO"
+      },
+      {
+        "name": "total_rows",
+        "type": "int unsigned",
+        "extra": "",
+        "default": null,
+        "nullable": "NO"
+      },
+      {
+        "name": "successful_rows",
+        "type": "int unsigned",
+        "extra": "",
+        "default": "0",
+        "nullable": "NO"
+      },
+      {
+        "name": "user_id",
+        "type": "bigint unsigned",
+        "extra": "",
+        "default": null,
+        "nullable": "NO"
+      },
+      {
+        "name": "created_at",
+        "type": "timestamp",
+        "extra": "",
+        "default": null,
+        "nullable": "YES"
+      },
+      {
+        "name": "updated_at",
+        "type": "timestamp",
+        "extra": "",
+        "default": null,
+        "nullable": "YES"
+      }
+    ]
+  },
+  {
+    "table": "failed_jobs",
+    "columns": [
+      {
+        "name": "id",
+        "type": "bigint unsigned",
+        "extra": "auto_increment",
+        "default": null,
+        "nullable": "NO"
+      },
+      {
+        "name": "uuid",
+        "type": "varchar(255)",
+        "extra": "",
+        "default": null,
+        "nullable": "NO"
+      },
+      {
+        "name": "connection",
+        "type": "text",
+        "extra": "",
+        "default": null,
+        "nullable": "NO"
+      },
+      {
+        "name": "queue",
+        "type": "text",
+        "extra": "",
+        "default": null,
+        "nullable": "NO"
+      },
+      {
+        "name": "payload",
+        "type": "longtext",
+        "extra": "",
+        "default": null,
+        "nullable": "NO"
+      },
+      {
+        "name": "exception",
+        "type": "longtext",
+        "extra": "",
+        "default": null,
+        "nullable": "NO"
+      },
+      {
+        "name": "failed_at",
+        "type": "timestamp",
+        "extra": "DEFAULT_GENERATED",
+        "default": "CURRENT_TIMESTAMP",
+        "nullable": "NO"
+      }
+    ]
+  },
+  {
+    "table": "feedback",
+    "columns": [
+      {
+        "name": "id",
+        "type": "bigint unsigned",
+        "extra": "auto_increment",
+        "default": null,
+        "nullable": "NO"
+      },
+      {
+        "name": "user_id",
+        "type": "bigint unsigned",
+        "extra": "",
+        "default": null,
+        "nullable": "NO"
+      },
+      {
+        "name": "message",
+        "type": "text",
+        "extra": "",
+        "default": null,
+        "nullable": "NO"
+      },
+      {
+        "name": "exception_message",
+        "type": "text",
+        "extra": "",
+        "default": null,
+        "nullable": "YES"
+      },
+      {
+        "name": "exception_trace",
+        "type": "text",
+        "extra": "",
+        "default": null,
+        "nullable": "YES"
+      },
+      {
+        "name": "created_at",
+        "type": "timestamp",
+        "extra": "",
+        "default": null,
+        "nullable": "YES"
+      },
+      {
+        "name": "updated_at",
+        "type": "timestamp",
+        "extra": "",
+        "default": null,
+        "nullable": "YES"
+      }
+    ]
+  },
+  {
+    "table": "job_batches",
+    "columns": [
+      {
+        "name": "id",
+        "type": "varchar(255)",
+        "extra": "",
+        "default": null,
+        "nullable": "NO"
+      },
+      {
+        "name": "name",
+        "type": "varchar(255)",
+        "extra": "",
+        "default": null,
+        "nullable": "NO"
+      },
+      {
+        "name": "total_jobs",
+        "type": "int",
+        "extra": "",
+        "default": null,
+        "nullable": "NO"
+      },
+      {
+        "name": "pending_jobs",
+        "type": "int",
+        "extra": "",
+        "default": null,
+        "nullable": "NO"
+      },
+      {
+        "name": "failed_jobs",
+        "type": "int",
+        "extra": "",
+        "default": null,
+        "nullable": "NO"
+      },
+      {
+        "name": "failed_job_ids",
+        "type": "longtext",
+        "extra": "",
+        "default": null,
+        "nullable": "NO"
+      },
+      {
+        "name": "options",
+        "type": "mediumtext",
+        "extra": "",
+        "default": null,
+        "nullable": "YES"
+      },
+      {
+        "name": "cancelled_at",
+        "type": "int",
+        "extra": "",
+        "default": null,
+        "nullable": "YES"
+      },
+      {
+        "name": "created_at",
+        "type": "int",
+        "extra": "",
+        "default": null,
+        "nullable": "NO"
+      },
+      {
+        "name": "finished_at",
+        "type": "int",
+        "extra": "",
+        "default": null,
+        "nullable": "YES"
+      }
+    ]
+  },
+  {
+    "table": "jobs",
+    "columns": [
+      {
+        "name": "id",
+        "type": "bigint unsigned",
+        "extra": "auto_increment",
+        "default": null,
+        "nullable": "NO"
+      },
+      {
+        "name": "queue",
+        "type": "varchar(255)",
+        "extra": "",
+        "default": null,
+        "nullable": "NO"
+      },
+      {
+        "name": "payload",
+        "type": "longtext",
+        "extra": "",
+        "default": null,
+        "nullable": "NO"
+      },
+      {
+        "name": "attempts",
+        "type": "tinyint unsigned",
+        "extra": "",
+        "default": null,
+        "nullable": "NO"
+      },
+      {
+        "name": "reserved_at",
+        "type": "int unsigned",
+        "extra": "",
+        "default": null,
+        "nullable": "YES"
+      },
+      {
+        "name": "available_at",
+        "type": "int unsigned",
+        "extra": "",
+        "default": null,
+        "nullable": "NO"
+      },
+      {
+        "name": "created_at",
+        "type": "int unsigned",
+        "extra": "",
+        "default": null,
+        "nullable": "NO"
+      }
+    ]
+  },
+  {
+    "table": "messages",
+    "columns": [
+      {
+        "name": "id",
+        "type": "bigint unsigned",
+        "extra": "auto_increment",
+        "default": null,
+        "nullable": "NO"
+      },
+      {
+        "name": "user_id",
+        "type": "bigint unsigned",
+        "extra": "",
+        "default": null,
+        "nullable": "NO"
+      },
+      {
+        "name": "announcement_id",
+        "type": "bigint unsigned",
+        "extra": "",
+        "default": null,
+        "nullable": "NO"
+      },
+      {
+        "name": "read_at",
+        "type": "datetime",
+        "extra": "",
+        "default": null,
+        "nullable": "YES"
+      },
+      {
+        "name": "created_at",
+        "type": "timestamp",
+        "extra": "",
+        "default": null,
+        "nullable": "YES"
+      },
+      {
+        "name": "updated_at",
+        "type": "timestamp",
+        "extra": "",
+        "default": null,
+        "nullable": "YES"
+      }
+    ]
+  },
+  {
+    "table": "migrations",
+    "columns": [
+      {
+        "name": "id",
+        "type": "int unsigned",
+        "extra": "auto_increment",
+        "default": null,
+        "nullable": "NO"
+      },
+      {
+        "name": "migration",
+        "type": "varchar(255)",
+        "extra": "",
+        "default": null,
+        "nullable": "NO"
+      },
+      {
+        "name": "batch",
+        "type": "int",
+        "extra": "",
+        "default": null,
+        "nullable": "NO"
+      }
+    ]
+  },
+  {
+    "table": "model_has_permissions",
+    "columns": [
+      {
+        "name": "permission_id",
+        "type": "bigint unsigned",
+        "extra": "",
+        "default": null,
+        "nullable": "NO"
+      },
+      {
+        "name": "model_type",
+        "type": "varchar(255)",
+        "extra": "",
+        "default": null,
+        "nullable": "NO"
+      },
+      {
+        "name": "model_id",
+        "type": "bigint unsigned",
+        "extra": "",
+        "default": null,
+        "nullable": "NO"
+      }
+    ]
+  },
+  {
+    "table": "model_has_roles",
+    "columns": [
+      {
+        "name": "role_id",
+        "type": "bigint unsigned",
+        "extra": "",
+        "default": null,
+        "nullable": "NO"
+      },
+      {
+        "name": "model_type",
+        "type": "varchar(255)",
+        "extra": "",
+        "default": null,
+        "nullable": "NO"
+      },
+      {
+        "name": "model_id",
+        "type": "bigint unsigned",
+        "extra": "",
+        "default": null,
+        "nullable": "NO"
+      }
+    ]
+  },
+  {
+    "table": "notifications",
+    "columns": [
+      {
+        "name": "id",
+        "type": "char(36)",
+        "extra": "",
+        "default": null,
+        "nullable": "NO"
+      },
+      {
+        "name": "type",
+        "type": "varchar(255)",
+        "extra": "",
+        "default": null,
+        "nullable": "NO"
+      },
+      {
+        "name": "notifiable_type",
+        "type": "varchar(255)",
+        "extra": "",
+        "default": null,
+        "nullable": "NO"
+      },
+      {
+        "name": "notifiable_id",
+        "type": "bigint unsigned",
+        "extra": "",
+        "default": null,
+        "nullable": "NO"
+      },
+      {
+        "name": "data",
+        "type": "text",
+        "extra": "",
+        "default": null,
+        "nullable": "NO"
+      },
+      {
+        "name": "read_at",
+        "type": "timestamp",
+        "extra": "",
+        "default": null,
+        "nullable": "YES"
+      },
+      {
+        "name": "created_at",
+        "type": "timestamp",
+        "extra": "",
+        "default": null,
+        "nullable": "YES"
+      },
+      {
+        "name": "updated_at",
+        "type": "timestamp",
+        "extra": "",
+        "default": null,
+        "nullable": "YES"
+      }
+    ]
+  },
+  {
+    "table": "outgoing_payment_earnings",
+    "columns": [
+      {
+        "name": "id",
+        "type": "bigint unsigned",
+        "extra": "auto_increment",
+        "default": null,
+        "nullable": "NO"
+      },
+      {
+        "name": "outgoing_payment_id",
+        "type": "bigint unsigned",
+        "extra": "",
+        "default": null,
+        "nullable": "NO"
+      },
+      {
+        "name": "earning_id",
+        "type": "bigint unsigned",
+        "extra": "",
+        "default": null,
+        "nullable": "NO"
+      },
+      {
+        "name": "created_at",
+        "type": "timestamp",
+        "extra": "",
+        "default": null,
+        "nullable": "YES"
+      },
+      {
+        "name": "updated_at",
+        "type": "timestamp",
+        "extra": "",
+        "default": null,
+        "nullable": "YES"
+      }
+    ]
+  },
+  {
+    "table": "outgoing_payments",
+    "columns": [
+      {
+        "name": "id",
+        "type": "bigint unsigned",
+        "extra": "auto_increment",
+        "default": null,
+        "nullable": "NO"
+      },
+      {
+        "name": "user_id",
+        "type": "bigint unsigned",
+        "extra": "",
+        "default": null,
+        "nullable": "NO"
+      },
+      {
+        "name": "wise_transfer_id",
+        "type": "varchar(255)",
+        "extra": "",
+        "default": null,
+        "nullable": "YES"
+      },
+      {
+        "name": "status",
+        "type": "varchar(255)",
+        "extra": "",
+        "default": null,
+        "nullable": "NO"
+      },
+      {
+        "name": "payment_type",
+        "type": "varchar(255)",
+        "extra": "",
+        "default": null,
+        "nullable": "NO"
+      },
+      {
+        "name": "amount",
+        "type": "int",
+        "extra": "",
+        "default": null,
+        "nullable": "NO"
+      },
+      {
+        "name": "currency",
+        "type": "varchar(255)",
+        "extra": "",
+        "default": null,
+        "nullable": "NO"
+      },
+      {
+        "name": "payment_details",
+        "type": "json",
+        "extra": "",
+        "default": null,
+        "nullable": "NO"
+      },
+      {
+        "name": "wise_response",
+        "type": "json",
+        "extra": "",
+        "default": null,
+        "nullable": "YES"
+      },
+      {
+        "name": "meta",
+        "type": "json",
+        "extra": "",
+        "default": null,
+        "nullable": "YES"
+      },
+      {
+        "name": "processed_at",
+        "type": "datetime",
+        "extra": "",
+        "default": null,
+        "nullable": "YES"
+      },
+      {
+        "name": "completed_at",
+        "type": "datetime",
+        "extra": "",
+        "default": null,
+        "nullable": "YES"
+      },
+      {
+        "name": "failed_at",
+        "type": "datetime",
+        "extra": "",
+        "default": null,
+        "nullable": "YES"
+      },
+      {
+        "name": "failure_reason",
+        "type": "varchar(255)",
+        "extra": "",
+        "default": null,
+        "nullable": "YES"
+      },
+      {
+        "name": "created_at",
+        "type": "timestamp",
+        "extra": "",
+        "default": null,
+        "nullable": "YES"
+      },
+      {
+        "name": "updated_at",
+        "type": "timestamp",
+        "extra": "",
+        "default": null,
+        "nullable": "YES"
+      },
+      {
+        "name": "deleted_at",
+        "type": "timestamp",
+        "extra": "",
+        "default": null,
+        "nullable": "YES"
+      }
+    ]
+  },
+  {
+    "table": "partners",
+    "columns": [
+      {
+        "name": "id",
+        "type": "bigint unsigned",
+        "extra": "auto_increment",
+        "default": null,
+        "nullable": "NO"
+      },
+      {
+        "name": "user_id",
+        "type": "bigint unsigned",
+        "extra": "",
+        "default": null,
+        "nullable": "NO"
+      },
+      {
+        "name": "percentage",
+        "type": "int",
+        "extra": "",
+        "default": "10",
+        "nullable": "NO"
+      },
+      {
+        "name": "company_name",
+        "type": "varchar(255)",
+        "extra": "",
+        "default": null,
+        "nullable": "YES"
+      },
+      {
+        "name": "created_at",
+        "type": "timestamp",
+        "extra": "",
+        "default": null,
+        "nullable": "YES"
+      },
+      {
+        "name": "updated_at",
+        "type": "timestamp",
+        "extra": "",
+        "default": null,
+        "nullable": "YES"
+      }
+    ]
+  },
+  {
+    "table": "password_reset_tokens",
+    "columns": [
+      {
+        "name": "email",
+        "type": "varchar(255)",
+        "extra": "",
+        "default": null,
+        "nullable": "NO"
+      },
+      {
+        "name": "token",
+        "type": "varchar(255)",
+        "extra": "",
+        "default": null,
+        "nullable": "NO"
+      },
+      {
+        "name": "created_at",
+        "type": "timestamp",
+        "extra": "",
+        "default": null,
+        "nullable": "YES"
+      }
+    ]
+  },
+  {
+    "table": "payment_items",
+    "columns": [
+      {
+        "name": "id",
+        "type": "bigint unsigned",
+        "extra": "auto_increment",
+        "default": null,
+        "nullable": "NO"
+      },
+      {
+        "name": "user_id",
+        "type": "bigint unsigned",
+        "extra": "",
+        "default": null,
+        "nullable": "NO"
+      },
+      {
+        "name": "payment_id",
+        "type": "bigint unsigned",
+        "extra": "",
+        "default": null,
+        "nullable": "NO"
+      },
+      {
+        "name": "currency",
+        "type": "varchar(255)",
+        "extra": "",
+        "default": null,
+        "nullable": "NO"
+      },
+      {
+        "name": "amount",
+        "type": "int",
+        "extra": "",
+        "default": null,
+        "nullable": "NO"
+      },
+      {
+        "name": "created_at",
+        "type": "timestamp",
+        "extra": "",
+        "default": null,
+        "nullable": "YES"
+      },
+      {
+        "name": "updated_at",
+        "type": "timestamp",
+        "extra": "",
+        "default": null,
+        "nullable": "YES"
+      }
+    ]
+  },
+  {
+    "table": "payments",
+    "columns": [
+      {
+        "name": "id",
+        "type": "bigint unsigned",
+        "extra": "auto_increment",
+        "default": null,
+        "nullable": "NO"
+      },
+      {
+        "name": "title",
+        "type": "varchar(255)",
+        "extra": "",
+        "default": null,
+        "nullable": "NO"
+      },
+      {
+        "name": "amount",
+        "type": "int",
+        "extra": "",
+        "default": null,
+        "nullable": "NO"
+      },
+      {
+        "name": "currency",
+        "type": "varchar(255)",
+        "extra": "",
+        "default": "USD",
+        "nullable": "NO"
+      },
+      {
+        "name": "status",
+        "type": "varchar(255)",
+        "extra": "",
+        "default": "pending",
+        "nullable": "NO"
+      },
+      {
+        "name": "created_at",
+        "type": "timestamp",
+        "extra": "",
+        "default": null,
+        "nullable": "YES"
+      },
+      {
+        "name": "updated_at",
+        "type": "timestamp",
+        "extra": "",
+        "default": null,
+        "nullable": "YES"
+      }
+    ]
+  },
+  {
+    "table": "permissions",
+    "columns": [
+      {
+        "name": "id",
+        "type": "bigint unsigned",
+        "extra": "auto_increment",
+        "default": null,
+        "nullable": "NO"
+      },
+      {
+        "name": "name",
+        "type": "varchar(255)",
+        "extra": "",
+        "default": null,
+        "nullable": "NO"
+      },
+      {
+        "name": "guard_name",
+        "type": "varchar(255)",
+        "extra": "",
+        "default": null,
+        "nullable": "NO"
+      },
+      {
+        "name": "created_at",
+        "type": "timestamp",
+        "extra": "",
+        "default": null,
+        "nullable": "YES"
+      },
+      {
+        "name": "updated_at",
+        "type": "timestamp",
+        "extra": "",
+        "default": null,
+        "nullable": "YES"
+      }
+    ]
+  },
+  {
+    "table": "personal_access_tokens",
+    "columns": [
+      {
+        "name": "id",
+        "type": "bigint unsigned",
+        "extra": "auto_increment",
+        "default": null,
+        "nullable": "NO"
+      },
+      {
+        "name": "tokenable_type",
+        "type": "varchar(255)",
+        "extra": "",
+        "default": null,
+        "nullable": "NO"
+      },
+      {
+        "name": "tokenable_id",
+        "type": "bigint unsigned",
+        "extra": "",
+        "default": null,
+        "nullable": "NO"
+      },
+      {
+        "name": "name",
+        "type": "varchar(255)",
+        "extra": "",
+        "default": null,
+        "nullable": "NO"
+      },
+      {
+        "name": "token",
+        "type": "varchar(64)",
+        "extra": "",
+        "default": null,
+        "nullable": "NO"
+      },
+      {
+        "name": "abilities",
+        "type": "text",
+        "extra": "",
+        "default": null,
+        "nullable": "YES"
+      },
+      {
+        "name": "last_used_at",
+        "type": "timestamp",
+        "extra": "",
+        "default": null,
+        "nullable": "YES"
+      },
+      {
+        "name": "expires_at",
+        "type": "timestamp",
+        "extra": "",
+        "default": null,
+        "nullable": "YES"
+      },
+      {
+        "name": "created_at",
+        "type": "timestamp",
+        "extra": "",
+        "default": null,
+        "nullable": "YES"
+      },
+      {
+        "name": "updated_at",
+        "type": "timestamp",
+        "extra": "",
+        "default": null,
+        "nullable": "YES"
+      }
+    ]
+  },
+  {
+    "table": "pulse_aggregates",
+    "columns": [
+      {
+        "name": "id",
+        "type": "bigint unsigned",
+        "extra": "auto_increment",
+        "default": null,
+        "nullable": "NO"
+      },
+      {
+        "name": "bucket",
+        "type": "int unsigned",
+        "extra": "",
+        "default": null,
+        "nullable": "NO"
+      },
+      {
+        "name": "period",
+        "type": "mediumint unsigned",
+        "extra": "",
+        "default": null,
+        "nullable": "NO"
+      },
+      {
+        "name": "type",
+        "type": "varchar(255)",
+        "extra": "",
+        "default": null,
+        "nullable": "NO"
+      },
+      {
+        "name": "key",
+        "type": "mediumtext",
+        "extra": "",
+        "default": null,
+        "nullable": "NO"
+      },
+      {
+        "name": "key_hash",
+        "type": "binary(16)",
+        "extra": "VIRTUAL GENERATED",
+        "default": null,
+        "nullable": "YES"
+      },
+      {
+        "name": "aggregate",
+        "type": "varchar(255)",
+        "extra": "",
+        "default": null,
+        "nullable": "NO"
+      },
+      {
+        "name": "value",
+        "type": "decimal(20,2)",
+        "extra": "",
+        "default": null,
+        "nullable": "NO"
+      },
+      {
+        "name": "count",
+        "type": "int unsigned",
+        "extra": "",
+        "default": null,
+        "nullable": "YES"
+      }
+    ]
+  },
+  {
+    "table": "pulse_entries",
+    "columns": [
+      {
+        "name": "id",
+        "type": "bigint unsigned",
+        "extra": "auto_increment",
+        "default": null,
+        "nullable": "NO"
+      },
+      {
+        "name": "timestamp",
+        "type": "int unsigned",
+        "extra": "",
+        "default": null,
+        "nullable": "NO"
+      },
+      {
+        "name": "type",
+        "type": "varchar(255)",
+        "extra": "",
+        "default": null,
+        "nullable": "NO"
+      },
+      {
+        "name": "key",
+        "type": "mediumtext",
+        "extra": "",
+        "default": null,
+        "nullable": "NO"
+      },
+      {
+        "name": "key_hash",
+        "type": "binary(16)",
+        "extra": "VIRTUAL GENERATED",
+        "default": null,
+        "nullable": "YES"
+      },
+      {
+        "name": "value",
+        "type": "bigint",
+        "extra": "",
+        "default": null,
+        "nullable": "YES"
+      }
+    ]
+  },
+  {
+    "table": "pulse_values",
+    "columns": [
+      {
+        "name": "id",
+        "type": "bigint unsigned",
+        "extra": "auto_increment",
+        "default": null,
+        "nullable": "NO"
+      },
+      {
+        "name": "timestamp",
+        "type": "int unsigned",
+        "extra": "",
+        "default": null,
+        "nullable": "NO"
+      },
+      {
+        "name": "type",
+        "type": "varchar(255)",
+        "extra": "",
+        "default": null,
+        "nullable": "NO"
+      },
+      {
+        "name": "key",
+        "type": "mediumtext",
+        "extra": "",
+        "default": null,
+        "nullable": "NO"
+      },
+      {
+        "name": "key_hash",
+        "type": "binary(16)",
+        "extra": "VIRTUAL GENERATED",
+        "default": null,
+        "nullable": "YES"
+      },
+      {
+        "name": "value",
+        "type": "mediumtext",
+        "extra": "",
+        "default": null,
+        "nullable": "NO"
+      }
+    ]
+  },
+  {
+    "table": "referrals",
+    "columns": [
+      {
+        "name": "id",
+        "type": "char(36)",
+        "extra": "",
+        "default": null,
+        "nullable": "NO"
+      },
+      {
+        "name": "referrer_id",
+        "type": "bigint unsigned",
+        "extra": "",
+        "default": null,
+        "nullable": "NO"
+      },
+      {
+        "name": "email",
+        "type": "varchar(255)",
+        "extra": "",
+        "default": null,
+        "nullable": "YES"
+      },
+      {
+        "name": "phone",
+        "type": "varchar(255)",
+        "extra": "",
+        "default": null,
+        "nullable": "YES"
+      },
+      {
+        "name": "created_at",
+        "type": "timestamp",
+        "extra": "",
+        "default": null,
+        "nullable": "YES"
+      },
+      {
+        "name": "updated_at",
+        "type": "timestamp",
+        "extra": "",
+        "default": null,
+        "nullable": "YES"
+      },
+      {
+        "name": "user_id",
+        "type": "bigint unsigned",
+        "extra": "",
+        "default": null,
+        "nullable": "YES"
+      },
+      {
+        "name": "secured_at",
+        "type": "datetime",
+        "extra": "",
+        "default": null,
+        "nullable": "YES"
+      },
+      {
+        "name": "type",
+        "type": "varchar(255)",
+        "extra": "",
+        "default": "concierge",
+        "nullable": "NO"
+      },
+      {
+        "name": "referrer_type",
+        "type": "varchar(255)",
+        "extra": "",
+        "default": "concierge",
+        "nullable": "NO"
+      },
+      {
+        "name": "first_name",
+        "type": "varchar(255)",
+        "extra": "",
+        "default": null,
+        "nullable": "YES"
+      },
+      {
+        "name": "last_name",
+        "type": "varchar(255)",
+        "extra": "",
+        "default": null,
+        "nullable": "YES"
+      },
+      {
+        "name": "company_name",
+        "type": "varchar(255)",
+        "extra": "",
+        "default": null,
+        "nullable": "YES"
+      },
+      {
+        "name": "meta",
+        "type": "json",
+        "extra": "",
+        "default": null,
+        "nullable": "YES"
+      },
+      {
+        "name": "notified_at",
+        "type": "datetime",
+        "extra": "",
+        "default": null,
+        "nullable": "YES"
+      },
+      {
+        "name": "reminded_at",
+        "type": "datetime",
+        "extra": "",
+        "default": null,
+        "nullable": "YES"
+      },
+      {
+        "name": "region_id",
+        "type": "varchar(255)",
+        "extra": "",
+        "default": null,
+        "nullable": "YES"
+      }
+    ]
+  },
+  {
+    "table": "role_has_permissions",
+    "columns": [
+      {
+        "name": "permission_id",
+        "type": "bigint unsigned",
+        "extra": "",
+        "default": null,
+        "nullable": "NO"
+      },
+      {
+        "name": "role_id",
+        "type": "bigint unsigned",
+        "extra": "",
+        "default": null,
+        "nullable": "NO"
+      }
+    ]
+  },
+  {
+    "table": "role_profiles",
+    "columns": [
+      {
+        "name": "id",
+        "type": "bigint unsigned",
+        "extra": "auto_increment",
+        "default": null,
+        "nullable": "NO"
+      },
+      {
+        "name": "user_id",
+        "type": "bigint unsigned",
+        "extra": "",
+        "default": null,
+        "nullable": "NO"
+      },
+      {
+        "name": "role_id",
+        "type": "bigint unsigned",
+        "extra": "",
+        "default": null,
+        "nullable": "NO"
+      },
+      {
+        "name": "name",
+        "type": "varchar(255)",
+        "extra": "",
+        "default": null,
+        "nullable": "NO"
+      },
+      {
+        "name": "is_active",
+        "type": "tinyint(1)",
+        "extra": "",
+        "default": "0",
+        "nullable": "NO"
+      },
+      {
+        "name": "created_at",
+        "type": "timestamp",
+        "extra": "",
+        "default": null,
+        "nullable": "YES"
+      },
+      {
+        "name": "updated_at",
+        "type": "timestamp",
+        "extra": "",
+        "default": null,
+        "nullable": "YES"
+      }
+    ]
+  },
+  {
+    "table": "roles",
+    "columns": [
+      {
+        "name": "id",
+        "type": "bigint unsigned",
+        "extra": "auto_increment",
+        "default": null,
+        "nullable": "NO"
+      },
+      {
+        "name": "name",
+        "type": "varchar(255)",
+        "extra": "",
+        "default": null,
+        "nullable": "NO"
+      },
+      {
+        "name": "guard_name",
+        "type": "varchar(255)",
+        "extra": "",
+        "default": null,
+        "nullable": "NO"
+      },
+      {
+        "name": "created_at",
+        "type": "timestamp",
+        "extra": "",
+        "default": null,
+        "nullable": "YES"
+      },
+      {
+        "name": "updated_at",
+        "type": "timestamp",
+        "extra": "",
+        "default": null,
+        "nullable": "YES"
+      }
+    ]
+  },
+  {
+    "table": "schedule_templates",
+    "columns": [
+      {
+        "name": "id",
+        "type": "bigint unsigned",
+        "extra": "auto_increment",
+        "default": null,
+        "nullable": "NO"
+      },
+      {
+        "name": "venue_id",
+        "type": "bigint unsigned",
+        "extra": "",
+        "default": null,
+        "nullable": "NO"
+      },
+      {
+        "name": "day_of_week",
+        "type": "varchar(255)",
+        "extra": "",
+        "default": null,
+        "nullable": "NO"
+      },
+      {
+        "name": "start_time",
+        "type": "time",
+        "extra": "",
+        "default": null,
+        "nullable": "NO"
+      },
+      {
+        "name": "end_time",
+        "type": "time",
+        "extra": "",
+        "default": null,
+        "nullable": "NO"
+      },
+      {
+        "name": "is_available",
+        "type": "tinyint(1)",
+        "extra": "",
+        "default": null,
+        "nullable": "NO"
+      },
+      {
+        "name": "available_tables",
+        "type": "int",
+        "extra": "",
+        "default": null,
+        "nullable": "NO"
+      },
+      {
+        "name": "price_per_head",
+        "type": "int",
+        "extra": "",
+        "default": null,
+        "nullable": "YES"
+      },
+      {
+        "name": "prime_time",
+        "type": "tinyint(1)",
+        "extra": "",
+        "default": "0",
+        "nullable": "NO"
+      },
+      {
+        "name": "prime_time_fee",
+        "type": "int",
+        "extra": "",
+        "default": "0",
+        "nullable": "NO"
+      },
+      {
+        "name": "party_size",
+        "type": "int",
+        "extra": "",
+        "default": "2",
+        "nullable": "NO"
+      },
+      {
+        "name": "created_at",
+        "type": "timestamp",
+        "extra": "",
+        "default": null,
+        "nullable": "YES"
+      },
+      {
+        "name": "updated_at",
+        "type": "timestamp",
+        "extra": "",
+        "default": null,
+        "nullable": "YES"
+      },
+      {
+        "name": "minimum_spend_per_guest",
+        "type": "int",
+        "extra": "",
+        "default": null,
+        "nullable": "YES"
+      }
+    ]
+  },
+  {
+    "table": "sessions",
+    "columns": [
+      {
+        "name": "id",
+        "type": "varchar(255)",
+        "extra": "",
+        "default": null,
+        "nullable": "NO"
+      },
+      {
+        "name": "user_id",
+        "type": "bigint unsigned",
+        "extra": "",
+        "default": null,
+        "nullable": "YES"
+      },
+      {
+        "name": "ip_address",
+        "type": "varchar(45)",
+        "extra": "",
+        "default": null,
+        "nullable": "YES"
+      },
+      {
+        "name": "user_agent",
+        "type": "text",
+        "extra": "",
+        "default": null,
+        "nullable": "YES"
+      },
+      {
+        "name": "payload",
+        "type": "longtext",
+        "extra": "",
+        "default": null,
+        "nullable": "NO"
+      },
+      {
+        "name": "last_activity",
+        "type": "int",
+        "extra": "",
+        "default": null,
+        "nullable": "NO"
+      }
+    ]
+  },
+  {
+    "table": "short_url_visits",
+    "columns": [
+      {
+        "name": "id",
+        "type": "bigint unsigned",
+        "extra": "auto_increment",
+        "default": null,
+        "nullable": "NO"
+      },
+      {
+        "name": "short_url_id",
+        "type": "bigint unsigned",
+        "extra": "",
+        "default": null,
+        "nullable": "NO"
+      },
+      {
+        "name": "ip_address",
+        "type": "varchar(255)",
+        "extra": "",
+        "default": null,
+        "nullable": "YES"
+      },
+      {
+        "name": "operating_system",
+        "type": "varchar(255)",
+        "extra": "",
+        "default": null,
+        "nullable": "YES"
+      },
+      {
+        "name": "operating_system_version",
+        "type": "varchar(255)",
+        "extra": "",
+        "default": null,
+        "nullable": "YES"
+      },
+      {
+        "name": "browser",
+        "type": "varchar(255)",
+        "extra": "",
+        "default": null,
+        "nullable": "YES"
+      },
+      {
+        "name": "browser_version",
+        "type": "varchar(255)",
+        "extra": "",
+        "default": null,
+        "nullable": "YES"
+      },
+      {
+        "name": "referer_url",
+        "type": "varchar(255)",
+        "extra": "",
+        "default": null,
+        "nullable": "YES"
+      },
+      {
+        "name": "device_type",
+        "type": "varchar(255)",
+        "extra": "",
+        "default": null,
+        "nullable": "YES"
+      },
+      {
+        "name": "visited_at",
+        "type": "timestamp",
+        "extra": "",
+        "default": null,
+        "nullable": "NO"
+      },
+      {
+        "name": "created_at",
+        "type": "timestamp",
+        "extra": "",
+        "default": null,
+        "nullable": "YES"
+      },
+      {
+        "name": "updated_at",
+        "type": "timestamp",
+        "extra": "",
+        "default": null,
+        "nullable": "YES"
+      }
+    ]
+  },
+  {
+    "table": "short_urls",
+    "columns": [
+      {
+        "name": "id",
+        "type": "bigint unsigned",
+        "extra": "auto_increment",
+        "default": null,
+        "nullable": "NO"
+      },
+      {
+        "name": "destination_url",
+        "type": "text",
+        "extra": "",
+        "default": null,
+        "nullable": "NO"
+      },
+      {
+        "name": "url_key",
+        "type": "varchar(255)",
+        "extra": "",
+        "default": null,
+        "nullable": "NO"
+      },
+      {
+        "name": "default_short_url",
+        "type": "varchar(255)",
+        "extra": "",
+        "default": null,
+        "nullable": "NO"
+      },
+      {
+        "name": "single_use",
+        "type": "tinyint(1)",
+        "extra": "",
+        "default": null,
+        "nullable": "NO"
+      },
+      {
+        "name": "forward_query_params",
+        "type": "tinyint(1)",
+        "extra": "",
+        "default": "0",
+        "nullable": "NO"
+      },
+      {
+        "name": "track_visits",
+        "type": "tinyint(1)",
+        "extra": "",
+        "default": null,
+        "nullable": "NO"
+      },
+      {
+        "name": "redirect_status_code",
+        "type": "int",
+        "extra": "",
+        "default": "301",
+        "nullable": "NO"
+      },
+      {
+        "name": "track_ip_address",
+        "type": "tinyint(1)",
+        "extra": "",
+        "default": "0",
+        "nullable": "NO"
+      },
+      {
+        "name": "track_operating_system",
+        "type": "tinyint(1)",
+        "extra": "",
+        "default": "0",
+        "nullable": "NO"
+      },
+      {
+        "name": "track_operating_system_version",
+        "type": "tinyint(1)",
+        "extra": "",
+        "default": "0",
+        "nullable": "NO"
+      },
+      {
+        "name": "track_browser",
+        "type": "tinyint(1)",
+        "extra": "",
+        "default": "0",
+        "nullable": "NO"
+      },
+      {
+        "name": "track_browser_version",
+        "type": "tinyint(1)",
+        "extra": "",
+        "default": "0",
+        "nullable": "NO"
+      },
+      {
+        "name": "track_referer_url",
+        "type": "tinyint(1)",
+        "extra": "",
+        "default": "0",
+        "nullable": "NO"
+      },
+      {
+        "name": "track_device_type",
+        "type": "tinyint(1)",
+        "extra": "",
+        "default": "0",
+        "nullable": "NO"
+      },
+      {
+        "name": "activated_at",
+        "type": "timestamp",
+        "extra": "",
+        "default": "2024-03-21 14:55:47",
+        "nullable": "YES"
+      },
+      {
+        "name": "deactivated_at",
+        "type": "timestamp",
+        "extra": "",
+        "default": null,
+        "nullable": "YES"
+      },
+      {
+        "name": "created_at",
+        "type": "timestamp",
+        "extra": "",
+        "default": null,
+        "nullable": "YES"
+      },
+      {
+        "name": "updated_at",
+        "type": "timestamp",
+        "extra": "",
+        "default": null,
+        "nullable": "YES"
+      }
+    ]
+  },
+  {
+    "table": "sms_responses",
+    "columns": [
+      {
+        "name": "id",
+        "type": "bigint unsigned",
+        "extra": "auto_increment",
+        "default": null,
+        "nullable": "NO"
+      },
+      {
+        "name": "phone_number",
+        "type": "varchar(255)",
+        "extra": "",
+        "default": null,
+        "nullable": "NO"
+      },
+      {
+        "name": "message",
+        "type": "text",
+        "extra": "",
+        "default": null,
+        "nullable": "NO"
+      },
+      {
+        "name": "response",
+        "type": "json",
+        "extra": "",
+        "default": null,
+        "nullable": "NO"
+      },
+      {
+        "name": "created_at",
+        "type": "timestamp",
+        "extra": "",
+        "default": null,
+        "nullable": "YES"
+      },
+      {
+        "name": "updated_at",
+        "type": "timestamp",
+        "extra": "",
+        "default": null,
+        "nullable": "YES"
+      }
+    ]
+  },
+  {
+    "table": "sms_templates",
+    "columns": [
+      {
+        "name": "id",
+        "type": "bigint unsigned",
+        "extra": "auto_increment",
+        "default": null,
+        "nullable": "NO"
+      },
+      {
+        "name": "key",
+        "type": "varchar(255)",
+        "extra": "",
+        "default": null,
+        "nullable": "NO"
+      },
+      {
+        "name": "content",
+        "type": "text",
+        "extra": "",
+        "default": null,
+        "nullable": "NO"
+      },
+      {
+        "name": "created_at",
+        "type": "timestamp",
+        "extra": "",
+        "default": null,
+        "nullable": "YES"
+      },
+      {
+        "name": "updated_at",
+        "type": "timestamp",
+        "extra": "",
+        "default": null,
+        "nullable": "YES"
+      }
+    ]
+  },
+  {
+    "table": "special_pricing_venues",
+    "columns": [
+      {
+        "name": "id",
+        "type": "bigint unsigned",
+        "extra": "auto_increment",
+        "default": null,
+        "nullable": "NO"
+      },
+      {
+        "name": "venue_id",
+        "type": "bigint unsigned",
+        "extra": "",
+        "default": null,
+        "nullable": "NO"
+      },
+      {
+        "name": "date",
+        "type": "date",
+        "extra": "",
+        "default": null,
+        "nullable": "NO"
+      },
+      {
+        "name": "fee",
+        "type": "int",
+        "extra": "",
+        "default": null,
+        "nullable": "NO"
+      },
+      {
+        "name": "created_at",
+        "type": "timestamp",
+        "extra": "",
+        "default": null,
+        "nullable": "YES"
+      },
+      {
+        "name": "updated_at",
+        "type": "timestamp",
+        "extra": "",
+        "default": null,
+        "nullable": "YES"
+      }
+    ]
+  },
+  {
+    "table": "special_requests",
+    "columns": [
+      {
+        "name": "id",
+        "type": "bigint unsigned",
+        "extra": "auto_increment",
+        "default": null,
+        "nullable": "NO"
+      },
+      {
+        "name": "uuid",
+        "type": "char(36)",
+        "extra": "",
+        "default": null,
+        "nullable": "NO"
+      },
+      {
+        "name": "venue_id",
+        "type": "bigint unsigned",
+        "extra": "",
+        "default": null,
+        "nullable": "NO"
+      },
+      {
+        "name": "concierge_id",
+        "type": "bigint unsigned",
+        "extra": "",
+        "default": null,
+        "nullable": "NO"
+      },
+      {
+        "name": "booking_date",
+        "type": "date",
+        "extra": "",
+        "default": null,
+        "nullable": "NO"
+      },
+      {
+        "name": "booking_time",
+        "type": "time",
+        "extra": "",
+        "default": null,
+        "nullable": "NO"
+      },
+      {
+        "name": "party_size",
+        "type": "int",
+        "extra": "",
+        "default": null,
+        "nullable": "NO"
+      },
+      {
+        "name": "special_request",
+        "type": "text",
+        "extra": "",
+        "default": null,
+        "nullable": "YES"
+      },
+      {
+        "name": "customer_first_name",
+        "type": "varchar(255)",
+        "extra": "",
+        "default": null,
+        "nullable": "NO"
+      },
+      {
+        "name": "customer_last_name",
+        "type": "varchar(255)",
+        "extra": "",
+        "default": null,
+        "nullable": "NO"
+      },
+      {
+        "name": "customer_phone",
+        "type": "varchar(255)",
+        "extra": "",
+        "default": null,
+        "nullable": "NO"
+      },
+      {
+        "name": "customer_email",
+        "type": "varchar(255)",
+        "extra": "",
+        "default": null,
+        "nullable": "YES"
+      },
+      {
+        "name": "commission_requested_percentage",
+        "type": "int",
+        "extra": "",
+        "default": "10",
+        "nullable": "NO"
+      },
+      {
+        "name": "minimum_spend",
+        "type": "int",
+        "extra": "",
+        "default": "0",
+        "nullable": "NO"
+      },
+      {
+        "name": "status",
+        "type": "varchar(255)",
+        "extra": "",
+        "default": "pending",
+        "nullable": "NO"
+      },
+      {
+        "name": "created_at",
+        "type": "timestamp",
+        "extra": "",
+        "default": null,
+        "nullable": "YES"
+      },
+      {
+        "name": "updated_at",
+        "type": "timestamp",
+        "extra": "",
+        "default": null,
+        "nullable": "YES"
+      },
+      {
+        "name": "schedule_template_id",
+        "type": "bigint unsigned",
+        "extra": "",
+        "default": null,
+        "nullable": "YES"
+      },
+      {
+        "name": "booking_id",
+        "type": "bigint unsigned",
+        "extra": "",
+        "default": null,
+        "nullable": "YES"
+      },
+      {
+        "name": "venue_message",
+        "type": "text",
+        "extra": "",
+        "default": null,
+        "nullable": "YES"
+      },
+      {
+        "name": "conversations",
+        "type": "json",
+        "extra": "",
+        "default": null,
+        "nullable": "YES"
+      },
+      {
+        "name": "meta",
+        "type": "json",
+        "extra": "",
+        "default": null,
+        "nullable": "YES"
+      }
+    ]
+  },
+  {
+    "table": "telescope_entries",
+    "columns": [
+      {
+        "name": "sequence",
+        "type": "bigint unsigned",
+        "extra": "auto_increment",
+        "default": null,
+        "nullable": "NO"
+      },
+      {
+        "name": "uuid",
+        "type": "char(36)",
+        "extra": "",
+        "default": null,
+        "nullable": "NO"
+      },
+      {
+        "name": "batch_id",
+        "type": "char(36)",
+        "extra": "",
+        "default": null,
+        "nullable": "NO"
+      },
+      {
+        "name": "family_hash",
+        "type": "varchar(255)",
+        "extra": "",
+        "default": null,
+        "nullable": "YES"
+      },
+      {
+        "name": "should_display_on_index",
+        "type": "tinyint(1)",
+        "extra": "",
+        "default": "1",
+        "nullable": "NO"
+      },
+      {
+        "name": "type",
+        "type": "varchar(20)",
+        "extra": "",
+        "default": null,
+        "nullable": "NO"
+      },
+      {
+        "name": "content",
+        "type": "longtext",
+        "extra": "",
+        "default": null,
+        "nullable": "NO"
+      },
+      {
+        "name": "created_at",
+        "type": "datetime",
+        "extra": "",
+        "default": null,
+        "nullable": "YES"
+      }
+    ]
+  },
+  {
+    "table": "telescope_entries_tags",
+    "columns": [
+      {
+        "name": "entry_uuid",
+        "type": "char(36)",
+        "extra": "",
+        "default": null,
+        "nullable": "NO"
+      },
+      {
+        "name": "tag",
+        "type": "varchar(255)",
+        "extra": "",
+        "default": null,
+        "nullable": "NO"
+      }
+    ]
+  },
+  {
+    "table": "telescope_monitoring",
+    "columns": [
+      {
+        "name": "tag",
+        "type": "varchar(255)",
+        "extra": "",
+        "default": null,
+        "nullable": "NO"
+      }
+    ]
+  },
+  {
+    "table": "user_activities",
+    "columns": [
+      {
+        "name": "id",
+        "type": "bigint unsigned",
+        "extra": "auto_increment",
+        "default": null,
+        "nullable": "NO"
+      },
+      {
+        "name": "user_id",
+        "type": "bigint unsigned",
+        "extra": "",
+        "default": null,
+        "nullable": "NO"
+      },
+      {
+        "name": "activity_type",
+        "type": "varchar(255)",
+        "extra": "",
+        "default": null,
+        "nullable": "NO"
+      },
+      {
+        "name": "route",
+        "type": "varchar(255)",
+        "extra": "",
+        "default": null,
+        "nullable": "YES"
+      },
+      {
+        "name": "method",
+        "type": "varchar(255)",
+        "extra": "",
+        "default": null,
+        "nullable": "YES"
+      },
+      {
+        "name": "ip_address",
+        "type": "varchar(255)",
+        "extra": "",
+        "default": null,
+        "nullable": "YES"
+      },
+      {
+        "name": "user_agent",
+        "type": "varchar(255)",
+        "extra": "",
+        "default": null,
+        "nullable": "YES"
+      },
+      {
+        "name": "properties",
+        "type": "json",
+        "extra": "",
+        "default": null,
+        "nullable": "YES"
+      },
+      {
+        "name": "platform",
+        "type": "varchar(255)",
+        "extra": "",
+        "default": null,
+        "nullable": "NO"
+      },
+      {
+        "name": "last_active_at",
+        "type": "timestamp",
+        "extra": "",
+        "default": null,
+        "nullable": "NO"
+      },
+      {
+        "name": "created_at",
+        "type": "timestamp",
+        "extra": "",
+        "default": null,
+        "nullable": "YES"
+      },
+      {
+        "name": "updated_at",
+        "type": "timestamp",
+        "extra": "",
+        "default": null,
+        "nullable": "YES"
+      }
+    ]
+  },
+  {
+    "table": "user_codes",
+    "columns": [
+      {
+        "name": "id",
+        "type": "bigint unsigned",
+        "extra": "auto_increment",
+        "default": null,
+        "nullable": "NO"
+      },
+      {
+        "name": "user_id",
+        "type": "bigint unsigned",
+        "extra": "",
+        "default": null,
+        "nullable": "NO"
+      },
+      {
+        "name": "code",
+        "type": "varchar(255)",
+        "extra": "",
+        "default": null,
+        "nullable": "NO"
+      },
+      {
+        "name": "created_at",
+        "type": "timestamp",
+        "extra": "",
+        "default": null,
+        "nullable": "YES"
+      },
+      {
+        "name": "updated_at",
+        "type": "timestamp",
+        "extra": "",
+        "default": null,
+        "nullable": "YES"
+      }
+    ]
+  },
+  {
+    "table": "users",
+    "columns": [
+      {
+        "name": "id",
+        "type": "bigint unsigned",
+        "extra": "auto_increment",
+        "default": null,
+        "nullable": "NO"
+      },
+      {
+        "name": "first_name",
+        "type": "varchar(255)",
+        "extra": "",
+        "default": null,
+        "nullable": "NO"
+      },
+      {
+        "name": "last_name",
+        "type": "varchar(255)",
+        "extra": "",
+        "default": null,
+        "nullable": "NO"
+      },
+      {
+        "name": "email",
+        "type": "varchar(255)",
+        "extra": "",
+        "default": null,
+        "nullable": "NO"
+      },
+      {
+        "name": "email_verified_at",
+        "type": "timestamp",
+        "extra": "",
+        "default": null,
+        "nullable": "YES"
+      },
+      {
+        "name": "password",
+        "type": "varchar(255)",
+        "extra": "",
+        "default": null,
+        "nullable": "NO"
+      },
+      {
+        "name": "two_factor_secret",
+        "type": "text",
+        "extra": "",
+        "default": null,
+        "nullable": "YES"
+      },
+      {
+        "name": "two_factor_recovery_codes",
+        "type": "text",
+        "extra": "",
+        "default": null,
+        "nullable": "YES"
+      },
+      {
+        "name": "two_factor_confirmed_at",
+        "type": "timestamp",
+        "extra": "",
+        "default": null,
+        "nullable": "YES"
+      },
+      {
+        "name": "remember_token",
+        "type": "varchar(100)",
+        "extra": "",
+        "default": null,
+        "nullable": "YES"
+      },
+      {
+        "name": "current_team_id",
+        "type": "bigint unsigned",
+        "extra": "",
+        "default": null,
+        "nullable": "YES"
+      },
+      {
+        "name": "profile_photo_path",
+        "type": "varchar(2048)",
+        "extra": "",
+        "default": null,
+        "nullable": "YES"
+      },
+      {
+        "name": "created_at",
+        "type": "timestamp",
+        "extra": "",
+        "default": null,
+        "nullable": "YES"
+      },
+      {
+        "name": "secured_at",
+        "type": "timestamp",
+        "extra": "",
+        "default": null,
+        "nullable": "YES"
+      },
+      {
+        "name": "last_login_at",
+        "type": "timestamp",
+        "extra": "",
+        "default": null,
+        "nullable": "YES"
+      },
+      {
+        "name": "last_login_ip",
+        "type": "varchar(255)",
+        "extra": "",
+        "default": null,
+        "nullable": "YES"
+      },
+      {
+        "name": "updated_at",
+        "type": "timestamp",
+        "extra": "",
+        "default": null,
+        "nullable": "YES"
+      },
+      {
+        "name": "stripe_id",
+        "type": "varchar(255)",
+        "extra": "",
+        "default": null,
+        "nullable": "YES"
+      },
+      {
+        "name": "pm_type",
+        "type": "varchar(255)",
+        "extra": "",
+        "default": null,
+        "nullable": "YES"
+      },
+      {
+        "name": "pm_last_four",
+        "type": "varchar(4)",
+        "extra": "",
+        "default": null,
+        "nullable": "YES"
+      },
+      {
+        "name": "trial_ends_at",
+        "type": "timestamp",
+        "extra": "",
+        "default": null,
+        "nullable": "YES"
+      },
+      {
+        "name": "phone",
+        "type": "varchar(255)",
+        "extra": "",
+        "default": null,
+        "nullable": "YES"
+      },
+      {
+        "name": "payout",
+        "type": "json",
+        "extra": "",
+        "default": null,
+        "nullable": "YES"
+      },
+      {
+        "name": "charity_percentage",
+        "type": "int",
+        "extra": "",
+        "default": "5",
+        "nullable": "NO"
+      },
+      {
+        "name": "partner_referral_id",
+        "type": "bigint unsigned",
+        "extra": "",
+        "default": null,
+        "nullable": "YES"
+      },
+      {
+        "name": "concierge_referral_id",
+        "type": "bigint unsigned",
+        "extra": "",
+        "default": null,
+        "nullable": "YES"
+      },
+      {
+        "name": "timezone",
+        "type": "varchar(255)",
+        "extra": "",
+        "default": "America/New_York",
+        "nullable": "NO"
+      },
+      {
+        "name": "address_1",
+        "type": "varchar(255)",
+        "extra": "",
+        "default": null,
+        "nullable": "YES"
+      },
+      {
+        "name": "address_2",
+        "type": "varchar(255)",
+        "extra": "",
+        "default": null,
+        "nullable": "YES"
+      },
+      {
+        "name": "city",
+        "type": "varchar(255)",
+        "extra": "",
+        "default": null,
+        "nullable": "YES"
+      },
+      {
+        "name": "state",
+        "type": "varchar(255)",
+        "extra": "",
+        "default": null,
+        "nullable": "YES"
+      },
+      {
+        "name": "zip",
+        "type": "varchar(255)",
+        "extra": "",
+        "default": null,
+        "nullable": "YES"
+      },
+      {
+        "name": "country",
+        "type": "varchar(255)",
+        "extra": "",
+        "default": null,
+        "nullable": "YES"
+      },
+      {
+        "name": "region",
+        "type": "varchar(255)",
+        "extra": "",
+        "default": null,
+        "nullable": "YES"
+      },
+      {
+        "name": "preferences",
+        "type": "json",
+        "extra": "",
+        "default": null,
+        "nullable": "YES"
+      },
+      {
+        "name": "suspended_at",
+        "type": "timestamp",
+        "extra": "",
+        "default": null,
+        "nullable": "YES"
+      },
+      {
+        "name": "expo_push_token",
+        "type": "varchar(255)",
+        "extra": "",
+        "default": null,
+        "nullable": "YES"
+      },
+      {
+        "name": "notification_regions",
+        "type": "json",
+        "extra": "",
+        "default": null,
+        "nullable": "YES"
+      }
+    ]
+  },
+  {
+    "table": "venue_group_managers",
+    "columns": [
+      {
+        "name": "id",
+        "type": "bigint unsigned",
+        "extra": "auto_increment",
+        "default": null,
+        "nullable": "NO"
+      },
+      {
+        "name": "user_id",
+        "type": "bigint unsigned",
+        "extra": "",
+        "default": null,
+        "nullable": "NO"
+      },
+      {
+        "name": "venue_group_id",
+        "type": "bigint unsigned",
+        "extra": "",
+        "default": null,
+        "nullable": "NO"
+      },
+      {
+        "name": "current_venue_id",
+        "type": "bigint unsigned",
+        "extra": "",
+        "default": null,
+        "nullable": "YES"
+      },
+      {
+        "name": "allowed_venue_ids",
+        "type": "json",
+        "extra": "",
+        "default": null,
+        "nullable": "YES"
+      },
+      {
+        "name": "is_current",
+        "type": "tinyint(1)",
+        "extra": "",
+        "default": "0",
+        "nullable": "NO"
+      },
+      {
+        "name": "created_at",
+        "type": "timestamp",
+        "extra": "",
+        "default": null,
+        "nullable": "YES"
+      },
+      {
+        "name": "updated_at",
+        "type": "timestamp",
+        "extra": "",
+        "default": null,
+        "nullable": "YES"
+      }
+    ]
+  },
+  {
+    "table": "venue_groups",
+    "columns": [
+      {
+        "name": "id",
+        "type": "bigint unsigned",
+        "extra": "auto_increment",
+        "default": null,
+        "nullable": "NO"
+      },
+      {
+        "name": "name",
+        "type": "varchar(255)",
+        "extra": "",
+        "default": null,
+        "nullable": "NO"
+      },
+      {
+        "name": "logo_path",
+        "type": "varchar(255)",
+        "extra": "",
+        "default": null,
+        "nullable": "YES"
+      },
+      {
+        "name": "slug",
+        "type": "varchar(255)",
+        "extra": "",
+        "default": null,
+        "nullable": "NO"
+      },
+      {
+        "name": "primary_manager_id",
+        "type": "bigint unsigned",
+        "extra": "",
+        "default": null,
+        "nullable": "YES"
+      },
+      {
+        "name": "created_at",
+        "type": "timestamp",
+        "extra": "",
+        "default": null,
+        "nullable": "YES"
+      },
+      {
+        "name": "updated_at",
+        "type": "timestamp",
+        "extra": "",
+        "default": null,
+        "nullable": "YES"
+      }
+    ]
+  },
+  {
+    "table": "venue_invoices",
+    "columns": [
+      {
+        "name": "id",
+        "type": "bigint unsigned",
+        "extra": "auto_increment",
+        "default": null,
+        "nullable": "NO"
+      },
+      {
+        "name": "venue_id",
+        "type": "bigint unsigned",
+        "extra": "",
+        "default": null,
+        "nullable": "NO"
+      },
+      {
+        "name": "created_by",
+        "type": "bigint unsigned",
+        "extra": "",
+        "default": null,
+        "nullable": "NO"
+      },
+      {
+        "name": "invoice_number",
+        "type": "varchar(255)",
+        "extra": "",
+        "default": null,
+        "nullable": "NO"
+      },
+      {
+        "name": "start_date",
+        "type": "datetime",
+        "extra": "",
+        "default": null,
+        "nullable": "NO"
+      },
+      {
+        "name": "end_date",
+        "type": "datetime",
+        "extra": "",
+        "default": null,
+        "nullable": "NO"
+      },
+      {
+        "name": "prime_total",
+        "type": "int",
+        "extra": "",
+        "default": null,
+        "nullable": "NO"
+      },
+      {
+        "name": "non_prime_total",
+        "type": "int",
+        "extra": "",
+        "default": null,
+        "nullable": "NO"
+      },
+      {
+        "name": "total_amount",
+        "type": "int",
+        "extra": "",
+        "default": null,
+        "nullable": "NO"
+      },
+      {
+        "name": "currency",
+        "type": "varchar(3)",
+        "extra": "",
+        "default": null,
+        "nullable": "NO"
+      },
+      {
+        "name": "due_date",
+        "type": "datetime",
+        "extra": "",
+        "default": null,
+        "nullable": "NO"
+      },
+      {
+        "name": "status",
+        "type": "varchar(255)",
+        "extra": "",
+        "default": null,
+        "nullable": "NO"
+      },
+      {
+        "name": "pdf_path",
+        "type": "varchar(255)",
+        "extra": "",
+        "default": null,
+        "nullable": "YES"
+      },
+      {
+        "name": "booking_ids",
+        "type": "json",
+        "extra": "",
+        "default": null,
+        "nullable": "NO"
+      },
+      {
+        "name": "sent_at",
+        "type": "datetime",
+        "extra": "",
+        "default": null,
+        "nullable": "YES"
+      },
+      {
+        "name": "paid_at",
+        "type": "datetime",
+        "extra": "",
+        "default": null,
+        "nullable": "YES"
+      },
+      {
+        "name": "created_at",
+        "type": "timestamp",
+        "extra": "",
+        "default": null,
+        "nullable": "YES"
+      },
+      {
+        "name": "updated_at",
+        "type": "timestamp",
+        "extra": "",
+        "default": null,
+        "nullable": "YES"
+      },
+      {
+        "name": "deleted_at",
+        "type": "timestamp",
+        "extra": "",
+        "default": null,
+        "nullable": "YES"
+      }
+    ]
+  },
+  {
+    "table": "venue_onboarding_locations",
+    "columns": [
+      {
+        "name": "id",
+        "type": "bigint unsigned",
+        "extra": "auto_increment",
+        "default": null,
+        "nullable": "NO"
+      },
+      {
+        "name": "venue_onboarding_id",
+        "type": "bigint unsigned",
+        "extra": "",
+        "default": null,
+        "nullable": "NO"
+      },
+      {
+        "name": "name",
+        "type": "varchar(255)",
+        "extra": "",
+        "default": null,
+        "nullable": "NO"
+      },
+      {
+        "name": "region",
+        "type": "varchar(255)",
+        "extra": "",
+        "default": "miami",
+        "nullable": "NO"
+      },
+      {
+        "name": "prime_hours",
+        "type": "json",
+        "extra": "",
+        "default": null,
+        "nullable": "YES"
+      },
+      {
+        "name": "booking_hours",
+        "type": "json",
+        "extra": "",
+        "default": null,
+        "nullable": "YES"
+      },
+      {
+        "name": "logo_path",
+        "type": "varchar(255)",
+        "extra": "",
+        "default": null,
+        "nullable": "YES"
+      },
+      {
+        "name": "created_venue_id",
+        "type": "bigint unsigned",
+        "extra": "",
+        "default": null,
+        "nullable": "YES"
+      },
+      {
+        "name": "created_at",
+        "type": "timestamp",
+        "extra": "",
+        "default": null,
+        "nullable": "YES"
+      },
+      {
+        "name": "updated_at",
+        "type": "timestamp",
+        "extra": "",
+        "default": null,
+        "nullable": "YES"
+      },
+      {
+        "name": "deleted_at",
+        "type": "timestamp",
+        "extra": "",
+        "default": null,
+        "nullable": "YES"
+      },
+      {
+        "name": "use_non_prime_incentive",
+        "type": "tinyint(1)",
+        "extra": "",
+        "default": "0",
+        "nullable": "NO"
+      },
+      {
+        "name": "non_prime_per_diem",
+        "type": "decimal(8,2)",
+        "extra": "",
+        "default": null,
+        "nullable": "YES"
+      }
+    ]
+  },
+  {
+    "table": "venue_onboardings",
+    "columns": [
+      {
+        "name": "id",
+        "type": "bigint unsigned",
+        "extra": "auto_increment",
+        "default": null,
+        "nullable": "NO"
+      },
+      {
+        "name": "company_name",
+        "type": "varchar(255)",
+        "extra": "",
+        "default": null,
+        "nullable": "NO"
+      },
+      {
+        "name": "first_name",
+        "type": "varchar(255)",
+        "extra": "",
+        "default": null,
+        "nullable": "NO"
+      },
+      {
+        "name": "last_name",
+        "type": "varchar(255)",
+        "extra": "",
+        "default": null,
+        "nullable": "NO"
+      },
+      {
+        "name": "email",
+        "type": "varchar(255)",
+        "extra": "",
+        "default": null,
+        "nullable": "NO"
+      },
+      {
+        "name": "phone",
+        "type": "varchar(255)",
+        "extra": "",
+        "default": null,
+        "nullable": "NO"
+      },
+      {
+        "name": "venue_count",
+        "type": "int",
+        "extra": "",
+        "default": null,
+        "nullable": "NO"
+      },
+      {
+        "name": "has_logos",
+        "type": "tinyint(1)",
+        "extra": "",
+        "default": "0",
+        "nullable": "NO"
+      },
+      {
+        "name": "agreement_accepted",
+        "type": "tinyint(1)",
+        "extra": "",
+        "default": "0",
+        "nullable": "NO"
+      },
+      {
+        "name": "agreement_accepted_at",
+        "type": "timestamp",
+        "extra": "",
+        "default": null,
+        "nullable": "YES"
+      },
+      {
+        "name": "prime_hours",
+        "type": "json",
+        "extra": "",
+        "default": null,
+        "nullable": "YES"
+      },
+      {
+        "name": "status",
+        "type": "varchar(255)",
+        "extra": "",
+        "default": "draft",
+        "nullable": "NO"
+      },
+      {
+        "name": "processed_by_id",
+        "type": "bigint unsigned",
+        "extra": "",
+        "default": null,
+        "nullable": "YES"
+      },
+      {
+        "name": "processed_at",
+        "type": "timestamp",
+        "extra": "",
+        "default": null,
+        "nullable": "YES"
+      },
+      {
+        "name": "notes",
+        "type": "text",
+        "extra": "",
+        "default": null,
+        "nullable": "YES"
+      },
+      {
+        "name": "created_at",
+        "type": "timestamp",
+        "extra": "",
+        "default": null,
+        "nullable": "YES"
+      },
+      {
+        "name": "updated_at",
+        "type": "timestamp",
+        "extra": "",
+        "default": null,
+        "nullable": "YES"
+      },
+      {
+        "name": "deleted_at",
+        "type": "timestamp",
+        "extra": "",
+        "default": null,
+        "nullable": "YES"
+      },
+      {
+        "name": "partner_id",
+        "type": "bigint unsigned",
+        "extra": "",
+        "default": null,
+        "nullable": "YES"
+      }
+    ]
+  },
+  {
+    "table": "venue_surge_rates",
+    "columns": [
+      {
+        "name": "id",
+        "type": "bigint unsigned",
+        "extra": "auto_increment",
+        "default": null,
+        "nullable": "NO"
+      },
+      {
+        "name": "time_slot",
+        "type": "time",
+        "extra": "",
+        "default": null,
+        "nullable": "NO"
+      },
+      {
+        "name": "prime_rate_percentage",
+        "type": "int",
+        "extra": "",
+        "default": "100",
+        "nullable": "NO"
+      },
+      {
+        "name": "non_prime_rate_percentage",
+        "type": "int",
+        "extra": "",
+        "default": "100",
+        "nullable": "NO"
+      },
+      {
+        "name": "created_at",
+        "type": "timestamp",
+        "extra": "",
+        "default": null,
+        "nullable": "YES"
+      },
+      {
+        "name": "updated_at",
+        "type": "timestamp",
+        "extra": "",
+        "default": null,
+        "nullable": "YES"
+      }
+    ]
+  },
+  {
+    "table": "venue_time_slots",
+    "columns": [
+      {
+        "name": "id",
+        "type": "bigint unsigned",
+        "extra": "auto_increment",
+        "default": null,
+        "nullable": "NO"
+      },
+      {
+        "name": "schedule_template_id",
+        "type": "bigint unsigned",
+        "extra": "",
+        "default": null,
+        "nullable": "NO"
+      },
+      {
+        "name": "booking_date",
+        "type": "date",
+        "extra": "",
+        "default": null,
+        "nullable": "NO"
+      },
+      {
+        "name": "prime_time",
+        "type": "tinyint(1)",
+        "extra": "",
+        "default": null,
+        "nullable": "NO"
+      },
+      {
+        "name": "prime_time_fee",
+        "type": "int",
+        "extra": "",
+        "default": null,
+        "nullable": "YES"
+      },
+      {
+        "name": "created_at",
+        "type": "timestamp",
+        "extra": "",
+        "default": null,
+        "nullable": "YES"
+      },
+      {
+        "name": "updated_at",
+        "type": "timestamp",
+        "extra": "",
+        "default": null,
+        "nullable": "YES"
+      },
+      {
+        "name": "is_available",
+        "type": "tinyint(1)",
+        "extra": "",
+        "default": "1",
+        "nullable": "NO"
+      },
+      {
+        "name": "available_tables",
+        "type": "int",
+        "extra": "",
+        "default": "0",
+        "nullable": "NO"
+      },
+      {
+        "name": "price_per_head",
+        "type": "int",
+        "extra": "",
+        "default": null,
+        "nullable": "YES"
+      },
+      {
+        "name": "minimum_spend_per_guest",
+        "type": "int",
+        "extra": "",
+        "default": "0",
+        "nullable": "NO"
+      }
+    ]
+  },
+  {
+    "table": "venues",
+    "columns": [
+      {
+        "name": "id",
+        "type": "bigint unsigned",
+        "extra": "auto_increment",
+        "default": null,
+        "nullable": "NO"
+      },
+      {
+        "name": "name",
+        "type": "varchar(255)",
+        "extra": "",
+        "default": null,
+        "nullable": "YES"
+      },
+      {
+        "name": "user_id",
+        "type": "bigint unsigned",
+        "extra": "",
+        "default": null,
+        "nullable": "NO"
+      },
+      {
+        "name": "slug",
+        "type": "varchar(255)",
+        "extra": "",
+        "default": null,
+        "nullable": "NO"
+      },
+      {
+        "name": "contact_phone",
+        "type": "varchar(255)",
+        "extra": "",
+        "default": null,
+        "nullable": "NO"
+      },
+      {
+        "name": "created_at",
+        "type": "timestamp",
+        "extra": "",
+        "default": null,
+        "nullable": "YES"
+      },
+      {
+        "name": "updated_at",
+        "type": "timestamp",
+        "extra": "",
+        "default": null,
+        "nullable": "YES"
+      },
+      {
+        "name": "payout_venue",
+        "type": "int",
+        "extra": "",
+        "default": "60",
+        "nullable": "NO"
+      },
+      {
+        "name": "primary_contact_name",
+        "type": "varchar(255)",
+        "extra": "",
+        "default": null,
+        "nullable": "YES"
+      },
+      {
+        "name": "booking_fee",
+        "type": "int",
+        "extra": "",
+        "default": "20000",
+        "nullable": "NO"
+      },
+      {
+        "name": "increment_fee",
+        "type": "int",
+        "extra": "",
+        "default": "50",
+        "nullable": "NO"
+      },
+      {
+        "name": "non_prime_fee_per_head",
+        "type": "int",
+        "extra": "",
+        "default": "10",
+        "nullable": "NO"
+      },
+      {
+        "name": "non_prime_type",
+        "type": "enum('free','paid')",
+        "extra": "",
+        "default": "paid",
+        "nullable": "NO"
+      },
+      {
+        "name": "open_days",
+        "type": "json",
+        "extra": "",
+        "default": null,
+        "nullable": "YES"
+      },
+      {
+        "name": "contacts",
+        "type": "json",
+        "extra": "",
+        "default": null,
+        "nullable": "YES"
+      },
+      {
+        "name": "is_suspended",
+        "type": "tinyint(1)",
+        "extra": "",
+        "default": "0",
+        "nullable": "NO"
+      },
+      {
+        "name": "non_prime_time",
+        "type": "json",
+        "extra": "",
+        "default": null,
+        "nullable": "YES"
+      },
+      {
+        "name": "business_hours",
+        "type": "json",
+        "extra": "",
+        "default": null,
+        "nullable": "YES"
+      },
+      {
+        "name": "party_sizes",
+        "type": "json",
+        "extra": "",
+        "default": null,
+        "nullable": "YES"
+      },
+      {
+        "name": "minimum_spend",
+        "type": "int",
+        "extra": "",
+        "default": null,
+        "nullable": "YES"
+      },
+      {
+        "name": "region",
+        "type": "varchar(255)",
+        "extra": "",
+        "default": "miami",
+        "nullable": "NO"
+      },
+      {
+        "name": "timezone",
+        "type": "varchar(255)",
+        "extra": "",
+        "default": null,
+        "nullable": "YES"
+      },
+      {
+        "name": "logo_path",
+        "type": "varchar(255)",
+        "extra": "",
+        "default": null,
+        "nullable": "YES"
+      },
+      {
+        "name": "status",
+        "type": "varchar(255)",
+        "extra": "",
+        "default": "draft",
+        "nullable": "NO"
+      },
+      {
+        "name": "no_wait",
+        "type": "tinyint(1)",
+        "extra": "",
+        "default": "0",
+        "nullable": "NO"
+      },
+      {
+        "name": "cutoff_time",
+        "type": "time",
+        "extra": "",
+        "default": null,
+        "nullable": "YES"
+      },
+      {
+        "name": "daily_prime_bookings_cap",
+        "type": "int",
+        "extra": "",
+        "default": null,
+        "nullable": "YES"
+      },
+      {
+        "name": "daily_non_prime_bookings_cap",
+        "type": "int",
+        "extra": "",
+        "default": null,
+        "nullable": "YES"
+      },
+      {
+        "name": "is_omakase",
+        "type": "tinyint(1)",
+        "extra": "",
+        "default": "0",
+        "nullable": "NO"
+      },
+      {
+        "name": "omakase_details",
+        "type": "text",
+        "extra": "",
+        "default": null,
+        "nullable": "YES"
+      },
+      {
+        "name": "omakase_concierge_fee",
+        "type": "int",
+        "extra": "",
+        "default": null,
+        "nullable": "YES"
+      },
+      {
+        "name": "venue_group_id",
+        "type": "bigint unsigned",
+        "extra": "",
+        "default": null,
+        "nullable": "YES"
+      },
+      {
+        "name": "cuisines",
+        "type": "json",
+        "extra": "",
+        "default": null,
+        "nullable": "YES"
+      },
+      {
+        "name": "neighborhood",
+        "type": "varchar(255)",
+        "extra": "",
+        "default": null,
+        "nullable": "YES"
+      }
+    ]
+  },
+  {
+    "table": "vip_codes",
+    "columns": [
+      {
+        "name": "id",
+        "type": "bigint unsigned",
+        "extra": "auto_increment",
+        "default": null,
+        "nullable": "NO"
+      },
+      {
+        "name": "code",
+        "type": "varchar(255)",
+        "extra": "",
+        "default": null,
+        "nullable": "NO"
+      },
+      {
+        "name": "concierge_id",
+        "type": "bigint unsigned",
+        "extra": "",
+        "default": null,
+        "nullable": "NO"
+      },
+      {
+        "name": "is_active",
+        "type": "tinyint(1)",
+        "extra": "",
+        "default": "1",
+        "nullable": "NO"
+      },
+      {
+        "name": "created_at",
+        "type": "timestamp",
+        "extra": "",
+        "default": null,
+        "nullable": "YES"
+      },
+      {
+        "name": "updated_at",
+        "type": "timestamp",
+        "extra": "",
+        "default": null,
+        "nullable": "YES"
+      },
+      {
+        "name": "deleted_at",
+        "type": "timestamp",
+        "extra": "",
+        "default": null,
+        "nullable": "YES"
+      }
+    ]
+  }
+]

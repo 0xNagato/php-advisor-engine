@@ -22,6 +22,7 @@ class VenueInvoice extends Model
 
     protected $fillable = [
         'venue_id',
+        'venue_group_id',
         'created_by',
         'invoice_number',
         'start_date',
@@ -33,10 +34,24 @@ class VenueInvoice extends Model
         'due_date',
         'status',
         'pdf_path',
+        'stripe_invoice_id',
+        'stripe_invoice_url',
         'booking_ids',
+        'venues_data',
         'sent_at',
         'paid_at',
     ];
+
+    protected static function boot(): void
+    {
+        parent::boot();
+
+        static::created(function (VenueInvoice $invoice) {
+            $invoice->update([
+                'invoice_number' => static::generateInvoiceNumber($invoice),
+            ]);
+        });
+    }
 
     /**
      * @return BelongsTo<Venue, $this>
@@ -44,6 +59,14 @@ class VenueInvoice extends Model
     public function venue(): BelongsTo
     {
         return $this->belongsTo(Venue::class);
+    }
+
+    /**
+     * @return BelongsTo<VenueGroup, $this>
+     */
+    public function venueGroup(): BelongsTo
+    {
+        return $this->belongsTo(VenueGroup::class);
     }
 
     public function bookings(): Collection
@@ -87,15 +110,18 @@ class VenueInvoice extends Model
         ]);
     }
 
-    public static function generateInvoiceNumber(Venue $venue): string
+    /**
+     * Generate an invoice number with venue group support
+     */
+    public static function generateInvoiceNumber(VenueInvoice $invoice): string
     {
-        $prefix = config('app.env') === 'production' ? 'INV' : 'TEST';
-        $venuePrefix = substr(strtoupper(preg_replace('/[^A-Za-z0-9]/', '', $venue->name)), 0, 3);
-        $venueId = str_pad($venue->id, 4, '0', STR_PAD_LEFT);
-        $date = now()->format('Ymd');
-        $sequence = static::query()->whereDate('created_at', now())->count() + 284;
+        $prefix = config('app.env') === 'production' ? 'invoice' : 'invoice-test';
+        $venuePrefix = $invoice->venue_group_id
+            ? Str::slug($invoice->venueGroup->name)
+            : Str::slug($invoice->venue->name);
+        $id = $invoice->id;
 
-        return "{$prefix}-{$venuePrefix}{$venueId}-{$date}-{$sequence}";
+        return "{$prefix}-{$venuePrefix}-{$id}";
     }
 
     public function getActivitylogOptions(): LogOptions
@@ -139,6 +165,7 @@ class VenueInvoice extends Model
             'paid_at' => 'datetime',
             'status' => VenueInvoiceStatus::class,
             'booking_ids' => 'array',
+            'venues_data' => 'array',
             'prime_total' => 'decimal:2',
             'non_prime_total' => 'decimal:2',
             'total_amount' => 'decimal:2',
@@ -148,5 +175,13 @@ class VenueInvoice extends Model
     public function name(): string
     {
         return Str::slug($this->invoice_number);
+    }
+
+    /**
+     * Get the Stripe invoice URL if available
+     */
+    public function getStripeInvoiceUrl(): ?string
+    {
+        return $this->stripe_invoice_url;
     }
 }

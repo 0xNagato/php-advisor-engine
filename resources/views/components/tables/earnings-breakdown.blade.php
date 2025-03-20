@@ -6,7 +6,7 @@
                 <div class="flex items-center">
                     <a href="{{ \App\Filament\Resources\BookingResource\Pages\ViewBooking::getUrl(['record' => $earning->booking]) }}"
                         class="text-indigo-600 truncate hover:underline">
-                        {{ $earning->booking->confirmed_at->format('M j, Y') }}
+                        {{ $earning->booking->booking_at->format('M j, Y') }}
                     </a>
                 </div>
                 <div class="flex items-center">

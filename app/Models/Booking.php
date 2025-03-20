@@ -7,6 +7,7 @@ use App\Enums\BookingStatus;
 use App\Services\Booking\BookingCalculationService;
 use App\Traits\FormatsPhoneNumber;
 use App\Traits\HasImmutableBookingProperties;
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Casts\AsArrayObject;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -81,6 +82,7 @@ class Booking extends Model
         'meta',
         'source',
         'device',
+        'booking_at_utc',
     ];
 
     protected $appends = ['guest_name', 'local_formatted_guest_phone'];
@@ -92,6 +94,13 @@ class Booking extends Model
         static::creating(static function (Booking $booking) {
             $booking->uuid = Str::uuid();
             $booking->total_fee = $booking->totalFee();
+
+            if ($booking->booking_at) {
+                $booking->booking_at_utc = Carbon::parse(
+                    $booking->booking_at->format('Y-m-d H:i:s'),
+                    $booking->venue->timezone
+                )->setTimezone('UTC');
+            }
 
             if ($booking->is_prime) {
                 $booking->venue_earnings =
@@ -118,6 +127,15 @@ class Booking extends Model
                 $booking->wasChanged('status')
             ) {
                 $booking->earnings()->delete();
+            }
+        });
+
+        static::updating(static function (Booking $booking) {
+            if ($booking->isDirty('booking_at') && $booking->booking_at) {
+                $booking->booking_at_utc = Carbon::parse(
+                    $booking->booking_at->format('Y-m-d H:i:s'),
+                    $booking->venue->timezone
+                )->setTimezone('UTC');
             }
         });
 
@@ -254,6 +272,7 @@ class Booking extends Model
     {
         return [
             'booking_at' => 'datetime',
+            'booking_at_utc' => 'datetime',
             'status' => BookingStatus::class,
             'stripe_charge' => StripeChargeData::class,
             'confirmed_at' => 'datetime',
