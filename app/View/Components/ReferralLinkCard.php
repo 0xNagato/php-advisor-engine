@@ -8,6 +8,7 @@ use chillerlan\QRCode\QROptions;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\URL;
 use Illuminate\View\Component;
+use Illuminate\View\View;
 
 class ReferralLinkCard extends Component
 {
@@ -52,7 +53,7 @@ class ReferralLinkCard extends Component
         $this->qrCodeDownloadUrl = (new QRCode($qrDownloadOptions))->render($this->referralUrl);
     }
 
-    public function render()
+    public function render(): View
     {
         return view('components.referral-link-card');
     }
