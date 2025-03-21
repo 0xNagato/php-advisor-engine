@@ -74,16 +74,18 @@ class ConciergeRecentBookings extends BaseWidget
                     ->label('Date')
                     ->size('xs')
                     ->dateTime('D, M j'),
-                TextColumn::make('earnings.amount')
+                TextColumn::make('id')
                     ->alignRight()
                     ->size('xs')
                     ->label('Earned')
                     ->formatStateUsing(function (Booking $booking) {
                         $labelStatus = [BookingStatus::CANCELLED, BookingStatus::NO_SHOW, BookingStatus::REFUNDED];
                         if (in_array($booking->status, $labelStatus)) {
-                            return new HtmlString('<span class="text-xs italic text-gray-500">'.
-                                $booking->status->label().
-                                '</span>');
+                            return new HtmlString(<<<HTML
+                                <span class="text-xs italic text-gray-500">
+                                    {$booking->status->label()}
+                                </span>
+                            HTML);
                         }
 
                         $total = $booking->earnings->sum('amount') ?? 0;
