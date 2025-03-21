@@ -27,7 +27,7 @@ class VenueLogosScroll extends Component
 
     public function __construct()
     {
-        $venues = cache()->remember('top_venues_scroll_latest_feb_26', now()->addHours(24), fn () => $this->getTopVenues());
+        $venues = cache()->remember('top_venues_scroll_latest_march_21', now()->addHours(24), fn () => $this->getTopVenues());
 
         // Randomize and split venues equally between first and second row
         $totalVenues = collect($venues)->flatten()->shuffle();
