@@ -334,7 +334,11 @@ class ViewBooking extends ViewRecord
                     ->color('danger')
                     ->size(ActionSize::ExtraLarge)
                     ->extraAttributes(['class' => 'w-full'])
-                    ->action(fn () => $this->cancelNonPrimeBooking()),
+                    ->action(function () {
+                        $this->cancelNonPrimeBooking();
+
+                        return redirect()->to(ViewBooking::getUrl(['record' => $this->record]));
+                    }),
                 $this->modifyBookingAction(null, false),
             ])
             ->modalContentFooter(fn (Action $action) => view(
@@ -431,7 +435,7 @@ class ViewBooking extends ViewRecord
 
         // Send cancellation notification to venue contacts
         $this->record->venue->contacts->each(function ($contact) {
-            $this->record->notify(new VenueBookingCancelled($contact));
+            $contact->notify(new VenueBookingCancelled($this->record));
         });
 
         // Delete any existing earnings

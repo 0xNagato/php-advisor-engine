@@ -8,6 +8,7 @@ use App\Models\Booking;
 use Carbon\Carbon;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
+use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 
 class VenueBookingCancelled extends Notification implements ShouldQueue
@@ -15,15 +16,15 @@ class VenueBookingCancelled extends Notification implements ShouldQueue
     use Queueable;
 
     public function __construct(
-        public VenueContactData $contact,
+        public Booking $booking
     ) {}
 
-    public function via(object $notifiable): array
+    public function via(VenueContactData $notifiable): array
     {
-        return $this->contact->toChannel();
+        return $notifiable->toChannel();
     }
 
-    private function formatBookingDate(Carbon $date, Booking $notifiable): string
+    private function formatBookingDate(Carbon $date): string
     {
         // Create booking date with venue timezone
         $bookingDate = Carbon::create(
@@ -33,10 +34,10 @@ class VenueBookingCancelled extends Notification implements ShouldQueue
             $date->hour,
             $date->minute,
             $date->second,
-            $notifiable->venue->timezone
+            $this->booking->venue->timezone
         );
 
-        $venueToday = now()->setTimezone($notifiable->venue->timezone);
+        $venueToday = now()->setTimezone($this->booking->venue->timezone);
 
         if ($bookingDate->isSameDay($venueToday)) {
             return 'Today, '.$bookingDate->format('M jS');
@@ -49,17 +50,35 @@ class VenueBookingCancelled extends Notification implements ShouldQueue
         return $bookingDate->format('M jS');
     }
 
-    public function toSMS(Booking $notifiable): SmsData
+    public function toSMS(VenueContactData $notifiable): SmsData
     {
         return new SmsData(
-            phone: $this->contact->contact_phone,
+            phone: $notifiable->contact_phone,
             templateKey: 'venue_booking_cancelled',
             templateData: [
-                'guest_name' => $notifiable->guest_name,
-                'guest_phone' => $notifiable->guest_phone,
-                'venue_name' => $notifiable->venue->name,
-                'booking_date' => $this->formatBookingDate($notifiable->booking_at, $notifiable),
+                'guest_name' => $this->booking->guest_name,
+                'guest_phone' => $this->booking->guest_phone,
+                'venue_name' => $this->booking->venue->name,
+                'booking_date' => $this->formatBookingDate($this->booking->booking_at),
             ]
         );
+    }
+
+    public function toMail(): MailMessage
+    {
+        $bookingDate = $this->formatBookingDate($this->booking->booking_at);
+        $bookingTime = $this->booking->booking_at->format('g:ia');
+
+        return (new MailMessage)
+            ->from('prima@primavip.co', 'PRIMA Reservation Platform')
+            ->subject("PRIMA Notice: Booking Canceled - {$this->booking->venue->name}")
+            ->greeting('Booking Canceled')
+            ->line("A booking has been canceled at {$this->booking->venue->name}.")
+            ->line('**Booking Details:**')
+            ->line("Customer: {$this->booking->guest_name}")
+            ->line("Customer phone: {$this->booking->guest_phone}")
+            ->line("Date: {$bookingDate}")
+            ->line("Time: {$bookingTime}")
+            ->line('Please update your records. Thank you.');
     }
 }
