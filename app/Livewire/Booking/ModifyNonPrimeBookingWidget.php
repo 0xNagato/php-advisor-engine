@@ -52,6 +52,7 @@ class ModifyNonPrimeBookingWidget extends Widget implements HasForms
             ];
 
             $this->pendingGuestCount = $this->booking->guest_count;
+            $this->selectedTimeSlotId = $this->booking->schedule_template_id;
 
             $this->form->fill([
                 'guest_count' => $this->booking->guest_count,
@@ -103,11 +104,6 @@ class ModifyNonPrimeBookingWidget extends Widget implements HasForms
     public function selectTimeSlot(int $scheduleTemplateId): void
     {
         $this->selectedTimeSlotId = $scheduleTemplateId;
-
-        // Log the selection with time
-        $schedule = ScheduleWithBooking::query()->find($scheduleTemplateId);
-
-        // Refresh available slots to update the selected state
         $this->loadAvailableSlots();
     }
 
@@ -116,8 +112,8 @@ class ModifyNonPrimeBookingWidget extends Widget implements HasForms
         $formState = $this->form->getState();
         $guestCount = $this->pendingGuestCount ?? intval($formState['guest_count']);
 
-        return filled($this->selectedTimeSlotId) && $guestCount !== $this->booking?->guest_count &&
-            $this->selectedTimeSlotId !== $this->booking?->schedule_template_id;
+        return filled($this->selectedTimeSlotId) && ($guestCount !== $this->booking?->guest_count ||
+                $this->selectedTimeSlotId !== $this->booking?->schedule_template_id);
     }
 
     protected function loadAvailableSlots(): void
@@ -146,9 +142,10 @@ class ModifyNonPrimeBookingWidget extends Widget implements HasForms
             ->where('prime_time', false)
             ->where('remaining_tables', '>', 0)
             ->where('is_available', true)
-            ->when($this->booking->booking_at->isToday() && now()->timezone($this->booking->venue->timezone)->format('Y-m-d') === $this->booking->booking_at->format('Y-m-d'), function (Builder $query) {
-                $query->where('start_time', '>', now()->timezone($this->booking->venue->timezone)->format('H:i:s'));
-            })
+            ->when($this->booking->booking_at->isToday() && now()->timezone($this->booking->venue->timezone)->format('Y-m-d') === $this->booking->booking_at->format('Y-m-d'),
+                function (Builder $query) {
+                    $query->where('start_time', '>', now()->timezone($this->booking->venue->timezone)->format('H:i:s'));
+                })
             ->orderBy('start_time')
             ->get();
 
