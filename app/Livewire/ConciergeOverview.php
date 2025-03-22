@@ -83,15 +83,15 @@ class ConciergeOverview extends BaseWidget
             EarningType::REFUND,
         ];
         $earnings = Earning::query()
-            ->whereNotNull('bookings.confirmed_at')
+            ->whereNotNull('bookings.booking_at_utc')
             ->when($this->isVip, function (Builder $query) {
                 $query->whereNotNull('vip_code_id');
             })
             ->join('bookings', 'earnings.booking_id', '=', 'bookings.id')
             ->where('earnings.user_id', $this->concierge->user_id)
-            ->whereBetween('bookings.confirmed_at', [$startDate, $endDate])
+            ->whereBetween('bookings.booking_at_utc', [$startDate, $endDate])
             ->whereIn('earnings.type', values: $earningTypes)
-            ->whereNotIn('bookings.status', [BookingStatus::REFUNDED, BookingStatus::PARTIALLY_REFUNDED])
+            ->whereNotIn('bookings.status', BookingStatus::REFUNDED_STATUSES)
             ->select(
                 DB::raw('COUNT(
                     DISTINCT CASE WHEN
@@ -125,13 +125,12 @@ class ConciergeOverview extends BaseWidget
     {
         $earningTypes = [EarningType::CONCIERGE, EarningType::CONCIERGE_BOUNTY, EarningType::REFUND];
         $result = Earning::query()
-            ->whereNotNull('bookings.confirmed_at')
             ->when($this->isVip, function (Builder $query) {
                 $query->whereNotNull('vip_code_id');
             })
             ->join('bookings', 'earnings.booking_id', '=', 'bookings.id')
             ->where('earnings.user_id', $this->concierge->user_id)
-            ->whereBetween('bookings.confirmed_at', [$startDate, $endDate])
+            ->whereBetween('bookings.booking_at_utc', [$startDate, $endDate])
             ->whereIn('earnings.type', $earningTypes)
             ->selectRaw('earnings.currency, AVG(earnings.amount) as average_earning, COUNT(*) as booking_count')
             ->groupBy('earnings.currency')
@@ -161,13 +160,12 @@ class ConciergeOverview extends BaseWidget
             EarningType::CONCIERGE_BOUNTY,
         ];
         $dailyData = Earning::query()
-            ->whereNotNull('bookings.confirmed_at')
             ->when($this->isVip, function (Builder $query) {
                 $query->whereNotNull('vip_code_id');
             })
             ->join('bookings', 'earnings.booking_id', '=', 'bookings.id')
             ->where('earnings.user_id', $this->concierge->user_id)
-            ->whereBetween('bookings.confirmed_at', [$startDate, $endDate])
+            ->whereBetween('bookings.booking_at_utc', [$startDate, $endDate])
             ->whereIn('earnings.type', $earningTypes)
             ->selectRaw('DATE(bookings.confirmed_at) as date, earnings.currency, earnings.type, COUNT(*) as bookings, SUM(earnings.amount) as total_earnings, AVG(earnings.amount) as avg_earning')
             ->groupBy('date', 'earnings.currency', 'earnings.type')

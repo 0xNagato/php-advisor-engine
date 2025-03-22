@@ -80,7 +80,7 @@ class TalkToPrima extends Widget implements HasForms
     {
         $data = $this->form->getState();
 
-        $selectedOptions = array_map(fn ($index) => strip_tags($this->reasons[$index]), $data['why']);
+        $selectedOptions = array_map(fn ($index) => strip_tags((string) $this->reasons[$index]), $data['why']);
         $selectedOptionsText = implode(', ', $selectedOptions);
 
         Mail::raw('Name: '.$data['name']."\n\n".

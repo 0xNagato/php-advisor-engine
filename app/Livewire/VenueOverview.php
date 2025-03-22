@@ -72,11 +72,10 @@ class VenueOverview extends BaseWidget
     protected function getEarnings(Carbon $startDate, Carbon $endDate): array
     {
         $earnings = Earning::query()
-            ->whereNotNull('bookings.confirmed_at')
             ->join('bookings', 'earnings.booking_id', '=', 'bookings.id')
             ->join('schedule_templates', 'bookings.schedule_template_id', '=', 'schedule_templates.id')
             ->where('schedule_templates.venue_id', $this->venue->id)
-            ->whereBetween('bookings.confirmed_at', [$startDate, $endDate])
+            ->whereBetween('bookings.booking_at_utc', [$startDate, $endDate])
             ->select(
                 DB::raw('COUNT(DISTINCT CASE WHEN bookings.is_prime = 1 THEN bookings.id END) as prime_bookings'),
                 DB::raw('COUNT(DISTINCT CASE WHEN bookings.is_prime = 0 THEN bookings.id END) as incentivised_bookings'),
@@ -99,11 +98,10 @@ class VenueOverview extends BaseWidget
     protected function getChartData(Carbon $startDate, Carbon $endDate): array
     {
         $dailyData = Earning::query()
-            ->whereNotNull('bookings.confirmed_at')
             ->join('bookings', 'earnings.booking_id', '=', 'bookings.id')
             ->join('schedule_templates', 'bookings.schedule_template_id', '=', 'schedule_templates.id')
             ->where('schedule_templates.venue_id', $this->venue->id)
-            ->whereBetween('bookings.confirmed_at', [$startDate, $endDate])
+            ->whereBetween('bookings.booking_at_utc', [$startDate, $endDate])
             ->selectRaw('
                 DATE(bookings.confirmed_at) as date,
                 earnings.currency,
