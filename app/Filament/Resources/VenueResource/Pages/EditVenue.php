@@ -421,7 +421,6 @@ class EditVenue extends EditRecord
 
                             // Redirect to refresh the page
                             $this->redirect(VenueResource::getUrl('edit', ['record' => $venue->id]));
-
                         } catch (Exception $e) {
                             Notification::make()
                                 ->title('Error')
@@ -515,7 +514,10 @@ class EditVenue extends EditRecord
 
                                     // Update earnings for added venues
                                     if (filled($addedVenues)) {
-                                        $earningsUpdated = UpdateVenueGroupEarnings::run($venueGroup, $addedVenues);
+                                        $earningsUpdated = UpdateVenueGroupEarnings::run(
+                                            $venueGroup,
+                                            $addedVenues
+                                        );
                                     }
                                 }
                             });
@@ -528,7 +530,6 @@ class EditVenue extends EditRecord
 
                             // Redirect to refresh the page
                             $this->redirect(VenueResource::getUrl('edit', ['record' => $venue->id]));
-
                         } catch (Exception $e) {
                             Notification::make()
                                 ->title('Error')
@@ -548,7 +549,7 @@ class EditVenue extends EditRecord
                     ->form([
                         Select::make('target_venue_group_id')
                             ->label('Venue Group to Merge')
-                            ->helperText('Select the venue group that will be merged into the current venue group. All venues and managers from the selected group will be transferred to the current group.')
+                            ->helperText("Select the venue group that will be merged into the current venue group. All venues and managers from the selected group will be transferred to the current group.")
                             ->options(fn () => VenueGroup::query()
                                 ->where('id', '!=', $venue->venue_group_id)
                                 ->pluck('name', 'id'))
@@ -587,17 +588,25 @@ class EditVenue extends EditRecord
                                 // Transfer all managers to the current venue group
                                 foreach ($managers as $manager) {
                                     // Check if manager already exists in current group
-                                    $existingManager = $currentVenueGroup->managers()->where('user_id',
-                                        $manager->id)->first();
+                                    $existingManager = $currentVenueGroup->managers()->where(
+                                        'user_id',
+                                        $manager->id
+                                    )->first();
 
                                     if ($existingManager) {
                                         // Manager already exists in current group, merge allowed venues
-                                        $currentAllowedVenueIds = json_decode($existingManager->pivot->allowed_venue_ids ?? '[]',
-                                            true);
-                                        $newAllowedVenueIds = json_decode($manager->pivot->allowed_venue_ids ?? '[]',
-                                            true);
-                                        $mergedAllowedVenueIds = array_unique(array_merge($currentAllowedVenueIds,
-                                            $newAllowedVenueIds));
+                                        $currentAllowedVenueIds = json_decode(
+                                            $existingManager->pivot->allowed_venue_ids ?? '[]',
+                                            true
+                                        );
+                                        $newAllowedVenueIds = json_decode(
+                                            $manager->pivot->allowed_venue_ids ?? '[]',
+                                            true
+                                        );
+                                        $mergedAllowedVenueIds = array_unique(array_merge(
+                                            $currentAllowedVenueIds,
+                                            $newAllowedVenueIds
+                                        ));
 
                                         $currentVenueGroup->managers()->updateExistingPivot($manager->id, [
                                             'allowed_venue_ids' => json_encode($mergedAllowedVenueIds),
@@ -631,7 +640,10 @@ class EditVenue extends EditRecord
                                 $targetVenueGroup->delete();
 
                                 // Update earnings for transferred venues
-                                $earningsUpdated = UpdateVenueGroupEarnings::run($currentVenueGroup, $venues);
+                                $earningsUpdated = UpdateVenueGroupEarnings::run(
+                                    $currentVenueGroup,
+                                    $venues
+                                );
                             });
 
                             Notification::make()
@@ -642,7 +654,6 @@ class EditVenue extends EditRecord
 
                             // Redirect to refresh the page
                             $this->redirect(VenueResource::getUrl('edit', ['record' => $venue->id]));
-
                         } catch (Exception $e) {
                             Notification::make()
                                 ->title('Error')
@@ -693,7 +704,6 @@ class EditVenue extends EditRecord
 
                             // Redirect to refresh the page
                             $this->redirect(VenueResource::getUrl('edit', ['record' => $venue->id]));
-
                         } catch (Exception $e) {
                             Notification::make()
                                 ->title('Error')

@@ -9,6 +9,7 @@ use AshAllenDesign\ShortURL\Exceptions\ShortURLException;
 use AshAllenDesign\ShortURL\Facades\ShortURL;
 use Carbon\Carbon;
 use Illuminate\Bus\Queueable;
+use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 use Illuminate\Support\Facades\URL;
 
@@ -39,28 +40,6 @@ class SendSpecialRequestConfirmation extends Notification
         $this->bookingTime = Carbon::parse($specialRequest->booking_time)->format('g:ia');
     }
 
-    public function toSms(VenueContactData $notifiable): SmsData
-    {
-        $bookingDate = ucfirst($this->bookingDate);
-        $currency = $this->specialRequest->venue->inRegion->currency;
-        $minimumSpend = moneyWithoutCents($this->specialRequest->minimum_spend * 100, $currency);
-        $customerName = $this->specialRequest->customer_name;
-        $partySize = $this->specialRequest->party_size;
-
-        return new SmsData(
-            phone: $notifiable->contact_phone,
-            templateKey: 'venue_special_request_confirmation',
-            templateData: [
-                'customer_name' => $customerName,
-                'booking_date' => $bookingDate,
-                'booking_time' => $this->bookingTime,
-                'party_size' => $partySize,
-                'minimum_spend' => $minimumSpend,
-                'confirmation_url' => $this->confirmationUrl,
-            ]
-        );
-    }
-
     /**
      * Get the notification's delivery channels.
      */
@@ -76,8 +55,56 @@ class SendSpecialRequestConfirmation extends Notification
      */
     private function generateConfirmationUrl(string $uuid): string
     {
-        $url = URL::signedRoute('venues.confirm-special-request', ['token' => $uuid], now()->addDays(self::SECURE_LINK_LIFE_IN_DAYS));
+        $url = URL::signedRoute('venues.confirm-special-request', ['token' => $uuid],
+            now()->addDays(self::SECURE_LINK_LIFE_IN_DAYS));
 
         return ShortURL::destinationUrl($url)->make()->default_short_url;
+    }
+
+    /**
+     * Prepare data for SMS and email notifications.
+     */
+    private function prepareNotificationData(): array
+    {
+        $currency = $this->specialRequest->venue->inRegion->currency;
+        $minimumSpend = moneyWithoutCents($this->specialRequest->minimum_spend * 100, $currency);
+
+        return [
+            'customer_name' => $this->specialRequest->customer_name,
+            'booking_date' => ucfirst($this->bookingDate),
+            'booking_time' => $this->bookingTime,
+            'party_size' => $this->specialRequest->party_size,
+            'minimum_spend' => $minimumSpend,
+            'confirmation_url' => $this->confirmationUrl,
+        ];
+    }
+
+    public function toSms(VenueContactData $notifiable): SmsData
+    {
+        $data = $this->prepareNotificationData();
+
+        return new SmsData(
+            phone: $notifiable->contact_phone,
+            templateKey: 'venue_special_request_confirmation',
+            templateData: $data
+        );
+    }
+
+    public function toMail(): MailMessage
+    {
+        $data = $this->prepareNotificationData();
+
+        return (new MailMessage)
+            ->from('prima@primavip.co', 'PRIMA Reservation Platform')
+            ->subject('PRIMA Notice: Special Request')
+            ->greeting("Special Request from {$data['customer_name']}")
+            ->line('**Booking Details:**')
+            ->line("Date: {$data['booking_date']}")
+            ->line("Time: {$data['booking_time']}")
+            ->line("{$data['party_size']} guests")
+            ->line("Min. Spend: {$data['minimum_spend']}")
+            ->line("Customer: {$data['customer_name']}")
+            ->line('**View Request Link:**')
+            ->action('View Request', $data['confirmation_url']);
     }
 }

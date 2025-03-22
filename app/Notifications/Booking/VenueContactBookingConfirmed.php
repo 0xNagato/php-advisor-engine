@@ -3,6 +3,7 @@
 namespace App\Notifications\Booking;
 
 use App\Data\SmsData;
+use App\Data\VenueContactData;
 use App\Models\Booking;
 use Carbon\Carbon;
 use Illuminate\Bus\Queueable;
@@ -30,7 +31,7 @@ class VenueContactBookingConfirmed extends Notification implements ShouldQueue
      *
      * @return array<int, string>
      */
-    public function via(object $notifiable): array
+    public function via(VenueContactData $notifiable): array
     {
         return $notifiable->toChannel();
     }
@@ -61,7 +62,7 @@ class VenueContactBookingConfirmed extends Notification implements ShouldQueue
         return $bookingDate->format('M jS');
     }
 
-    public function toSMS(object $notifiable): SmsData
+    public function toSMS(VenueContactData $notifiable): SmsData
     {
         $baseTemplate = $this->reminder
             ? 'venue_contact_booking_confirmed_reminder'
@@ -96,19 +97,28 @@ class VenueContactBookingConfirmed extends Notification implements ShouldQueue
     {
         $bookingDate = $this->formatBookingDate($this->booking->booking_at);
         $bookingTime = $this->booking->booking_at->format('g:ia');
-
         $notes = $this->booking->notes ?? 'NA';
+
+        if ($this->reminder) {
+            $subject = "Reminder: Upcoming Booking at {$this->booking->venue->name}";
+            $greeting = 'Booking Reminder';
+            $introLine = "This is a reminder for an upcoming booking at {$this->booking->venue->name}.";
+        } else {
+            $subject = "New Booking Confirmation - {$this->booking->venue->name}";
+            $greeting = 'New Booking Confirmation';
+            $introLine = "A new booking has been confirmed at {$this->booking->venue->name}.";
+        }
 
         return (new MailMessage)
             ->from('prima@primavip.co', 'PRIMA Reservation Platform')
-            ->subject("New Booking Confirmation - {$this->booking->venue->name}")
-            ->greeting('New Booking Confirmation')
-            ->line("A new booking has been confirmed at {$this->booking->venue->name}.")
+            ->subject($subject)
+            ->greeting($greeting)
+            ->line($introLine)
             ->line('**Booking Details:**')
             ->line("Date: {$bookingDate}")
             ->line("Time: {$bookingTime}")
             ->line("Party Size: {$this->booking->guest_count}")
-            ->line("Customer: {$this->booking->guest_first_name} {$this->booking->guest_last_name}")
+            ->line("Customer: {$this->booking->guest_name}")
             ->line("Customer phone: {$this->booking->guest_phone}")
             ->line("Notes: {$notes}")
             ->line('**Confirmation Link:**')

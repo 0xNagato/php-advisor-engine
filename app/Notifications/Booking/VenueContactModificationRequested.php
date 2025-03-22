@@ -16,51 +16,13 @@ class VenueContactModificationRequested extends Notification implements ShouldQu
     use Queueable;
 
     public function __construct(
-        public VenueContactData $contact,
+        public BookingModificationRequest $modificationRequest,
         public string $confirmationUrl,
     ) {}
 
-    public function via(object $notifiable): array
+    public function via(VenueContactData $notifiable): array
     {
-        return [...$this->contact->toChannel(), 'mail'];
-    }
-
-    public function toSMS(BookingModificationRequest $notifiable): SmsData
-    {
-        $booking = $notifiable->booking;
-
-        return new SmsData(
-            phone: $this->contact->contact_phone,
-            templateKey: 'venue_modification_request',
-            templateData: [
-                'venue_name' => $booking->venue->name,
-                'guest_name' => $booking->guest_name,
-                'guest_phone' => $booking->guest_phone,
-                'booking_date' => Carbon::toNotificationFormat($booking->booking_at),
-                'booking_time' => $booking->booking_at->format('g:ia'),
-                'changes_requested' => $this->getChangesDescription($notifiable),
-                'confirmation_url' => $this->confirmationUrl,
-            ]
-        );
-    }
-
-    public function toMail(BookingModificationRequest $notifiable): MailMessage
-    {
-        $booking = $notifiable->booking;
-
-        return (new MailMessage)
-            ->subject('Booking Modification Request - '.$booking->venue->name)
-            ->greeting('Booking Modification Request')
-            ->line("A modification request has been received for the booking at {$booking->venue->name}.")
-            ->line('Booking Details:')
-            ->line("Guest: {$booking->guest_name}")
-            ->line("Phone: {$booking->guest_phone}")
-            ->line('Date: '.Carbon::toNotificationFormat($booking->booking_at))
-            ->line('Time: '.$booking->booking_at->format('g:ia'))
-            ->line('Requested Changes:')
-            ->line($this->getChangesDescription($notifiable))
-            ->action('Review Modification Request', $this->confirmationUrl)
-            ->line('Please review and confirm the requested changes.');
+        return $notifiable->toChannel();
     }
 
     private function getChangesDescription(BookingModificationRequest $request): string
@@ -76,5 +38,46 @@ class VenueContactModificationRequested extends Notification implements ShouldQu
         }
 
         return implode(', ', $changes);
+    }
+
+    public function toSMS(VenueContactData $notifiable): SmsData
+    {
+        $booking = $this->modificationRequest->booking;
+
+        return new SmsData(
+            phone: $notifiable->contact_phone,
+            templateKey: 'venue_modification_request',
+            templateData: [
+                'venue_name' => $booking->venue->name,
+                'guest_name' => $booking->guest_name,
+                'guest_phone' => $booking->guest_phone,
+                'booking_date' => Carbon::toNotificationFormat($booking->booking_at),
+                'booking_time' => $booking->booking_at->format('g:ia'),
+                'changes_requested' => $this->getChangesDescription($this->modificationRequest),
+                'confirmation_url' => $this->confirmationUrl,
+            ]
+        );
+    }
+
+    public function toMail(): MailMessage
+    {
+        $booking = $this->modificationRequest->booking;
+        $bookingDate = Carbon::toNotificationFormat($booking->booking_at);
+        $bookingTime = $booking->booking_at->format('g:ia');
+
+        return (new MailMessage)
+            ->from('prima@primavip.co', 'PRIMA Reservation Platform')
+            ->subject("PRIMA Notice: Change Request - {$booking->venue->name}")
+            ->greeting('Booking change requested.')
+            ->line('A change has been requested.')
+            ->line('**Booking Details:**')
+            ->line("Customer: {$booking->guest_name}")
+            ->line("Customer phone: {$booking->guest_phone}")
+            ->line("Date: {$bookingDate}")
+            ->line("Time: {$bookingTime}")
+            ->line('Change requested:')
+            ->line($this->getChangesDescription($this->modificationRequest))
+            ->line('**Confirmation Link:**')
+            ->action('Confirm', $this->confirmationUrl);
     }
 }

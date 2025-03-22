@@ -40,9 +40,11 @@ class SendConfirmationToVenueContacts extends Action
                 reminder: $reminder
             )));
 
-        $admin = User::query()->where('email', 'andru.weir@gmail.com')->first();
-        if ($admin) {
-            $admin->notify(new AdminBookingConfirmed($booking, $confirmationUrl));
+        if (! $reminder) {
+            $admin = User::query()->where('email', 'andru.weir@gmail.com')->first();
+            if ($admin) {
+                $admin->notify(new AdminBookingConfirmed($booking, $confirmationUrl));
+            }
         }
     }
 }
