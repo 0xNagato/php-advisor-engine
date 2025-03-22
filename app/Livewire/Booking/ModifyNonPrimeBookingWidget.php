@@ -16,7 +16,7 @@ use Filament\Forms\Contracts\HasForms;
 use Filament\Forms\Form;
 use Filament\Notifications\Notification;
 use Filament\Widgets\Widget;
-use Illuminate\Contracts\Database\Query\Builder;
+use Illuminate\Database\Eloquent\Builder;
 
 class ModifyNonPrimeBookingWidget extends Widget implements HasForms
 {
@@ -146,8 +146,8 @@ class ModifyNonPrimeBookingWidget extends Widget implements HasForms
             ->where('prime_time', false)
             ->where('remaining_tables', '>', 0)
             ->where('is_available', true)
-            ->when($this->booking->booking_at->isToday(), function (Builder $query) {
-                $query->where('start_time', '>', now()->addMinutes(90)->format('H:i:s'));
+            ->when($this->booking->booking_at->isToday() && now()->timezone($this->booking->venue->timezone)->format('Y-m-d') === $this->booking->booking_at->format('Y-m-d'), function (Builder $query) {
+                $query->where('start_time', '>', now()->timezone($this->booking->venue->timezone)->format('H:i:s'));
             })
             ->orderBy('start_time')
             ->get();
