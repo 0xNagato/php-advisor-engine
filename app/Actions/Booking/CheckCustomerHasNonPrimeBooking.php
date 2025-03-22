@@ -15,6 +15,11 @@ class CheckCustomerHasNonPrimeBooking
 
     public function handle(string $phoneNumber, string $bookingDate, ?string $timezone = null): ?Booking
     {
+        // If the check is disabled via config, return null immediately
+        if (! config('app.check_customer_has_non_prime_booking')) {
+            return null;
+        }
+
         // Create the date range in local timezone
         $date = Carbon::parse($bookingDate, $timezone ?: 'UTC');
         $startOfDay = $date->copy()->startOfDay();
