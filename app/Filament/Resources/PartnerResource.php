@@ -8,6 +8,7 @@ use App\Filament\Resources\PartnerResource\Pages\ListPartners;
 use App\Filament\Resources\PartnerResource\Pages\ViewPartner;
 use App\Models\Partner;
 use App\Traits\ImpersonatesOther;
+use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables\Actions\Action;
 use Filament\Tables\Actions\EditAction;
@@ -27,6 +28,20 @@ class PartnerResource extends Resource
     public static function canAccess(): bool
     {
         return auth()->user()->hasActiveRole('super_admin');
+    }
+
+    public static function form(Form $form): Form
+    {
+        return $form
+            ->schema([
+                // Forms\Components\TextInput::make('user_id')
+                //     ->required()
+                //     ->numeric(),
+                // Forms\Components\TextInput::make('percentage')
+                //     ->required()
+                //     ->maxLength(255)
+                //     ->default(10),
+            ]);
     }
 
     public static function table(Table $table): Table

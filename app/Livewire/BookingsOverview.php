@@ -35,7 +35,11 @@ class BookingsOverview extends BaseWidget
 
         $bookings = Booking::query()
             ->whereBetween('confirmed_at', [$startDateUTC, $endDateUTC])
-            ->whereIn('status', BookingStatus::REPORTING_STATUSES)
+            ->whereIn('status', [
+                BookingStatus::CONFIRMED,
+                BookingStatus::VENUE_CONFIRMED,
+                BookingStatus::PARTIALLY_REFUNDED,
+            ])
             ->select(
                 DB::raw('COUNT(*) as count'),
                 DB::raw('SUM(total_fee - total_refunded) as total_amount'),
@@ -50,6 +54,8 @@ class BookingsOverview extends BaseWidget
 
         $currencyService = app(CurrencyConversionService::class);
         $totalAmountUSD = $currencyService->convertToUSD($bookings->pluck('total_amount', 'currency')->toArray());
+        $platformEarningsUSD = $currencyService->convertToUSD($bookings->pluck('platform_earnings',
+            'currency')->toArray());
         $platformRevenueUSD = $currencyService->convertToUSD($bookings->pluck('platform_revenue',
             'currency')->toArray());
 
@@ -74,7 +80,7 @@ class BookingsOverview extends BaseWidget
     protected function getChartData(Carbon $startDateUTC, Carbon $endDateUTC): array
     {
         $dailyData = Booking::query()
-            ->inReportStatuses()
+            ->confirmed()
             ->whereBetween('confirmed_at', [$startDateUTC, $endDateUTC])
             ->select(
                 DB::raw('DATE(confirmed_at) as date'),

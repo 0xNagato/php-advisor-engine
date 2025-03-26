@@ -63,7 +63,8 @@ class PartnerOverview extends BaseWidget
                 EarningType::PARTNER_VENUE,
                 EarningType::REFUND,
             ])
-            ->whereBetween('bookings.booking_at_utc', [$startDate, $endDate])
+            ->whereNotNull('bookings.confirmed_at')
+            ->whereBetween('bookings.confirmed_at', [$startDate, $endDate])
             ->where('earnings.user_id', $this->partner->user_id)
             ->where(function ($q) {
                 $q->where('bookings.partner_concierge_id', $this->partner->id)
@@ -99,7 +100,8 @@ class PartnerOverview extends BaseWidget
                 EarningType::PARTNER_VENUE,
                 EarningType::REFUND,
             ])
-            ->whereBetween('bookings.booking_at_utc', [$startDate, $endDate])
+            ->whereNotNull('bookings.confirmed_at')
+            ->whereBetween('bookings.confirmed_at', [$startDate, $endDate])
             ->where('earnings.user_id', $this->partner->user_id)
             ->where(function ($q) {
                 $q->where('bookings.partner_concierge_id', $this->partner->id)
@@ -136,7 +138,8 @@ class PartnerOverview extends BaseWidget
                 EarningType::REFUND,
             ])
             ->where('earnings.user_id', $this->partner->user_id)
-            ->whereBetween('bookings.booking_at_utc', [$startDate, $endDate])
+            ->whereNotNull('bookings.confirmed_at')
+            ->whereBetween('bookings.confirmed_at', [$startDate, $endDate])
             ->where(function ($q) {
                 $q->where('bookings.partner_concierge_id', $this->partner->id)
                     ->orWhere('bookings.partner_venue_id', $this->partner->id);

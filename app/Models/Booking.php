@@ -157,11 +157,6 @@ class Booking extends Model
         return $this->schedule->fee($this->guest_count);
     }
 
-    public function scopeInReportStatuses($query)
-    {
-        return $query->whereIn('status', BookingStatus::REPORTING_STATUSES);
-    }
-
     public function scopeConfirmed($query)
     {
         return $query->whereIn('status', [BookingStatus::CONFIRMED, BookingStatus::VENUE_CONFIRMED]);
