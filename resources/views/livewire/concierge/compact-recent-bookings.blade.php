@@ -18,7 +18,7 @@
                         <tr class="cursor-pointer hover:bg-gray-50"
                             onclick="window.location='{{ ViewBooking::getUrl([$booking]) }}'">
                             <td class="px-3 py-2 text-xs text-gray-900 whitespace-nowrap">
-                                {{ Str::limit($booking->schedule->venue->name, 20) }}
+                                {{ Str::limit($booking->venue->name, 20) }}
                             </td>
                             <td class="px-3 py-2 text-xs text-gray-500 whitespace-nowrap">
                                 {{ $booking->booking_at->format('M j') }}

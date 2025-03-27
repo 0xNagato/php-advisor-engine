@@ -19,6 +19,7 @@ use Filament\Tables\Actions\Action;
 use Filament\Tables\Actions\EditAction;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
+use Illuminate\Support\Carbon;
 use Spatie\Permission\Models\Role;
 
 class AnnouncementResource extends Resource
@@ -74,7 +75,17 @@ class AnnouncementResource extends Resource
         return $table
             ->columns([
                 TextColumn::make('title'),
+                TextColumn::make('published_at')
+                    ->dateTime('M jS, Y g:ia')
+                    ->timezone(fn () => auth()->user()->timezone ?? config('app.timezone'))
+                    ->sortable()
+                    ->placeholder('Not Published')
+                    ->description(fn ($record) => $record->published_at ?
+                        Carbon::parse($record->published_at)
+                            ->timezone(auth()->user()->timezone ?? config('app.timezone'))
+                            ->diffForHumans() : null),
             ])
+            ->defaultSort('created_at', 'desc')
             ->actions([
                 Action::make('Publish')
                     ->icon('fas-paper-plane')

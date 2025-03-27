@@ -101,7 +101,8 @@ class ReservationHub extends Page
         $this->currency = $region->currency;
 
         if ($this->booking !== null) {
-            $this->booking = Booking::with('schedule.venue')->find($this->booking->id);
+            $this->booking = Booking::query()->find($this->booking->id);
+
             if ($this->booking->is_refunded_or_partially_refunded) {
                 $this->resetBooking();
             }

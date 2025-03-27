@@ -37,6 +37,7 @@ class ListBookings extends ListRecords
                         BookingStatus::REFUNDED,
                         BookingStatus::PARTIALLY_REFUNDED,
                         BookingStatus::CANCELLED,
+                        BookingStatus::NO_SHOW,
                     ]);
 
                 if (auth()->user()->hasActiveRole('concierge')) {
@@ -44,7 +45,7 @@ class ListBookings extends ListRecords
                 }
 
                 if (auth()->user()->hasActiveRole('venue')) {
-                    return $query->whereHas('schedule.venue', function (Builder $query) {
+                    return $query->whereHas('venue', function (Builder $query) {
                         $query->where('id', auth()->user()->venue->id);
                     });
                 }

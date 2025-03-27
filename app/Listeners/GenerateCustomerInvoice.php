@@ -5,7 +5,6 @@ namespace App\Listeners;
 use App\Events\BookingPaid;
 use Exception;
 use Illuminate\Contracts\Queue\ShouldQueue;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Sentry;
 
@@ -48,7 +47,7 @@ class GenerateCustomerInvoice implements ShouldQueue
                 'invoice_url' => $invoiceUrl,
             ]);
         } catch (Exception $e) {
-            Log::error('Failed to generate invoice', ['booking_id' => $event->booking->id, 'exception' => $e->getMessage()]);
+            logger()->error('Failed to generate invoice', ['booking_id' => $event->booking->id, 'exception' => $e->getMessage()]);
             Sentry::captureException($e);
         }
     }

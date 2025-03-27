@@ -23,6 +23,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\HtmlString;
 use Illuminate\Validation\Rules\Password as PasswordRule;
+use Throwable;
 use Ysfkaya\FilamentPhoneInput\Forms\PhoneInput;
 use Ysfkaya\FilamentPhoneInput\PhoneInputNumberType;
 
@@ -60,7 +61,7 @@ trait HandlesConciergeInvitation
 
         $inviter = $this->invitingPartner ?? $this->invitingConcierge;
 
-        return "You were referred by: {$inviter->user->name}";
+        return "You were referred by: {$inviter?->user->name}";
     }
 
     public function form(Form $form): Form
@@ -124,10 +125,10 @@ trait HandlesConciergeInvitation
                     '))
                     ->options(function () {
                         $regions = Region::all();
-                        $orderedNames = ['Miami', 'Los Angeles', 'Ibiza', 'New York'];
 
-                        return $regions->sortBy(function ($region) use ($orderedNames) {
-                            $index = array_search($region->name, $orderedNames);
+                        return $regions->sortBy(function ($region) {
+                            $orderedNames = ['Miami', 'Los Angeles', 'Ibiza', 'New York'];
+                            $index = array_search($region->name, $orderedNames, true);
 
                             return $index === false ? PHP_INT_MAX : $index;
                         })
@@ -155,13 +156,16 @@ trait HandlesConciergeInvitation
             ->statePath('data');
     }
 
+    /**
+     * @throws Throwable
+     */
     public function secureAccount(): void
     {
         try {
             $this->rateLimit(5);
         } catch (TooManyRequestsException $exception) {
             Notification::make()
-                ->title("Too many requests! Please wait another {$exception->secondsUntilAvailable} seconds to create your account.")
+                ->title("Too many requests! Please wait another $exception->secondsUntilAvailable seconds to create your account.")
                 ->danger()
                 ->send();
 
@@ -213,7 +217,10 @@ trait HandlesConciergeInvitation
             }
             // No need to set a referral ID for venue_manager referrals
 
-            $user = User::query()->create($userData);
+            $user = User::query()->create([
+                ...$userData,
+                'region' => $this->referral->region_id ?? $data['notification_regions'][0],
+            ]);
 
             $this->referral->update([
                 'user_id' => $user->id,

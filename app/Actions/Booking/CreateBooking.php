@@ -11,7 +11,6 @@ use App\Models\ScheduleTemplate;
 use App\Models\ScheduleWithBooking;
 use App\Models\VipCode;
 use App\Services\SalesTaxService;
-use AshAllenDesign\ShortURL\Facades\ShortURL;
 use chillerlan\QRCode\QRCode;
 use Exception;
 use Illuminate\Support\Carbon;
@@ -137,24 +136,22 @@ class CreateBooking
         ]);
 
         try {
-            $shortUrlQr = ShortURL::destinationUrl(
-                route('booking.checkout', [
-                    'booking' => $booking->uuid,
-                    'r' => 'qr',
-                ])
-            )->make();
+            $shortUrlQr = route('booking.checkout', [
+                'booking' => $booking->uuid,
+                'r' => 'qr',
+            ]);
 
-            $shortUrl = ShortURL::destinationUrl(
-                route('booking.checkout', [
-                    'booking' => $booking->uuid,
-                    'r' => 'sms',
-                ])
-            )->make();
+            $shortUrl = route('booking.checkout', [
+                'booking' => $booking->uuid,
+                'r' => 'sms',
+            ]);
 
             $vipUrl = route('booking.checkout', [
                 'booking' => $booking->uuid,
                 'r' => 'vip',
             ]);
+
+            $qrCode = (new QRCode)->render($shortUrlQr);
         } catch (Exception $e) {
             Sentry::captureException($e);
 
@@ -166,9 +163,9 @@ class CreateBooking
 
         return CreateBookingReturnData::from([
             'booking' => $booking,
-            'bookingUrl' => $shortUrl->default_short_url,
+            'bookingUrl' => $shortUrl,
             'bookingVipUrl' => $vipUrl,
-            'qrCode' => (new QRCode)->render($shortUrlQr->default_short_url),
+            'qrCode' => $qrCode,
         ]);
     }
 

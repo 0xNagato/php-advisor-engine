@@ -81,7 +81,7 @@ class ViewBooking extends ViewRecord
         $this->authorizeAccess();
 
         $this->booking = $this->record;
-        $this->region = Region::query()->find($this->booking->venue->region)->first();
+        $this->region = Region::query()->find($this->booking->venue->region);
 
         // Store the original previous URL
         $this->originalPreviousUrl = URL::previous();

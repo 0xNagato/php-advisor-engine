@@ -179,7 +179,7 @@ class BookingService
     {
         $booking->load('schedule.venue');
         $schedule = $booking->schedule;
-        $venue = $schedule->venue;
+        $venue = $booking->venue;
 
         $extraPeople = max(0, $booking->guest_count - 2);
 

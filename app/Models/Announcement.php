@@ -8,6 +8,10 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 /**
+ * @property array<int, string> $region
+ * @property array<int, string> $recipient_roles
+ * @property array<int, string> $recipient_user_ids
+ *
  * @mixin IdeHelperAnnouncement
  */
 class Announcement extends Model

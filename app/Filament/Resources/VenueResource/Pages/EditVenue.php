@@ -549,7 +549,7 @@ class EditVenue extends EditRecord
                     ->form([
                         Select::make('target_venue_group_id')
                             ->label('Venue Group to Merge')
-                            ->helperText("Select the venue group that will be merged into the current venue group. All venues and managers from the selected group will be transferred to the current group.")
+                            ->helperText('Select the venue group that will be merged into the current venue group. All venues and managers from the selected group will be transferred to the current group.')
                             ->options(fn () => VenueGroup::query()
                                 ->where('id', '!=', $venue->venue_group_id)
                                 ->pluck('name', 'id'))

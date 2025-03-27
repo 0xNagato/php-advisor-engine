@@ -71,7 +71,7 @@ class BookingResource extends Resource
                     ->label('Concierge')
                     ->numeric()
                     ->sortable(),
-                TextColumn::make('schedule.venue.name')
+                TextColumn::make('venue.name')
                     ->label('Venue')
                     ->searchable()
                     ->sortable(),

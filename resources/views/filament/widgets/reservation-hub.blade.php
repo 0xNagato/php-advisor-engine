@@ -251,7 +251,7 @@
                             initializeStripe();
                         }">
 
-                        @if ($booking && !$booking->schedule->prime_time)
+                        @if ($booking && !$booking->is_prime)
                             <div class="w-full">
                                 @if ($booking->schedule->minimum_spend_per_guest > 0)
                                     <div

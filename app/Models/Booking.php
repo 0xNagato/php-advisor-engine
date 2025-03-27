@@ -154,6 +154,10 @@ class Booking extends Model
 
     public function totalFee(): int
     {
+        if (! $this->booking_at || ! $this->schedule) {
+            return $this->total_fee ?? 0;
+        }
+
         return $this->schedule->fee($this->guest_count);
     }
 
@@ -173,12 +177,36 @@ class Booking extends Model
     }
 
     /**
+     * Scope query to filter by venue ID
+     */
+    public function scopeForVenue($query, int $venueId)
+    {
+        return $query->whereExists(function ($query) use ($venueId) {
+            $query->select(\DB::raw(1))
+                ->from('schedule_templates')
+                ->where('schedule_templates.venue_id', $venueId)
+                ->whereColumn('schedule_templates.id', 'bookings.schedule_template_id');
+        });
+    }
+
+    /**
      * @return BelongsTo<ScheduleWithBooking, $this>
      */
     public function schedule(): BelongsTo
     {
-        return $this->belongsTo(ScheduleWithBooking::class, 'schedule_template_id', 'schedule_template_id')
-            ->whereColumn('booking_at', 'schedule_with_bookings.booking_at');
+        $relation = $this->belongsTo(ScheduleWithBooking::class, 'schedule_template_id', 'schedule_template_id');
+
+        if ($this->booking_at) {
+            $booking_date = $this->booking_at->format('Y-m-d');
+            $booking_time = $this->booking_at->format('H:i:s');
+
+            $relation->where(function ($query) use ($booking_date, $booking_time) {
+                $query->whereDate('schedule_with_bookings.booking_at', $booking_date)
+                    ->whereTime('schedule_with_bookings.booking_at', $booking_time);
+            });
+        }
+
+        return $relation;
     }
 
     /**
@@ -235,7 +263,7 @@ class Booking extends Model
 
     protected function primeTime(): Attribute
     {
-        return Attribute::make(get: fn () => $this->schedule->prime_time);
+        return Attribute::make(get: fn () => $this->is_prime);
     }
 
     protected function localFormattedGuestPhone(): Attribute

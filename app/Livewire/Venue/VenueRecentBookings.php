@@ -50,9 +50,7 @@ class VenueRecentBookings extends BaseWidget
             })
             ->orderByDesc('booking_at')
             ->whereBetween('created_at', [$startDate, $endDate])->orderByDesc('created_at')
-            ->whereHas('schedule', function ($query) {
-                $query->where('venue_id', $this->venue->id);
-            });
+            ->forVenue($this->venue->id);
 
         return $table
             ->recordUrl(fn (Booking $booking) => route('filament.admin.resources.bookings.view', $booking))

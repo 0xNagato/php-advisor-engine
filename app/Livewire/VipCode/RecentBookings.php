@@ -40,10 +40,10 @@ class RecentBookings extends BaseWidget
             ->recordUrl(fn (Booking $booking): string => ViewBooking::getUrl(['record' => $booking]))
             ->openRecordUrlInNewTab()
             ->columns([
-                TextColumn::make('schedule.venue.name')
+                TextColumn::make('venue.name')
                     ->searchable()
                     ->formatStateUsing(fn (Booking $booking): string => view('components.two-line-cell', [
-                        'primary' => $booking->schedule->venue->name,
+                        'primary' => $booking->venue->name,
                         'secondary' => $booking->booking_at->format('M d, Y g:i A'),
                     ])->render())
                     ->html()

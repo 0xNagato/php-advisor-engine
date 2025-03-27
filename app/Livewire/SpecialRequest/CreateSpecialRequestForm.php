@@ -43,7 +43,7 @@ class CreateSpecialRequestForm extends Widget implements HasForms
 
     public function mount(): void
     {
-        $region = Region::query()->find(session('region', 'miami'))?->first();
+        $region = Region::query()->find(session('region', 'miami'));
         $this->timezone = $region->timezone;
         $this->currency = $region->currency;
 

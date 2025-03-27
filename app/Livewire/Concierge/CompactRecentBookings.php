@@ -13,7 +13,7 @@ class CompactRecentBookings extends Component
         $recentBookings = Booking::query()
             ->confirmed()
             ->where('concierge_id', auth()->user()->concierge->id)
-            ->with(['schedule.venue', 'earnings'])
+            ->with(['venue', 'earnings'])
             ->orderByDesc('booking_at')
             ->limit(5)
             ->get();

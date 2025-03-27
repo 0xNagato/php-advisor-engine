@@ -6,6 +6,7 @@ namespace App\Livewire\Booking;
 
 use App\Models\Booking;
 use App\Notifications\Booking\SendCustomerBookingPaymentForm;
+use AshAllenDesign\ShortURL\Facades\ShortURL;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Concerns\InteractsWithForms;
@@ -97,7 +98,9 @@ class SMSBookingForm extends Widget implements HasForms
             'notes' => $data['notes'],
         ]);
 
-        $this->booking->notify(new SendCustomerBookingPaymentForm(url: $this->bookingUrl));
+        $shortUrl = ShortURL::destinationUrl($this->bookingUrl)->make()->default_short_url;
+
+        $this->booking->notify(new SendCustomerBookingPaymentForm(url: $shortUrl));
 
         $this->SMSSent = true;
         $this->dispatch('sms-sent');

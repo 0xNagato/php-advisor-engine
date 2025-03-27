@@ -1,10 +1,6 @@
 @php
     use App\Enums\BookingStatus;
     use App\Enums\EarningType;
-    use App\Filament\Resources\ConciergeResource;
-    use App\Filament\Resources\PartnerResource;
-    use App\Filament\Resources\VenueResource;
-    use libphonenumber\PhoneNumberFormat;
 @endphp
 <div @class([
     'relative',
@@ -18,7 +14,7 @@
                 Email Invoice
             </x-filament::button>
             <x-filament::button color="indigo" class="w-1/2" size="sm" icon="gmdi-file-download-o" tag="a"
-                                :href="route('customer.invoice.download', ['uuid' => $booking->uuid])">
+                :href="route('customer.invoice.download', ['uuid' => $booking->uuid])">
                 Download PDF
             </x-filament::button>
         </div>
@@ -27,7 +23,7 @@
             <form wire:submit="emailInvoice" class="max-w-3xl p-4 mx-auto my-4 bg-gray-100 border rounded-lg">
                 {{ $this->form }}
                 <button type="submit"
-                        class="w-full px-4 py-2 mt-4 text-xs font-semibold text-white bg-indigo-600 rounded-lg sm:text-xs">
+                    class="w-full px-4 py-2 mt-4 text-xs font-semibold text-white bg-indigo-600 rounded-lg sm:text-xs">
                     Send Email
                 </button>
             </form>
@@ -47,7 +43,7 @@
             <!-- SVG Background Element -->
             <figure class="absolute inset-x-0 bottom-0 -mb-px ">
                 <svg preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg" x="0px" y="0px"
-                     viewBox="0 0 1920 100.1">
+                    viewBox="0 0 1920 100.1">
                     <path fill="currentColor" class="fill-white" d="M0,0c0,0,934.4,93.4,1920,0v100.1H0L0,0z"></path>
                 </svg>
             </figure>
@@ -400,12 +396,7 @@
                     isset($this->canModifyBooking) &&
                     $this->canModifyBooking &&
                     !auth()->user()->hasActiveRole('super_admin'))
-                <x-filament::actions class="w-full mt-4"
-                                     :actions="[
-                                     $this->cancelBookingAction,
-                                     $this->modifyGuestInfoAction,
-                                     $this->modifyBookingAction,
-                                     ]" />
+                <x-filament::actions class="w-full mt-4" :actions="[$this->cancelBookingAction, $this->modifyGuestInfoAction, $this->modifyBookingAction]" />
             @endif
         </div>
         <!-- End Body -->

@@ -16,8 +16,7 @@ class ConciergeObserver
      */
     public function created(Concierge $concierge): void
     {
-        // Skip completely when running tests to improve test performance
-        if ($this->isTestEnvironment()) {
+        if (app()->runningUnitTests()) {
             return;
         }
 
@@ -31,6 +30,11 @@ class ConciergeObserver
                 return;
             }
 
+            // Get user's region and notification regions
+            $user = $concierge->user;
+            $userRegion = $user->region;
+            $userNotificationRegions = $user->notification_regions ?? [];
+
             // Get all published announcements targeted at concierges - using the most efficient approach
             $announcements = Announcement::query()
                 ->where(function ($query) use ($conciergeRole) {
@@ -39,13 +43,46 @@ class ConciergeObserver
                         ->orWhereJsonContains('recipient_roles', $conciergeRole->id);
                 })
                 ->where('published_at', '<=', now())
+                ->where(function ($query) use ($userRegion, $userNotificationRegions) {
+                    // Either the announcement has no region restrictions
+                    $query->whereNull('region')
+                        ->orWhere('region', '[]')
+                        // Or it includes the user's primary region
+                        ->orWhereJsonContains('region', $userRegion);
+
+                    // Or it includes any of the user's notification regions
+                    if (filled($userNotificationRegions)) {
+                        foreach ($userNotificationRegions as $region) {
+                            $query->orWhereJsonContains('region', $region);
+                        }
+                    }
+                })
+                ->orderBy('published_at', 'asc') // Order by published_at to maintain chronological order
                 ->get();
 
             // If we found no announcements specifically for concierges, try a broader approach
             if ($announcements->isEmpty()) {
-                $announcements = Announcement::query()->whereNull('recipient_roles')
-                    ->orWhere('recipient_roles', '[]')
+                $announcements = Announcement::query()
+                    ->where(function ($query) {
+                        $query->whereNull('recipient_roles')
+                            ->orWhere('recipient_roles', '[]');
+                    })
                     ->where('published_at', '<=', now())
+                    ->where(function ($query) use ($userRegion, $userNotificationRegions) {
+                        // Either the announcement has no region restrictions
+                        $query->whereNull('region')
+                            ->orWhere('region', '[]')
+                            // Or it includes the user's primary region
+                            ->orWhereJsonContains('region', $userRegion);
+
+                        // Or it includes any of the user's notification regions
+                        if (filled($userNotificationRegions)) {
+                            foreach ($userNotificationRegions as $region) {
+                                $query->orWhereJsonContains('region', $region);
+                            }
+                        }
+                    })
+                    ->orderBy('published_at', 'asc') // Order by published_at to maintain chronological order
                     ->get();
             }
 
@@ -64,7 +101,7 @@ class ConciergeObserver
                     $messagesToInsert[] = [
                         'user_id' => $concierge->user_id,
                         'announcement_id' => $announcement->id,
-                        'created_at' => $now,
+                        'created_at' => $announcement->published_at,
                         'updated_at' => $now,
                     ];
                 }
@@ -85,15 +122,5 @@ class ConciergeObserver
                 'user_id' => $concierge->user_id,
             ]);
         }
-    }
-
-    /**
-     * Determine if we're running in a test environment.
-     */
-    private function isTestEnvironment(): bool
-    {
-        return app()->environment('testing') ||
-               (defined('PHPUNIT_RUNNING') && PHPUNIT_RUNNING) ||
-               env('APP_ENV') === 'testing';
     }
 }

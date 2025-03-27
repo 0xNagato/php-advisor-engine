@@ -66,7 +66,7 @@ class ConciergeRecentBookings extends BaseWidget
             ->emptyStateIcon('heroicon-o-currency-dollar')
             ->emptyStateHeading('Earnings will show here when bookings begin!')
             ->columns([
-                TextColumn::make('schedule.venue.name')
+                TextColumn::make('venue.name')
                     ->label('Venue')
                     ->size('xs')
                     ->searchable(),
