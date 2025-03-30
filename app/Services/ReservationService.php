@@ -23,11 +23,6 @@ class ReservationService
     use HandlesVenueClosures;
 
     /**
-     * The region associated with the current user.
-     */
-    private readonly Region $region;
-
-    /**
      * The minimum number of minutes in the future a reservation can be made while the date is today.
      * If a reservation is requested within this window, it will be adjusted to the next available time slot.
      */
@@ -55,9 +50,9 @@ class ReservationService
         public int $timeSlotOffset = 0,
         public array $cuisines = [],
         public ?string $neighborhood = '',
+        public ?Region $region = null
     ) {
-        // Set the user's region using the GetUserRegion action
-        $this->region = GetUserRegion::run();
+        $this->region ??= GetUserRegion::run();
     }
 
     /**
@@ -67,7 +62,9 @@ class ReservationService
      */
     public function getAvailableVenues(): Collection
     {
-        /** @var Carbon $requestedTime */
+        /**
+         * @var Carbon $requestedTime
+         */
         $requestedTime = Carbon::createFromFormat('H:i:s', $this->reservationTime, $this->region->timezone);
 
         $adjustedTime = $this->adjustTime($requestedTime->format('H:i:s'));
@@ -78,7 +75,9 @@ class ReservationService
 
         $currentTime = Carbon::now($this->region->timezone)->format('H:i:s');
 
-        /** @var Collection<int, Venue> $venues */
+        /**
+         * @var Collection<int, Venue> $venues
+         */
         $venues = Venue::available()
             ->where('region', $this->region->id)
             ->where(function ($query) {
@@ -91,16 +90,17 @@ class ReservationService
                 $query->whereIn('status', $statuses);
             })
             // Filter by concierge's allowed venues if applicable
-            ->when(auth()->check() && auth()->user()->hasActiveRole('concierge') && auth()->user()->concierge, function ($query) {
-                $allowedVenueIds = auth()->user()->concierge->allowed_venue_ids ?? [];
+            ->when(auth()->check() && auth()->user()->hasActiveRole('concierge') && auth()->user()->concierge,
+                function ($query) {
+                    $allowedVenueIds = auth()->user()->concierge->allowed_venue_ids ?? [];
 
-                // Only apply the filter if there are allowed venues
-                if (filled($allowedVenueIds)) {
-                    // Ensure all IDs are integers
-                    $allowedVenueIds = array_map('intval', $allowedVenueIds);
-                    $query->whereIn('id', $allowedVenueIds);
-                }
-            })
+                    // Only apply the filter if there are allowed venues
+                    if (filled($allowedVenueIds)) {
+                        // Ensure all IDs are integers
+                        $allowedVenueIds = array_map('intval', $allowedVenueIds);
+                        $query->whereIn('id', $allowedVenueIds);
+                    }
+                })
             ->when($this->cuisines, function ($query) {
                 $query->whereJsonContains('cuisines', $this->cuisines);
             })
@@ -121,8 +121,11 @@ class ReservationService
         $venues->each(function ($venue) use ($currentTime) {
             if ($venue->cutoff_time) {
                 $currentTimeCarbon = Carbon::createFromFormat('H:i:s', $currentTime, $this->region->timezone);
-                $cutoffTimeCarbon = Carbon::createFromFormat('H:i:s', $venue->cutoff_time->format('H:i:s'),
-                    $this->region->timezone);
+                $cutoffTimeCarbon = Carbon::createFromFormat(
+                    'H:i:s',
+                    $venue->cutoff_time->format('H:i:s'),
+                    $this->region->timezone
+                );
 
                 // Only apply cutoff time check if the reservation is for today
                 $isToday = Carbon::parse($this->date, $this->region->timezone)->isToday();
@@ -188,12 +191,16 @@ class ReservationService
      */
     public function adjustTime(string $reservation): string
     {
-        /** @var Carbon $reservationTime */
+        /**
+         * @var Carbon $reservationTime
+         */
         $reservationTime = Carbon::createFromFormat('H:i:s', $reservation, $this->region->timezone);
 
         $currentTime = Carbon::now($this->region->timezone);
 
-        /** @var Carbon $reservationDate */
+        /**
+         * @var Carbon $reservationDate
+         */
         $reservationDate = Carbon::createFromFormat('Y-m-d', $this->date, $this->region->timezone);
 
         $adjustedTime = $reservation;

@@ -15,7 +15,12 @@
         $headerClass,
     ])>
         @if ($logoUrl)
-            <a href="{{ $logoUrl }}">PRIMA</a>
+            <div class="flex items-center justify-between p-4">
+                <a href="{{ $logoUrl }}">PRIMA</a>
+                <div class="w-full max-w-[200px] md:max-w-[300px] pt-2">
+                    <livewire:vip.region-selector />
+                </div>
+            </div>
         @else
             PRIMA
         @endif

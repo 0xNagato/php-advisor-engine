@@ -5,6 +5,7 @@ namespace App\Livewire\Vip;
 use App\Actions\Booking\CreateBooking;
 use App\Models\Region;
 use App\Models\Venue;
+use App\Models\VipCode;
 use App\Services\ReservationService;
 use App\Services\VipCodeService;
 use App\Traits\ManagesBookingForms;
@@ -13,6 +14,7 @@ use Filament\Forms\Form;
 use Filament\Notifications\Notification;
 use Filament\Pages\Page;
 use Illuminate\Database\Eloquent\Collection;
+use Livewire\Attributes\On;
 
 /**
  * @property Form $form
@@ -40,6 +42,8 @@ class AvailabilityCalendar extends Page
 
     public ?Region $region = null;
 
+    public ?VipCode $vipCode = null;
+
     public string $code = '';
 
     public function mount(): void
@@ -48,11 +52,11 @@ class AvailabilityCalendar extends Page
             $this->redirect('/');
         }
 
-        if (! $vipCode = app(VipCodeService::class)->findByCode($this->code)) {
+        if (! $this->vipCode = app(VipCodeService::class)->findByCode($this->code)) {
             $this->redirect('/');
         }
 
-        $region_id = $vipCode->concierge->user->region ?? config('app.default_region');
+        $region_id = $this->vipCode->concierge->user->region ?? config('app.default_region');
 
         $this->region = Region::query()->where('id', $region_id)->first();
         $this->timezone = $this->region->timezone;
@@ -79,6 +83,20 @@ class AvailabilityCalendar extends Page
         $this->loadVenues();
     }
 
+    #[On('vip-region-changed')]
+    public function regionChanged(): void
+    {
+        $region = session('vip-region') ?? $this->vipCode->concierge->user->region;
+        $this->region = Region::query()->where('id', $region)->first();
+
+        $this->neighborhoods = $this->region->neighborhoods->pluck('name', 'id');
+        $this->timezone = $this->region->timezone;
+        $this->currency = $this->region->currency;
+        $this->venues = null;
+
+        $this->form->fill();
+    }
+
     public function createBooking(int $scheduleTemplateId, ?string $date = null): void
     {
         $this->loadVenues();
@@ -86,7 +104,6 @@ class AvailabilityCalendar extends Page
         $data = $this->form->getState();
         $data['date'] = $date ?? $data['date'];
 
-        $vipCode = app(VipCodeService::class)->findByCode($this->code);
         try {
             $device = isPrimaApp() ? 'mobile_app' : 'web';
 
@@ -95,7 +112,7 @@ class AvailabilityCalendar extends Page
                 data: $data,
                 timezone: $this->region->timezone,
                 currency: $this->region->currency,
-                vipCode: $vipCode,
+                vipCode: $this->vipCode,
                 source: 'vip',
                 device: $device
             );
@@ -130,7 +147,8 @@ class AvailabilityCalendar extends Page
                 guestCount: $this->data['guest_count'],
                 reservationTime: $this->data['reservation_time'],
                 timeslotCount: $this->data['timeslot_count'] ?? 5,
-                timeSlotOffset: 2
+                timeSlotOffset: 2,
+                region: $this->region,
             );
 
             $this->venues = $reservation->getAvailableVenues();
