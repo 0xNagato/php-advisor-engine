@@ -49,6 +49,8 @@ class ScheduleManager extends Component
 
     public ?float $dayPricePerHead = null;
 
+    public ?float $weeklyPricePerHead = null;
+
     protected $listeners = [
         'calendar-date-selected' => 'handleDateSelection',
     ];
@@ -1143,10 +1145,82 @@ class ScheduleManager extends Component
 
     public function openPricePerHeadModal(): void
     {
-        // Reset the price per head value before opening the modal
-        $this->dayPricePerHead = null;
+        // Set the default price per head value to the venue's non-prime fee
+        $this->dayPricePerHead = $this->venue->non_prime_fee_per_head;
 
         // Open the modal
         $this->dispatch('open-modal', id: 'set-price-per-head-modal');
+    }
+
+    public function openTemplateWeeklyPricePerHeadModal(): void
+    {
+        // Set the default price per head value to the venue's non-prime fee
+        $this->weeklyPricePerHead = $this->venue->non_prime_fee_per_head;
+
+        // Open the modal
+        $this->dispatch('open-modal', id: 'set-template-price-per-head-modal');
+    }
+
+    public function setTemplateWeeklyPricePerHead(): void
+    {
+        try {
+            // Get all templates for the selected day that are not prime
+            $templates = $this->venue->scheduleTemplates()
+                ->where('day_of_week', $this->selectedDay)
+                ->where('is_available', true)
+                ->where('prime_time', false)
+                ->get();
+
+            // Store original data for logging
+            $originalData = $templates->mapWithKeys(fn ($template) => [$template->id => [
+                'time' => $template->start_time,
+                'party_size' => $template->party_size,
+                'price_per_head' => $template->price_per_head,
+                'prime_time' => $template->prime_time,
+            ]])->toArray();
+
+            // Update all non-prime templates to set price_per_head
+            foreach ($templates as $template) {
+                $template->update([
+                    'price_per_head' => $this->weeklyPricePerHead ?? 0,
+                ]);
+            }
+
+            // Log the activity
+            $this->getActivityLogger()
+                ->performedOn($this->venue)
+                ->withProperties([
+                    'action' => 'set_template_weekly_price_per_head',
+                    'day_of_week' => $this->selectedDay,
+                    'price_per_head' => $this->weeklyPricePerHead,
+                    'original_data' => $originalData,
+                ])
+                ->log('Concierge incentive set for non-prime timeslots on weekly template for '.ucfirst($this->selectedDay));
+
+            // Reset the price per head input
+            $this->weeklyPricePerHead = null;
+
+            // Close the modal
+            $this->dispatch('close-modal', id: 'set-template-price-per-head-modal');
+
+            // Reload the schedules
+            $this->initializeSchedules();
+
+            Notification::make()
+                ->title('Concierge incentive updated for non-prime time slots in the weekly template')
+                ->success()
+                ->send();
+        } catch (Exception $e) {
+            Log::error('Error in setTemplateWeeklyPricePerHead', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+                'day' => $this->selectedDay,
+            ]);
+
+            Notification::make()
+                ->title('Error setting concierge incentive')
+                ->danger()
+                ->send();
+        }
     }
 }

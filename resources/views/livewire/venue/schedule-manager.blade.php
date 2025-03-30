@@ -49,9 +49,13 @@
                     Venue is closed on {{ ucfirst($selectedDay) }}s
                 </div>
             @else
-                <div class="flex justify-end mt-4 mb-3">
+                <div class="flex justify-end mt-4 mb-3 space-x-2">
                     <x-filament::button wire:click="makeTemplateNonPrime" size="xs" color="info">
                         Make Day Non-Prime
+                    </x-filament::button>
+
+                    <x-filament::button wire:click="openTemplateWeeklyPricePerHeadModal" size="xs" color="primary">
+                        Set Concierge Incentive
                     </x-filament::button>
                 </div>
 
@@ -309,16 +313,14 @@
                         </div>
                     </div>
 
-                    @if ($activeView === 'calendar')
-                        <div class="col-span-2 mt-2 space-y-2" x-show="!isPrime">
-                            <span class="text-sm font-medium">Concierge Incentive Per Customer</span>
-                            <div class="relative">
-                                <span class="absolute inset-y-0 flex items-center text-gray-500 left-3">$</span>
-                                <input type="number" wire:model="editingSlot.price_per_head" min="0"
-                                    class="block w-full text-sm border-gray-300 rounded-lg shadow-sm pl-7 focus:border-primary-500 focus:ring-1 focus:ring-primary-500" />
-                            </div>
+                    <div class="col-span-2 mt-2 space-y-2" x-show="!isPrime">
+                        <span class="text-sm font-medium">Concierge Incentive Per Customer</span>
+                        <div class="relative">
+                            <span class="absolute inset-y-0 flex items-center text-gray-500 left-3">$</span>
+                            <input type="number" wire:model="editingSlot.price_per_head" min="0"
+                                class="block w-full text-sm border-gray-300 rounded-lg shadow-sm pl-7 focus:border-primary-500 focus:ring-1 focus:ring-primary-500" />
                         </div>
-                    @endif
+                    </div>
                 </div>
             </div>
             <div x-show="isPrime">
@@ -385,6 +387,44 @@
                     Cancel
                 </x-filament::button>
                 <x-filament::button wire:click="setPricePerHeadForDay" size="sm">
+                    Apply
+                </x-filament::button>
+            </div>
+        </x-slot>
+    </x-filament::modal>
+
+    <x-filament::modal id="set-template-price-per-head-modal" width="sm">
+        <x-slot name="header">
+            <div class="flex items-center justify-between w-full">
+                <span class="text-sm text-gray-600">
+                    Set Concierge Incentive for {{ ucfirst($selectedDay) }}s
+                </span>
+            </div>
+        </x-slot>
+
+        <div class="space-y-4">
+            <div class="space-y-2">
+                <span class="text-sm font-medium">Concierge Incentive Per Customer</span>
+                <div class="relative">
+                    <span class="absolute inset-y-0 flex items-center text-gray-500 left-3">$</span>
+                    <input type="number" wire:model="weeklyPricePerHead" min="0" step="0.01"
+                        class="block w-full text-sm border-gray-300 rounded-lg shadow-sm pl-7 focus:border-primary-500 focus:ring-1 focus:ring-primary-500" />
+                </div>
+                <p class="text-xs text-gray-500">
+                    This will set the concierge incentive per customer for all non-prime time slots on
+                    {{ ucfirst($selectedDay) }}s in the weekly template.
+                    Prime time slots will remain unchanged.
+                </p>
+            </div>
+        </div>
+
+        <x-slot name="footer">
+            <div class="flex justify-end gap-2">
+                <x-filament::button color="gray"
+                    wire:click="$dispatch('close-modal', { id: 'set-template-price-per-head-modal' })" size="sm">
+                    Cancel
+                </x-filament::button>
+                <x-filament::button wire:click="setTemplateWeeklyPricePerHead" size="sm">
                     Apply
                 </x-filament::button>
             </div>
