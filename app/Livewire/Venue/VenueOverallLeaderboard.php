@@ -2,12 +2,12 @@
 
 namespace App\Livewire\Venue;
 
+use App\Enums\BookingStatus;
 use App\Models\Earning;
 use App\Models\Venue;
 use App\Services\CurrencyConversionService;
 use Carbon\Carbon;
 use Filament\Widgets\Widget;
-use Illuminate\Contracts\Database\Query\Builder;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
@@ -80,12 +80,13 @@ class VenueOverallLeaderboard extends Widget
                         'earnings.currency',
                         DB::raw('COUNT(DISTINCT earnings.booking_id) as booking_count'),
                     ])
-                    ->join('venues', 'venues.user_id', '=', 'earnings.user_id')
-                    ->join('bookings', function (Builder $join) use ($tempStartDate, $tempEndDate) {
-                        $join->on('earnings.booking_id', '=', 'bookings.id')
-                            ->whereNotNull('bookings.confirmed_at')
-                            ->whereBetween('bookings.confirmed_at', [$tempStartDate, $tempEndDate]);
-                    });
+                    ->join('bookings', 'earnings.booking_id', '=', 'bookings.id')
+                    ->join('schedule_templates', 'bookings.schedule_template_id', '=', 'schedule_templates.id')
+                    ->join('venues', 'venues.id', '=', 'schedule_templates.venue_id')
+                    ->whereBetween('bookings.confirmed_at', [$tempStartDate, $tempEndDate])
+                    ->whereIn('bookings.status', BookingStatus::PAYOUT_STATUSES);
+
+                $query->where('earnings.type', 'venue');
 
                 if ($this->selectedRegion) {
                     $query->where('venues.region', $this->selectedRegion);
@@ -97,22 +98,21 @@ class VenueOverallLeaderboard extends Widget
                     ->limit($this->limit)
                     ->get();
 
-                return $earnings->filter(fn ($row) => $row->total_earned > 0)
-                    ->map(function ($earning) use ($currencyService) {
-                        $totalUSD = $currencyService->convertToUSD([$earning->currency => $earning->total_earned]);
+                return $earnings->map(function ($earning) use ($currencyService) {
+                    $totalUSD = $currencyService->convertToUSD([$earning->currency => $earning->total_earned]);
 
-                        return [
-                            'user_id' => $earning->user_id,
-                            'venue_id' => $earning->venue_id,
-                            'venue_name' => $earning->venue_name,
-                            'booking_count' => $earning->booking_count,
-                            'total_earned' => $earning->total_earned,
-                            'currency' => $earning->currency,
-                            'currency_symbol' => $this->getCurrencySymbol($earning->currency),
-                            'total_usd' => $totalUSD,
-                            'region' => $earning->region,
-                        ];
-                    });
+                    return [
+                        'user_id' => $earning->user_id,
+                        'venue_id' => $earning->venue_id,
+                        'venue_name' => $earning->venue_name,
+                        'booking_count' => $earning->booking_count,
+                        'total_earned' => $earning->total_earned,
+                        'currency' => $earning->currency,
+                        'currency_symbol' => $this->getCurrencySymbol($earning->currency),
+                        'total_usd' => $totalUSD,
+                        'region' => $earning->region,
+                    ];
+                });
             }
         );
     }

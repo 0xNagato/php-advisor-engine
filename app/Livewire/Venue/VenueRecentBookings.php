@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Venue;
 
+use App\Enums\BookingStatus;
 use App\Filament\Actions\Venue\MarkAsNoShowAction;
 use App\Filament\Actions\Venue\ReverseMarkAsNoShowAction;
 use App\Models\Booking;
@@ -43,7 +44,8 @@ class VenueRecentBookings extends BaseWidget
         $startDate = $this->filters['startDate'] ?? now()->subDays(30);
         $endDate = $this->filters['endDate'] ?? now();
 
-        $query = Booking::confirmedOrNoShow()
+        $query = Booking::query()
+            ->recentBookings()
             ->limit(10)
             ->with('earnings', function ($query) {
                 $query->where('user_id', $this->venue->user_id);
@@ -87,6 +89,15 @@ class VenueRecentBookings extends BaseWidget
                     ->size('xs')
                     ->label('Earned')
                     ->formatStateUsing(function (Booking $booking) {
+                        $labelStatus = [BookingStatus::CANCELLED, BookingStatus::NO_SHOW, BookingStatus::REFUNDED];
+                        if (in_array($booking->status, $labelStatus)) {
+                            return new HtmlString(<<<HTML
+                                <span class="text-xs italic text-gray-500">
+                                    {$booking->status->label()}
+                                </span>
+                            HTML);
+                        }
+
                         $total = $booking->earnings->sum('amount');
 
                         return money($total, $booking->currency);

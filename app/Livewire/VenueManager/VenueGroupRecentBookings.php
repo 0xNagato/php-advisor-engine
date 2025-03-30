@@ -2,6 +2,7 @@
 
 namespace App\Livewire\VenueManager;
 
+use App\Enums\BookingStatus;
 use App\Models\Booking;
 use App\Models\Venue;
 use Filament\Tables\Columns\TextColumn;
@@ -34,7 +35,8 @@ class VenueGroupRecentBookings extends BaseWidget
         $startDate = $this->filters['startDate'] ?? now()->subDays(30);
         $endDate = $this->filters['endDate'] ?? now();
 
-        $query = Booking::confirmedOrNoShow()
+        $query = Booking::query()
+            ->recentBookings()
             ->limit(10)
             ->with(['earnings', 'venue.user'])
             ->orderByDesc('booking_at')
@@ -80,6 +82,15 @@ class VenueGroupRecentBookings extends BaseWidget
                     ->size('xs')
                     ->label('Earned')
                     ->formatStateUsing(function (Booking $booking) {
+                        $labelStatus = [BookingStatus::CANCELLED, BookingStatus::NO_SHOW, BookingStatus::REFUNDED];
+                        if (in_array($booking->status, $labelStatus)) {
+                            return new HtmlString(<<<HTML
+                                <span class="text-xs italic text-gray-500">
+                                    {$booking->status->label()}
+                                </span>
+                            HTML
+                            );
+                        }
                         $total = $booking->earnings
                             ->whereIn('type', ['venue', 'venue_paid'])
                             ->sum('amount');

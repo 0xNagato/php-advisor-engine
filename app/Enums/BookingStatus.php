@@ -19,7 +19,7 @@ enum BookingStatus: string
 
     case PARTIALLY_REFUNDED = 'partially_refunded';
 
-    public const REPORTING_STATUSES = [
+    public const array REPORTING_STATUSES = [
         self::CONFIRMED,
         self::VENUE_CONFIRMED,
         self::COMPLETED,
@@ -27,7 +27,7 @@ enum BookingStatus: string
         self::PARTIALLY_REFUNDED,
     ];
 
-    public const NON_REPORTING_STATUSES = [
+    public const array NON_REPORTING_STATUSES = [
         self::PENDING,
         self::GUEST_ON_PAGE,
         self::ABANDONED,
@@ -35,7 +35,7 @@ enum BookingStatus: string
         self::NO_SHOW,
     ];
 
-    public const PAYOUT_STATUSES = [
+    public const array PAYOUT_STATUSES = [
         self::CONFIRMED,
         self::VENUE_CONFIRMED,
         self::COMPLETED,

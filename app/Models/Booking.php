@@ -176,6 +176,17 @@ class Booking extends Model
         return $query->whereIn('status', [BookingStatus::CONFIRMED, BookingStatus::NO_SHOW]);
     }
 
+    public function scopeRecentBookings($query)
+    {
+        return $query->whereIn('status', [
+            BookingStatus::CONFIRMED,
+            BookingStatus::NO_SHOW,
+            BookingStatus::CANCELLED,
+            BookingStatus::REFUNDED,
+            BookingStatus::PARTIALLY_REFUNDED,
+        ]);
+    }
+
     /**
      * Scope query to filter by venue ID
      */
@@ -375,7 +386,8 @@ class Booking extends Model
 
     public function transferToConcierge(Concierge $newConcierge): void
     {
-        throw_unless(in_array($this->status, [BookingStatus::CONFIRMED, BookingStatus::VENUE_CONFIRMED]), new InvalidArgumentException('Only confirmed bookings can be transferred.'));
+        throw_unless(in_array($this->status, [BookingStatus::CONFIRMED, BookingStatus::VENUE_CONFIRMED]),
+            new InvalidArgumentException('Only confirmed bookings can be transferred.'));
 
         DB::transaction(function () use ($newConcierge) {
             $oldConciergeId = $this->concierge_id;
