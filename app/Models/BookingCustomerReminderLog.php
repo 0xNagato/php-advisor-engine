@@ -1,0 +1,32 @@
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+
+class BookingCustomerReminderLog extends Model
+{
+    protected $table = 'booking_customer_reminder_logs';
+
+    protected $fillable = [
+        'booking_id',
+        'guest_phone',
+        'sent_at',
+    ];
+
+    public function casts(): array
+    {
+        return [
+            'sent_at' => 'datetime',
+        ];
+    }
+
+    /**
+     * @return BelongsTo<Booking, $this>
+     */
+    public function booking(): BelongsTo
+    {
+        return $this->belongsTo(Booking::class);
+    }
+}

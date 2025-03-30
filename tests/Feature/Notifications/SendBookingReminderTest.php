@@ -1,0 +1,225 @@
+<?php
+
+use App\Actions\Booking\CreateBooking;
+use App\Enums\BookingStatus;
+use App\Models\BookingCustomerReminderLog;
+use App\Models\Concierge;
+use App\Models\Partner;
+use App\Models\ScheduleTemplate;
+use App\Models\Venue;
+use App\Notifications\Booking\CustomerReminder;
+use Carbon\Carbon;
+use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\Notification;
+
+use function Pest\Laravel\actingAs;
+
+beforeEach(function () {
+    $this->venue = Venue::factory()->create([
+        'payout_venue' => 60,
+        'non_prime_fee_per_head' => 10,
+        'timezone' => 'UTC',
+    ]);
+    $this->concierge = Concierge::factory()->create();
+    $this->partner = Partner::factory()->create(['percentage' => 6]);
+
+    $this->baseTemplate = ScheduleTemplate::factory()->create([
+        'venue_id' => $this->venue->id,
+        'start_time' => Carbon::now('UTC')->addMinutes(30)->format('H:i:s'),
+        'party_size' => 0,
+    ]);
+
+    $this->scheduleTemplate = ScheduleTemplate::factory()->create([
+        'venue_id' => $this->venue->id,
+        'start_time' => Carbon::now('UTC')->addMinutes(30)->format('H:i:s'),
+        'day_of_week' => $this->baseTemplate->day_of_week,
+        'party_size' => 2,
+    ]);
+
+    $this->action = new CreateBooking;
+    actingAs($this->concierge->user);
+
+    Notification::fake();
+});
+
+it('sends a booking reminder notification for eligible bookings', function () {
+    $nowUtc = Carbon::now('UTC');
+
+    $bookingData = [
+        'date' => $nowUtc->format('Y-m-d'),
+        'guest_count' => 2,
+    ];
+
+    $result = $this->action::run(
+        $this->scheduleTemplate->id,
+        $bookingData,
+        'UTC',
+        'USD'
+    );
+
+    $booking = $result->booking;
+
+    $booking->update([
+        'guest_phone' => '+1234567890',
+        'status' => BookingStatus::CONFIRMED,
+    ]);
+
+    // Ensure no reminder log exists initially
+    $this->assertDatabaseMissing('booking_customer_reminder_logs', [
+        'booking_id' => $booking->id,
+    ]);
+
+    Artisan::call('booking:send-reminder-sms');
+
+    Notification::assertSentTo(
+        [$booking],
+        CustomerReminder::class,
+        function ($notification) use ($booking) {
+            return $notification->booking->id === $booking->id;
+        }
+    );
+
+    // Assert that a reminder log was created
+    $this->assertDatabaseHas('booking_customer_reminder_logs', [
+        'booking_id' => $booking->id,
+        'guest_phone' => $booking->guest_phone,
+    ]);
+});
+
+it('does not send notifications for past or non-eligible bookings', function () {
+    $nowUtc = Carbon::now('UTC');
+
+    $pastBookingData = [
+        'date' => $nowUtc->subDay()->format('Y-m-d'),
+        'guest_count' => 2,
+    ];
+
+    $resultPast = $this->action::run(
+        $this->scheduleTemplate->id,
+        $pastBookingData,
+        'UTC',
+        'USD'
+    );
+    $pastBooking = $resultPast->booking;
+
+    $pastBooking->update([
+        'guest_phone' => '+1234567890',
+        'status' => BookingStatus::CONFIRMED,
+    ]);
+
+    $nonEligibleBookingData = [
+        'date' => $nowUtc->format('Y-m-d'),
+        'guest_count' => 2,
+    ];
+
+    $resultNonEligible = $this->action::run(
+        $this->scheduleTemplate->id,
+        $nonEligibleBookingData,
+        'UTC',
+        'USD'
+    );
+    $nonEligibleBooking = $resultNonEligible->booking;
+
+    $nonEligibleBooking->update([
+        'guest_phone' => null,
+        'status' => BookingStatus::PENDING,
+    ]);
+
+    Artisan::call('booking:send-reminder-sms');
+
+    Notification::assertNotSentTo(
+        [$pastBooking, $nonEligibleBooking],
+        CustomerReminder::class
+    );
+});
+
+it('does not send notifications when booking does not match the 30-minute threshold', function () {
+    $nowUtc = Carbon::now('UTC');
+
+    // Update the schedule template start time to be a few minutes outside the threshold
+    $this->scheduleTemplate->update([
+        'start_time' => $nowUtc->addMinutes(25)->format('H:i:s'), // Start time is 25 minutes from now
+    ]);
+
+    // Create a booking that would usually qualify
+    $bookingData = [
+        'date' => $nowUtc->format('Y-m-d'),
+        'guest_count' => 2,
+    ];
+
+    $result = $this->action::run(
+        $this->scheduleTemplate->id,
+        $bookingData,
+        'UTC',
+        'USD'
+    );
+
+    $booking = $result->booking;
+
+    // Update the booking with necessary valid fields
+    $booking->update([
+        'guest_phone' => '+1234567890',
+        'status' => BookingStatus::CONFIRMED,
+    ]);
+
+    // Assert that the booking_at_utc is not within the 30-minute threshold
+    // (Note: Add 30 minutes to current UTC time to calculate the threshold)
+    $notificationThreshold = $nowUtc->addMinutes(30);
+    expect($booking->booking_at_utc)->toBeLessThan($notificationThreshold);
+
+    // Trigger the command to send reminders
+    Artisan::call('booking:send-reminder-sms');
+
+    // Verify no notification is sent because the start time does not align
+    Notification::assertNotSentTo(
+        [$booking],
+        CustomerReminder::class
+    );
+});
+
+it('does not send a reminder notification if a reminder log already exists', function () {
+    $nowUtc = Carbon::now('UTC');
+
+    // Create a booking
+    $bookingData = [
+        'date' => $nowUtc->format('Y-m-d'),
+        'guest_count' => 2,
+    ];
+
+    $result = $this->action::run(
+        $this->scheduleTemplate->id,
+        $bookingData,
+        'UTC',
+        'USD'
+    );
+
+    $booking = $result->booking;
+
+    // Update booking to make it eligible
+    $booking->update([
+        'guest_phone' => '+1234567890',
+        'status' => BookingStatus::CONFIRMED,
+    ]);
+
+    // Create a reminder log for the booking
+    BookingCustomerReminderLog::create([
+        'booking_id' => $booking->id,
+        'guest_phone' => $booking->guest_phone,
+        'sent_at' => now(),
+    ]);
+
+    // Run the command to handle reminders
+    Artisan::call('booking:send-reminder-sms');
+
+    // Ensure no notification was sent
+    Notification::assertNotSentTo(
+        [$booking],
+        CustomerReminder::class
+    );
+
+    // Assert no duplicate reminder log was created
+    $this->assertEquals(
+        1,
+        BookingCustomerReminderLog::where('booking_id', $booking->id)->count()
+    );
+});

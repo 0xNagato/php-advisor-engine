@@ -267,6 +267,14 @@ class Booking extends Model
         return $this->belongsTo(VipCode::class);
     }
 
+    /**
+     * @return HasMany<BookingCustomerReminderLog, $this>
+     */
+    public function reminderLogs(): HasMany
+    {
+        return $this->hasMany(BookingCustomerReminderLog::class, 'booking_id');
+    }
+
     protected function guestName(): Attribute
     {
         return Attribute::make(get: fn () => $this->guest_first_name.' '.$this->guest_last_name);

@@ -289,7 +289,7 @@
                             Fees paid are for reservation only. Not applicable towards venue bill.
                         @endif
 
-                        @if ($booking->schedule->minimum_spend_per_guest > 0)
+                        @if ($booking->schedule?->minimum_spend_per_guest > 0)
                             <div class="mt-2 text-blue-700">
                                 ${{ $booking->schedule->minimum_spend_per_guest }} minimum spend per diner required.
                                 Booking fees do not apply to restaurant bill or minimum spend.

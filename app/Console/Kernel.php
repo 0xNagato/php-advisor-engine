@@ -42,6 +42,11 @@ class Kernel extends ConsoleKernel
                 ->everyMinute()
                 ->withoutOverlapping();
 
+            // Send booking reminders
+            $schedule->command('prima:bookings-send-customer-reminder')
+                ->everyMinute()
+                ->withoutOverlapping();
+
             // $schedule->command('app:send-daily-summary-email')->dailyAt('08:00')->timezone('America/New_York');
         }
 
