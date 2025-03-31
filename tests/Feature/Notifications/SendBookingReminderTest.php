@@ -69,7 +69,7 @@ it('sends a booking reminder notification for eligible bookings', function () {
         'booking_id' => $booking->id,
     ]);
 
-    Artisan::call('booking:send-reminder-sms');
+    Artisan::call('prima:bookings-send-customer-reminder');
 
     Notification::assertSentTo(
         [$booking],
@@ -125,7 +125,7 @@ it('does not send notifications for past or non-eligible bookings', function () 
         'status' => BookingStatus::PENDING,
     ]);
 
-    Artisan::call('booking:send-reminder-sms');
+    Artisan::call('prima:bookings-send-customer-reminder');
 
     Notification::assertNotSentTo(
         [$pastBooking, $nonEligibleBooking],
@@ -168,7 +168,7 @@ it('does not send notifications when booking does not match the 30-minute thresh
     expect($booking->booking_at_utc)->toBeLessThan($notificationThreshold);
 
     // Trigger the command to send reminders
-    Artisan::call('booking:send-reminder-sms');
+    Artisan::call('prima:bookings-send-customer-reminder');
 
     // Verify no notification is sent because the start time does not align
     Notification::assertNotSentTo(
@@ -209,7 +209,7 @@ it('does not send a reminder notification if a reminder log already exists', fun
     ]);
 
     // Run the command to handle reminders
-    Artisan::call('booking:send-reminder-sms');
+    Artisan::call('prima:bookings-send-customer-reminder');
 
     // Ensure no notification was sent
     Notification::assertNotSentTo(
