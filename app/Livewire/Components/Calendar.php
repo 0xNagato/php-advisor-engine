@@ -38,14 +38,38 @@ class Calendar extends Component
 
     public function previousMonth(): void
     {
-        $current = Carbon::createFromFormat('Y-m', $this->currentMonth, $this->timezone);
-        $this->currentMonth = $current->subMonth()->format('Y-m');
+        // Extract year and month as integers
+        [$year, $month] = explode('-', $this->currentMonth);
+        $year = (int) $year;
+        $month = (int) $month;
+
+        // Decrement month and handle year change
+        $month--;
+        if ($month === 0) {
+            $month = 12;
+            $year--;
+        }
+
+        // Format back as Y-m
+        $this->currentMonth = sprintf('%04d-%02d', $year, $month);
     }
 
     public function nextMonth(): void
     {
-        $current = Carbon::createFromFormat('Y-m', $this->currentMonth, $this->timezone);
-        $this->currentMonth = $current->addMonth()->format('Y-m');
+        // Extract year and month as integers
+        [$year, $month] = explode('-', $this->currentMonth);
+        $year = (int) $year;
+        $month = (int) $month;
+
+        // Increment month and handle year change
+        $month++;
+        if ($month > 12) {
+            $month = 1;
+            $year++;
+        }
+
+        // Format back as Y-m
+        $this->currentMonth = sprintf('%04d-%02d', $year, $month);
     }
 
     public function selectDate(string $date): void
@@ -57,7 +81,8 @@ class Calendar extends Component
 
     protected function getWeeks(): array
     {
-        $current = Carbon::createFromFormat('Y-m', $this->currentMonth, $this->timezone);
+        // Create first day of the month to avoid any day overflow issues
+        $current = Carbon::parse($this->currentMonth.'-01', $this->timezone);
         $start = $current->copy()->startOfMonth();
 
         if ($start->dayOfWeek !== Carbon::SUNDAY) {
@@ -82,9 +107,12 @@ class Calendar extends Component
 
     public function render()
     {
+        // Create first day of the month to avoid any day overflow issues
+        $currentMonthCarbon = Carbon::parse($this->currentMonth.'-01', $this->timezone);
+
         return view('livewire.components.calendar', [
             'weeks' => $this->getWeeks(),
-            'currentMonthCarbon' => Carbon::createFromFormat('Y-m', $this->currentMonth, $this->timezone),
+            'currentMonthCarbon' => $currentMonthCarbon,
         ]);
     }
 }
