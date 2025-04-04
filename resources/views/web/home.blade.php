@@ -1,3 +1,11 @@
+@php
+    use App\Models\VipCode;
+    $vipCode = Cache::remember(
+        'available_calendar_button_vip_code_1',
+        60,
+        fn() => VipCode::query()->where('concierge_id', 1)->active()->first(),
+    );
+@endphp
 <x-layouts.web>
 
     <section class="fade-in">
@@ -80,8 +88,8 @@
                                     Get guaranteed access to exclusive venues in Miami, New York, LA, and more.
                                 </p>
                             </div>
-                            <a href="#" class="intro_cta-box_btn"
-                               @click.prevent="$dispatch('prima-open-modal', { id: 'prima-contact' })">
+                            <a href="{{ config('app.primary_domain') . '/' . ltrim(route('v.booking', ['code' => $vipCode->code], false), '/') }}"
+                               class="intro_cta-box_btn">
                                 Talk to PRIMA Concierge
                             </a>
                         </div>
@@ -128,8 +136,8 @@
                                 Enjoy VIP access to exclusive dining experiences.
                             </li>
                         </ul>
-                        <a href="#" class="text-white btn bg-gradient-to-b from-primary to-primary_light btn_full"
-                           @click.prevent="$dispatch('prima-open-modal', { id: 'prima-contact' })">
+                        <a href="{{ config('app.primary_domain') . '/' . ltrim(route('v.booking', ['code' => $vipCode->code], false), '/') }}"
+                           class="text-white btn bg-gradient-to-b from-primary to-primary_light btn_full">
                             Talk to PRIMA Concierge
                         </a>
                     </div>
@@ -247,7 +255,8 @@
                             </p>
                         </div>
                         <p>
-                            Reward hospitality professionals throughout the local and broader market with incentives for booking
+                            Reward hospitality professionals throughout the local and broader market with incentives for
+                            booking
                             reservations at your venue without the need for additional staffing, technology or
                             administration. Let PRIMA handle everything.
                         </p>
@@ -425,7 +434,8 @@
                     real-time. Enjoy guaranteed bookings without the usual hassle of waiting lists.
                 </p>
                 <video controls playsinline>
-                    <source src="https://prima-bucket.nyc3.digitaloceanspaces.com/production/PrimaVIPUpdate280225.mp4" type="video/mp4">
+                    <source src="https://prima-bucket.nyc3.digitaloceanspaces.com/production/PrimaVIPUpdate280225.mp4"
+                            type="video/mp4">
                     Your browser does not support the video tag.
                 </video>
             </div>
