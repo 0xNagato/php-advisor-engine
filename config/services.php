@@ -75,4 +75,13 @@ return [
         'workspace_id' => env('ASANA_WORKSPACE_ID'),
         'project_id' => env('ASANA_PROJECT_ID'),
     ],
+
+    'clicksend' => [
+        'username' => env('CLICKSEND_USERNAME'),
+        'api_key' => env('CLICKSEND_API_KEY'),
+        'from' => env('CLICKSEND_FROM'),
+        'from_numbers' => [
+            'GB' => env('CLICKSEND_FROM_GB'),
+        ],
+    ],
 ];

@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Http\Integrations\ClickSend\ClickSend;
 use App\Http\Integrations\Twilio\Twilio;
 use App\Jobs\SendSimpleTextingSmsJob;
 use Saloon\Http\Response;
@@ -21,8 +22,18 @@ class SmsService
             );
 
             return null;
+        } elseif ($phoneNumber->country === 'GB') { // Assuming 'GB' for UK country code
+            // Look up the country-specific 'from' number
+            $fromNumber = config('services.clicksend.from_numbers.GB');
+
+            return (new ClickSend)->sms(
+                phone: $phoneNumber->phone,
+                text: $text,
+                from: $fromNumber // Pass the specific UK 'from' number
+            );
         }
 
+        // Fallback to Twilio for other international numbers
         return (new Twilio)->sms(
             phone: $phoneNumber->phone,
             text: $text
