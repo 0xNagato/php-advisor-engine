@@ -90,7 +90,7 @@
                             </div>
                             <a href="{{ config('app.primary_domain') . '/' . ltrim(route('v.booking', ['code' => $vipCode->code], false), '/') }}"
                                class="intro_cta-box_btn">
-                                Talk to PRIMA Concierge
+                                Book Your Dining Experience
                             </a>
                         </div>
                     </div>
@@ -138,7 +138,7 @@
                         </ul>
                         <a href="{{ config('app.primary_domain') . '/' . ltrim(route('v.booking', ['code' => $vipCode->code], false), '/') }}"
                            class="text-white btn bg-gradient-to-b from-primary to-primary_light btn_full">
-                            Talk to PRIMA Concierge
+                            Book Your Dining Experience
                         </a>
                     </div>
                 </div>

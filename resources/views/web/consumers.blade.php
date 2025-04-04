@@ -26,7 +26,7 @@
                             <span class="intro_hero-btn_container">
                                 <a href="{{ config('app.primary_domain') . '/' . ltrim(route('v.booking', ['code' => $vipCode->code], false), '/') }}"
                                     class="intro_hero-btn bg-gradient-to-b from-primary to-purple">
-                                    Talk to PRIMA Concierge
+                                    Book Your Dining Experience
                                 </a>
                             </span>
                         </div>
@@ -293,7 +293,7 @@
                         </p>
                         <a href="{{ config('app.primary_domain') . '/' . ltrim(route('v.booking', ['code' => $vipCode->code], false), '/') }}"
                             class="btn bg-gradient-to-b from-purple to-primary text-white mt-[10px] md:mt-6 btn_full">
-                            Talk to PRIMA Concierge
+                            Book Your Dining Experience
                         </a>
                     </div>
                 </div>
@@ -321,7 +321,7 @@
 
                 <a href="{{ config('app.primary_domain') . '/' . ltrim(route('v.booking', ['code' => $vipCode->code], false), '/') }}"
                     class="text-white btn bg-gradient-to-b from-purple to-primary btn_full">
-                    Talk to PRIMA Concierge
+                    Book Your Dining Experience
                 </a>
 
                 <div class="grid w-full grid-cols-1 gap-4 2 md:grid-cols-2 lg:grid-cols-3">
