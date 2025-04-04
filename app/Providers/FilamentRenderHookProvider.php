@@ -80,17 +80,17 @@ class FilamentRenderHookProvider extends ServiceProvider
         );
 
         if (app()->environment('production')) {
-            Filament::registerRenderHook(PanelsRenderHook::HEAD_START, static fn () => new HtmlString("
+            Filament::registerRenderHook(PanelsRenderHook::HEAD_START, static fn () => new HtmlString(<<<'HTML'
                 <!-- Google tag (gtag.js) -->
-                <script async src='https://www.googletagmanager.com/gtag/js?id=G-Z8HQ7BTL4F'></script>
+                <script async src="https://www.googletagmanager.com/gtag/js?id=G-9GTWLVMQJW"></script>
                 <script>
                   window.dataLayer = window.dataLayer || [];
                   function gtag(){dataLayer.push(arguments);}
                   gtag('js', new Date());
 
-                  gtag('config', 'G-Z8HQ7BTL4F');
+                  gtag('config', 'G-9GTWLVMQJW');
                 </script>
-            "));
+            HTML));
         }
 
         Filament::registerRenderHook(
