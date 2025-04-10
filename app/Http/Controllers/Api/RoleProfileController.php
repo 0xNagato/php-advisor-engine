@@ -31,16 +31,8 @@ class RoleProfileController extends Controller
 
     public function switch(Request $request, RoleProfile $profile): JsonResponse
     {
-        if ($profile->user_id !== $request->user()->id) {
-            return response()->json([
-                'message' => 'Profile does not belong to this user',
-            ], 403);
-        }
-
-        $request->user()->switchProfile($profile);
-
         return response()->json([
-            'message' => 'Profile switched successfully',
-        ]);
+            'message' => 'Role switching is currently disabled',
+        ], 403);
     }
 }
