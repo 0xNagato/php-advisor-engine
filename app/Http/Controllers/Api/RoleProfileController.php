@@ -32,7 +32,7 @@ class RoleProfileController extends Controller
     public function switch(Request $request, RoleProfile $profile): JsonResponse
     {
         return response()->json([
-            'message' => 'Role switching is currently disabled',
+            'message' => 'Role switching is currently disabled from the mobile app, please use the web app to switch roles.',
         ], 403);
     }
 }
