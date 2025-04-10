@@ -16,14 +16,14 @@ class TwoFactorAuthenticationService
     /**
      * @throws Throwable
      */
-    public function generateCode(User $user): ?int
+    public function generateCode(User $user, string $channel = 'sms'): ?int
     {
-        if ($this->isWithinCooldownPeriod($user)) {
+        if ($this->isWithinCooldownPeriod($user) && $channel === 'sms') {
             return null;
         }
 
         $code = $user->generateTwoFactorCode();
-        $user->notify(new SendTwoFactorCode($code));
+        $user->notify(new SendTwoFactorCode($code, $channel));
 
         return $code;
     }

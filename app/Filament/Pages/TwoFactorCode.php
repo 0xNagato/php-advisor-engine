@@ -40,6 +40,10 @@ class TwoFactorCode extends Page
 
     public string $phoneNumberSuffix;
 
+    public string $emailSuffix;
+
+    public string $via;
+
     public string $redirectUrl;
 
     protected ?TwoFactorAuthenticationService $twoFactorService = null;
@@ -65,6 +69,7 @@ class TwoFactorCode extends Page
     {
         Filament::getPanel()->navigation(false);
         $this->phoneNumberSuffix = substr((string) auth()->user()->phone, -4);
+        $this->emailSuffix = preg_replace('/^(.{2}).*?@/', '$1***@', (string) auth()->user()->email);
         $this->redirectUrl = $this->request->query('redirect') ?? config('app.platform_url');
 
         $this->nextCodeAvailableAt = $this->twoFactorService->getNextCodeAvailableAt(auth()->user());
@@ -74,18 +79,19 @@ class TwoFactorCode extends Page
     /**
      * @throws Throwable
      */
-    public function sendCode(): void
+    public function sendCode(string $channel): void
     {
-        $this->generateNewCode();
+        $this->via = $channel;
+        $this->generateNewCode($channel);
         $this->formVisible = true;
     }
 
     /**
      * @throws Throwable
      */
-    public function generateNewCode(): void
+    public function generateNewCode(string $channel): void
     {
-        $code = $this->twoFactorService->generateCode(auth()->user());
+        $code = $this->twoFactorService->generateCode(auth()->user(), $channel);
 
         if ($code === null) {
             $this->nextCodeAvailableAt = $this->twoFactorService->getNextCodeAvailableAt(auth()->user());
@@ -186,5 +192,11 @@ class TwoFactorCode extends Page
         Session::regenerateToken();
 
         return redirect()->route('filament.admin.auth.login');
+    }
+
+    public function resetForm(): void
+    {
+        $this->formVisible = false;
+        $this->reset('data');
     }
 }
