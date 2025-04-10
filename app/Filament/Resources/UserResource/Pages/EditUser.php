@@ -14,6 +14,7 @@ use Filament\Actions\Action;
 use Filament\Actions\ActionGroup;
 use Filament\Forms\Components\Placeholder;
 use Filament\Forms\Components\Section;
+use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Form;
 use Filament\Notifications\Notification;
@@ -83,6 +84,53 @@ class EditUser extends EditRecord
                     ->redirectTo(config('app.platform_url'))
                     ->hidden(fn () => isPrimaApp())
                     ->record($this->record),
+
+                Action::make('switchRoleProfile')
+                    ->label('Switch Role Profile')
+                    ->icon('heroicon-m-arrows-right-left')
+                    ->color('gray')
+                    ->form([
+                        Select::make('profile_id')
+                            ->label('Select Role Profile')
+                            ->options(function () {
+                                return $this->record->roleProfiles()
+                                    ->with('role')
+                                    ->get()
+                                    ->mapWithKeys(fn ($profile) => [
+                                        $profile->id => sprintf(
+                                            '%s (%s)',
+                                            $profile->role->name,
+                                            $profile->is_active ? 'Active' : 'Inactive'
+                                        ),
+                                    ]);
+                            })
+                            ->required(),
+                    ])
+                    ->action(function (array $data): void {
+                        $profile = $this->record->roleProfiles()
+                            ->findOrFail($data['profile_id']);
+
+                        if ($profile->is_active) {
+                            Notification::make()
+                                ->warning()
+                                ->title('Profile Already Active')
+                                ->body('This role profile is already active.')
+                                ->send();
+
+                            return;
+                        }
+
+                        $this->record->switchProfile($profile);
+
+                        Notification::make()
+                            ->success()
+                            ->title('Role Profile Switched')
+                            ->body('The role profile has been switched successfully.')
+                            ->send();
+
+                        $this->record->refresh();
+                    })
+                    ->visible(fn () => $this->record->roleProfiles()->count() > 1),
 
                 Action::make('makePartner')
                     ->label('Make Partner')
