@@ -5,6 +5,7 @@ namespace App\Jobs;
 use App\Http\Integrations\SimpleTexting\SimpleTexting;
 use App\Models\User;
 use App\Notifications\Admin\SimpleTextingDownNotification;
+use App\Notifications\SimpleTextingFailed;
 use Exception;
 use GuzzleHttp\Exception\ConnectException;
 use Illuminate\Bus\Queueable;
@@ -13,6 +14,7 @@ use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Notification;
 use Sentry\State\Scope as SentryScope;
 
 use function Sentry\captureException;
@@ -80,6 +82,15 @@ class SendSimpleTextingSmsJob implements ShouldQueue
                     captureMessage('SimpleTexting API Failed');
                 });
 
+                Notification::route('mail', 'prima+failedemail@primavip.co')
+                    ->notify(new SimpleTextingFailed(
+                        phone: $this->phone,
+                        status: $status,
+                        body: $body,
+                        attempt: $this->attempts(),
+                        text: $this->text
+                    ));
+
                 $this->fail($response->body());
             }
         } catch (ConnectException $e) {
@@ -114,5 +125,10 @@ class SendSimpleTextingSmsJob implements ShouldQueue
 
             $this->fail($e);
         }
+    }
+
+    private function formatJson(array $data): string
+    {
+        return json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
     }
 }
