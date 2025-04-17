@@ -92,18 +92,16 @@ class EditUser extends EditRecord
                     ->form([
                         Select::make('profile_id')
                             ->label('Select Role Profile')
-                            ->options(function () {
-                                return $this->record->roleProfiles()
-                                    ->with('role')
-                                    ->get()
-                                    ->mapWithKeys(fn ($profile) => [
-                                        $profile->id => sprintf(
-                                            '%s (%s)',
-                                            $profile->role->name,
-                                            $profile->is_active ? 'Active' : 'Inactive'
-                                        ),
-                                    ]);
-                            })
+                            ->options(fn () => $this->record->roleProfiles()
+                                ->with('role')
+                                ->get()
+                                ->mapWithKeys(fn ($profile) => [
+                                    $profile->id => sprintf(
+                                        '%s (%s)',
+                                        $profile->role->name,
+                                        $profile->is_active ? 'Active' : 'Inactive'
+                                    ),
+                                ]))
                             ->required(),
                     ])
                     ->action(function (array $data): void {

@@ -230,7 +230,7 @@ return [
     'default_timezone' => env('LOCAL_ENV_TIMEZONE', 'America/New_York'),
     'default_region' => env('LOCAL_ENV_REGION', 'miami'),
     'no_tax' => env('NO_TAX', true),
-    'active_regions' => ['miami', 'los_angeles', 'ibiza'],
+    'active_regions' => ['miami', 'los_angeles', 'ibiza', 'formentera'],
     'dev_ip_address' => env('DEV_IP_ADDRESS'),
     'native_key' => env('APP_NATIVE_KEY'),
     'primary_domain' => env('PRIMARY_DOMAIN', env('APP_URL', 'https://primavip.co')),

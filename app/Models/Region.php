@@ -58,6 +58,18 @@ class Region extends Model
             'timezone' => 'Europe/Madrid',
         ],
         [
+            'id' => 'formentera',
+            'name' => 'Formentera',
+            'lat' => 38.7075,
+            'lon' => 1.4318,
+            'currency' => 'EUR',
+            'currency_symbol' => '€',
+            'tax_rate' => 0.10,
+            'tax_rate_term' => 'VAT',
+            'country' => 'Spain',
+            'timezone' => 'Europe/Madrid',
+        ],
+        [
             'id' => 'mykonos',
             'name' => 'Mykonos',
             'lat' => 37.4500,
