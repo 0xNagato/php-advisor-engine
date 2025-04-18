@@ -27,6 +27,7 @@ use Illuminate\Routing\Middleware\ThrottleRequests;
 use Illuminate\Session\Middleware\AuthenticateSession;
 use Illuminate\Session\Middleware\StartSession;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
+use Spatie\Permission\Middleware\RoleMiddleware;
 
 class Kernel extends HttpKernel
 {
@@ -88,6 +89,7 @@ class Kernel extends HttpKernel
         'guest' => RedirectIfAuthenticated::class,
         'password.confirm' => RequirePassword::class,
         'precognitive' => HandlePrecognitiveRequests::class,
+        'role' => RoleMiddleware::class,
         'signed' => ValidateSignature::class,
         'throttle' => ThrottleRequests::class,
         'verified' => EnsureEmailIsVerified::class,

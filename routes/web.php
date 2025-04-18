@@ -1,6 +1,7 @@
 <?php
 
 use App\Filament\Pages\CreatePassword;
+use App\Http\Controllers\Admin\BookingCalculatorController;
 use App\Http\Controllers\Booking\BookingCheckoutController;
 use App\Http\Controllers\DemoAuthController;
 use App\Http\Controllers\DownloadInvoiceController;
@@ -142,6 +143,11 @@ Route::get('/venue-group-invoice/{venueGroup}/{startDate}/{endDate}', DownloadVe
 Route::middleware(['auth', 'verified'])->group(function () {
     // Venue manager routes
     Route::get('/venue-manager/add-venue', VenueOnboarding::class)->name('venue-manager.add-venue');
+});
+
+Route::middleware(['auth'])->group(function () {
+    Route::get('/admin/booking-calculator', [BookingCalculatorController::class, 'index'])
+        ->name('admin.booking-calculator');
 });
 
 require __DIR__.'/auth.php';
