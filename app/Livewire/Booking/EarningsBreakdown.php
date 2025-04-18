@@ -46,7 +46,11 @@ class EarningsBreakdown extends Component
 
     public function render(): View
     {
-        return view('livewire.booking.earnings-breakdown', [
+        $viewName = auth()->id() === 1
+            ? 'livewire.booking.earnings-breakdown-advanced'
+            : 'livewire.booking.earnings-breakdown';
+
+        return view($viewName, [
             'groupedEarnings' => $this->booking->earnings->sumByUserAndType(),
             'platformEarnings' => $this->calculatePlatformEarnings(),
             'currency' => $this->booking->currency,
