@@ -473,9 +473,10 @@ class ListVenues extends ListRecords
                     ]),
                 Action::make('bulkEditBookings')
                     ->iconButton()
-                    ->icon('heroicon-o-pencil-square')
+                    ->icon('gmdi-menu-book')
                     ->label('Bulk Edit Bookings')
                     ->color('primary')
+                    ->visible(fn () => in_array(auth()->id(), [1, 2, 204]))
                     ->action(function (Venue $record): void {
                         // Store venue ID and Name
                         $this->currentVenueId = $record->id;
@@ -513,15 +514,17 @@ class ListVenues extends ListRecords
                     ])
                     ->modalContent(function (Venue $venue) {
                         try {
-                            $recentBookings = DB::table('bookings')
-                                ->join('schedule_templates', 'bookings.schedule_template_id', '=', 'schedule_templates.id')
-                                ->where('schedule_templates.venue_id', $venue->id)
-                                ->whereIn('bookings.status', [
+                            // Use Eloquent model with proper relationships instead of DB::table
+                            $recentBookings = Booking::query()
+                                ->whereHas('schedule', function ($query) use ($venue) {
+                                    $query->where('venue_id', $venue->id);
+                                })
+                                ->whereIn('status', [
                                     BookingStatus::CONFIRMED->value,
                                     BookingStatus::VENUE_CONFIRMED->value,
                                 ])
-                                ->select('bookings.*')
-                                ->orderByDesc('bookings.created_at')
+                                ->with(['concierge.user'])
+                                ->orderByDesc('created_at')
                                 ->limit(10)
                                 ->get();
 

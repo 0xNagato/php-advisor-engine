@@ -53,14 +53,15 @@
                         class="flex flex-col justify-between h-full p-2 space-y-1 bg-white border border-gray-200 rounded-lg shadow">
                         <div>
                             <div class="text-xs font-semibold">
-                                {{ $booking->concierge->user->name }}
+                                {{ $booking->concierge?->user?->name ?? 'N/A' }}
                             </div>
                             <div class="text-xs text-gray-600">
-                                {{ $booking->booking_at->format('D, M j g:ia') }}
+                                {{ $booking->booking_at ? $booking->booking_at->format('D, M j g:ia') : 'N/A' }}
                             </div>
                         </div>
                         <div class="text-xs font-semibold">
-                            Fee: {{ money($booking->total_fee, $booking->currency) }}
+                            Fee:
+                            {{ $booking->total_fee && $booking->currency ? money($booking->total_fee, $booking->currency) : 'N/A' }}
                         </div>
                     </div>
                 @endforeach
@@ -90,12 +91,15 @@
                             <tr class="cursor-pointer hover:bg-gray-100"
                                 onclick="window.location='{{ route('filament.admin.resources.bookings.view', $booking) }}'">
                                 <td class="px-3 py-2 text-sm whitespace-nowrap">{{ $booking->id }}</td>
-                                <td class="px-3 py-2 text-sm whitespace-nowrap">{{ $booking->concierge->user->name }}
+                                <td class="px-3 py-2 text-sm whitespace-nowrap">
+                                    {{ $booking->concierge?->user?->name ?? 'N/A' }}
                                 </td>
                                 <td class="px-3 py-2 text-sm whitespace-nowrap">
-                                    {{ $booking->booking_at->format('D, M j g:ia') }}</td>
+                                    {{ $booking->booking_at ? $booking->booking_at->format('D, M j g:ia') : 'N/A' }}
+                                </td>
                                 <td class="px-3 py-2 text-sm whitespace-nowrap">
-                                    {{ money($booking->total_fee, $booking->currency) }}</td>
+                                    {{ $booking->total_fee && $booking->currency ? money($booking->total_fee, $booking->currency) : 'N/A' }}
+                                </td>
                             </tr>
                         @endforeach
                     </tbody>
