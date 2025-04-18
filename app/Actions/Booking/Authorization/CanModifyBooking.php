@@ -27,8 +27,6 @@ class CanModifyBooking
             return false;
         }
 
-        $isSuperAdmin = $user->hasActiveRole('super_admin');
-
         // Basic conditions: non-prime and correct status
         if ($booking->is_prime ||
             ! in_array($booking->status, [
@@ -37,6 +35,8 @@ class CanModifyBooking
             ])) {
             return false;
         }
+
+        $isSuperAdmin = $user->hasActiveRole('super_admin');
 
         // Check if the user is the booking's concierge or a super admin
         $isBookingConcierge = $user->hasActiveRole('concierge') &&

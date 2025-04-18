@@ -21,4 +21,9 @@ class VenueContactData extends Data
     {
         return $this->preferences?->toChannel() ?? [];
     }
+
+    public function getKey(): string
+    {
+        return $this->contact_phone ?? $this->email;
+    }
 }

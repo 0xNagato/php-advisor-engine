@@ -41,11 +41,17 @@ class VenueFactory extends Factory
                     'contact_name' => 'Alex Zhardanovsky',
                     'contact_phone' => '+19176644415',
                     'use_for_reservations' => true,
+                    'preferences' => [
+                        'sms' => true, 'mail' => false,
+                    ],
                 ],
                 [
                     'contact_name' => 'Andrew Weir',
                     'contact_phone' => '+16473823326',
                     'use_for_reservations' => true,
+                    'preferences' => [
+                        'sms' => true, 'mail' => false,
+                    ],
                 ],
             ],
 

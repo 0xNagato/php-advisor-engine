@@ -124,4 +124,12 @@ class VenueContactBookingConfirmed extends Notification implements ShouldQueue
             ->line('**Confirmation Link:**')
             ->action('Confirm', $this->confirmationUrl);
     }
+
+    /**
+     * Determine if the notification should be sent.
+     */
+    public function shouldSend(): bool
+    {
+        return $this->booking->is_confirmed;
+    }
 }

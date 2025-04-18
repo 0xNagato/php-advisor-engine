@@ -433,10 +433,13 @@ class ViewBooking extends ViewRecord
             'status' => BookingStatus::CANCELLED,
         ]);
 
-        // Send cancellation notification to venue contacts
-        $this->record->venue->contacts->each(function ($contact) {
-            $contact->notify(new VenueBookingCancelled($this->record));
-        });
+        // Validate if the booking is older than created + 5 minutes
+        if ($this->record->created_at->diffInMinutes(now()) > 5) {
+            // Send cancellation notification to venue contacts
+            $this->record->venue->contacts->each(function ($contact) {
+                $contact->notify(new VenueBookingCancelled($this->record));
+            });
+        }
 
         // Delete any existing earnings
         $this->record->earnings()->delete();

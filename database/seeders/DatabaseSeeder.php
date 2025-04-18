@@ -70,10 +70,12 @@ class DatabaseSeeder extends Seeder
             'password' => bcrypt('secure_password_here'),
         ])->create();
 
-        Concierge::query()->create([
+        $houseConcierge = Concierge::query()->create([
             'user_id' => $houseConciergeUser->id,
             'hotel_name' => 'Prima VIP House',
         ]);
+
+        EnsureVipCodeExists::run($houseConcierge);
 
         $houseConciergeUser->assignRole('concierge');
 
@@ -179,7 +181,7 @@ class DatabaseSeeder extends Seeder
 
             $user->assignRole('concierge');
 
-            // Create or update referral record
+            // Create or update the referral record
             Referral::query()->updateOrCreate([
                 'referrer_id' => $housePartner->user_id,
                 'user_id' => $user->id,

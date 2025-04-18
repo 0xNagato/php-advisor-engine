@@ -30,13 +30,13 @@ class BookingModificationRequest extends Model
     ];
 
     // Status constants
-    const STATUS_PENDING = 'pending';
+    const string STATUS_PENDING = 'pending';
 
-    const STATUS_APPROVED = 'approved';
+    const string STATUS_APPROVED = 'approved';
 
-    const STATUS_REJECTED = 'rejected';
+    const string STATUS_REJECTED = 'rejected';
 
-    const STATUS_CANCELLED = 'cancelled';
+    const string STATUS_CANCELLED = 'cancelled';
 
     // Relationships
     /**

@@ -31,10 +31,10 @@ class SendModificationRequestToVenueContacts extends Action
 
         foreach ($contacts as $contact) {
             if ($contact->use_for_reservations) {
-                $contact->notify(new VenueContactModificationRequested(
+                $contact->notify((new VenueContactModificationRequested(
                     modificationRequest: $modificationRequest,
                     confirmationUrl: $confirmationUrl
-                ));
+                ))->delay(now()->addMinutes(5)));
             }
         }
     }

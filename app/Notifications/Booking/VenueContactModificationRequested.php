@@ -80,4 +80,9 @@ class VenueContactModificationRequested extends Notification implements ShouldQu
             ->line('**Confirmation Link:**')
             ->action('Confirm', $this->confirmationUrl);
     }
+
+    public function shouldSendNow(): bool
+    {
+        return $this->modificationRequest->booking->is_confirmed;
+    }
 }
