@@ -2,21 +2,33 @@
 
 namespace App\Filament\Resources\VenueResource\Pages;
 
+use App\Enums\BookingStatus;
 use App\Filament\Resources\PartnerResource\Pages\ViewPartner;
 use App\Filament\Resources\VenueResource;
+use App\Models\Booking;
 use App\Models\Region;
+use App\Models\ScheduleTemplate;
 use App\Models\Venue;
+use App\Notifications\Booking\CustomerBookingConfirmed;
+use App\Services\Booking\BookingCalculationService;
+use App\Traits\HandlesPartySizeMapping;
 use App\Traits\ImpersonatesOther;
 use Carbon\Carbon;
+use Exception;
+use Filament\Notifications\Notification;
 use Filament\Resources\Pages\ListRecords;
 use Filament\Tables\Actions\Action;
 use Filament\Tables\Actions\EditAction;
 use Filament\Tables\Actions\ViewAction;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
+use Illuminate\Support\Facades\DB;
+use Livewire\Attributes\Computed;
+use Livewire\Attributes\On;
 
 class ListVenues extends ListRecords
 {
+    use HandlesPartySizeMapping;
     use ImpersonatesOther;
 
     protected static string $resource = VenueResource::class;
@@ -28,6 +40,354 @@ class ListVenues extends ListRecords
     public ?string $tableSortDirection = 'desc';
 
     const bool USE_SLIDE_OVER = false;
+
+    // Variables for booking filter
+    public ?string $startDate = null;
+
+    public ?string $endDate = null;
+
+    public ?int $currentVenueId = null;
+
+    public ?string $currentVenueName = null;
+
+    public ?string $region = null;
+
+    public ?array $statuses = null;
+
+    // Flag for showing edit form in the modal
+    public bool $showEditForm = false;
+
+    // Flag for select all bookings
+    public bool $shouldSelectAllBookings = false;
+
+    // Selected bookings and form data
+    public array $selectedBookings = [];
+
+    public array $bulkEditData = [
+        'guest_first_name' => '',
+        'guest_last_name' => '',
+        'guest_email' => '',
+        'guest_phone' => '',
+        'guest_count' => 1,
+        'booking_date' => null,
+        'booking_time' => null,
+        'status' => '',
+        'send_confirmation' => false,
+    ];
+
+    /**
+     * Generate time slots in 30-minute intervals for dropdown.
+     */
+    #[Computed]
+    public function timeSlots(): array
+    {
+        $slots = [];
+        $start = Carbon::today()->startOfDay();
+        $end = Carbon::today()->endOfDay();
+
+        while ($start->lessThan($end)) {
+            $slots[$start->format('H:i')] = $start->format('h:i A'); // Use H:i for value, h:i A for display
+            $start->addMinutes(30);
+        }
+
+        return $slots;
+    }
+
+    #[Computed]
+    public function filteredBookings()
+    {
+        // Skip the notification if we're just loading the page and not inside a modal
+        $isLoadingDataForModal = session()->has('bulk_edit_modal_open') || request()->has('bulkEditModalOpen');
+
+        if (! $this->currentVenueId) {
+            // Only show notification if we're actively trying to load booking data
+            if ($isLoadingDataForModal) {
+                Notification::make()
+                    ->title('Debug: No venue ID provided')
+                    ->body('Please select a venue first or try again')
+                    ->warning()
+                    ->send();
+            }
+
+            return collect();
+        }
+
+        $venue = Venue::query()->find($this->currentVenueId);
+
+        if (! $venue) {
+            Notification::make()
+                ->title('Venue not found')
+                ->warning()
+                ->send();
+
+            return collect();
+        }
+
+        // Don't use the venue's bookings relationship directly as it filters by status
+        // Instead, use the hasManyThrough method and create a custom query
+        $query = $venue->hasManyThrough(
+            Booking::class,
+            ScheduleTemplate::class
+        );
+
+        // Exclude abandoned bookings by default, but show all other statuses including cancelled
+        $query->where('status', '!=', BookingStatus::ABANDONED->value);
+
+        // If date range is provided, filter by date
+        if ($this->startDate && $this->endDate) {
+            $userTimezone = auth()->user()?->timezone ?? config('app.default_timezone');
+
+            $startDate = Carbon::parse($this->startDate, $userTimezone)
+                ->startOfDay()
+                ->setTimezone('UTC');
+
+            $endDate = Carbon::parse($this->endDate, $userTimezone)
+                ->endOfDay()
+                ->setTimezone('UTC');
+
+            $query->whereBetween('booking_at', [$startDate, $endDate]);
+        }
+
+        // Get the result
+        $result = $query->orderByDesc('booking_at')
+            ->limit($this->startDate && $this->endDate ? 50 : 10) // Show 10 by default, 50 if date range
+            ->get();
+
+        return $result;
+    }
+
+    /**
+     * Send booking confirmation notification to the customer
+     */
+    private function sendBookingConfirmation(Booking $booking): void
+    {
+        try {
+            $booking->notify(new CustomerBookingConfirmed);
+
+            activity()
+                ->performedOn($booking)
+                ->withProperties([
+                    'guest_name' => $booking->guest_name,
+                    'guest_phone' => $booking->guest_phone,
+                    'guest_email' => $booking->guest_email,
+                    'amount' => $booking->total_with_tax_in_cents,
+                    'currency' => $booking->currency,
+                    'sent_by' => auth()->user()->name,
+                ])
+                ->log('Booking confirmation resent to customer via bulk edit');
+        } catch (Exception $e) {
+            Notification::make()
+                ->warning()
+                ->title('Warning')
+                ->body("Could not send confirmation for Booking #{$booking->id}: {$e->getMessage()}")
+                ->send();
+        }
+    }
+
+    /**
+     * Bulk edit the selected bookings with the provided data
+     */
+    public function bulkEditBookings(): void
+    {
+        $editedCount = 0;
+        $calculationService = app(BookingCalculationService::class);
+
+        DB::beginTransaction();
+        try {
+            $bookings = Booking::query()->whereIn('id', $this->selectedBookings)->get();
+
+            if ($bookings->isEmpty()) {
+                DB::rollBack();
+                Notification::make()
+                    ->warning()
+                    ->title('No Bookings Found')
+                    ->body('No bookings were found to update.')
+                    ->send();
+
+                return;
+            }
+
+            foreach ($bookings as $booking) {
+                $oldStatus = $booking->status;
+                $oldGuestCount = $booking->guest_count;
+                $oldBookingAt = $booking->booking_at;
+                $oldScheduleTemplateId = $booking->schedule_template_id;
+
+                // Combine date and time, validate
+                if (blank($this->bulkEditData['booking_date']) || blank($this->bulkEditData['booking_time'])) {
+                    Notification::make()
+                        ->danger()
+                        ->title('Validation Failed')
+                        ->body("Booking date and time are required for booking #{$booking->id}.")
+                        ->send();
+
+                    continue; // Skip this booking
+                }
+
+                try {
+                    $newBookingAt = Carbon::createFromFormat(
+                        'Y-m-d H:i',
+                        $this->bulkEditData['booking_date'].' '.$this->bulkEditData['booking_time']
+                    );
+                } catch (Exception) {
+                    Notification::make()
+                        ->danger()
+                        ->title('Validation Failed')
+                        ->body("Invalid date/time format for booking #{$booking->id}.")
+                        ->send();
+
+                    continue; // Skip this booking
+                }
+
+                $guestCount = (int) $this->bulkEditData['guest_count'];
+
+                // Determine the target template party size using the trait method
+                $targetPartySize = $this->getTargetPartySize($guestCount);
+
+                if ($targetPartySize === null) {
+                    Notification::make()
+                        ->danger()
+                        ->title('Update Failed')
+                        ->body("Cannot accommodate party size of {$guestCount} for booking #{$booking->id}.")
+                        ->send();
+
+                    continue; // Skip this booking
+                }
+
+                // Ensure we have the current venue ID for the query
+                if (! $this->currentVenueId) {
+                    Notification::make()
+                        ->danger()
+                        ->title('Error')
+                        ->body('Venue context lost. Cannot find schedule template.')
+                        ->send();
+
+                    continue; // Skip this booking
+                }
+
+                // Find the appropriate schedule template
+                $newScheduleTemplate = ScheduleTemplate::findTemplateForDateTime(
+                    $this->currentVenueId,
+                    $newBookingAt,
+                    $targetPartySize
+                );
+
+                if (! $newScheduleTemplate) {
+                    Notification::make()
+                        ->danger()
+                        ->title('Update Failed')
+                        ->body("No valid schedule template found for booking #{$booking->id} at the selected date/time.")
+                        ->send();
+
+                    continue; // Skip this booking
+                }
+
+                $newScheduleTemplateId = $newScheduleTemplate->id;
+
+                // Prepare data for fill(), EXCLUDING booking_at initially
+                $updateDataForFill = array_filter([
+                    'guest_first_name' => $this->bulkEditData['guest_first_name'],
+                    'guest_last_name' => $this->bulkEditData['guest_last_name'],
+                    'guest_email' => $this->bulkEditData['guest_email'],
+                    'guest_phone' => $this->bulkEditData['guest_phone'],
+                    'guest_count' => $guestCount,
+                    'status' => $this->bulkEditData['status'],
+                    'schedule_template_id' => $newScheduleTemplateId,
+                ]);
+
+                // Handle booking updates: fill other data, set booking_at directly, then save
+                $booking->fill($updateDataForFill);
+                $booking->booking_at = $newBookingAt; // Set booking_at directly
+
+                $saveResult = $booking->save();
+
+                if (! $saveResult) {
+                    Notification::make()
+                        ->danger()
+                        ->title('Update Failed')
+                        ->body("Could not update booking #{$booking->id}. Save operation failed.")
+                        ->send();
+
+                    continue;
+                }
+
+                // Recalculation logic & Post-update actions (only if save was successful)
+                $oldBookingAtCarbon = $oldBookingAt ? Carbon::parse($oldBookingAt) : null;
+                if ($guestCount !== $oldGuestCount ||
+                    ! $newBookingAt->equalTo($oldBookingAtCarbon) ||
+                    $newScheduleTemplateId !== $oldScheduleTemplateId
+                ) {
+                    // Delete existing earnings
+                    $booking->earnings()->delete();
+                    // Recalculate total fee
+                    $booking->total_fee = $booking->totalFee();
+                    $booking->saveQuietly();
+                    // Recalculate earnings
+                    $calculationService->calculateEarnings($booking);
+                }
+
+                // Handle special status changes
+                if ($this->bulkEditData['status'] !== $oldStatus) {
+                    if ($this->bulkEditData['status'] === BookingStatus::CANCELLED->value) {
+                        $booking->earnings()->delete();
+                    } elseif ($this->bulkEditData['status'] === BookingStatus::CONFIRMED->value) {
+                        $booking->earnings()->update(['confirmed_at' => now()]);
+                    }
+                }
+
+                // Send confirmation if requested
+                if ($this->bulkEditData['send_confirmation'] && in_array($booking->status, [
+                    BookingStatus::CONFIRMED->value,
+                    BookingStatus::VENUE_CONFIRMED->value,
+                ])) {
+                    $this->sendBookingConfirmation($booking);
+                }
+
+                // Log the activity
+                activity()
+                    ->performedOn($booking)
+                    ->withProperties([
+                        'old_status' => $oldStatus,
+                        'new_status' => $this->bulkEditData['status'],
+                        'old_guest_count' => $oldGuestCount,
+                        'new_guest_count' => $guestCount,
+                        'old_booking_at' => $oldBookingAt ? Carbon::parse($oldBookingAt)->toIso8601String() : null,
+                        'new_booking_at' => $newBookingAt->toIso8601String(),
+                        'old_schedule_template_id' => $oldScheduleTemplateId,
+                        'new_schedule_template_id' => $newScheduleTemplateId,
+                        'modified_by' => auth()->user()->name,
+                        'bulk_edit' => true,
+                        'confirmation_sent' => $this->bulkEditData['send_confirmation'] ?? false,
+                    ])
+                    ->log('Booking bulk edited');
+
+                $editedCount++;
+            }
+
+            DB::commit();
+
+            if ($editedCount > 0) {
+                Notification::make()
+                    ->success()
+                    ->title('Bookings Updated')
+                    ->body("Successfully updated {$editedCount} bookings.")
+                    ->send();
+
+                $this->clearEditForm();
+
+                // Refresh the bookings list
+                $this->dispatch('refresh');
+            }
+
+        } catch (Exception $e) {
+            DB::rollBack();
+            Notification::make()
+                ->danger()
+                ->title('Error Updating Bookings')
+                ->body('An error occurred: '.$e->getMessage())
+                ->send();
+        }
+    }
 
     public function table(Table $table): Table
     {
@@ -111,6 +471,36 @@ class ListVenues extends ListRecords
                     ->extraAttributes([
                         'class' => 'hidden md:inline-flex',
                     ]),
+                Action::make('bulkEditBookings')
+                    ->iconButton()
+                    ->icon('heroicon-o-pencil-square')
+                    ->label('Bulk Edit Bookings')
+                    ->color('primary')
+                    ->action(function (Venue $record): void {
+                        // Store venue ID and Name
+                        $this->currentVenueId = $record->id;
+                        $this->currentVenueName = $record->name;
+
+                        // Reset selections and form state
+                        $this->selectedBookings = [];
+                        $this->showEditForm = false;
+                        $this->bulkEditData = [
+                            'guest_first_name' => '',
+                            'guest_last_name' => '',
+                            'guest_email' => '',
+                            'guest_phone' => '',
+                            'guest_count' => 1,
+                            'booking_date' => null,
+                            'booking_time' => null,
+                            'status' => '',
+                            'send_confirmation' => false,
+                        ];
+
+                        // Dispatch event to open modal
+                        $this->dispatch('open-bulk-edit-modal', [
+                            'venue_id' => $record->id,
+                        ]);
+                    }),
                 Action::make('viewConcierge')
                     ->iconButton()
                     ->icon('tabler-maximize')
@@ -122,14 +512,26 @@ class ListVenues extends ListRecords
                             ->size('sm'),
                     ])
                     ->modalContent(function (Venue $venue) {
-                        $recentBookings = $venue->bookings()
-                            ->with('concierge.user')
-                            ->confirmed()
-                            ->limit(10)
-                            ->orderByDesc('created_at')
-                            ->get();
+                        try {
+                            $recentBookings = DB::table('bookings')
+                                ->join('schedule_templates', 'bookings.schedule_template_id', '=', 'schedule_templates.id')
+                                ->where('schedule_templates.venue_id', $venue->id)
+                                ->whereIn('bookings.status', [
+                                    BookingStatus::CONFIRMED->value,
+                                    BookingStatus::VENUE_CONFIRMED->value,
+                                ])
+                                ->select('bookings.*')
+                                ->orderByDesc('bookings.created_at')
+                                ->limit(10)
+                                ->get();
 
-                        $lastLogging = $venue->user->authentications()->latest('login_at')->first()->login_at ?? null;
+                            $lastLogging = $venue->user->authentications()->latest('login_at')->first()->login_at ?? null;
+                        } catch (Exception $e) {
+                            // Log the error but continue
+                            session()->put('concierge_modal_error', $e->getMessage());
+                            $recentBookings = collect();
+                            $lastLogging = null;
+                        }
 
                         return view('partials.venue-table-modal-view', [
                             'user' => $venue->user,
@@ -151,5 +553,206 @@ class ListVenues extends ListRecords
                     ->slideOver(self::USE_SLIDE_OVER),
             ])
             ->paginated([10, 25, 50, 100]);
+    }
+
+    public function populateEditFormFromBooking($bookingId = null)
+    {
+        if (blank($bookingId)) {
+            Notification::make()
+                ->warning()
+                ->title('No Booking Selected')
+                ->body('Please select a booking to edit.')
+                ->send();
+
+            return;
+        }
+
+        $booking = Booking::query()->find($bookingId);
+
+        if (! $booking) {
+            Notification::make()
+                ->error()
+                ->title('Booking Not Found')
+                ->body('The selected booking could not be found.')
+                ->send();
+
+            return;
+        }
+
+        // Keep the venue ID and name
+        // Don't reset the venue information when selecting a booking
+
+        // Format the booking date properly for datetime-local input
+        $bookingAtFormatted = $booking->booking_at ?
+            Carbon::parse($booking->booking_at)->format('Y-m-d\TH:i') :
+            null;
+
+        // Populate the bulk edit form with the booking data
+        $this->bulkEditData = [
+            'guest_first_name' => $booking->guest_first_name,
+            'guest_last_name' => $booking->guest_last_name,
+            'guest_email' => $booking->guest_email,
+            'guest_phone' => $booking->guest_phone,
+            'guest_count' => $booking->guest_count,
+            'booking_date' => $booking->booking_at ? Carbon::parse($booking->booking_at)->format('Y-m-d') : null,
+            'booking_time' => $booking->booking_at ? Carbon::parse($booking->booking_at)->format('H:i') : null,
+            'status' => $booking->status,
+            'send_confirmation' => false,
+        ];
+
+        // Clear any previous selections and select only this booking
+        $this->selectedBookings = [$bookingId];
+
+        // Show the edit form
+        $this->showEditForm = true;
+    }
+
+    /**
+     * Handle the date range filter form submission
+     */
+    public function filterBookings()
+    {
+        // No additional logic needed - the startDate and endDate properties
+        // are automatically updated by Livewire's wire:model binding
+        // The computed filteredBookings property will refresh automatically
+
+        // Force a refresh of the computed property
+        $this->dispatch('refresh');
+    }
+
+    /**
+     * Reset the date filters
+     */
+    public function resetFilter(): void
+    {
+        $this->startDate = null;
+        $this->endDate = null;
+        $this->selectedBookings = [];
+        $this->shouldSelectAllBookings = false;
+        $this->showEditForm = false;
+
+        // Refresh the listing
+        $this->dispatch('refresh');
+    }
+
+    public function editSelectedBookings()
+    {
+        if (blank($this->selectedBookings)) {
+            Notification::make()
+                ->warning()
+                ->title('No Bookings Selected')
+                ->body('Please select at least one booking to edit.')
+                ->send();
+
+            return;
+        }
+
+        // Validate guest count before proceeding
+        $guestCount = (int) $this->bulkEditData['guest_count'];
+        if ($guestCount < $this->getMinGuestCount() || $guestCount > $this->getMaxGuestCount()) {
+            Notification::make()
+                ->danger()
+                ->title('Invalid Party Size')
+                ->body("Party size must be between {$this->getMinGuestCount()} and {$this->getMaxGuestCount()}.")
+                ->send();
+
+            return;
+        }
+
+        $this->bulkEditBookings();
+
+        // Reset selection after update
+        $this->selectedBookings = [];
+
+        // Hide the edit form
+        $this->showEditForm = false;
+
+        // Clear the modal flag
+        session()->forget('bulk_edit_modal_open');
+    }
+
+    /**
+     * Handle modal closed event to clear session flags
+     */
+    public function clearModalFlags(bool $clearVenueContext = true): void
+    {
+        if ($clearVenueContext) {
+            $this->currentVenueId = null;
+            $this->currentVenueName = null;
+        }
+
+        $this->selectedBookings = [];
+        $this->shouldSelectAllBookings = false;
+        $this->showEditForm = false;
+        $this->bulkEditData = [
+            'guest_first_name' => '',
+            'guest_last_name' => '',
+            'guest_email' => '',
+            'guest_phone' => '',
+            'guest_count' => $this->getMinGuestCount(),
+            'booking_date' => null,
+            'booking_time' => null,
+            'status' => '',
+            'send_confirmation' => false,
+        ];
+    }
+
+    public function mount(): void
+    {
+        parent::mount();
+        $this->clearModalFlags();
+
+        // Set default date range to the last 30 days
+        $userTimezone = auth()->user()?->timezone ?? config('app.default_timezone');
+        $this->endDate = Carbon::now($userTimezone)->format('Y-m-d');
+        $this->startDate = Carbon::now($userTimezone)->subDays(30)->format('Y-m-d');
+    }
+
+    /**
+     * Helper method to get filtered bookings for use in methods like toggleAllBookings
+     */
+    public function getFilteredBookings()
+    {
+        return $this->filteredBookings();
+    }
+
+    public function toggleAllBookings(): void
+    {
+        $this->shouldSelectAllBookings = ! $this->shouldSelectAllBookings;
+
+        // Either we can select everything or reset the selection
+        if ($this->shouldSelectAllBookings) {
+            $this->selectedBookings = $this->getFilteredBookings()->pluck('id')->flip()->map(fn () => true)->toArray();
+        } else {
+            $this->selectedBookings = [];
+        }
+    }
+
+    public function toggleEditForm(bool $state): void
+    {
+        $this->showEditForm = $state;
+    }
+
+    /**
+     * Clear the edit form and reset all related state
+     */
+    public function clearEditForm(): void
+    {
+        // Clear form state but preserve venue context
+        $this->clearModalFlags(false);
+
+        $this->dispatch('bulk-edit-form-cleared');
+    }
+
+    /**
+     * Handle when the edit modal is closed
+     */
+    #[On('close-modal')]
+    public function handleModalClosed($data = []): void
+    {
+        // Only clear modal flags when the bulk-edit-bookings-modal is closed
+        if (isset($data['id']) && $data['id'] === 'bulk-edit-bookings-modal') {
+            $this->clearModalFlags(true); // Clear venue context when modal is actually closed
+        }
     }
 }

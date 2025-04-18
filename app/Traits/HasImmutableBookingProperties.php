@@ -5,8 +5,8 @@ namespace App\Traits;
 trait HasImmutableBookingProperties
 {
     protected array $immutableProperties = [
-        'schedule_template_id',
-        'booking_at',
+        // 'schedule_template_id',
+        // 'booking_at',
     ];
 
     public function setAttribute($key, $value)
