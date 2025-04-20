@@ -10,6 +10,7 @@ use App\Models\Concierge;
 use App\Models\ScheduleTemplate;
 use App\Models\ScheduleWithBooking;
 use App\Models\VipCode;
+use App\Services\ReservationService;
 use App\Services\SalesTaxService;
 use chillerlan\QRCode\QRCode;
 use Exception;
@@ -40,6 +41,7 @@ class CreateBooking
         ?string $device = null
     ): CreateBookingReturnData {
         $scheduleTemplate = ScheduleTemplate::query()->findOrFail($scheduleTemplateId);
+        $venue = $scheduleTemplate->venue;
 
         // Get the schedule with override data
         $schedule = ScheduleWithBooking::query()->where('schedule_template_id', $scheduleTemplateId)
@@ -67,6 +69,24 @@ class CreateBooking
             $bookingAt->gt($currentDate->copy()->addDays(self::MAX_DAYS_IN_ADVANCE)),
             new RuntimeException('Booking cannot be created more than '.self::MAX_DAYS_IN_ADVANCE.' days in advance.')
         );
+
+        // Validate booking time restrictions for today's bookings
+        if ($bookingAt->isToday()) {
+            // Check minimum advance booking time (global setting)
+            $minAdvanceTime = $currentDate->copy()->addMinutes(ReservationService::MINUTES_PAST);
+            throw_if($bookingAt->lt($minAdvanceTime), new RuntimeException('Booking cannot be created less than '.ReservationService::MINUTES_PAST.' minutes in advance for today.'));
+
+            // Check venue's specific cutoff time if set
+            if ($venue->cutoff_time) {
+                $cutoffTimeToday = Carbon::parse($venue->cutoff_time, $timezone)->setDate(
+                    $currentDate->year,
+                    $currentDate->month,
+                    $currentDate->day
+                );
+
+                throw_if($currentDate->gt($cutoffTimeToday), new RuntimeException('Booking cannot be created after the venue\'s cutoff time for today.'));
+            }
+        }
 
         $conciergeId = $this->getConciergeId($vipCode);
         $concierge = Concierge::with('user')->find($conciergeId);
