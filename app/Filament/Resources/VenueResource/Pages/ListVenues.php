@@ -22,6 +22,7 @@ use Filament\Tables\Actions\EditAction;
 use Filament\Tables\Actions\ViewAction;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
+use Illuminate\Contracts\Database\Query\Builder;
 use Illuminate\Support\Facades\DB;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\On;
@@ -516,7 +517,7 @@ class ListVenues extends ListRecords
                         try {
                             // Use Eloquent model with proper relationships instead of DB::table
                             $recentBookings = Booking::query()
-                                ->whereHas('schedule', function ($query) use ($venue) {
+                                ->whereHas('schedule', function (Builder $query) use ($venue) {
                                     $query->where('venue_id', $venue->id);
                                 })
                                 ->whereIn('status', [

@@ -4,12 +4,10 @@ namespace App\Livewire\Booking;
 
 use App\Models\Booking;
 use Illuminate\View\View;
-use Livewire\Attributes\Reactive;
 use Livewire\Component;
 
 class EarningsBreakdown extends Component
 {
-    #[Reactive]
     public Booking $booking;
 
     public function mount(Booking $booking): void

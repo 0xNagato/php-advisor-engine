@@ -73,6 +73,16 @@ class Cuisine extends Model
             'description' => 'Spicy, aromatic dishes like Pad Thai, green curry, and tom yum soup.',
         ],
         [
+            'id' => 'greek',
+            'name' => 'Greek',
+            'description' => 'Features moussaka, souvlaki, tzatziki, and feta-based dishes with olive oil and herbs.',
+        ],
+        [
+            'id' => 'turkish',
+            'name' => 'Turkish',
+            'description' => 'Known for kebabs, baklava, meze platters, and rich flavors from the Ottoman cuisine.',
+        ],
+        [
             'id' => 'vegan',
             'name' => 'Vegan',
             'description' => 'A cuisine that excludes all animal products.',
