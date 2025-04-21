@@ -5,6 +5,7 @@ namespace App\Filament\Pages\Concierge;
 use App\Constants\BookingPercentages;
 use App\Models\Concierge;
 use App\Models\Region;
+use App\Models\ScheduleWithBooking;
 use App\Models\Venue;
 use App\Services\ReservationService;
 use App\Traits\ManagesBookingForms;
@@ -71,7 +72,7 @@ class EarningsPotential extends Page
             ->statePath('data');
     }
 
-    public function conciergePayout(Venue $venue, bool $isPrime): int
+    public function conciergePayout(Venue $venue, ScheduleWithBooking $schedule, bool $isPrime): int
     {
         $concierge = Concierge::query()->where('user_id', auth()->id())->first();
         if (! $concierge) {
@@ -89,7 +90,12 @@ class EarningsPotential extends Page
             return (int) ($totalFee * ($concierge->payout_percentage / 100) * 100);
         }
 
-        $totalFee = $venue->non_prime_fee_per_head * $guestCount;
+        $non_prime_fee_per_head = $venue->non_prime_fee_per_head;
+        if ($schedule->timeSlots->count()) {
+            $override = $schedule->timeSlots->first();
+            $non_prime_fee_per_head = $override->price_per_head;
+        }
+        $totalFee = $non_prime_fee_per_head * $guestCount;
 
         return (int) ($totalFee * (1 - (BookingPercentages::PLATFORM_PERCENTAGE_CONCIERGE / 100)) * 100);
     }

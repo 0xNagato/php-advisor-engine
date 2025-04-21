@@ -6,6 +6,7 @@ use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 /**
  * @mixin IdeHelperScheduleTemplate
@@ -34,6 +35,11 @@ class ScheduleTemplate extends Model
     public function venue(): BelongsTo
     {
         return $this->belongsTo(Venue::class);
+    }
+
+    public function timeSlots(): HasMany
+    {
+        return $this->hasMany(VenueTimeSlot::class);
     }
 
     protected function casts(): array

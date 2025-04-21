@@ -65,7 +65,7 @@
                                         @elseif ($schedule->is_bookable)
                                             @php
                                                 $isPrime = $schedule->prime_time;
-                                                $earnings = $this->conciergePayout($venue, $isPrime);
+                                                $earnings = $this->conciergePayout($venue, $schedule, $isPrime);
                                             @endphp
                                             <p class="text-base font-bold">
                                                 @money($earnings, $this->currency)

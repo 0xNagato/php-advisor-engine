@@ -75,6 +75,11 @@ class ScheduleWithBooking extends Model
         return $this->hasMany(Booking::class);
     }
 
+    public function timeSlots(): HasMany
+    {
+        return $this->hasMany(VenueTimeSlot::class, 'schedule_template_id');
+    }
+
     protected function bookingAt(): Attribute
     {
         return Attribute::make(get: fn () => $this->schedule_start);
