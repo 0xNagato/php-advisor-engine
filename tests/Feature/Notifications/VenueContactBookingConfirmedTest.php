@@ -22,7 +22,7 @@ beforeEach(function () {
     // Create a schedule template for the venue
     $this->scheduleTemplate = ScheduleTemplate::factory()->create([
         'venue_id' => $this->venue->id,
-        'start_time' => Carbon::now('UTC')->addMinutes(30)->format('H:i:s'),
+        'start_time' => Carbon::now('UTC')->addMinutes(40)->format('H:i:s'),
         'day_of_week' => Carbon::now('UTC')->format('l'),
         'party_size' => 4,
     ]);

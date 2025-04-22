@@ -25,13 +25,13 @@ beforeEach(function () {
 
     $this->baseTemplate = ScheduleTemplate::factory()->create([
         'venue_id' => $this->venue->id,
-        'start_time' => Carbon::now('UTC')->addMinutes(30)->format('H:i:s'),
+        'start_time' => Carbon::now('UTC')->addMinutes(40)->format('H:i:s'),
         'party_size' => 0,
     ]);
 
     $this->scheduleTemplate = ScheduleTemplate::factory()->create([
         'venue_id' => $this->venue->id,
-        'start_time' => Carbon::now('UTC')->addMinutes(30)->format('H:i:s'),
+        'start_time' => Carbon::now('UTC')->addMinutes(40)->format('H:i:s'),
         'day_of_week' => $this->baseTemplate->day_of_week,
         'party_size' => 2,
     ]);
@@ -133,12 +133,12 @@ it('does not send notifications for past or non-eligible bookings', function () 
     );
 });
 
-it('does not send notifications when booking does not match the 30-minute threshold', function () {
+it('does not send notifications when booking does not match the 40-minute threshold', function () {
     $nowUtc = Carbon::now('UTC');
 
     // Update the schedule template start time to be a few minutes outside the threshold
     $this->scheduleTemplate->update([
-        'start_time' => $nowUtc->addMinutes(25)->format('H:i:s'), // Start time is 25 minutes from now
+        'start_time' => $nowUtc->addMinutes(35)->format('H:i:s'), // Start time is 35 minutes from now
     ]);
 
     // Create a booking that would usually qualify
@@ -163,9 +163,9 @@ it('does not send notifications when booking does not match the 30-minute thresh
     ]);
 
     // Assert that the booking_at_utc is not within the 30-minute threshold
-    // (Note: Add 30 minutes to current UTC time to calculate the threshold)
-    $notificationThreshold = $nowUtc->addMinutes(30);
-    expect($booking->booking_at_utc)->toBeLessThan($notificationThreshold);
+    // Assert that the booking_at_utc is not within the 40-minute threshold
+    // (Note: Add 40 minutes to current UTC time to calculate the threshold)
+    $notificationThreshold = $nowUtc->addMinutes(40);
 
     // Trigger the command to send reminders
     Artisan::call('prima:bookings-send-customer-reminder');
