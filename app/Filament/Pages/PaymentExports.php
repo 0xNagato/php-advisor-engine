@@ -218,8 +218,8 @@ class PaymentExports extends Page implements HasTable
                         'venue_search' => $venue->name,
                         'start_date' => $this->data['startDate'],
                         'end_date' => $this->data['endDate'],
-                        'status' => [BookingStatus::CONFIRMED->value, BookingStatus::VENUE_CONFIRMED->value, BookingStatus::PARTIALLY_REFUNDED->value, BookingStatus::NO_SHOW->value],
-                        'show_booking_time' => true, // Default to booking time
+                        'status' => BookingStatus::PAYOUT_STATUSES,
+                        'show_booking_time' => true,
                     ];
 
                     // Use the route name for the BookingSearch page
@@ -278,12 +278,10 @@ class PaymentExports extends Page implements HasTable
 
                     $filters = [
                         // Match filters expected by BookingSearch.php
-                        // Note: BookingSearch doesn't directly support filtering by multiple venue *IDs*
-                        // We'll pass the group name to the venue_search filter instead.
                         'venue_search' => $venueGroup?->name ?? '',
                         'start_date' => $this->data['startDate'],
                         'end_date' => $this->data['endDate'],
-                        'status' => [BookingStatus::CONFIRMED->value, BookingStatus::VENUE_CONFIRMED->value, BookingStatus::PARTIALLY_REFUNDED->value, BookingStatus::NO_SHOW->value],
+                        'status' => BookingStatus::PAYOUT_STATUSES,
                         'show_booking_time' => true,
                     ];
 
@@ -320,7 +318,7 @@ class PaymentExports extends Page implements HasTable
                         ($user->hasRole('concierge') ? 'concierge_search' : 'partner_search') => $user->name, // Pass user name to search filters
                         'start_date' => $this->data['startDate'],
                         'end_date' => $this->data['endDate'],
-                        'status' => [BookingStatus::CONFIRMED->value, BookingStatus::VENUE_CONFIRMED->value, BookingStatus::PARTIALLY_REFUNDED->value, BookingStatus::NO_SHOW->value],
+                        'status' => BookingStatus::PAYOUT_STATUSES,
                         'show_booking_time' => true,
                     ];
 

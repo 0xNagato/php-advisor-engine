@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Actions;
 
+use App\Enums\BookingStatus;
 use App\Enums\EarningType;
 use App\Enums\VenueInvoiceStatus;
 use App\Models\Venue;
@@ -59,12 +60,14 @@ class GenerateVenueInvoice
                 'bookings.guest_email',
                 'bookings.is_prime',
                 'bookings.booking_at_utc',
+                'bookings.status',
             ])
             ->whereBetween('booking_at_utc', [$startDateUtc, $endDateUtc])
+            ->whereIn('bookings.status', BookingStatus::PAYOUT_STATUSES)
             ->orderBy('booking_at')
             ->get();
 
-        throw_if($bookings->isEmpty(), new RuntimeException('No bookings found for the specified date range.'));
+        throw_if($bookings->isEmpty(), new RuntimeException('No bookings eligible for payout found for the specified date range.'));
 
         // Split bookings into prime and non-prime
         $primeBookings = $bookings->where('is_prime', true);
@@ -218,12 +221,14 @@ class GenerateVenueInvoice
                 'bookings.guest_email',
                 'bookings.is_prime',
                 'bookings.booking_at_utc',
+                'bookings.status',
             ])
             ->whereBetween('booking_at_utc', [$startDateUtc, $endDateUtc])
+            ->whereIn('bookings.status', BookingStatus::PAYOUT_STATUSES)
             ->orderBy('booking_at')
             ->get();
 
-        throw_if($bookings->isEmpty(), new RuntimeException('No bookings found for the specified date range.'));
+        throw_if($bookings->isEmpty(), new RuntimeException('No bookings eligible for payout found for the specified date range.'));
 
         // Split bookings into prime and non-prime
         $primeBookings = $bookings->where('is_prime', true);

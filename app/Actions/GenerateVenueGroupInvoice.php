@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Actions;
 
+use App\Enums\BookingStatus;
 use App\Enums\EarningType;
 use App\Enums\VenueInvoiceStatus;
 use App\Models\Booking;
@@ -79,9 +80,10 @@ class GenerateVenueGroupInvoice
                     'bookings.guest_phone',
                     'bookings.guest_email',
                     'bookings.is_prime',
-                    // No venue_id in bookings table, it's accessed through schedule_templates
+                    'bookings.status',
                 ])
                 ->whereBetween('booking_at_utc', [$startDateUtc, $endDateUtc])
+                ->whereIn('bookings.status', BookingStatus::PAYOUT_STATUSES)
                 ->orderBy('booking_at')
                 ->get();
 
@@ -131,7 +133,7 @@ class GenerateVenueGroupInvoice
             $allBookings = $allBookings->merge($bookings);
         }
 
-        throw_if($allBookings->isEmpty(), new RuntimeException('No bookings found for any venue in the specified date range.'));
+        throw_if($allBookings->isEmpty(), new RuntimeException('No bookings eligible for payout found for any venue in the specified date range.'));
 
         return DB::transaction(function () use ($venueGroup, $referenceVenue, $startDateCarbon, $endDateCarbon, $allBookings, $bookingsByVenue, $primeTotalAmount, $nonPrimeTotalAmount, $venuesData, $currency) {
             // Create the invoice record - using only the fields from the latest version
@@ -297,11 +299,16 @@ class GenerateVenueGroupInvoice
                     'bookings.guest_phone',
                     'bookings.guest_email',
                     'bookings.is_prime',
-                    // No venue_id in bookings table, it's accessed through schedule_templates
+                    'bookings.status',
                 ])
                 ->whereBetween('booking_at_utc', [$startDateUtc, $endDateUtc])
+                ->whereIn('bookings.status', BookingStatus::PAYOUT_STATUSES)
                 ->orderBy('booking_at')
                 ->get();
+
+            if ($bookings->isEmpty()) {
+                continue;
+            }
 
             // Split bookings for this venue
             $primeBookings = $bookings->where('is_prime', true);
@@ -340,6 +347,8 @@ class GenerateVenueGroupInvoice
                 $currency = $bookings->first()->currency ?? 'USD';
             }
         }
+
+        throw_if($allBookings->isEmpty(), new RuntimeException('No bookings eligible for payout found for any venue in the specified date range.'));
 
         return [
             'venue' => $referenceVenue,
