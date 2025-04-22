@@ -1,7 +1,13 @@
 <div class="p-6 bg-white rounded-lg shadow filament-card">
     <h3 class="text-base font-semibold leading-6 text-gray-900">Your Referral Link</h3>
     <p class="mt-1 text-sm text-gray-500">
-        Share this link with other concierges to invite them to join PRIMA. You'll earn commissions on their bookings.
+        @if ($type === 'venue_manager')
+            Share this link with concierges to invite them to promote venues within your venue group.
+        @else
+            {{-- Default text for concierge and partner --}}
+            Share this link with other concierges to invite them to join PRIMA. You'll earn commissions on their
+            bookings.
+        @endif
     </p>
     <div x-data="{
         copied: false,
