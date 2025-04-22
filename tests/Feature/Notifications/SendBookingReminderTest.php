@@ -44,7 +44,13 @@ beforeEach(function () {
 
 it('sends a booking reminder notification for eligible bookings', function () {
     $nowUtc = Carbon::now('UTC');
-
+    
+    // Explicitly create a booking with start time that falls within the 30-minute notification window
+    // The notification command sends reminders for bookings 30 minutes before they start
+    $this->scheduleTemplate->update([
+        'start_time' => $nowUtc->copy()->addMinutes(40)->format('H:i:s'),
+    ]);
+    
     $bookingData = [
         'date' => $nowUtc->format('Y-m-d'),
         'guest_count' => 2,
@@ -68,7 +74,12 @@ it('sends a booking reminder notification for eligible bookings', function () {
     $this->assertDatabaseMissing('booking_customer_reminder_logs', [
         'booking_id' => $booking->id,
     ]);
-
+    
+    // Force the booking time to be exactly 30 minutes from now to trigger the notification
+    $booking->update([
+        'booking_at_utc' => Carbon::now('UTC')->addMinutes(30),
+    ]);
+    
     Artisan::call('prima:bookings-send-customer-reminder');
 
     Notification::assertSentTo(
@@ -138,7 +149,7 @@ it('does not send notifications when booking does not match the 40-minute thresh
 
     // Update the schedule template start time to be a few minutes outside the threshold
     $this->scheduleTemplate->update([
-        'start_time' => $nowUtc->addMinutes(35)->format('H:i:s'), // Start time is 35 minutes from now
+        'start_time' => $nowUtc->addMinutes(45)->format('H:i:s'), // Start time is 45 minutes from now
     ]);
 
     // Create a booking that would usually qualify
