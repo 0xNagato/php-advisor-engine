@@ -66,7 +66,7 @@ test('Non-prime booking with VenueTimeSlot override calculates earnings correctl
     // Create a VenueTimeSlot as an override for the schedule template
     $override = VenueTimeSlot::factory()->create([
         'schedule_template_id' => $this->scheduleTemplate->id,
-        'booking_date' => now()->toDateString(),
+        'booking_date' => now()->addDay()->toDateString(),
         'prime_time' => false,
         'price_per_head' => 25, // Override price
     ]);
@@ -74,7 +74,7 @@ test('Non-prime booking with VenueTimeSlot override calculates earnings correctl
     $result = $this->action::run(
         $this->scheduleTemplate->id,
         [
-            'date' => now()->format('Y-m-d'),
+            'date' => now()->addDay()->format('Y-m-d'),
             'guest_count' => $guestCount,
         ],
         'UTC',

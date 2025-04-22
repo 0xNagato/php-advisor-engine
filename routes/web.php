@@ -132,7 +132,7 @@ Route::get('venue-manager/invitation/{referral}', App\Filament\Pages\VenueManage
     ->name('venue-manager.invitation')
     ->middleware(['signed']);
 
-Route::get('venue-invoice/{user}/{startDate}/{endDate}', DownloadVenueInvoiceController::class)
+Route::get('venue-invoice/{venue}/{startDate}/{endDate}', DownloadVenueInvoiceController::class)
     ->name('venue.invoice.download')
     ->middleware('auth');
 

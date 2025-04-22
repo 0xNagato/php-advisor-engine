@@ -212,9 +212,7 @@ trait HandlesConciergeInvitation
                 };
                 $referrerId = $this->invitingPartner?->user_id ?? $this->invitingConcierge?->user_id ?? $this->invitingVenueManager?->id ?? null;
 
-                if (! $referrerType || ! $referrerId) {
-                    throw new Exception('Could not determine referrer for direct invitation.');
-                }
+                throw_if(! $referrerType || ! $referrerId, new Exception('Could not determine referrer for direct invitation.'));
 
                 $inviterRegion = match ($referrerType) {
                     'partner' => $this->invitingPartner?->user?->region,
@@ -287,7 +285,7 @@ trait HandlesConciergeInvitation
                 $conciergeData['venue_group_id'] = $venueGroup->id;
 
                 $allowedVenueIds = $venueGroup->getAllowedVenueIds($this->referral->referrer);
-                if (! empty($allowedVenueIds)) {
+                if (filled($allowedVenueIds)) {
                     $conciergeData['allowed_venue_ids'] = array_map('intval', $allowedVenueIds);
                 } else {
                     $conciergeData['allowed_venue_ids'] = [];

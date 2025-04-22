@@ -22,9 +22,7 @@ class ReferralLinkCard extends Component
     public function __construct(public string $type)
     {
         $user = auth()->user();
-        if (! $user) {
-            abort(403, 'User not authenticated.');
-        }
+        abort_unless($user, 403, 'User not authenticated.');
 
         $cacheKey = "referral_link_{$user->id}_{$type}";
 

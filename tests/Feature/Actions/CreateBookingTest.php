@@ -46,7 +46,7 @@ beforeEach(function () {
 
 it('it can create a booking successfully', function () {
     $bookingData = [
-        'date' => now()->format('Y-m-d'),
+        'date' => now()->addDay()->format('Y-m-d'),
         'guest_count' => 2,
     ];
 
@@ -108,7 +108,7 @@ it('throws exception when booking is more than 30 days in advance', function () 
 it('creates booking with correct timezone', function () {
     $timezone = 'America/New_York';
     $bookingData = [
-        'date' => now()->format('Y-m-d'),
+        'date' => now()->addDay()->format('Y-m-d'),
         'guest_count' => 2,
     ];
 
@@ -133,7 +133,7 @@ it('creates booking with correct timezone', function () {
 it('creates booking with vip code when provided', function () {
     $vipCode = VipCode::factory()->create();
     $bookingData = [
-        'date' => now()->format('Y-m-d'),
+        'date' => now()->addDay()->format('Y-m-d'),
         'guest_count' => 2,
     ];
 
@@ -165,7 +165,7 @@ it('it calculates correct total amount based on guest count for non prime', func
     $result = $this->action::run(
         $this->scheduleTemplate->id,
         [
-            'date' => now()->format('Y-m-d'),
+            'date' => now()->addDay()->format('Y-m-d'),
             'guest_count' => $guestCount,
         ],
         'UTC',

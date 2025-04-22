@@ -57,7 +57,7 @@ it('ensures the customer_booking_confirmed_non_prime SMS content is correct', fu
     $result = $this->action::run(
         $this->scheduleTemplate->id,
         [
-            'date' => now()->format('Y-m-d'),
+            'date' => now()->addDay()->format('Y-m-d'),
             'guest_count' => $guestCount,
         ],
         'UTC',
