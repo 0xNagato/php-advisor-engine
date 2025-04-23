@@ -560,6 +560,7 @@ class PaymentExports extends Page implements HasTable
             'venue' => $venue->id, // Use venue_id as per route definition
             'startDate' => $this->data['startDate'],
             'endDate' => $this->data['endDate'],
+            'regenerate' => true, // Force regeneration of the invoice
         ]);
 
         $this->js("window.open('$url', '_blank')");
@@ -631,6 +632,7 @@ class PaymentExports extends Page implements HasTable
             'venueGroup' => $venueGroup->id,
             'startDate' => $this->data['startDate'],
             'endDate' => $this->data['endDate'],
+            'regenerate' => true, // Force regeneration of the invoice
         ]);
 
         $this->js("window.open('$url', '_blank')");
