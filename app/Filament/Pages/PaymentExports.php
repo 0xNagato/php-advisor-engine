@@ -24,9 +24,13 @@ use Filament\Tables\Contracts\HasTable;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Illuminate\Contracts\Database\Query\Builder;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\HtmlString;
 use Livewire\Attributes\Url;
+use pxlrbt\FilamentExcel\Actions\Tables\ExportAction;
+use pxlrbt\FilamentExcel\Columns\Column;
+use pxlrbt\FilamentExcel\Exports\ExcelExport;
 
 class PaymentExports extends Page implements HasTable
 {
@@ -384,7 +388,8 @@ class PaymentExports extends Page implements HasTable
                         ->searchable(),
                     // The query modification is automatically handled by Filament
                     // based on the column name ('venue_group_id')
-                ]);
+                ])
+                ->headerActions($this->getExportHeaderActions('venue'));
         }
 
         // ------------------------ VENUE GROUP ------------------------
@@ -436,7 +441,8 @@ class PaymentExports extends Page implements HasTable
                 ->actions($this->getInvoiceActions())
                 ->heading($this->headingDates($tz))
                 ->defaultSort('total_earnings', 'desc')
-                ->paginated([10, 25, 50, 100]);
+                ->paginated([10, 25, 50, 100])
+                ->headerActions($this->getExportHeaderActions('venue_group'));
         }
 
         // ------------------------ CONCIERGE / PARTNER ------------------------
@@ -456,7 +462,9 @@ class PaymentExports extends Page implements HasTable
             ->when($role === 'partner', fn ($q) => $q->has('partner'))
             ->groupBy('users.id', 'earnings.currency');
 
-        $builder = User::query()->fromSub($userQuery, 'users');
+        $builder = User::query()
+            ->fromSub($userQuery, 'users')
+            ->with(['concierge']); // Eager load concierge for export formatting
 
         return $table
             ->query($builder)
@@ -464,7 +472,8 @@ class PaymentExports extends Page implements HasTable
             ->actions($this->getInvoiceActions())
             ->heading($this->headingDates($tz))
             ->defaultSort('total_earnings', 'desc')
-            ->paginated([10, 25, 50, 100]);
+            ->paginated([10, 25, 50, 100])
+            ->headerActions($this->getExportHeaderActions($role));
     }
 
     protected function hasExistingVenueInvoice(Venue $venue, string $startDate, string $endDate): bool
@@ -748,5 +757,158 @@ class PaymentExports extends Page implements HasTable
         $venueGroup = VenueGroup::query()->where('primary_manager_id', $record->id)->first();
 
         return $venueGroup ? "Generate Group Invoice for {$venueGroup->name}" : 'Generate Group Invoice';
+    }
+
+    // ================= CSV Export Actions =================
+
+    protected function getExportHeaderActions(string $role): array
+    {
+        $tz = auth()->user()->timezone ?? config('app.timezone');
+        $startDate = Carbon::parse($this->data['startDate'], $tz)->format('Y-m-d');
+        $endDate = Carbon::parse($this->data['endDate'], $tz)->format('Y-m-d');
+        $dateRange = "{$startDate}_to_{$endDate}";
+
+        // Base configurations
+        $exportAllConfig = ExcelExport::make('table')
+            ->fromTable()
+            ->withWriterType(\Maatwebsite\Excel\Excel::CSV)
+            ->withFilename("Payment-Exports-{$role}-{$dateRange}");
+
+        $exportMissingConfig = ExcelExport::make('table')
+            ->fromTable()
+            ->withWriterType(\Maatwebsite\Excel\Excel::CSV)
+            ->withFilename("Missing-Banking-{$role}-{$dateRange}");
+
+        // Role-specific columns and modifications
+        if ($role === 'venue') {
+            $exportAllConfig->withColumns([
+                Column::make('name')->heading('Venue Name'),
+                Column::make('user.name')->heading('Owner Name'),
+                Column::make('user.email')->heading('Owner Email'),
+                Column::make('user.phone')->heading('Owner Phone'),
+                Column::make('bookings_count')->heading('Bookings Count'),
+                Column::make('total_earnings')
+                    ->formatStateUsing(fn (Model $record) => money($record->total_earnings, $record->currency)),
+                Column::make('currency')->heading('Currency'),
+                // Address Info (from User)
+                Column::make('user.address_1')->heading('Address 1'),
+                Column::make('user.address_2')->heading('Address 2'),
+                Column::make('user.city')->heading('City'),
+                Column::make('user.state')->heading('State'),
+                Column::make('user.zip')->heading('Zip'),
+                Column::make('user.country')->heading('Country'),
+                // Banking Info (from User)
+                Column::make('user.payout.payout_name')->heading('Payout Name'),
+                Column::make('user.payout.payout_type')->heading('Payout Type'),
+                Column::make('user.payout.account_type')->heading('Account Type'),
+                Column::make('user.payout.account_number')->heading('Account Number'),
+                Column::make('user.payout.routing_number')->heading('Routing Number'),
+            ]);
+
+            $exportMissingConfig->modifyQueryUsing(fn ($query) => $query->whereHas('user', function ($q) {
+                $q->where(fn ($qq) => $qq->whereNull('payout')->orWhere('payout', '=', '')->orWhere('payout', '=', '{}'));
+            }))
+                ->withColumns([
+                    Column::make('name')->heading('Venue Name'),
+                    Column::make('user.name')->heading('Owner Name'),
+                    Column::make('user.email')->heading('Owner Email'),
+                    Column::make('user.phone')->heading('Owner Phone'),
+                ]);
+
+        } elseif ($role === 'venue_group') {
+            $exportAllConfig->withColumns([
+                Column::make('primaryManagedVenueGroups.0.name')->heading('Group Name'), // Access via relation
+                Column::make('name')->heading('Manager Name'),
+                Column::make('email')->heading('Manager Email'),
+                Column::make('phone')->heading('Manager Phone'),
+                Column::make('bookings_count')->heading('Total Bookings (Group)'),
+                Column::make('total_earnings')
+                    ->formatStateUsing(fn (Model $record) => money($record->total_earnings, $record->currency)),
+                Column::make('currency')->heading('Currency'),
+                // Address Info (from User)
+                Column::make('address_1')->heading('Address 1'),
+                Column::make('address_2')->heading('Address 2'),
+                Column::make('city')->heading('City'),
+                Column::make('state')->heading('State'),
+                Column::make('zip')->heading('Zip'),
+                Column::make('country')->heading('Country'),
+                // Banking Info (from User)
+                Column::make('payout.payout_name')->heading('Payout Name'),
+                Column::make('payout.payout_type')->heading('Payout Type'),
+                Column::make('payout.account_type')->heading('Account Type'),
+                Column::make('payout.account_number')->heading('Account Number'),
+                Column::make('payout.routing_number')->heading('Routing Number'),
+            ]);
+
+            $exportMissingConfig->modifyQueryUsing(fn ($query) => $query->where(function ($q) {
+                $q->whereNull('payout')->orWhere('payout', '=', '')->orWhere('payout', '=', '{}');
+            }))
+                ->withColumns([
+                    Column::make('primaryManagedVenueGroups.0.name')->heading('Group Name'),
+                    Column::make('name')->heading('Manager Name'),
+                    Column::make('email')->heading('Manager Email'),
+                    Column::make('phone')->heading('Manager Phone'),
+                ]);
+
+        } else { // Concierge / Partner
+            $exportAllConfig->withColumns([
+                // Use original formatting closure for name
+                Column::make('name')->heading('Name')->formatStateUsing(function (User $record) {
+                    if ($record->hasRole('concierge')) {
+                        return $record->name." - Hotel/Company: {$record->concierge?->hotel_name}";
+                    } elseif ($record->hasRole('partner')) {
+                        return $record->name.' - Partner';
+                    }
+
+                    return $record->name;
+                }),
+                Column::make('email')->heading('Email'),
+                Column::make('phone')->heading('Phone'),
+                Column::make('bookings_count')->heading('Bookings Count'),
+                Column::make('total_earnings')
+                    ->formatStateUsing(fn (Model $record) => money($record->total_earnings, $record->currency)),
+                Column::make('currency')->heading('Currency'),
+                // Address Info
+                Column::make('address_1')->heading('Address 1'),
+                Column::make('address_2')->heading('Address 2'),
+                Column::make('city')->heading('City'),
+                Column::make('state')->heading('State'),
+                Column::make('zip')->heading('Zip'),
+                Column::make('country')->heading('Country'),
+                // Banking Info
+                Column::make('payout.payout_name')->heading('Payout Name'),
+                Column::make('payout.payout_type')->heading('Payout Type'),
+                Column::make('payout.account_type')->heading('Account Type'),
+                Column::make('payout.account_number')->heading('Account Number'),
+                Column::make('payout.routing_number')->heading('Routing Number'),
+            ]);
+
+            $exportMissingConfig->modifyQueryUsing(fn ($query) => $query->where(function ($q) {
+                $q->whereNull('payout')->orWhere('payout', '=', '')->orWhere('payout', '=', '{}');
+            }))
+                ->withColumns([
+                    // Use original formatting closure for name
+                    Column::make('name')->heading('Name')->formatStateUsing(function (User $record) {
+                        if ($record->hasRole('concierge')) {
+                            return $record->name." - Hotel/Company: {$record->concierge?->hotel_name}";
+                        } elseif ($record->hasRole('partner')) {
+                            return $record->name.' - Partner';
+                        }
+
+                        return $record->name;
+                    }),
+                    Column::make('email')->heading('Email'),
+                    Column::make('phone')->heading('Phone'),
+                ]);
+        }
+
+        return [
+            ExportAction::make('exportAll')
+                ->label('Export All')
+                ->exports([$exportAllConfig]),
+            ExportAction::make('exportMissingBankInfo')
+                ->label('Export Missing Banking')
+                ->exports([$exportMissingConfig]),
+        ];
     }
 }
