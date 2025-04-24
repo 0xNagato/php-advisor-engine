@@ -17,6 +17,8 @@ class ConciergeReferralEarnings extends Page
 
     public static ?string $title = 'Referral Earnings';
 
+    protected static ?string $navigationGroup = 'Financials';
+
     protected static ?string $navigationIcon = 'heroicon-s-currency-dollar';
 
     protected static string $view = 'filament.pages.concierge.concierge-referral-earnings';
