@@ -27,7 +27,7 @@ class IbizaHikeStationBooking extends Page
     use FormatsPhoneNumber;
     use ManagesBookingForms;
 
-    protected static ?string $navigationIcon = 'heroicon-o-sun';
+    protected static ?string $navigationIcon = 'phosphor-mountains-bold';
 
     protected static string $view = 'filament.pages.ibiza-hike-station-booking';
 
