@@ -48,6 +48,8 @@ class EarningsBreakdown extends Component
             ? 'livewire.booking.earnings-breakdown-advanced'
             : 'livewire.booking.earnings-breakdown';
 
+        $viewName = 'livewire.booking.earnings-breakdown';
+
         return view($viewName, [
             'groupedEarnings' => $this->booking->earnings->sumByUserAndType(),
             'platformEarnings' => $this->calculatePlatformEarnings(),

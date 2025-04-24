@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Casts\VenueContactCollection;
 use App\Enums\BookingStatus;
 use App\Enums\VenueStatus;
+use App\Enums\VenueType;
 use App\Models\Traits\HasEarnings;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
@@ -82,6 +83,7 @@ class Venue extends Model
         'omakase_concierge_fee',
         'cuisines',
         'neighborhood',
+        'venue_type',
     ];
 
     protected function casts(): array
@@ -93,6 +95,7 @@ class Venue extends Model
             'business_hours' => 'array',
             'party_sizes' => 'array',
             'status' => VenueStatus::class,
+            'venue_type' => VenueType::class,
             'cutoff_time' => 'datetime',
             'daily_booking_cap' => 'integer',
             'cuisines' => 'array',

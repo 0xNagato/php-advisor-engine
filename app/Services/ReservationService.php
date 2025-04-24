@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Actions\Region\GetUserRegion;
 use App\Enums\VenueStatus;
+use App\Enums\VenueType;
 use App\Models\Region;
 use App\Models\ScheduleWithBooking;
 use App\Models\Venue;
@@ -89,6 +90,7 @@ class ReservationService
 
                 $query->whereIn('status', $statuses);
             })
+            ->where('venue_type', '!=', VenueType::HIKE_STATION)
             // Filter by concierge's allowed venues if applicable
             ->when(auth()->check() && auth()->user()->hasActiveRole('concierge') && auth()->user()->concierge,
                 function ($query) {
