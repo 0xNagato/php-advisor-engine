@@ -495,7 +495,7 @@ class ListVenues extends ListRecords
                             : $date->timezone(auth()->user()->timezone)->format('M j, Y g:ia');
                     })
                     ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
+                    ->hidden(),
             ])
             ->filters([
                 Filter::make('only_with_bookings')
