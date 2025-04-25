@@ -49,6 +49,10 @@ class VenueBookingConfirmation extends Page
 
     public function confirmBooking(): void
     {
+        if ($this->isBookingCancelled()) {
+            return;
+        }
+
         if ($this->booking->venue_confirmed_at === null) {
             $payload = [
                 'venue_confirmed_at' => now(),
@@ -114,6 +118,12 @@ class VenueBookingConfirmation extends Page
     }
 
     #[Computed]
+    public function isBookingCancelled(): bool
+    {
+        return $this->booking->status === BookingStatus::CANCELLED;
+    }
+
+    #[Computed]
     public function bookingDetails(): array
     {
         if ($this->booking->is_prime) {
@@ -151,7 +161,12 @@ class VenueBookingConfirmation extends Page
             ->button()
             ->size('lg')
             ->extraAttributes(['class' => 'w-full'])
+            ->disabled($this->isBookingCancelled())
             ->action(function () {
+                if ($this->isBookingCancelled()) {
+                    return;
+                }
+
                 if ($this->booking->venue_confirmed_at === null) {
                     Log::info('Venue confirmed booking', [
                         'name' => $this->booking->venue->name,

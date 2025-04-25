@@ -2,7 +2,9 @@
 
     <div class="flex flex-col w-full gap-2 p-4 mx-4 bg-white rounded-lg shadow-sm ring-1 ring-gray-950/5">
         <h1 class="text-2xl tracking-tight text-center text-gray-950 dm-serif">
-            @if ($booking->venue_confirmed_at)
+            @if ($this->isBookingCancelled())
+                This Reservation Has Been Cancelled
+            @elseif ($booking->venue_confirmed_at)
                 Thank You for Confirming the Reservation!
             @else
                 Please Confirm Booking:
@@ -28,7 +30,17 @@
             </div>
         @endif
 
-        @if ($booking->venue_confirmed_at)
+        @if ($this->isBookingCancelled())
+            <div
+                class="flex flex-col items-center justify-center p-3 space-y-1 text-sm border border-red-200 rounded-lg bg-red-50">
+                <p class="text-red-600 font-medium">
+                    This reservation has been cancelled and cannot be confirmed.
+                </p>
+                <p class="text-red-500">
+                    No action is required from you at this time.
+                </p>
+            </div>
+        @elseif ($booking->venue_confirmed_at)
             <div
                 class="flex flex-col items-center justify-center p-3 space-y-1 text-sm text-gray-600 border border-gray-200 rounded-lg bg-gray-50">
                 <p>We've notified the guests and reminded them to be on time for their reservation.</p>
@@ -72,37 +84,41 @@
             @endif
         </div>
 
-        <div class="pt-2">
-            <div class="p-4 text-sm border rounded-lg bg-gray-50">
-                @if ($this->bookingDetails['type'] === 'prime')
-                    <h3 class="mb-3 font-semibold">Earnings Details:</h3>
-                    <div class="space-y-2">
-                        <p><span class="font-semibold">Total Booking Fee:</span>
-                            {{ money($this->bookingDetails['totalFee'], $booking->currency) }}
-                        </p>
-                        <p class="p-2 font-bold text-green-700 border border-green-200 rounded-md bg-green-50">
-                            <span class="font-semibold">You Earn:</span>
-                            {{ money($this->bookingDetails['venueEarnings'], $booking->currency) }}
-                        </p>
-                    </div>
-                @else
-                    <h3 class="mb-3 font-semibold">Non-Prime Booking Details:</h3>
-                    <div class="space-y-2">
-                        <p><span class="font-semibold">Incentive Plan:</span>
-                            {{ money($this->bookingDetails['perDinerFee'] * 100, $booking->currency) }} per guest</p>
-                        <p><span class="font-semibold">Guest Count:</span> {{ $this->bookingDetails['guestCount'] }}
-                        </p>
-                        <p><span class="font-semibold">PRIMA Platform Fee:</span>
-                            {{ money($this->bookingDetails['venueFee'] * 100, $booking->currency) }}
-                        </p>
-                        <p><span class="font-semibold">Total Fee:</span>
-                            {{ money($this->bookingDetails['totalFee'] * 100, $booking->currency) }}</p>
-                    </div>
-                @endif
+        @if (!$this->isBookingCancelled())
+            <div class="pt-2">
+                <div class="p-4 text-sm border rounded-lg bg-gray-50">
+                    @if ($this->bookingDetails['type'] === 'prime')
+                        <h3 class="mb-3 font-semibold">Earnings Details:</h3>
+                        <div class="space-y-2">
+                            <p><span class="font-semibold">Total Booking Fee:</span>
+                                {{ money($this->bookingDetails['totalFee'], $booking->currency) }}
+                            </p>
+                            <p class="p-2 font-bold text-green-700 border border-green-200 rounded-md bg-green-50">
+                                <span class="font-semibold">You Earn:</span>
+                                {{ money($this->bookingDetails['venueEarnings'], $booking->currency) }}
+                            </p>
+                        </div>
+                    @else
+                        <h3 class="mb-3 font-semibold">Non-Prime Booking Details:</h3>
+                        <div class="space-y-2">
+                            <p><span class="font-semibold">Incentive Plan:</span>
+                                {{ money($this->bookingDetails['perDinerFee'] * 100, $booking->currency) }} per guest
+                            </p>
+                            <p><span class="font-semibold">Guest Count:</span>
+                                {{ $this->bookingDetails['guestCount'] }}
+                            </p>
+                            <p><span class="font-semibold">PRIMA Platform Fee:</span>
+                                {{ money($this->bookingDetails['venueFee'] * 100, $booking->currency) }}
+                            </p>
+                            <p><span class="font-semibold">Total Fee:</span>
+                                {{ money($this->bookingDetails['totalFee'] * 100, $booking->currency) }}</p>
+                        </div>
+                    @endif
+                </div>
+                <p class="mt-4 text-xs font-medium text-center">Thank you for using PRIMA to fill your dining room!
+                </p>
             </div>
-            <p class="mt-4 text-xs font-medium text-center">Thank you for using PRIMA to fill your dining room!
-            </p>
-        </div>
+        @endif
 
     </div>
 </x-layouts.simple-wrapper>
