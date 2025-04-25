@@ -21,6 +21,8 @@ use Filament\Tables\Actions\Action;
 use Filament\Tables\Actions\EditAction;
 use Filament\Tables\Actions\ViewAction;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\Filter;
+use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Illuminate\Contracts\Database\Query\Builder;
 use Illuminate\Support\Facades\DB;
@@ -53,13 +55,17 @@ class ListVenues extends ListRecords
 
     public ?string $region = null;
 
+    // Filter for showing only venues with bookings
+    public bool $onlyWithBookings = false;
+
     public ?array $statuses = null;
-    
+
     // Customer search query
     public ?string $customerSearch = null;
-    
+
     // Bulk status update
     public string $bulkIdsInput = '';
+
     public string $bulkStatus = '';
 
     // Flag for showing edit form in the modal
@@ -99,6 +105,15 @@ class ListVenues extends ListRecords
         }
 
         return $slots;
+    }
+
+    /**
+     * Get all available regions for the filter dropdown.
+     */
+    #[Computed]
+    public function availableRegions(): array
+    {
+        return Region::all()->pluck('name', 'id')->toArray();
     }
 
     #[Computed]
@@ -155,10 +170,10 @@ class ListVenues extends ListRecords
 
             $query->whereBetween('booking_at', [$startDate, $endDate]);
         }
-        
+
         // If customer search is provided, filter by guest info
-        if (!empty($this->customerSearch)) {
-            $searchTerm = '%' . $this->customerSearch . '%';
+        if (! empty($this->customerSearch)) {
+            $searchTerm = '%'.$this->customerSearch.'%';
             $query->where(function ($query) use ($searchTerm) {
                 $query->where('guest_first_name', 'like', $searchTerm)
                     ->orWhere('guest_last_name', 'like', $searchTerm)
@@ -418,6 +433,8 @@ class ListVenues extends ListRecords
                     ->with(['partnerReferral.user.partner', 'user.authentications', 'venueGroup'])
                     ->withCount(['confirmedBookings'])
                     ->leftJoin('users', 'venues.user_id', '=', 'users.id')
+                    ->when($this->onlyWithBookings, fn ($query) => $query->has('confirmedBookings'))
+                    ->when($this->region, fn ($query) => $query->where('venues.region', $this->region))
                     ->orderByDesc('users.updated_at')
             )
             ->columns([
@@ -479,6 +496,19 @@ class ListVenues extends ListRecords
                     })
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
+            ])
+            ->filters([
+                Filter::make('only_with_bookings')
+                    ->label('Only venues with bookings')
+                    ->toggle()
+                    ->query(fn (Builder $query): Builder => $query->has('confirmedBookings')),
+
+                SelectFilter::make('region')
+                    ->label('Region')
+                    ->options(fn () => Region::all()->pluck('name', 'id')->toArray())
+                    ->query(fn (Builder $query, array $data): Builder => $data['value'] ? $query->where('venues.region', $data['value']) : $query
+                    )
+                    ->preload(),
             ])
             ->actions([
                 Action::make('impersonate')
@@ -654,6 +684,8 @@ class ListVenues extends ListRecords
         $this->selectedBookings = [];
         $this->shouldSelectAllBookings = false;
         $this->showEditForm = false;
+        $this->onlyWithBookings = false;
+        $this->region = null;
 
         // Refresh the listing
         $this->dispatch('refresh');
@@ -779,7 +811,7 @@ class ListVenues extends ListRecords
             $this->clearModalFlags(true); // Clear venue context when modal is actually closed
         }
     }
-    
+
     /**
      * Process the bulk ID status update
      */
@@ -791,41 +823,44 @@ class ListVenues extends ListRecords
                 ->title('Missing Information')
                 ->body('Please provide both booking IDs and a status to update.')
                 ->send();
+
             return;
         }
-        
+
         // Parse IDs - supports comma-separated, space-separated, or one-per-line
         $ids = preg_split('/[\s,]+/', trim($this->bulkIdsInput));
         $ids = array_filter($ids); // Remove empty values
-        
+
         if (empty($ids)) {
             Notification::make()
                 ->warning()
                 ->title('No IDs Found')
                 ->body('Please provide valid booking IDs.')
                 ->send();
+
             return;
         }
-        
+
         // Validate the status
         $validStatuses = [
             BookingStatus::CANCELLED->value,
-            BookingStatus::NO_SHOW->value
+            BookingStatus::NO_SHOW->value,
         ];
-        
-        if (!in_array($this->bulkStatus, $validStatuses)) {
+
+        if (! in_array($this->bulkStatus, $validStatuses)) {
             Notification::make()
                 ->warning()
                 ->title('Invalid Status')
                 ->body('Please select a valid status (Cancelled or No-Show).')
                 ->send();
+
             return;
         }
-        
+
         DB::beginTransaction();
         try {
             $bookings = Booking::query()->whereIn('id', $ids)->get();
-            
+
             if ($bookings->isEmpty()) {
                 DB::rollBack();
                 Notification::make()
@@ -833,28 +868,29 @@ class ListVenues extends ListRecords
                     ->title('No Bookings Found')
                     ->body('None of the provided IDs matched existing bookings.')
                     ->send();
+
                 return;
             }
-            
+
             $updatedCount = 0;
             $calculationService = app(BookingCalculationService::class);
-            
+
             foreach ($bookings as $booking) {
                 $oldStatus = $booking->status;
-                
+
                 // Skip if status is already the same
                 if ($oldStatus->value === $this->bulkStatus) {
                     continue;
                 }
-                
+
                 $booking->status = $this->bulkStatus;
                 $booking->save();
-                
+
                 // Remove earnings for cancelled and no-show bookings
                 if ($this->bulkStatus === BookingStatus::CANCELLED->value || $this->bulkStatus === BookingStatus::NO_SHOW->value) {
                     $booking->earnings()->delete();
                 }
-                
+
                 // Log the activity
                 activity()
                     ->performedOn($booking)
@@ -865,19 +901,19 @@ class ListVenues extends ListRecords
                         'bulk_update' => true,
                     ])
                     ->log('Booking status bulk updated');
-                
+
                 $updatedCount++;
             }
-            
+
             DB::commit();
-            
+
             if ($updatedCount > 0) {
                 Notification::make()
                     ->success()
                     ->title('Bookings Updated')
-                    ->body("Successfully updated {$updatedCount} of " . count($ids) . " bookings.")
+                    ->body("Successfully updated {$updatedCount} of ".count($ids).' bookings.')
                     ->send();
-                
+
                 // Reset form
                 $this->bulkIdsInput = '';
                 $this->bulkStatus = '';
@@ -888,13 +924,13 @@ class ListVenues extends ListRecords
                     ->body('No bookings were updated. They may already have the selected status.')
                     ->send();
             }
-            
+
         } catch (\Exception $e) {
             DB::rollBack();
             Notification::make()
                 ->danger()
                 ->title('Error Updating Bookings')
-                ->body('An error occurred: ' . $e->getMessage())
+                ->body('An error occurred: '.$e->getMessage())
                 ->send();
         }
     }
