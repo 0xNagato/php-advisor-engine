@@ -672,7 +672,6 @@ class VenueOnboarding extends Component
 
     public function render(): View
     {
-        $partners = null;
         $partnerId = $this->partner_id;
         $partnerName = $this->partner_name;
 

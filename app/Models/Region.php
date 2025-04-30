@@ -202,4 +202,14 @@ class Region extends Model
 
         return $region?->timezone;
     }
+
+    /**
+     * Get the currency symbol for a specific region
+     */
+    public static function getCurrencySymbolForRegion(string $regionId): ?string
+    {
+        $region = self::query()->firstWhere('id', $regionId);
+
+        return $region?->currency_symbol ?? '$';
+    }
 }
