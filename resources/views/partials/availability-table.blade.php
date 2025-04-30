@@ -150,7 +150,10 @@
             @endphp
             @if($isLastTopTier)
                 <tr class="odd:bg-gray-100 h-4" aria-hidden="true">
-                    <td colspan="{{ count($timeslotHeaders) + 1 }}"></td>
+                    <td colspan="{{ count($timeslotHeaders) + 1 }}" style="position: relative; height: 32px;">
+                        <div
+                            style="position: absolute; top: 50%; left: 0; width: 100%; transform: translateY(-50%); border-bottom: 1px solid black;"></div>
+                    </td>
                 </tr>
             @endif
         @endforeach
