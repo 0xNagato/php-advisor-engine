@@ -11,7 +11,6 @@ use App\Notifications\Booking\ConciergeFirstBooking;
 use App\Notifications\Booking\CustomerBookingConfirmed;
 use App\Traits\FormatsPhoneNumber;
 use Exception;
-use Illuminate\Support\Facades\Activity;
 use Illuminate\Support\Facades\DB;
 use Stripe\Charge;
 use Stripe\Customer;
@@ -134,8 +133,7 @@ class BookingService
 
             $taxData = app(SalesTaxService::class)->calculateTax(
                 $booking->venue->region,
-                $booking->total_fee,
-                noTax: config('app.no_tax')
+                $booking->total_fee
             );
 
             $totalWithTaxInCents = $booking->total_fee + $taxData->amountInCents;

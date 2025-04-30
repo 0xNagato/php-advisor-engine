@@ -44,6 +44,7 @@ class Region extends Model
             'tax_rate_term' => 'Sales Tax',
             'country' => 'United States',
             'timezone' => 'America/New_York',
+            'taxable' => false,
         ],
         [
             'id' => 'ibiza',
@@ -56,6 +57,7 @@ class Region extends Model
             'tax_rate_term' => 'VAT',
             'country' => 'Spain',
             'timezone' => 'Europe/Madrid',
+            'taxable' => true,
         ],
         [
             'id' => 'formentera',
@@ -68,6 +70,7 @@ class Region extends Model
             'tax_rate_term' => 'VAT',
             'country' => 'Spain',
             'timezone' => 'Europe/Madrid',
+            'taxable' => true,
         ],
         [
             'id' => 'mykonos',
@@ -80,6 +83,7 @@ class Region extends Model
             'tax_rate_term' => 'VAT',
             'country' => 'Greece',
             'timezone' => 'Europe/Athens',
+            'taxable' => true,
         ],
         [
             'id' => 'paris',
@@ -92,6 +96,7 @@ class Region extends Model
             'tax_rate_term' => 'VAT',
             'country' => 'France',
             'timezone' => 'Europe/Paris',
+            'taxable' => true,
         ],
         [
             'id' => 'london',
@@ -104,6 +109,7 @@ class Region extends Model
             'tax_rate_term' => 'VAT',
             'country' => 'United Kingdom',
             'timezone' => 'Europe/London',
+            'taxable' => true,
         ],
         [
             'id' => 'st_tropez',
@@ -116,6 +122,7 @@ class Region extends Model
             'tax_rate_term' => 'VAT',
             'country' => 'France',
             'timezone' => 'Europe/Paris',
+            'taxable' => true,
         ],
         [
             'id' => 'new_york',
@@ -128,6 +135,7 @@ class Region extends Model
             'tax_rate_term' => 'Sales Tax',
             'country' => 'United States',
             'timezone' => 'America/New_York',
+            'taxable' => false,
         ],
         [
             'id' => 'los_angeles',
@@ -140,6 +148,7 @@ class Region extends Model
             'tax_rate_term' => 'Sales Tax',
             'country' => 'United States',
             'timezone' => 'America/Los_Angeles',
+            'taxable' => false,
         ],
         [
             'id' => 'las_vegas',
@@ -152,6 +161,7 @@ class Region extends Model
             'tax_rate_term' => 'Sales Tax',
             'country' => 'United States',
             'timezone' => 'America/Los_Angeles',
+            'taxable' => false,
         ],
     ];
 

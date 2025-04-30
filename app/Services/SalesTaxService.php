@@ -8,9 +8,9 @@ use RuntimeException;
 
 class SalesTaxService
 {
-    public function calculateTax(string $region, int $amountInCents, bool $noTax = false): SalesTaxData
+    public function calculateTax(string $region, int $amountInCents): SalesTaxData
     {
-        if ($noTax) {
+        if (! $region->taxable) {
             return new SalesTaxData(
                 amountInCents: 0,
                 region: $region,

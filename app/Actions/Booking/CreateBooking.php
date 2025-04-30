@@ -142,8 +142,7 @@ class CreateBooking
 
         $taxData = app(SalesTaxService::class)->calculateTax(
             $booking->venue->region,
-            $booking->total_fee,
-            noTax: config('app.no_tax')
+            $booking->total_fee
         );
 
         $totalWithTaxInCents = $booking->total_fee + $taxData->amountInCents;
