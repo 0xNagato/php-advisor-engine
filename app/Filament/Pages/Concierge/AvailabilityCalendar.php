@@ -3,6 +3,7 @@
 namespace App\Filament\Pages\Concierge;
 
 use App\Models\Region;
+use App\Models\Specialty;
 use App\Models\Venue;
 use App\Services\ReservationService;
 use App\Traits\ManagesBookingForms;
@@ -54,6 +55,7 @@ class AvailabilityCalendar extends Page
 
         $this->region = Region::query()->where('id', $region)->first();
         $this->neighborhoods = $this->region->neighborhoods->pluck('name', 'id');
+        $this->specialties = Specialty::getSpecialtiesByRegion($region);
         $this->timezone = $this->region->timezone;
         $this->currency = $this->region->currency;
         $this->toggleAdvance(session('advanceFilters', false));
@@ -117,6 +119,7 @@ class AvailabilityCalendar extends Page
                 timeSlotOffset: 2,
                 cuisines: $this->data['cuisine'],
                 neighborhood: $this->data['neighborhood'],
+                specialty: $this->data['specialty'],
             );
 
             $this->venues = $reservation->getAvailableVenues();

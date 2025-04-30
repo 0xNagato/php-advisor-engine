@@ -11,6 +11,7 @@ use App\Models\Cuisine;
 use App\Models\Neighborhood;
 use App\Models\Partner;
 use App\Models\Region;
+use App\Models\Specialty;
 use App\Models\User;
 use App\Models\Venue;
 use App\Models\VenueGroup;
@@ -168,10 +169,18 @@ class EditVenue extends EditRecord
                                     ->orderBy('name')->pluck('name', 'id');
                                 $set('neighborhood', null);
                                 $set('neighborhoodOptions', $neighborhoods);
+
+                                $specialities = Specialty::getSpecialtiesByRegion($state);
+                                $set('specialty', null);
+                                $set('specialtyOptions', $specialities);
                             }),
                         Select::make('neighborhood')
                             ->placeholder('Select Neighborhood')
                             ->options(fn (callable $get) => $get('neighborhoodOptions') ?? [])
+                            ->reactive(),
+                        Select::make('specialty')
+                            ->placeholder('Select Specialty')
+                            ->options(fn (callable $get) => $get('specialtyOptions') ?? [])
                             ->reactive(),
                         TextInput::make('primary_contact_name')
                             ->label('Primary Contact Name')
@@ -218,7 +227,8 @@ class EditVenue extends EditRecord
                                     return null;
                                 }
 
-                                return $state instanceof Carbon ? $state->format('H:i') : date('H:i', strtotime($state));
+                                return $state instanceof Carbon ? $state->format('H:i') : date('H:i',
+                                    strtotime($state));
                             }),
                         Toggle::make('no_wait')
                             ->label('No Wait')
@@ -799,6 +809,7 @@ class EditVenue extends EditRecord
         if (isset($data['region'])) {
             $data['neighborhoodOptions'] = Neighborhood::query()->where('region', $data['region'])
                 ->orderBy('name')->pluck('name', 'id');
+            $data['specialtyOptions'] = Specialty::getSpecialtiesByRegion($data['region']);
         }
 
         if (! isset($data['contacts'])) {

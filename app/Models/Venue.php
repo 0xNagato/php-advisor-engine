@@ -83,6 +83,7 @@ class Venue extends Model
         'omakase_concierge_fee',
         'cuisines',
         'neighborhood',
+        'specialty',
         'venue_type',
     ];
 

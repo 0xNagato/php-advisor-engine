@@ -51,7 +51,8 @@ class ReservationService
         public int $timeSlotOffset = 0,
         public array $cuisines = [],
         public ?string $neighborhood = '',
-        public ?Region $region = null
+        public ?Region $region = null,
+        public ?string $specialty = ''
     ) {
         $this->region ??= GetUserRegion::run();
     }
@@ -108,6 +109,9 @@ class ReservationService
             })
             ->when($this->neighborhood, function ($query) {
                 $query->where('neighborhood', $this->neighborhood);
+            })
+            ->when($this->specialty, function ($query) {
+                $query->where('specialty', $this->specialty);
             })
             ->withSchedulesForDate(
                 date: $this->date,

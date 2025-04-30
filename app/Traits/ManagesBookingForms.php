@@ -6,6 +6,7 @@ use App\Actions\Reservations\GetReservationTimeOptions;
 use App\Models\Cuisine;
 use App\Services\ReservationService;
 use Filament\Forms\Components\DatePicker;
+use Filament\Forms\Components\Grid;
 use Filament\Forms\Components\Hidden;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\ToggleButtons;
@@ -28,6 +29,8 @@ trait ManagesBookingForms
     public bool $advanced = false;
 
     public ?Collection $neighborhoods = null;
+
+    public ?Collection $specialties = null;
 
     protected function commonFormComponents(): array
     {
@@ -53,16 +56,22 @@ trait ManagesBookingForms
                 ->live()
                 ->columnSpanFull()
                 ->required(),
-            Select::make('neighborhood')
-                ->prefixIcon('ri-community-line')
-                ->searchable()
-                ->options(fn () => $this->neighborhoods)
-                ->placeholder('Neighborhood')
-                ->hiddenLabel()
-                ->columnSpanFull()
-                ->live()
-                ->visible($this->advanced),
-            $this->getCuisineInput(),
+            Grid::make()
+                ->id('advanced')
+                ->columns(3)
+                ->schema([
+                    Select::make('neighborhood')
+                        ->prefixIcon('ri-community-line')
+                        ->searchable()
+                        ->options(fn () => $this->neighborhoods)
+                        ->placeholder('Neighborhood')
+                        ->hiddenLabel()
+                        ->columnSpan(1)
+                        ->live()
+                        ->visible($this->advanced),
+                    $this->getCuisineInput(),
+                    $this->getSpecialtyInput(),
+                ])->visible($this->advanced),
             DatePicker::make('select_date')
                 ->hiddenLabel()
                 ->live()
@@ -134,7 +143,21 @@ trait ManagesBookingForms
             ->placeholder('Cuisine')
             ->hiddenLabel()
             ->multiple()
-            ->columnSpanFull()
+            ->columnSpan(1)
+            ->live()
+            ->visible($this->advanced);
+    }
+
+    protected function getSpecialtyInput(): Select
+    {
+        return Select::make('specialty')
+            ->prefixIcon('ri-landscape-line')
+            ->label('Specialty')
+            ->options($this->specialties)
+            ->searchable()
+            ->placeholder('Specialty')
+            ->hiddenLabel()
+            ->columnSpan(1)
             ->live()
             ->visible($this->advanced);
     }
