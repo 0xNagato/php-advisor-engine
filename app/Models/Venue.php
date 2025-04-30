@@ -185,6 +185,11 @@ class Venue extends Model
         return $query;
     }
 
+    public function scopeActive($query)
+    {
+        return $query->where('status', VenueStatus::ACTIVE);
+    }
+
     protected function logo(): Attribute
     {
         return Attribute::make(get: fn () => $this->logo_path

@@ -230,7 +230,7 @@ return [
     'default_timezone' => env('LOCAL_ENV_TIMEZONE', 'America/New_York'),
     'default_region' => env('LOCAL_ENV_REGION', 'miami'),
     'no_tax' => env('NO_TAX', true),
-    'active_regions' => ['miami', 'los_angeles', 'ibiza', 'formentera'],
+    'active_regions' => ['miami', 'los_angeles', 'ibiza'],
     'dev_ip_address' => env('DEV_IP_ADDRESS'),
     'native_key' => env('APP_NATIVE_KEY'),
     'primary_domain' => env('PRIMARY_DOMAIN', env('APP_URL', 'https://primavip.co')),
@@ -244,6 +244,9 @@ return [
     'widget_cache_timeout_minutes' => (int) env('WIDGET_CACHE_TIMEOUT_MINUTES', 5),
     'override_venues' => env('OVERRIDE_VENUES', ''),
     'closure_venues' => env('CLOSURE_VENUES', '73,76,95,112,129'),
+    'ibiza_top_tier_venues' => env('IBIZA_TOP_TIER_VENUES', '189,195'),
+    'los_angeles_top_tier_venues' => env('LOS_ANGELES_TOP_TIER_VENUES', ''),
+    'miami_top_tier_venues' => env('MIAMI_TOP_TIER_VENUES', ''),
     'allow_advanced_toggle' => env('ALLOW_ADVANCED_TOGGLE', false),
     'test_stripe_email' => env('TEST_STRIPE_EMAIL', 'test@primavip.co'),
 

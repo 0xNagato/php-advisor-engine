@@ -119,7 +119,7 @@ class ReservationService
 
         $venues = $this->applyClosureRules($venues, $this->date);
 
-        // Mark schedules as sold out if venue is past cutoff time
+        // Mark schedules as sold out if the venue is past cutoff time
         $venues->each(function ($venue) use ($currentTime) {
             if ($venue->cutoff_time) {
                 $currentTimeCarbon = Carbon::createFromFormat('H:i:s', $currentTime, $this->region->timezone);
@@ -142,9 +142,14 @@ class ReservationService
             }
         });
 
+        $topTiers = $this->getTopTiers();
+
         $sorted = $venues
             // Group venues based on availability and status, only considering middle 3 timeslots
-            ->groupBy(function ($venue) {
+            ->groupBy(function ($venue) use ($topTiers) {
+                if (filled($topTiers) && in_array((string) $venue->id, $topTiers, true)) {
+                    return 'top_tiers';
+                }
                 if ($venue->status === VenueStatus::PENDING) {
                     return 'pending';
                 }
@@ -170,10 +175,11 @@ class ReservationService
             })
             ->map(fn ($group) => // Sort each group alphabetically A-Z
             $group->sortBy(fn ($venue) => strtolower($venue->name)))
-            // Combine groups in desired order
+            // Combine groups in the desired order
             ->pipe(function ($groups) {
                 return collect([])
                     ->concat($groups->get('hidden', collect()))           // Hidden venues first
+                    ->concat($groups->get('top_tiers', collect()))        // Then top tiers
                     ->concat($groups->get('prime_available', collect()))  // Then prime slots
                     ->concat($groups->get('non_prime_available', collect())) // Then non-prime slots
                     ->concat($groups->get('sold_out', collect()))        // Then sold out venues
@@ -388,5 +394,16 @@ class ReservationService
             ->whereDate('booking_date', '<=', $currentDate->addDays(self::AVAILABILITY_DAYS))
             ->orderBy('booking_date')
             ->get();
+    }
+
+    private function getTopTiers(): array
+    {
+        $envTopTiers = config('app.'.$this->region->id.'_top_tier_venues', '');
+        if (blank($envTopTiers)) {
+            return [];
+        }
+
+        // If numeric values are provided, convert them to strings for comparison
+        return array_map('strval', array_filter(explode(',', (string) $envTopTiers)));
     }
 }
