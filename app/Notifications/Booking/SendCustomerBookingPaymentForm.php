@@ -41,6 +41,8 @@ class SendCustomerBookingPaymentForm extends Notification
             templateData: [
                 'venue_name' => $notifiable->venue->name,
                 'payment_url' => $this->url,
+                'booking_date' => $notifiable->booking_at->format('D M jS'),
+                'booking_time' => $notifiable->booking_at->format('g:ia'),
             ]
         );
     }
