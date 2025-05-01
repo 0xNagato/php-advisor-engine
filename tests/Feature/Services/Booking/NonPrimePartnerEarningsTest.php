@@ -6,6 +6,7 @@ use App\Models\Concierge;
 use App\Models\Partner;
 use App\Models\Venue;
 use App\Services\Booking\BookingCalculationService;
+use App\Services\Booking\ConciergePromotionalEarningsService;
 use App\Services\Booking\EarningCreationService;
 use App\Services\Booking\NonPrimeEarningsCalculationService;
 
@@ -13,8 +14,9 @@ beforeEach(function () {
     $earningCreationService = new EarningCreationService;
     $nonPrimeEarningsCalculationService = new NonPrimeEarningsCalculationService($earningCreationService);
 
+    $promotionalService = new ConciergePromotionalEarningsService;
     $this->service = new BookingCalculationService(
-        new \App\Services\Booking\PrimeEarningsCalculationService($earningCreationService),
+        new \App\Services\Booking\PrimeEarningsCalculationService($earningCreationService, $promotionalService),
         $nonPrimeEarningsCalculationService
     );
 

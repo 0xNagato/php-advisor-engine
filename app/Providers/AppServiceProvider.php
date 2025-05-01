@@ -11,6 +11,7 @@ use App\Models\User;
 use App\Observers\ConciergeObserver;
 use App\Observers\UserManyChatObserver;
 use App\Services\Booking\BookingCalculationService;
+use App\Services\Booking\ConciergePromotionalEarningsService;
 use App\Services\Booking\EarningCreationService;
 use App\Services\Booking\NonPrimeEarningsCalculationService;
 use App\Services\Booking\PrimeEarningsCalculationService;
@@ -109,8 +110,11 @@ class AppServiceProvider extends ServiceProvider
 
         $this->app->bind(EarningCreationService::class, fn () => new EarningCreationService);
 
+        $this->app->bind(ConciergePromotionalEarningsService::class, fn () => new ConciergePromotionalEarningsService);
+
         $this->app->bind(PrimeEarningsCalculationService::class, fn ($app) => new PrimeEarningsCalculationService(
-            $app->make(EarningCreationService::class)
+            $app->make(EarningCreationService::class),
+            $app->make(ConciergePromotionalEarningsService::class)
         ));
 
         $this->app->bind(NonPrimeEarningsCalculationService::class, fn ($app) => new NonPrimeEarningsCalculationService(

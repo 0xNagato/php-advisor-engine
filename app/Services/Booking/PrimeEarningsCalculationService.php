@@ -11,7 +11,8 @@ use App\Models\Partner;
 readonly class PrimeEarningsCalculationService
 {
     public function __construct(
-        private EarningCreationService $earningCreationService
+        private EarningCreationService $earningCreationService,
+        private ConciergePromotionalEarningsService $promotionalEarningsService
     ) {}
 
     public function calculate(Booking $booking): void
@@ -52,11 +53,16 @@ readonly class PrimeEarningsCalculationService
 
     private function calculateConciergeEarnings(Booking $booking): float
     {
+        // Calculate base earnings
+        $baseEarnings = 0;
         if ($booking->venue->is_omakase && $booking->venue->omakase_concierge_fee) {
-            return $booking->venue->omakase_concierge_fee * $booking->guest_count;
+            $baseEarnings = $booking->venue->omakase_concierge_fee * $booking->guest_count;
+        } else {
+            $baseEarnings = $booking->total_fee * ($booking->concierge->payout_percentage / 100);
         }
 
-        return $booking->total_fee * ($booking->concierge->payout_percentage / 100);
+        // Apply promotional multiplier if applicable
+        return $this->promotionalEarningsService->applyEarningsMultiplier($baseEarnings, $booking);
     }
 
     private function calculateAndCreateReferralEarnings(Booking $booking, float $remainder): float

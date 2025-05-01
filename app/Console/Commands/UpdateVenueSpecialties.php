@@ -3,6 +3,7 @@
 namespace App\Console\Commands;
 
 use App\Models\Venue;
+use Exception;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
 
@@ -37,7 +38,7 @@ class UpdateVenueSpecialties extends Command
             'Waterfront View' => 'waterfront',
             'On the Beach' => 'on_the_beach',
             'Family Friendly' => 'family_friendly',
-            'Sunset View' => 'sunset_view', 
+            'Sunset View' => 'sunset_view',
             'Fine Dining' => 'fine_dining',
             'Romantic Atmosphere' => 'romantic_atmosphere',
             'Live Music/DJ' => 'live_music_dj',
@@ -219,92 +220,93 @@ class UpdateVenueSpecialties extends Command
         $errorCount = 0;
 
         // Begin transaction
-        if (!$dryRun) {
+        if (! $dryRun) {
             DB::beginTransaction();
         }
 
         try {
             $this->info('Starting venue specialty update process...');
-            
+
             // Create a progress bar
             $progressBar = $this->output->createProgressBar(count($venueData));
             $progressBar->start();
-            
+
             // Process each venue
             foreach ($venueData as $row) {
                 // Extract venue data
                 $region = $row[0];
                 $slug = $row[1];
-                
+
                 // Find the venue
-                $venue = Venue::where('slug', $slug)->first();
-                
-                if (!$venue) {
+                $venue = Venue::query()->where('slug', $slug)->first();
+
+                if (! $venue) {
                     $this->warn("Venue with slug '{$slug}' not found, skipping.");
                     $skippedCount++;
                     $progressBar->advance();
+
                     continue;
                 }
-                
+
                 // Map specialties from the data
                 $specialties = [];
                 $i = 2; // Start index for specialty columns
-                
+
                 foreach ($specialtyMapping as $csvHeader => $dbId) {
                     if (isset($row[$i]) && $row[$i] === 'X') {
                         $specialties[] = $dbId;
                     }
                     $i++;
                 }
-                
+
                 // Add any additional specialties from our mapping
                 if (isset($additionalSpecialties[$slug])) {
                     foreach ($additionalSpecialties[$slug] as $additionalSpecialty) {
-                        if (!in_array($additionalSpecialty, $specialties)) {
+                        if (! in_array($additionalSpecialty, $specialties)) {
                             $specialties[] = $additionalSpecialty;
                         }
                     }
                 }
-                
+
                 // Update the venue
                 $oldSpecialties = $venue->specialty ?? [];
-                
-                if (!$dryRun) {
+
+                if (! $dryRun) {
                     $venue->specialty = $specialties;
                     $venue->save();
                 }
-                
-                $oldSpecialtiesStr = !empty($oldSpecialties) ? implode(', ', $oldSpecialties) : 'none';
-                $newSpecialtiesStr = !empty($specialties) ? implode(', ', $specialties) : 'none';
-                
+
+                $oldSpecialtiesStr = filled($oldSpecialties) ? implode(', ', $oldSpecialties) : 'none';
+                $newSpecialtiesStr = filled($specialties) ? implode(', ', $specialties) : 'none';
+
                 $this->line("\nUpdated: {$venue->name} (ID: {$venue->id}, Slug: {$slug})");
                 $this->line("  - Old specialties: {$oldSpecialtiesStr}");
                 $this->line("  - New specialties: {$newSpecialtiesStr}");
-                
+
                 $updatedCount++;
                 $progressBar->advance();
             }
-            
+
             $progressBar->finish();
             $this->newLine(2);
-            
+
             // Commit transaction
-            if (!$dryRun) {
+            if (! $dryRun) {
                 DB::commit();
                 $this->info('Changes committed to database.');
             } else {
                 $this->info('DRY RUN: No changes were made to the database.');
             }
-            
+
             // Get all existing venues
-            $allVenues = Venue::orderBy('region')->orderBy('name')->get(['id', 'name', 'slug', 'region']);
-            
+            $allVenues = Venue::query()->orderBy('region')->orderBy('name')->get(['id', 'name', 'slug', 'region']);
+
             // Create a lookup of slugs that have specialties in our data
             $slugsWithSpecialties = [];
             foreach ($venueData as $row) {
                 $slug = $row[1];
                 $hasSpecialty = false;
-                
+
                 // Check columns 2-11 for any 'X' values (specialty columns)
                 for ($i = 2; $i <= 11; $i++) {
                     if (isset($row[$i]) && $row[$i] === 'X') {
@@ -312,46 +314,44 @@ class UpdateVenueSpecialties extends Command
                         break;
                     }
                 }
-                
+
                 if ($hasSpecialty) {
                     $slugsWithSpecialties[] = $slug;
                 }
             }
-            
+
             // Get venues without specialties by checking against our lookup
-            $venuesWithoutSpecialties = $allVenues->filter(function ($venue) use ($slugsWithSpecialties) {
-                return !in_array($venue->slug, $slugsWithSpecialties);
-            });
+            $venuesWithoutSpecialties = $allVenues->filter(fn ($venue) => ! in_array($venue->slug, $slugsWithSpecialties));
 
             // Summary
             $this->info('Process completed!');
             $this->info("Venues updated: {$updatedCount}");
             $this->info("Venues skipped: {$skippedCount}");
             $this->info("Errors: {$errorCount}");
-            
+
             if ($venuesWithoutSpecialties->count() > 0) {
                 $this->newLine();
                 $this->info("VENUES WITHOUT SPECIALTIES ({$venuesWithoutSpecialties->count()} venues):");
                 $headers = ['ID', 'Name', 'Slug', 'Region'];
                 $rows = [];
-                
+
                 foreach ($venuesWithoutSpecialties as $venue) {
                     $rows[] = [$venue->id, $venue->name, $venue->slug, $venue->region];
                 }
-                
+
                 $this->table($headers, $rows);
             }
-            
+
             return self::SUCCESS;
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             // Rollback transaction on error
-            if (!$dryRun) {
+            if (! $dryRun) {
                 DB::rollBack();
             }
-            
-            $this->error("ERROR: " . $e->getMessage());
-            $this->error("Stack trace: " . $e->getTraceAsString());
-            
+
+            $this->error('ERROR: '.$e->getMessage());
+            $this->error('Stack trace: '.$e->getTraceAsString());
+
             return self::FAILURE;
         }
     }
