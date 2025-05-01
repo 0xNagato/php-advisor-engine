@@ -160,11 +160,10 @@ trait ManagesBookingForms
             ->multiple()
             ->columnSpan(1)
             ->live()
-            ->visible(function () {
+            ->visible(fn () =>
                 // Only show for configured regions and when advanced mode is enabled
-                return $this->advanced && 
-                       $this->region && 
-                       in_array($this->region->id, config('app.specialty_filter_regions', []));
-            });
+                $this->advanced &&
+                   $this->region &&
+                   in_array($this->region->id, config('app.specialty_filter_regions', [])));
     }
 }

@@ -176,7 +176,7 @@ class ListVenues extends ListRecords
         }
 
         // If customer search is provided, filter by guest info
-        if (! empty($this->customerSearch)) {
+        if (filled($this->customerSearch)) {
             $searchTerm = '%'.$this->customerSearch.'%';
             $query->where(function ($query) use ($searchTerm) {
                 $query->where('guest_first_name', 'like', $searchTerm)
@@ -828,7 +828,7 @@ class ListVenues extends ListRecords
      */
     public function bulkUpdateBookingStatuses(): void
     {
-        if (empty($this->bulkIdsInput) || empty($this->bulkStatus)) {
+        if (blank($this->bulkIdsInput) || blank($this->bulkStatus)) {
             Notification::make()
                 ->warning()
                 ->title('Missing Information')
@@ -842,7 +842,7 @@ class ListVenues extends ListRecords
         $ids = preg_split('/[\s,]+/', trim($this->bulkIdsInput));
         $ids = array_filter($ids); // Remove empty values
 
-        if (empty($ids)) {
+        if (blank($ids)) {
             Notification::make()
                 ->warning()
                 ->title('No IDs Found')
@@ -936,7 +936,7 @@ class ListVenues extends ListRecords
                     ->send();
             }
 
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             DB::rollBack();
             Notification::make()
                 ->danger()

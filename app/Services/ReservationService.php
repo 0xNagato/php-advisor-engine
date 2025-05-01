@@ -55,9 +55,9 @@ class ReservationService
         public array|string|null $specialty = []
     ) {
         $this->region ??= GetUserRegion::run();
-        
+
         // Convert string specialty to array if needed
-        if (is_string($this->specialty) && !empty($this->specialty)) {
+        if (is_string($this->specialty) && filled($this->specialty)) {
             $this->specialty = [$this->specialty];
         }
     }
@@ -117,7 +117,7 @@ class ReservationService
             })
             ->when($this->specialty && count($this->specialty) > 0, function ($query) {
                 // Handle array of specialty values
-                $query->where(function($q) {
+                $query->where(function ($q) {
                     foreach ($this->specialty as $spec) {
                         $q->orWhereJsonContains('specialty', $spec);
                     }

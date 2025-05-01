@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\Venue;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -12,14 +13,14 @@ return new class extends Migration
     public function up(): void
     {
         // First convert existing values to JSON format
-        $venues = \App\Models\Venue::whereNotNull('specialty')->get();
+        $venues = Venue::query()->whereNotNull('specialty')->get();
         foreach ($venues as $venue) {
-            if (!is_array($venue->specialty)) {
+            if (! is_array($venue->specialty)) {
                 $venue->specialty = [$venue->specialty];
                 $venue->save();
             }
         }
-        
+
         // Then modify the column type to JSON
         Schema::table('venues', function (Blueprint $table) {
             $table->json('specialty')->nullable()->change();

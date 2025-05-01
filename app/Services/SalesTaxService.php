@@ -13,9 +13,7 @@ class SalesTaxService
         // Convert string to Region if needed
         if (is_string($region)) {
             $regionObj = Region::query()->find($region);
-            if (! $regionObj) {
-                throw new RuntimeException("Region '$region' not found.");
-            }
+            throw_unless($regionObj, new RuntimeException("Region '$region' not found."));
             $regionId = $region;
         } else {
             $regionObj = $region;

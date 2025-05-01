@@ -84,6 +84,21 @@ class Neighborhood extends Model
             'region' => 'miami',
             'name' => 'Key Biscayne',
         ],
+        [
+            'id' => 'miami_beach',
+            'region' => 'miami',
+            'name' => 'Miami Beach',
+        ],
+        [
+            'id' => 'aventura',
+            'region' => 'miami',
+            'name' => 'Aventura',
+        ],
+        [
+            'id' => 'doral',
+            'region' => 'miami',
+            'name' => 'Doral',
+        ],
 
         // Ibiza
         [
@@ -135,6 +150,26 @@ class Neighborhood extends Model
             'id' => 'cala_llonga',
             'region' => 'ibiza',
             'name' => 'Cala Llonga',
+        ],
+        [
+            'id' => 'es_cavallet',
+            'region' => 'ibiza',
+            'name' => 'Es Cavallet',
+        ],
+        [
+            'id' => 'cala_vadella',
+            'region' => 'ibiza',
+            'name' => 'Cala Vadella',
+        ],
+        [
+            'id' => 'san_miguel',
+            'region' => 'ibiza',
+            'name' => 'San Miguel',
+        ],
+        [
+            'id' => 'santa_gertrudis',
+            'region' => 'ibiza',
+            'name' => 'Santa Gertrudis',
         ],
 
         // Mykonos
@@ -188,6 +223,21 @@ class Neighborhood extends Model
             'region' => 'mykonos',
             'name' => 'Kalafati',
         ],
+        [
+            'id' => 'paradise_beach',
+            'region' => 'mykonos',
+            'name' => 'Paradise Beach',
+        ],
+        [
+            'id' => 'super_paradise',
+            'region' => 'mykonos',
+            'name' => 'Super Paradise Beach',
+        ],
+        [
+            'id' => 'elia_beach',
+            'region' => 'mykonos',
+            'name' => 'Elia Beach',
+        ],
 
         // Paris
         [
@@ -240,6 +290,21 @@ class Neighborhood extends Model
             'region' => 'paris',
             'name' => 'Pigalle',
         ],
+        [
+            'id' => 'opera',
+            'region' => 'paris',
+            'name' => 'Opéra',
+        ],
+        [
+            'id' => 'louvre',
+            'region' => 'paris',
+            'name' => 'Louvre',
+        ],
+        [
+            'id' => 'eiffel_tower',
+            'region' => 'paris',
+            'name' => 'Eiffel Tower (7th arrondissement)',
+        ],
 
         // London
         [
@@ -291,6 +356,21 @@ class Neighborhood extends Model
             'id' => 'canary_wharf',
             'region' => 'london',
             'name' => 'Canary Wharf',
+        ],
+        [
+            'id' => 'covent_garden',
+            'region' => 'london',
+            'name' => 'Covent Garden',
+        ],
+        [
+            'id' => 'westminster',
+            'region' => 'london',
+            'name' => 'Westminster',
+        ],
+        [
+            'id' => 'knightsbridge',
+            'region' => 'london',
+            'name' => 'Knightsbridge',
         ],
 
         // St. Tropez
@@ -401,6 +481,26 @@ class Neighborhood extends Model
             'region' => 'new_york',
             'name' => 'Financial District',
         ],
+        [
+            'id' => 'west_village',
+            'region' => 'new_york',
+            'name' => 'West Village',
+        ],
+        [
+            'id' => 'midtown',
+            'region' => 'new_york',
+            'name' => 'Midtown',
+        ],
+        [
+            'id' => 'upper_west_side',
+            'region' => 'new_york',
+            'name' => 'Upper West Side',
+        ],
+        [
+            'id' => 'east_village',
+            'region' => 'new_york',
+            'name' => 'East Village',
+        ],
 
         // Los Angeles
         [
@@ -453,6 +553,21 @@ class Neighborhood extends Model
             'region' => 'los_angeles',
             'name' => 'Westwood',
         ],
+        [
+            'id' => 'west_hollywood',
+            'region' => 'los_angeles',
+            'name' => 'West Hollywood',
+        ],
+        [
+            'id' => 'bel_air',
+            'region' => 'los_angeles',
+            'name' => 'Bel Air',
+        ],
+        [
+            'id' => 'los_feliz',
+            'region' => 'los_angeles',
+            'name' => 'Los Feliz',
+        ],
 
         // Las Vegas
         [
@@ -494,6 +609,16 @@ class Neighborhood extends Model
             'id' => 'southern_highlands',
             'region' => 'las_vegas',
             'name' => 'Southern Highlands',
+        ],
+        [
+            'id' => 'arts_district',
+            'region' => 'las_vegas',
+            'name' => 'Arts District',
+        ],
+        [
+            'id' => 'chinatown',
+            'region' => 'las_vegas',
+            'name' => 'Chinatown',
         ],
     ];
 }

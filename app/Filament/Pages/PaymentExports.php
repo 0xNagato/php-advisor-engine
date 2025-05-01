@@ -28,6 +28,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\HtmlString;
 use Livewire\Attributes\Url;
+use Maatwebsite\Excel\Excel;
 use pxlrbt\FilamentExcel\Actions\Tables\ExportAction;
 use pxlrbt\FilamentExcel\Columns\Column;
 use pxlrbt\FilamentExcel\Exports\ExcelExport;
@@ -773,12 +774,12 @@ class PaymentExports extends Page implements HasTable
         // Base configurations
         $exportAllConfig = ExcelExport::make('table')
             ->fromTable()
-            ->withWriterType(\Maatwebsite\Excel\Excel::CSV)
+            ->withWriterType(Excel::CSV)
             ->withFilename("Payment-Exports-{$role}-{$dateRange}");
 
         $exportMissingConfig = ExcelExport::make('table')
             ->fromTable()
-            ->withWriterType(\Maatwebsite\Excel\Excel::CSV)
+            ->withWriterType(Excel::CSV)
             ->withFilename("Missing-Banking-{$role}-{$dateRange}");
 
         // Role-specific columns and modifications

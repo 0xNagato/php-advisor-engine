@@ -25,14 +25,14 @@ class IbizaHikeStationSeeder extends Seeder
         if (! app()->isProduction()) {
             $this->command->warn('Running development cleanup for potentially broken Ibiza Hike Station data...');
             DB::transaction(function () use ($venueSlug) {
-                $existingVenue = Venue::where('slug', $venueSlug)->first();
+                $existingVenue = Venue::query()->where('slug', $venueSlug)->first();
 
                 if ($existingVenue) {
                     $venueId = $existingVenue->id;
                     $this->command->warn("Found existing venue with slug {$venueSlug} (ID: {$venueId}). Deleting related data...");
 
                     // 1. Get IDs of templates to be deleted
-                    $templateIds = ScheduleTemplate::where('venue_id', $venueId)->pluck('id');
+                    $templateIds = ScheduleTemplate::query()->where('venue_id', $venueId)->pluck('id');
 
                     if ($templateIds->isNotEmpty()) {
                         // 2. Delete dependent Bookings first
@@ -42,7 +42,7 @@ class IbizaHikeStationSeeder extends Seeder
                         }
 
                         // 3. Now delete the ScheduleTemplates
-                        $deletedTemplates = ScheduleTemplate::whereIn('id', $templateIds)->delete(); // Use whereIn for safety
+                        $deletedTemplates = ScheduleTemplate::query()->whereIn('id', $templateIds)->delete(); // Use whereIn for safety
                         $this->command->warn("- Deleted {$deletedTemplates} associated ScheduleTemplates.");
                     } else {
                         $this->command->info('- No ScheduleTemplates found for this venue.');

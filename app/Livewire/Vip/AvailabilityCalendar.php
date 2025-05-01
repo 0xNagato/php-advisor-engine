@@ -4,6 +4,7 @@ namespace App\Livewire\Vip;
 
 use App\Actions\Booking\CreateBooking;
 use App\Models\Region;
+use App\Models\Specialty;
 use App\Models\Venue;
 use App\Models\VipCode;
 use App\Services\ReservationService;
@@ -62,7 +63,7 @@ class AvailabilityCalendar extends Page
         $this->timezone = $this->region->timezone;
         $this->currency = $this->region->currency;
         $this->neighborhoods = $this->region->neighborhoods->pluck('name', 'id');
-        $this->specialties = \App\Models\Specialty::getSpecialtiesByRegion($this->region->id);
+        $this->specialties = Specialty::getSpecialtiesByRegion($this->region->id);
         $this->form->fill();
     }
 
@@ -92,7 +93,7 @@ class AvailabilityCalendar extends Page
         $this->region = Region::query()->where('id', $region)->first();
 
         $this->neighborhoods = $this->region->neighborhoods->pluck('name', 'id');
-        $this->specialties = \App\Models\Specialty::getSpecialtiesByRegion($this->region->id);
+        $this->specialties = Specialty::getSpecialtiesByRegion($this->region->id);
         $this->timezone = $this->region->timezone;
         $this->currency = $this->region->currency;
         $this->venues = null;
