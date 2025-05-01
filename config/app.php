@@ -277,6 +277,16 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Specialty Filter Configuration
+    |--------------------------------------------------------------------------
+    |
+    | Define which regions should show the specialty filter in the availability calendar
+    |
+    */
+    'specialty_filter_regions' => ['ibiza'],
+
+    /*
+    |--------------------------------------------------------------------------
     | App Login Customization
     |--------------------------------------------------------------------------
     |

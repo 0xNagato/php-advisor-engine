@@ -58,7 +58,7 @@ trait ManagesBookingForms
                 ->required(),
             Grid::make()
                 ->id('advanced')
-                ->columns(3)
+                ->columns($this->region && in_array($this->region->id, config('app.specialty_filter_regions', [])) ? 3 : 2)
                 ->schema([
                     Select::make('neighborhood')
                         ->prefixIcon('ri-community-line')
@@ -66,7 +66,7 @@ trait ManagesBookingForms
                         ->options(fn () => $this->neighborhoods)
                         ->placeholder('Neighborhood')
                         ->hiddenLabel()
-                        ->columnSpan(1)
+                        ->columnSpan(1) // Always take 1 column
                         ->live()
                         ->visible($this->advanced),
                     $this->getCuisineInput(),
@@ -143,7 +143,7 @@ trait ManagesBookingForms
             ->placeholder('Cuisine')
             ->hiddenLabel()
             ->multiple()
-            ->columnSpan(1)
+            ->columnSpan(1) // Always take 1 column
             ->live()
             ->visible($this->advanced);
     }
@@ -159,6 +159,11 @@ trait ManagesBookingForms
             ->hiddenLabel()
             ->columnSpan(1)
             ->live()
-            ->visible($this->advanced);
+            ->visible(function () {
+                // Only show for configured regions and when advanced mode is enabled
+                return $this->advanced && 
+                       $this->region && 
+                       in_array($this->region->id, config('app.specialty_filter_regions', []));
+            });
     }
 }
