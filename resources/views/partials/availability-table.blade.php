@@ -152,12 +152,12 @@
                 @if ($isLastTopTier)
                     <tr class="bg-white" aria-hidden="true">
                         <td colspan="{{ count($timeslotHeaders) + 1 }}" class="relative">
-                            <div class="h-4"></div>
-                            <div class="absolute inset-x-0 bottom-0 border-b-2 border-gray-300"></div>
+                            <div class="h-2"></div>
+                            <div class="absolute inset-x-0 bottom-0 border-b-2 border-gray-200"></div>
                         </td>
                     </tr>
                     <tr aria-hidden="true">
-                        <td colspan="{{ count($timeslotHeaders) + 1 }}" class="h-4"></td>
+                        <td colspan="{{ count($timeslotHeaders) + 1 }}" class="h-2"></td>
                     </tr>
                 @endif
             @endforeach
