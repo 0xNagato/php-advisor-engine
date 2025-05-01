@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\VenueResource\Pages;
 
 use App\Enums\BookingStatus;
+use App\Enums\VenueStatus;
 use App\Filament\Resources\PartnerResource\Pages\ViewPartner;
 use App\Filament\Resources\VenueResource;
 use App\Models\Booking;
@@ -57,6 +58,9 @@ class ListVenues extends ListRecords
 
     // Filter for showing only venues with bookings
     public bool $onlyWithBookings = false;
+
+    // Filter for showing only active status venues
+    public bool $onlyActiveStatus = false;
 
     public ?array $statuses = null;
 
@@ -434,6 +438,7 @@ class ListVenues extends ListRecords
                     ->withCount(['confirmedBookings'])
                     ->leftJoin('users', 'venues.user_id', '=', 'users.id')
                     ->when($this->onlyWithBookings, fn ($query) => $query->has('confirmedBookings'))
+                    ->when($this->onlyActiveStatus, fn ($query) => $query->where('venues.status', VenueStatus::ACTIVE->value))
                     ->when($this->region, fn ($query) => $query->where('venues.region', $this->region))
                     ->orderByDesc('users.updated_at')
             )
@@ -502,6 +507,11 @@ class ListVenues extends ListRecords
                     ->label('Only venues with bookings')
                     ->toggle()
                     ->query(fn (Builder $query): Builder => $query->has('confirmedBookings')),
+
+                Filter::make('only_active_status')
+                    ->label('Only active status venues')
+                    ->toggle()
+                    ->query(fn (Builder $query): Builder => $query->where('venues.status', VenueStatus::ACTIVE->value)),
 
                 SelectFilter::make('region')
                     ->label('Region')
@@ -685,6 +695,7 @@ class ListVenues extends ListRecords
         $this->shouldSelectAllBookings = false;
         $this->showEditForm = false;
         $this->onlyWithBookings = false;
+        $this->onlyActiveStatus = false;
         $this->region = null;
 
         // Refresh the listing
