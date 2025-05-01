@@ -3,160 +3,164 @@
     use App\Models\Region;
     use App\Models\Venue;
 
-    $envTopTiers = config('app.'.$this->region->id.'_top_tier_venues', '');
-    $topTiers = blank($envTopTiers) ? []: explode(',', (string) $envTopTiers);
+    $envTopTiers = config('app.' . $this->region->id . '_top_tier_venues', '');
+    $topTiers = blank($envTopTiers) ? [] : explode(',', (string) $envTopTiers);
     $topTiersQueue = $topTiers;
 @endphp
 <div class="relative -mx-4 -mt-4 bg-white border-t sm:mx-0 sm:mt-0">
     <table class="w-full table-auto">
         <thead class="text-xs uppercase">
-        <tr class="sticky bg-white border-b shadow {{ $stickyHeaderTopPosition }}">
-            <th></th>
-            @foreach ($timeslotHeaders as $index => $timeslot)
-                <th
-                    class="p-2 pl-4 text-center text-sm font-semibold {{ $loop->first ? 'hidden sm:table-cell' : '' }} {{ $loop->last ? 'hidden sm:table-cell' : '' }}">
-                    {{ $timeslot }}
-                </th>
-            @endforeach
-        </tr>
-        </thead>
-        <tbody>
-        @foreach ($venues as $venue)
-            <tr class="odd:bg-gray-100 {{ $venue->status === VenueStatus::HIDDEN ? 'opacity-50' : '' }}">
-                <td class="pl-2 text-center w-28">
-                    <div class="flex items-center justify-center h-12">
-                        @if ($venue->logo_path)
-                            <img src="{{ $venue->logo }}" loading="lazy" alt="{{ $venue->name }}"
-                                 class="object-contain max-h-[48px] max-w-[112px]">
-                        @else
-                            <span class="text-xs font-semibold text-center uppercase line-clamp-2">
-                                    {{ $venue->name }}
-                                @if ($venue->status === VenueStatus::HIDDEN)
-                                    <span class="block text-[10px] text-gray-500">(Hidden)</span>
-                                @endif
-                                </span>
-                        @endif
-                    </div>
-                </td>
-
-                @foreach ($venue->schedules as $index => $schedule)
-                    <td
-                        class="p-1 pr-2 {{ $loop->first ? 'hidden sm:table-cell' : '' }} {{ $loop->last ? 'hidden sm:table-cell' : '' }}">
-                        <button
-                            @if (
-                                $schedule->is_bookable &&
-                                    !$schedule->is_within_buffer &&
-                                    ($venue->status === VenueStatus::ACTIVE ||
-                                        (auth()->user()?->hasRole('super_admin') && $venue->status === VenueStatus::HIDDEN))) wire:click="createBooking({{ $schedule->id }}, '{{ $schedule->booking_date->format('Y-m-d') }}')"
-                            @elseif ($venue->status === VenueStatus::UPCOMING)
-                                x-on:click="$dispatch('open-modal', { id: 'pending-venue-{{ $venue->id }}' })" @endif
-                            @class([
-                                'text-sm font-semibold rounded p-1 w-full mx-1 flex flex-col gap-y-[1px] justify-center items-center h-12',
-                                'bg-green-600 text-white cursor-pointer hover:bg-green-500' =>
-                                    !$schedule->is_within_buffer &&
-                                    $schedule->prime_time &&
-                                    $schedule->is_bookable &&
-                                    ($venue->status === VenueStatus::ACTIVE ||
-                                        (auth()->user()?->hasRole('super_admin') &&
-                                            $venue->status === VenueStatus::HIDDEN)),
-                                'bg-info-400 text-white cursor-pointer hover:bg-info-500' =>
-                                    !$schedule->is_within_buffer &&
-                                    !$schedule->prime_time &&
-                                    $schedule->is_bookable &&
-                                    ($venue->status === VenueStatus::ACTIVE ||
-                                        (auth()->user()?->hasRole('super_admin') &&
-                                            $venue->status === VenueStatus::HIDDEN)),
-                                'bg-[#E29B46] text-white cursor-pointer hover:bg-orange-500' =>
-                                    !$schedule->is_within_buffer &&
-                                    $schedule->has_low_inventory &&
-                                    $schedule->is_bookable &&
-                                    ($venue->status === VenueStatus::ACTIVE ||
-                                        (auth()->user()?->hasRole('super_admin') &&
-                                            $venue->status === VenueStatus::HIDDEN)),
-                                'bg-gray-200 text-gray-500 border-none cursor-not-allowed' =>
-                                    (!$schedule->is_bookable && $venue->status !== VenueStatus::PENDING) ||
-                                    $schedule->is_within_buffer,
-                                'bg-gray-200 text-gray-500 hover:bg-gray-200 cursor-pointer' =>
-                                    $venue->status === VenueStatus::PENDING,
-                            ])>
-                            @if ($venue->status === VenueStatus::PENDING)
-                                <p>
-                                    <span class="text-sm font-semibold uppercase">Soon</span>
-                                </p>
-                            @elseif ($schedule->is_within_buffer)
-                                <p class="text-xs text-gray-500">
-                                    N/A
-                                </p>
-                            @elseif ($schedule->is_bookable && $schedule->prime_time)
-                                <p class="text-base font-bold">
-                                    {{ moneyWithoutCents($schedule->fee($data['guest_count']), $currency) }}
-                                </p>
-                                @if ($schedule->has_low_inventory)
-                                    <p class="-mt-1 text-xs font-semibold text-white">
-                                        {{ $schedule->remaining_tables === 1 ? 'Last Table' : 'Last Tables' }}
-                                    </p>
-                                @endif
-                                @if ($schedule->no_wait)
-                                    <p class="-mt-1 text-xs font-semibold text-white">
-                                        No Wait
-                                    </p>
-                                @endif
-                                @if ($venue->is_omakase)
-                                    <p class="-mt-1 text-xs font-semibold text-white">
-                                        Omakase
-                                    </p>
-                                @endif
-                            @elseif($schedule->is_bookable && !$schedule->prime_time)
-                                <p class="text-xs uppercase text-nowrap sm:text-base">No Fee</p>
-                                @if ($schedule->has_low_inventory)
-                                    <p class="-mt-1 text-xs font-semibold text-white">
-                                        {{ $schedule->remaining_tables === 1 ? 'Last Table' : 'Last Tables' }}
-                                    </p>
-                                @endif
-                                @if ($schedule->no_wait)
-                                    <p class="-mt-1 text-xs font-semibold text-white">
-                                        No Wait
-                                    </p>
-                                @endif
-                                @if ($venue->is_omakase)
-                                    <p class="-mt-1 text-xs font-semibold text-white">
-                                        Omakase
-                                    </p>
-                                @endif
-                            @else
-                                <p class="text-xs uppercase text-nowrap">
-                                    @if (!$schedule->is_bookable)
-                                        @if ($schedule->is_available && $schedule->remaining_tables === 0)
-                                            Sold Out
-                                        @else
-                                            Closed
-                                        @endif
-                                    @endif
-                                </p>
-                            @endif
-                        </button>
-                    </td>
+            <tr class="sticky bg-white border-b shadow {{ $stickyHeaderTopPosition }}">
+                <th></th>
+                @foreach ($timeslotHeaders as $index => $timeslot)
+                    <th
+                        class="p-2 pl-4 text-center text-sm font-semibold {{ $loop->first ? 'hidden sm:table-cell' : '' }} {{ $loop->last ? 'hidden sm:table-cell' : '' }}">
+                        {{ $timeslot }}
+                    </th>
                 @endforeach
             </tr>
-
-            @php
-                // Determine if the current venue is the "last top tier" (only one item is left in $topTiersQueue)
-                $isLastTopTier = false;
-                if (!empty($topTiersQueue) && ($key = array_search($venue->id, $topTiersQueue)) !== false) {
-                    $isLastTopTier = count($topTiersQueue) === 1 && $venue->id == $topTiersQueue[$key];
-                    unset($topTiersQueue[$key]);
-                    $topTiersQueue = array_values($topTiersQueue);
-                }
-            @endphp
-            @if($isLastTopTier)
-                <tr class="odd:bg-gray-100 h-4" aria-hidden="true">
-                    <td colspan="{{ count($timeslotHeaders) + 1 }}" style="position: relative; height: 32px;">
-                        <div
-                            style="position: absolute; top: 50%; left: 0; width: 100%; transform: translateY(-50%); border-bottom: 1px solid black;"></div>
+        </thead>
+        <tbody>
+            @foreach ($venues as $venue)
+                <tr
+                    class="{{ $venue->status === VenueStatus::HIDDEN ? 'opacity-50' : '' }} {{ in_array($venue->id, $topTiers) ? 'bg-amber-100 even:bg-amber-50' : 'odd:bg-gray-100' }}">
+                    <td class="pl-2 text-center w-28">
+                        <div class="flex items-center justify-center h-12">
+                            @if ($venue->logo_path)
+                                <img src="{{ $venue->logo }}" loading="lazy" alt="{{ $venue->name }}"
+                                    class="object-contain max-h-[48px] max-w-[112px]">
+                            @else
+                                <span class="text-xs font-semibold text-center uppercase line-clamp-2">
+                                    {{ $venue->name }}
+                                    @if ($venue->status === VenueStatus::HIDDEN)
+                                        <span class="block text-[10px] text-gray-500">(Hidden)</span>
+                                    @endif
+                                </span>
+                            @endif
+                        </div>
                     </td>
+
+                    @foreach ($venue->schedules as $index => $schedule)
+                        <td
+                            class="p-1 pr-2 {{ $loop->first ? 'hidden sm:table-cell' : '' }} {{ $loop->last ? 'hidden sm:table-cell' : '' }}">
+                            <button
+                                @if (
+                                    $schedule->is_bookable &&
+                                        !$schedule->is_within_buffer &&
+                                        ($venue->status === VenueStatus::ACTIVE ||
+                                            (auth()->user()?->hasRole('super_admin') && $venue->status === VenueStatus::HIDDEN))) wire:click="createBooking({{ $schedule->id }}, '{{ $schedule->booking_date->format('Y-m-d') }}')"
+                            @elseif ($venue->status === VenueStatus::UPCOMING)
+                                x-on:click="$dispatch('open-modal', { id: 'pending-venue-{{ $venue->id }}' })" @endif
+                                @class([
+                                    'text-sm font-semibold rounded p-1 w-full mx-1 flex flex-col gap-y-[1px] justify-center items-center h-12',
+                                    'bg-green-600 text-white cursor-pointer hover:bg-green-500' =>
+                                        !$schedule->is_within_buffer &&
+                                        $schedule->prime_time &&
+                                        $schedule->is_bookable &&
+                                        ($venue->status === VenueStatus::ACTIVE ||
+                                            (auth()->user()?->hasRole('super_admin') &&
+                                                $venue->status === VenueStatus::HIDDEN)),
+                                    'bg-info-400 text-white cursor-pointer hover:bg-info-500' =>
+                                        !$schedule->is_within_buffer &&
+                                        !$schedule->prime_time &&
+                                        $schedule->is_bookable &&
+                                        ($venue->status === VenueStatus::ACTIVE ||
+                                            (auth()->user()?->hasRole('super_admin') &&
+                                                $venue->status === VenueStatus::HIDDEN)),
+                                    'bg-[#E29B46] text-white cursor-pointer hover:bg-orange-500' =>
+                                        !$schedule->is_within_buffer &&
+                                        $schedule->has_low_inventory &&
+                                        $schedule->is_bookable &&
+                                        ($venue->status === VenueStatus::ACTIVE ||
+                                            (auth()->user()?->hasRole('super_admin') &&
+                                                $venue->status === VenueStatus::HIDDEN)),
+                                    'bg-gray-200 text-gray-500 border-none cursor-not-allowed' =>
+                                        (!$schedule->is_bookable && $venue->status !== VenueStatus::PENDING) ||
+                                        $schedule->is_within_buffer,
+                                    'bg-gray-200 text-gray-500 hover:bg-gray-200 cursor-pointer' =>
+                                        $venue->status === VenueStatus::PENDING,
+                                ])>
+                                @if ($venue->status === VenueStatus::PENDING)
+                                    <p>
+                                        <span class="text-sm font-semibold uppercase">Soon</span>
+                                    </p>
+                                @elseif ($schedule->is_within_buffer)
+                                    <p class="text-xs text-gray-500">
+                                        N/A
+                                    </p>
+                                @elseif ($schedule->is_bookable && $schedule->prime_time)
+                                    <p class="text-base font-bold">
+                                        {{ moneyWithoutCents($schedule->fee($data['guest_count']), $currency) }}
+                                    </p>
+                                    @if ($schedule->has_low_inventory)
+                                        <p class="-mt-1 text-xs font-semibold text-white">
+                                            {{ $schedule->remaining_tables === 1 ? 'Last Table' : 'Last Tables' }}
+                                        </p>
+                                    @endif
+                                    @if ($schedule->no_wait)
+                                        <p class="-mt-1 text-xs font-semibold text-white">
+                                            No Wait
+                                        </p>
+                                    @endif
+                                    @if ($venue->is_omakase)
+                                        <p class="-mt-1 text-xs font-semibold text-white">
+                                            Omakase
+                                        </p>
+                                    @endif
+                                @elseif($schedule->is_bookable && !$schedule->prime_time)
+                                    <p class="text-xs uppercase text-nowrap sm:text-base">No Fee</p>
+                                    @if ($schedule->has_low_inventory)
+                                        <p class="-mt-1 text-xs font-semibold text-white">
+                                            {{ $schedule->remaining_tables === 1 ? 'Last Table' : 'Last Tables' }}
+                                        </p>
+                                    @endif
+                                    @if ($schedule->no_wait)
+                                        <p class="-mt-1 text-xs font-semibold text-white">
+                                            No Wait
+                                        </p>
+                                    @endif
+                                    @if ($venue->is_omakase)
+                                        <p class="-mt-1 text-xs font-semibold text-white">
+                                            Omakase
+                                        </p>
+                                    @endif
+                                @else
+                                    <p class="text-xs uppercase text-nowrap">
+                                        @if (!$schedule->is_bookable)
+                                            @if ($schedule->is_available && $schedule->remaining_tables === 0)
+                                                Sold Out
+                                            @else
+                                                Closed
+                                            @endif
+                                        @endif
+                                    </p>
+                                @endif
+                            </button>
+                        </td>
+                    @endforeach
                 </tr>
-            @endif
-        @endforeach
+
+                @php
+                    // Determine if the current venue is the "last top tier" (only one item is left in $topTiersQueue)
+                    $isLastTopTier = false;
+                    if (!empty($topTiersQueue) && ($key = array_search($venue->id, $topTiersQueue)) !== false) {
+                        $isLastTopTier = count($topTiersQueue) === 1 && $venue->id == $topTiersQueue[$key];
+                        unset($topTiersQueue[$key]);
+                        $topTiersQueue = array_values($topTiersQueue);
+                    }
+                @endphp
+                @if ($isLastTopTier)
+                    <tr class="bg-white" aria-hidden="true">
+                        <td colspan="{{ count($timeslotHeaders) + 1 }}" class="relative">
+                            <div class="h-4"></div>
+                            <div class="absolute inset-x-0 bottom-0 border-b-2 border-gray-300"></div>
+                        </td>
+                    </tr>
+                    <tr aria-hidden="true">
+                        <td colspan="{{ count($timeslotHeaders) + 1 }}" class="h-4"></td>
+                    </tr>
+                @endif
+            @endforeach
         </tbody>
     </table>
 </div>
