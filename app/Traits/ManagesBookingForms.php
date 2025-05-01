@@ -157,6 +157,7 @@ trait ManagesBookingForms
             ->searchable()
             ->placeholder('Specialty')
             ->hiddenLabel()
+            ->multiple()
             ->columnSpan(1)
             ->live()
             ->visible(function () {

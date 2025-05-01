@@ -61,6 +61,8 @@ class AvailabilityCalendar extends Page
         $this->region = Region::query()->where('id', $region_id)->first();
         $this->timezone = $this->region->timezone;
         $this->currency = $this->region->currency;
+        $this->neighborhoods = $this->region->neighborhoods->pluck('name', 'id');
+        $this->specialties = \App\Models\Specialty::getSpecialtiesByRegion($this->region->id);
         $this->form->fill();
     }
 
@@ -90,6 +92,7 @@ class AvailabilityCalendar extends Page
         $this->region = Region::query()->where('id', $region)->first();
 
         $this->neighborhoods = $this->region->neighborhoods->pluck('name', 'id');
+        $this->specialties = \App\Models\Specialty::getSpecialtiesByRegion($this->region->id);
         $this->timezone = $this->region->timezone;
         $this->currency = $this->region->currency;
         $this->venues = null;

@@ -100,6 +100,7 @@ class Venue extends Model
             'cutoff_time' => 'datetime',
             'daily_booking_cap' => 'integer',
             'cuisines' => 'array',
+            'specialty' => 'array',
         ];
     }
 

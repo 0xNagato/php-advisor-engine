@@ -181,6 +181,7 @@ class EditVenue extends EditRecord
                         Select::make('specialty')
                             ->placeholder('Select Specialty')
                             ->options(fn (callable $get) => $get('specialtyOptions') ?? [])
+                            ->multiple()
                             ->reactive(),
                         TextInput::make('primary_contact_name')
                             ->label('Primary Contact Name')

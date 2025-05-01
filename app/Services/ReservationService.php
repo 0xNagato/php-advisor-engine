@@ -52,9 +52,14 @@ class ReservationService
         public array $cuisines = [],
         public ?string $neighborhood = '',
         public ?Region $region = null,
-        public ?string $specialty = ''
+        public array|string|null $specialty = []
     ) {
         $this->region ??= GetUserRegion::run();
+        
+        // Convert string specialty to array if needed
+        if (is_string($this->specialty) && !empty($this->specialty)) {
+            $this->specialty = [$this->specialty];
+        }
     }
 
     /**
@@ -110,8 +115,13 @@ class ReservationService
             ->when($this->neighborhood, function ($query) {
                 $query->where('neighborhood', $this->neighborhood);
             })
-            ->when($this->specialty, function ($query) {
-                $query->where('specialty', $this->specialty);
+            ->when($this->specialty && count($this->specialty) > 0, function ($query) {
+                // Handle array of specialty values
+                $query->where(function($q) {
+                    foreach ($this->specialty as $spec) {
+                        $q->orWhereJsonContains('specialty', $spec);
+                    }
+                });
             })
             ->withSchedulesForDate(
                 date: $this->date,
