@@ -374,7 +374,7 @@
             </x-filament::modal>
         @elseif($booking && $booking->status === BookingStatus::CONFIRMED)
             <div class="flex flex-col items-center gap-3" id="form">
-                <div class="text-xl font-semibold text-black divider divider-neutral">Reservation Confirmed</div>
+                <div class="text-xl font-semibold text-black divider divider-neutral">Reservation Received</div>
                 <p class="text-center">Thank you for the booking!<br>We are notifying the venue now.</p>
             </div>
 
