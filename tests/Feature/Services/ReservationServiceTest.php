@@ -19,10 +19,10 @@ beforeEach(function () {
     $this->dayAfterTomorrow = Carbon::now()->addDays(2)->format('Y-m-d');
 });
 
-test('it includes venues with last_minute_booking_days = 0 for any day', function () {
+test('it includes venues with advance_booking_window = 0 for any day', function () {
     Venue::factory()->create([
         'region' => $this->region->id,
-        'last_minute_booking_days' => 0, // Always available for any day
+        'advance_booking_window' => 0, // Always available for any day
         'status' => VenueStatus::ACTIVE,
     ]);
 
@@ -37,14 +37,14 @@ test('it includes venues with last_minute_booking_days = 0 for any day', functio
 
     expect($venues)->toBeInstanceOf(Collection::class)
         ->and($venues->count())->toBe(1)
-        ->and($venues->first()->last_minute_booking_days)->toBe(0);
+        ->and($venues->first()->advance_booking_window)->toBe(0);
 });
 
-// Test with last_minute_booking_days matching $dayDifference
-test('it includes venues with last_minute_booking_days matching dayDifference', function () {
+// Test with advance_booking_window matching $dayDifference
+test('it includes venues with advance_booking_window matching dayDifference', function () {
     Venue::factory()->create([
         'region' => $this->region->id,
-        'last_minute_booking_days' => 1,
+        'advance_booking_window' => 1,
         'status' => VenueStatus::ACTIVE,
     ]);
 
@@ -58,7 +58,7 @@ test('it includes venues with last_minute_booking_days matching dayDifference', 
     $venues = $service->getAvailableVenues();
 
     expect($venues->count())->toBe(1)
-        ->and($venues->first()->last_minute_booking_days)->toBe(1);
+        ->and($venues->first()->advance_booking_window)->toBe(1);
 
     // Now for tomorrow's reservation, it should fail
     $service = new ReservationService(
@@ -73,11 +73,11 @@ test('it includes venues with last_minute_booking_days matching dayDifference', 
     expect($venues->count())->toBe(0); // It shouldn't return
 });
 
-// Test with last_minute_booking_days > $dayDifference
-test('it includes venues with last_minute_booking_days greater than dayDifference', function () {
+// Test with advance_booking_window > $dayDifference
+test('it includes venues with advance_booking_window greater than dayDifference', function () {
     Venue::factory()->create([
         'region' => $this->region->id,
-        'last_minute_booking_days' => 3, // Available for future dates
+        'advance_booking_window' => 3, // Available for future dates
         'status' => VenueStatus::ACTIVE,
     ]);
 
@@ -91,14 +91,14 @@ test('it includes venues with last_minute_booking_days greater than dayDifferenc
     $venues = $service->getAvailableVenues();
 
     expect($venues->count())->toBe(1)
-        ->and($venues->first()->last_minute_booking_days)->toBe(3);
+        ->and($venues->first()->advance_booking_window)->toBe(3);
 });
 
 // Test with status filtering
 test('it excludes venues with invalid status during filtering', function () {
     Venue::factory()->create([
         'region' => $this->region->id,
-        'last_minute_booking_days' => 0,
+        'advance_booking_window' => 0,
         'status' => VenueStatus::DRAFT, // Invalid status
     ]);
 
@@ -114,23 +114,23 @@ test('it excludes venues with invalid status during filtering', function () {
     expect($venues->count())->toBe(0); // No venues due to invalid status
 });
 
-// Test with multiple venues having different last_minute_booking_days
-test('it correctly filters multiple venues with different last_minute_booking_days', function () {
+// Test with multiple venues having different advance_booking_window settings
+test('it correctly filters multiple venues with different advance_booking_window settings', function () {
     Venue::factory()->create([
         'region' => $this->region->id,
-        'last_minute_booking_days' => 0,
+        'advance_booking_window' => 0,
         'status' => VenueStatus::ACTIVE,
     ]);
 
     Venue::factory()->create([
         'region' => $this->region->id,
-        'last_minute_booking_days' => 1,
+        'advance_booking_window' => 1,
         'status' => VenueStatus::ACTIVE,
     ]);
 
     Venue::factory()->create([
         'region' => $this->region->id,
-        'last_minute_booking_days' => 2,
+        'advance_booking_window' => 2,
         'status' => VenueStatus::ACTIVE,
     ]);
 
@@ -156,7 +156,7 @@ test('it correctly filters multiple venues with different last_minute_booking_da
 
     $venuesTomorrow = $serviceTomorrow->getAvailableVenues();
 
-    // Should exclude the venue with last_minute_booking_days = 1
+    // Should exclude the venue with advance_booking_window = 1
     expect($venuesTomorrow->count())->toBe(2);
 });
 

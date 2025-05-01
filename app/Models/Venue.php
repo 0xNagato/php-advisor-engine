@@ -85,6 +85,7 @@ class Venue extends Model
         'neighborhood',
         'specialty',
         'venue_type',
+        'advance_booking_window',
     ];
 
     protected function casts(): array
@@ -200,16 +201,16 @@ class Venue extends Model
         );
     }
 
-    protected function isAvailableForLastMinuteBooking(): Attribute
+    protected function isAvailableForAdvanceBooking(): Attribute
     {
         return Attribute::make(
             get: function () {
-                if ($this->last_minute_booking_days === null) {
+                if ($this->advance_booking_window === null) {
                     return false;
                 }
 
                 $today = Carbon::now();
-                $endDate = $today->copy()->addDays($this->last_minute_booking_days - 1);
+                $endDate = $today->copy()->addDays($this->advance_booking_window - 1);
 
                 return $today->between($today, $endDate);
             }

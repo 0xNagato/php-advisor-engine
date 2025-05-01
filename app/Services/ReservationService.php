@@ -103,10 +103,10 @@ class ReservationService
                 $query->whereIn('status', $statuses);
             })
             ->where('venue_type', '!=', VenueType::HIKE_STATION)
-            // Filter venues based on last-minute booking days
+            // Filter venues based on advance booking window
             ->where(function ($query) use ($dayDifference) {
-                $query->where('last_minute_booking_days', '=', 0) // Always include venues with 0
-                    ->orWhere('last_minute_booking_days', '>=', $dayDifference); // Include venues with sufficient days
+                $query->where('advance_booking_window', '=', 0) // Always include venues with 0 (no restrictions)
+                    ->orWhere('advance_booking_window', '>=', $dayDifference); // Include venues with sufficient window
             })
             // Filter by concierge's allowed venues if applicable
             ->when(auth()->check() && auth()->user()->hasActiveRole('concierge') && auth()->user()->concierge,
