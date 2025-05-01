@@ -245,7 +245,7 @@ class EditVenue extends EditRecord
                             ->nullable(),
                         TextInput::make('omakase_concierge_fee')
                             ->label('Omakase Concierge Fee Per Guest')
-                            ->prefix('$')
+                            ->prefix(fn (Get $get) => Region::getCurrencySymbolForRegion($get('region') ?? 'miami'))
                             ->numeric()
                             ->visible(fn (Get $get): bool => $get('is_omakase'))
                             ->helperText('Amount paid to concierge per guest for each Omakase booking')
@@ -279,13 +279,13 @@ class EditVenue extends EditRecord
                     ->schema([
                         TextInput::make('booking_fee')
                             ->label('Booking Fee')
-                            ->prefix('$')
+                            ->prefix(fn (Get $get) => Region::getCurrencySymbolForRegion($get('region') ?? 'miami'))
                             ->default(200)
                             ->numeric()
                             ->required(),
                         TextInput::make('increment_fee')
                             ->label('Increment Fee')
-                            ->prefix('$')
+                            ->prefix(fn (Get $get) => Region::getCurrencySymbolForRegion($get('region') ?? 'miami'))
                             ->default(0)
                             ->numeric(),
                         TextInput::make('payout_venue')
@@ -310,7 +310,7 @@ class EditVenue extends EditRecord
                                     ->required(),
                                 TextInput::make('fee')
                                     ->label('Fee')
-                                    ->prefix('$')
+                                    ->prefix(fn () => Region::getCurrencySymbolForRegion($this->getRecord()->region ?? 'miami'))
                                     ->numeric()
                                     ->required(),
                             ]),
