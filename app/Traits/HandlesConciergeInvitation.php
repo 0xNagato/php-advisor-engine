@@ -7,7 +7,6 @@ use App\Models\Partner;
 use App\Models\Referral;
 use App\Models\Region;
 use App\Models\User;
-use App\Notifications\Concierge\ConciergeCreated;
 use App\Notifications\Concierge\ConciergeRegisteredEmail;
 use DanHarrin\LivewireRateLimiting\Exceptions\TooManyRequestsException;
 use Exception;
@@ -207,12 +206,14 @@ trait HandlesConciergeInvitation
                 $referrerType = match (true) {
                     ! is_null($this->invitingPartner) => 'partner',
                     ! is_null($this->invitingConcierge) => 'concierge',
-                    property_exists($this, 'invitingVenueManager') && ! is_null($this->invitingVenueManager) => 'venue_manager',
+                    property_exists($this,
+                        'invitingVenueManager') && ! is_null($this->invitingVenueManager) => 'venue_manager',
                     default => null,
                 };
                 $referrerId = $this->invitingPartner?->user_id ?? $this->invitingConcierge?->user_id ?? $this->invitingVenueManager?->id ?? null;
 
-                throw_if(! $referrerType || ! $referrerId, new Exception('Could not determine referrer for direct invitation.'));
+                throw_if(! $referrerType || ! $referrerId,
+                    new Exception('Could not determine referrer for direct invitation.'));
 
                 $inviterRegion = match ($referrerType) {
                     'partner' => $this->invitingPartner?->user?->region,
@@ -305,8 +306,6 @@ trait HandlesConciergeInvitation
                     'date' => now()->format('F j, Y'),
                 ]
             ));
-
-            $user->notify(new ConciergeCreated($user));
 
             DB::commit();
 
