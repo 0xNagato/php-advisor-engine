@@ -200,6 +200,22 @@ class Venue extends Model
         );
     }
 
+    protected function isAvailableForLastMinuteBooking(): Attribute
+    {
+        return Attribute::make(
+            get: function () {
+                if ($this->last_minute_booking_days === null) {
+                    return false;
+                }
+
+                $today = Carbon::now();
+                $endDate = $today->copy()->addDays($this->last_minute_booking_days - 1);
+
+                return $today->between($today, $endDate);
+            }
+        );
+    }
+
     /**
      * @return HasMany<ScheduleTemplate, $this>
      */

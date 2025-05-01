@@ -82,6 +82,12 @@ class ReservationService
 
         $currentTime = Carbon::now($this->region->timezone)->format('H:i:s');
 
+        // Parse the reservation date
+        $reservationDate = Carbon::parse($this->date)->startOfDay();
+
+        // Calculate the difference in days between today and the reservation date
+        $dayDifference = today()->diffInDays($reservationDate) + 1;
+
         /**
          * @var Collection<int, Venue> $venues
          */
@@ -97,6 +103,11 @@ class ReservationService
                 $query->whereIn('status', $statuses);
             })
             ->where('venue_type', '!=', VenueType::HIKE_STATION)
+            // Filter venues based on last-minute booking days
+            ->where(function ($query) use ($dayDifference) {
+                $query->where('last_minute_booking_days', '=', 0) // Always include venues with 0
+                    ->orWhere('last_minute_booking_days', '>=', $dayDifference); // Include venues with sufficient days
+            })
             // Filter by concierge's allowed venues if applicable
             ->when(auth()->check() && auth()->user()->hasActiveRole('concierge') && auth()->user()->concierge,
                 function ($query) {

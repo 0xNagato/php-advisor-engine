@@ -231,6 +231,11 @@ class EditVenue extends EditRecord
                                 return $state instanceof Carbon ? $state->format('H:i') : date('H:i',
                                     strtotime($state));
                             }),
+                        Select::make('last_minute_booking_days')
+                            ->label('Last Minute Booking Days')
+                            ->options(array_combine(range(0, 7), range(0, 7))) // Generates options from 0 to 7
+                            ->default(0)
+                            ->helperText('Set the number of days allowed for last-minute bookings. Use 0 to disable.'),
                         Toggle::make('no_wait')
                             ->label('No Wait')
                             ->helperText('When enabled, guests will be seated immediately upon arrival')
