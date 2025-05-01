@@ -58,7 +58,7 @@ trait ManagesBookingForms
                 ->required(),
             Grid::make()
                 ->id('advanced')
-                ->columns($this->region && in_array($this->region->id, config('app.specialty_filter_regions', [])) ? 3 : 2)
+                ->columns((property_exists($this, 'region') && $this->region?->id && in_array($this->region->id, config('app.specialty_filter_regions', []))) ? 3 : 2)
                 ->schema([
                     Select::make('neighborhood')
                         ->prefixIcon('ri-community-line')
