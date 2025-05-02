@@ -242,7 +242,7 @@
                             @endif
                         </div>
                     </li>
-                    @if ($booking->tax > 0)
+                    @if ($booking->tax > 0 && $booking->is_prime)
                         <li
                             class="inline-flex items-center px-4 py-3 text-xs text-gray-800 border-b sm:text-sm last:border-b-0 dark:border-gray-700 dark:text-gray-200">
                             <div class="flex items-center justify-between w-full">
@@ -272,6 +272,8 @@
                                 <span>
                                     @if (in_array($booking->status, [BookingStatus::REFUNDED, BookingStatus::PARTIALLY_REFUNDED]))
                                         {{ money($booking->final_total, $booking->currency) }}
+                                    @elseif (!$booking->is_prime)
+                                        {{ money($booking->total_fee, $booking->currency) }}
                                     @else
                                         {{ money($booking->total_with_tax_in_cents, $booking->currency) }}
                                     @endif
