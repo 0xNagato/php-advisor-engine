@@ -78,13 +78,45 @@ class CreateBooking
 
             // Check venue's specific cutoff time if set
             if ($venue->cutoff_time) {
-                $cutoffTimeToday = Carbon::parse($venue->cutoff_time, $timezone)->setDate(
-                    $currentDate->year,
-                    $currentDate->month,
-                    $currentDate->day
-                );
-
-                throw_if($currentDate->gt($cutoffTimeToday), new RuntimeException('Booking cannot be created after the venue\'s cutoff time for today.'));
+                /* 
+                 * This is a complete rewrite of the venue cutoff time logic to fix timezone issues.
+                 * The issue was that comparing dates with different timezones leads to incorrect results.
+                 */
+                
+                // Step 1: Get the venue's timezone
+                $venueTimezone = $venue->timezone;
+                
+                // Step 2: Get current time in the venue's timezone
+                $currentTime = Carbon::now($venueTimezone);
+                
+                // Step 3: Extract just the time portion (not the date) from the venue's cutoff time
+                $cutoffHour = (int) $venue->cutoff_time->format('H');
+                $cutoffMinute = (int) $venue->cutoff_time->format('i');
+                $cutoffSecond = (int) $venue->cutoff_time->format('s');
+                
+                // Step 4: Create today's cutoff time in the venue timezone
+                $todayCutoffTime = Carbon::now($venueTimezone)
+                    ->setTime($cutoffHour, $cutoffMinute, $cutoffSecond);
+                
+                // Step 5: Compare current time with cutoff time (both in venue timezone)
+                $isPastCutoff = $currentTime->greaterThan($todayCutoffTime);
+                
+                // Detailed logging to verify times are created and compared correctly
+                \Illuminate\Support\Facades\Log::debug('Cutoff time check', [
+                    'venue_id' => $venue->id,
+                    'venue_name' => $venue->name,
+                    'current_time' => $currentTime->toDateTimeString(),
+                    'current_time_timezone' => $currentTime->timezone->getName(),
+                    'cutoff_time' => $todayCutoffTime->toDateTimeString(),
+                    'cutoff_time_timezone' => $todayCutoffTime->timezone->getName(),
+                    'cutoff_raw' => sprintf('%02d:%02d:%02d', $cutoffHour, $cutoffMinute, $cutoffSecond),
+                    'is_past_cutoff' => $isPastCutoff,
+                ]);
+                
+                // Throw exception if past cutoff time
+                if ($isPastCutoff) {
+                    throw new \RuntimeException('Booking cannot be created after the venue\'s cutoff time for today.');
+                }
             }
         }
 
