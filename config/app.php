@@ -231,6 +231,36 @@ return [
     'default_region' => env('LOCAL_ENV_REGION', 'miami'),
     'no_tax' => env('NO_TAX', true),
     'active_regions' => ['miami', 'los_angeles', 'ibiza'],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Region Geolocation Configuration
+    |--------------------------------------------------------------------------
+    |
+    | Configuration for mapping region codes and country codes to Prima regions
+    |
+    */
+    'region_code_mapping' => [
+        'FL' => 'miami',
+        'CA' => 'los_angeles',
+        'IB' => 'ibiza',
+    ],
+    'country_region_mapping' => [
+        // North America
+        'US' => 'miami',
+        'CA' => 'los_angeles',
+        'MX' => 'los_angeles',
+
+        // Europe
+        'ES' => 'ibiza',
+        'PT' => 'ibiza',
+        'FR' => 'ibiza',
+        'IT' => 'ibiza',
+        'DE' => 'ibiza',
+        'GB' => 'ibiza',
+        'IE' => 'ibiza',
+    ],
+
     'dev_ip_address' => env('DEV_IP_ADDRESS'),
     'native_key' => env('APP_NATIVE_KEY'),
     'primary_domain' => env('PRIMARY_DOMAIN', env('APP_URL', 'https://primavip.co')),

@@ -9,6 +9,7 @@ use App\Models\Venue;
 use App\Models\VipCode;
 use App\Services\ReservationService;
 use App\Services\VipCodeService;
+use App\Traits\HandlesRegionValidation;
 use App\Traits\ManagesBookingForms;
 use Exception;
 use Filament\Forms\Form;
@@ -22,6 +23,7 @@ use Livewire\Attributes\On;
  */
 class AvailabilityCalendar extends Page
 {
+    use HandlesRegionValidation;
     use ManagesBookingForms;
 
     protected static string $layout = 'components.layouts.app';
@@ -57,7 +59,7 @@ class AvailabilityCalendar extends Page
             $this->redirect('/');
         }
 
-        $region_id = $this->vipCode->concierge->user->region ?? config('app.default_region');
+        $region_id = $this->resolveRegion();
 
         $this->region = Region::query()->where('id', $region_id)->first();
         $this->timezone = $this->region->timezone;
@@ -91,7 +93,6 @@ class AvailabilityCalendar extends Page
     {
         $region = session('vip-region') ?? $this->vipCode->concierge->user->region;
         $this->region = Region::query()->where('id', $region)->first();
-
         $this->neighborhoods = $this->region->neighborhoods->pluck('name', 'id');
         $this->specialties = Specialty::getSpecialtiesByRegion($this->region->id);
         $this->timezone = $this->region->timezone;
