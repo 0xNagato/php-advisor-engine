@@ -127,7 +127,7 @@ class IbizaHikeStationBooking extends Page
     {
         // Get base date components from trait AS IS
         $dateComponents = collect($this->commonFormComponents())
-            ->filter(fn ($c) => in_array($c->getName(), ['date', 'radio_date', 'select_date']))
+            ->filter(fn ($c) => $c instanceof \Filament\Forms\Components\Component && method_exists($c, 'getName') && in_array($c->getName(), ['date', 'radio_date', 'select_date']))
             ->all();
 
         return $form
