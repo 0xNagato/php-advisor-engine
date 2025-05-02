@@ -171,6 +171,11 @@ class Neighborhood extends Model
             'region' => 'ibiza',
             'name' => 'Santa Gertrudis',
         ],
+        [
+            'id' => 'formentera',
+            'region' => 'ibiza',
+            'name' => 'Formentera',
+        ],
 
         // Mykonos
         [

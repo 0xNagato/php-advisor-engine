@@ -6,7 +6,6 @@ use App\Traits\HandlesRegionValidation;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Http;
-use Mockery;
 use Tests\TestCase;
 
 class RegionGeolocationTest extends TestCase
@@ -16,10 +15,10 @@ class RegionGeolocationTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        
+
         // Clear cache to ensure fresh tests
         Cache::flush();
-        
+
         // Set up mock config values
         Config::set('app.default_region', 'miami');
         Config::set('app.region_code_mapping', [
@@ -103,7 +102,7 @@ class RegionGeolocationTest extends TestCase
         $region = $this->resolveRegion('203.0.113.5'); // Test IP
         $this->assertEquals('miami', $region);
     }
-    
+
     public function test_resolves_los_angeles_from_canada_ip(): void
     {
         // Mock IPAPI response for Canada
@@ -117,12 +116,12 @@ class RegionGeolocationTest extends TestCase
         $region = $this->resolveRegion('203.0.113.6'); // Test IP
         $this->assertEquals('los_angeles', $region);
     }
-    
+
     public function test_resolves_ibiza_from_european_countries(): void
     {
         // Test a few European countries
         $europeanCountries = ['FR', 'IT', 'GB'];
-        
+
         foreach ($europeanCountries as $index => $country) {
             // Mock IPAPI response for the country
             Http::fake([
@@ -131,8 +130,8 @@ class RegionGeolocationTest extends TestCase
                     'country_code' => $country,
                 ], 200),
             ]);
-            
-            $ip = "203.0.113." . (10 + $index); // Different test IP for each country
+
+            $ip = '203.0.113.'.(10 + $index); // Different test IP for each country
             $region = $this->resolveRegion($ip);
             $this->assertEquals('ibiza', $region, "Country {$country} should map to ibiza");
         }

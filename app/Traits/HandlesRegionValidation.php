@@ -22,8 +22,8 @@ trait HandlesRegionValidation
         if (! $ip) {
             // Try to get the IP from Cloudflare headers first
             $ip = $request->header('CF-Connecting-IP');
-            
-            if (!$ip) {
+
+            if (! $ip) {
                 // Fall back to standard IP detection if header isn't present
                 $ip = $request->ip();
             }
@@ -36,9 +36,7 @@ trait HandlesRegionValidation
 
         $cacheKey = "region_resolution_{$ip}";
 
-        return Cache::remember($cacheKey, now()->addHours(12), function () use ($ip, $defaultRegion) {
-            return $this->resolveRegionFromIp($ip, $defaultRegion);
-        });
+        return Cache::remember($cacheKey, now()->addHours(12), fn () => $this->resolveRegionFromIp($ip, $defaultRegion));
     }
 
     /**
@@ -50,7 +48,7 @@ trait HandlesRegionValidation
         try {
             $regionCode = null;
             $countryCode = null;
-            
+
             // Attempt to fetch region and country code from IPAPI
             $ipApiData = $this->getRegionAndCountryCodeFromIpApi($ip);
             if ($ipApiData) {
@@ -72,7 +70,7 @@ trait HandlesRegionValidation
             if ($regionCode && isset($regionMapping[$regionCode])) {
                 return $regionMapping[$regionCode];
             }
-            
+
             // If region code not found, try mapping by country code
             return $this->getRegionByCountryCode($countryCode, $defaultRegion);
         } catch (Exception $e) {
@@ -145,11 +143,12 @@ trait HandlesRegionValidation
      */
     private function getRegionByCountryCode(?string $countryCode, string $defaultRegion): string
     {
-        if (!$countryCode) {
+        if (! $countryCode) {
             return $defaultRegion;
         }
-        
+
         $countryMapping = config('app.country_region_mapping', []);
+
         return $countryMapping[$countryCode] ?? $defaultRegion;
     }
 }

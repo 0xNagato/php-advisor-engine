@@ -4,8 +4,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Build/Test/Lint Commands
 
-- **Development server**: `php artisan serve`
-- **Frontend dev**: `npm run dev`
+- **Development server**: This project is run via Laravel Herd it's always available
+- **Frontend dev**: I always have assets compiled on file change, no need to worry about this.
 - **Build frontend**: `npm run build`
 - **Run tests**: `./vendor/bin/pest`
 - **Run single test**: `./vendor/bin/pest tests/Feature/SomeTest.php`
@@ -35,3 +35,4 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - Follow Laravel conventions for Controllers, Models, and Resources
 - Use type safety with Data Transfer Objects (DTOs) via spatie/laravel-data
 - Implement Filament resources for admin functionality
+- Never clear any type of cache locally

@@ -102,6 +102,32 @@ class AvailabilityCalendar extends Page
         $this->form->fill();
     }
 
+    #[On('formentera-selected')]
+    public function formenteraSelected(): void
+    {
+        if ($this->region?->id === 'ibiza') {
+            // Find the Formentera neighborhood ID
+            $formenteraNeighborhood = $this->neighborhoods->search('Formentera');
+            if ($formenteraNeighborhood) {
+                $this->data['neighborhood'] = $formenteraNeighborhood;
+                $this->venues = null;
+                $this->form->fill($this->data);
+                $this->loadVenues();
+            }
+        }
+    }
+
+    #[On('formentera-unselected')]
+    public function formenteraUnselected(): void
+    {
+        if ($this->region?->id === 'ibiza') {
+            $this->data['neighborhood'] = null;
+            $this->venues = null;
+            $this->form->fill($this->data);
+            $this->loadVenues();
+        }
+    }
+
     public function createBooking(int $scheduleTemplateId, ?string $date = null): void
     {
         $this->loadVenues();
@@ -154,6 +180,9 @@ class AvailabilityCalendar extends Page
                 timeslotCount: $this->data['timeslot_count'] ?? 5,
                 timeSlotOffset: 2,
                 region: $this->region,
+                neighborhood: $this->data['neighborhood'] ?? null,
+                cuisines: $this->data['cuisine'] ?? [],
+                specialty: $this->data['specialty'] ?? [],
             );
 
             $this->venues = $reservation->getAvailableVenues();
