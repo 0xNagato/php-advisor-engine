@@ -43,6 +43,8 @@ class SendCustomerBookingPaymentForm extends Notification
                 'payment_url' => $this->url,
                 'booking_date' => $notifiable->booking_at->format('D M jS'),
                 'booking_time' => $notifiable->booking_at->format('g:ia'),
+                'guest_count' => $notifiable->guest_count,
+                'amount' => money($notifiable->total_with_tax_in_cents, $notifiable->currency),
             ]
         );
     }

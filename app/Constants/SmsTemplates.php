@@ -4,7 +4,7 @@ namespace App\Constants;
 
 class SmsTemplates
 {
-    public const TEMPLATES = [
+    public const array TEMPLATES = [
         'admin_venue_failed_to_confirm_booking' => 'PRIMA Reservation - Venue {venue_name} failed to confirm the reservation #{booking_id} scheduled for {booking_date}, at {booking_time}',
         'concierge_created' => "Welcome to PRIMA! Your account is now ready to earn commissions by booking reservations at the top restaurants.\n\nMore info about PRIMA: {more_info}\n\nHow our app works: {how_it_works}\n\nWelcome aboard!",
         'concierge_referral' => '{referrer} has invited you to join PRIMA, click {url} now to create your account. To learn about PRIMA click {how_it_works} - Welcome aboard!',
@@ -13,9 +13,9 @@ class SmsTemplates
         'concierge_special_request_change_request' => 'Special request changes have been requested from {venue}. Click here for more details {link}.',
         'concierge_special_request_rejected' => 'Special request has been rejected from {venue}. Click here for more details {link}.',
         'customer_booking_confirmed_non_prime' => '👋 Hello from PRIMA VIP! Your reservation at {venue_name} on {booking_date} at {booking_time} has been booked by {concierge_name}. Please arrive within 15 minutes of your reservation and mention PRIMA VIP when checking in! Thank you for booking with us. (https://primaapp.com)',
-        'customer_booking_confirmed_prime' => '👋 from PRIMAVIP. Your reservation at {venue_name} on {booking_date} at {booking_time} is confirmed. (Fee paid is for reservation only, not applied to restaurant bill) - View your invoice at {invoice_url}. Questions? Reply here.',
-        'customer_booking_confirmed_prime_omakase' => '👋 from PRIMAVIP. Your reservation at {venue_name} on {booking_date} at {booking_time} is confirmed. Fee paid is for your omakase experience and will be applied towards the final bill at {venue_name}. View your invoice at {invoice_url}. Questions? Reply here.',
-        'customer_booking_payment_form' => '👋 Hello from PRIMA VIP! Your reservation at {venue_name} is currently awaiting payment. Please click {payment_url} to guarantee your booking on {booking_date} at {booking_time}.',
+        'customer_booking_confirmed_prime' => '👋 Thank you for your trust! PRIMA is currently reaching out to management at {venue_name} to secure your table. If anything goes wrong, we will contact you, however, 99.9% of all tables are confirmed in under 15 minutes. (https://primaapp.com)',
+        'customer_booking_confirmed_prime_omakase' => '👋 Thank you for your trust! PRIMA is currently reaching out to management at {venue_name} to secure your omakase experience. If anything goes wrong, we will contact you; however, 99.9% of all tables are confirmed in under 15 minutes. The fee you paid will be applied towards your omakase experience\'s final bill. View your invoice at {invoice_url}. Questions? Reply here. (https://primaapp.com)',
+        'customer_booking_payment_form' => '👋 Hello from PRIMA VIP! We’ve received your reservation request for {venue_name} at {booking_time} for {guest_count} guests. PRIMA secures last minute tables at sold out restaurants by working directly with restaurant management and opening up reserved tables. The fee for your table is {amount}. Most tables are secured within 15 minutes of payment. Please click {payment_url} to make a secure payment now, and we will go to work. If you have any questions, please reply to this message; we are available 24/7. More information: https://primaapp.com',
         'customer_modification_requested' => 'We have received your reservation change request from {concierge_name}. We are reaching out to the restaurant to confirm and will notify you shortly. Thank you! Team PRIMA',
         'partner_created' => 'Welcome to PRIMA! Your account has been created. Please click {login_url} to login and update your payment info and begin making reservations. Thank you for joining us!',
         'two_factor_code' => 'Do not share this code with anyone. Your 2FA login code for PRIMA is {code}',
