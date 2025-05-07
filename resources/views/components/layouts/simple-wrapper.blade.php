@@ -17,8 +17,8 @@
         @if ($logoUrl)
             <div class="flex items-center justify-between p-4">
                 <a href="{{ $logoUrl }}">PRIMA</a>
-                <div class="w-full max-w-[200px] md:max-w-[300px] pt-2">
-                    <livewire:vip.region-selector />
+                <div class="flex justify-end pt-2">
+                    <livewire:availability.advance-filters />
                 </div>
             </div>
         @else

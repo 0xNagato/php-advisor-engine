@@ -7,6 +7,10 @@
 @endphp
 
 <x-layouts.simple-wrapper content-class="max-w-3xl" logo-url="{{ url('/') }}">
+    <div class="w-full mb-6">
+        <livewire:vip.region-selector />
+    </div>
+    
     <div class="w-full">
         {{ $this->form }}
     </div>
@@ -24,6 +28,11 @@
     <style>
         .fi-btn-group {
             width: 100% !important;
+        }
+        
+        .inline-form {
+            gap: 1rem !important;
+            column-gap: 0.5rem !important;
         }
     </style>
 </x-layouts.simple-wrapper>

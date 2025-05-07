@@ -66,6 +66,7 @@ class AvailabilityCalendar extends Page
         $this->currency = $this->region->currency;
         $this->neighborhoods = $this->region->neighborhoods->pluck('name', 'id');
         $this->specialties = Specialty::getSpecialtiesByRegion($this->region->id);
+        $this->advanced = session('advanceFilters', false);
         $this->form->fill();
     }
 
@@ -126,6 +127,14 @@ class AvailabilityCalendar extends Page
             $this->form->fill($this->data);
             $this->loadVenues();
         }
+    }
+    
+    #[On('advanceToggled')]
+    public function advanceToggled(bool $state): void
+    {
+        $this->advanced = $state;
+        $this->form->fill($this->data);
+        $this->loadVenues();
     }
 
     public function createBooking(int $scheduleTemplateId, ?string $date = null): void

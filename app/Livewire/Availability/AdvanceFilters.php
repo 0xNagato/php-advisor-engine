@@ -9,6 +9,7 @@ use Filament\Forms\Form;
 use Filament\Forms\Get;
 use Filament\Widgets\Widget;
 use Illuminate\Support\HtmlString;
+use Livewire\Attributes\On;
 
 /**
  * @property Form $form
@@ -22,15 +23,25 @@ class AdvanceFilters extends Widget implements HasForms
     protected static ?string $pollingInterval = null;
 
     public ?array $data = [];
+    
+    public ?string $currentRegion = null;
 
     public function mount(): void
     {
+        $this->currentRegion = session('vip-region', auth()->user()->region ?? null);
+        $this->form->fill();
+    }
+    
+    #[On('vip-region-changed')]
+    public function regionChanged(): void
+    {
+        $this->currentRegion = session('vip-region', auth()->user()->region ?? null);
         $this->form->fill();
     }
 
     public function form(Form $form): Form
     {
-        $isIbizaRegion = auth()->user()->region === 'ibiza';
+        $isIbizaRegion = $this->currentRegion === 'ibiza';
 
         return $form->schema([
             Toggle::make('advanceFilters')
@@ -45,7 +56,7 @@ class AdvanceFilters extends Widget implements HasForms
             Toggle::make('formentera')
                 ->label(fn () => new HtmlString('<span class="text-xs sm:text-sm">Formentera</span>'))
                 ->live()
-                ->visible($isIbizaRegion)
+                ->visible(fn() => $this->currentRegion === 'ibiza')
                 ->default(false)
                 ->extraAttributes(['class' => 'mt-0 pt-0 toggle-sm'])
                 ->afterStateUpdated(function ($state) {
