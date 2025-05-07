@@ -3,6 +3,7 @@
 namespace App\Console\Commands;
 
 use App\Enums\BookingStatus;
+use App\Enums\VenueType;
 use App\Models\Booking;
 use App\Models\BookingCustomerReminderLog;
 use App\Notifications\Booking\CustomerReminder;
@@ -32,7 +33,7 @@ class SendBookingReminderSms extends Command
             })
             ->whereHas('venue', function (Builder $query) {
                 // Exclude Ibiza Hike Station venues (venue_type = 'hike_station')
-                $query->where('venue_type', '!=', \App\Enums\VenueType::HIKE_STATION->value);
+                $query->where('venue_type', '!=', VenueType::HIKE_STATION->value);
             })
             ->get();
 

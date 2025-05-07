@@ -150,5 +150,4 @@ Route::middleware(['auth'])->group(function () {
         ->name('admin.booking-calculator');
 });
 
-
 require __DIR__.'/auth.php';
