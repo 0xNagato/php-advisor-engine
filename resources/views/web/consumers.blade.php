@@ -1,10 +1,6 @@
 @php
     use App\Models\VipCode;
-    $vipCode = Cache::remember(
-        'available_calendar_button_vip_code_1',
-        60,
-        fn() => VipCode::query()->where('concierge_id', 1)->active()->first(),
-    );
+    $vipCode = 'PRIMA';
 @endphp
 <x-layouts.web>
 
@@ -24,7 +20,7 @@
                                 <span class="text-intro">Anytime, Anywhere</span>
                             </h1>
                             <span class="intro_hero-btn_container">
-                                <a href="{{ config('app.primary_domain') . '/' . ltrim(route('v.booking', ['code' => $vipCode->code], false), '/') }}"
+                                <a href="{{ config('app.primary_domain') . '/' . ltrim(route('v.booking', ['code' => $vipCode], false), '/') }}"
                                     class="intro_hero-btn bg-gradient-to-b from-primary to-purple">
                                     Book Your Dining Experience
                                 </a>
@@ -233,7 +229,7 @@
                                 Enjoy VIP treatment at top-tier dining spots worldwide.
                             </li>
                         </ul>
-                        <a href="{{ config('app.primary_domain') . '/' . ltrim(route('v.booking', ['code' => $vipCode->code], false), '/') }}"
+                        <a href="{{ config('app.primary_domain') . '/' . ltrim(route('v.booking', ['code' => $vipCode], false), '/') }}"
                             class="w-full text-center text-white btn bg-gradient-to-b from-purple to-primary md:w-auto">
                             Book Your Dream Dining Experience
                         </a>
@@ -291,7 +287,7 @@
                             communities in major cities. This guarantees you a seamless dining experience at top
                             restaurants, with reliable bookings and fewer cancellations.
                         </p>
-                        <a href="{{ config('app.primary_domain') . '/' . ltrim(route('v.booking', ['code' => $vipCode->code], false), '/') }}"
+                        <a href="{{ config('app.primary_domain') . '/' . ltrim(route('v.booking', ['code' => $vipCode], false), '/') }}"
                             class="btn bg-gradient-to-b from-purple to-primary text-white mt-[10px] md:mt-6 btn_full">
                             Book Your Dining Experience
                         </a>
@@ -319,7 +315,7 @@
                     </p>
                 </div>
 
-                <a href="{{ config('app.primary_domain') . '/' . ltrim(route('v.booking', ['code' => $vipCode->code], false), '/') }}"
+                <a href="{{ config('app.primary_domain') . '/' . ltrim(route('v.booking', ['code' => $vipCode], false), '/') }}"
                     class="text-white btn bg-gradient-to-b from-purple to-primary btn_full">
                     Book Your Dining Experience
                 </a>
@@ -445,7 +441,7 @@
                         No More Waiting, Just Enjoy!
                     </li>
                 </ul>
-                <a href="{{ config('app.primary_domain') . '/' . ltrim(route('v.booking', ['code' => $vipCode->code], false), '/') }}"
+                <a href="{{ config('app.primary_domain') . '/' . ltrim(route('v.booking', ['code' => $vipCode], false), '/') }}"
                     class="btn bg-white text-primary mt-4 relative z-10 btn_full font-bricolage font-[600] antialiased">
                     Reserve Your Table Now!
                 </a>

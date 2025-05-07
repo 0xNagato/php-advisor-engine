@@ -5,7 +5,10 @@ namespace App\Livewire\Concierge;
 use App\Enums\BookingStatus;
 use App\Models\VipCode;
 use App\Services\CurrencyConversionService;
+use chillerlan\QRCode\QRCode;
+use chillerlan\QRCode\QROptions;
 use Filament\Support\Enums\IconPosition;
+use Filament\Support\Enums\MaxWidth;
 use Filament\Tables\Actions\Action;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Columns\ToggleColumn;
@@ -13,6 +16,7 @@ use Filament\Tables\Concerns\HasFilters;
 use Filament\Tables\Table;
 use Filament\Widgets\TableWidget;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\HtmlString;
 
 class VipCodesTable extends TableWidget
 {
@@ -101,6 +105,28 @@ class VipCodesTable extends TableWidget
                     ->size('xs'),
             ])
             ->actions([
+                Action::make('viewQR')
+                    ->iconButton()
+                    ->icon('tabler-qrcode')
+                    ->size('xs')
+                    ->modalWidth(MaxWidth::ExtraSmall)
+                    ->modalHeading('')
+                    ->modalContent(function (VipCode $vipCode): HtmlString {
+                        $qrCode = $this->getQr($vipCode);
+
+                        return new HtmlString(<<<HTML
+                                    <div class="flex flex-col items-center">
+                                      <img src="{$qrCode['image']}" alt="{$vipCode->code} QR Code" class="w-85 h-85">
+                                      <a href="{$qrCode['downloadURL']}" download="prima-referral-qr.png"
+                                        class="text-sm text-indigo-600 underline hover:text-indigo-800">
+                                        Download QR Code
+                                      </a>
+                                    </div>
+                                HTML
+                        );
+                    })
+                    ->modalSubmitAction(false)
+                    ->modalCancelAction(false),
                 Action::make('viewVipBookings')
                     ->iconButton()
                     ->icon('tabler-maximize')
@@ -118,5 +144,34 @@ class VipCodesTable extends TableWidget
             ->recordAction(fn (): string => 'viewVipBookings')
             ->defaultSortOptionLabel('Created')
             ->defaultSort('created_at', 'desc');
+    }
+
+    private function getQr(VipCode $vipCode): array
+    {
+        $qrLink = config('app.primary_domain').'/';
+        $qrLink .= ltrim(route('v.booking', ['code' => $vipCode->code], false), '/');
+
+        // Generate QR code for display (without caching)
+        $qrDisplayOptions = new QROptions([
+            'outputType' => QRCode::OUTPUT_IMAGE_PNG,
+            'eccLevel' => QRCode::ECC_H,
+            'scale' => 5,
+        ]);
+
+        $qrCode = (new QRCode($qrDisplayOptions))->render($qrLink);
+
+        // Generate downloadable QR code (without caching)
+        $qrDownloadOptions = new QROptions([
+            'outputType' => QRCode::OUTPUT_IMAGE_PNG,
+            'eccLevel' => QRCode::ECC_H,
+            'scale' => 10,
+        ]);
+
+        $qrCodeDownloadUrl = (new QRCode($qrDownloadOptions))->render($qrLink);
+
+        return [
+            'image' => $qrCode,
+            'downloadURL' => $qrCodeDownloadUrl,
+        ];
     }
 }
