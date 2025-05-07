@@ -30,6 +30,10 @@ class SendBookingReminderSms extends Command
             ->whereDoesntHave('reminderLogs', function (Builder $query) {
                 $query->whereColumn('booking_id', 'bookings.id');
             })
+            ->whereHas('venue', function (Builder $query) {
+                // Exclude Ibiza Hike Station venues (venue_type = 'hike_station')
+                $query->where('venue_type', '!=', \App\Enums\VenueType::HIKE_STATION->value);
+            })
             ->get();
 
         $count = $bookings->count();
