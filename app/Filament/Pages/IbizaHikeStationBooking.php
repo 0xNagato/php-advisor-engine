@@ -300,8 +300,8 @@ class IbizaHikeStationBooking extends Page
 
         // Base price for 5 hikers: 300 euros = 30000 cents
         $basePrice = 30000;
-        // Additional hiker price: 50 euros = 5000 cents each
-        $additionalHikerPrice = 5000;
+        // Additional hiker price: 60 euros = 6000 cents each
+        $additionalHikerPrice = 6000;
         $minimumHikers = 5;
 
         // Calculate additional hikers beyond the minimum 5
