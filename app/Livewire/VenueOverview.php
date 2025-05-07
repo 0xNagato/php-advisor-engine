@@ -26,21 +26,19 @@ class VenueOverview extends BaseWidget
     {
         $startDate = Carbon::parse($this->startDate ?? now()->subDays(30))->startOfDay();
         $endDate = Carbon::parse($this->endDate ?? now())->endOfDay();
+        $currencySymbol = $this->venue->inRegion->currency_symbol;
 
         $earnings = $this->getEarnings($startDate, $endDate);
         $prevEarnings = $this->getEarnings($startDate->copy()->subDays($startDate->diffInDays($endDate)), $startDate);
         $chartData = $this->getChartData($startDate, $endDate);
 
-        $currencyService = app(CurrencyConversionService::class);
-        $venueEarningsUSD = $currencyService->convertToUSD($earnings['venue_earnings']);
-        $venuePaidUSD = $currencyService->convertToUSD($earnings['venue_paid']);
-        $totalEarningsUSD = $venueEarningsUSD - abs($venuePaidUSD);
+        $venueEarnings = $this->sumScaledValues($earnings['venue_earnings']);
+        $venuePaid = $this->sumScaledValues($earnings['venue_paid']);
+        $totalEarnings = $venueEarnings - abs($venuePaid);
 
-        $prevVenueEarningsUSD = $currencyService->convertToUSD($prevEarnings['venue_earnings']);
-        $prevVenuePaidUSD = $currencyService->convertToUSD($prevEarnings['venue_paid']);
-        $prevTotalEarningsUSD = $prevVenueEarningsUSD - abs($prevVenuePaidUSD);
-
-        $currencySymbol = $this->venue->inRegion->currency_symbol;
+        $prevVenueEarnings = $this->sumScaledValues($prevEarnings['venue_earnings']);
+        $prevVenuePaid = $this->sumScaledValues($prevEarnings['venue_paid']);
+        $prevTotalEarnings = $prevVenueEarnings - abs($prevVenuePaid);
 
         return [
             $this->createStat('Total Bookings', $earnings['total_bookings'], null, $prevEarnings['total_bookings'])
@@ -57,13 +55,13 @@ class VenueOverview extends BaseWidget
             )
                 ->chart($chartData['incentivised_bookings'])
                 ->color('warning'),
-            $this->createStat('Total Earnings', $totalEarningsUSD, $currencySymbol, $prevTotalEarningsUSD)
+            $this->createStat('Total Earnings', $totalEarnings, $currencySymbol, $prevTotalEarnings)
                 ->chart($chartData['total_earnings'])
                 ->color('success'),
-            $this->createStat('Prime Earnings', $venueEarningsUSD, $currencySymbol, $prevVenueEarningsUSD)
+            $this->createStat('Prime Earnings', $venueEarnings, $currencySymbol, $prevVenueEarnings)
                 ->chart($chartData['prime_earnings'])
                 ->color('primary'),
-            $this->createStat('Incentivised Cost', $venuePaidUSD, $currencySymbol, $prevVenuePaidUSD)
+            $this->createStat('Incentivised Cost', $venuePaid, $currencySymbol, $prevVenuePaid)
                 ->chart($chartData['incentivised_cost'])
                 ->color('warning'),
         ];
@@ -155,7 +153,8 @@ class VenueOverview extends BaseWidget
         float $value,
         ?string $currencySymbol = null,
         float $previousValue = 0
-    ): Stat {
+    ): Stat
+    {
         $formattedValue = $currencySymbol
             ? $currencySymbol.number_format($value, 2)
             : number_format($value);
@@ -170,5 +169,22 @@ class VenueOverview extends BaseWidget
         }
 
         return $stat;
+    }
+
+    /**
+     * Sums an array of monetary values in subunits and scales them to units.
+     *
+     * @param  array  $values  Key-value array of monetary amounts grouped by currency.
+     * @return float Aggregated amount scaled to units (e.g., dollars).
+     */
+    protected function sumScaledValues(array $values): float
+    {
+        $total = 0;
+
+        foreach ($values as $amount) {
+            $total += $amount / 100;
+        }
+
+        return $total;
     }
 }
