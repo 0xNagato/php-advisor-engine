@@ -20,7 +20,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - **PHP version**: 8.3+
 - **Framework**: Laravel 11 with Filament 3, Livewire 3 and Laravel Actions
 - **Type hints**: Always use proper type hints and return types in method signatures
-- **Naming**: PascalCase for classes; camelCase for methods and variables; snake_case for DB columns 
+- **Naming**: PascalCase for classes; camelCase for methods and variables; snake_case for DB columns
 - **Business Logic**: Place complex business logic in dedicated Action classes (lorisleiva/laravel-actions)
 - **Error handling**: Use typed exceptions with clear messages; catch only specific exceptions
 - **Imports**: Group imports by type (PHP core, Laravel, third-party, app)
@@ -36,3 +36,5 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - Use type safety with Data Transfer Objects (DTOs) via spatie/laravel-data
 - Implement Filament resources for admin functionality
 - Never clear any type of cache locally
+- Do not stage files or commit changes until they have been tested and confirmed
+- Use the MySQL MCP whenever database lookups are needed
