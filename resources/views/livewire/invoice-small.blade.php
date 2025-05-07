@@ -15,7 +15,13 @@
             <div class="font-semibold">{{ $booking->venue->name }}</div>
             <div class="text-xs text-slate-600">
                 <div>{{ $booking->booking_at->format('l, M jS') }}</div>
-                <div>{{ $booking->booking_at->format('g:i a') }}, {{ $booking->guest_count }} guests</div>
+                <div>
+                    @if ($booking->venue->venue_type === \App\Enums\VenueType::HIKE_STATION)
+                        {{ $booking->booking_at->format('H:i') === '10:00' ? 'Morning Hike' : 'Sunset Hike' }}, {{ $booking->guest_count }} hikers
+                    @else
+                        {{ $booking->booking_at->format('g:i a') }}, {{ $booking->guest_count }} guests
+                    @endif
+                </div>
             </div>
         </div>
         @if ($booking->is_prime && $showAmount)

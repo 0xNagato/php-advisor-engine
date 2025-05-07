@@ -235,7 +235,7 @@ class IbizaHikeStationBooking extends Page
             }
 
             $this->selectedDaySlots[] = [
-                'time' => $slotKey === 'morning' ? 'Morning (10:00 AM)' : 'Afternoon (2:00 PM)',
+                'time' => $slotKey === 'morning' ? 'Morning Hike' : 'Sunset Hike',
                 'price' => $basePrice,
                 'is_available' => $isAvailable, // Use potentially modified availability
                 'slot_key' => $slotKey,
@@ -275,7 +275,7 @@ class IbizaHikeStationBooking extends Page
                 }
 
                 $dayData['slots'][] = [
-                    'time_formatted' => $slotKey === 'morning' ? '10:00 AM' : '2:00 PM',
+                    'time_formatted' => $slotKey === 'morning' ? 'Morning Hike' : 'Sunset Hike',
                     'price' => $basePrice,
                     'is_available' => $isAvailableNextDay, // Use potentially modified availability
                     'slot_key' => $slotKey,

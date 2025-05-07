@@ -51,7 +51,7 @@ Thank you for using PRIMA, please find your invoice attached.
     </tr>
     <tr>
         <td>
-            {{ $booking->venue->name }} ({{ $booking->guest_count }} guests)
+            {{ $booking->venue->name }} ({{ $booking->venue->venue_type === \App\Enums\VenueType::HIKE_STATION ? $booking->guest_count . ' hikers' : $booking->guest_count . ' guests' }})
         </td>
         <td>
             {{ money($booking->total_fee) }}

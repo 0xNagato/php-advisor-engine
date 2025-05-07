@@ -137,7 +137,12 @@
                 <div>
                     <span class="block text-xs text-gray-500 uppercase">Booking Time:</span>
                     <span class="block text-xs font-medium text-gray-800 sm:text-sm dark:text-gray-200">
-                        {{ $booking->booking_at->format('M d, Y g:i A') }}
+                        @if ($booking->venue->venue_type === \App\Enums\VenueType::HIKE_STATION)
+                            {{ $booking->booking_at->format('M d, Y') }} - 
+                            {{ $booking->booking_at->format('H:i') === '10:00' ? 'Morning Hike' : 'Sunset Hike' }}
+                        @else
+                            {{ $booking->booking_at->format('M d, Y g:i A') }}
+                        @endif
                     </span>
                 </div>
 
