@@ -574,14 +574,17 @@ class VenueOnboarding extends Component
                             return;
                         }
 
-                        // Check for uniqueness of the phone number in the users table
-                        $phoneE164 = $phone->formatE164();
-                        $exists = User::query()->where('phone', $phoneE164)->exists();
-                        if ($exists) {
-                            $this->existingAccountDetected = true;
-                            $this->existingAccountType = 'phone';
-                            $this->existingAccountIdentifier = $phoneE164;
-                            $fail('The phone number is already registered with another account.');
+                        // Only check for uniqueness if the config flag is enabled
+                        if (config('app.venue_onboarding_unique_phone', false)) {
+                            // Check for uniqueness of the phone number in the users table
+                            $phoneE164 = $phone->formatE164();
+                            $exists = User::query()->where('phone', $phoneE164)->exists();
+                            if ($exists) {
+                                $this->existingAccountDetected = true;
+                                $this->existingAccountType = 'phone';
+                                $this->existingAccountIdentifier = $phoneE164;
+                                $fail('The phone number is already registered with another account.');
+                            }
                         }
                     },
                 ],

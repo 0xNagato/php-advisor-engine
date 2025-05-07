@@ -304,6 +304,16 @@ return [
     |
     */
     'check_customer_has_non_prime_booking' => env('CHECK_CUSTOMER_HAS_NON_PRIME_BOOKING', false),
+    
+    /*
+    |--------------------------------------------------------------------------
+    | Venue Onboarding Settings
+    |--------------------------------------------------------------------------
+    |
+    | Configuration flags for venue onboarding process
+    |
+    */
+    'venue_onboarding_unique_phone' => env('VENUE_ONBOARDING_UNIQUE_PHONE', false),
 
     /*
     |--------------------------------------------------------------------------
