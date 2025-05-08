@@ -13,7 +13,10 @@ class MessageResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-o-newspaper';
 
-    protected static ?int $navigationSort = -5;
+    public static function getNavigationSort(): ?int
+    {
+        return auth()->user()?->hasActiveRole('super_admin') ? 5 : -5;
+    }
 
     protected static ?string $navigationLabel = 'Announcements';
 
@@ -35,7 +38,7 @@ class MessageResource extends Resource
             return ! session('simpleMode');
         }
 
-        return auth()->user()?->hasActiveRole(['concierge', 'super_admin', 'partner']);
+        return auth()->user()?->hasActiveRole(['concierge', 'partner']);
     }
 
     public static function getPages(): array

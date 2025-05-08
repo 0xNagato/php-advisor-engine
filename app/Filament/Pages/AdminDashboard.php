@@ -29,6 +29,8 @@ class AdminDashboard extends Dashboard
 
     protected static string $view = 'filament.pages.admin.admin-dashboard';
 
+    protected static ?int $navigationSort = -10;
+
     public bool $isLoading = false;
 
     public static function canAccess(): bool

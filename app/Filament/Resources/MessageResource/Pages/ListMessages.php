@@ -14,6 +14,7 @@ class ListMessages extends ListRecords
     protected ?string $heading = '';
 
     protected static string $view = 'filament.pages.messages.list-messages';
+    
 
     /**
      * @var Collection<Message>
