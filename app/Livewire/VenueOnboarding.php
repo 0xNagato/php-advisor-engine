@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Livewire;
 
+use App\Actions\SendVenueOnboardingInquiryEmail;
 use App\Data\VenueOnboardingData;
 use App\Models\Region;
 use App\Models\User;
@@ -40,6 +41,18 @@ class VenueOnboarding extends Component
     public string $existingAccountType = '';
 
     public string $existingAccountIdentifier = '';
+
+    // Contact form properties for when public onboarding is disabled
+    public array $contact = [
+        'name' => '',
+        'email' => '',
+        'phone' => '',
+        'region' => '',
+        'venue_name' => '',
+        'message' => '',
+    ];
+
+    public bool $formSubmitted = false;
 
     // Flag to determine if this is an existing venue manager adding a new venue
     public bool $isExistingVenueManager = false;
@@ -137,6 +150,9 @@ class VenueOnboarding extends Component
                 'label' => $region->name,
             ])
             ->toArray();
+
+        // Set default region for contact form
+        $this->contact['region'] = Region::active()->first()?->id ?? '';
 
         // Check if the user is a logged-in venue manager
         if (Auth::check() && Auth::user()->hasActiveRole('venue_manager')) {
@@ -675,6 +691,18 @@ class VenueOnboarding extends Component
 
     public function render(): View
     {
+        // Check if public venue onboarding is disabled and current user is not logged in
+        // or doesn't have required roles to access this page
+        $publicOnboardingEnabled = config('app.public_venue_onboarding_enabled', false);
+        $hasAccess = Auth::check() && Auth::user()->hasActiveRole('venue_manager');
+
+        if (! $publicOnboardingEnabled && ! $hasAccess) {
+            // If onboarding is disabled for public users, render a contact form
+            return view('livewire.venue-onboarding-contact')->layout('components.layouts.app', [
+                'title' => 'Contact Us About Venue Onboarding',
+            ]);
+        }
+
         $partnerId = $this->partner_id;
         $partnerName = $this->partner_name;
 
@@ -710,6 +738,40 @@ class VenueOnboarding extends Component
         Session::forget('venue_onboarding');
         $this->reset();
         $this->mount();
+    }
+
+    /**
+     * Submit the contact form when public onboarding is disabled
+     */
+    public function submitContactForm(): void
+    {
+        $this->validate([
+            'contact.name' => 'required|string|max:255',
+            'contact.email' => 'required|email|max:255',
+            'contact.phone' => 'required|string',
+            'contact.region' => 'required|string',
+            'contact.venue_name' => 'required|string|max:255',
+            'contact.message' => 'required|string|max:1000',
+        ]);
+
+        // Format phone number
+        $this->contact['phone'] = $this->getInternationalFormattedPhoneNumber($this->contact['phone']);
+
+        // Send the contact email
+        SendVenueOnboardingInquiryEmail::run($this->contact);
+
+        // Reset form and show success message
+        $this->formSubmitted = true;
+
+        // Clear form fields
+        $this->contact = [
+            'name' => '',
+            'email' => '',
+            'phone' => '',
+            'region' => '',
+            'venue_name' => '',
+            'message' => '',
+        ];
     }
 
     public function updatedHasLogos(bool $value): void
