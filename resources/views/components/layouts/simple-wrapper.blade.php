@@ -22,7 +22,20 @@
                 </div>
             </div>
         @else
-            PRIMA
+            <div class="flex items-center justify-between p-4">
+                <div>PRIMA</div>
+                <div>
+                    @auth
+                        <a href="{{ route('filament.admin.pages.dashboard') }}" class="text-sm font-medium text-indigo-600 hover:text-indigo-500">
+                            Dashboard
+                        </a>
+                    @else
+                        <a href="{{ route('filament.admin.auth.login') }}" class="text-sm font-medium text-indigo-600 hover:text-indigo-500">
+                            Login
+                        </a>
+                    @endauth
+                </div>
+            </div>
         @endif
     </div>
     <div @class([
