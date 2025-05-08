@@ -1,7 +1,7 @@
 <x-layouts.app>
     <x-layouts.simple-wrapper contentClass="max-w-3xl">
         <div class="w-full sm:px-6 lg:px-8">
-            <div class="overflow-hidden bg-white shadow-sm sm:rounded-lg">
+            <div class="overflow-hidden bg-white shadow-sm rounded-lg">
                 <div class="p-6 md:p-8 text-gray-900">
                     <div class="space-y-2 mb-6 border-b pb-4">
                         <h1 class="text-xl font-bold">{{ $message->announcement->title }}</h1>
