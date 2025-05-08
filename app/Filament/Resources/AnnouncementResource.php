@@ -108,10 +108,52 @@ class AnnouncementResource extends Resource
 
                         // Generate short URL
                         $shortUrl = PrimaShortUrls::getMessageUrl($message->id);
+                        
+                        // Get the short URL record to find visits data
+                        $destinationUrl = route('public.announcement', ['message' => $message->id]);
+                        $shortUrlRecord = \AshAllenDesign\ShortURL\Models\ShortURL::where(
+                            'destination_url',
+                            $destinationUrl
+                        )->first();
+                        
+                        $visitsPerDay = collect();
+                        
+                        if ($shortUrlRecord) {
+                            // Get visits grouped by day
+                            $visitsPerDay = \AshAllenDesign\ShortURL\Models\ShortURLVisit::where(
+                                'short_url_id',
+                                $shortUrlRecord->id
+                            )
+                                ->selectRaw(
+                                    'DATE(visited_at) as visit_date, COUNT(DISTINCT ip_address) as unique_visits'
+                                )
+                                ->groupBy('visit_date')
+                                ->orderBy('visit_date', 'desc')
+                                ->get()
+                                ->map(function ($item) {
+                                    $date = \Carbon\Carbon::parse($item->visit_date);
+                                    return [
+                                        'date' => $date->format('D M j, y'),
+                                        'unique_visits' => $item->unique_visits,
+                                    ];
+                                });
+                                
+                            // Get total unique visits
+                            $totalUniqueVisits = \AshAllenDesign\ShortURL\Models\ShortURLVisit::where(
+                                'short_url_id',
+                                $shortUrlRecord->id
+                            )
+                                ->distinct('ip_address')
+                                ->count('ip_address');
+                        } else {
+                            $totalUniqueVisits = 0;
+                        }
 
                         // Return a view with copy functionality
                         return view('filament.resources.announcement-resource.pages.copy-link-modal', [
                             'shortUrl' => $shortUrl,
+                            'visitsPerDay' => $visitsPerDay,
+                            'totalUniqueVisits' => $totalUniqueVisits,
                         ]);
                     }),
                 Action::make('Publish')

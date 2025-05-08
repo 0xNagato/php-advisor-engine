@@ -1,4 +1,4 @@
-<div class="space-y-4">
+<div class="space-y-6">
     <div class="flex items-center gap-x-3">
         <input type="text" value="{{ $shortUrl }}"
             id="announcement-url"
@@ -21,7 +21,53 @@
             </span>
         </x-filament::button>
     </div>
-    <p class="text-sm text-gray-500">
-        When partners or concierges visit this link, they'll see the full announcement message.
-    </p>
+    
+    <div>
+        <p class="text-sm text-gray-500 mb-3">
+            When partners or concierges visit this link, they'll see the full announcement message.
+        </p>
+        
+        <div class="border rounded-lg overflow-hidden">
+            <div class="bg-gray-50 px-4 py-2 border-b">
+                <div class="flex items-center justify-between">
+                    <h3 class="text-sm font-medium text-gray-700">Link Analytics</h3>
+                    <span class="text-sm font-medium text-gray-700 flex items-center gap-x-1">
+                        <x-heroicon-m-eye class="w-4 h-4" />
+                        {{ $totalUniqueVisits }} total unique {{ Str::plural('visit', $totalUniqueVisits) }}
+                    </span>
+                </div>
+            </div>
+            
+            @if($visitsPerDay->isEmpty())
+                <div class="p-4 text-sm text-gray-500 text-center">
+                    No visits recorded yet
+                </div>
+            @else
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th scope="col" class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Date
+                            </th>
+                            <th scope="col" class="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Unique Visits
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200">
+                        @foreach($visitsPerDay as $visit)
+                            <tr>
+                                <td class="px-4 py-2 whitespace-nowrap text-sm text-gray-700">
+                                    {{ $visit['date'] }}
+                                </td>
+                                <td class="px-4 py-2 whitespace-nowrap text-sm text-gray-700 text-right">
+                                    {{ $visit['unique_visits'] }}
+                                </td>
+                            </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            @endif
+        </div>
+    </div>
 </div>
