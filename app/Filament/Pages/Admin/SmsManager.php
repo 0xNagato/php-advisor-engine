@@ -108,7 +108,6 @@ class SmsManager extends Page implements HasTable
                     ->columns(2)
                     ->gridDirection('row')
                     ->required()
-                    // No live() to prevent form refreshes
                     ->columnSpanFull(),
 
                 CheckboxList::make('data.regions')
@@ -116,14 +115,12 @@ class SmsManager extends Page implements HasTable
                     ->helperText('Only send to users in selected regions. Leave empty to send to all regions.')
                     ->options(Region::query()->orderBy('name')->pluck('name', 'id'))
                     ->gridDirection('row')
-                    // No live() to prevent form refreshes
                     ->columnSpanFull(),
 
                 Toggle::make('data.test_mode')
                     ->label('Test Mode (Send to yourself only)')
                     ->helperText('When enabled, SMS will only be sent to user ID 1 for testing')
                     ->hidden(fn () => auth()->id() !== 1)
-                    // No live() to prevent form refreshes
                     ->columnSpanFull(),
 
                 Textarea::make('data.message')
