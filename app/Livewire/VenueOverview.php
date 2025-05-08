@@ -153,8 +153,7 @@ class VenueOverview extends BaseWidget
         float $value,
         ?string $currencySymbol = null,
         float $previousValue = 0
-    ): Stat
-    {
+    ): Stat {
         $formattedValue = $currencySymbol
             ? $currencySymbol.number_format($value, 2)
             : number_format($value);

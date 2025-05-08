@@ -304,7 +304,7 @@ return [
     |
     */
     'check_customer_has_non_prime_booking' => env('CHECK_CUSTOMER_HAS_NON_PRIME_BOOKING', false),
-    
+
     /*
     |--------------------------------------------------------------------------
     | Venue Onboarding Settings

@@ -19,12 +19,12 @@ class BookingPolicy
         if ($user->can('view_any_booking')) {
             return true;
         }
-        
+
         // Allow venue managers to view bookings
         if ($user->hasActiveRole('venue_manager') && $user->managedVenueGroups->count() > 0) {
             return true;
         }
-        
+
         return false;
     }
 
@@ -42,31 +42,31 @@ class BookingPolicy
         if ($user->hasActiveRole('venue_manager')) {
             // Get all venue groups the user manages
             $venueGroups = $user->managedVenueGroups;
-            
+
             if ($venueGroups && $venueGroups->count() > 0) {
                 foreach ($venueGroups as $venueGroup) {
                     // Get allowed venue IDs for this manager in this group
                     $allowedVenueIds = $venueGroup->getAllowedVenueIds($user);
-                    
+
                     // Load the venue relation if it hasn't been loaded yet
-                    if (!$booking->relationLoaded('venue')) {
+                    if (! $booking->relationLoaded('venue')) {
                         $booking->load('venue');
                     }
-                    
+
                     // Check if venue is null - this would indicate a problem with the relationship
-                    if (!$booking->venue) {
+                    if (! $booking->venue) {
                         // Try to find venue ID from meta if available
                         if (isset($booking->meta['venue']['id'])) {
                             $venueId = $booking->meta['venue']['id'];
-                            
+
                             // If no specific venues are set, check against venues in the group
-                            if (empty($allowedVenueIds)) {
+                            if (blank($allowedVenueIds)) {
                                 // Check if this venue ID belongs to the venue group
                                 $groupVenueIds = $venueGroup->venues()->pluck('id')->toArray();
                                 if (in_array($venueId, $groupVenueIds)) {
                                     return true;
                                 }
-                            } 
+                            }
                             // Otherwise, check directly against allowed venues list
                             elseif (in_array($venueId, $allowedVenueIds)) {
                                 return true;
@@ -74,11 +74,11 @@ class BookingPolicy
                         }
                     } else {
                         // If no specific venues are set, the manager can access all venues in the group
-                        if (empty($allowedVenueIds)) {
+                        if (blank($allowedVenueIds)) {
                             if ($booking->venue->venue_group_id === $venueGroup->id) {
                                 return true;
                             }
-                        } 
+                        }
                         // Otherwise, check if the booking's venue is in the allowed list
                         elseif (in_array($booking->venue->id, $allowedVenueIds)) {
                             return true;
@@ -87,7 +87,7 @@ class BookingPolicy
                 }
             }
         }
-        
+
         return false;
     }
 

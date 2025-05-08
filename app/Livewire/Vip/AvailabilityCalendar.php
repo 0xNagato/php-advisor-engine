@@ -128,7 +128,7 @@ class AvailabilityCalendar extends Page
             $this->loadVenues();
         }
     }
-    
+
     #[On('advanceToggled')]
     public function advanceToggled(bool $state): void
     {

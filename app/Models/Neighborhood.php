@@ -134,7 +134,7 @@ class Neighborhood extends Model
         [
             'id' => 'san_jose',
             'region' => 'ibiza',
-            'name' => 'San José (Sant Josep de sa Talaia)',
+            'name' => 'San José',
         ],
         [
             'id' => 'figueretas',

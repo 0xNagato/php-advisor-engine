@@ -23,7 +23,7 @@ class AdvanceFilters extends Widget implements HasForms
     protected static ?string $pollingInterval = null;
 
     public ?array $data = [];
-    
+
     public ?string $currentRegion = null;
 
     public function mount(): void
@@ -31,7 +31,7 @@ class AdvanceFilters extends Widget implements HasForms
         $this->currentRegion = session('vip-region', auth()->user()->region ?? null);
         $this->form->fill();
     }
-    
+
     #[On('vip-region-changed')]
     public function regionChanged(): void
     {
@@ -56,7 +56,7 @@ class AdvanceFilters extends Widget implements HasForms
             Toggle::make('formentera')
                 ->label(fn () => new HtmlString('<span class="text-xs sm:text-sm">Formentera</span>'))
                 ->live()
-                ->visible(fn() => $this->currentRegion === 'ibiza')
+                ->visible(fn () => $this->currentRegion === 'ibiza')
                 ->default(false)
                 ->extraAttributes(['class' => 'mt-0 pt-0 toggle-sm'])
                 ->afterStateUpdated(function ($state) {

@@ -7,58 +7,60 @@ use App\Filament\Resources\BookingResource\Pages\EditBooking;
 use App\Filament\Resources\BookingResource\Pages\ListBookings;
 use App\Filament\Resources\BookingResource\Pages\ViewBooking;
 use App\Models\Booking;
+use DB;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
 
 class BookingResource extends Resource
 {
     protected static ?string $model = Booking::class;
 
     protected static ?string $navigationIcon = 'gmdi-restaurant-menu-o';
-    
-    public static function getEloquentQuery(): \Illuminate\Database\Eloquent\Builder
+
+    public static function getEloquentQuery(): Builder
     {
         $query = parent::getEloquentQuery();
-        
+
         $user = auth()->user();
-        
+
         // If user is a venue manager, only show bookings for their venues
         if ($user->hasActiveRole('venue_manager')) {
             $venueGroups = $user->managedVenueGroups;
-            
+
             if ($venueGroups && $venueGroups->count() > 0) {
-                $query->where(function($subquery) use ($venueGroups, $user) {
+                $query->where(function ($subquery) use ($venueGroups, $user) {
                     foreach ($venueGroups as $venueGroup) {
                         $allowedVenueIds = $venueGroup->getAllowedVenueIds($user);
-                        
-                        if (empty($allowedVenueIds)) {
+
+                        if (blank($allowedVenueIds)) {
                             // If no specific venues are set, show all bookings from venues in the group
                             $venueIds = $venueGroup->venues()->pluck('id')->toArray();
-                            
+
                             // Use join to check schedule_template.venue_id
                             $subquery->orWhereExists(function ($scheduleQuery) use ($venueIds) {
-                                $scheduleQuery->select(\DB::raw(1))
+                                $scheduleQuery->select(DB::raw(1))
                                     ->from('schedule_templates')
                                     ->whereIn('schedule_templates.venue_id', $venueIds)
                                     ->whereColumn('schedule_templates.id', 'bookings.schedule_template_id');
                             });
-                            
+
                             // Also check meta->venue->id for bookings that might not have schedule_template relation
-                            $subquery->orWhereRaw("JSON_UNQUOTE(JSON_EXTRACT(meta, '$.venue.id')) IN (" . implode(',', $venueIds) . ")");
+                            $subquery->orWhereRaw("JSON_UNQUOTE(JSON_EXTRACT(meta, '$.venue.id')) IN (".implode(',', $venueIds).')');
                         } else {
                             // Use join to check schedule_template.venue_id
                             $subquery->orWhereExists(function ($scheduleQuery) use ($allowedVenueIds) {
-                                $scheduleQuery->select(\DB::raw(1))
+                                $scheduleQuery->select(DB::raw(1))
                                     ->from('schedule_templates')
                                     ->whereIn('schedule_templates.venue_id', $allowedVenueIds)
                                     ->whereColumn('schedule_templates.id', 'bookings.schedule_template_id');
                             });
-                            
+
                             // Also check meta->venue->id for bookings that might not have schedule_template relation
-                            $subquery->orWhereRaw("JSON_UNQUOTE(JSON_EXTRACT(meta, '$.venue.id')) IN (" . implode(',', $allowedVenueIds) . ")");
+                            $subquery->orWhereRaw("JSON_UNQUOTE(JSON_EXTRACT(meta, '$.venue.id')) IN (".implode(',', $allowedVenueIds).')');
                         }
                     }
                 });
@@ -67,7 +69,7 @@ class BookingResource extends Resource
                 $query->whereRaw('1 = 0');
             }
         }
-        
+
         return $query;
     }
 

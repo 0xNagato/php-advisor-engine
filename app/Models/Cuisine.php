@@ -92,6 +92,51 @@ class Cuisine extends Model
             'name' => 'Gluten-Free',
             'description' => 'A cuisine that excludes gluten-containing ingredients.',
         ],
+        [
+            'id' => 'spanish',
+            'name' => 'Spanish',
+            'description' => 'Features tapas, paella, and regional Spanish dishes.',
+        ],
+        [
+            'id' => 'grill',
+            'name' => 'Grill',
+            'description' => 'Specializes in grilled meats and seafood.',
+        ],
+        [
+            'id' => 'seafood',
+            'name' => 'Seafood',
+            'description' => 'Focuses on fresh fish and shellfish preparations.',
+        ],
+        [
+            'id' => 'international',
+            'name' => 'International',
+            'description' => 'Offers a diverse menu with dishes from various global cuisines.',
+        ],
+        [
+            'id' => 'fusion',
+            'name' => 'Fusion',
+            'description' => 'Blends culinary traditions from two or more cultures.',
+        ],
+        [
+            'id' => 'middle_eastern',
+            'name' => 'Middle Eastern',
+            'description' => 'Includes dishes like falafel, shawarma, and tagines.',
+        ],
+        [
+            'id' => 'peruvian',
+            'name' => 'Peruvian',
+            'description' => 'Known for ceviche, lomo saltado, and aji amarillo-based sauces.',
+        ],
+        [
+            'id' => 'asian',
+            'name' => 'Asian',
+            'description' => 'A broad category covering various East and Southeast Asian cuisines.',
+        ],
+        [
+            'id' => 'steakhouse',
+            'name' => 'Steakhouse',
+            'description' => 'Primarily serves steaks and chops.',
+        ],
     ];
 
     /**
