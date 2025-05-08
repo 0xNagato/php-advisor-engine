@@ -26,7 +26,7 @@
                 <div>PRIMA</div>
                 <div>
                     @auth
-                        <a href="{{ route('filament.admin.pages.admin-dashboard') }}" class="text-sm font-medium text-indigo-600 hover:text-indigo-500">
+                        <a href="{{ config('app.platform_url') }}" class="text-sm font-medium text-indigo-600 hover:text-indigo-500">
                             Dashboard
                         </a>
                     @else
