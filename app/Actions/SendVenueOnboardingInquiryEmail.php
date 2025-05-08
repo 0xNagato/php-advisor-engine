@@ -24,7 +24,7 @@ class SendVenueOnboardingInquiryEmail
                 ->cc('alex@primavip.co')
                 ->bcc('andru.weir@gmail.com')
                 ->replyTo($contactData['email'])
-                ->subject('New Venue Onboarding Inquiry: ' . $contactData['venue_name'])
+                ->subject('New Venue Onboarding Inquiry: '.$contactData['venue_name'])
                 ->html(nl2br($formattedMessage));
         });
 

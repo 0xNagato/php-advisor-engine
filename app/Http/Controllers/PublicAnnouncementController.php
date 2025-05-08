@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Models\Message;
-use Illuminate\Http\RedirectResponse;
 use Illuminate\View\View;
 
 class PublicAnnouncementController extends Controller
@@ -12,7 +11,7 @@ class PublicAnnouncementController extends Controller
     {
         $message = Message::with('announcement')->findOrFail($messageId);
         $showPlatformLink = false;
-        
+
         // If the user is logged in, mark the message as read if appropriate
         // and provide a link to platform view instead of redirecting
         if (auth()->check()) {
@@ -20,7 +19,7 @@ class PublicAnnouncementController extends Controller
             if ($message->user_id === auth()->id() && is_null($message->read_at)) {
                 $message->update(['read_at' => now()]);
             }
-            
+
             // Set flag to show platform link
             $showPlatformLink = true;
         }

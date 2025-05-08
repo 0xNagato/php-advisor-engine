@@ -19,7 +19,6 @@ use Filament\Forms\Components\TextInput;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\ViewRecord;
 use Illuminate\Support\Facades\Notification as NotificationFacade;
-use Illuminate\Support\HtmlString;
 use Illuminate\Validation\ValidationException;
 
 class ViewVenueOnboarding extends ViewRecord
@@ -52,7 +51,7 @@ class ViewVenueOnboarding extends ViewRecord
                 ->modalSubmitAction(false)
                 ->modalCancelAction(false)
                 ->color('gray'),
-                
+
             Action::make('resend_agreement')
                 ->label('Resend Agreement')
                 ->icon('heroicon-o-envelope')

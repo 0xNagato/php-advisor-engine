@@ -7,9 +7,11 @@ namespace App\Http\Controllers;
 use App\Actions\GenerateVenueAgreement;
 use App\Models\VenueOnboarding;
 use App\Notifications\VenueAgreementCopy;
+use Exception;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Crypt;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\View\View;
 use Symfony\Component\HttpFoundation\StreamedResponse;
@@ -23,12 +25,12 @@ class VenueAgreementController extends Controller
         try {
             // Decrypt the ID
             $onboardingId = Crypt::decrypt($onboarding);
-            $onboardingModel = VenueOnboarding::findOrFail($onboardingId);
-            
+            $onboardingModel = VenueOnboarding::query()->findOrFail($onboardingId);
+
             return view('venue.agreement', [
                 'onboarding' => $onboardingModel,
             ]);
-        } catch (\Exception $e) {
+        } catch (Exception) {
             abort(404, 'The agreement could not be found.');
         }
     }
@@ -40,7 +42,7 @@ class VenueAgreementController extends Controller
     {
         return $this->publicDownload($request, $onboarding);
     }
-    
+
     /**
      * Public download endpoint that doesn't require signature verification
      */
@@ -49,25 +51,25 @@ class VenueAgreementController extends Controller
         try {
             // Decrypt the ID
             $onboardingId = Crypt::decrypt($onboarding);
-            $onboardingModel = VenueOnboarding::findOrFail($onboardingId);
-            
+            $onboardingModel = VenueOnboarding::query()->findOrFail($onboardingId);
+
             // Generate the agreement PDF
             $pdfContent = GenerateVenueAgreement::run($onboardingModel);
 
             // Stream the download to the client
             return response()->streamDownload(
-                fn () => print($pdfContent),
+                fn () => print ($pdfContent),
                 'prima-venue-agreement.pdf',
                 ['Content-Type' => 'application/pdf']
             );
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             // Log the error for debugging but don't expose details to the user
-            \Illuminate\Support\Facades\Log::error('Error downloading venue agreement', [
+            Log::error('Error downloading venue agreement', [
                 'encrypted_id' => $onboarding,
                 'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString()
+                'trace' => $e->getTraceAsString(),
             ]);
-            
+
             abort(404, 'The agreement could not be found.');
         }
     }
@@ -77,18 +79,18 @@ class VenueAgreementController extends Controller
         try {
             // Decrypt the ID
             $onboardingId = Crypt::decrypt($onboarding);
-            $onboardingModel = VenueOnboarding::findOrFail($onboardingId);
-            
+            $onboardingModel = VenueOnboarding::query()->findOrFail($onboardingId);
+
             $request->validate([
                 'email' => 'required|email',
             ]);
-            
+
             // Send email with the agreement attached
             Notification::route('mail', $request->input('email'))
                 ->notify(new VenueAgreementCopy($onboardingModel));
 
             return back()->with('success', 'Agreement has been sent to your email.');
-        } catch (\Exception $e) {
+        } catch (Exception) {
             abort(404, 'The agreement could not be found.');
         }
     }

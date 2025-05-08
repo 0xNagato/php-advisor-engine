@@ -11,6 +11,8 @@ use App\Models\Message;
 use App\Models\Region;
 use App\Models\User;
 use App\Services\PrimaShortUrls;
+use AshAllenDesign\ShortURL\Models\ShortURL;
+use AshAllenDesign\ShortURL\Models\ShortURLVisit;
 use Filament\Forms\Components\MarkdownEditor;
 use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Select;
@@ -101,29 +103,23 @@ class AnnouncementResource extends Resource
                     ->modalCancelAction(false)
                     ->modalContent(function (Announcement $announcement) {
                         // Find or create a message for this announcement
-                        $message = Message::firstOrCreate([
+                        $message = Message::query()->firstOrCreate([
                             'announcement_id' => $announcement->id,
                             'user_id' => auth()->id(),
                         ]);
 
                         // Generate short URL
                         $shortUrl = PrimaShortUrls::getMessageUrl($message->id);
-                        
+
                         // Get the short URL record to find visits data
                         $destinationUrl = route('public.announcement', ['message' => $message->id]);
-                        $shortUrlRecord = \AshAllenDesign\ShortURL\Models\ShortURL::where(
-                            'destination_url',
-                            $destinationUrl
-                        )->first();
-                        
+                        $shortUrlRecord = ShortURL::query()->where('destination_url', $destinationUrl)->first();
+
                         $visitsPerDay = collect();
-                        
+
                         if ($shortUrlRecord) {
                             // Get visits grouped by day
-                            $visitsPerDay = \AshAllenDesign\ShortURL\Models\ShortURLVisit::where(
-                                'short_url_id',
-                                $shortUrlRecord->id
-                            )
+                            $visitsPerDay = ShortURLVisit::query()->where('short_url_id', $shortUrlRecord->id)
                                 ->selectRaw(
                                     'DATE(visited_at) as visit_date, COUNT(DISTINCT ip_address) as unique_visits'
                                 )
@@ -132,17 +128,15 @@ class AnnouncementResource extends Resource
                                 ->get()
                                 ->map(function ($item) {
                                     $date = \Carbon\Carbon::parse($item->visit_date);
+
                                     return [
                                         'date' => $date->format('D M j, y'),
                                         'unique_visits' => $item->unique_visits,
                                     ];
                                 });
-                                
+
                             // Get total unique visits
-                            $totalUniqueVisits = \AshAllenDesign\ShortURL\Models\ShortURLVisit::where(
-                                'short_url_id',
-                                $shortUrlRecord->id
-                            )
+                            $totalUniqueVisits = ShortURLVisit::query()->where('short_url_id', $shortUrlRecord->id)
                                 ->distinct('ip_address')
                                 ->count('ip_address');
                         } else {
