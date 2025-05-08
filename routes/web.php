@@ -26,6 +26,9 @@ Route::get('/privacy', function () {
     return view('privacy');
 });
 
+Route::get('/announcement/{message}', [\App\Http\Controllers\PublicAnnouncementController::class, 'show'])
+    ->name('public.announcement');
+
 Route::get('/about-us', static function () {
     return view('web.about-us');
 })->name('about-us');
@@ -115,18 +118,18 @@ Route::prefix('venue')->name('venue.')->group(function () {
         ->missing(function () {
             return response()->view('errors.modification-request-expired', [], 403);
         });
-        
+
     // Venue Agreement routes
     Route::get('agreement/{onboarding}', [\App\Http\Controllers\VenueAgreementController::class, 'show'])
         ->name('agreement')
         ->middleware(['signed'])
         ->where('onboarding', '.*'); // Allow any character in the encrypted ID
-        
+
     // Create a public download endpoint
     Route::get('public-agreement-download/{onboarding}', [\App\Http\Controllers\VenueAgreementController::class, 'publicDownload'])
         ->name('agreement.public-download')
         ->where('onboarding', '.*'); // Allow any character in the encrypted ID
-        
+
     // Keep email endpoint with signed middleware
     Route::post('agreement/{onboarding}/email', [\App\Http\Controllers\VenueAgreementController::class, 'email'])
         ->name('agreement.email')

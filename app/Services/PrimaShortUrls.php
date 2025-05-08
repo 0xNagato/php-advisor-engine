@@ -55,12 +55,12 @@ class PrimaShortUrls
      */
     public static function getMessageUrl(int $messageId): string
     {
-        $cacheKey = "message_url_{$messageId}";
+        $cacheKey = "public_message_url_{$messageId}";
 
         return Cache::rememberForever($cacheKey, function () use ($messageId) {
             try {
-                // Generate the destination URL for viewing the message
-                $destinationUrl = route('filament.admin.resources.messages.view', ['record' => $messageId]);
+                // Generate the destination URL for viewing the message publicly
+                $destinationUrl = route('public.announcement', ['message' => $messageId]);
 
                 // First check if a short URL already exists for this message
                 $existingUrl = \AshAllenDesign\ShortURL\Models\ShortURL::query()
@@ -81,7 +81,7 @@ class PrimaShortUrls
                 // If there's an error, log it and return the original URL as fallback
                 Log::warning("Error creating message URL for message ID {$messageId}: ".$e->getMessage());
 
-                return route('filament.admin.resources.messages.view', ['record' => $messageId]);
+                return route('public.announcement', ['message' => $messageId]);
             }
         });
     }
