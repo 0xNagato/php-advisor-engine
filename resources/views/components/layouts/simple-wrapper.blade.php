@@ -22,7 +22,7 @@
                 </div>
             </div>
         @else
-            <div class="flex items-center justify-between p-4">
+            <div class="flex items-center justify-between">
                 <div>PRIMA</div>
                 <div>
                     @auth
