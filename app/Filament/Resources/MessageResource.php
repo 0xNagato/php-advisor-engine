@@ -35,7 +35,7 @@ class MessageResource extends Resource
             return ! session('simpleMode');
         }
 
-        return auth()->user()?->hasActiveRole(['concierge']);
+        return auth()->user()?->hasActiveRole(['concierge', 'super_admin', 'partner']);
     }
 
     public static function getPages(): array
