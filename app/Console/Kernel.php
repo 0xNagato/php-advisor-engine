@@ -18,6 +18,11 @@ class Kernel extends ConsoleKernel
     {
         $schedule->command('telescope:prune --hours=48')->daily();
 
+        // Check for scheduled SMS messages every minute
+        $schedule->command('sms:process-scheduled')
+            ->everyMinute()
+            ->withoutOverlapping();
+
         /**
          * Production-only scheduled tasks
          */
