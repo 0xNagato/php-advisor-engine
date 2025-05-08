@@ -7,8 +7,10 @@ use App\Filament\Resources\AnnouncementResource\Pages\CreateAnnouncement;
 use App\Filament\Resources\AnnouncementResource\Pages\EditAnnouncement;
 use App\Filament\Resources\AnnouncementResource\Pages\ListAnnouncements;
 use App\Models\Announcement;
+use App\Models\Message;
 use App\Models\Region;
 use App\Models\User;
+use App\Services\PrimaShortUrls;
 use Filament\Forms\Components\MarkdownEditor;
 use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Select;
@@ -87,6 +89,31 @@ class AnnouncementResource extends Resource
             ])
             ->defaultSort('created_at', 'desc')
             ->actions([
+                Action::make('copyLink')
+                    ->label('Copy Link')
+                    ->icon('heroicon-o-link')
+                    ->tooltip('Copy shareable link to clipboard')
+                    ->color('gray')
+                    ->visible(fn (Announcement $announcement) => $announcement->published_at !== null)
+                    ->modalHeading('Share Announcement Link')
+                    ->modalDescription('Copy this link to share the announcement with partners and concierges.')
+                    ->modalSubmitAction(false)
+                    ->modalCancelAction(false)
+                    ->modalContent(function (Announcement $announcement) {
+                        // Find or create a message for this announcement
+                        $message = Message::firstOrCreate([
+                            'announcement_id' => $announcement->id,
+                            'user_id' => auth()->id(),
+                        ]);
+
+                        // Generate short URL
+                        $shortUrl = PrimaShortUrls::getMessageUrl($message->id);
+
+                        // Return a view with copy functionality
+                        return view('filament.resources.announcement-resource.pages.copy-link-modal', [
+                            'shortUrl' => $shortUrl,
+                        ]);
+                    }),
                 Action::make('Publish')
                     ->icon('fas-paper-plane')
                     ->requiresConfirmation()
