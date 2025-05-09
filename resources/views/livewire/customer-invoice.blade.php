@@ -357,7 +357,7 @@
             @endif
 
             @if (
-                !$download &&
+                !$download && !isset($customerInvoice) &&
                     auth()->check() &&
                     auth()->user()->hasActiveRole('super_admin') &&
                     $booking->status !== BookingStatus::PENDING &&
@@ -380,6 +380,7 @@
                     </div>
                 </div>
             @endif
+            
             @if (!$download && auth()->check() && auth()->user()->hasActiveRole('super_admin') && !isset($customerInvoice))
                 <x-filament::actions :actions="[
                     $this->resendInvoiceAction,

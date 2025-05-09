@@ -5,11 +5,7 @@ namespace App\Livewire\Admin;
 use App\Actions\Booking\SendModificationRequestToVenueContacts;
 use App\Filament\Resources\BookingResource\Pages\ViewBooking;
 use App\Models\BookingModificationRequest;
-use App\Notifications\Booking\ConciergeModificationApproved;
-use App\Notifications\Booking\ConciergeModificationRejected;
-use App\Notifications\Booking\CustomerModificationApproved;
-use App\Notifications\Booking\CustomerModificationRejected;
-use App\Services\Booking\BookingCalculationService;
+use App\Services\BookingModificationService;
 use Filament\Forms\Components\Textarea;
 use Filament\Notifications\Notification;
 use Filament\Tables\Actions\Action;
@@ -17,7 +13,6 @@ use Filament\Tables\Actions\ActionGroup;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Filament\Widgets\TableWidget as BaseWidget;
-use Illuminate\Support\Facades\DB;
 use Throwable;
 
 class ConfirmationManagerModifications extends BaseWidget
@@ -98,37 +93,8 @@ class ConfirmationManagerModifications extends BaseWidget
      */
     public function approveModification(BookingModificationRequest $modificationRequest): void
     {
-        DB::transaction(function () use ($modificationRequest) {
-            $modificationRequest->markAsApproved();
-
-            // Delete existing earnings before updating booking
-            $modificationRequest->booking->earnings()->delete();
-
-            // Update the booking with new details using DB facade
-            DB::table('bookings')
-                ->where('id', $modificationRequest->booking->id)
-                ->update([
-                    'guest_count' => $modificationRequest->requested_guest_count,
-                    'schedule_template_id' => $modificationRequest->requested_schedule_template_id,
-                    'booking_at' => $modificationRequest->booking->booking_at->format('Y-m-d').' '.
-                        $modificationRequest->requested_time,
-                ]);
-
-            // Recalculate earnings with the new booking details
-            app(BookingCalculationService::class)->calculateEarnings($modificationRequest->booking->refresh());
-
-            // Send notifications
-            $modificationRequest->notify(new CustomerModificationApproved);
-            $modificationRequest->notify(new ConciergeModificationApproved);
-
-            activity()
-                ->performedOn($modificationRequest->booking)
-                ->withProperties([
-                    'modification_request_id' => $modificationRequest->id,
-                    'status' => 'approved',
-                ])
-                ->log('Venue approved booking modification request');
-        });
+        app(BookingModificationService::class)
+            ->approve($modificationRequest, 'Super Admin');
 
         Notification::make()
             ->success()
@@ -139,20 +105,8 @@ class ConfirmationManagerModifications extends BaseWidget
 
     public function rejectModification(BookingModificationRequest $modificationRequest, ?string $reason = null): void
     {
-        $modificationRequest->markAsRejected($reason);
-
-        // Send notifications
-        $modificationRequest->notify(new CustomerModificationRejected);
-        $modificationRequest->notify(new ConciergeModificationRejected);
-
-        activity()
-            ->performedOn($modificationRequest->booking)
-            ->withProperties([
-                'modification_request_id' => $modificationRequest->id,
-                'status' => 'rejected',
-                'reason' => $reason,
-            ])
-            ->log('Venue rejected booking modification request');
+        app(BookingModificationService::class)
+            ->reject($modificationRequest, $reason, 'Super Admin');
 
         Notification::make()
             ->success()
