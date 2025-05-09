@@ -504,7 +504,7 @@ const emailInvoice = async () => {
             : 'Enter Contact Information To Confirm.'
         }}
       </p>
-      <p class="text-sm text-gray-600">
+      <p class="text-sm text-gray-600" v-if="mingleData.totalWithTaxesInCents > 0">
         Enter payment details below so that PRIMA may secure your table request.
         60% of the fee paid is paid to
         {{ mingleData.venueName }} management for opening a previously sold-out
