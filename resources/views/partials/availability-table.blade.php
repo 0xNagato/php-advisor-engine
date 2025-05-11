@@ -2,10 +2,12 @@
     use App\Enums\VenueStatus;
     use App\Models\Region;
     use App\Models\Venue;
+    use App\Models\Cuisine;
 
     $envTopTiers = config('app.' . $this->region->id . '_top_tier_venues', '');
     $topTiers = blank($envTopTiers) ? [] : explode(',', (string) $envTopTiers);
     $topTiersQueue = $topTiers;
+    $showVenueModals = config('app.show_venue_modals', true);
 @endphp
 <div class="relative -mx-4 -mt-4 bg-white border-t sm:mx-0 sm:mt-0">
     <table class="w-full table-auto">
@@ -25,7 +27,7 @@
                 <tr
                     class="{{ $venue->status === VenueStatus::HIDDEN ? 'opacity-50' : '' }} {{ in_array($venue->id, $topTiers) ? 'bg-amber-100 even:bg-amber-50' : 'odd:bg-gray-100' }}">
                     <td class="pl-2 text-center w-28">
-                        <div class="flex items-center justify-center h-12">
+                        <div class="flex items-center justify-center h-12 {{ $showVenueModals ? 'cursor-pointer' : 'cursor-default' }}" @if($showVenueModals) x-on:click="$dispatch('open-modal', { id: 'venue-details-{{ $venue->id }}' })" @endif>
                             @if ($venue->logo_path)
                                 <img src="{{ $venue->logo }}" loading="lazy" alt="{{ $venue->name }}"
                                     class="object-contain max-h-[48px] max-w-[112px]">
@@ -189,5 +191,135 @@
                 </x-filament::button>
             </x-slot>
         </x-filament::modal>
+    @endif
+
+    @if($showVenueModals)
+    {{-- Venue Details Modal --}}
+    <x-filament::modal id="venue-details-{{ $venue->id }}" width="md" :close-button="false">
+        {{-- Header with logo and address --}}
+        <div class="flex items-start justify-between">
+            <div class="flex-shrink-0 w-1/2">
+                @if ($venue->logo_path)
+                    <img src="{{ $venue->logo }}" alt="{{ $venue->name }}" class="object-contain h-12">
+                @else
+                    <span class="text-lg font-bold">{{ $venue->name }}</span>
+                @endif
+            </div>
+            <div class="w-1/2 pr-8 text-right">
+                <div class="text-xs text-right text-gray-700">
+                    {{ $venue->address ?? '123 Main Street' }}
+                </div>
+                <div class="text-xs text-right text-gray-600 whitespace-nowrap">
+                    {{ $venue->getFormattedLocation() }}
+                </div>
+                <div class="text-xs text-right text-indigo-500">
+                    @if ($venue->cuisines && is_array($venue->cuisines) && count($venue->cuisines) > 0)
+                        @php
+                            $cuisineNames = collect($venue->cuisines)->map(function($cuisineId) {
+                                $cuisine = \App\Models\Cuisine::findById($cuisineId);
+                                return $cuisine ? $cuisine->name : null;
+                            })->filter()->join(', ');
+                        @endphp
+                        {{ $cuisineNames }}
+                    @else
+                        Cuisine information unavailable
+                    @endif
+                </div>
+            </div>
+        </div>
+
+        {{-- Close button in top right corner --}}
+        <div class="absolute z-10 top-4 right-4">
+            <button
+                x-on:click="$dispatch('close-modal', { id: 'venue-details-{{ $venue->id }}' })"
+                class="text-gray-700 hover:text-gray-900 focus:outline-none"
+            >
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+            </button>
+        </div>
+
+        {{-- Photo section - simplified carousel --}}
+        <div class="mt-0">
+            <div class="relative flex items-center justify-center overflow-hidden bg-gray-200 rounded-lg h-36">
+                @if (isset($venue->photo_path))
+                    <img src="{{ $venue->photo_path }}" alt="{{ $venue->name }}" class="object-cover w-full h-full">
+                @else
+                    <span class="text-gray-500">Venue Photo</span>
+                @endif
+            </div>
+        </div>
+
+        {{-- Description --}}
+        <div class="mt-0">
+            <p class="text-sm text-gray-700">
+                {{ $venue->clean_description ?: ($venue->description ?: 'This is a placeholder description for the venue. More details about the venue, cuisine, atmosphere, and special features would appear here. This is a placeholder description for the venue. More details about the venue, cuisine, atmosphere, and special features would appear here. This is a placeholder description for the venue. More details about the venue, cuisine, atmosphere, and special features would appear here.') }}
+            </p>
+        </div>
+
+        {{-- Buttons Row --}}
+        <div class="flex mt-1 space-x-2">
+            {{-- Book Now Button --}}
+            @php
+                // Get applicable schedule
+                $bookableSchedule = null;
+                $scheduleTime = '';
+
+                if(isset($venue->schedules) && count($venue->schedules) > 0) {
+                    foreach($venue->schedules as $schedule) {
+                        if($schedule->is_bookable && !$schedule->is_within_buffer) {
+                            $bookableSchedule = $schedule;
+
+                            // Extract display time (assuming start_time is available)
+                            if(isset($schedule->start_time)) {
+                                $timeObj = \Carbon\Carbon::createFromFormat('H:i:s', $schedule->start_time);
+                                $scheduleTime = $timeObj->format('g:i A');
+                            }
+
+                            break;
+                        }
+                    }
+                }
+
+                $isPrimeTime = $bookableSchedule ? $bookableSchedule->prime_time : false;
+                $hasLowInventory = $bookableSchedule ? $bookableSchedule->has_low_inventory : false;
+                $isBookable = $bookableSchedule ? true : false;
+
+                $buttonClass = $hasLowInventory ?
+                    'bg-[#E29B46] hover:bg-orange-500' :
+                    ($isPrimeTime ?
+                        'bg-green-600 hover:bg-green-500' :
+                        'bg-info-400 hover:bg-info-500');
+            @endphp
+
+            <div class="w-1/2">
+                @if($isBookable)
+                    <button
+                        wire:click="createBooking({{ $bookableSchedule->id }}, '{{ $bookableSchedule->booking_date->format('Y-m-d') }}')"
+                        class="w-full py-2 px-4 {{ $buttonClass }} text-white text-xs font-semibold rounded-md focus:outline-none"
+                    >
+                        Book {{ $scheduleTime }}
+                    </button>
+                @else
+                    <button
+                        class="w-full px-4 py-2 text-xs font-semibold text-gray-500 bg-gray-200 rounded-md cursor-not-allowed focus:outline-none"
+                    >
+                        No Available Times
+                    </button>
+                @endif
+            </div>
+
+            {{-- Return to Calendar Button --}}
+            <div class="w-1/2">
+                <button
+                    x-on:click="$dispatch('close-modal', { id: 'venue-details-{{ $venue->id }}' })"
+                    class="w-full px-4 py-2 text-xs font-semibold text-white bg-indigo-600 rounded-md hover:bg-indigo-700 focus:outline-none"
+                >
+                    Return To Calendar
+                </button>
+            </div>
+        </div>
+    </x-filament::modal>
     @endif
 @endforeach

@@ -5,7 +5,9 @@ namespace App\Actions\VipCode;
 use App\Models\VipCode;
 use chillerlan\QRCode\QRCode;
 use chillerlan\QRCode\QROptions;
+use DOMDocument;
 use Illuminate\Support\Str;
+use Storage;
 
 class GenerateVipReferralQRCode
 {
@@ -60,7 +62,7 @@ class GenerateVipReferralQRCode
         $svgUrl = asset('storage/'.$svgPath);
 
         // Store the SVG in storage for printing
-        \Storage::disk('public')->put($svgPath, $brandedSvg);
+        Storage::disk('public')->put($svgPath, $brandedSvg);
 
         return [
             'image' => $qrCodeImage, // Base64 PNG for display
@@ -80,7 +82,7 @@ class GenerateVipReferralQRCode
         string $fontFamily,
         QROptions $qrCustomSvgOptions
     ): string {
-        $dom = new \DOMDocument;
+        $dom = new DOMDocument;
         $dom->preserveWhiteSpace = false;
         $dom->formatOutput = true;
 

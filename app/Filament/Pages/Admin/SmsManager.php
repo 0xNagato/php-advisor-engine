@@ -68,7 +68,7 @@ class SmsManager extends Page implements HasTable
                         if (! $state) {
                             // Reset scheduling data if toggled off
                             $this->data['scheduled_time'] = null;
-                        } elseif (empty($this->data['scheduled_time'])) {
+                        } elseif (blank($this->data['scheduled_time'])) {
                             // Set default to 10 minutes in the future
                             $userTimezone = auth()->user()->timezone ?? config('app.timezone');
                             $this->data['scheduled_time'] = now()->timezone($userTimezone)->addMinutes(10)->format('Y-m-d H:i:s');

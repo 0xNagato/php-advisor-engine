@@ -14,15 +14,13 @@ class VipCodeController extends Controller
      */
     public function printQRCode(Request $request): View
     {
-        $vipCode = VipCode::where('code', $request->input('code'))->firstOrFail();
+        $vipCode = VipCode::query()->where('code', $request->input('code'))->firstOrFail();
         $templateUrl = asset('images/printer_template.png');
 
         // The SVG path will be passed directly to the view
         $svgPath = $request->input('svg_path');
 
-        if (! $svgPath || ! Storage::disk('public')->exists($svgPath)) {
-            abort(404, 'QR code image not found');
-        }
+        abort_if(! $svgPath || ! Storage::disk('public')->exists($svgPath), 404, 'QR code image not found');
 
         $qrUrl = asset('storage/'.$svgPath);
 

@@ -105,6 +105,99 @@ class Venue extends Model
         ];
     }
 
+    /**
+     * Get formatted neighborhood name
+     */
+    protected function formattedNeighborhood(): Attribute
+    {
+        return Attribute::make(
+            get: function () {
+                if (blank($this->neighborhood)) {
+                    return '';
+                }
+
+                try {
+                    // Use the Neighborhood model to get the properly formatted name
+                    $model = Neighborhood::query()->find($this->neighborhood);
+
+                    return $model ? $model->name : '';
+                } catch (Throwable) {
+                    return '';
+                }
+            }
+        );
+    }
+
+    /**
+     * Get formatted region name
+     */
+    protected function formattedRegion(): Attribute
+    {
+        return Attribute::make(
+            get: function () {
+                if (blank($this->region)) {
+                    return '';
+                }
+
+                try {
+                    // Use the Region model to get the properly formatted name
+                    $model = Region::query()->find($this->region);
+
+                    return $model ? $model->name : '';
+                } catch (Throwable) {
+                    return '';
+                }
+            }
+        );
+    }
+
+    /**
+     * Get full formatted address
+     */
+    protected function formattedAddress(): Attribute
+    {
+        return Attribute::make(
+            get: function () {
+                $parts = [];
+
+                if (filled($this->address)) {
+                    $parts[] = $this->address;
+                }
+
+                $location = [];
+                if (filled($this->formattedNeighborhood)) {
+                    $location[] = $this->formattedNeighborhood;
+                }
+
+                if (filled($this->formattedRegion)) {
+                    $location[] = $this->formattedRegion;
+                }
+
+                if (filled($location)) {
+                    $parts[] = implode(', ', $location);
+                }
+
+                return $parts;
+            }
+        );
+    }
+
+    /**
+     * Get the venue description with cite tags removed
+     */
+    protected function cleanDescription(): Attribute
+    {
+        return Attribute::make(get: function () {
+            if (blank($this->description)) {
+                return '';
+            }
+            // Remove all cite tags and their attributes
+            $cleanDescription = preg_replace('/<\/?cite[^>]*>/', '', $this->description);
+
+            return $cleanDescription;
+        });
+    }
+
     protected static function boot(): void
     {
         parent::boot();
@@ -392,5 +485,38 @@ class Venue extends Model
     public function venueGroup(): BelongsTo
     {
         return $this->belongsTo(VenueGroup::class);
+    }
+
+    /**
+     * Get a formatted location string for display in modals
+     */
+    public function getFormattedLocation(): string
+    {
+        $neighborhood = null;
+        $region = null;
+
+        try {
+            if (filled($this->neighborhood)) {
+                $neighborhood = Neighborhood::query()->find($this->neighborhood);
+            }
+
+            if (filled($this->region)) {
+                $region = Region::query()->find($this->region);
+            }
+        } catch (Throwable) {
+            // Silently handle errors
+        }
+
+        $parts = [];
+
+        if ($neighborhood) {
+            $parts[] = $neighborhood->name;
+        }
+
+        if ($region) {
+            $parts[] = $region->name;
+        }
+
+        return implode(', ', $parts);
     }
 }
