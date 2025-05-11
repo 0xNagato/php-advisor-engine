@@ -30,11 +30,11 @@ class VenueAgreementCopy extends Notification implements ShouldQueue
 
         return (new MailMessage)
             ->subject('Your PRIMA Venue Agreement')
-            ->greeting("Hello {$this->onboarding->first_name},")
+            ->greeting("Hello {$this->onboarding->company_name},")
             ->line('Thank you for completing the PRIMA venue onboarding process.')
             ->line('As requested, here is a copy of your agreement details:')
             ->line("Company Name: {$this->onboarding->company_name}")
-            ->line("Signed By: {$this->onboarding->first_name} {$this->onboarding->last_name}")
+            ->line("Signed By: {$this->onboarding->company_name}")
             ->line('Date: '.$this->onboarding->created_at->format('F j, Y'))
             ->attachData(
                 $pdfContent,
