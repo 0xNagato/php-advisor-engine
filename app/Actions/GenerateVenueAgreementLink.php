@@ -20,24 +20,20 @@ class GenerateVenueAgreementLink
         // Encrypt the onboarding ID for security
         $encryptedId = Crypt::encrypt($onboarding->id);
 
-        // Generate a signed URL that expires in 30 days
-        $signedUrl = URL::temporarySignedRoute(
-            'venue.agreement',
-            now()->addDays(30),
-            ['onboarding' => $encryptedId]
-        );
+        // Generate a regular URL (no longer using signatures)
+        $agreementUrl = route('venue.agreement', ['onboarding' => $encryptedId]);
 
         // Convert to a short URL for easier sharing
         try {
-            $shortUrl = ShortURL::destinationUrl($signedUrl)
+            $shortUrl = ShortURL::destinationUrl($agreementUrl)
                 ->trackVisits()
                 ->trackIPAddress()
                 ->make();
 
             return $shortUrl->default_short_url;
         } catch (Exception) {
-            // If there's an error with the short URL service, return the original signed URL
-            return $signedUrl;
+            // If there's an error with the short URL service, return the original URL
+            return $agreementUrl;
         }
     }
 }

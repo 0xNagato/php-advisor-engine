@@ -142,7 +142,7 @@
         <div class="signature-grid">
             <p>
                 <span class="signature-label">Accepted By:</span>
-                {{ $first_name }} {{ $last_name }}
+                {{ $company_name }}
             </p>
             <p>
                 <span class="signature-label">Date of Acceptance:</span>

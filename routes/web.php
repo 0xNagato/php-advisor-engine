@@ -122,7 +122,6 @@ Route::prefix('venue')->name('venue.')->group(function () {
     // Venue Agreement routes
     Route::get('agreement/{onboarding}', [\App\Http\Controllers\VenueAgreementController::class, 'show'])
         ->name('agreement')
-        ->middleware(['signed'])
         ->where('onboarding', '.*'); // Allow any character in the encrypted ID
 
     // Create a public download endpoint
@@ -130,10 +129,9 @@ Route::prefix('venue')->name('venue.')->group(function () {
         ->name('agreement.public-download')
         ->where('onboarding', '.*'); // Allow any character in the encrypted ID
 
-    // Keep email endpoint with signed middleware
+    // Make email endpoint public too
     Route::post('agreement/{onboarding}/email', [\App\Http\Controllers\VenueAgreementController::class, 'email'])
         ->name('agreement.email')
-        ->middleware(['signed'])
         ->where('onboarding', '.*'); // Allow any character in the encrypted ID
 });
 
