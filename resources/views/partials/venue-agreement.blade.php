@@ -124,7 +124,7 @@
             <div>
                 <p class="font-semibold">Accepted By:</p>
                 <p>
-                    @if (filled($first_name) && filled($last_name))
+                    @if ($agreement_accepted && filled($first_name) && filled($last_name))
                         {{ $first_name }} {{ $last_name }}
                     @else
                         {{ $company_name }}
