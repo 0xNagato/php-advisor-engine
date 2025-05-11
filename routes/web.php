@@ -129,10 +129,7 @@ Route::prefix('venue')->name('venue.')->group(function () {
         ->name('agreement.public-download')
         ->where('onboarding', '.*'); // Allow any character in the encrypted ID
 
-    // Make email endpoint public too
-    Route::post('agreement/{onboarding}/email', [\App\Http\Controllers\VenueAgreementController::class, 'email'])
-        ->name('agreement.email')
-        ->where('onboarding', '.*'); // Allow any character in the encrypted ID
+    // Email endpoint removed as it's now handled by the Livewire component
 });
 
 Route::get('/join/{type}/{id}', DirectConciergeInvitation::class)

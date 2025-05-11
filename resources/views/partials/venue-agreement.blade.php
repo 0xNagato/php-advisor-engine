@@ -123,7 +123,13 @@
         <div class="grid grid-cols-2 gap-4">
             <div>
                 <p class="font-semibold">Accepted By:</p>
-                <p>{{ $company_name }}</p>
+                <p>
+                    @if (filled($first_name) && filled($last_name))
+                        {{ $first_name }} {{ $last_name }}
+                    @else
+                        {{ $company_name }}
+                    @endif
+                </p>
             </div>
             <div>
                 <p class="font-semibold">Date of Acceptance:</p>

@@ -6,13 +6,10 @@ namespace App\Http\Controllers;
 
 use App\Actions\GenerateVenueAgreement;
 use App\Models\VenueOnboarding;
-use App\Notifications\VenueAgreementCopy;
 use Exception;
-use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Notification;
 use Illuminate\View\View;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
@@ -74,24 +71,5 @@ class VenueAgreementController extends Controller
         }
     }
 
-    public function email(Request $request, string $onboarding): RedirectResponse
-    {
-        try {
-            // Decrypt the ID
-            $onboardingId = Crypt::decrypt($onboarding);
-            $onboardingModel = VenueOnboarding::query()->findOrFail($onboardingId);
-
-            $request->validate([
-                'email' => 'required|email',
-            ]);
-
-            // Send email with the agreement attached
-            Notification::route('mail', $request->input('email'))
-                ->notify(new VenueAgreementCopy($onboardingModel));
-
-            return back()->with('success', 'Agreement has been sent to your email.');
-        } catch (Exception) {
-            abort(404, 'The agreement could not be found.');
-        }
-    }
+    // Email method removed as it's now handled by the Livewire component
 }

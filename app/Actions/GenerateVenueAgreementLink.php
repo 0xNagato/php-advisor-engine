@@ -8,7 +8,6 @@ use App\Models\VenueOnboarding;
 use AshAllenDesign\ShortURL\Facades\ShortURL;
 use Exception;
 use Illuminate\Support\Facades\Crypt;
-use Illuminate\Support\Facades\URL;
 use Lorisleiva\Actions\Concerns\AsAction;
 
 class GenerateVenueAgreementLink
