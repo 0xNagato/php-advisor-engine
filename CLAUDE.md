@@ -38,3 +38,21 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - Never clear any type of cache locally
 - Do not stage files or commit changes until they have been tested and confirmed
 - Use the MySQL MCP whenever database lookups are needed
+
+## Configuration Notes
+
+### Venue Onboarding Steps
+The onboarding process for venues can be configured via the `VENUE_ONBOARDING_STEPS` environment variable or in `config/app.php`. The available steps are:
+
+- `company`: Basic company information
+- `venues`: Venue names and regions
+- `booking-hours`: Define operating hours
+- `prime-hours`: Set prime time hours (when reservations require payment)
+- `incentive`: Configure non-prime incentives
+- `agreement`: Accept terms and agreement
+
+Default configuration: `company,venues,agreement` (excludes booking-hours, prime-hours, and incentive steps)
+
+When the incentive step is hidden, the system uses the following defaults:
+- Non-prime incentives: Enabled (true)
+- Per diem amount: $10.00 per guest

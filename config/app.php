@@ -314,7 +314,8 @@ return [
     |
     */
     'venue_onboarding_unique_phone' => env('VENUE_ONBOARDING_UNIQUE_PHONE', false),
-    'public_venue_onboarding_enabled' => env('PUBLIC_VENUE_ONBOARDING_ENABLED', false),
+    'public_venue_onboarding_enabled' => env('PUBLIC_VENUE_ONBOARDING_ENABLED', true),
+    'venue_onboarding_steps' => env('VENUE_ONBOARDING_STEPS', 'company,venues,agreement'),
 
     /*
     |--------------------------------------------------------------------------
