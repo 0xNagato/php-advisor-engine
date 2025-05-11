@@ -354,4 +354,16 @@ return [
 
     'invoice_html_preview' => env('INVOICE_HTML_PREVIEW', false),
 
+    /*
+    |--------------------------------------------------------------------------
+    | Feature Flags
+    |--------------------------------------------------------------------------
+    |
+    | Feature flags to control certain functionality in the application
+    |
+    */
+    'features' => [
+        'show_qr_code_print_button' => env('FEATURE_SHOW_QR_PRINT_BUTTON', false),
+    ],
+
 ];

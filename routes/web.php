@@ -170,4 +170,7 @@ Route::middleware(['auth'])->group(function () {
         ->name('admin.booking-calculator');
 });
 
+// VIP Code print route
+Route::get('/vip-code/print', [App\Http\Controllers\VipCodeController::class, 'printQRCode'])->name('vip-code.print');
+
 require __DIR__.'/auth.php';
