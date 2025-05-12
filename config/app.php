@@ -322,7 +322,7 @@ return [
     | Venue display options
     |--------------------------------------------------------------------------
     */
-    'show_venue_modals' => env('SHOW_VENUE_MODALS', default: true),
+    'show_venue_modals' => env('SHOW_VENUE_MODALS', default: false),
 
     /*
     |--------------------------------------------------------------------------
