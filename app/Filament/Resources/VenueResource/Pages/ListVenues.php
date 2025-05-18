@@ -16,6 +16,9 @@ use App\Traits\HandlesPartySizeMapping;
 use App\Traits\ImpersonatesOther;
 use Carbon\Carbon;
 use Exception;
+use Maatwebsite\Excel\Excel;
+use pxlrbt\FilamentExcel\Actions\Tables\ExportAction;
+use pxlrbt\FilamentExcel\Exports\ExcelExport;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\ListRecords;
 use Filament\Tables\Actions\Action;
@@ -442,6 +445,18 @@ class ListVenues extends ListRecords
                     ->when($this->region, fn ($query) => $query->where('venues.region', $this->region))
                     ->orderByDesc('users.updated_at')
             )
+            ->headerActions([
+                ExportAction::make('export')
+                    ->label('Export CSV')
+                    ->icon('heroicon-o-arrow-down-tray')
+                    ->color('gray')
+                    ->exports([
+                        ExcelExport::make('venues')
+                            ->fromTable()
+                            ->withWriterType(Excel::CSV)
+                            ->withFilename('Venues-Export-' . now()->format('Y-m-d'))
+                    ])
+            ])
             ->columns([
                 TextColumn::make('name')
                     ->size('xs')
