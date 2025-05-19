@@ -2,6 +2,7 @@
 
 namespace App\Filament\Pages\Concierge;
 
+use App\Actions\Region\GetUserRegion;
 use App\Constants\BookingPercentages;
 use App\Models\Concierge;
 use App\Models\Region;
@@ -44,7 +45,7 @@ class EarningsPotential extends Page
 
     public function mount(): void
     {
-        $region = Region::query()->find(session('region', 'miami'));
+        $region = Region::query()->find(session('region', GetUserRegion::run()->id));
         $this->timezone = $region?->timezone;
         $this->currency = $region?->currency;
         $this->form->fill();
