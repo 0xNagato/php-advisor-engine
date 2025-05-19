@@ -266,7 +266,7 @@ class VenueOnboarding extends Component
         }
 
         // Ensure we always have at least company and agreement steps
-        if (empty($this->steps)) {
+        if (blank($this->steps)) {
             $this->steps = [
                 'company' => self::ALL_AVAILABLE_STEPS['company'],
                 'agreement' => self::ALL_AVAILABLE_STEPS['agreement'],

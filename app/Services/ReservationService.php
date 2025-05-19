@@ -103,7 +103,7 @@ class ReservationService
                 $query->whereIn('status', $statuses);
             })
             ->where('venue_type', '!=', VenueType::HIKE_STATION)
-            // Filter venues based on advance booking window
+            // Filter venues based on the advance booking window
             ->where(function ($query) use ($dayDifference) {
                 $query->where('advance_booking_window', '=', 0) // Always include venues with 0 (no restrictions)
                     ->orWhere('advance_booking_window', '>=', $dayDifference); // Include venues with sufficient window
@@ -121,13 +121,17 @@ class ReservationService
                     }
                 })
             ->when($this->cuisines, function ($query) {
-                $query->whereJsonContains('cuisines', $this->cuisines);
+                $query->where(function ($q) {
+                    foreach ($this->cuisines as $cuisine) {
+                        $q->orWhereJsonContains('cuisines', $cuisine);
+                    }
+                });
             })
             ->when($this->neighborhood, function ($query) {
                 $query->where('neighborhood', $this->neighborhood);
             })
             ->when($this->specialty && count($this->specialty) > 0, function ($query) {
-                // Handle array of specialty values
+                // Handle an array of specialty values
                 $query->where(function ($q) {
                     foreach ($this->specialty as $spec) {
                         $q->orWhereJsonContains('specialty', $spec);
