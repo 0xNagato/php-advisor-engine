@@ -12,11 +12,12 @@ use Illuminate\Support\Facades\Notification;
 use function Pest\Laravel\actingAs;
 
 beforeEach(function () {
-    // Create a venue with factory (includes contacts)
+    // Create a venue with a factory (includes contacts)
     $this->venue = Venue::factory()->create([
         'payout_venue' => 60,
         'non_prime_fee_per_head' => 10,
         'timezone' => 'UTC',
+        'region' => 'miami',
     ]);
 
     // Create a schedule template for the venue
@@ -51,8 +52,6 @@ it('sends notification with a 5-minute delay to venue contacts if booking is con
     $result = $this->action::run(
         $this->scheduleTemplate->id,
         $bookingData,
-        'UTC',
-        'USD'
     );
 
     $booking = $result->booking;
@@ -94,8 +93,6 @@ it('does not send notification to venue contacts if booking is canceled', functi
     $result = $this->action::run(
         $this->scheduleTemplate->id,
         $bookingData,
-        'UTC',
-        'USD'
     );
 
     $booking = $result->booking;

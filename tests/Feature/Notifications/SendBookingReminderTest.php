@@ -19,6 +19,7 @@ beforeEach(function () {
         'payout_venue' => 60,
         'non_prime_fee_per_head' => 10,
         'timezone' => 'UTC',
+        'region' => 'miami',
     ]);
     $this->concierge = Concierge::factory()->create();
     $this->partner = Partner::factory()->create(['percentage' => 6]);
@@ -59,8 +60,6 @@ it('sends a booking reminder notification for eligible bookings', function () {
     $result = $this->action::run(
         $this->scheduleTemplate->id,
         $bookingData,
-        'UTC',
-        'USD'
     );
 
     $booking = $result->booking;
@@ -107,9 +106,7 @@ it('does not send notifications for past or non-eligible bookings', function () 
 
     $resultPast = $this->action::run(
         $this->scheduleTemplate->id,
-        $pastBookingData,
-        'UTC',
-        'USD'
+        $pastBookingData
     );
     $pastBooking = $resultPast->booking;
 
@@ -125,9 +122,7 @@ it('does not send notifications for past or non-eligible bookings', function () 
 
     $resultNonEligible = $this->action::run(
         $this->scheduleTemplate->id,
-        $nonEligibleBookingData,
-        'UTC',
-        'USD'
+        $nonEligibleBookingData
     );
     $nonEligibleBooking = $resultNonEligible->booking;
 
@@ -160,9 +155,7 @@ it('does not send notifications when booking does not match the 40-minute thresh
 
     $result = $this->action::run(
         $this->scheduleTemplate->id,
-        $bookingData,
-        'UTC',
-        'USD'
+        $bookingData
     );
 
     $booking = $result->booking;
@@ -199,9 +192,7 @@ it('does not send a reminder notification if a reminder log already exists', fun
 
     $result = $this->action::run(
         $this->scheduleTemplate->id,
-        $bookingData,
-        'UTC',
-        'USD'
+        $bookingData
     );
 
     $booking = $result->booking;

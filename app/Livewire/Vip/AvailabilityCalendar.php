@@ -150,8 +150,6 @@ class AvailabilityCalendar extends Page
             $result = CreateBooking::run(
                 scheduleTemplateId: $scheduleTemplateId,
                 data: $data,
-                timezone: $this->region->timezone,
-                currency: $this->region->currency,
                 vipCode: $this->vipCode,
                 source: 'vip',
                 device: $device

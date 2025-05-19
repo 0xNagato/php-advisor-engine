@@ -35,13 +35,11 @@ class CreateBooking
     public function handle(
         int $scheduleTemplateId,
         array $data,
-        string $timezone,
-        string $currency,
         ?VipCode $vipCode = null,
         ?string $source = null,
         ?string $device = null
     ): CreateBookingReturnData {
-        $scheduleTemplate = ScheduleTemplate::query()->findOrFail($scheduleTemplateId);
+        $scheduleTemplate = ScheduleTemplate::query()->with('venue.inRegion')->findOrFail($scheduleTemplateId);
         $venue = $scheduleTemplate->venue;
 
         // Get the schedule with override data
@@ -50,11 +48,14 @@ class CreateBooking
             ->first();
 
         if (! $schedule) {
-            // If no schedule view record exists, fall back to template
+            // If no schedule view record exists, fall back to the template
             $isPrime = $scheduleTemplate->prime_time;
         } else {
             $isPrime = $schedule->prime_time;
         }
+
+        $timezone = $venue->inRegion->timezone ?? $scheduleTemplate->venue->timezone;
+        $currency = $venue->inRegion->currency ?? $scheduleTemplate->venue->currency;
 
         /**
          * @var Carbon $bookingAt
@@ -75,7 +76,10 @@ class CreateBooking
         if ($bookingAt->isToday()) {
             // Check minimum advance booking time (global setting)
             $minAdvanceTime = $currentDate->copy()->addMinutes(ReservationService::MINUTES_PAST);
-            throw_if($bookingAt->lt($minAdvanceTime), new RuntimeException('Booking cannot be created less than '.ReservationService::MINUTES_PAST.' minutes in advance for today.'));
+            throw_if(
+                $bookingAt->lt($minAdvanceTime),
+                new RuntimeException('Booking cannot be created less than '.ReservationService::MINUTES_PAST.' minutes in advance for today.')
+            );
 
             // Check venue's specific cutoff time if set
             if ($venue->cutoff_time) {
@@ -114,7 +118,10 @@ class CreateBooking
                     'is_past_cutoff' => $isPastCutoff,
                 ]);
 
-                throw_if($isPastCutoff, new RuntimeException('Booking cannot be created after the venue\'s cutoff time for today.'));
+                throw_if(
+                    $isPastCutoff,
+                    new RuntimeException('Booking cannot be created after the venue\'s cutoff time for today.')
+                );
             }
         }
 
@@ -126,9 +133,15 @@ class CreateBooking
 
         // Check if concierge is restricted to specific venues
         if ($concierge && $concierge->venue_group_id && filled($concierge->allowed_venue_ids)) {
-            throw_unless(in_array($venue->id, $concierge->allowed_venue_ids), new RuntimeException('You are not authorized to book at this venue.'));
+            throw_unless(
+                in_array($venue->id, $concierge->allowed_venue_ids),
+                new RuntimeException('You are not authorized to book at this venue.')
+            );
 
-            throw_if($venue->venue_group_id !== $concierge->venue_group_id, new RuntimeException('You are not authorized to book at venues outside your venue group.'));
+            throw_if(
+                $venue->venue_group_id !== $concierge->venue_group_id,
+                new RuntimeException('You are not authorized to book at venues outside your venue group.')
+            );
         }
 
         // Prepare meta data for non-prime bookings

@@ -17,6 +17,8 @@ beforeEach(function () {
     $this->venue = Venue::factory()->create([
         'payout_venue' => 60,
         'non_prime_fee_per_head' => 10,
+        'timezone' => 'UTC',
+        'region' => 'miami',
     ]);
     $this->concierge = Concierge::factory()->create();
     $this->partner = Partner::factory()->create(['percentage' => 6]);
@@ -25,7 +27,7 @@ beforeEach(function () {
         $mock->shouldReceive('getAttribute')->with('payout_percentage')->andReturn(10);
     });
 
-    // Create base template (party_size = 0)
+    // Create a base template (party_size = 0)
     $baseTemplate = ScheduleTemplate::factory()->create([
         'venue_id' => $this->venue->id,
         'start_time' => '14:00:00',
@@ -52,9 +54,7 @@ it('it can create a booking successfully', function () {
 
     $this->action::run(
         $this->scheduleTemplate->id,
-        $bookingData,
-        'UTC',
-        'USD'
+        $bookingData
     );
 
     assertDatabaseHas('bookings', [
@@ -68,8 +68,6 @@ test('it creates a prime booking successfully with all earnings', function () {
     $this->venue->user->update(['partner_referral_id' => $this->partner->id]);
     $this->scheduleTemplate->update(['prime_time' => 1]);
 
-    $timezone = 'UTC';
-    $currency = 'USD';
     $data = [
         'date' => now()->addDays(2)->format('Y-m-d'),
         'guest_count' => 2,
@@ -78,9 +76,7 @@ test('it creates a prime booking successfully with all earnings', function () {
     // Act
     $result = $this->action->handle(
         $this->scheduleTemplate->id,
-        $data,
-        $timezone,
-        $currency
+        $data
     );
 
     // Assert
@@ -98,15 +94,13 @@ it('throws exception when booking is more than 30 days in advance', function () 
 
     expect(fn () => CreateBooking::run(
         $this->scheduleTemplate->id,
-        $bookingData,
-        'UTC',
-        'USD'
+        $bookingData
     ))
         ->toThrow(RuntimeException::class, 'Booking cannot be created more than 30 days in advance.');
 });
 
 it('creates booking with correct timezone', function () {
-    $timezone = 'America/New_York';
+    $timezone = $this->venue->inRegion->timezone;
     $bookingData = [
         'date' => now()->addDay()->format('Y-m-d'),
         'guest_count' => 2,
@@ -114,9 +108,7 @@ it('creates booking with correct timezone', function () {
 
     CreateBooking::run(
         $this->scheduleTemplate->id,
-        $bookingData,
-        $timezone,
-        'USD'
+        $bookingData
     );
 
     $booking = Booking::first();
@@ -140,8 +132,6 @@ it('creates booking with vip code when provided', function () {
     CreateBooking::run(
         $this->scheduleTemplate->id,
         $bookingData,
-        'UTC',
-        'USD',
         $vipCode
     );
 
@@ -167,9 +157,7 @@ it('it calculates correct total amount based on guest count for non prime', func
         [
             'date' => now()->addDay()->format('Y-m-d'),
             'guest_count' => $guestCount,
-        ],
-        'UTC',
-        'USD'
+        ]
     );
 
     $bookingEarnings = getNonPrimeBookingEarnings($guestCount, $this->venue);

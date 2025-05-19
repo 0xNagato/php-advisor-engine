@@ -31,9 +31,7 @@ it('processes a full refund for a booked and paid booking', function () {
     // Create a booking
     $bookingResult = (new CreateBooking)->handle(
         $this->scheduleTemplate->id,
-        ['date' => now()->addDays(2)->format('Y-m-d'), 'guest_count' => 2],
-        'UTC',
-        'USD'
+        ['date' => now()->addDays(2)->format('Y-m-d'), 'guest_count' => 2]
     );
 
     $booking = $bookingResult->booking;
@@ -71,8 +69,6 @@ it('handles a refund failure for a booked and paid booking', function () {
     $bookingResult = (new CreateBooking)->handle(
         $this->scheduleTemplate->id,
         ['date' => now()->addDays(2)->format('Y-m-d'), 'guest_count' => 2],
-        'UTC',
-        'USD'
     );
 
     $booking = $bookingResult->booking;

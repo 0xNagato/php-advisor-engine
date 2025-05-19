@@ -333,7 +333,6 @@ class ReservationHub extends Page
 
     public function createBooking(int $scheduleTemplateId, ?string $date = null, ?string $source = 'reservation_hub'): void
     {
-        $userTimezone = $this->timezone;
         $data = $this->form->getState();
         $data['date'] = $date ?? $data['date'];
 
@@ -342,9 +341,6 @@ class ReservationHub extends Page
             $result = CreateBooking::run(
                 scheduleTemplateId: $scheduleTemplateId,
                 data: $data,
-                timezone: $userTimezone,
-                currency: $this->currency,
-                vipCode: null,
                 source: $source,
                 device: $device
             );

@@ -60,8 +60,6 @@ class BookingController extends Controller
             $booking = CreateBooking::run(
                 $validatedData['schedule_template_id'],
                 $validatedData,
-                $region->timezone,
-                $region->currency,
                 null,
                 'api',
                 $device

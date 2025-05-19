@@ -53,9 +53,7 @@ it('sends follow-up SMS for eligible bookings from the previous day', function (
 
     $resultPast = $this->action::run(
         $this->scheduleTemplate->id,
-        $pastBookingData,
-        'UTC',
-        'USD'
+        $pastBookingData
     );
     $pastBooking = $resultPast->booking;
 
@@ -105,9 +103,7 @@ it('does not send follow-up notification for ineligible bookings from the previo
     // Create a booking with no guest phone (non-eligible)
     $resultNoPhone = $this->action::run(
         $this->scheduleTemplate->id,
-        $pastBookingData,
-        'UTC',
-        'USD'
+        $pastBookingData
     );
     $noPhoneBooking = $resultNoPhone->booking;
 
@@ -119,9 +115,7 @@ it('does not send follow-up notification for ineligible bookings from the previo
     // Create a booking with an invalid status (non-eligible)
     $resultInvalidStatus = $this->action::run(
         $this->scheduleTemplate->id,
-        $pastBookingData,
-        'UTC',
-        'USD'
+        $pastBookingData
     );
     $invalidStatusBooking = $resultInvalidStatus->booking;
 
@@ -164,9 +158,7 @@ it('does not send follow-up SMS if a reminder log already exists', function () {
 
     $resultPast = $this->action::run(
         $this->scheduleTemplate->id,
-        $pastBookingData,
-        'UTC',
-        'USD'
+        $pastBookingData
     );
     $pastBooking = $resultPast->booking;
 
@@ -214,17 +206,13 @@ it('sends follow-up SMS to multiple eligible bookings', function () {
     // Create two eligible bookings
     $resultPast1 = $this->action::run(
         $this->scheduleTemplate->id,
-        $pastBookingData1,
-        'UTC',
-        'USD'
+        $pastBookingData1
     );
     $pastBooking1 = $resultPast1->booking;
 
     $resultPast2 = $this->action::run(
         $this->scheduleTemplate->id,
-        $pastBookingData2,
-        'UTC',
-        'USD'
+        $pastBookingData2
     );
     $pastBooking2 = $resultPast2->booking;
 
@@ -301,9 +289,7 @@ it('sends SMS only if customer has a booking yesterday and not today', function 
 
     $yesterdayResult = $this->action::run(
         $this->scheduleTemplate->id,
-        $yesterdayBookingData,
-        'UTC',
-        'USD'
+        $yesterdayBookingData
     );
 
     $yesterdayBooking = $yesterdayResult->booking;
@@ -311,11 +297,11 @@ it('sends SMS only if customer has a booking yesterday and not today', function 
     $yesterdayBooking->update([
         'guest_phone' => '+1234567890',
         'status' => BookingStatus::CONFIRMED,
-        'booking_at' => $yesterday->format('Y-m-d H:i:s'), // Set exact time to be part of yesterday
+        'booking_at' => $yesterday->format('Y-m-d H:i:s'), // Set the exact time to be part of yesterday
     ]);
 
     // Create a booking for today with the same guest_phone
-    $todayBookingTime = $today->copy()->addHours(1)->format('H:i:s'); // Ensure it meets the 35-minute rule
+    $todayBookingTime = $today->copy()->addHour()->format('H:i:s'); // Ensure it meets the 35-minute rule
     $todayBookingData = [
         'date' => $today->format('Y-m-d'), // Today
         'guest_count' => 2,
@@ -325,9 +311,7 @@ it('sends SMS only if customer has a booking yesterday and not today', function 
 
     $todayResult = $this->action::run(
         $this->scheduleTemplate->id,
-        $todayBookingData,
-        'UTC',
-        'USD'
+        $todayBookingData
     );
 
     $todayBooking = $todayResult->booking;
@@ -335,7 +319,7 @@ it('sends SMS only if customer has a booking yesterday and not today', function 
     $todayBooking->update([
         'guest_phone' => '+1234567890', // Same guest phone as yesterday's booking
         'status' => BookingStatus::CONFIRMED,
-        'booking_at' => $today->format('Y-m-d H:i:s'), // Set exact time to be part of today
+        'booking_at' => $today->format('Y-m-d H:i:s'), // Set the exact time to be part of today
     ]);
 
     // Carbon set noon for testing
@@ -364,7 +348,7 @@ it('sends SMS only if customer has a booking yesterday and not today', function 
 
     Artisan::call('prima:bookings-send-daily-customer-follow-up');
 
-    // Assert that SMS is sent to the customer as they have a booking yesterday and no booking today
+    // Assert that SMS is sent to the customer as they had a booking yesterday and no booking today
     Notification::assertSentTo(
         [$yesterdayBooking],
         CustomerFollowUp::class,
@@ -395,9 +379,7 @@ it('sends SMS only within the allowed time range in the venue timezone', functio
 
     $resultPast = $this->action::run(
         $this->scheduleTemplate->id,
-        $yesterdayBookingData,
-        'UTC',
-        'USD'
+        $yesterdayBookingData
     );
 
     $yesterdayBooking = $resultPast->booking;
@@ -439,9 +421,7 @@ it('not sends SMS because not within the allowed time range in the venue timezon
 
     $resultPast = $this->action::run(
         $this->scheduleTemplate->id,
-        $yesterdayBookingData,
-        'UTC',
-        'USD'
+        $yesterdayBookingData
     );
 
     $yesterdayBooking = $resultPast->booking;

@@ -18,7 +18,8 @@ use function Pest\Laravel\actingAs;
 beforeEach(function () {
     $earningCreationService = new EarningCreationService;
     $promotionalService = new ConciergePromotionalEarningsService;
-    $primeEarningsCalculationService = new PrimeEarningsCalculationService($earningCreationService, $promotionalService);
+    $primeEarningsCalculationService = new PrimeEarningsCalculationService($earningCreationService,
+        $promotionalService);
     $nonPrimeEarningsCalculationService = new NonPrimeEarningsCalculationService($earningCreationService);
 
     $this->service = new BookingCalculationService(
@@ -29,6 +30,8 @@ beforeEach(function () {
     $this->venue = Venue::factory()->create([
         'payout_venue' => 60,
         'non_prime_fee_per_head' => 10,
+        'timezone' => 'UTC',
+        'region' => 'miami',
     ]);
     $this->concierge = Concierge::factory()->create();
     $this->partner = Partner::factory()->create(['percentage' => 6]);
@@ -78,9 +81,7 @@ test('Non-prime booking with VenueTimeSlot override calculates earnings correctl
         [
             'date' => now()->addDay()->format('Y-m-d'),
             'guest_count' => $guestCount,
-        ],
-        'UTC',
-        'USD'
+        ]
     );
 
     $pricePerHead = $override->price_per_head;
