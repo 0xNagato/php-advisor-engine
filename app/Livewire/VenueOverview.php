@@ -47,12 +47,8 @@ class VenueOverview extends BaseWidget
             $this->createStat('Prime Bookings', $earnings['prime_bookings'], null, $prevEarnings['prime_bookings'])
                 ->chart($chartData['prime_bookings'])
                 ->color('primary'),
-            $this->createStat(
-                'Incentivised Bookings',
-                $earnings['incentivised_bookings'],
-                null,
-                $prevEarnings['incentivised_bookings']
-            )
+            $this->createStat('Incentivised Bookings', $earnings['incentivised_bookings'], null,
+                $prevEarnings['incentivised_bookings'])
                 ->chart($chartData['incentivised_bookings'])
                 ->color('warning'),
             $this->createStat('Total Earnings', $totalEarnings, $currencySymbol, $prevTotalEarnings)
