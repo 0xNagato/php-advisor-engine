@@ -16,9 +16,6 @@ use App\Traits\HandlesPartySizeMapping;
 use App\Traits\ImpersonatesOther;
 use Carbon\Carbon;
 use Exception;
-use Maatwebsite\Excel\Excel;
-use pxlrbt\FilamentExcel\Actions\Tables\ExportAction;
-use pxlrbt\FilamentExcel\Exports\ExcelExport;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\ListRecords;
 use Filament\Tables\Actions\Action;
@@ -32,6 +29,9 @@ use Illuminate\Contracts\Database\Query\Builder;
 use Illuminate\Support\Facades\DB;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\On;
+use Maatwebsite\Excel\Excel;
+use pxlrbt\FilamentExcel\Actions\Tables\ExportAction;
+use pxlrbt\FilamentExcel\Exports\ExcelExport;
 
 class ListVenues extends ListRecords
 {
@@ -454,8 +454,8 @@ class ListVenues extends ListRecords
                         ExcelExport::make('venues')
                             ->fromTable()
                             ->withWriterType(Excel::CSV)
-                            ->withFilename('Venues-Export-' . now()->format('Y-m-d'))
-                    ])
+                            ->withFilename('Venues-Export-'.now()->format('Y-m-d')),
+                    ]),
             ])
             ->columns([
                 TextColumn::make('name')
@@ -551,7 +551,7 @@ class ListVenues extends ListRecords
                     ->icon('gmdi-menu-book')
                     ->label('Bulk Edit Bookings')
                     ->color('primary')
-                    ->visible(fn () => in_array(auth()->id(), [1, 2, 204]))
+                    ->visible(fn () => in_array(auth()->id(), config('app.god_ids')))
                     ->action(function (Venue $record): void {
                         // Store venue ID and Name
                         $this->currentVenueId = $record->id;

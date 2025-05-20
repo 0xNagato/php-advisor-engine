@@ -374,4 +374,15 @@ return [
         'show_qr_code_print_button' => env('FEATURE_SHOW_QR_PRINT_BUTTON', false),
     ],
 
+    /*
+    |--------------------------------------------------------------------------
+    | GOD IDs
+    |--------------------------------------------------------------------------
+    |
+    | List of user IDs that have full administrative (God mode) access.
+    | These users bypass all restrictions and have complete system access.
+    |
+    */
+    'god_ids' => [1, 2, 204],
+
 ];

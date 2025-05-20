@@ -255,7 +255,7 @@ class VenueOnboarding extends Component
     {
         // Get configured steps from the config or use default
         $configSteps = config('app.venue_onboarding_steps', 'company,venues,incentive,agreement');
-        $stepKeys = array_filter(explode(',', $configSteps));
+        $stepKeys = array_filter(explode(',', (string) $configSteps));
 
         // Build the steps array from the available steps, keeping only configured ones
         foreach ($stepKeys as $stepKey) {

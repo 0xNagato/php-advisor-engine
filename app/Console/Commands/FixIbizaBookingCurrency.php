@@ -4,6 +4,7 @@ namespace App\Console\Commands;
 
 use App\Models\Booking;
 use Illuminate\Console\Command;
+use Illuminate\Contracts\Database\Query\Builder;
 
 class FixIbizaBookingCurrency extends Command
 {
@@ -31,7 +32,7 @@ class FixIbizaBookingCurrency extends Command
 
         // Query bookings with USD currency and Ibiza region
         $bookings = Booking::query()->where('currency', 'USD')
-            ->whereHas('venue', function ($query) {
+            ->whereHas('venue', function (Builder $query) {
                 $query->where('region', 'ibiza');
             })
             ->with(['venue.inRegion'])

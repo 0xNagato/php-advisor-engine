@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\VenueResource\Pages;
 
+use App\Actions\Venue\DeleteVenueAction;
 use App\Actions\Venue\UpdateVenueGroupEarnings;
 use App\Enums\VenueStatus;
 use App\Filament\Resources\VenueResource;
@@ -802,6 +803,47 @@ class EditVenue extends EditRecord
                     ->requiresConfirmation()
                     ->modalHeading('Change Venue Status')
                     ->modalDescription('Are you sure you want to change the status of this venue?'),
+
+                Action::make('delete')
+                    ->label('Delete Venue')
+                    ->icon('heroicon-o-trash')
+                    ->color('danger')
+                    ->visible(fn () => in_array(auth()->id(), config('app.god_ids', [])))
+                    ->requiresConfirmation()
+                    ->modalHeading('Delete Venue')
+                    ->modalDescription('Are you sure you want to delete this venue? This action cannot be undone and all venue data will be permanently removed.')
+                    ->action(function () use ($venue) {
+                        try {
+                            // Check if this is the only venue in a group before deleting
+                            $isOnlyVenueInGroup = $venue->venue_group_id !== null &&
+                             $venue->venueGroup &&
+                             $venue->venueGroup->venues()->count() === 1;
+
+                            DeleteVenueAction::run($venue);
+
+                            if ($isOnlyVenueInGroup) {
+                                Notification::make()
+                                    ->title('Venue and Venue Group Deleted')
+                                    ->body('The venue and its venue group have been successfully deleted. Any managers or concierges who were only associated with this venue group have been suspended.')
+                                    ->success()
+                                    ->send();
+                            } else {
+                                Notification::make()
+                                    ->title('Venue Deleted')
+                                    ->body('The venue has been successfully deleted.')
+                                    ->success()
+                                    ->send();
+                            }
+
+                            $this->redirect(VenueResource::getUrl('index'));
+                        } catch (RuntimeException $e) {
+                            Notification::make()
+                                ->title('Error')
+                                ->body($e->getMessage())
+                                ->danger()
+                                ->send();
+                        }
+                    }),
             ])
                 ->icon('heroicon-o-ellipsis-vertical')
                 ->color('primary')
