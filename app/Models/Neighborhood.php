@@ -99,6 +99,31 @@ class Neighborhood extends Model
             'region' => 'miami',
             'name' => 'Doral',
         ],
+        [
+            'id' => 'sunny_isles',
+            'region' => 'miami',
+            'name' => 'Sunny Isles',
+        ],
+        [
+            'id' => 'bal_harbour',
+            'region' => 'miami',
+            'name' => 'Bal Harbour',
+        ],
+        [
+            'id' => 'surfside',
+            'region' => 'miami',
+            'name' => 'Surfside',
+        ],
+        [
+            'id' => 'hollywood_beach',
+            'region' => 'miami',
+            'name' => 'Hollywood Beach',
+        ],
+        [
+            'id' => 'fort_lauderdale',
+            'region' => 'miami',
+            'name' => 'Fort Lauderdale',
+        ],
 
         // Ibiza
         [

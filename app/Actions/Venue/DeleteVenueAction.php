@@ -9,6 +9,7 @@ use DB;
 use Exception;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Schema;
+use Log;
 use Lorisleiva\Actions\Concerns\AsAction;
 use RuntimeException;
 
@@ -126,7 +127,7 @@ class DeleteVenueAction
                     }
 
                     // Update all concierges at once to set venue_group_id to null
-                    if (! empty($conciergeData)) {
+                    if (filled($conciergeData)) {
                         DB::table('concierges')
                             ->where('venue_group_id', $venueGroup->id)
                             ->update(['venue_group_id' => null]);
@@ -141,7 +142,7 @@ class DeleteVenueAction
                             ->count();
 
                         // Get the user associated with this concierge
-                        $user = User::find($data['user_id']);
+                        $user = User::query()->find($data['user_id']);
 
                         if ($otherGroupsCount === 0 && $user) {
                             // This concierge is not part of any other venue group, suspend their account
@@ -172,10 +173,9 @@ class DeleteVenueAction
                             'deleted_by' => Auth::id(),
                             'deleted_by_name' => Auth::user()->name ?? 'System',
                             'primary_manager_id' => $venueGroup->primary_manager_id,
-                            'suspended_managers' => $managers->filter(function ($manager) {
+                            'suspended_managers' => $managers->filter(fn ($manager) =>
                                 // Count managers who were suspended
-                                return $manager->suspended_at !== null;
-                            })->count(),
+                                $manager->suspended_at !== null)->count(),
                             'total_managers' => count($managerIds),
                         ])
                         ->log('Venue group deleted');
@@ -227,7 +227,7 @@ class DeleteVenueAction
         // Find all schedule template IDs for this venue
         $scheduleTemplateIds = $venue->scheduleTemplates()->pluck('id')->toArray();
 
-        if (empty($scheduleTemplateIds)) {
+        if (blank($scheduleTemplateIds)) {
             return; // No schedule templates, so no bookings
         }
 
@@ -283,7 +283,7 @@ class DeleteVenueAction
                     DB::table($table)
                         ->where($column, $venue->id)
                         ->update([$column => null]);
-                } catch (Exception $e) {
+                } catch (Exception) {
                     // If not nullable, attempt to delete the records
                     try {
                         DB::table($table)
@@ -291,7 +291,7 @@ class DeleteVenueAction
                             ->delete();
                     } catch (Exception $innerE) {
                         // Log the error but continue with other tables
-                        \Log::warning("Could not handle references in table {$table}: {$innerE->getMessage()}");
+                        Log::warning("Could not handle references in table {$table}: {$innerE->getMessage()}");
                     }
                 }
             }
@@ -357,7 +357,7 @@ class DeleteVenueAction
         // Find all schedule template IDs for this venue
         $scheduleTemplateIds = $venue->scheduleTemplates()->pluck('id')->toArray();
 
-        if (empty($scheduleTemplateIds)) {
+        if (blank($scheduleTemplateIds)) {
             return;
         }
 
@@ -374,7 +374,7 @@ class DeleteVenueAction
                 ->delete();
 
             // Log the deletion
-            \Log::info('Deleted '.$nonReportingBookings->count().' non-reporting bookings for venue '.$venue->id);
+            Log::info('Deleted '.$nonReportingBookings->count().' non-reporting bookings for venue '.$venue->id);
         }
 
         // Note: We already check for reporting bookings in ensureVenueHasNoBookings(),
