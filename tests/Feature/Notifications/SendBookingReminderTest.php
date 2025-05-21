@@ -2,6 +2,7 @@
 
 use App\Actions\Booking\CreateBooking;
 use App\Enums\BookingStatus;
+use App\Models\Booking;
 use App\Models\BookingCustomerReminderLog;
 use App\Models\Concierge;
 use App\Models\Partner;
@@ -98,25 +99,24 @@ it('sends a booking reminder notification for eligible bookings', function () {
 
 it('does not send notifications for past or non-eligible bookings', function () {
     $nowUtc = Carbon::now('UTC');
+    $yesterday = $nowUtc->copy()->subDay();
 
-    $pastBookingData = [
-        'date' => $nowUtc->subDay()->format('Y-m-d'),
+    // Create a past booking directly using the factory
+    $yesterdayDateTime = $yesterday->format('Y-m-d').' '.$this->scheduleTemplate->start_time;
+    $pastBooking = Booking::factory()->create([
         'guest_count' => 2,
-    ];
-
-    $resultPast = $this->action::run(
-        $this->scheduleTemplate->id,
-        $pastBookingData
-    );
-    $pastBooking = $resultPast->booking;
-
-    $pastBooking->update([
+        'booking_at' => $yesterdayDateTime,
+        'booking_at_utc' => Carbon::parse($yesterdayDateTime, 'UTC'),
+        'concierge_id' => $this->concierge->id,
+        'schedule_template_id' => $this->scheduleTemplate->id,
         'guest_phone' => '+1234567890',
         'status' => BookingStatus::CONFIRMED,
     ]);
 
+    // Fixed booking data for non-eligible booking
     $nonEligibleBookingData = [
         'date' => $nowUtc->format('Y-m-d'),
+        'booking_at' => $nowUtc->format('Y-m-d').' '.$this->scheduleTemplate->start_time,
         'guest_count' => 2,
     ];
 
