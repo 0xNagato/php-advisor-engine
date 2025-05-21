@@ -245,7 +245,7 @@ class PaymentExports extends Page implements HasTable
     {
         return [
             TextColumn::make('name') // This will be the User's name, but formatted to show group info
-                ->label('Venue Group')
+            ->label('Venue Group')
                 ->sortable(['first_name', 'last_name'])
                 ->html()
                 ->formatStateUsing(function (User $record): string {

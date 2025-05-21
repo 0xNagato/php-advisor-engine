@@ -6,7 +6,7 @@ use App\Enums\BookingStatus;
 use App\Models\Booking;
 use App\Models\Concierge;
 use App\Models\Region;
-use App\Models\ScheduleWithBooking;
+use App\Models\ScheduleWithBookingMV;
 use App\Models\Venue;
 use App\Models\VipCode;
 use App\Services\SalesTaxService;
@@ -153,7 +153,7 @@ class GenerateDemoBookings
             $dateRange = collect($startDate->daysUntil($endDate));
 
             foreach ($dateRange as $date) {
-                $availableSchedules = ScheduleWithBooking::query()->where('venue_id', $venue->id)
+                $availableSchedules = ScheduleWithBookingMV::query()->where('venue_id', $venue->id)
                     ->where('is_available', true)
                     ->where('booking_date', $date->format('Y-m-d'))
                     ->inRandomOrder()
@@ -178,7 +178,7 @@ class GenerateDemoBookings
      */
     protected function createBooking(
         Venue $venue,
-        ScheduleWithBooking $schedule,
+        ScheduleWithBookingMV $schedule,
         Concierge $concierge,
         SalesTaxService $salesTaxService,
         Collection $regions
@@ -246,7 +246,7 @@ class GenerateDemoBookings
                     break 2;
                 }
 
-                $availableSchedules = ScheduleWithBooking::query()
+                $availableSchedules = ScheduleWithBookingMV::query()
                     ->where('venue_id', $venue->id)
                     ->where('is_available', true)
                     ->where('booking_date', $date->format('Y-m-d'))

@@ -49,7 +49,7 @@ class BookingResource extends Resource
                             });
 
                             // Also check meta->venue->id for bookings that might not have schedule_template relation
-                            $subquery->orWhereRaw("JSON_UNQUOTE(JSON_EXTRACT(meta, '$.venue.id')) IN (".implode(',', $venueIds).')');
+                            $subquery->orWhereIn(DB::raw("(meta->'venue'->>'id')::int"), $venueIds);
                         } else {
                             // Use join to check schedule_template.venue_id
                             $subquery->orWhereExists(function ($scheduleQuery) use ($allowedVenueIds) {
@@ -60,7 +60,8 @@ class BookingResource extends Resource
                             });
 
                             // Also check meta->venue->id for bookings that might not have schedule_template relation
-                            $subquery->orWhereRaw("JSON_UNQUOTE(JSON_EXTRACT(meta, '$.venue.id')) IN (".implode(',', $allowedVenueIds).')');
+                            $subquery->orWhereRaw("(meta->'venue'->>'id')::int IN (".implode(',',
+                                $allowedVenueIds).')');
                         }
                     }
                 });

@@ -76,7 +76,7 @@ class UserResource extends Resource
             ->query(
                 static::getModel()::query()
                     ->with(['roleProfiles.role'])
-                    ->orderByRaw('COALESCE(last_login_at, "1000-01-01") DESC')
+                    ->orderByRaw("COALESCE(last_login_at, '1000-01-01') DESC")
             )
             ->recordUrl(fn (User $record): string => EditUser::getUrl(['record' => $record]))
             ->columns([

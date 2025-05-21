@@ -5,7 +5,7 @@ namespace Database\Seeders;
 use App\Enums\BookingStatus;
 use App\Models\Booking;
 use App\Models\Concierge;
-use App\Models\ScheduleWithBooking;
+use App\Models\ScheduleWithBookingMV;
 use App\Models\Venue;
 use App\Services\SalesTaxService;
 use Carbon\Carbon;
@@ -46,7 +46,7 @@ class BookingSeeder extends Seeder
 
     private function createBooking(
         Venue $venue,
-        ScheduleWithBooking $schedule,
+        ScheduleWithBookingMV $schedule,
         Collection $concierges,
         SalesTaxService $salesTaxService
     ): void {

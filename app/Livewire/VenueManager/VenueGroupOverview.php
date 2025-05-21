@@ -76,10 +76,10 @@ class VenueGroupOverview extends BaseWidget
             ->whereIn('schedule_templates.venue_id', $this->venues->pluck('id'))
             ->whereBetween('bookings.confirmed_at', [$startDate, $endDate])
             ->select(
-                DB::raw('COUNT(DISTINCT CASE WHEN bookings.is_prime = 1 THEN bookings.id END) as prime_bookings'),
-                DB::raw('COUNT(DISTINCT CASE WHEN bookings.is_prime = 0 THEN bookings.id END) as incentivised_bookings'),
-                DB::raw('SUM(CASE WHEN earnings.type IN ("'.EarningType::VENUE->value.'", "'.EarningType::REFUND->value.'") THEN earnings.amount ELSE 0 END) as venue_earnings'),
-                DB::raw('SUM(CASE WHEN earnings.type = "venue_paid" THEN earnings.amount ELSE 0 END) as venue_paid'),
+                DB::raw('COUNT(DISTINCT CASE WHEN bookings.is_prime = true THEN bookings.id END) as prime_bookings'),
+                DB::raw('COUNT(DISTINCT CASE WHEN bookings.is_prime = false THEN bookings.id END) as incentivised_bookings'),
+                DB::raw("SUM(CASE WHEN earnings.type IN ('".EarningType::VENUE->value."', '".EarningType::REFUND->value."') THEN earnings.amount ELSE 0 END) as venue_earnings"),
+                DB::raw("SUM(CASE WHEN earnings.type = 'venue_paid' THEN earnings.amount ELSE 0 END) as venue_paid"),
                 'earnings.currency'
             )
             ->groupBy('earnings.currency')
@@ -102,14 +102,14 @@ class VenueGroupOverview extends BaseWidget
             ->join('schedule_templates', 'bookings.schedule_template_id', '=', 'schedule_templates.id')
             ->whereIn('schedule_templates.venue_id', $this->venues->pluck('id'))
             ->whereBetween('bookings.confirmed_at', [$startDate, $endDate])
-            ->selectRaw('
+            ->selectRaw("
                 DATE(bookings.confirmed_at) as date,
                 earnings.currency,
-                COUNT(DISTINCT CASE WHEN bookings.is_prime = 1 THEN bookings.id END) as prime_bookings,
-                COUNT(DISTINCT CASE WHEN bookings.is_prime = 0 THEN bookings.id END) as incentivised_bookings,
-                SUM(CASE WHEN earnings.type IN ("'.EarningType::VENUE->value.'", "'.EarningType::REFUND->value.'") THEN earnings.amount ELSE 0 END) as prime_earnings,
-                SUM(CASE WHEN earnings.type = "venue_paid" THEN earnings.amount ELSE 0 END) as incentivised_cost
-            ')
+                COUNT(DISTINCT CASE WHEN bookings.is_prime = true THEN bookings.id END) as prime_bookings,
+                COUNT(DISTINCT CASE WHEN bookings.is_prime = false THEN bookings.id END) as incentivised_bookings,
+                SUM(CASE WHEN earnings.type IN ('".EarningType::VENUE->value."', '".EarningType::REFUND->value."') THEN earnings.amount ELSE 0 END) as prime_earnings,
+                SUM(CASE WHEN earnings.type = 'venue_paid' THEN earnings.amount ELSE 0 END) as incentivised_cost
+            ")
             ->groupBy('date', 'earnings.currency')
             ->orderBy('date')
             ->get();

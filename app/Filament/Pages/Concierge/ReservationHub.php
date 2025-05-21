@@ -11,7 +11,7 @@ use App\Filament\Pages\IbizaHikeStationBooking;
 use App\Models\Booking;
 use App\Models\Region;
 use App\Models\ScheduleTemplate;
-use App\Models\ScheduleWithBooking;
+use App\Models\ScheduleWithBookingMV;
 use App\Models\Venue;
 use App\Services\BookingService;
 use App\Traits\FormatsPhoneNumber;
@@ -277,7 +277,7 @@ class ReservationHub extends Page
 
     protected function getSchedulesToday($venueId, $reservationTime, $endTimeForQuery, $guestCount): Collection
     {
-        $schedules = ScheduleWithBooking::with('venue')
+        $schedules = ScheduleWithBookingMV::with('venue')
             ->where('venue_id', $venueId)
             ->where('booking_date', $this->form->getState()['date'])
             ->where('party_size', $guestCount)
@@ -313,7 +313,7 @@ class ReservationHub extends Page
         $guestCount
     ): Collection {
         if ($requestedDate->isSameDay($currentDate)) {
-            return ScheduleWithBooking::with('venue')
+            return ScheduleWithBookingMV::with('venue')
                 ->where('venue_id', $venueId)
                 ->where('start_time', $this->form->getState()['reservation_time'])
                 ->where('party_size', $guestCount)
@@ -331,8 +331,11 @@ class ReservationHub extends Page
         $this->schedulesThisWeek = new Collection;
     }
 
-    public function createBooking(int $scheduleTemplateId, ?string $date = null, ?string $source = 'reservation_hub'): void
-    {
+    public function createBooking(
+        int $scheduleTemplateId,
+        ?string $date = null,
+        ?string $source = 'reservation_hub'
+    ): void {
         $data = $this->form->getState();
         $data['date'] = $date ?? $data['date'];
 

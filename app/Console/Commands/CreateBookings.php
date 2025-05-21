@@ -4,7 +4,7 @@ namespace App\Console\Commands;
 
 use App\Models\Concierge;
 use App\Models\Partner;
-use App\Models\ScheduleWithBooking;
+use App\Models\ScheduleWithBookingMV;
 use App\Services\SalesTaxService;
 use Illuminate\Console\Command;
 
@@ -32,7 +32,7 @@ class CreateBookings extends Command
         $scheduleId = $this->argument('schedule');
         $number = $this->argument('number');
 
-        $schedule = ScheduleWithBooking::query()->find($scheduleId);
+        $schedule = ScheduleWithBookingMV::query()->find($scheduleId);
 
         if (! $schedule) {
             $this->error("Schedule with id $scheduleId not found.");

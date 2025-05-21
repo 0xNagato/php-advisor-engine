@@ -22,7 +22,7 @@ trait ManagesBookingForms
 
     public const int MINUTES_FUTURE = 120;
 
-    public const int MAX_DAYS_IN_ADVANCE = 30;
+    public const int MAX_DAYS_IN_ADVANCE = 90;
 
     public string $timezone;
 
@@ -132,8 +132,8 @@ trait ManagesBookingForms
     protected function getCuisineInput(): Select
     {
         $cuisines = Cuisine::all()->groupBy('group')
-            ->mapWithKeys(fn ($items, $group) => [$group => $items->pluck('name', 'id')->toArray()]
-            )->toArray();
+            ->mapWithKeys(fn ($items, $group) => [$group => $items->pluck('name', 'id')->toArray()])
+            ->toArray();
 
         return Select::make('cuisine')
             ->prefixIcon('phosphor-bowl-steam-bold')

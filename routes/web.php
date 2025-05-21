@@ -8,6 +8,7 @@ use App\Http\Controllers\DownloadInvoiceController;
 use App\Http\Controllers\DownloadVenueGroupInvoiceController;
 use App\Http\Controllers\DownloadVenueInvoiceController;
 use App\Http\Controllers\ExceptionFormController;
+use App\Http\Controllers\VenueAgreementController;
 use App\Livewire\Booking\CreateBooking;
 use App\Livewire\Booking\CustomerInvoice;
 use App\Livewire\Concierge\ConciergeInvitation;
@@ -48,7 +49,9 @@ Route::get('/concierges', static function () {
 Route::get('/story', Story::class)->name('story');
 
 Route::get('/onboarding/{token?}', VenueOnboarding::class)->name('onboarding');
-/** @deprecated */
+/**
+ * @deprecated
+*/
 Route::get('/onboarding/token/{token?}', VenueOnboarding::class)->name('onboarding.token');
 
 Route::redirect('/app', config('app.apple_app_store_url'));
@@ -120,12 +123,15 @@ Route::prefix('venue')->name('venue.')->group(function () {
         });
 
     // Venue Agreement routes
-    Route::get('agreement/{onboarding}', [\App\Http\Controllers\VenueAgreementController::class, 'show'])
+    Route::get('agreement/{onboarding}', [VenueAgreementController::class, 'show'])
         ->name('agreement')
         ->where('onboarding', '.*'); // Allow any character in the encrypted ID
 
     // Create a public download endpoint
-    Route::get('public-agreement-download/{onboarding}', [\App\Http\Controllers\VenueAgreementController::class, 'publicDownload'])
+    Route::get(
+        'public-agreement-download/{onboarding}',
+        [VenueAgreementController::class, 'publicDownload']
+    )
         ->name('agreement.public-download')
         ->where('onboarding', '.*'); // Allow any character in the encrypted ID
 

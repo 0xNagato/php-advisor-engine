@@ -93,15 +93,15 @@ class ConciergeOverview extends BaseWidget
             ->whereIn('earnings.type', values: $earningTypes)
             ->whereNotIn('bookings.status', [BookingStatus::REFUNDED, BookingStatus::PARTIALLY_REFUNDED])
             ->select(
-                DB::raw('COUNT(
+                DB::raw("COUNT(
                     DISTINCT CASE WHEN
-                        earnings.type IN ("'.EarningType::CONCIERGE->value.'", "'.EarningType::CONCIERGE_BOUNTY->value.'")
-                        and earnings.type NOT IN ("'.EarningType::REFUND->value.'")
+                        earnings.type IN ('".EarningType::CONCIERGE->value."', '".EarningType::CONCIERGE_BOUNTY->value."')
+                        and earnings.type NOT IN ('".EarningType::REFUND->value."')
                     THEN bookings.id END
                     )
-                as number_of_direct_bookings'),
-                DB::raw('COUNT(DISTINCT CASE WHEN earnings.type IN
-                ("'.EarningType::CONCIERGE_REFERRAL_1->value.'", "'.EarningType::CONCIERGE_REFERRAL_2->value.'") THEN bookings.id END) as number_of_referral_bookings'),
+                as number_of_direct_bookings"),
+                DB::raw("COUNT(DISTINCT CASE WHEN earnings.type IN
+                ('".EarningType::CONCIERGE_REFERRAL_1->value."', '".EarningType::CONCIERGE_REFERRAL_2->value."') THEN bookings.id END) as number_of_referral_bookings"),
                 DB::raw('SUM(earnings.amount) as total_earnings'),
                 'earnings.currency'
             )
@@ -129,7 +129,7 @@ class ConciergeOverview extends BaseWidget
             ->when($this->isVip, function (Builder $query) {
                 $query->whereNotNull('vip_code_id');
             })
-            ->join('bookings', 'earnings.booking_id', '=', 'bookings.id')
+            ->join('bookings', 'earnings.booking_id', ' = ', 'bookings.id')
             ->where('earnings.user_id', $this->concierge->user_id)
             ->whereBetween('bookings.confirmed_at', [$startDate, $endDate])
             ->whereIn('earnings.type', $earningTypes)

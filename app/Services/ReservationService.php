@@ -6,7 +6,7 @@ use App\Actions\Region\GetUserRegion;
 use App\Enums\VenueStatus;
 use App\Enums\VenueType;
 use App\Models\Region;
-use App\Models\ScheduleWithBooking;
+use App\Models\ScheduleWithBookingMV;
 use App\Models\Venue;
 use App\Traits\HandlesVenueClosures;
 use Illuminate\Database\Eloquent\Collection;
@@ -384,7 +384,7 @@ class ReservationService
      * Get schedules for a specific venue and date.
      *
      * @param  int  $venueId  The ID of the venue
-     * @return Collection Collection of ScheduleWithBooking models
+     * @return Collection Collection of ScheduleWithBookingMV models
      */
     private function getSchedulesByDate(int $venueId): Collection
     {
@@ -392,7 +392,7 @@ class ReservationService
         $startTime = $this->calculateStartTime($reservationTime);
         $endTimeForQuery = $this->calculateEndTime($startTime, $this->region->timezone, $this->timeslotCount);
 
-        return ScheduleWithBooking::query()
+        return ScheduleWithBookingMV::query()
             ->with('venue')
             ->where('venue_id', $venueId)
             ->where('booking_date', $this->date)
@@ -407,14 +407,14 @@ class ReservationService
      * Get schedules for a specific venue for the upcoming week.
      *
      * @param  int  $venueId  The ID of the venue
-     * @return Collection Collection of ScheduleWithBooking models
+     * @return Collection Collection of ScheduleWithBookingMV models
      */
     private function getSchedulesThisWeek(int $venueId): Collection
     {
         $currentDate = Carbon::now($this->region->timezone);
         $startTime = $this->calculateStartTime($this->reservationTime);
 
-        return ScheduleWithBooking::query()
+        return ScheduleWithBookingMV::query()
             ->with('venue')
             ->where('venue_id', $venueId)
             ->where('start_time', $startTime)

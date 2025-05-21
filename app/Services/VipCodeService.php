@@ -6,11 +6,11 @@ use App\Models\VipCode;
 
 class VipCodeService
 {
-    public function findByCode(string $code)
+    public function findByCode(string $code): VipCode
     {
         return VipCode::with('concierge.user')
             ->active()
-            ->where('code', strtoupper($code))
+            ->whereRaw('LOWER(code) = ?', [strtolower($code)])
             ->first();
     }
 }

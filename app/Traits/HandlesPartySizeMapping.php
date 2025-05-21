@@ -11,7 +11,7 @@ trait HandlesPartySizeMapping
      */
     public function getAllowedGuestCounts(): array
     {
-        return range(2, 8);
+        return range(2, 20);
     }
 
     /**
@@ -27,7 +27,7 @@ trait HandlesPartySizeMapping
      */
     public function getMaxGuestCount(): int
     {
-        return 8;
+        return 20;
     }
 
     /**

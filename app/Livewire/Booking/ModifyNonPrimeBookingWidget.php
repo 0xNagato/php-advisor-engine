@@ -5,7 +5,7 @@ namespace App\Livewire\Booking;
 use App\Actions\Booking\SendModificationRequestToVenueContacts;
 use App\Models\Booking;
 use App\Models\BookingModificationRequest;
-use App\Models\ScheduleWithBooking;
+use App\Models\ScheduleWithBookingMV;
 use App\Notifications\Booking\CustomerModificationRequested;
 use Exception;
 use Filament\Forms\Components\Grid;
@@ -134,7 +134,7 @@ class ModifyNonPrimeBookingWidget extends Widget implements HasForms
             default => 8,
         };
 
-        $schedules = ScheduleWithBooking::query()
+        $schedules = ScheduleWithBookingMV::query()
             ->with('venue')
             ->where('venue_id', $this->booking->venue->id)
             ->where('booking_date', $this->booking->booking_at->format('Y-m-d'))
@@ -172,7 +172,7 @@ class ModifyNonPrimeBookingWidget extends Widget implements HasForms
 
         try {
             $formState = $this->form->getState();
-            $schedule = $this->selectedTimeSlotId ? ScheduleWithBooking::query()->find($this->selectedTimeSlotId) : null;
+            $schedule = $this->selectedTimeSlotId ? ScheduleWithBookingMV::query()->find($this->selectedTimeSlotId) : null;
 
             // Determine request source and user
             $requestSource = auth()->check() ? auth()->user()->main_role : 'customer';

@@ -201,11 +201,11 @@ class Booking extends Model
     }
 
     /**
-     * @return BelongsTo<ScheduleWithBooking, $this>
+     * @return BelongsTo<ScheduleWithBookingMV, $this>
      */
     public function schedule(): BelongsTo
     {
-        $relation = $this->belongsTo(ScheduleWithBooking::class, 'schedule_template_id', 'schedule_template_id');
+        $relation = $this->belongsTo(ScheduleWithBookingMV::class, 'schedule_template_id', 'schedule_template_id');
 
         if ($this->booking_at) {
             $booking_date = $this->booking_at->format('Y-m-d');

@@ -232,6 +232,12 @@ class Venue extends Model
                 '4' => 4,
                 '6' => 6,
                 '8' => 8,
+                '10' => 10,
+                '12' => 12,
+                '14' => 14,
+                '16' => 16,
+                '18' => 18,
+                '20' => 20,
             ];
         });
 
@@ -329,11 +335,11 @@ class Venue extends Model
     /**
      * Get the schedules for the venue.
      *
-     * @return HasMany<ScheduleWithBooking, $this>
+     * @return HasMany<ScheduleWithBookingMV, $this>
      */
     public function schedules(): HasMany
     {
-        return $this->hasMany(ScheduleWithBooking::class, 'venue_id');
+        return $this->hasMany(ScheduleWithBookingMV::class, 'venue_id');
     }
 
     public function scopeWithSchedulesForDate($query, string $date, int $partySize, string $startTime, string $endTime)

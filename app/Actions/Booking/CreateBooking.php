@@ -8,7 +8,7 @@ use App\Events\BookingCreated;
 use App\Models\Booking;
 use App\Models\Concierge;
 use App\Models\ScheduleTemplate;
-use App\Models\ScheduleWithBooking;
+use App\Models\ScheduleWithBookingMV;
 use App\Models\VipCode;
 use App\Services\ReservationService;
 use App\Services\SalesTaxService;
@@ -43,7 +43,7 @@ class CreateBooking
         $venue = $scheduleTemplate->venue;
 
         // Get the schedule with override data
-        $schedule = ScheduleWithBooking::query()->where('schedule_template_id', $scheduleTemplateId)
+        $schedule = ScheduleWithBookingMV::query()->where('schedule_template_id', $scheduleTemplateId)
             ->where('booking_date', Carbon::parse($data['date'])->format('Y-m-d'))
             ->first();
 
@@ -222,6 +222,9 @@ class CreateBooking
         }
 
         BookingCreated::dispatch($booking);
+
+        // Dispatch the job to handle refreshing
+        //        RefreshMaterializedView::dispatch();
 
         return CreateBookingReturnData::from([
             'booking' => $booking,
