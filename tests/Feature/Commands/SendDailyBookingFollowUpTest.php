@@ -2,6 +2,7 @@
 
 use App\Actions\Booking\CreateBooking;
 use App\Enums\BookingStatus;
+use App\Models\Booking;
 use App\Models\BookingCustomerReminderLog;
 use App\Models\Concierge;
 use App\Models\Partner;
@@ -50,7 +51,7 @@ it('sends follow-up SMS for eligible bookings from the previous day', function (
 
     // Create a booking directly in the database for yesterday
     $yesterdayDateTime = $yesterday->format('Y-m-d').' '.$this->scheduleTemplate->start_time;
-    $pastBooking = \App\Models\Booking::factory()->create([
+    $pastBooking = Booking::factory()->create([
         'guest_count' => 2,
         'booking_at' => $yesterdayDateTime,
         'booking_at_utc' => Carbon::parse($yesterdayDateTime, 'UTC'),
@@ -99,7 +100,7 @@ it('does not send follow-up notification for ineligible bookings from the previo
 
     // Create a booking with no guest phone (non-eligible)
     $yesterdayDateTime = $yesterday->format('Y-m-d').' '.$this->scheduleTemplate->start_time;
-    $noPhoneBooking = \App\Models\Booking::factory()->create([
+    $noPhoneBooking = Booking::factory()->create([
         'guest_count' => 2,
         'booking_at' => $yesterdayDateTime,
         'booking_at_utc' => Carbon::parse($yesterdayDateTime, 'UTC'),
@@ -110,7 +111,7 @@ it('does not send follow-up notification for ineligible bookings from the previo
     ]);
 
     // Create a booking with an invalid status (non-eligible)
-    $invalidStatusBooking = \App\Models\Booking::factory()->create([
+    $invalidStatusBooking = Booking::factory()->create([
         'guest_count' => 2,
         'booking_at' => $yesterdayDateTime,
         'booking_at_utc' => Carbon::parse($yesterdayDateTime, 'UTC'),
@@ -149,7 +150,7 @@ it('does not send follow-up SMS if a reminder log already exists', function () {
 
     // Create a booking directly in the database for yesterday
     $yesterdayDateTime = $yesterday->format('Y-m-d').' '.$this->scheduleTemplate->start_time;
-    $pastBooking = \App\Models\Booking::factory()->create([
+    $pastBooking = Booking::factory()->create([
         'guest_count' => 2,
         'booking_at' => $yesterdayDateTime,
         'booking_at_utc' => Carbon::parse($yesterdayDateTime, 'UTC'),
@@ -187,7 +188,7 @@ it('sends follow-up SMS to multiple eligible bookings', function () {
 
     // Create two eligible bookings directly
     $yesterdayDateTime = $yesterday->format('Y-m-d').' '.$this->scheduleTemplate->start_time;
-    $pastBooking1 = \App\Models\Booking::factory()->create([
+    $pastBooking1 = Booking::factory()->create([
         'guest_count' => 2,
         'booking_at' => $yesterdayDateTime,
         'booking_at_utc' => Carbon::parse($yesterdayDateTime, 'UTC'),
@@ -197,7 +198,7 @@ it('sends follow-up SMS to multiple eligible bookings', function () {
         'status' => BookingStatus::CONFIRMED,
     ]);
 
-    $pastBooking2 = \App\Models\Booking::factory()->create([
+    $pastBooking2 = Booking::factory()->create([
         'guest_count' => 4,
         'booking_at' => $yesterdayDateTime,
         'booking_at_utc' => Carbon::parse($yesterdayDateTime, 'UTC'),
@@ -264,7 +265,7 @@ it('sends SMS only if customer has a booking yesterday and not today', function 
 
     // Create a booking for yesterday directly
     $yesterdayDateTime = $yesterday->format('Y-m-d').' '.$this->scheduleTemplate->start_time;
-    $yesterdayBooking = \App\Models\Booking::factory()->create([
+    $yesterdayBooking = Booking::factory()->create([
         'guest_count' => 2,
         'booking_at' => $yesterdayDateTime,
         'booking_at_utc' => Carbon::parse($yesterdayDateTime, 'UTC'),
@@ -276,20 +277,18 @@ it('sends SMS only if customer has a booking yesterday and not today', function 
 
     // Create a booking for today with the same guest_phone
     $todayBookingTime = $today->copy()->addHour()->format('H:i:s'); // Ensure it meets the 35-minute rule
-    $todayBookingData = [
-        'booking_at' => $today->format('Y-m-d').' '.$todayBookingTime, // Today
-        'guest_count' => 2,
-    ];
 
     $this->scheduleTemplate->update(['start_time' => $todayBookingTime]); // Adjust schedule start time for today
 
-    // Make sure to include date in the booking data
-    $todayResult = $this->action::run(
-        $this->scheduleTemplate->id,
-        array_merge($todayBookingData, ['date' => $today->format('Y-m-d')])
-    );
-
-    $todayBooking = $todayResult->booking;
+    $todayBooking = Booking::factory()->create([
+        'guest_count' => 2,
+        'booking_at' => $today->format('Y-m-d').' '.$todayBookingTime,
+        'booking_at_utc' => Carbon::parse($yesterdayDateTime, 'UTC'),
+        'concierge_id' => $this->concierge->id,
+        'schedule_template_id' => $this->scheduleTemplate->id,
+        'guest_phone' => '+1234567890',
+        'status' => BookingStatus::CONFIRMED,
+    ]);
 
     $todayBooking->update([
         'guest_phone' => '+1234567890', // Same guest phone as yesterday's booking
@@ -347,7 +346,7 @@ it('sends SMS only within the allowed time range in the venue timezone', functio
 
     // Create a booking for yesterday directly
     $yesterdayDateTime = $yesterday->format('Y-m-d').' '.$this->scheduleTemplate->start_time;
-    $yesterdayBooking = \App\Models\Booking::factory()->create([
+    $yesterdayBooking = Booking::factory()->create([
         'guest_count' => 2,
         'booking_at' => $yesterdayDateTime,
         'booking_at_utc' => Carbon::parse($yesterdayDateTime, 'UTC'),
@@ -382,7 +381,7 @@ it('not sends SMS because not within the allowed time range in the venue timezon
 
     // Create a booking for yesterday directly
     $yesterdayDateTime = $yesterday->format('Y-m-d').' '.$this->scheduleTemplate->start_time;
-    $yesterdayBooking = \App\Models\Booking::factory()->create([
+    $yesterdayBooking = Booking::factory()->create([
         'guest_count' => 2,
         'booking_at' => $yesterdayDateTime,
         'booking_at_utc' => Carbon::parse($yesterdayDateTime, 'UTC'),
