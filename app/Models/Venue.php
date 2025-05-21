@@ -207,10 +207,11 @@ class Venue extends Model
 
             // Generate base slug
             $baseSlug = Str::slug("{$venue->region}-{$venue->name}");
+            $baseSlug = strtolower($baseSlug);
 
             // Find if any similar slugs exist and get the count
             $count = static::query()
-                ->where('slug', 'like', $baseSlug.'%')
+                ->whereRaw('LOWER(slug) like ?', [$baseSlug.'%'])
                 ->count();
 
             // If similar slugs exist, append the next number
