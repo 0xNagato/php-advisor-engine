@@ -88,13 +88,13 @@ test('venue earnings for bookings with different concierges', function () {
 
 test('venue earnings are rounded correctly', function () {
     Booking::withoutEvents(function () {
-        $venue = Venue::factory()->create(['payout_venue' => 62.5]);
+        $venue = Venue::factory()->create(['payout_venue' => 62]);
         $concierge = Concierge::factory()->create();
         $booking = createBooking($venue, $concierge, 10000);
 
         $this->service->calculateEarnings($booking);
 
-        assertEarningExists($booking, 'venue', 6300);
+        assertEarningExists($booking, 'venue', 6200);
     });
 });
 

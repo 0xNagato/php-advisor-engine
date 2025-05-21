@@ -6,7 +6,7 @@ use App\Models\VipCode;
 
 class VipCodeService
 {
-    public function findByCode(string $code): VipCode
+    public function findByCode(string $code): ?VipCode
     {
         return VipCode::with('concierge.user')
             ->active()
