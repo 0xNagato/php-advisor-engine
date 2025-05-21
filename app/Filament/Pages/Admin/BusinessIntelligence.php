@@ -91,8 +91,10 @@ class BusinessIntelligence extends Page implements HasTable
                     ->selectRaw('COUNT(CASE WHEN bookings.status = ? THEN 1 END) as cancelled_bookings', ['cancelled'])
                     ->selectRaw('COUNT(CASE WHEN bookings.status = ? THEN 1 END) as no_show_bookings', ['no_show'])
                     ->selectRaw('COUNT(CASE WHEN bookings.status = ? THEN 1 END) as total_bookings', ['confirmed'])
-                    ->selectRaw('AVG(CASE WHEN bookings.status = ? THEN bookings.guest_count END) as average_diners', ['confirmed'])
-                    ->selectRaw('ROUND(CAST((COUNT(CASE WHEN bookings.status IN (?, ?) THEN 1 END) * 100.0) / NULLIF(COUNT(bookings.id), 0) AS DECIMAL(5,1)), 1) as problem_percentage', ['cancelled', 'no_show'])
+                    ->selectRaw('AVG(CASE WHEN bookings.status = ? THEN bookings.guest_count END) as average_diners',
+                        ['confirmed'])
+                    ->selectRaw('ROUND(CAST((COUNT(CASE WHEN bookings.status IN (?, ?) THEN 1 END) * 100.0) / NULLIF(COUNT(bookings.id), 0) AS DECIMAL(5,1)), 1) as problem_percentage',
+                        ['cancelled', 'no_show'])
                     ->leftJoin('bookings', 'concierges.id', '=', 'bookings.concierge_id')
                     ->when(isset($this->filters['startDate'], $this->filters['endDate']), function ($query) {
                         $query->whereBetween('bookings.booking_at', [
@@ -118,11 +120,14 @@ class BusinessIntelligence extends Page implements HasTable
                                 <div class="text-gray-500">{$record->hotel_name}</div>
                                 <div class="text-gray-500">{$record->user->referrer?->name}</div>
                             </div>
-                        HTML))
-                    ->searchable(query: fn (Builder $query, string $search): Builder => $query->whereHas('user', function (Builder $query) use ($search) {
-                        $query->where('users.first_name', 'like', "%{$search}%")
-                            ->orWhere('users.last_name', 'like', "%{$search}%");
-                    }))
+                        HTML
+                    ))
+                    ->searchable(query: fn (Builder $query, string $search): Builder => $query->whereHas('user',
+                        function (Builder $query) use ($search) {
+                            $search = strtolower($search);
+                            $query->whereRaw('LOWER(users.first_name) like ?', ["%{$search}%"])
+                                ->orWhereRaw('LOWER(users.last_name) like ?', ["%{$search}%"]);
+                        }))
                     ->sortable(),
                 TextColumn::make('total_bookings')
                     ->label('Bookings')

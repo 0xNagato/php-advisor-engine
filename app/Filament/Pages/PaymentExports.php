@@ -236,7 +236,8 @@ class PaymentExports extends Page implements HasTable
             TextColumn::make('total_earnings')
                 ->label('Earnings')
                 ->sortable()
-                ->formatStateUsing(fn ($record) => money($record->total_earnings, $record->currency).' '.$record->currency),
+                ->formatStateUsing(fn ($record) => money($record->total_earnings,
+                    $record->currency).' '.$record->currency),
         ];
     }
 
@@ -245,7 +246,7 @@ class PaymentExports extends Page implements HasTable
     {
         return [
             TextColumn::make('name') // This will be the User's name, but formatted to show group info
-            ->label('Venue Group')
+                ->label('Venue Group')
                 ->sortable(['first_name', 'last_name'])
                 ->html()
                 ->formatStateUsing(function (User $record): string {
@@ -298,7 +299,8 @@ class PaymentExports extends Page implements HasTable
             TextColumn::make('total_earnings')
                 ->label('Earnings')
                 ->sortable()
-                ->formatStateUsing(fn ($record) => money($record->total_earnings, $record->currency).' '.$record->currency),
+                ->formatStateUsing(fn ($record) => money($record->total_earnings,
+                    $record->currency).' '.$record->currency),
         ];
     }
 
@@ -320,7 +322,8 @@ class PaymentExports extends Page implements HasTable
                 ->url(function (User $user): string {
                     $filters = [
                         // Match filters expected by BookingSearch.php
-                        ($user->hasRole('concierge') ? 'concierge_search' : 'partner_search') => $user->name, // Pass user name to search filters
+                        ($user->hasRole('concierge') ? 'concierge_search' : 'partner_search') => $user->name,
+                        // Pass user name to search filters
                         'start_date' => $this->data['startDate'],
                         'end_date' => $this->data['endDate'],
                         'status' => BookingStatus::PAYOUT_STATUSES,
@@ -335,7 +338,8 @@ class PaymentExports extends Page implements HasTable
             TextColumn::make('total_earnings')
                 ->label('Earnings')
                 ->sortable()
-                ->formatStateUsing(fn ($record) => money($record->total_earnings, $record->currency).' '.$record->currency),
+                ->formatStateUsing(fn ($record) => money($record->total_earnings,
+                    $record->currency).' '.$record->currency),
         ];
     }
 
@@ -363,10 +367,11 @@ class PaymentExports extends Page implements HasTable
                 ->whereIn('b.status', BookingStatus::PAYOUT_STATUSES)
                 ->whereIn('e.type', [EarningType::VENUE->value, EarningType::VENUE_PAID->value])
                 ->when($search, function ($q) use ($search) {
+                    $search = strtolower($search);
                     $q->where(function ($qq) use ($search) {
-                        $qq->where('venues.name', 'like', "%$search%")
-                            ->orWhere('users.first_name', 'like', "%$search%")
-                            ->orWhere('users.last_name', 'like', "%$search%");
+                        $qq->whereRaw('LOWER(venues.name) like ?', ["%$search%"])
+                            ->orWhereRaw('LOWER(users.first_name) like ?', ["%$search%"])
+                            ->orWhereRaw('LOWER(users.last_name) like ?', ["%$search%"]);
                     });
                 })
                 ->whereBetween('b.booking_at_utc', [$startUtc, $endUtc])
@@ -411,7 +416,8 @@ class PaymentExports extends Page implements HasTable
                     JOIN earnings e            ON e.booking_id = b.id AND e.user_id = (
                         SELECT vg.primary_manager_id FROM venue_groups vg WHERE vg.id = v.venue_group_id
                     )
-                    WHERE b.status IN ("'.implode('","', array_map(fn ($s) => $s->value, BookingStatus::PAYOUT_STATUSES)).'")
+                    WHERE b.status IN ("'.implode('","',
+                    array_map(fn ($s) => $s->value, BookingStatus::PAYOUT_STATUSES)).'")
                       AND e.type IN ("'.implode('","', [EarningType::VENUE->value, EarningType::VENUE_PAID->value]).'")
                       AND b.booking_at_utc BETWEEN "'.$startUtc->format('Y-m-d H:i:s').'" AND "'.$endUtc->format('Y-m-d H:i:s').'"
                     GROUP BY v.venue_group_id, e.currency
@@ -426,10 +432,11 @@ class PaymentExports extends Page implements HasTable
                 ])
                 ->when($search, function (Builder $query) use ($search) {
                     // Search both primary manager name and venue group name
+                    $search = strtolower($search);
                     $query->where(function ($q) use ($search) {
-                        $q->where('users.first_name', 'like', "%$search%")
-                            ->orWhere('users.last_name', 'like', "%$search%")
-                            ->orWhere('venue_groups.name', 'like', "%$search%");
+                        $q->whereRaw('LOWER(users.first_name) like ?', ["%$search%"])
+                            ->orWhereRaw('LOWER(users.last_name) like ?', ["%$search%"])
+                            ->orWhereRaw('LOWER(venue_groups.name) like ?', ["%$search%"]);
                     });
                 })
                 ->whereNotNull('venue_earnings.bookings_count');
@@ -654,7 +661,8 @@ class PaymentExports extends Page implements HasTable
 
         // Check for any overlapping invoices
         $overlappingInvoices = $this->getOverlappingInvoices(null, $venueGroup->id, $startDateCarbon, $endDateCarbon);
-        $warningHtml = $this->generateOverlappingInvoicesWarning($overlappingInvoices, 'Overlapping Group Invoices Found');
+        $warningHtml = $this->generateOverlappingInvoicesWarning($overlappingInvoices,
+            'Overlapping Group Invoices Found');
 
         $standardHtml = <<<'HTML'
             <div class="space-y-2 text-sm text-gray-600">
@@ -698,16 +706,20 @@ class PaymentExports extends Page implements HasTable
         })->get();
     }
 
-    protected function generateOverlappingInvoicesWarning($overlappingInvoices, string $title = 'Overlapping Invoices Found'): HtmlString
-    {
+    protected function generateOverlappingInvoicesWarning(
+        $overlappingInvoices,
+        string $title = 'Overlapping Invoices Found'
+    ): HtmlString {
         if ($overlappingInvoices->count() === 0) {
             return new HtmlString('');
         }
 
         $invoiceItems = [];
         foreach ($overlappingInvoices as $i => $invoice) {
-            $invoiceStartDate = Carbon::createFromFormat('Y-m-d', substr((string) $invoice->start_date, 0, 10))->format('M d, Y');
-            $invoiceEndDate = Carbon::createFromFormat('Y-m-d', substr((string) $invoice->end_date, 0, 10))->format('M d, Y');
+            $invoiceStartDate = Carbon::createFromFormat('Y-m-d',
+                substr((string) $invoice->start_date, 0, 10))->format('M d, Y');
+            $invoiceEndDate = Carbon::createFromFormat('Y-m-d',
+                substr((string) $invoice->end_date, 0, 10))->format('M d, Y');
 
             $divider = $i > 0 ? '<div class="border-t border-blue-100"></div>' : '';
 
@@ -809,7 +821,8 @@ class PaymentExports extends Page implements HasTable
             ]);
 
             $exportMissingConfig->modifyQueryUsing(fn ($query) => $query->whereHas('user', function ($q) {
-                $q->where(fn ($qq) => $qq->whereNull('payout')->orWhere('payout', '=', '')->orWhere('payout', '=', '{}'));
+                $q->where(fn ($qq) => $qq->whereNull('payout')->orWhere('payout', '=', '')->orWhere('payout', '=',
+                    '{}'));
             }))
                 ->withColumns([
                     Column::make('name')->heading('Venue Name'),

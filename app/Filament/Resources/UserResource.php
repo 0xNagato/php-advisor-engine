@@ -84,10 +84,11 @@ class UserResource extends Resource
                     ->sortable(['first_name', 'last_name'])
                     ->size('sm')
                     ->searchable(query: fn (Builder $query, string $search): Builder => $query->where(function ($query) use ($search) {
-                        $query->where('first_name', 'like', "%{$search}%")
-                            ->orWhere('last_name', 'like', "%{$search}%")
-                            ->orWhere('email', 'like', "%{$search}%")
-                            ->orWhere('phone', 'like', "%{$search}%");
+                        $search = strtolower($search);
+                        $query->whereRaw('LOWER(first_name) like ?', ["%{$search}%"])
+                            ->orWhereRaw('LOWER(last_name) like ?', ["%{$search}%"])
+                            ->orWhereRaw('LOWER(email) like ?', ["%{$search}%"])
+                            ->orWhereRaw('LOWER(phone) like ?', ["%{$search}%"]);
                     }))
                     ->formatStateUsing(fn (User $record): string => new HtmlString(<<<HTML
                         <div class="space-y-0.5">
