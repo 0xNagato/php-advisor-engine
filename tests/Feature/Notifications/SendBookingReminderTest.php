@@ -1,6 +1,5 @@
 <?php
 
-use App\Actions\Booking\CreateBooking;
 use App\Enums\BookingStatus;
 use App\Models\Booking;
 use App\Models\BookingCustomerReminderLog;
@@ -38,7 +37,6 @@ beforeEach(function () {
         'party_size' => 2,
     ]);
 
-    $this->action = new CreateBooking;
     actingAs($this->concierge->user);
 
     Notification::fake();
@@ -58,12 +56,13 @@ it('sends a booking reminder notification for eligible bookings', function () {
         'guest_count' => 2,
     ];
 
-    $result = $this->action::run(
-        $this->scheduleTemplate->id,
-        $bookingData,
-    );
-
-    $booking = $result->booking;
+    $booking = Booking::factory()->create([
+        'guest_count' => $bookingData['guest_count'],
+        'booking_at' => $bookingData['date'] . ' ' . $this->scheduleTemplate->start_time,
+        'booking_at_utc' => Carbon::parse($bookingData['date'] . ' ' . $this->scheduleTemplate->start_time, 'UTC'),
+        'concierge_id' => $this->concierge->id,
+        'schedule_template_id' => $this->scheduleTemplate->id,
+    ]);
 
     $booking->update([
         'guest_phone' => '+1234567890',
@@ -120,11 +119,13 @@ it('does not send notifications for past or non-eligible bookings', function () 
         'guest_count' => 2,
     ];
 
-    $resultNonEligible = $this->action::run(
-        $this->scheduleTemplate->id,
-        $nonEligibleBookingData
-    );
-    $nonEligibleBooking = $resultNonEligible->booking;
+    $nonEligibleBooking = Booking::factory()->create([
+        'guest_count' => $nonEligibleBookingData['guest_count'],
+        'booking_at' => $nonEligibleBookingData['booking_at'],
+        'booking_at_utc' => Carbon::parse($nonEligibleBookingData['booking_at'], 'UTC'),
+        'concierge_id' => $this->concierge->id,
+        'schedule_template_id' => $this->scheduleTemplate->id,
+    ]);
 
     $nonEligibleBooking->update([
         'guest_phone' => null,
@@ -153,12 +154,13 @@ it('does not send notifications when booking does not match the 40-minute thresh
         'guest_count' => 2,
     ];
 
-    $result = $this->action::run(
-        $this->scheduleTemplate->id,
-        $bookingData
-    );
-
-    $booking = $result->booking;
+    $booking = Booking::factory()->create([
+        'guest_count' => $bookingData['guest_count'],
+        'booking_at' => $bookingData['date'] . ' ' . $this->scheduleTemplate->start_time,
+        'booking_at_utc' => Carbon::parse($bookingData['date'] . ' ' . $this->scheduleTemplate->start_time, 'UTC'),
+        'concierge_id' => $this->concierge->id,
+        'schedule_template_id' => $this->scheduleTemplate->id,
+    ]);
 
     // Update the booking with necessary valid fields
     $booking->update([
@@ -190,12 +192,13 @@ it('does not send a reminder notification if a reminder log already exists', fun
         'guest_count' => 2,
     ];
 
-    $result = $this->action::run(
-        $this->scheduleTemplate->id,
-        $bookingData
-    );
-
-    $booking = $result->booking;
+    $booking = Booking::factory()->create([
+        'guest_count' => $bookingData['guest_count'],
+        'booking_at' => $bookingData['date'] . ' ' . $this->scheduleTemplate->start_time,
+        'booking_at_utc' => Carbon::parse($bookingData['date'] . ' ' . $this->scheduleTemplate->start_time, 'UTC'),
+        'concierge_id' => $this->concierge->id,
+        'schedule_template_id' => $this->scheduleTemplate->id,
+    ]);
 
     // Update booking to make it eligible
     $booking->update([
