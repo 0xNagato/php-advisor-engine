@@ -51,7 +51,7 @@ Route::get('/story', Story::class)->name('story');
 Route::get('/onboarding/{token?}', VenueOnboarding::class)->name('onboarding');
 /**
  * @deprecated
-*/
+ */
 Route::get('/onboarding/token/{token?}', VenueOnboarding::class)->name('onboarding.token');
 
 Route::redirect('/app', config('app.apple_app_store_url'));

@@ -58,8 +58,8 @@ it('sends a booking reminder notification for eligible bookings', function () {
 
     $booking = Booking::factory()->create([
         'guest_count' => $bookingData['guest_count'],
-        'booking_at' => $bookingData['date'] . ' ' . $this->scheduleTemplate->start_time,
-        'booking_at_utc' => Carbon::parse($bookingData['date'] . ' ' . $this->scheduleTemplate->start_time, 'UTC'),
+        'booking_at' => $bookingData['date'].' '.$this->scheduleTemplate->start_time,
+        'booking_at_utc' => Carbon::parse($bookingData['date'].' '.$this->scheduleTemplate->start_time, 'UTC'),
         'concierge_id' => $this->concierge->id,
         'schedule_template_id' => $this->scheduleTemplate->id,
     ]);
@@ -156,8 +156,8 @@ it('does not send notifications when booking does not match the 40-minute thresh
 
     $booking = Booking::factory()->create([
         'guest_count' => $bookingData['guest_count'],
-        'booking_at' => $bookingData['date'] . ' ' . $this->scheduleTemplate->start_time,
-        'booking_at_utc' => Carbon::parse($bookingData['date'] . ' ' . $this->scheduleTemplate->start_time, 'UTC'),
+        'booking_at' => $bookingData['date'].' '.$this->scheduleTemplate->start_time,
+        'booking_at_utc' => Carbon::parse($bookingData['date'].' '.$this->scheduleTemplate->start_time, 'UTC'),
         'concierge_id' => $this->concierge->id,
         'schedule_template_id' => $this->scheduleTemplate->id,
     ]);
@@ -194,8 +194,8 @@ it('does not send a reminder notification if a reminder log already exists', fun
 
     $booking = Booking::factory()->create([
         'guest_count' => $bookingData['guest_count'],
-        'booking_at' => $bookingData['date'] . ' ' . $this->scheduleTemplate->start_time,
-        'booking_at_utc' => Carbon::parse($bookingData['date'] . ' ' . $this->scheduleTemplate->start_time, 'UTC'),
+        'booking_at' => $bookingData['date'].' '.$this->scheduleTemplate->start_time,
+        'booking_at_utc' => Carbon::parse($bookingData['date'].' '.$this->scheduleTemplate->start_time, 'UTC'),
         'concierge_id' => $this->concierge->id,
         'schedule_template_id' => $this->scheduleTemplate->id,
     ]);

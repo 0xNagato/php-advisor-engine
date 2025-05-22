@@ -367,7 +367,7 @@ class PaymentExports extends Page implements HasTable
                 ->whereIn('b.status', BookingStatus::PAYOUT_STATUSES)
                 ->whereIn('e.type', [EarningType::VENUE->value, EarningType::VENUE_PAID->value])
                 ->when($search, function ($q) use ($search) {
-                    $search = strtolower($search);
+                    $search = strtolower((string) $search);
                     $q->where(function ($qq) use ($search) {
                         $qq->whereRaw('LOWER(venues.name) like ?', ["%$search%"])
                             ->orWhereRaw('LOWER(users.first_name) like ?', ["%$search%"])
@@ -432,7 +432,7 @@ class PaymentExports extends Page implements HasTable
                 ])
                 ->when($search, function (Builder $query) use ($search) {
                     // Search both primary manager name and venue group name
-                    $search = strtolower($search);
+                    $search = strtolower((string) $search);
                     $query->where(function ($q) use ($search) {
                         $q->whereRaw('LOWER(users.first_name) like ?', ["%$search%"])
                             ->orWhereRaw('LOWER(users.last_name) like ?', ["%$search%"])

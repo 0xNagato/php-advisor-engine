@@ -258,7 +258,7 @@ class BookingSearch extends Page implements HasTable
                     $query->where(function ($query) use ($terms, $search) {
                         // Search for hotel name directly
                         $query->whereHas('concierge', function (Builder $q) use ($search) {
-                            $search = strtolower($search);
+                            $search = strtolower((string) $search);
                             $q->whereRaw('LOWER(hotel_name) like ?', ["%{$search}%"]);
                         });
 
