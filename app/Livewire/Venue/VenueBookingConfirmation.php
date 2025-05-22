@@ -16,7 +16,7 @@ use Livewire\Attributes\Computed;
 
 class VenueBookingConfirmation extends Page
 {
-    public const MINUTES_BEFORE_BOOKING_CUTOFF = 15;
+    public const int MINUTES_BEFORE_BOOKING_CUTOFF = 5;
 
     public Booking $booking;
 

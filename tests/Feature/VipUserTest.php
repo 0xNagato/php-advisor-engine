@@ -5,7 +5,7 @@ use App\Models\VipCode;
 
 use function Pest\Laravel\get;
 
-test('cannot access booking route without vipcode', function () {
+test('cannot access booking route without vip code', function () {
     $response = get('/v/booking');
 
     $response->assertRedirect('/');
