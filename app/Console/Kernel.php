@@ -57,6 +57,11 @@ class Kernel extends ConsoleKernel
                 ->hourly()
                 ->withoutOverlapping();
 
+            // Sync QR code visit statistics
+            $schedule->command('qr-codes:sync-stats')
+                ->hourly()
+                ->withoutOverlapping();
+
             // $schedule->command('app:send-daily-summary-email')->dailyAt('08:00')->timezone('America/New_York');
         }
 
