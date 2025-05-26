@@ -52,6 +52,53 @@ class QrCodeResource extends Resource
 
     protected static ?int $navigationSort = 100;
 
+    public static function shouldRegisterNavigation(): bool
+    {
+        return auth()->user()?->hasActiveRole('super_admin') ?? false;
+    }
+
+    public static function getEloquentQuery(): Builder
+    {
+        $query = parent::getEloquentQuery();
+
+        // Ensure only super_admin users can access this resource
+        if (! auth()->user()?->hasActiveRole('super_admin')) {
+            return $query->whereRaw('1 = 0'); // Return empty result set
+        }
+
+        return $query;
+    }
+
+    public static function canViewAny(): bool
+    {
+        return auth()->user()?->hasActiveRole('super_admin') ?? false;
+    }
+
+    public static function canView(Model $record): bool
+    {
+        return auth()->user()?->hasActiveRole('super_admin') ?? false;
+    }
+
+    public static function canCreate(): bool
+    {
+        return auth()->user()?->hasActiveRole('super_admin') ?? false;
+    }
+
+    public static function canEdit(Model $record): bool
+    {
+        return auth()->user()?->hasActiveRole('super_admin') ?? false;
+    }
+
+    public static function canDelete(Model $record): bool
+    {
+        return auth()->user()?->hasActiveRole('super_admin') ?? false;
+    }
+
+    public static function canDeleteAny(): bool
+    {
+        return auth()->user()?->hasActiveRole('super_admin') ?? false;
+    }
+
     public static function form(Form $form): Form
     {
         return $form
