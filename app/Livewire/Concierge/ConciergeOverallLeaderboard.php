@@ -59,6 +59,7 @@ class ConciergeOverallLeaderboard extends Widget
             ->setTimezone('UTC');
 
         $cacheKey = "concierge_leaderboard_{$tempStartDate->toDateTimeString()}_{$tempEndDate->toDateTimeString()}";
+        Cache::forget($cacheKey);
 
         return Cache::remember(
             $cacheKey,
@@ -96,19 +97,28 @@ class ConciergeOverallLeaderboard extends Widget
                         BookingStatus::CANCELLED,
                     ])
                     ->whereIn('earnings.type', $conciergeEarningTypes)
-                    ->groupBy('earnings.user_id', 'concierges.id', 'earnings.currency', 'users.first_name', 'users.last_name')
+                    ->groupBy('earnings.user_id', 'concierges.id', 'earnings.currency', 'users.first_name',
+                        'users.last_name')
                     ->get()
                     ->filter(fn ($row) => $row->total_earned > 0);
 
-                $conciergeTotals = $earnings->groupBy('user_id')->map(function ($conciergeEarnings) use ($currencyService) {
-                    $totalUSD = $conciergeEarnings->sum(fn ($earning) => $currencyService->convertToUSD([$earning->currency => $earning->total_earned])
-                    );
+                //                ds($earnings->groupBy('user_id')->toArray())->label('Concierge Earnings');
+
+                $conciergeTotals = $earnings->groupBy('user_id')->map(function ($conciergeEarnings) use (
+                    $currencyService
+                ) {
+                    $totalEarned = $conciergeEarnings->sum('total_earned');
+                    if ($conciergeEarnings->count() > 2) {
+                        $totalEarned = $conciergeEarnings->sum(fn ($earning
+                        ) => $currencyService->convertToUSD([$earning->currency => $earning->total_earned]));
+                    }
 
                     return [
                         'user_id' => $conciergeEarnings->first()->user_id,
                         'concierge_id' => $conciergeEarnings->first()->concierge_id,
                         'user_name' => $conciergeEarnings->first()->user_name,
-                        'total_usd' => $totalUSD,
+                        'currency' => $conciergeEarnings->first()->currency,
+                        'total_earned' => $totalEarned,
                         'direct_booking_count' => $conciergeEarnings->sum('direct_booking_count'),
                         'referral_booking_count' => $conciergeEarnings->sum('referral_booking_count'),
                         'earnings_breakdown' => $conciergeEarnings->map(fn ($earning) => [
@@ -117,7 +127,7 @@ class ConciergeOverallLeaderboard extends Widget
                             'usd_equivalent' => $currencyService->convertToUSD([$earning->currency => $earning->total_earned]),
                         ])->toArray(),
                     ];
-                })->sortByDesc('total_usd')->take($this->limit)->values();
+                })->sortByDesc('total_earned')->take($this->limit)->values();
 
                 return collect($conciergeTotals);
             }
