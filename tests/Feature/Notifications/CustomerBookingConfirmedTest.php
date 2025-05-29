@@ -29,19 +29,19 @@ beforeEach(function () {
     });
 
     // Create a base template (party_size = 0)
-    $baseTemplate = ScheduleTemplate::factory()->create([
+    $baseTemplate = ScheduleTemplate::where([
         'venue_id' => $this->venue->id,
         'start_time' => '14:00:00',
         'party_size' => 0,
-    ]);
+    ])->get()->first();
 
     // Create a guest count template
-    $this->scheduleTemplate = ScheduleTemplate::factory()->create([
+    $this->scheduleTemplate = ScheduleTemplate::where([
         'venue_id' => $this->venue->id,
         'start_time' => '14:00:00',
         'day_of_week' => $baseTemplate->day_of_week,
         'party_size' => 2,
-    ]);
+    ])->get()->first();
 
     $this->action = new CreateBooking;
     actingAs($this->concierge->user);
