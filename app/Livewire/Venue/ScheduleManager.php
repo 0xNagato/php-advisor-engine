@@ -514,7 +514,11 @@ class ScheduleManager extends Component
     public function openBulkEditModal(string $day, string $time): void
     {
         // Use the first party size's settings as default
-        $firstSize = array_key_first(array_filter($this->venue->party_sizes, fn ($size) => $size !== 'Special Request'));
+        $firstSize = array_key_first(array_filter(
+            $this->venue->party_sizes,
+            fn ($value, $key) => $key !== 'Special Request',
+            ARRAY_FILTER_USE_BOTH
+        ));
         $schedule = $this->calendarSchedules[$time][$firstSize] ?? null;
 
         if (! $schedule) {
@@ -539,7 +543,11 @@ class ScheduleManager extends Component
     public function openBulkTemplateEditModal(string $time): void
     {
         // Use the first party size's settings as default
-        $firstSize = array_key_first(array_filter($this->venue->party_sizes, fn ($size) => $size !== 'Special Request'));
+        $firstSize = array_key_first(array_filter(
+            $this->venue->party_sizes,
+            fn ($value, $key) => $key !== 'Special Request',
+            ARRAY_FILTER_USE_BOTH
+        ));
         $schedule = $this->schedules[$this->selectedDay][$time][$firstSize] ?? null;
 
         if (! $schedule) {
@@ -645,12 +653,14 @@ class ScheduleManager extends Component
                     ->where('booking_date', $this->selectedDate)
                     ->first();
 
-                return [$template->id => [
-                    'time' => $template->start_time,
-                    'party_size' => $template->party_size,
-                    'is_available' => $override?->is_available ?? $template->is_available,
-                    'prime_time' => $override?->prime_time ?? $template->prime_time,
-                ]];
+                return [
+                    $template->id => [
+                        'time' => $template->start_time,
+                        'party_size' => $template->party_size,
+                        'is_available' => $override?->is_available ?? $template->is_available,
+                        'prime_time' => $override?->prime_time ?? $template->prime_time,
+                    ],
+                ];
             })->toArray();
 
             // Create overrides for each template setting is_available to false
@@ -715,12 +725,14 @@ class ScheduleManager extends Component
                     ->where('booking_date', $this->selectedDate)
                     ->first();
 
-                return [$template->id => [
-                    'time' => $template->start_time,
-                    'party_size' => $template->party_size,
-                    'is_available' => $override?->is_available ?? $template->is_available,
-                    'prime_time' => $override?->prime_time ?? $template->prime_time,
-                ]];
+                return [
+                    $template->id => [
+                        'time' => $template->start_time,
+                        'party_size' => $template->party_size,
+                        'is_available' => $override?->is_available ?? $template->is_available,
+                        'prime_time' => $override?->prime_time ?? $template->prime_time,
+                    ],
+                ];
             })->toArray();
 
             // Create overrides for each template setting prime_time to true
@@ -787,12 +799,14 @@ class ScheduleManager extends Component
                     ->where('booking_date', $this->selectedDate)
                     ->first();
 
-                return [$template->id => [
-                    'time' => $template->start_time,
-                    'party_size' => $template->party_size,
-                    'is_available' => $override?->is_available ?? $template->is_available,
-                    'available_tables' => $override?->available_tables ?? $template->available_tables,
-                ]];
+                return [
+                    $template->id => [
+                        'time' => $template->start_time,
+                        'party_size' => $template->party_size,
+                        'is_available' => $override?->is_available ?? $template->is_available,
+                        'available_tables' => $override?->available_tables ?? $template->available_tables,
+                    ],
+                ];
             })->toArray();
 
             // Create overrides for each template setting available_tables to 0
@@ -860,12 +874,14 @@ class ScheduleManager extends Component
                     ->where('booking_date', $this->selectedDate)
                     ->first();
 
-                return [$template->id => [
-                    'time' => $template->start_time,
-                    'party_size' => $template->party_size,
-                    'is_available' => $override?->is_available ?? $template->is_available,
-                    'prime_time' => $override?->prime_time ?? $template->prime_time,
-                ]];
+                return [
+                    $template->id => [
+                        'time' => $template->start_time,
+                        'party_size' => $template->party_size,
+                        'is_available' => $override?->is_available ?? $template->is_available,
+                        'prime_time' => $override?->prime_time ?? $template->prime_time,
+                    ],
+                ];
             })->toArray();
 
             // Create overrides for each template setting prime_time to false
@@ -925,12 +941,14 @@ class ScheduleManager extends Component
                 ->get();
 
             // Store original data for logging
-            $originalData = $templates->mapWithKeys(fn ($template) => [$template->id => [
-                'time' => $template->start_time,
-                'party_size' => $template->party_size,
-                'is_available' => $template->is_available,
-                'prime_time' => $template->prime_time,
-            ]])->toArray();
+            $originalData = $templates->mapWithKeys(fn ($template) => [
+                $template->id => [
+                    'time' => $template->start_time,
+                    'party_size' => $template->party_size,
+                    'is_available' => $template->is_available,
+                    'prime_time' => $template->prime_time,
+                ],
+            ])->toArray();
 
             // Update all templates to set prime_time to false
             foreach ($templates as $template) {
@@ -1065,12 +1083,14 @@ class ScheduleManager extends Component
                     ->where('booking_date', $this->selectedDate)
                     ->first();
 
-                return [$template->id => [
-                    'time' => $template->start_time,
-                    'party_size' => $template->party_size,
-                    'price_per_head' => $override?->price_per_head ?? $template->price_per_head,
-                    'prime_time' => $override?->prime_time ?? $template->prime_time,
-                ]];
+                return [
+                    $template->id => [
+                        'time' => $template->start_time,
+                        'party_size' => $template->party_size,
+                        'price_per_head' => $override?->price_per_head ?? $template->price_per_head,
+                        'prime_time' => $override?->prime_time ?? $template->prime_time,
+                    ],
+                ];
             })->toArray();
 
             // Create overrides for each template setting price_per_head only for non-prime slots
@@ -1172,12 +1192,14 @@ class ScheduleManager extends Component
                 ->get();
 
             // Store original data for logging
-            $originalData = $templates->mapWithKeys(fn ($template) => [$template->id => [
-                'time' => $template->start_time,
-                'party_size' => $template->party_size,
-                'price_per_head' => $template->price_per_head,
-                'prime_time' => $template->prime_time,
-            ]])->toArray();
+            $originalData = $templates->mapWithKeys(fn ($template) => [
+                $template->id => [
+                    'time' => $template->start_time,
+                    'party_size' => $template->party_size,
+                    'price_per_head' => $template->price_per_head,
+                    'prime_time' => $template->prime_time,
+                ],
+            ])->toArray();
 
             // Update all non-prime templates to set price_per_head
             foreach ($templates as $template) {
