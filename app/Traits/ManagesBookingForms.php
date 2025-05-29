@@ -16,6 +16,8 @@ use Illuminate\Support\Collection;
 
 trait ManagesBookingForms
 {
+    use HandlesPartySizeMapping;
+
     public const int AVAILABILITY_DAYS = 3;
 
     public const int MINUTES_PAST = 35;
@@ -58,7 +60,8 @@ trait ManagesBookingForms
                 ->required(),
             Grid::make()
                 ->id('advanced')
-                ->columns((property_exists($this, 'region') && $this->region?->id && in_array($this->region->id, config('app.specialty_filter_regions', []))) ? 3 : 2)
+                ->columns((property_exists($this, 'region') && $this->region?->id && in_array($this->region->id,
+                    config('app.specialty_filter_regions', []))) ? 3 : 2)
                 ->schema([
                     Select::make('neighborhood')
                         ->prefixIcon('ri-community-line')
@@ -113,15 +116,10 @@ trait ManagesBookingForms
     {
         return Select::make('guest_count')
             ->prefixIcon('heroicon-m-users')
-            ->options([
-                2 => '2 Guests',
-                3 => '3 Guests',
-                4 => '4 Guests',
-                5 => '5 Guests',
-                6 => '6 Guests',
-                7 => '7 Guests',
-                8 => '8 Guests',
-            ])
+            ->options(array_combine(
+                $this->getAllowedGuestCounts(),
+                array_map(fn ($i) => "$i Guests", $this->getAllowedGuestCounts())
+            ))
             ->placeholder('Party Size')
             ->live()
             ->hiddenLabel()
@@ -160,10 +158,9 @@ trait ManagesBookingForms
             ->multiple()
             ->columnSpan(1)
             ->live()
-            ->visible(fn () =>
-                // Only show for configured regions and when advanced mode is enabled
+            ->visible(fn () => // Only show for configured regions and when advanced mode is enabled
                 $this->advanced &&
-                   $this->region &&
-                   in_array($this->region->id, config('app.specialty_filter_regions', [])));
+                $this->region &&
+                in_array($this->region->id, config('app.specialty_filter_regions', [])));
     }
 }
