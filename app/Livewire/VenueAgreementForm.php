@@ -3,10 +3,13 @@
 namespace App\Livewire;
 
 use App\Data\VenueContactData;
+use App\Models\User;
 use App\Models\Venue;
 use App\Models\VenueOnboarding;
+use App\Notifications\AgreementAcceptedNotification;
 use App\Notifications\VenueAgreementCopy;
 use Illuminate\Support\Facades\Notification;
+use Illuminate\View\View;
 use Livewire\Component;
 
 class VenueAgreementForm extends Component
@@ -74,7 +77,7 @@ class VenueAgreementForm extends Component
 
         $this->updateOnboarding();
 
-        // Send email with the agreement attached
+        // Send an email with the agreement attached
         Notification::route('mail', $this->email)
             ->notify(new VenueAgreementCopy($this->onboarding));
 
@@ -92,12 +95,30 @@ class VenueAgreementForm extends Component
             'agreement_accepted_at' => now(),
         ]);
 
+        // Send notification to all admins
+        $this->notifyAdminsOfAgreementAccepted();
+
         // Update any venues connected to this onboarding
         $this->updateConnectedVenues();
     }
 
     /**
-     * Updates any venues that were created from this onboarding with the collected contact information
+     * Notify all administrators that the agreement has been accepted.
+     */
+    private function notifyAdminsOfAgreementAccepted(): void
+    {
+        $companyName = $this->onboarding->company_name;
+
+        // Get all users with the 'super_admin' role
+        $admins = User::role('super_admin')->get();
+
+        foreach ($admins as $admin) {
+            $admin->notify(new AgreementAcceptedNotification($companyName));
+        }
+    }
+
+    /**
+     * Updates any venues created from this onboarding with the collected contact information
      */
     private function updateConnectedVenues(): void
     {
@@ -156,7 +177,7 @@ class VenueAgreementForm extends Component
         }
     }
 
-    public function render()
+    public function render(): View
     {
         return view('livewire.venue-agreement-form');
     }

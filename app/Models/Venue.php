@@ -15,6 +15,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasManyThrough;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\HasOneThrough;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
@@ -525,5 +526,16 @@ class Venue extends Model
         }
 
         return implode(', ', $parts);
+    }
+
+    /**
+     * @return HasOne<VenueOnboarding, $this>
+     */
+    public function venueOnboarding(): HasOne
+    {
+        return $this->hasOne(VenueOnboarding::class, 'venue_group_id', 'venue_group_id')
+            ->orWhere(function ($query) {
+                $query->where('company_name', $this->name);
+            });
     }
 }
