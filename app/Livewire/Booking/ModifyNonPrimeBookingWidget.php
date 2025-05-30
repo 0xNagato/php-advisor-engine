@@ -150,7 +150,6 @@ class ModifyNonPrimeBookingWidget extends Widget implements HasForms
                     $query->where('start_time', '>', now()->timezone($this->booking->venue->timezone)->format('H:i:s'));
                 })
             ->orderBy('start_time')
-            ->tap(fn ($query) => ds($query->toRawSql())->label('query'))
             ->get();
 
         $this->availableSlots = $schedules->map(fn ($schedule) => [
