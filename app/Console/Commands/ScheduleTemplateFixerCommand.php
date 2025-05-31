@@ -33,6 +33,12 @@ class ScheduleTemplateFixerCommand extends Command
         $venueIds = $this->getVenuesWithInconsistencies($limit);
 
         foreach ($venueIds as $venueId) {
+            if (in_array($venueId, [188, 213])) {
+                $this->warn("Ignoring venue_id = $venueId.");
+
+                continue;
+            }
+
             $this->info("Processing venue_id = $venueId");
             $results = $this->getInconsistenciesForVenue($venueId);
 
