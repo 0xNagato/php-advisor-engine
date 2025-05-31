@@ -6,16 +6,24 @@ use App\Models\ScheduleTemplate;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
 
-class ScheduleTemplateFixerCommand extends Command
+class ScheduleTemplatePrimeTimeFixerCommand extends Command
 {
-    protected $signature = 'schedule-template:fix-is-available {--limit=1 : Number of venues to process per execution}';
+    protected $signature = 'schedule-template:fix-prime-time
+                            {--limit=1 : Number of venues to process per execution}
+                            {--dry-run : Preview changes without making them}';
 
-    protected $description = 'Fix inconsistencies in schedule templates for venues';
+    protected $description = 'Fix inconsistencies in schedule templates prime time for venues';
 
     public function handle(): int
     {
         $startTime = now();
+        $isDryRun = $this->option('dry-run');
         $this->info("Starting to process venues at {$startTime->format('H:i:s')}...");
+
+        if ($isDryRun) {
+            $this->warn('Dry-run mode enabled. No changes will be made.');
+        }
+
         $totalVenues = $this->countTotalVenuesWithInconsistencies();
 
         if ($totalVenues === 0) {
@@ -33,7 +41,7 @@ class ScheduleTemplateFixerCommand extends Command
         $venueIds = $this->getVenuesWithInconsistencies($limit);
 
         foreach ($venueIds as $venueId) {
-            if (in_array($venueId, [188, 213])) {
+            if (in_array($venueId, [99, 315, 188, 213])) {
                 $this->warn("Ignoring venue_id = $venueId.");
 
                 continue;
@@ -51,18 +59,26 @@ class ScheduleTemplateFixerCommand extends Command
             $tableData = [];
             foreach ($results as $result) {
                 if ((int) $result->distinct_party_size_count === 5) {
-                    $affectedRows = $this->fixInconsistencies(
-                        $venueId,
-                        $result->day_of_week,
-                        $result->start_time,
-                        $result->is_available
-                    );
+                    if ($isDryRun) {
+                        $tableData[] = [
+                            'Day' => ucfirst((string) $result->day_of_week),
+                            'Start Time' => $result->start_time,
+                            'Rows Fixed' => 'Preview',
+                        ];
+                    } else {
+                        $affectedRows = $this->fixInconsistencies(
+                            $venueId,
+                            $result->day_of_week,
+                            $result->start_time,
+                            $result->prime_time
+                        );
 
-                    $tableData[] = [
-                        'Day' => ucfirst((string) $result->day_of_week),
-                        'Start Time' => $result->start_time,
-                        'Rows Fixed' => $affectedRows,
-                    ];
+                        $tableData[] = [
+                            'Day' => ucfirst((string) $result->day_of_week),
+                            'Start Time' => $result->start_time,
+                            'Rows Fixed' => $affectedRows,
+                        ];
+                    }
                 }
             }
 
@@ -85,8 +101,8 @@ class ScheduleTemplateFixerCommand extends Command
     {
         return ScheduleTemplate::query()
             ->select('venue_id')
-            ->whereNotIn('venue_id', [188, 213])
-            ->groupBy('venue_id', 'day_of_week', 'start_time', 'is_available')
+            ->whereNotIn('venue_id', [99, 315, 188, 213])
+            ->groupBy('venue_id', 'day_of_week', 'start_time', 'prime_time')
             ->havingRaw('COUNT(DISTINCT party_size) <> 11')
             ->distinct()
             ->count('venue_id');
@@ -96,8 +112,8 @@ class ScheduleTemplateFixerCommand extends Command
     {
         return ScheduleTemplate::query()
             ->select('venue_id')
-            ->whereNotIn('venue_id', [188, 213])
-            ->groupBy('venue_id', 'day_of_week', 'start_time', 'is_available')
+            ->whereNotIn('venue_id', [99, 315, 188, 213])
+            ->groupBy('venue_id', 'day_of_week', 'start_time', 'prime_time')
             ->havingRaw('COUNT(DISTINCT party_size) <> 11')
             ->pluck('venue_id')
             ->unique()
@@ -112,16 +128,16 @@ class ScheduleTemplateFixerCommand extends Command
                 'venue_id',
                 'day_of_week',
                 'start_time',
-                'is_available',
+                'prime_time',
                 DB::raw('COUNT(DISTINCT party_size) AS distinct_party_size_count'),
             ])
             ->where('venue_id', $venueId)
-            ->groupBy('venue_id', 'day_of_week', 'start_time', 'is_available')
+            ->groupBy('venue_id', 'day_of_week', 'start_time', 'prime_time')
             ->havingRaw('COUNT(DISTINCT party_size) <> 11')
             ->get();
     }
 
-    private function fixInconsistencies(int $venueId, string $dayOfWeek, string $startTime, bool $isAvailable): int
+    private function fixInconsistencies(int $venueId, string $dayOfWeek, string $startTime, bool $primeTime): int
     {
         return ScheduleTemplate::query()
             ->where('venue_id', $venueId)
@@ -129,7 +145,7 @@ class ScheduleTemplateFixerCommand extends Command
             ->where('start_time', $startTime)
             ->where('party_size', '>', 8)
             ->update([
-                'is_available' => $isAvailable,
+                'prime_time' => $primeTime,
             ]);
     }
 
