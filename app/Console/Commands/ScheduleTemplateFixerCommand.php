@@ -33,6 +33,12 @@ class ScheduleTemplateFixerCommand extends Command
         $venueIds = $this->getVenuesWithInconsistencies($limit);
 
         foreach ($venueIds as $venueId) {
+            if (in_array($venueId, [188, 213])) {
+                $this->warn("Ignoring venue_id = $venueId.");
+
+                continue;
+            }
+
             $this->info("Processing venue_id = $venueId");
             $results = $this->getInconsistenciesForVenue($venueId);
 
@@ -79,6 +85,7 @@ class ScheduleTemplateFixerCommand extends Command
     {
         return ScheduleTemplate::query()
             ->select('venue_id')
+            ->whereNotIn('venue_id', [188, 213])
             ->groupBy('venue_id', 'day_of_week', 'start_time', 'is_available')
             ->havingRaw('COUNT(DISTINCT party_size) <> 11')
             ->distinct()
@@ -89,6 +96,7 @@ class ScheduleTemplateFixerCommand extends Command
     {
         return ScheduleTemplate::query()
             ->select('venue_id')
+            ->whereNotIn('venue_id', [188, 213])
             ->groupBy('venue_id', 'day_of_week', 'start_time', 'is_available')
             ->havingRaw('COUNT(DISTINCT party_size) <> 11')
             ->limit($limit)
