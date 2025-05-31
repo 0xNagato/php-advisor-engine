@@ -79,6 +79,7 @@ class ScheduleTemplateFixerCommand extends Command
     {
         return ScheduleTemplate::query()
             ->select('venue_id')
+            ->whereNotIn('venue_id', [188, 213])
             ->groupBy('venue_id', 'day_of_week', 'start_time', 'is_available')
             ->havingRaw('COUNT(DISTINCT party_size) <> 11')
             ->distinct()
@@ -89,6 +90,7 @@ class ScheduleTemplateFixerCommand extends Command
     {
         return ScheduleTemplate::query()
             ->select('venue_id')
+            ->whereNotIn('venue_id', [188, 213])
             ->groupBy('venue_id', 'day_of_week', 'start_time', 'is_available')
             ->havingRaw('COUNT(DISTINCT party_size) <> 11')
             ->limit($limit)
