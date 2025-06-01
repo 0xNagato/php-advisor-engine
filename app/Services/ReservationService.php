@@ -91,7 +91,7 @@ class ReservationService
         /**
          * @var Collection<int, Venue> $venues
          */
-        $venues = Venue::available()
+        $venues = Venue::query()
             ->where('region', $this->region->id)
             ->where(function ($query) {
                 $statuses = [VenueStatus::ACTIVE, VenueStatus::PENDING];
@@ -171,12 +171,10 @@ class ReservationService
             }
         });
 
-        $topTiers = $this->getTopTiers();
-
         $sorted = $venues
             // Group venues based on availability and status, only considering middle 3 timeslots
-            ->groupBy(function ($venue) use ($topTiers) {
-                if (filled($topTiers) && in_array((string) $venue->id, $topTiers, true)) {
+            ->groupBy(function ($venue) {
+                if ($venue->tier === 1) {
                     return 'top_tiers';
                 }
                 if ($venue->status === VenueStatus::PENDING) {

@@ -184,6 +184,10 @@ class EditVenue extends EditRecord
                             ->options(fn (callable $get) => $get('specialtyOptions') ?? [])
                             ->multiple()
                             ->reactive(),
+                        Select::make('tier')
+                            ->placeholder('Select Tier')
+                            ->options([1 => 'Top', 2 => 'Normal'])
+                            ->required(),
                         TextInput::make('primary_contact_name')
                             ->label('Primary Contact Name')
                             ->required(),
@@ -317,7 +321,8 @@ class EditVenue extends EditRecord
                                     ->required(),
                                 TextInput::make('fee')
                                     ->label('Fee')
-                                    ->prefix(fn () => Region::getCurrencySymbolForRegion($this->getRecord()->region ?? 'miami'))
+                                    ->prefix(fn (
+                                    ) => Region::getCurrencySymbolForRegion($this->getRecord()->region ?? 'miami'))
                                     ->numeric()
                                     ->required(),
                             ]),
@@ -816,8 +821,8 @@ class EditVenue extends EditRecord
                         try {
                             // Check if this is the only venue in a group before deleting
                             $isOnlyVenueInGroup = $venue->venue_group_id !== null &&
-                             $venue->venueGroup &&
-                             $venue->venueGroup->venues()->count() === 1;
+                                $venue->venueGroup &&
+                                $venue->venueGroup->venues()->count() === 1;
 
                             DeleteVenueAction::run($venue);
 

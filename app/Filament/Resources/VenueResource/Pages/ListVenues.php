@@ -441,7 +441,8 @@ class ListVenues extends ListRecords
                     ->withCount(['confirmedBookings'])
                     ->leftJoin('users', 'venues.user_id', '=', 'users.id')
                     ->when($this->onlyWithBookings, fn ($query) => $query->has('confirmedBookings'))
-                    ->when($this->onlyActiveStatus, fn ($query) => $query->where('venues.status', VenueStatus::ACTIVE->value))
+                    ->when($this->onlyActiveStatus,
+                        fn ($query) => $query->where('venues.status', VenueStatus::ACTIVE->value))
                     ->when($this->region, fn ($query) => $query->where('venues.region', $this->region))
                     ->orderByDesc('users.updated_at')
             )
@@ -458,6 +459,9 @@ class ListVenues extends ListRecords
                     ]),
             ])
             ->columns([
+                TextColumn::make('tier')
+                    ->formatStateUsing(fn (int $state): string => $state === 1 ? 'Top' : 'Normal')
+                    ->size('xs'),
                 TextColumn::make('name')
                     ->size('xs')
                     ->searchable(),
@@ -471,7 +475,10 @@ class ListVenues extends ListRecords
                     ->label('Venue Group')
                     ->grow(false)
                     ->size('xs')
-                    ->formatStateUsing(fn ($state, Venue $record) => $record->venueGroup ? $record->venueGroup->name : '-')
+                    ->formatStateUsing(fn (
+                        $state,
+                        Venue $record
+                    ) => $record->venueGroup ? $record->venueGroup->name : '-')
                     ->visibleFrom('md'),
                 TextColumn::make('partnerReferral.user.name')->label('Partner')
                     ->url(fn (Venue $record) => $record->partnerReferral?->user?->partner
@@ -531,7 +538,8 @@ class ListVenues extends ListRecords
                 SelectFilter::make('region')
                     ->label('Region')
                     ->options(fn () => Region::all()->pluck('name', 'id')->toArray())
-                    ->query(fn (Builder $query, array $data): Builder => $data['value'] ? $query->where('venues.region', $data['value']) : $query
+                    ->query(fn (Builder $query, array $data): Builder => $data['value'] ? $query->where('venues.region',
+                        $data['value']) : $query
                     )
                     ->preload(),
             ])

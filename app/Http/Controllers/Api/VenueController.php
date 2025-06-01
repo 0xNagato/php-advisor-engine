@@ -15,7 +15,7 @@ class VenueController extends Controller
         $region = GetUserRegion::run();
 
         // Get all available venues in the region
-        $query = Venue::available()
+        $query = Venue::query()
             ->where('region', $region->id)
             ->where('status', VenueStatus::ACTIVE);
 

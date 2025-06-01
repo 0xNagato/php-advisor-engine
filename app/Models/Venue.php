@@ -8,7 +8,6 @@ use App\Enums\VenueStatus;
 use App\Enums\VenueType;
 use App\Models\Traits\HasEarnings;
 use Carbon\Carbon;
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -86,6 +85,7 @@ class Venue extends Model
         'specialty',
         'venue_type',
         'advance_booking_window',
+        'tier',
     ];
 
     protected function casts(): array
@@ -106,7 +106,7 @@ class Venue extends Model
     }
 
     /**
-     * Get formatted neighborhood name
+     * Get a formatted neighborhood name
      */
     protected function formattedNeighborhood(): Attribute
     {
@@ -152,7 +152,7 @@ class Venue extends Model
     }
 
     /**
-     * Get full formatted address
+     * Get a full formatted address
      */
     protected function formattedAddress(): Attribute
     {
@@ -281,11 +281,6 @@ class Venue extends Model
         }
 
         $this->scheduleTemplates()->insert($schedulesData);
-    }
-
-    public function scopeAvailable(Builder $query): Builder
-    {
-        return $query;
     }
 
     public function scopeActive($query)
