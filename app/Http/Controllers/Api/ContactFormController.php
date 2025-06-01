@@ -12,7 +12,7 @@ class ContactFormController extends Controller
     public function submit(Request $request): JsonResponse
     {
         $request->validate([
-            'message' => 'required|string|max:500',
+            'message' => ['required', 'string', 'max:500'],
         ]);
 
         $user = $request->user();

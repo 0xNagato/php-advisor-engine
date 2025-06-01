@@ -11,7 +11,7 @@ class UpdatePushTokenController extends Controller
     public function __invoke(Request $request): JsonResponse
     {
         $request->validate([
-            'push_token' => 'required|string',
+            'push_token' => ['required', 'string'],
         ]);
 
         $request->user()->update([
