@@ -275,6 +275,12 @@ class ScheduleManager extends Component
         }
 
         if (! $schedule) {
+            Notification::make()
+                ->title('No Schedule Found')
+                ->body('No schedule exists for these slot.')
+                ->danger()
+                ->send();
+
             return;
         }
 
@@ -470,12 +476,145 @@ class ScheduleManager extends Component
         }
     }
 
+    public function saveEditingPartySize(): void
+    {
+        try {
+            if ($this->editingSlot['time'] === '*' && $this->editingSlot['size']) {
+                if ($this->activeView === 'calendar') {
+                    // Calendar mode: Update "VenueTimeSlot" overrides for a specific date
+                    if (! $this->editingSlot['date']) {
+                        throw new Exception('The booking date must be provided for calendar overrides.');
+                    }
+
+                    $originalData = [];
+                    $newData = [];
+
+                    foreach ($this->timeSlots as $slot) {
+                        $time = $slot['time'];
+
+                        $template = $this->venue->scheduleTemplates()
+                            ->where('day_of_week', $this->editingSlot['day'])
+                            ->where('start_time', $time)
+                            ->where('party_size', $this->editingSlot['size'])
+                            ->first();
+
+                        if ($template) {
+                            // Fetch the existing VenueTimeSlot or create/update it
+                            $override = VenueTimeSlot::query()
+                                ->where('schedule_template_id', $template->id)
+                                ->where('booking_date', $this->editingSlot['date'])
+                                ->first();
+
+                            $originalData[$time] = $override ? $override->attributesToArray() : null;
+
+                            VenueTimeSlot::updateOrCreate(
+                                [
+                                    'schedule_template_id' => $template->id,
+                                    'booking_date' => $this->editingSlot['date'],
+                                ],
+                                [
+                                    'is_available' => $this->editingSlot['is_available'],
+                                    'prime_time' => $this->editingSlot['is_prime'],
+                                    'available_tables' => $this->editingSlot['available_tables'],
+                                    'minimum_spend_per_guest' => $this->editingSlot['minimum_spend_per_guest'],
+                                    'price_per_head' => $this->editingSlot['price_per_head'],
+                                ]
+                            );
+
+                            $newData[$time] = VenueTimeSlot::query()
+                                ->where('schedule_template_id', $template->id)
+                                ->where('booking_date', $this->editingSlot['date'])
+                                ->first()
+                                ->attributesToArray();
+                        }
+                    }
+
+                    // Log the changes
+                    $this->getActivityLogger()
+                        ->performedOn($this->venue)
+                        ->withProperties([
+                            'action' => 'calendar_bulk_update',
+                            'booking_date' => $this->editingSlot['date'],
+                            'party_size' => $this->editingSlot['size'],
+                            'original_data' => $originalData,
+                            'new_data' => $newData,
+                        ])
+                        ->log('Updated bulk party size overrides for calendar mode');
+
+                    Notification::make()
+                        ->title('All time slots updated for party size successfully')
+                        ->success()
+                        ->send();
+
+                } else {
+                    // Template mode (original logic remains for batch updates across templates)
+                    foreach ($this->timeSlots as $slot) {
+                        $time = $slot['time'];
+
+                        // Update the schedule for each time slot
+                        $this->schedules[$this->selectedDay][$time][$this->editingSlot['size']] = [
+                            'is_available' => $this->editingSlot['is_available'],
+                            'is_prime' => $this->editingSlot['is_prime'],
+                            'available_tables' => $this->editingSlot['available_tables'],
+                            'minimum_spend_per_guest' => $this->editingSlot['minimum_spend_per_guest'],
+                            'price_per_head' => $this->editingSlot['price_per_head'],
+                            'template_id' => $this->schedules[$this->selectedDay][$time][$this->editingSlot['size']]['template_id'] ?? null,
+                        ];
+                    }
+
+                    // Persist the changes to the database
+                    foreach ($this->timeSlots as $slot) {
+                        $time = $slot['time'];
+
+                        $template = $this->venue->scheduleTemplates()
+                            ->where('day_of_week', $this->selectedDay)
+                            ->where('start_time', $time)
+                            ->where('party_size', $this->editingSlot['size'])
+                            ->first();
+
+                        if ($template) {
+                            $template->update([
+                                'is_available' => $this->editingSlot['is_available'],
+                                'prime_time' => $this->editingSlot['is_prime'],
+                                'available_tables' => $this->editingSlot['available_tables'],
+                                'minimum_spend_per_guest' => $this->editingSlot['minimum_spend_per_guest'],
+                                'price_per_head' => $this->editingSlot['price_per_head'],
+                            ]);
+                        }
+                    }
+
+                    Notification::make()
+                        ->title('All time slots updated for party size successfully')
+                        ->success()
+                        ->send();
+                }
+            } else {
+                throw new Exception('Invalid operation for saving bulk editing party size');
+            }
+
+            $this->closeEditModal();
+
+        } catch (Exception $e) {
+            Log::error('Error saving party size schedule', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+                'editingSlot' => $this->editingSlot,
+            ]);
+
+            Notification::make()
+                ->title('Error updating schedule')
+                ->body('Please try again or contact support if the problem persists.')
+                ->danger()
+                ->send();
+        }
+    }
+
     protected function saveOverride(ScheduleTemplate $template): void
     {
         try {
             $bookingDate = Carbon::parse($this->editingSlot['date'])->format('Y-m-d');
 
-            // First find if an override exists
+            // First, find if an override exists
             $override = VenueTimeSlot::query()
                 ->where('schedule_template_id', $template->id)
                 ->where('booking_date', $bookingDate)
@@ -513,7 +652,6 @@ class ScheduleManager extends Component
 
     public function openBulkEditModal(string $day, string $time): void
     {
-        // Use the first party size's settings as default
         $firstSize = array_key_first(array_filter(
             $this->venue->party_sizes,
             fn ($value, $key) => $key !== 'Special Request',
@@ -522,11 +660,17 @@ class ScheduleManager extends Component
         $schedule = $this->calendarSchedules[$time][$firstSize] ?? null;
 
         if (! $schedule) {
+            Notification::make()
+                ->title('No Schedule Found')
+                ->body("No schedule exists for $time on $day.")
+                ->danger()
+                ->send();
+
             return;
         }
 
         $this->editingSlot = [
-            'day' => $day,
+            'day' => strtolower($day),
             'date' => $this->selectedDate,
             'time' => $time,
             'size' => '*',  // Special marker for bulk edit
@@ -537,6 +681,39 @@ class ScheduleManager extends Component
             'minimum_spend_per_guest' => $schedule['minimum_spend_per_guest'],
         ];
 
+        $this->dispatch('open-modal', id: 'edit-slot');
+    }
+
+    public function openBulkEditPartySizeModal(string $day, int $size): void
+    {
+        // Retrieve the first matching schedule for the party size on the selected day
+        $schedule = collect($this->calendarSchedules)
+            ->first(fn ($timeSlots) => isset($timeSlots[$size]))[$size] ?? null;
+
+        if (! $schedule) {
+            Notification::make()
+                ->title('No Schedule Found')
+                ->body("No schedule exists for party size $size on $day.")
+                ->danger()
+                ->send();
+
+            return;
+        }
+
+        // Prepare the editing slot with relevant details
+        $this->editingSlot = [
+            'day' => $day,
+            'date' => $this->selectedDate,
+            'time' => '*', // Bulk edit marker for all time slots
+            'size' => $size,
+            'is_available' => $schedule['is_available'],
+            'is_prime' => $schedule['is_prime'],
+            'price_per_head' => $schedule['price_per_head'],
+            'available_tables' => $schedule['available_tables'],
+            'minimum_spend_per_guest' => $schedule['minimum_spend_per_guest'],
+        ];
+
+        // Open the bulk editing modal
         $this->dispatch('open-modal', id: 'edit-slot');
     }
 
@@ -551,6 +728,12 @@ class ScheduleManager extends Component
         $schedule = $this->schedules[$this->selectedDay][$time][$firstSize] ?? null;
 
         if (! $schedule) {
+            Notification::make()
+                ->title('No Schedule Found')
+                ->body("No schedule exists for $time.")
+                ->danger()
+                ->send();
+
             return;
         }
 
@@ -567,6 +750,39 @@ class ScheduleManager extends Component
             'template_id' => $schedule['template_id'],
         ];
 
+        $this->dispatch('open-modal', id: 'edit-slot');
+    }
+
+    public function openBulkTemplateSizeEditModal(int $size): void
+    {
+        // Use the first time slot's settings as default
+        $firstTimeSlot = $this->timeSlots[0]['time'] ?? null;
+        if (! isset($this->schedules[$this->selectedDay][$firstTimeSlot][$size])) {
+            Notification::make()
+                ->title('No Schedule Found')
+                ->body("No schedule exists for party size $size.")
+                ->danger()
+                ->send();
+
+            return;
+        }
+
+        $schedule = $this->schedules[$this->selectedDay][$firstTimeSlot][$size];
+
+        $this->editingSlot = [
+            'day' => $this->selectedDay,
+            'date' => null,
+            'time' => '*', // Indicates operation will apply to all times
+            'size' => $size, // Target party size
+            'is_available' => $schedule['is_available'],
+            'is_prime' => $schedule['is_prime'],
+            'available_tables' => $schedule['available_tables'],
+            'minimum_spend_per_guest' => $schedule['minimum_spend_per_guest'],
+            'price_per_head' => $schedule['price_per_head'],
+            'template_id' => $schedule['template_id'],
+        ];
+
+        // Open a modal for bulk editing
         $this->dispatch('open-modal', id: 'edit-slot');
     }
 
