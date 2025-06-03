@@ -504,6 +504,7 @@ class ListVenues extends ListRecords
                     ->label('Venue Group')
                     ->grow(false)
                     ->size('xs')
+                    ->default('-')
                     ->formatStateUsing(fn (
                         $state,
                         Venue $record
