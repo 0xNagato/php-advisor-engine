@@ -174,8 +174,13 @@ class ReservationService
         $sorted = $venues
             // Group venues based on availability and status, only considering middle 3 timeslots
             ->groupBy(function ($venue) {
-                if ($venue->tier === 1) {
-                    return 'top_tiers';
+                // Check if venue is in tier 1 (either DB tier=1 OR in config tier_1)
+                if ($venue->tier === 1 || $this->isVenueInConfigTier($venue->id, 1)) {
+                    return 'gold';
+                }
+                // Check if venue is in tier 2 (either DB tier=2 OR in config tier_2)
+                if ($venue->tier === 2 || $this->isVenueInConfigTier($venue->id, 2)) {
+                    return 'silver';
                 }
                 if ($venue->status === VenueStatus::PENDING) {
                     return 'pending';
@@ -200,13 +205,33 @@ class ReservationService
                         : 'closed'
                 );
             })
-            ->map(fn ($group) => // Sort each group alphabetically A-Z
-            $group->sortBy(fn ($venue) => strtolower($venue->name)))
+            ->map(function ($group, $groupKey) {
+                // Sort tier groups: config venues first (in config order), then others alphabetically
+                if (in_array($groupKey, ['gold', 'silver'])) {
+                    $tierNumber = $groupKey === 'gold' ? 1 : 2;
+                    $configVenues = $this->getVenuesInTier($this->region->id, $tierNumber);
+
+                    return $group->sortBy(function ($venue) use ($configVenues) {
+                        $configPosition = array_search($venue->id, $configVenues);
+
+                        if ($configPosition !== false) {
+                            // Venue is in config - use config position
+                            return $configPosition;
+                        } else {
+                            // Venue not in config - sort alphabetically after config venues
+                            return 1000 + ord(strtolower($venue->name[0]));
+                        }
+                    });
+                }
+
+                return $group->sortBy(fn ($venue) => strtolower($venue->name));
+            })
             // Combine groups in the desired order
             ->pipe(function ($groups) {
                 return collect([])
                     ->concat($groups->get('hidden', collect()))           // Hidden venues first
-                    ->concat($groups->get('top_tiers', collect()))        // Then top tiers
+                    ->concat($groups->get('gold', collect()))            // Then gold venues
+                    ->concat($groups->get('silver', collect()))          // Then silver venues
                     ->concat($groups->get('prime_available', collect()))  // Then prime slots
                     ->concat($groups->get('non_prime_available', collect())) // Then non-prime slots
                     ->concat($groups->get('sold_out', collect()))        // Then sold out venues
@@ -423,14 +448,98 @@ class ReservationService
             ->get();
     }
 
-    private function getTopTiers(): array
+    /**
+     * Check if a venue is configured in a specific tier.
+     *
+     * @param  int  $venueId  The venue ID to check
+     * @param  int  $tier  The tier number (1 or 2)
+     * @return bool True if venue is in the config for this tier
+     */
+    private function isVenueInConfigTier(int $venueId, int $tier): bool
     {
-        $envTopTiers = config('app.'.$this->region->id.'_top_tier_venues', '');
-        if (blank($envTopTiers)) {
-            return [];
+        $configVenues = $this->getVenuesInTier($this->region->id, $tier);
+
+        return in_array($venueId, $configVenues);
+    }
+
+    /**
+     * Get the tier and position for a venue based on configuration.
+     *
+     * @param  int  $venueId  The venue ID to check
+     * @return array Contains 'tier' and 'position' keys
+     */
+    private function getVenueTierPosition(int $venueId): array
+    {
+        $tierConfig = config('venue-tiers.tiers.'.$this->region->id, []);
+
+        // Check tier 1
+        if (isset($tierConfig['tier_1'])) {
+            $position = array_search($venueId, $tierConfig['tier_1']);
+            if ($position !== false) {
+                return [
+                    'tier' => 1,
+                    'position' => $position,
+                ];
+            }
         }
 
-        // If numeric values are provided, convert them to strings for comparison
-        return array_map('strval', array_filter(explode(',', (string) $envTopTiers)));
+        // Check tier 2
+        if (isset($tierConfig['tier_2'])) {
+            $position = array_search($venueId, $tierConfig['tier_2']);
+            if ($position !== false) {
+                return [
+                    'tier' => 2,
+                    'position' => $position,
+                ];
+            }
+        }
+
+        // Default tier
+        return [
+            'tier' => config('venue-tiers.default_tier', 3),
+            'position' => PHP_INT_MAX, // Put at end
+        ];
+    }
+
+    /**
+     * Get all venue tier configurations for a specific region.
+     *
+     * @param  string  $regionId  The region ID
+     * @return array The tier configuration for the region
+     */
+    public static function getVenueTierConfig(string $regionId): array
+    {
+        return config('venue-tiers.tiers.'.$regionId, []);
+    }
+
+    /**
+     * Get all venues in a specific tier for a region.
+     *
+     * @param  string  $regionId  The region ID
+     * @param  int  $tier  The tier number (1 or 2)
+     * @return array Array of venue IDs in the specified tier
+     */
+    public static function getVenuesInTier(string $regionId, int $tier): array
+    {
+        $tierConfig = self::getVenueTierConfig($regionId);
+
+        return $tierConfig['tier_'.$tier] ?? [];
+    }
+
+    /**
+     * Get the display label for a tier.
+     *
+     * @param  int  $tier  The tier number
+     * @return string The tier label
+     */
+    public static function getTierLabel(int $tier): string
+    {
+        $labels = config('venue-tiers.tier_labels', [
+            1 => 'Gold',
+            2 => 'Silver',
+            3 => 'Standard',
+        ]);
+
+        return $labels[$tier] ?? 'Standard';
     }
 }

@@ -12,6 +12,7 @@ use App\Models\ScheduleTemplate;
 use App\Models\Venue;
 use App\Notifications\Booking\CustomerBookingConfirmed;
 use App\Services\Booking\BookingCalculationService;
+use App\Services\ReservationService;
 use App\Traits\HandlesPartySizeMapping;
 use App\Traits\ImpersonatesOther;
 use Carbon\Carbon;
@@ -460,7 +461,34 @@ class ListVenues extends ListRecords
             ])
             ->columns([
                 TextColumn::make('tier')
-                    ->formatStateUsing(fn (int $state): string => $state === 1 ? 'Top' : 'Normal')
+                    ->label('Tier')
+                    ->formatStateUsing(function (?int $state, Venue $record): string {
+                        // Check if venue is in tier 1 (either DB tier=1 OR in config tier_1)
+                        $goldVenues = ReservationService::getVenuesInTier($record->region, 1);
+                        $silverVenues = ReservationService::getVenuesInTier($record->region, 2);
+
+                        if ($record->tier === 1 || in_array($record->id, $goldVenues)) {
+                            return 'Gold';
+                        } elseif ($record->tier === 2 || in_array($record->id, $silverVenues)) {
+                            return 'Silver';
+                        } else {
+                            return 'Standard';
+                        }
+                    })
+                    ->badge()
+                    ->color(function (?int $state, Venue $record): string {
+                        // Check if venue is in tier 1 (either DB tier=1 OR in config tier_1)
+                        $goldVenues = ReservationService::getVenuesInTier($record->region, 1);
+                        $silverVenues = ReservationService::getVenuesInTier($record->region, 2);
+
+                        if ($record->tier === 1 || in_array($record->id, $goldVenues)) {
+                            return 'warning'; // Gold
+                        } elseif ($record->tier === 2 || in_array($record->id, $silverVenues)) {
+                            return 'gray';    // Silver
+                        } else {
+                            return 'primary'; // Standard (blue)
+                        }
+                    })
                     ->size('xs'),
                 TextColumn::make('name')
                     ->size('xs')

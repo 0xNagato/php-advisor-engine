@@ -16,6 +16,7 @@ use App\Models\Specialty;
 use App\Models\User;
 use App\Models\Venue;
 use App\Models\VenueGroup;
+use App\Services\ReservationService;
 use Carbon\Carbon;
 use Exception;
 use Filament\Actions\Action;
@@ -186,8 +187,46 @@ class EditVenue extends EditRecord
                             ->reactive(),
                         Select::make('tier')
                             ->placeholder('Select Tier')
-                            ->options([1 => 'Top', 2 => 'Normal'])
-                            ->required(),
+                            ->options([
+                                1 => 'Gold',
+                                2 => 'Silver',
+                                null => 'Standard',
+                            ])
+                            ->default(null)
+                            ->helperText('Gold venues appear first in search results, followed by Silver, then Standard. Ordering within tiers is managed through configuration.'),
+                        Placeholder::make('tier_position')
+                            ->label('Tier Position')
+                            ->content(function () use ($venue) {
+                                if (! $venue->region) {
+                                    return 'Set region first to see tier position';
+                                }
+
+                                $tier1Venues = ReservationService::getVenuesInTier($venue->region, 1);
+                                $tier2Venues = ReservationService::getVenuesInTier($venue->region, 2);
+
+                                $tier1Position = array_search($venue->id, $tier1Venues);
+                                $tier2Position = array_search($venue->id, $tier2Venues);
+
+                                // Check if venue is in Gold tier (DB tier=1 OR config tier_1)
+                                if ($venue->tier === 1 || $tier1Position !== false) {
+                                    if ($tier1Position !== false) {
+                                        return new HtmlString('<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">Position '.($tier1Position + 1).' in Gold (configured)</span>');
+                                    } else {
+                                        return new HtmlString('<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">Gold tier (database only)</span>');
+                                    }
+                                }
+                                // Check if venue is in Silver tier (DB tier=2 OR config tier_2)
+                                elseif ($venue->tier === 2 || $tier2Position !== false) {
+                                    if ($tier2Position !== false) {
+                                        return new HtmlString('<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">Position '.($tier2Position + 1).' in Silver (configured)</span>');
+                                    } else {
+                                        return new HtmlString('<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">Silver tier (database only)</span>');
+                                    }
+                                } else {
+                                    return new HtmlString('<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">Standard tier</span>');
+                                }
+                            })
+                            ->helperText('This shows if the venue is configured in the tier ordering system. Contact admin to change tier positions.'),
                         TextInput::make('primary_contact_name')
                             ->label('Primary Contact Name')
                             ->required(),

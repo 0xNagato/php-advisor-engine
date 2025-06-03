@@ -3,10 +3,11 @@
     use App\Models\Region;
     use App\Models\Venue;
     use App\Models\Cuisine;
+    use App\Services\ReservationService;
 
-    $envTopTiers = config('app.' . $this->region->id . '_top_tier_venues', '');
-    $topTiers = blank($envTopTiers) ? [] : explode(',', (string) $envTopTiers);
-    $topTiersQueue = $topTiers;
+    // Get tier venues for this region using the new configuration system
+    $goldVenues = ReservationService::getVenuesInTier($this->region->id, 1);
+    $silverVenues = ReservationService::getVenuesInTier($this->region->id, 2);
     $topTiersLine = false;
     $showVenueModals = config('app.show_venue_modals', true);
 @endphp
@@ -24,51 +25,15 @@
             </tr>
         </thead>
         <tbody>
-            @php
-                // Check if we have top tier venues and find the position where spacing should be added
-                $hasTopTierVenues = $venues->contains(fn($v) => $v->tier === 1);
-                $needsSpacingAfterIndex = null;
 
-                if ($hasTopTierVenues) {
-                    // Find the last top tier venue position
-                    $lastTopTierIndex = null;
-                    foreach ($venues as $index => $v) {
-                        if ($v->tier === 1) {
-                            $lastTopTierIndex = $index;
-                        }
-                    }
-
-                    // Find the first non-top-tier venue after the last top tier venue
-                    if ($lastTopTierIndex !== null) {
-                        for ($i = $lastTopTierIndex + 1; $i < count($venues); $i++) {
-                            if ($venues[$i]->tier > 1) {
-                                $needsSpacingAfterIndex = $lastTopTierIndex;
-                                break;
-                            }
-                        }
-                    }
-                }
-            @endphp
             @foreach ($venues as $venue)
-                @if ($needsSpacingAfterIndex !== null && $loop->index === $needsSpacingAfterIndex + 1 && !$topTiersLine)
-                    <tr class="bg-white" aria-hidden="true">
-                        <td colspan="{{ count($timeslotHeaders) + 1 }}" class="relative">
-                            <div class="h-2"></div>
-                            <div class="absolute inset-x-0 bottom-0 border-b-2 border-gray-200"></div>
-                        </td>
-                    </tr>
-                    <tr aria-hidden="true">
-                        <td colspan="{{ count($timeslotHeaders) + 1 }}" class="h-2"></td>
-                    </tr>
-                    @php
-                        $topTiersLine = true;
-                    @endphp
-                @endif
-
                 <tr @class([
                     'opacity-50' => $venue->status === VenueStatus::HIDDEN,
-                    'bg-amber-100 even:bg-amber-50' => $venue->tier === 1,
-                    'odd:bg-gray-100' => $venue->tier !== 1,
+                    'bg-amber-100 even:bg-amber-50' =>
+                        $venue->tier === 1 || in_array($venue->id, $goldVenues),
+                    'odd:bg-gray-100' => !(
+                        $venue->tier === 1 || in_array($venue->id, $goldVenues)
+                    ),
                 ])>
                     <td class="pl-2 text-center w-28">
                         <div class="flex items-center justify-center h-12 {{ $showVenueModals ? 'cursor-pointer' : 'cursor-default' }}"
@@ -186,6 +151,42 @@
                         </td>
                     @endforeach
                 </tr>
+
+                {{-- Add spacing between tiers --}}
+                @if (isset($venues[$loop->index + 1]))
+                    @php
+                        $currentIsGold = $venue->tier === 1 || in_array($venue->id, $goldVenues);
+                        $currentIsSilver = $venue->tier === 2 || in_array($venue->id, $silverVenues);
+
+                        $nextVenue = $venues[$loop->index + 1];
+                        $nextIsGold = $nextVenue->tier === 1 || in_array($nextVenue->id, $goldVenues);
+                        $nextIsSilver = $nextVenue->tier === 2 || in_array($nextVenue->id, $silverVenues);
+                    @endphp
+
+                    {{-- Add proper tier separator when transitioning from Gold to non-Gold --}}
+                    @if ($currentIsGold && !$nextIsGold)
+                        <tr class="bg-white" aria-hidden="true">
+                            <td colspan="{{ count($timeslotHeaders) + 1 }}" class="relative">
+                                <div class="h-2"></div>
+                                <div class="absolute inset-x-0 bottom-0 border-b-2 border-gray-200"></div>
+                            </td>
+                        </tr>
+                        <tr aria-hidden="true">
+                            <td colspan="{{ count($timeslotHeaders) + 1 }}" class="h-2"></td>
+                        </tr>
+                        {{-- Add proper tier separator when transitioning from Silver to non-Silver (and non-Gold) --}}
+                    @elseif ($currentIsSilver && !$nextIsSilver && !$nextIsGold)
+                        <tr class="bg-white" aria-hidden="true">
+                            <td colspan="{{ count($timeslotHeaders) + 1 }}" class="relative">
+                                <div class="h-2"></div>
+                                <div class="absolute inset-x-0 bottom-0 border-b-2 border-gray-200"></div>
+                            </td>
+                        </tr>
+                        <tr aria-hidden="true">
+                            <td colspan="{{ count($timeslotHeaders) + 1 }}" class="h-2"></td>
+                        </tr>
+                    @endif
+                @endif
             @endforeach
         </tbody>
     </table>
