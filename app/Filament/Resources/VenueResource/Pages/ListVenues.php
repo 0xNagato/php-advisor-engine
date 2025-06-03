@@ -489,6 +489,7 @@ class ListVenues extends ListRecords
                             return 'primary'; // Standard (blue)
                         }
                     })
+                    ->default(0)
                     ->size('xs'),
                 TextColumn::make('name')
                     ->size('xs')
