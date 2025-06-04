@@ -24,6 +24,7 @@ class VenueGroupOverview extends BaseWidget
 
     protected function getStats(): array
     {
+        $this->venues->load('inRegion');
         $startDate = Carbon::parse($this->startDate ?? now()->subDays(30))->startOfDay();
         $endDate = Carbon::parse($this->endDate ?? now())->endOfDay();
         $currencySymbol = $this->venues->pluck('inRegion.currency_symbol')->unique()->first();

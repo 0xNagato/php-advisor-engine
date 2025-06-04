@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Console\Commands;
 
 use App\Models\VenueOnboarding;
+use Exception;
 use Illuminate\Console\Command;
 
 class FixAgreementAcceptedTimestamps extends Command
@@ -80,7 +81,7 @@ class FixAgreementAcceptedTimestamps extends Command
                 $updatedCount++;
 
                 $this->line("✓ Updated record {$record->id} ({$record->company_name})");
-            } catch (\Exception $e) {
+            } catch (Exception $e) {
                 $this->error("✗ Failed to update record {$record->id}: {$e->getMessage()}");
             }
         }

@@ -27,6 +27,9 @@ class ScheduleManager extends Page
             /** @var User $user */
             $user = auth()->user();
             $currentVenue = $user->currentVenueGroup()?->currentVenue($user);
+            if (session()->has('impersonate.venue_id')) {
+                $currentVenue = Venue::query()->find(session()->get('impersonate.venue_id'));
+            }
 
             return $currentVenue?->name ?? 'Venue Management';
         }
@@ -58,7 +61,9 @@ class ScheduleManager extends Page
         $user = auth()->user();
         abort_unless($user->hasActiveRole(['venue', 'venue_manager']), 403);
 
-        if ($user->hasActiveRole('venue')) {
+        if (session()->has('impersonate.venue_id')) {
+            $this->venue = Venue::query()->find(session()->get('impersonate.venue_id'));
+        } elseif ($user->hasActiveRole('venue')) {
             $this->venue = $user->venue;
         } elseif ($user->hasActiveRole('venue_manager')) {
             $venueGroup = $user->currentVenueGroup();
