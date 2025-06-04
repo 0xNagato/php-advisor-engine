@@ -9,6 +9,7 @@ use function Pest\Livewire\livewire;
 
 beforeEach(function () {
     $this->venue = Venue::factory()->create([
+        'region' => 'miami',
         'timezone' => 'America/New_York',
         'open_days' => [
             'monday' => 'open',
