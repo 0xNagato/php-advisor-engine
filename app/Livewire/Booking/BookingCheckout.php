@@ -99,6 +99,7 @@ class BookingCheckout extends Component implements HasMingles
             'omakaseDetails' => $this->booking->venue->omakase_details,
             'minimumSpendPerGuest' => $this->booking->schedule->minimum_spend_per_guest ?? 0,
             'venueName' => $this->booking->venue->name,
+            'guestCount' => $this->booking->guest_count,
         ];
     }
 

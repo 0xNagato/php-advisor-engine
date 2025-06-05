@@ -7,6 +7,7 @@ use App\Events\BookingPaid;
 use App\Models\Booking;
 use App\Notifications\Booking\ConciergeFirstBooking;
 use App\Notifications\Booking\CustomerBookingConfirmed;
+use App\Notifications\Booking\CustomerBookingRequestReceived;
 use App\Traits\FormatsPhoneNumber;
 use Exception;
 use Lorisleiva\Actions\Concerns\AsAction;
@@ -28,8 +29,10 @@ class CompleteBooking
 
             // Only process Stripe payment for prime bookings with payment intent
             if ($booking->prime_time && $paymentIntentId) {
-
-                $paymentIntent = $this->stripeClient->paymentIntents->retrieve($paymentIntentId, ['expand' => ['latest_charge']]);
+                $paymentIntent = $this->stripeClient->paymentIntents->retrieve(
+                    $paymentIntentId,
+                    ['expand' => ['latest_charge']]
+                );
 
                 throw_if($paymentIntent->status !== 'succeeded', new Exception('Payment not successful'));
 
@@ -52,7 +55,11 @@ class CompleteBooking
                 'notes' => $formData['notes'] ?? null,
             ]);
 
-            $booking->notify(new CustomerBookingConfirmed);
+            if ($booking->is_non_prime_ibiza_big_group) {
+                $booking->notify(new CustomerBookingRequestReceived);
+            } else {
+                $booking->notify(new CustomerBookingConfirmed);
+            }
             SendConfirmationToVenueContacts::run($booking);
 
             if ($booking->concierge && $booking->concierge->bookings()->count() === 1) {
