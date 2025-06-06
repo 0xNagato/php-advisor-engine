@@ -209,7 +209,7 @@ class ReservationService
                 // Sort tier groups: config venues first (in config order), then others alphabetically
                 if (in_array($groupKey, ['gold', 'silver'])) {
                     $tierNumber = $groupKey === 'gold' ? 1 : 2;
-                    $configVenues = $this->getVenuesInTier($this->region->id, $tierNumber);
+                    $configVenues = static::getVenuesInTier($this->region->id, $tierNumber);
 
                     return $group->sortBy(function ($venue) use ($configVenues) {
                         $configPosition = array_search($venue->id, $configVenues);
@@ -219,7 +219,7 @@ class ReservationService
                             return $configPosition;
                         } else {
                             // Venue not in config - sort alphabetically after config venues
-                            return 1000 + ord(strtolower($venue->name[0]));
+                            return 1000 + ord(strtolower((string) $venue->name[0]));
                         }
                     });
                 }
@@ -457,7 +457,7 @@ class ReservationService
      */
     private function isVenueInConfigTier(int $venueId, int $tier): bool
     {
-        $configVenues = $this->getVenuesInTier($this->region->id, $tier);
+        $configVenues = static::getVenuesInTier($this->region->id, $tier);
 
         return in_array($venueId, $configVenues);
     }

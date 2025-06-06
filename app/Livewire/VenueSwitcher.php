@@ -17,6 +17,8 @@ class VenueSwitcher extends Component
     /** @var Collection<int, Venue>|\Illuminate\Support\Collection */
     public Collection $venues;
 
+    public ?Venue $currentVenue = null;
+
     public function mount(): void
     {
         if (! auth()->user()?->hasActiveRole('venue_manager')) {
@@ -40,6 +42,10 @@ class VenueSwitcher extends Component
         $this->venues = $venueGroup->venues()
             ->whereIn('id', $allowedVenueIds)
             ->get();
+        $this->currentVenue = auth()->user()->currentVenueGroup()?->currentVenue(auth()->user());
+        if (session()->has('impersonate.venue_id')) {
+            $this->currentVenue = Venue::query()->find(session()->get('impersonate.venue_id'));
+        }
     }
 
     public function switchVenue(int $venueId): void
@@ -59,7 +65,11 @@ class VenueSwitcher extends Component
         }
 
         try {
-            $venueGroup->switchVenue(auth()->user(), $venue);
+            if (session()->has('impersonate.venue_id')) {
+                session()->put('impersonate.venue_id', $venueId);
+            } else {
+                $venueGroup->switchVenue(auth()->user(), $venue);
+            }
             $this->dispatch('venue-switched', venue: $venue);
 
             redirect()->to(request()->header('Referer'));

@@ -515,7 +515,8 @@ class ListVenues extends ListRecords
                         $state,
                         Venue $record
                     ) => $record->venueGroup ? $record->venueGroup->name : '-')
-                    ->visibleFrom('md'),
+                    ->visibleFrom('md')
+                    ->searchable(),
                 TextColumn::make('partnerReferral.user.name')->label('Partner')
                     ->url(fn (Venue $record) => $record->partnerReferral?->user?->partner
                         ? ViewPartner::getUrl(['record' => $record->partnerReferral->user->partner])
@@ -583,7 +584,7 @@ class ListVenues extends ListRecords
                 Action::make('impersonate')
                     ->iconButton()
                     ->icon('impersonate-icon')
-                    ->action(fn (Venue $record) => $this->impersonate($record->user))
+                    ->action(fn (Venue $record) => $this->impersonateVenue($record->user, $record))
                     ->hidden(fn () => isPrimaApp()),
                 EditAction::make()
                     ->iconButton()
