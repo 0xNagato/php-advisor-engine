@@ -448,6 +448,12 @@ class ListVenues extends ListRecords
                     ->orderByDesc('users.updated_at')
             )
             ->headerActions([
+                Action::make('bulkEdit')
+                    ->label('Bulk Edit Venues')
+                    ->icon('heroicon-o-pencil-square')
+                    ->color('primary')
+                    ->url('/platform/bulk-edit-venues')
+                    ->visible(fn () => auth()->user()->hasRole(['super_admin', 'admin'])),
                 ExportAction::make('export')
                     ->label('Export CSV')
                     ->icon('heroicon-o-arrow-down-tray')
