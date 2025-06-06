@@ -52,7 +52,7 @@ class BulkEditVenues extends Page
 
     public static function shouldRegisterNavigation(): bool
     {
-        return auth()->user()?->hasRole(['super_admin', 'admin']);
+        return auth()->user()?->hasRole(['super_admin']);
     }
 
     public function mount(): void
