@@ -111,8 +111,8 @@ class BulkEditVenues extends Page
         $this->venuesData = [];
 
         foreach ($venues as $venue) {
-            // Refresh venue from database to ensure we have latest data
-            $freshVenue = Venue::find($venue->id);
+            // Refresh venue from the database to ensure we have the latest data
+            $freshVenue = Venue::query()->find($venue->id);
 
             $this->venuesData[$venue->id] = [
                 'address' => $freshVenue->address ?? '',
@@ -260,7 +260,7 @@ class BulkEditVenues extends Page
 
         try {
             foreach ($this->venuesData as $venueId => $data) {
-                $venue = Venue::find($venueId);
+                $venue = Venue::query()->find($venueId);
 
                 if (! $venue) {
                     continue;
@@ -272,7 +272,7 @@ class BulkEditVenues extends Page
                     $newImages = [];
 
                     // Process uploaded images if any
-                    if (isset($data['images']) && ! empty($data['images'])) {
+                    if (isset($data['images']) && filled($data['images'])) {
                         $imageFiles = is_array($data['images']) ? $data['images'] : [$data['images']];
 
                         foreach ($imageFiles as $imageFile) {
@@ -298,7 +298,7 @@ class BulkEditVenues extends Page
                                         'error' => $e->getMessage(),
                                     ]);
                                 }
-                            } elseif (is_string($imageFile) && ! empty($imageFile)) {
+                            } elseif (is_string($imageFile) && filled($imageFile)) {
                                 // Existing file path - keep it
                                 if (Storage::disk('do')->exists($imageFile)) {
                                     $newImages[] = $imageFile;
@@ -327,7 +327,7 @@ class BulkEditVenues extends Page
                         ->performedOn($venue)
                         ->withProperties([
                             'bulk_edit' => true,
-                            'updated_fields' => array_keys(array_filter($data, fn ($value) => ! empty($value))),
+                            'updated_fields' => array_keys(array_filter($data, fn ($value) => filled($value))),
                             'updated_by' => auth()->user()->name,
                         ])
                         ->log('Venue bulk edited');

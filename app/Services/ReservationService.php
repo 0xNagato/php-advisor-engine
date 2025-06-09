@@ -149,9 +149,7 @@ class ReservationService
         $venues = $this->applyClosureRules($venues, $this->date);
 
         // Filter out venues that have no schedules/timeslots
-        $venues = $venues->filter(function ($venue) {
-            return $venue->schedules && $venue->schedules->count() > 0;
-        });
+        $venues = $venues->filter(fn ($venue) => $venue->schedules && $venue->schedules->count() > 0);
 
         // Mark schedules as sold out if the venue is past cutoff time
         $venues->each(function ($venue) use ($currentTime) {
