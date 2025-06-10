@@ -35,7 +35,7 @@ class TaskRequestPage extends Page
     public static function canAccess(): bool
     {
         // only users with id of 1 or 2 can access this page
-        return in_array(auth()->user()?->id, [1, 2]);
+        return in_array(auth()->user()?->id, [1, 2]) && auth()->user()->hasActiveRole(['super_admin']);
     }
 
     protected static ?string $navigationGroup = 'Advanced Tools';

@@ -30,9 +30,9 @@
                 <tr @class([
                     'opacity-50' => $venue->status === VenueStatus::HIDDEN,
                     'bg-amber-100 even:bg-amber-50' =>
-                        $venue->tier === 1 || in_array($venue->id, $goldVenues),
+                        isset($venue->current_group) && $venue->current_group === 'gold',
                     'odd:bg-gray-100' => !(
-                        $venue->tier === 1 || in_array($venue->id, $goldVenues)
+                        isset($venue->current_group) && $venue->current_group === 'gold'
                     ),
                 ])>
                     <td class="pl-2 text-center w-28">
@@ -155,12 +155,12 @@
                 {{-- Add spacing between tiers --}}
                 @if (isset($venues[$loop->index + 1]))
                     @php
-                        $currentIsGold = $venue->tier === 1 || in_array($venue->id, $goldVenues);
-                        $currentIsSilver = $venue->tier === 2 || in_array($venue->id, $silverVenues);
+                        $currentIsGold = isset($venue->current_group) && $venue->current_group === 'gold';
+                        $currentIsSilver = isset($venue->current_group) && $venue->current_group === 'silver';
 
                         $nextVenue = $venues[$loop->index + 1];
-                        $nextIsGold = $nextVenue->tier === 1 || in_array($nextVenue->id, $goldVenues);
-                        $nextIsSilver = $nextVenue->tier === 2 || in_array($nextVenue->id, $silverVenues);
+                        $nextIsGold = isset($nextVenue->current_group) && $nextVenue->current_group === 'gold';
+                        $nextIsSilver = isset($nextVenue->current_group) && $nextVenue->current_group === 'silver';
                     @endphp
 
                     {{-- Add proper tier separator when transitioning from Gold to non-Gold --}}

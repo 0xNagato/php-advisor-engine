@@ -49,6 +49,8 @@ class Venue extends Model
         'user_id',
         'name',
         'slug',
+        'address',
+        'description',
         'contact_phone',
         'payout_venue',
         'payout_charity',
@@ -66,6 +68,7 @@ class Venue extends Model
         'party_sizes',
         'minimum_spend',
         'logo_path',
+        'images',
         'region',
         'timezone',
         'increment_fee',
@@ -102,6 +105,7 @@ class Venue extends Model
             'daily_booking_cap' => 'integer',
             'cuisines' => 'array',
             'specialty' => 'array',
+            'images' => 'array',
         ];
     }
 
@@ -196,6 +200,16 @@ class Venue extends Model
 
             return $cleanDescription;
         });
+    }
+
+    /**
+     * Get formatted address with line breaks converted to HTML
+     */
+    protected function formattedAddressHtml(): Attribute
+    {
+        return Attribute::make(
+            get: fn () => $this->address ? nl2br(e($this->address)) : ''
+        );
     }
 
     protected static function boot(): void
