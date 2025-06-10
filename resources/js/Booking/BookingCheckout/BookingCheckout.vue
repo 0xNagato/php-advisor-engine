@@ -63,7 +63,8 @@ interface MingleData {
   omakaseDetails: string;
   minimumSpendPerGuest?: number;
   venueName?: string;
-  guestCount?: string;
+  venueRegion: string;
+  guestCount: number;
 }
 
 interface Props {
@@ -535,7 +536,10 @@ const emailInvoice = async () => {
           spend or restaurant bill.
         </p>
       </div>
-      <div v-if="mingleData.guestCount >= 8" class="mb-4 text-justify">
+      <div
+        v-if="mingleData.venueRegion === 'ibiza' && mingleData.guestCount >= 8"
+        class="mb-4 text-justify"
+      >
         <p>
           Note: Parties of 8 or more require additional approval by
           {{ mingleData.venueName }}. Please submit the reservation request
