@@ -63,6 +63,8 @@ interface MingleData {
   omakaseDetails: string;
   minimumSpendPerGuest?: number;
   venueName?: string;
+  venueRegion: string;
+  guestCount: number;
 }
 
 interface Props {
@@ -504,7 +506,10 @@ const emailInvoice = async () => {
             : 'Enter Contact Information To Confirm.'
         }}
       </p>
-      <p class="mb-2 text-xs text-gray-600" v-if="mingleData.totalWithTaxesInCents > 0">
+      <p
+        class="mb-2 text-xs text-gray-600"
+        v-if="mingleData.totalWithTaxesInCents > 0"
+      >
         Enter payment details below so that PRIMA may secure your table request.
         60% of the fee paid is paid to
         {{ mingleData.venueName }} management for opening a previously sold-out
@@ -529,6 +534,18 @@ const emailInvoice = async () => {
           }}
           per diner minimum spend. Booking fees do not apply toward minimum
           spend or restaurant bill.
+        </p>
+      </div>
+      <div
+        v-if="mingleData.venueRegion === 'ibiza' && mingleData.guestCount >= 8"
+        class="mb-4 text-justify"
+      >
+        <p>
+          Note: Parties of 8 or more require additional approval by
+          {{ mingleData.venueName }}. Please submit the reservation request
+          below. Approvals typically take 15-30 minutes (during operating
+          hours). We will notify you as soon as the booking has been approved.
+          Thank you!
         </p>
       </div>
       <form class="w-full" @submit.prevent="handleSubmit">
