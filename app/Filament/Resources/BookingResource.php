@@ -60,8 +60,10 @@ class BookingResource extends Resource
                             });
 
                             // Also check meta->venue->id for bookings that might not have schedule_template relation
-                            $subquery->orWhereRaw("(meta->'venue'->>'id')::int IN (".implode(',',
-                                $allowedVenueIds).')');
+                            $subquery->orWhereRaw("(meta->'venue'->>'id')::int IN (".implode(
+                                ',',
+                                $allowedVenueIds
+                            ).')');
                         }
                     }
                 });
@@ -121,7 +123,6 @@ class BookingResource extends Resource
     {
         return $table
             ->columns([
-
                 TextColumn::make('concierge.user.name')
                     ->label('Concierge')
                     ->numeric()
