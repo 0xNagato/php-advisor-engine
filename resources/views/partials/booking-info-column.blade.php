@@ -12,15 +12,10 @@
                     {{ $record->status === BookingStatus::REFUNDED ? 'Refunded' : 'Partial Refund' }}
                 </span>
             @elseif ($record->status === BookingStatus::CANCELLED)
-{{--                <x-heroicon-s-x-circle class="h-4 w-4 -mt-0.5 text-red-600" />--}}
                 <span class="text-xs text-red-600">Cancelled</span>
             @elseif ($record->venue_confirmed_at)
                 <span class="text-xs text-green-600">
                     Accepted
-                </span>
-            @else
-                <span class="text-xs text-gray-500">
-                    Pending
                 </span>
             @endif
         </div>
