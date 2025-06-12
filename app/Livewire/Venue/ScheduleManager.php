@@ -19,6 +19,8 @@ class ScheduleManager extends Component
 
     public Venue $venue;
 
+    public string $currencySymbol = '$';
+
     public string $activeView = 'template';
 
     public string $selectedDay = 'monday';
@@ -70,6 +72,7 @@ class ScheduleManager extends Component
 
         $this->todayDate = $today->format('Y-m-d');
         $this->selectedDate = $this->todayDate;
+        $this->currencySymbol = $this->venue->inRegion->currency_symbol;
     }
 
     public function updatedActiveView(string $value): void
