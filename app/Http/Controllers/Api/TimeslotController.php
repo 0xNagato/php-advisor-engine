@@ -17,7 +17,7 @@ class TimeslotController extends Controller
         $currentDate = now($region->timezone)->format('Y-m-d');
 
         if (! $date || $date < $currentDate) {
-            // If date is invalid or in the past, return all times as unavailable
+            // If the date is invalid or in the past, return all times as unavailable
             return response()->json([
                 'data' => $this->allTimesUnavailable(),
             ]);

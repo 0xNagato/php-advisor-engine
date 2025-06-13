@@ -222,7 +222,7 @@ class BookingService
             'guest_first_name' => $form['first_name'],
             'guest_last_name' => $form['last_name'],
             'guest_phone' => $formattedPhone,
-            'guest_email' => $form['email'],
+            'guest_email' => $form['email'] ?? null,
             'status' => BookingStatus::CONFIRMED,
             'stripe_charge' => $booking->prime_time ? $stripeCharge->toArray() : null,
             'stripe_charge_id' => $booking->prime_time ? $stripeCharge->id : null,

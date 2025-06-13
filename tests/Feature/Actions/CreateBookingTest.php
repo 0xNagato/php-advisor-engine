@@ -27,14 +27,14 @@ beforeEach(function () {
         $mock->shouldReceive('getAttribute')->with('payout_percentage')->andReturn(10);
     });
 
-    // Create a base template (party_size = 0)
+    // Get a base template (party_size = 0)
     $baseTemplate = ScheduleTemplate::where([
         'venue_id' => $this->venue->id,
         'start_time' => '14:00:00',
         'party_size' => 0,
     ])->get()->first();
 
-    // Create a guest count template
+    // Get a guest count template
     $this->scheduleTemplate = ScheduleTemplate::where([
         'venue_id' => $this->venue->id,
         'start_time' => '14:00:00',

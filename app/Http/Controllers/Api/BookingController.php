@@ -64,7 +64,6 @@ class BookingController extends Controller
                 'api',
                 $device
             );
-
         } catch (Exception $e) {
             activity()
                 ->withProperties([
@@ -141,7 +140,7 @@ class BookingController extends Controller
             'guest_first_name' => $validatedData['first_name'],
             'guest_last_name' => $validatedData['last_name'],
             'guest_phone' => $validatedData['phone'],
-            'guest_email' => $validatedData['email'],
+            'guest_email' => $validatedData['email'] ?? null,
             'notes' => $validatedData['notes'],
         ]);
 
@@ -223,7 +222,7 @@ class BookingController extends Controller
      */
     private function handleNonPrimeBooking(Booking $booking, array $validatedData): JsonResponse
     {
-        // Check if customer already has a non-prime booking for this day
+        // Check if the customer already has a non-prime booking for this day
         $hasExistingBooking = CheckCustomerHasNonPrimeBooking::run(
             $validatedData['phone'],
             $booking->booking_at->format('Y-m-d'),
