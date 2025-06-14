@@ -134,15 +134,13 @@
                                 <x-gmdi-qr-code class="w-6 h-6 font-semibold" />
                                 <div>QR Code</div>
                             </button>
-                            @nonmobileapp
-                                <button
-                                    :class="{ 'bg-indigo-600 text-white': tab === 'collectPayment', 'bg-gray-100': tab !== 'collectPayment' }"
-                                    @click="tab = 'collectPayment'"
-                                    class="flex items-center gap-1 px-4 py-2 text-xs font-semibold bg-gray-100 rounded-lg shadow-lg shadow-gray-400">
-                                    <x-gmdi-credit-card class="w-6 h-6 font-semibold text-center" />
-                                    <div>Collect CC</div>
-                                </button>
-                            @endnonmobileapp
+                            <button
+                                :class="{ 'bg-indigo-600 text-white': tab === 'collectPayment', 'bg-gray-100': tab !== 'collectPayment' }"
+                                @click="tab = 'collectPayment'"
+                                class="flex items-center gap-1 px-4 py-2 text-xs font-semibold bg-gray-100 rounded-lg shadow-lg shadow-gray-400">
+                                <x-gmdi-credit-card class="w-6 h-6 font-semibold text-center" />
+                                <div>Collect CC</div>
+                            </button>
                         </div>
 
                     </div>
@@ -179,7 +177,7 @@
                                     setTimeout(initializeStripe, 10);
                                 }
                             }
-                        
+
                             function setupStripe() {
                                 const stripe = Stripe('{{ config('services.stripe.key') }}');
                                 const elements = stripe.elements();
@@ -188,40 +186,40 @@
                                     hidePostalCode: true
                                 });
                                 card.mount('#card-element');
-                        
+
                                 const form = document.getElementById('form');
-                        
+
                                 form.addEventListener('submit', async (e) => {
                                     e.preventDefault();
-                        
+
                                     // Phone validation
                                     const phoneInput = document.getElementById('phone');
                                     const phoneError = document.getElementById('phone-error');
-                        
+
                                     // Reset the error
                                     phoneError.classList.add('hidden');
                                     phoneError.textContent = '';
-                        
+
                                     // Check if the international telephone input has been initialized
                                     if (phoneInput.getAttribute('data-intl-tel-input-id')) {
                                         const iti = window.intlTelInputGlobals.getInstance(phoneInput);
-                        
+
                                         if (!iti.isValidNumber()) {
                                             phoneError.textContent = 'Please enter a valid phone number';
                                             phoneError.classList.remove('hidden');
                                             $wire.$set('isLoading', false);
                                             return;
                                         }
-                        
+
                                         // Set the phone number in E.164 format for submission
                                         phoneInput.value = iti.getNumber();
                                     }
-                        
+
                                     $wire.$set('isLoading', true);
-                        
+
                                     @if($booking->prime_time)
                                     const { token, error } = await stripe.createToken(card);
-                        
+
                                     if (error) {
                                         $wire.$set('isLoading', false);
                                         return;
@@ -229,7 +227,7 @@
                                     @else
                                     var token = { id: '' };
                                     @endif
-                        
+
                                     const formData = {
                                         first_name: document.querySelector('input[name=first_name]').value,
                                         last_name: document.querySelector('input[name=last_name]').value,
@@ -238,16 +236,16 @@
                                         notes: document.querySelector('textarea[name=notes]').value,
                                         token: token?.id ?? ''
                                     };
-                        
+
                                     @if(!$booking->prime_time)
                                     formData.real_customer_confirmation = document.querySelector('input[name=real_customer_confirmation]').checked;
                                     @endif
-                        
+
                                     $wire.$call('completeBooking', formData);
                                 })
-                        
+
                             }
-                        
+
                             initializeStripe();
                         }">
 
