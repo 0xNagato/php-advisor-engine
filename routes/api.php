@@ -4,10 +4,13 @@ use App\Http\Controllers\Api\AppConfigController;
 use App\Http\Controllers\Api\AvailabilityCalendarController;
 use App\Http\Controllers\Api\BookingController;
 use App\Http\Controllers\Api\ContactFormController;
+use App\Http\Controllers\Api\CuisineController;
 use App\Http\Controllers\Api\MeController;
+use App\Http\Controllers\Api\NeighborhoodController;
 use App\Http\Controllers\Api\RegionController;
 use App\Http\Controllers\Api\ReservationHubController;
 use App\Http\Controllers\Api\RoleProfileController;
+use App\Http\Controllers\Api\SpecialtyController;
 use App\Http\Controllers\Api\TimeslotController;
 use App\Http\Controllers\Api\UpdatePushTokenController;
 use App\Http\Controllers\Api\VenueController;
@@ -20,6 +23,9 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 
 Route::middleware('auth:sanctum')->group(function () {
     Route::get('/regions', [RegionController::class, 'index']);
+    Route::get('/neighborhoods', NeighborhoodController::class);
+    Route::get('/cuisines', CuisineController::class);
+    Route::get('/specialties', SpecialtyController::class);
     Route::post('/regions', [RegionController::class, 'store']);
     Route::get('/timeslots', TimeslotController::class);
     Route::get('/venues', VenueController::class);
