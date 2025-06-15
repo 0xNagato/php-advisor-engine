@@ -23,7 +23,7 @@ use Filament\Support\Facades\FilamentColor;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Support\Facades\Blade;
-// use Illuminate\Support\Facades\URL;
+use Illuminate\Support\Facades\URL;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Validation\ValidationException;
 use Laravel\Telescope\TelescopeApplicationServiceProvider;
@@ -52,10 +52,10 @@ class AppServiceProvider extends ServiceProvider
             });
         }
 
-        /*if (app()->isLocal()) {
+        if (app()->isLocal()) {
             ($this->{'app'}['request'] ?? null)?->server?->set('HTTPS', 'on');
             URL::forceScheme('https');
-        }*/
+        }
 
         Actions::registerCommands();
 

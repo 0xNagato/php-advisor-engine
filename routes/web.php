@@ -108,7 +108,7 @@ Route::get('/venues/contact-bookings', VenueContactRecentBookings::class)
 
 Route::post('/exception-form', ExceptionFormController::class)->name('exception.form');
 
-Route::get('vip/login/{code?}', fn ($code = null) => redirect($code ? "/v/{$code}" : '/'))->name('vip.login');
+Route::get('vip/login/{code?}', fn ($code = null) => redirect($code ? "/v/$code" : '/'))->name('vip.login');
 
 Route::get('v/{code}', AvailabilityCalendar::class)->name('v.booking');
 Route::get('v/calendar', AvailabilityCalendar::class)->name('v.calendar');
