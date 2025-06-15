@@ -14,7 +14,12 @@ class CalendarRequest extends FormRequest
             'date' => ['required', 'date'],
             'guest_count' => ['required', 'integer', 'min:1'],
             'reservation_time' => ['required', 'date_format:H:i:s'],
-            'timeslot_count' => ['sometimes', 'integer', 'min:1', 'max:20'], // Add this line
+            'timeslot_count' => ['sometimes', 'integer', 'min:1', 'max:20'],
+            'cuisine' => ['sometimes', 'array'],
+            'cuisine.*' => ['string'],
+            'neighborhood' => ['sometimes', 'string'],
+            'specialty' => ['sometimes', 'array'],
+            'specialty.*' => ['string'],
         ];
     }
 

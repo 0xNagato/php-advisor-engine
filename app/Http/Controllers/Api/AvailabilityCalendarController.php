@@ -19,7 +19,10 @@ class AvailabilityCalendarController extends Controller
             guestCount: $validatedData['guest_count'],
             reservationTime: $validatedData['reservation_time'],
             timeslotCount: $validatedData['timeslot_count'] ?? 5, // Default to 5 if not provided
-            timeSlotOffset: $validatedData['time_slot_offset'] ?? 1, // Default to 2 if not provided
+            timeSlotOffset: $validatedData['time_slot_offset'] ?? 1, // Default to 1 if not provided
+            cuisines: $validatedData['cuisine'] ?? [],
+            neighborhood: $validatedData['neighborhood'] ?? null,
+            specialty: $validatedData['specialty'] ?? [],
         );
 
         return response()->json([
