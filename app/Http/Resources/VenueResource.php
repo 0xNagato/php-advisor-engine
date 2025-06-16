@@ -21,6 +21,8 @@ class VenueResource extends JsonResource
             'logo' => $this->resource->logo,
             'non_prime_time' => $this->non_prime_time,
             'business_hours' => $this->business_hours,
+            'tier' => $this->tier,
+            'tier_label' => $this->tier_label,
             'schedules' => VenueScheduleResource::collection($this->schedules),
         ];
     }
