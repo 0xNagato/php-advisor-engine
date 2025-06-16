@@ -22,11 +22,14 @@ This endpoint provides information about available venues and timeslots for a sp
 | reservation_time | string (HH:MM:SS) | Yes | The time for the reservation |
 | timeslot_count | integer | No | The number of timeslots to return (default: 5, min: 1, max: 20) |
 | time_slot_offset | integer | No | The offset for timeslots (default: 1) |
+| cuisine | array | No | Filter venues by cuisine types |
+| neighborhood | string | No | Filter venues by neighborhood |
+| specialty | array | No | Filter venues by specialty types |
 
 ### Example Request
 ```bash
 curl -X GET \
-  'https://api.example.com/api/calendar?date=2023-06-15&guest_count=4&reservation_time=19:00:00&timeslot_count=5' \
+  'https://api.example.com/api/calendar?date=2023-06-15&guest_count=4&reservation_time=19:00:00&timeslot_count=5&cuisine[]=italian&cuisine[]=japanese&neighborhood=downtown&specialty[]=steak' \
   -H 'Authorization: Bearer your-api-token' \
   -H 'Accept: application/json'
 ```
@@ -42,72 +45,101 @@ curl -X GET \
   "data": {
     "venues": [
       {
-        "id": 1,
-        "name": "Restaurant A",
-        "description": "A fine dining restaurant",
-        "address": "123 Main St",
-        "city": "New York",
-        "state": "NY",
-        "zip": "10001",
-        "phone": "+1 (555) 123-4567",
-        "email": "info@restauranta.com",
-        "website": "https://www.restauranta.com",
-        "image_url": "https://example.com/images/restaurant-a.jpg",
-        "availability": [
+        "id": 76,
+        "name": "Call Me Gaby",
+        "status": "active",
+        "logo": "https://prima-bucket.nyc3.digitaloceanspaces.com/venues/call_me_gaby.png",
+        "non_prime_time": null,
+        "business_hours": null,
+        "tier": null,
+        "tier_label": "Standard",
+        "schedules": [
           {
-            "time": "18:30:00",
-            "available": true,
-            "schedule_template_id": 123
+            "id": 102882,
+            "schedule_template_id": 102882,
+            "is_bookable": false,
+            "prime_time": true,
+            "time": {
+              "value": "4:00 PM",
+              "raw": "16:00:00"
+            },
+            "date": "2025-06-17",
+            "fee": "$100",
+            "has_low_inventory": false
           },
           {
-            "time": "19:00:00",
-            "available": true,
-            "schedule_template_id": 124
+            "id": 102887,
+            "schedule_template_id": 102887,
+            "is_bookable": false,
+            "prime_time": true,
+            "time": {
+              "value": "4:30 PM",
+              "raw": "16:30:00"
+            },
+            "date": "2025-06-17",
+            "fee": "$100",
+            "has_low_inventory": false
           },
           {
-            "time": "19:30:00",
-            "available": false,
-            "schedule_template_id": null
+            "id": 102892,
+            "schedule_template_id": 102892,
+            "is_bookable": true,
+            "prime_time": true,
+            "time": {
+              "value": "5:00 PM",
+              "raw": "17:00:00"
+            },
+            "date": "2025-06-17",
+            "fee": "$100",
+            "has_low_inventory": true
           }
         ]
       },
       {
-        "id": 2,
-        "name": "Restaurant B",
-        "description": "A casual dining restaurant",
-        "address": "456 Broadway",
-        "city": "New York",
-        "state": "NY",
-        "zip": "10002",
-        "phone": "+1 (555) 987-6543",
-        "email": "info@restaurantb.com",
-        "website": "https://www.restaurantb.com",
-        "image_url": "https://example.com/images/restaurant-b.jpg",
-        "availability": [
+        "id": 63,
+        "name": "Mandolin",
+        "status": "active",
+        "logo": "https://prima-bucket.nyc3.digitaloceanspaces.com/venues/mandolin.png",
+        "non_prime_time": null,
+        "business_hours": null,
+        "tier": null,
+        "tier_label": "Standard",
+        "schedules": [
           {
-            "time": "18:30:00",
-            "available": false,
-            "schedule_template_id": null
+            "id": 81042,
+            "schedule_template_id": 81042,
+            "is_bookable": true,
+            "prime_time": true,
+            "time": {
+              "value": "4:00 PM",
+              "raw": "16:00:00"
+            },
+            "date": "2025-06-17",
+            "fee": "$200",
+            "has_low_inventory": true
           },
           {
-            "time": "19:00:00",
-            "available": true,
-            "schedule_template_id": 125
-          },
-          {
-            "time": "19:30:00",
-            "available": true,
-            "schedule_template_id": 126
+            "id": 81047,
+            "schedule_template_id": 81047,
+            "is_bookable": true,
+            "prime_time": true,
+            "time": {
+              "value": "4:30 PM",
+              "raw": "16:30:00"
+            },
+            "date": "2025-06-17",
+            "fee": "$200",
+            "has_low_inventory": true
           }
         ]
       }
     ],
     "timeslots": [
-      "18:30:00",
-      "19:00:00",
-      "19:30:00",
-      "20:00:00",
-      "20:30:00"
+      "4:00 PM",
+      "4:30 PM",
+      "5:00 PM",
+      "5:30 PM",
+      "6:00 PM"
     ]
   }
 }
@@ -119,20 +151,23 @@ curl -X GET \
 | data.venues | array | List of venues with their availability |
 | data.venues[].id | integer | Unique identifier for the venue |
 | data.venues[].name | string | Name of the venue |
-| data.venues[].description | string | Description of the venue |
-| data.venues[].address | string | Street address of the venue |
-| data.venues[].city | string | City where the venue is located |
-| data.venues[].state | string | State where the venue is located |
-| data.venues[].zip | string | ZIP code of the venue |
-| data.venues[].phone | string | Contact phone number for the venue |
-| data.venues[].email | string | Contact email for the venue |
-| data.venues[].website | string | Website URL for the venue |
-| data.venues[].image_url | string | URL of the venue's image |
-| data.venues[].availability | array | List of availability slots for the venue |
-| data.venues[].availability[].time | string | Time slot (HH:MM:SS) |
-| data.venues[].availability[].available | boolean | Whether the time slot is available |
-| data.venues[].availability[].schedule_template_id | integer\|null | ID of the schedule template if available, null otherwise |
-| data.timeslots | array | List of time slots for the requested date |
+| data.venues[].status | string | Status of the venue (active, pending, etc.) |
+| data.venues[].logo | string | URL of the venue's logo |
+| data.venues[].non_prime_time | string\|null | Non-prime time information for the venue |
+| data.venues[].business_hours | string\|null | Business hours information for the venue |
+| data.venues[].tier | integer\|null | Tier level of the venue |
+| data.venues[].tier_label | string | Human-readable label for the venue's tier |
+| data.venues[].schedules | array | List of schedule slots for the venue |
+| data.venues[].schedules[].id | integer | Unique identifier for the schedule |
+| data.venues[].schedules[].schedule_template_id | integer | ID of the schedule template needed for booking |
+| data.venues[].schedules[].is_bookable | boolean | Whether the time slot is available for booking |
+| data.venues[].schedules[].prime_time | boolean | Whether the time slot is during prime time |
+| data.venues[].schedules[].time.value | string | Formatted time (e.g., "4:00 PM") |
+| data.venues[].schedules[].time.raw | string | Raw time format (HH:MM:SS) |
+| data.venues[].schedules[].date | string | Date of the schedule (YYYY-MM-DD) |
+| data.venues[].schedules[].fee | string | Fee for the reservation at this time slot |
+| data.venues[].schedules[].has_low_inventory | boolean | Whether there is limited availability for this time slot |
+| data.timeslots | array | List of formatted time slots for the requested date |
 
 ### Error Responses
 
