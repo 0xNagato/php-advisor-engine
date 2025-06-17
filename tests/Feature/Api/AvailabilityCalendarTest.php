@@ -5,8 +5,8 @@ use App\Models\Cuisine;
 use App\Models\Neighborhood;
 use App\Models\Specialty;
 use App\Models\User;
-
 use App\Models\Venue;
+
 use function Pest\Laravel\getJson;
 
 beforeEach(function () {
