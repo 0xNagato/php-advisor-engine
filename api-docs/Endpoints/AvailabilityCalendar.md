@@ -19,7 +19,7 @@ This endpoint provides information about available venues and timeslots for a sp
 |-----------|------|----------|-------------|
 | date | string (YYYY-MM-DD) | Yes | The date for which to check availability |
 | guest_count | integer | Yes | The number of guests for the reservation (minimum: 1) |
-| reservation_time | string (HH:MM:SS) | Yes | The time for the reservation |
+    | reservation_time | string (HH:MM:SS) | Yes | The time for the reservation. If the reservation is for the current day, the time must be at least 30 minutes from the current time. |
 | timeslot_count | integer | No | The number of timeslots to return (default: 5, min: 1, max: 20) |
 | time_slot_offset | integer | No | The offset for timeslots (default: 1) |
 | cuisine | array | No | Filter venues by cuisine types |
@@ -188,7 +188,8 @@ curl -X GET \
     "The guest count field is required."
   ],
   "reservation_time": [
-    "The reservation time field is required."
+    "The reservation time field is required.",
+    "The reservation time must be at least 30 minutes from now."
   ]
 }
 ```
@@ -198,3 +199,4 @@ curl -X GET \
 - The `schedule_template_id` is needed when creating a booking for a specific time slot
 - Time slots are returned in chronological order
 - The number of time slots returned can be controlled with the `timeslot_count` parameter
+- For same-day reservations, the reservation time must be at least 30 minutes from the current time
