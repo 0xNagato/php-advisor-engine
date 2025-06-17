@@ -1,10 +1,12 @@
 <?php
 
+use App\Enums\VenueStatus;
 use App\Models\Cuisine;
 use App\Models\Neighborhood;
 use App\Models\Specialty;
 use App\Models\User;
 
+use App\Models\Venue;
 use function Pest\Laravel\getJson;
 
 beforeEach(function () {
@@ -109,29 +111,29 @@ test('venues are filtered correctly by cuisine', function () {
     $japaneseCuisine = Cuisine::where('name', 'Japanese')->first()->id;
 
     // Create 2 venues with Italian cuisine
-    $italianVenue1 = \App\Models\Venue::factory()->create([
+    $italianVenue1 = Venue::factory()->create([
         'cuisines' => [$italianCuisine],
-        'status' => \App\Enums\VenueStatus::ACTIVE,
+        'status' => VenueStatus::ACTIVE,
         'region' => 'miami',
     ]);
 
-    $italianVenue2 = \App\Models\Venue::factory()->create([
+    $italianVenue2 = Venue::factory()->create([
         'cuisines' => [$italianCuisine],
-        'status' => \App\Enums\VenueStatus::ACTIVE,
+        'status' => VenueStatus::ACTIVE,
         'region' => 'miami',
     ]);
 
     // Create 1 venue with Japanese cuisine
-    $japaneseVenue = \App\Models\Venue::factory()->create([
+    $japaneseVenue = Venue::factory()->create([
         'cuisines' => [$japaneseCuisine],
-        'status' => \App\Enums\VenueStatus::ACTIVE,
+        'status' => VenueStatus::ACTIVE,
         'region' => 'miami',
     ]);
 
     // Create 1 venue with both cuisines
-    $bothCuisinesVenue = \App\Models\Venue::factory()->create([
+    $bothCuisinesVenue = Venue::factory()->create([
         'cuisines' => [$italianCuisine, $japaneseCuisine],
-        'status' => \App\Enums\VenueStatus::ACTIVE,
+        'status' => VenueStatus::ACTIVE,
         'region' => 'miami',
     ]);
 
@@ -184,22 +186,22 @@ test('venues are filtered correctly by neighborhood', function () {
     $southBeachNeighborhood = Neighborhood::where('name', 'South Beach')->first()->id;
 
     // Create 2 venues in Brickell
-    $brickellVenue1 = \App\Models\Venue::factory()->create([
+    $brickellVenue1 = Venue::factory()->create([
         'neighborhood' => $brickellNeighborhood,
-        'status' => \App\Enums\VenueStatus::ACTIVE,
+        'status' => VenueStatus::ACTIVE,
         'region' => 'miami',
     ]);
 
-    $brickellVenue2 = \App\Models\Venue::factory()->create([
+    $brickellVenue2 = Venue::factory()->create([
         'neighborhood' => $brickellNeighborhood,
-        'status' => \App\Enums\VenueStatus::ACTIVE,
+        'status' => VenueStatus::ACTIVE,
         'region' => 'miami',
     ]);
 
     // Create 1 venue in South Beach
-    $southBeachVenue = \App\Models\Venue::factory()->create([
+    $southBeachVenue = Venue::factory()->create([
         'neighborhood' => $southBeachNeighborhood,
-        'status' => \App\Enums\VenueStatus::ACTIVE,
+        'status' => VenueStatus::ACTIVE,
         'region' => 'miami',
     ]);
 
@@ -241,29 +243,29 @@ test('venues are filtered correctly by specialty', function () {
     $finingDiningSpecialty = Specialty::where('name', 'Fine Dining')->first()->id;
 
     // Create 2 venues with Waterfront specialty
-    $waterfrontVenue1 = \App\Models\Venue::factory()->create([
+    $waterfrontVenue1 = Venue::factory()->create([
         'specialty' => [$waterfrontSpecialty],
-        'status' => \App\Enums\VenueStatus::ACTIVE,
+        'status' => VenueStatus::ACTIVE,
         'region' => 'miami',
     ]);
 
-    $waterfrontVenue2 = \App\Models\Venue::factory()->create([
+    $waterfrontVenue2 = Venue::factory()->create([
         'specialty' => [$waterfrontSpecialty],
-        'status' => \App\Enums\VenueStatus::ACTIVE,
+        'status' => VenueStatus::ACTIVE,
         'region' => 'miami',
     ]);
 
     // Create 1 venue with Fine Dining specialty
-    $fineDiningVenue = \App\Models\Venue::factory()->create([
+    $fineDiningVenue = Venue::factory()->create([
         'specialty' => [$finingDiningSpecialty],
-        'status' => \App\Enums\VenueStatus::ACTIVE,
+        'status' => VenueStatus::ACTIVE,
         'region' => 'miami',
     ]);
 
     // Create 1 venue with both specialties
-    $bothSpecialtiesVenue = \App\Models\Venue::factory()->create([
+    $bothSpecialtiesVenue = Venue::factory()->create([
         'specialty' => [$waterfrontSpecialty, $finingDiningSpecialty],
-        'status' => \App\Enums\VenueStatus::ACTIVE,
+        'status' => VenueStatus::ACTIVE,
         'region' => 'miami',
     ]);
 
