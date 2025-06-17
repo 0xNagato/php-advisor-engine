@@ -54,6 +54,8 @@ class DownloadVenueInvoiceController extends Controller
         if (config('app.invoice_html_preview')) {
             // Use the static method from the action to prepare the view data
             $data = GenerateVenueInvoice::prepareViewData($venue, $startDateCarbon, $endDateCarbon, $invoice);
+            ds($data['nonPrimeBookings'])->label('Non-Prime Bookings');
+            ds($data['nonPrimeTotalAmount'])->label('Non-Prime Total Amount');
 
             // Return the HTML view directly
             return view('pdfs.venue-invoice', $data);
