@@ -19,23 +19,23 @@ class DownloadVenueInvoiceController extends Controller
         // Get the user's timezone
         $userTimezone = auth()->user()->timezone ?? config('app.timezone');
 
-        // Parse dates in user's timezone to get the correct date components
+        // Parse dates in the user's timezone to get the correct date components
         $startDateCarbon = Carbon::parse($startDate, $userTimezone);
         $endDateCarbon = Carbon::parse($endDate, $userTimezone);
 
         // Check if regeneration is requested
         $shouldRegenerate = $request->boolean('regenerate', false);
 
-        // Find existing invoice or generate a new one
+        // Find an existing invoice or generate a new one
         $invoice = VenueInvoice::query()
             ->where('venue_id', $venue->id)
             ->whereDate('start_date', $startDateCarbon->format('Y-m-d'))
             ->whereDate('end_date', $endDateCarbon->format('Y-m-d'))
             ->first();
 
-        // Regenerate if requested or if invoice doesn't exist
+        // Regenerate if requested or if the invoice doesn't exist
         if ($shouldRegenerate || ! $invoice) {
-            // If regenerating and invoice exists, delete the old one
+            // If regenerating and invoice exist, delete the old one
             if ($invoice) {
                 // Delete the old PDF file if it exists
                 if ($invoice->pdf_path && Storage::disk('do')->exists($invoice->pdf_path)) {
