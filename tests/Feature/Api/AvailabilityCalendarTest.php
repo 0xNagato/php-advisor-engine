@@ -103,6 +103,49 @@ test('authenticated user can fetch availability calendar with all filters', func
         ]);
 });
 
+test('authenticated user can fetch availability calendar with region parameter', function () {
+    $date = now()->addDay()->format('Y-m-d');
+
+    // Test with a specific region
+    getJson("/api/calendar?date=$date&guest_count=2&reservation_time=14:30:00&region=miami", [
+        'Authorization' => 'Bearer '.$this->token,
+    ])
+        ->assertSuccessful()
+        ->assertJsonStructure([
+            'data' => [
+                'venues',
+                'timeslots',
+            ],
+        ]);
+
+    // Test with a different region
+    getJson("/api/calendar?date=$date&guest_count=2&reservation_time=14:30:00&region=paris", [
+        'Authorization' => 'Bearer '.$this->token,
+    ])
+        ->assertSuccessful()
+        ->assertJsonStructure([
+            'data' => [
+                'venues',
+                'timeslots',
+            ],
+        ]);
+});
+
+test('availability calendar rejects invalid region parameter', function () {
+    $date = now()->addDay()->format('Y-m-d');
+
+    $response = getJson("/api/calendar?date=$date&guest_count=2&reservation_time=14:30:00&region=invalid_region", [
+        'Authorization' => 'Bearer '.$this->token,
+    ]);
+
+    $response->assertStatus(422)
+        ->assertJson([
+            'region' => [
+                'The selected region is invalid.',
+            ],
+        ]);
+});
+
 test('venues are filtered correctly by cuisine', function () {
     $date = now()->addDay()->format('Y-m-d');
 

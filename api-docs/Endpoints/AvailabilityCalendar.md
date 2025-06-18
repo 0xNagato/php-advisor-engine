@@ -1,35 +1,61 @@
 # Availability Calendar Endpoint
 
 ## Overview
+
 This endpoint provides information about available venues and timeslots for a specific date, guest count, and reservation time. It's used to display the availability calendar in the booking interface.
 
 ## Request
+
 - **Method:** GET
 - **URL:** `/api/calendar`
 - **Authentication:** Required
 
 ### Headers
+
 | Header | Value | Required | Description |
 |--------|-------|----------|-------------|
 | Authorization | Bearer {token} | Yes | Authentication token |
 | Accept | application/json | Yes | Specifies the expected response format |
 
 ### Parameters
+
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
 | date | string (YYYY-MM-DD) | Yes | The date for which to check availability |
 | guest_count | integer | Yes | The number of guests for the reservation (minimum: 1) |
-    | reservation_time | string (HH:MM:SS) | Yes | The time for the reservation. If the reservation is for the current day, the time must be at least 30 minutes from the current time. |
+| reservation_time | string (HH:MM:SS) | Yes | The time for the reservation. If the reservation is for the current day, the time must be at least 30 minutes from the current time. |
 | timeslot_count | integer | No | The number of timeslots to return (default: 5, min: 1, max: 20) |
 | time_slot_offset | integer | No | The offset for timeslots (default: 1) |
 | cuisine | array | No | Filter venues by cuisine types |
 | neighborhood | string | No | Filter venues by neighborhood |
 | specialty | array | No | Filter venues by specialty types |
+| region | string | No | Region ID to override the concierge's default region and view availability in a different region. When specified, the response will show venues and timeslots for the specified region with timezone adjustments. Valid values: `miami`, `ibiza`, `mykonos`, `paris`, `london`, `st_tropez`, `new_york`, `los_angeles`, `las_vegas` |
 
-### Example Request
+### Example Requests
+
+#### Basic Request (uses concierge's default region)
+
 ```bash
 curl -X GET \
-  'https://api.example.com/api/calendar?date=2023-06-15&guest_count=4&reservation_time=19:00:00&timeslot_count=5&cuisine[]=italian&cuisine[]=japanese&neighborhood=downtown&specialty[]=steak' \
+  'https://api.example.com/api/calendar?date=2023-06-15&guest_count=4&reservation_time=19:00:00' \
+  -H 'Authorization: Bearer your-api-token' \
+  -H 'Accept: application/json'
+```
+
+#### Request with Region Override
+
+```bash
+curl -X GET \
+  'https://api.example.com/api/calendar?date=2023-06-15&guest_count=4&reservation_time=19:00:00&region=miami' \
+  -H 'Authorization: Bearer your-api-token' \
+  -H 'Accept: application/json'
+```
+
+#### Request with All Filters and Region
+
+```bash
+curl -X GET \
+  'https://api.example.com/api/calendar?date=2023-06-15&guest_count=4&reservation_time=19:00:00&timeslot_count=5&cuisine[]=italian&cuisine[]=japanese&neighborhood=downtown&specialty[]=steak&region=paris' \
   -H 'Authorization: Bearer your-api-token' \
   -H 'Accept: application/json'
 ```
@@ -37,9 +63,11 @@ curl -X GET \
 ## Response
 
 ### Success Response
+
 - **Status Code:** 200 OK
 
 #### Response Body
+
 ```json
 {
   "data": {
@@ -146,6 +174,7 @@ curl -X GET \
 ```
 
 #### Response Fields
+
 | Field | Type | Description |
 |-------|------|-------------|
 | data.venues | array | List of venues with their availability |
@@ -172,6 +201,7 @@ curl -X GET \
 ### Error Responses
 
 #### 401 Unauthorized
+
 ```json
 {
   "message": "Unauthenticated."
@@ -179,6 +209,7 @@ curl -X GET \
 ```
 
 #### 422 Unprocessable Entity
+
 ```json
 {
   "date": [
@@ -190,13 +221,39 @@ curl -X GET \
   "reservation_time": [
     "The reservation time field is required.",
     "The reservation time must be at least 30 minutes from now."
+  ],
+  "region": [
+    "The selected region is invalid."
   ]
 }
 ```
 
 ## Notes
+
 - The response includes both a list of venues with their availability and a list of time slots
 - The `schedule_template_id` is needed when creating a booking for a specific time slot
 - Time slots are returned in chronological order
 - The number of time slots returned can be controlled with the `timeslot_count` parameter
 - For same-day reservations, the reservation time must be at least 30 minutes from the current time
+
+### Region Parameter Behavior
+
+- **Default Behavior**: When no `region` parameter is provided, the API uses the authenticated concierge's default region
+- **Region Override**: When a `region` parameter is specified, the API overrides the concierge's default region and shows availability for the specified region
+- **Timezone Handling**: All date/time calculations (including the 30-minute minimum advance booking rule) are automatically adjusted to use the specified region's timezone
+- **Venue Filtering**: Only venues located in the specified region will be returned in the response
+- **Currency**: Pricing will be displayed in the currency of the specified region (e.g., USD for US regions, EUR for European regions)
+
+### Valid Region Values
+
+| Region ID | Region Name | Timezone | Currency |
+|-----------|-------------|----------|----------|
+| `miami` | Miami | America/New_York | USD |
+| `new_york` | New York | America/New_York | USD |
+| `los_angeles` | Los Angeles | America/Los_Angeles | USD |
+| `las_vegas` | Las Vegas | America/Los_Angeles | USD |
+| `ibiza` | Ibiza | Europe/Madrid | EUR |
+| `mykonos` | Mykonos | Europe/Athens | EUR |
+| `paris` | Paris | Europe/Paris | EUR |
+| `london` | London | Europe/London | GBP |
+| `st_tropez` | St. Tropez | Europe/Paris | EUR |

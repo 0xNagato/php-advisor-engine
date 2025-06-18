@@ -3,6 +3,7 @@
 namespace App\Http\Requests\Api;
 
 use App\Actions\Region\GetUserRegion;
+use App\Models\Region;
 use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Http\Exceptions\HttpResponseException;
@@ -24,8 +25,10 @@ class CalendarRequest extends FormRequest
                         return; // Date validation will fail separately
                     }
 
-                    // Get the user's region for timezone
-                    $region = GetUserRegion::run();
+                    // Get the region for timezone - use provided region or fallback to user's region
+                    $regionId = $this->input('region');
+                    $region = $regionId ? Region::query()->where('id', $regionId)->first() : null;
+                    $region = $region ?: GetUserRegion::run();
 
                     // Create Carbon instances for the reservation date/time and current time
                     $reservationDateTime = Carbon::createFromFormat(
@@ -49,6 +52,16 @@ class CalendarRequest extends FormRequest
             'neighborhood' => ['sometimes', 'string'],
             'specialty' => ['sometimes', 'array'],
             'specialty.*' => ['string'],
+            'region' => [
+                'sometimes',
+                'string',
+                function ($attribute, $value, $fail) {
+                    // Validate that the region exists in the Region Sushi model
+                    if ($value && ! Region::query()->where('id', $value)->exists()) {
+                        $fail('The selected region is invalid.');
+                    }
+                },
+            ],
         ];
     }
 
