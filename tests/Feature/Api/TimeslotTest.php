@@ -41,3 +41,39 @@ test('timeslots can be filtered by date', function () {
             'data',
         ]);
 });
+
+test('authenticated user can fetch timeslots with region parameter', function () {
+    $date = now()->addDay()->format('Y-m-d');
+
+    // Test with a specific region
+    getJson("/api/timeslots?date={$date}&region=miami", [
+        'Authorization' => 'Bearer '.$this->token,
+    ])
+        ->assertSuccessful()
+        ->assertJsonStructure([
+            'data',
+        ]);
+
+    // Test with a different region
+    getJson("/api/timeslots?date={$date}&region=paris", [
+        'Authorization' => 'Bearer '.$this->token,
+    ])
+        ->assertSuccessful()
+        ->assertJsonStructure([
+            'data',
+        ]);
+});
+
+test('timeslots endpoint rejects invalid region parameter', function () {
+    $date = now()->addDay()->format('Y-m-d');
+
+    getJson("/api/timeslots?date={$date}&region=invalid_region", [
+        'Authorization' => 'Bearer '.$this->token,
+    ])
+        ->assertStatus(422)
+        ->assertJson([
+            'region' => [
+                'The selected region is invalid.',
+            ],
+        ]);
+});

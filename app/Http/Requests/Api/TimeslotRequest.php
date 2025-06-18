@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests\Api;
 
+use App\Models\Region;
 use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Http\Exceptions\HttpResponseException;
@@ -12,6 +13,16 @@ class TimeslotRequest extends FormRequest
     {
         return [
             'date' => ['required', 'date'],
+            'region' => [
+                'sometimes',
+                'string',
+                function ($attribute, $value, $fail) {
+                    // Validate that the region exists in the Region Sushi model
+                    if ($value && ! Region::query()->where('id', $value)->exists()) {
+                        $fail('The selected region is invalid.');
+                    }
+                },
+            ],
         ];
     }
 
