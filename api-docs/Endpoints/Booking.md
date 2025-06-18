@@ -1,16 +1,19 @@
 # Booking Endpoint
 
 ## Overview
+
 This endpoint provides functionality for creating, updating, and deleting bookings in the system.
 
 ## Create Booking
 
 ### Request
+
 - **Method:** POST
 - **URL:** `/api/bookings`
 - **Authentication:** Required
 
 #### Headers
+
 | Header | Value | Required | Description |
 |--------|-------|----------|-------------|
 | Authorization | Bearer {token} | Yes | Authentication token |
@@ -18,6 +21,7 @@ This endpoint provides functionality for creating, updating, and deleting bookin
 | Content-Type | application/json | Yes | Specifies the request format |
 
 #### Request Body
+
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
 | date | string (YYYY-MM-DD) | Yes | The date for the booking (must not be in the past) |
@@ -25,6 +29,7 @@ This endpoint provides functionality for creating, updating, and deleting bookin
 | guest_count | integer | Yes | The number of guests for the booking |
 
 #### Example Request
+
 ```bash
 curl -X POST \
   https://api.example.com/api/bookings \
@@ -41,9 +46,13 @@ curl -X POST \
 ### Response
 
 #### Success Response
+
 - **Status Code:** 200 OK
 
 ##### Response Body
+
+**Non-Prime Booking Response:**
+
 ```json
 {
     "data": {
@@ -67,9 +76,47 @@ curl -X POST \
 }
 ```
 
+**Prime Booking Response:**
+
+```json
+{
+    "data": {
+        "bookings_enabled": true,
+        "bookings_disabled_message": "Bookings are currently disabled while we are onboarding venues and concierges. We expect to be live by mid-November.",
+        "id": 288706,
+        "guest_count": "4",
+        "dayDisplay": "Sun, Jun 15 at 8:00 pm",
+        "status": "pending",
+        "venue": "Gekko",
+        "logo": "https://prima-bucket.nyc3.digitaloceanspaces.com/venues/gekko.png",
+        "total": "$150.00",
+        "subtotal": "$130.43",
+        "tax_rate_term": "NYC Tax",
+        "tax_amount": "$19.57",
+        "bookingUrl": "http://localhost:8000/checkout/ba52e84f-9dd2-41e1-a80f-d928ac2e5a6d?r=sms",
+        "qrCode": "data:image/svg+xml;base64,PD94b...",
+        "is_prime": 1,
+        "booking_at": "2025-06-15T20:00:00.000000Z",
+        "paymentIntentSecret": "pi_1234567890abcdef_secret_1234567890abcdef"
+    }
+}
+```
+
+##### Response Fields
+
+| Field | Type | Description |
+|-------|------|-------------|
+| paymentIntentSecret | string | **Prime bookings only** - Stripe payment intent client secret for processing payment |
+| is_prime | integer | Indicates if the booking is prime (1) or non-prime (0) |
+| total | string | Total amount to be charged (formatted with currency) |
+| subtotal | string | Subtotal before taxes (formatted with currency) |
+| tax_amount | string | Tax amount (formatted with currency) |
+| tax_rate_term | string | Description of the tax rate applied |
+
 #### Error Responses
 
 ##### 401 Unauthorized
+
 ```json
 {
   "message": "Unauthenticated."
@@ -77,6 +124,7 @@ curl -X POST \
 ```
 
 ##### 404 Not Found
+
 ```json
 {
   "message": "Booking failed"
@@ -84,6 +132,15 @@ curl -X POST \
 ```
 
 ##### 422 Unprocessable Entity
+
+```json
+{
+  "message": "Venue is not currently accepting bookings"
+}
+```
+
+or
+
 ```json
 {
   "date": [
@@ -99,14 +156,26 @@ curl -X POST \
 }
 ```
 
+##### 500 Internal Server Error
+
+**Prime bookings only** - Returned when payment intent creation fails:
+
+```json
+{
+  "message": "Payment processing unavailable. Please try again."
+}
+```
+
 ## Update Booking
 
 ### Request
+
 - **Method:** PUT
 - **URL:** `/api/bookings/{booking}`
 - **Authentication:** Required
 
 #### Headers
+
 | Header | Value | Required | Description |
 |--------|-------|----------|-------------|
 | Authorization | Bearer {token} | Yes | Authentication token |
@@ -114,11 +183,13 @@ curl -X POST \
 | Content-Type | application/json | Yes | Specifies the request format |
 
 #### URL Parameters
+
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
 | booking | integer | Yes | The ID of the booking to update |
 
 #### Request Body
+
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
 | first_name | string | Yes | The first name of the guest (max: 255 characters) |
@@ -129,6 +200,7 @@ curl -X POST \
 | bookingUrl | string | Yes | The URL for the booking payment form |
 
 #### Example Request
+
 ```bash
 curl -X PUT \
   https://api.example.com/api/bookings/456 \
@@ -148,9 +220,11 @@ curl -X PUT \
 ### Response
 
 #### Success Response
+
 - **Status Code:** 200 OK
 
 ##### Response Body
+
 ```json
 {
   "message": "SMS Message Sent Successfully"
@@ -160,6 +234,7 @@ curl -X PUT \
 #### Error Responses
 
 ##### 401 Unauthorized
+
 ```json
 {
   "message": "Unauthenticated."
@@ -167,6 +242,7 @@ curl -X PUT \
 ```
 
 ##### 404 Not Found
+
 ```json
 {
   "message": "Booking already confirmed or cancelled"
@@ -174,6 +250,7 @@ curl -X PUT \
 ```
 
 ##### 422 Unprocessable Entity
+
 ```json
 {
   "message": "Venue is not currently accepting bookings"
@@ -210,22 +287,26 @@ or
 ## Delete Booking
 
 ### Request
+
 - **Method:** DELETE
 - **URL:** `/api/bookings/{booking}`
 - **Authentication:** Required
 
 #### Headers
+
 | Header | Value | Required | Description |
 |--------|-------|----------|-------------|
 | Authorization | Bearer {token} | Yes | Authentication token |
 | Accept | application/json | Yes | Specifies the expected response format |
 
 #### URL Parameters
+
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
 | booking | integer | Yes | The ID of the booking to delete |
 
 #### Example Request
+
 ```bash
 curl -X DELETE \
   https://api.example.com/api/bookings/456 \
@@ -236,9 +317,11 @@ curl -X DELETE \
 ### Response
 
 #### Success Response
+
 - **Status Code:** 200 OK
 
 ##### Response Body
+
 ```json
 {
   "message": "Booking Abandoned"
@@ -248,6 +331,7 @@ curl -X DELETE \
 #### Error Responses
 
 ##### 401 Unauthorized
+
 ```json
 {
   "message": "Unauthenticated."
@@ -255,6 +339,7 @@ curl -X DELETE \
 ```
 
 ##### 404 Not Found
+
 ```json
 {
   "message": "No query results for model [App\\Models\\Booking] 456"
@@ -262,6 +347,7 @@ curl -X DELETE \
 ```
 
 ##### 422 Unprocessable Entity
+
 ```json
 {
   "message": "Booking cannot be abandoned in its current status"
@@ -269,8 +355,12 @@ curl -X DELETE \
 ```
 
 ## Notes
+
 - When creating a booking, the `schedule_template_id` should be obtained from the availability calendar endpoint
 - When updating a booking, the booking must be in the "pending" status
 - When deleting a booking, the booking must be in the "pending" or "guest_on_page" status
 - The delete operation doesn't actually delete the booking from the database, but changes its status to "abandoned"
 - For non-prime bookings, a customer can only have one booking per day at a venue
+- **Prime bookings** automatically include a `paymentIntentSecret` in the response for immediate payment processing
+- The `paymentIntentSecret` should be used with Stripe's client-side payment libraries to process the payment
+- Payment intent creation includes booking metadata for tracking purposes

@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Actions\Booking\CheckCustomerHasNonPrimeBooking;
 use App\Actions\Booking\CreateBooking;
+use App\Actions\Booking\CreateStripePaymentIntent;
 use App\Actions\Region\GetUserRegion;
 use App\Data\Booking\CreateBookingReturnData;
 use App\Enums\BookingStatus;
@@ -84,10 +85,35 @@ class BookingController extends Controller
 
         $bookingResource = BookingResource::make($booking);
 
-        $bookingResource = $bookingResource->additional([
+        $additionalData = [
             'region' => $region,
             'dayDisplay' => $dayDisplay,
-        ]);
+        ];
+
+        // Create payment intent for prime bookings
+        if ($booking->booking->is_prime) {
+            try {
+                $paymentIntentSecret = CreateStripePaymentIntent::run($booking->booking);
+                $additionalData['paymentIntentSecret'] = $paymentIntentSecret;
+            } catch (ApiErrorException $e) {
+                activity()
+                    ->performedOn($booking->booking)
+                    ->withProperties([
+                        'venue_id' => $venue->id,
+                        'venue_name' => $venue->name,
+                        'concierge_id' => auth()->user()?->concierge?->id,
+                        'concierge_name' => auth()->user()?->name,
+                        'error' => $e->getMessage(),
+                    ])
+                    ->log('API - Payment intent creation failed');
+
+                return response()->json([
+                    'message' => 'Payment processing unavailable. Please try again.',
+                ], 500);
+            }
+        }
+
+        $bookingResource = $bookingResource->additional($additionalData);
 
         return response()->json([
             'data' => $bookingResource,

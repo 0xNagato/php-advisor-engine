@@ -8,12 +8,37 @@ use App\Models\ScheduleTemplate;
 use App\Models\User;
 use App\Models\Venue;
 use App\Models\VenueTimeSlot;
+use Stripe\StripeClient;
 
 use function Pest\Laravel\deleteJson;
 use function Pest\Laravel\postJson;
 use function Pest\Laravel\putJson;
 
 beforeEach(function () {
+    // Mock StripeClient for payment intent creation
+    $this->stripeMock = Mockery::mock(StripeClient::class);
+    $this->stripeMock->paymentIntents = Mockery::mock();
+
+    // Set up default payment intent mock response
+    $defaultResponse = new class
+    {
+        public string $client_secret = 'pi_test_1234567890_secret_abcdefghij';
+
+        public string $id = 'pi_test_1234567890';
+
+        public int $amount = 15000;
+
+        public string $currency = 'usd';
+
+        public string $status = 'requires_payment_method';
+    };
+
+    $this->stripeMock->paymentIntents->shouldReceive('create')
+        ->withAnyArgs()
+        ->andReturn($defaultResponse);
+
+    app()->instance(StripeClient::class, $this->stripeMock);
+
     // Create a test user
     $this->user = User::factory()->create();
     $this->user->assignRole('concierge');
@@ -100,6 +125,45 @@ test('booking require date', function () {
         ->assertStatus(422);
 });
 
+test('prime booking includes payment intent secret', function () {
+    // Create a prime schedule template
+    $primeScheduleTemplate = ScheduleTemplate::factory()->create([
+        'venue_id' => $this->venue->id,
+        'start_time' => '20:00:00',
+        'party_size' => 2,
+        'prime_time' => true, // This is what makes it prime
+        'day_of_week' => 1, // Monday
+    ]);
+
+    $response = postJson('/api/bookings', [
+        'date' => now()->addDay()->format('Y-m-d'),
+        'schedule_template_id' => $primeScheduleTemplate->id,
+        'guest_count' => 2,
+    ], [
+        'Authorization' => 'Bearer '.$this->token,
+    ]);
+
+    $response->assertSuccessful()
+        ->assertJsonStructure([
+            'data' => [
+                'bookings_enabled',
+                'bookings_disabled_message',
+                'id',
+                'guest_count',
+                'status',
+                'is_prime',
+                'paymentIntentSecret', // Should be present for prime bookings
+            ],
+        ])
+        ->assertJson([
+            'data' => [
+                'is_prime' => 'true',
+            ],
+        ]);
+
+    expect($response->json('data.paymentIntentSecret'))->toEqual('pi_test_1234567890_secret_abcdefghij');
+});
+
 test('user can confirm their booking', function () {
     // Create a test booking
     $booking = Booking::factory()->create([
@@ -138,6 +202,10 @@ test('user can delete their booking', function () {
         ]);
 
     expect($booking->fresh()->status)->toBe(BookingStatus::ABANDONED);
+});
+
+afterEach(function () {
+    Mockery::close();
 });
 
 test('user cannot delete booking on status confirmed', function () {

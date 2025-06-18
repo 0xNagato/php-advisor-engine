@@ -21,7 +21,7 @@ class BookingResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
-        return [
+        $data = [
             'bookings_enabled' => config('app.bookings_enabled'),
             'bookings_disabled_message' => config('app.bookings_disabled_message'),
             'id' => $this->booking->id,
@@ -39,5 +39,12 @@ class BookingResource extends JsonResource
             'is_prime' => $this->booking->is_prime ? 'true' : 0,
             'booking_at' => $this->booking->booking_at,
         ];
+
+        // Include payment intent secret for prime bookings
+        if (isset($this->additional['paymentIntentSecret'])) {
+            $data['paymentIntentSecret'] = $this->additional['paymentIntentSecret'];
+        }
+
+        return $data;
     }
 }
