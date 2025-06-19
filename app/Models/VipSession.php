@@ -5,15 +5,18 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Laravel\Sanctum\PersonalAccessToken;
 
 /**
  * @property int $id
  * @property int $vip_code_id
  * @property string $token
+ * @property int|null $sanctum_token_id
  * @property \Carbon\Carbon $expires_at
  * @property \Carbon\Carbon $created_at
  * @property \Carbon\Carbon $updated_at
  * @property-read VipCode $vipCode
+ * @property-read PersonalAccessToken|null $sanctumToken
  */
 class VipSession extends Model
 {
@@ -22,6 +25,7 @@ class VipSession extends Model
     protected $fillable = [
         'vip_code_id',
         'token',
+        'sanctum_token_id',
         'expires_at',
     ];
 
@@ -38,6 +42,14 @@ class VipSession extends Model
     public function vipCode(): BelongsTo
     {
         return $this->belongsTo(VipCode::class);
+    }
+
+    /**
+     * @return BelongsTo<PersonalAccessToken, $this>
+     */
+    public function sanctumToken(): BelongsTo
+    {
+        return $this->belongsTo(PersonalAccessToken::class, 'sanctum_token_id');
     }
 
     /**
