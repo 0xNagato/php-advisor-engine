@@ -14,12 +14,17 @@ use App\Http\Controllers\Api\SpecialtyController;
 use App\Http\Controllers\Api\TimeslotController;
 use App\Http\Controllers\Api\UpdatePushTokenController;
 use App\Http\Controllers\Api\VenueController;
+use App\Http\Controllers\Api\VipSessionController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
+
+// VIP Session endpoints (public - no authentication required)
+Route::post('/vip/sessions', [VipSessionController::class, 'createSession']);
+Route::post('/vip/sessions/validate', [VipSessionController::class, 'validateSession']);
 
 Route::middleware('auth:sanctum')->group(function () {
     Route::get('/regions', [RegionController::class, 'index']);
@@ -39,6 +44,9 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/profiles/{profile}/switch', [RoleProfileController::class, 'switch']);
     Route::get('/me', MeController::class);
     Route::post('/update-push-token', UpdatePushTokenController::class);
+
+    // VIP Session analytics (authenticated)
+    Route::get('/vip/sessions/analytics', [VipSessionController::class, 'getSessionAnalytics']);
 });
 
 Route::get('/app-config', AppConfigController::class)->name('app-config');

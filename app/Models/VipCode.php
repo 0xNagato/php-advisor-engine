@@ -11,6 +11,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasManyThrough;
+use Illuminate\Support\Str;
 
 /**
  * @mixin IdeHelperVipCode
@@ -88,5 +89,50 @@ class VipCode extends Model
                 return $currencyService->convertToUSD($earnings->toArray());
             }
         );
+    }
+
+    /**
+     * @return HasMany<VipSession, $this>
+     */
+    public function sessions(): HasMany
+    {
+        return $this->hasMany(VipSession::class);
+    }
+
+    /**
+     * Generate a new session token for this VIP code
+     */
+    public function generateSessionToken(): string
+    {
+        $token = Str::random(64);
+
+        $this->sessions()->create([
+            'token' => hash('sha256', $token),
+            'expires_at' => now()->addHours(24),
+            'created_at' => now(),
+        ]);
+
+        return $token;
+    }
+
+    /**
+     * Validate a session token
+     */
+    public function validateSessionToken(string $token): bool
+    {
+        return $this->sessions()
+            ->where('token', hash('sha256', $token))
+            ->where('expires_at', '>', now())
+            ->exists();
+    }
+
+    /**
+     * Clean up expired sessions
+     */
+    public function cleanExpiredSessions(): void
+    {
+        $this->sessions()
+            ->where('expires_at', '<', now())
+            ->delete();
     }
 }
