@@ -484,8 +484,11 @@ class PaymentExports extends Page implements HasTable
             ->headerActions($this->getExportHeaderActions($role));
     }
 
-    protected function hasExistingVenueInvoice(Venue $venue, string $startDate, string $endDate): bool
+    protected function hasExistingVenueInvoice(Venue $venue, ?string $startDate, ?string $endDate): bool
     {
+        if (blank($startDate) || blank($endDate)) {
+            return false;
+        }
         $userTimezone = auth()->user()->timezone ?? config('app.timezone');
         $startDateCarbon = Carbon::parse($startDate, $userTimezone);
         $endDateCarbon = Carbon::parse($endDate, $userTimezone);
