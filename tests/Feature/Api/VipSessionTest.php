@@ -1,13 +1,27 @@
 <?php
 
 use App\Models\Concierge;
+use App\Models\User;
 use App\Models\VipCode;
 use App\Models\VipSession;
+use Laravel\Sanctum\PersonalAccessToken;
 
 use function Pest\Laravel\getJson;
 use function Pest\Laravel\postJson;
 
 beforeEach(function () {
+    // Create demo user for fallback sessions
+    $this->demoUser = User::factory()->create([
+        'first_name' => 'Demo',
+        'last_name' => 'Concierge',
+        'email' => 'demo@primavip.co',
+    ]);
+
+    $this->demoConcierge = Concierge::factory()->create([
+        'user_id' => $this->demoUser->id,
+        'hotel_name' => 'Demo Hotel',
+    ]);
+
     // Create a test concierge and VIP code
     $this->concierge = Concierge::factory()->create();
     $this->vipCode = VipCode::create([
@@ -54,6 +68,10 @@ test('can create VIP session with valid code', function () {
     $this->assertDatabaseHas('vip_sessions', [
         'vip_code_id' => $this->vipCode->id,
     ]);
+
+    // Check that a Sanctum token was created
+    $sessionToken = $response->json('data.session_token');
+    $this->assertNotNull(PersonalAccessToken::findToken($sessionToken));
 });
 
 test('creates demo session for invalid VIP code', function () {
@@ -78,10 +96,11 @@ test('creates demo session for invalid VIP code', function () {
             ],
         ]);
 
-    // Check that no session was created in the database for invalid code
-    $this->assertDatabaseMissing('vip_sessions', [
-        'vip_code_id' => $this->vipCode->id,
-    ]);
+    // Check that a Sanctum token was created for demo user
+    $sessionToken = $response->json('data.session_token');
+    $sanctumToken = PersonalAccessToken::findToken($sessionToken);
+    $this->assertNotNull($sanctumToken);
+    $this->assertEquals($this->demoUser->id, $sanctumToken->tokenable_id);
 });
 
 test('validates VIP session token correctly', function () {
@@ -139,16 +158,19 @@ test('rejects invalid session token', function () {
 });
 
 test('rejects expired session token', function () {
-    // Create a session manually that's already expired
-    $token = 'expired_test_token';
+    // Create a Sanctum token that's already expired
+    $expiredToken = $this->concierge->user->createToken('expired-test', ['*'], now()->subHour());
+
+    // Create corresponding VIP session record
     VipSession::create([
         'vip_code_id' => $this->vipCode->id,
-        'token' => hash('sha256', $token),
-        'expires_at' => now()->subHour(), // Already expired
+        'token' => hash('sha256', $expiredToken->plainTextToken),
+        'sanctum_token_id' => $expiredToken->accessToken->id,
+        'expires_at' => now()->subHour(),
     ]);
 
     $response = postJson('/api/vip/sessions/validate', [
-        'session_token' => $token,
+        'session_token' => $expiredToken->plainTextToken,
     ]);
 
     $response->assertStatus(401)
@@ -199,32 +221,102 @@ test('session analytics requires authentication', function () {
 });
 
 test('cleans up expired sessions correctly', function () {
-    // Create some sessions, some expired
+    // Create expired Sanctum tokens and VIP sessions
+    $expiredToken1 = $this->concierge->user->createToken('expired1', ['*'], now()->subHour());
+    $expiredToken2 = $this->concierge->user->createToken('expired2', ['*'], now()->subMinute());
+    $activeToken = $this->concierge->user->createToken('active', ['*'], now()->addHour());
+
     VipSession::create([
         'vip_code_id' => $this->vipCode->id,
-        'token' => hash('sha256', 'expired1'),
+        'token' => hash('sha256', $expiredToken1->plainTextToken),
+        'sanctum_token_id' => $expiredToken1->accessToken->id,
         'expires_at' => now()->subHour(),
     ]);
 
     VipSession::create([
         'vip_code_id' => $this->vipCode->id,
-        'token' => hash('sha256', 'active1'),
-        'expires_at' => now()->addHour(),
+        'token' => hash('sha256', $expiredToken2->plainTextToken),
+        'sanctum_token_id' => $expiredToken2->accessToken->id,
+        'expires_at' => now()->subMinute(),
     ]);
 
     VipSession::create([
         'vip_code_id' => $this->vipCode->id,
-        'token' => hash('sha256', 'expired2'),
-        'expires_at' => now()->subMinute(),
+        'token' => hash('sha256', $activeToken->plainTextToken),
+        'sanctum_token_id' => $activeToken->accessToken->id,
+        'expires_at' => now()->addHour(),
     ]);
 
-    // Clean up expired sessions
-    $this->vipCode->cleanExpiredSessions();
+    // Clean up expired sessions using the service
+    $cleanupCount = app(\App\Services\VipCodeService::class)->cleanupExpiredSessions();
+
+    // Should have cleaned up 2 expired sessions
+    $this->assertEquals(2, $cleanupCount);
 
     // Should have only the active session left
     $this->assertEquals(1, VipSession::where('vip_code_id', $this->vipCode->id)->count());
-    $this->assertEquals(
-        hash('sha256', 'active1'),
-        VipSession::where('vip_code_id', $this->vipCode->id)->first()->token
-    );
+
+    // Should have cleaned up the expired Sanctum tokens too
+    $this->assertNull(PersonalAccessToken::find($expiredToken1->accessToken->id));
+    $this->assertNull(PersonalAccessToken::find($expiredToken2->accessToken->id));
+    $this->assertNotNull(PersonalAccessToken::find($activeToken->accessToken->id));
+});
+
+test('VIP session token works with API authentication', function () {
+    // Create a VIP session
+    $response = postJson('/api/vip/sessions', [
+        'vip_code' => 'TESTCODE',
+    ]);
+
+    $sessionToken = $response->json('data.session_token');
+
+    // Test that the token works with authenticated endpoints
+    $meResponse = getJson('/api/me', [
+        'Authorization' => 'Bearer '.$sessionToken,
+    ]);
+
+    $meResponse->assertSuccessful()
+        ->assertJsonStructure([
+            'success',
+            'data' => [
+                'user' => [
+                    'id',
+                    'name',
+                    'email',
+                ],
+            ],
+        ]);
+
+    // Should return the concierge user, not the demo user
+    $this->assertEquals($this->concierge->user->id, $meResponse->json('data.user.id'));
+});
+
+test('demo session token works with API authentication', function () {
+    // Create a demo session with invalid code
+    $response = postJson('/api/vip/sessions', [
+        'vip_code' => 'INVALIDCODE',
+    ]);
+
+    $sessionToken = $response->json('data.session_token');
+
+    // Test that the demo token works with authenticated endpoints
+    $meResponse = getJson('/api/me', [
+        'Authorization' => 'Bearer '.$sessionToken,
+    ]);
+
+    $meResponse->assertSuccessful()
+        ->assertJsonStructure([
+            'success',
+            'data' => [
+                'user' => [
+                    'id',
+                    'name',
+                    'email',
+                ],
+            ],
+        ]);
+
+    // Should return the demo user
+    $this->assertEquals($this->demoUser->id, $meResponse->json('data.user.id'));
+    $this->assertEquals('demo@primavip.co', $meResponse->json('data.user.email'));
 });
