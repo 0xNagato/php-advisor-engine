@@ -22,6 +22,7 @@ class CuisineController extends Controller
      */
     #[OpenApi\Operation(
         tags: ['Cuisines'],
+        security: 'BearerTokenSecurityScheme'
     )]
     #[OpenApiResponse(factory: CuisineListResponse::class)]
     public function __invoke(): JsonResponse

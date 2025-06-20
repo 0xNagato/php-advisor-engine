@@ -30,6 +30,7 @@ class RegionController extends Controller
      */
     #[OpenApi\Operation(
         tags: ['Regions'],
+        security: 'BearerTokenSecurityScheme'
     )]
     #[OpenApiResponse(factory: RegionListResponse::class)]
     public function index(): JsonResponse
@@ -54,6 +55,7 @@ class RegionController extends Controller
      */
     #[OpenApi\Operation(
         tags: ['Regions'],
+        security: 'BearerTokenSecurityScheme'
     )]
     #[RequestBody(factory: RegionRequestBody::class)]
     #[OpenApiResponse(factory: NoContentResponse::class)]

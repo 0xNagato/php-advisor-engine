@@ -21,6 +21,7 @@ class RoleProfileController extends Controller
      */
     #[OpenApi\Operation(
         tags: ['Role Profiles'],
+        security: 'BearerTokenSecurityScheme'
     )]
     #[OpenApiResponse(factory: RoleProfileListResponse::class)]
     public function index(Request $request): JsonResponse

@@ -20,6 +20,7 @@ class ReservationHubController extends Controller
      */
     #[OpenApi\Operation(
         tags: ['Reservation Hubs'],
+        security: 'BearerTokenSecurityScheme'
     )]
     #[Parameters(factory: HubParameter::class)]
     #[OpenApiResponse(factory: HubResponse::class)]

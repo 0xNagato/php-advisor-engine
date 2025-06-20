@@ -19,6 +19,7 @@ class UpdatePushTokenController extends Controller
      */
     #[OpenApi\Operation(
         tags: ['Update Push Tokens'],
+        security: 'BearerTokenSecurityScheme'
     )]
     #[RequestBody(factory: PushTokenRequestBody::class)]
     #[OpenApiResponse(factory: MessageResponse::class)]

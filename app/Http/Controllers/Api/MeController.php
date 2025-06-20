@@ -18,6 +18,7 @@ class MeController extends Controller
      */
     #[OpenApi\Operation(
         tags: ['Me'],
+        security: 'BearerTokenSecurityScheme'
     )]
     #[OpenApiResponse(factory: MeResponse::class)]
     public function __invoke(Request $request): JsonResponse

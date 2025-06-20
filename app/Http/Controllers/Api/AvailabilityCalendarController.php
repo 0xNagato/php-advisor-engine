@@ -22,6 +22,7 @@ class AvailabilityCalendarController extends Controller
      */
     #[OpenApi\Operation(
         tags: ['Availability Calendars'],
+        security: 'BearerTokenSecurityScheme'
     )]
     #[Parameters(factory: CalendarParameter::class)]
     #[OpenApiResponse(factory: CalendarResponse::class)]

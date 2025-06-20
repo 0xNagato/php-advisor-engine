@@ -22,6 +22,7 @@ class ContactFormController extends Controller
      */
     #[OpenApi\Operation(
         tags: ['Contact Forms'],
+        security: 'BearerTokenSecurityScheme'
     )]
     #[RequestBody(factory: ContactFormRequestBody::class)]
     #[OpenApiResponse(factory: MessageResponse::class)]

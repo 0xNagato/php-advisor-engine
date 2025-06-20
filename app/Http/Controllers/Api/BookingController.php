@@ -39,6 +39,7 @@ class BookingController extends Controller
      */
     #[OpenApi\Operation(
         tags: ['Bookings'],
+        security: 'BearerTokenSecurityScheme'
     )]
     #[RequestBody(factory: BookingCreateRequestBody::class)]
     #[OpenApiResponse(factory: BookingResponse::class)]
@@ -143,6 +144,7 @@ class BookingController extends Controller
      */
     #[OpenApi\Operation(
         tags: ['Bookings'],
+        security: 'BearerTokenSecurityScheme'
     )]
     #[RequestBody(factory: BookingUpdateRequestBody::class)]
     #[OpenApiResponse(factory: MessageResponse::class)]
@@ -215,6 +217,7 @@ class BookingController extends Controller
      */
     #[OpenApi\Operation(
         tags: ['Bookings'],
+        security: 'BearerTokenSecurityScheme'
     )]
     #[OpenApiResponse(factory: MessageResponse::class)]
     public function destroy(int $id): JsonResponse

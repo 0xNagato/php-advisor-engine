@@ -19,6 +19,7 @@ class VenueController extends Controller
      */
     #[OpenApi\Operation(
         tags: ['Venues'],
+        security: 'BearerTokenSecurityScheme'
     )]
     #[OpenApiResponse(factory: VenueListResponse::class)]
     public function __invoke(): JsonResponse

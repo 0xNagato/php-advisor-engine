@@ -25,6 +25,7 @@ class NeighborhoodController extends Controller
      */
     #[OpenApi\Operation(
         tags: ['Neighborhoods'],
+        security: 'BearerTokenSecurityScheme'
     )]
     #[Parameters(factory: RegionParameter::class)]
     #[OpenApiResponse(factory: NeighborhoodListResponse::class)]
