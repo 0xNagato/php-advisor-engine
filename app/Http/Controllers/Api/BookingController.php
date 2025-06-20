@@ -24,6 +24,9 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Response;
 use Stripe\Exception\ApiErrorException;
 use Vyuldashev\LaravelOpenApi\Attributes as OpenApi;
+use Vyuldashev\LaravelOpenApi\Attributes\RequestBody;
+use App\OpenApi\RequestBodies\BookingCreateRequestBody;
+use App\OpenApi\RequestBodies\BookingUpdateRequestBody;
 
 #[OpenApi\PathItem]
 class BookingController extends Controller
@@ -34,6 +37,7 @@ class BookingController extends Controller
     #[OpenApi\Operation(
         tags: ['Bookings'],
     )]
+    #[RequestBody(factory: BookingCreateRequestBody::class)]
     public function store(BookingCreateRequest $request): JsonResponse|Response
     {
         $validatedData = $request->validated();
@@ -136,6 +140,7 @@ class BookingController extends Controller
     #[OpenApi\Operation(
         tags: ['Bookings'],
     )]
+    #[RequestBody(factory: BookingUpdateRequestBody::class)]
     public function update(BookingUpdateRequest $request, Booking $booking): JsonResponse
     {
         $validatedData = $request->validated();
@@ -204,11 +209,12 @@ class BookingController extends Controller
      * Delete (abandon) a booking by ID.
      *
      * @param  int  $id
+     * @return JsonResponse
      */
     #[OpenApi\Operation(
         tags: ['Bookings'],
     )]
-    public function destroy($id): JsonResponse
+    public function destroy(int $id): JsonResponse
     {
         /** @var Booking $booking */
         $booking = Booking::query()->findOrFail($id);
