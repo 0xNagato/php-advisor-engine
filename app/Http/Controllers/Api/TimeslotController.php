@@ -7,8 +7,10 @@ use App\Actions\Reservations\GetReservationTimeOptions;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Api\TimeslotRequest;
 use App\Models\Region;
+use App\OpenApi\Parameters\TimeslotParameter;
 use Illuminate\Http\JsonResponse;
 use Vyuldashev\LaravelOpenApi\Attributes as OpenApi;
+use Vyuldashev\LaravelOpenApi\Attributes\Parameters;
 
 #[OpenApi\PathItem]
 /**
@@ -34,6 +36,7 @@ class TimeslotController extends Controller
     #[OpenApi\Operation(
         tags: ['Timeslots'],
     )]
+    #[Parameters(factory: TimeslotParameter::class)]
     public function __invoke(TimeslotRequest $request): JsonResponse
     {
         $validatedData = $request->validated();

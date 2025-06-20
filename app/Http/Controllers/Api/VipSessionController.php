@@ -4,10 +4,13 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\VipSession;
+use App\OpenApi\RequestBodies\VipSessionCreateRequestBody;
+use App\OpenApi\RequestBodies\VipSessionValidateRequestBody;
 use App\Services\VipCodeService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Vyuldashev\LaravelOpenApi\Attributes as OpenApi;
+use Vyuldashev\LaravelOpenApi\Attributes\RequestBody;
 
 #[OpenApi\PathItem]
 class VipSessionController extends Controller
@@ -22,6 +25,7 @@ class VipSessionController extends Controller
     #[OpenApi\Operation(
         tags: ['VIP Sessions'],
     )]
+    #[RequestBody(factory: VipSessionCreateRequestBody::class)]
     public function createSession(Request $request): JsonResponse
     {
         $request->validate([
@@ -45,7 +49,7 @@ class VipSessionController extends Controller
             ],
         ];
 
-        // Add demo message if in demo mode
+        // Add a demo message if in demo mode
         if ($sessionData['is_demo']) {
             $response['data']['demo_message'] = $sessionData['demo_message'];
         } else {
@@ -70,6 +74,7 @@ class VipSessionController extends Controller
     #[OpenApi\Operation(
         tags: ['VIP Sessions'],
     )]
+    #[RequestBody(factory: VipSessionValidateRequestBody::class)]
     public function validateSession(Request $request): JsonResponse
     {
         $request->validate([

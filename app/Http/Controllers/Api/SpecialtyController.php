@@ -4,9 +4,11 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\Specialty;
+use App\OpenApi\Parameters\RegionParameter;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Vyuldashev\LaravelOpenApi\Attributes as OpenApi;
+use Vyuldashev\LaravelOpenApi\Attributes\Parameters;
 
 #[OpenApi\PathItem]
 class SpecialtyController extends Controller
@@ -22,6 +24,7 @@ class SpecialtyController extends Controller
     #[OpenApi\Operation(
         tags: ['Specialties'],
     )]
+    #[Parameters(factory: RegionParameter::class)]
     public function __invoke(Request $request): JsonResponse
     {
         $data = when(
