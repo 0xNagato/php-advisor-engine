@@ -6,9 +6,15 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Api\HubRequest;
 use App\Services\ReservationService;
 use Illuminate\Http\JsonResponse;
+use Vyuldashev\LaravelOpenApi\Attributes as OpenApi;
 
+#[OpenApi\PathItem]
 class ReservationHubController extends Controller
 {
+    /**
+     * Fetch venue schedules for a specific venue based on reservation criteria.
+     */
+    #[OpenApi\Operation]
     public function __invoke(HubRequest $request): JsonResponse
     {
         $validatedData = $request->validated();

@@ -7,9 +7,15 @@ use App\Enums\VenueStatus;
 use App\Http\Controllers\Controller;
 use App\Models\Venue;
 use Illuminate\Http\JsonResponse;
+use Vyuldashev\LaravelOpenApi\Attributes as OpenApi;
 
+#[OpenApi\PathItem]
 class VenueController extends Controller
 {
+    /**
+     * Retrieve available venues in the current region.
+     */
+    #[OpenApi\Operation]
     public function __invoke(): JsonResponse
     {
         $region = GetUserRegion::run();

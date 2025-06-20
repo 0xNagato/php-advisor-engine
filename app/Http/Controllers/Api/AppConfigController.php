@@ -5,11 +5,20 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use Illuminate\Cache\CacheManager;
 use Illuminate\Http\JsonResponse;
+use Vyuldashev\LaravelOpenApi\Attributes as OpenApi;
 
+#[OpenApi\PathItem]
 class AppConfigController extends Controller
 {
     public function __construct(private readonly CacheManager $cache) {}
 
+    /**
+     * Retrieve the application configuration.
+     *
+     * This endpoint provides the application-wide configuration settings
+     * such as booking status and login page customization.
+     */
+    #[OpenApi\Operation]
     public function __invoke(): JsonResponse
     {
         return $this->cache->remember('app_config', 3600, fn () => response()->json([

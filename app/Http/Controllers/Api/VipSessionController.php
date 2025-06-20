@@ -3,10 +3,13 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Models\VipSession;
 use App\Services\VipCodeService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Vyuldashev\LaravelOpenApi\Attributes as OpenApi;
 
+#[OpenApi\PathItem]
 class VipSessionController extends Controller
 {
     public function __construct(
@@ -14,12 +17,13 @@ class VipSessionController extends Controller
     ) {}
 
     /**
-     * Create a VIP session from a VIP code
+     * Create a VIP session from a VIP code.
      */
+    #[OpenApi\Operation]
     public function createSession(Request $request): JsonResponse
     {
         $request->validate([
-            'vip_code' => 'required|string|min:4|max:12',
+            'vip_code' => ['required', 'string', 'min:4', 'max:12'],
         ]);
 
         $sessionData = $this->vipCodeService->createVipSession($request->input('vip_code'));
@@ -59,12 +63,13 @@ class VipSessionController extends Controller
     }
 
     /**
-     * Validate a VIP session token
+     * Validate a VIP session token.
      */
+    #[OpenApi\Operation]
     public function validateSession(Request $request): JsonResponse
     {
         $request->validate([
-            'session_token' => 'required|string',
+            'session_token' => ['required', 'string'],
         ]);
 
         $sessionData = $this->vipCodeService->validateSessionToken($request->input('session_token'));
@@ -107,11 +112,11 @@ class VipSessionController extends Controller
     public function getSessionAnalytics(Request $request): JsonResponse
     {
         // This would require admin authentication
-        // For now, just return basic stats
+        // For now, return basic stats
 
-        $totalSessions = \App\Models\VipSession::count();
-        $activeSessions = \App\Models\VipSession::where('expires_at', '>', now())->count();
-        $expiredSessions = \App\Models\VipSession::where('expires_at', '<=', now())->count();
+        $totalSessions = VipSession::query()->count();
+        $activeSessions = VipSession::query()->where('expires_at', '>', now())->count();
+        $expiredSessions = VipSession::query()->where('expires_at', '<=', now())->count();
 
         return response()->json([
             'success' => true,
@@ -120,9 +125,9 @@ class VipSessionController extends Controller
                 'active_sessions' => $activeSessions,
                 'expired_sessions' => $expiredSessions,
                 'session_creation_rate' => [
-                    'last_24h' => \App\Models\VipSession::where('created_at', '>', now()->subDay())->count(),
-                    'last_7d' => \App\Models\VipSession::where('created_at', '>', now()->subWeek())->count(),
-                    'last_30d' => \App\Models\VipSession::where('created_at', '>', now()->subMonth())->count(),
+                    'last_24h' => VipSession::query()->where('created_at', '>', now()->subDay())->count(),
+                    'last_7d' => VipSession::query()->where('created_at', '>', now()->subWeek())->count(),
+                    'last_30d' => VipSession::query()->where('created_at', '>', now()->subMonth())->count(),
                 ],
             ],
         ]);

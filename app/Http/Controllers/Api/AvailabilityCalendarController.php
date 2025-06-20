@@ -8,9 +8,15 @@ use App\Http\Resources\VenueResource;
 use App\Models\Region;
 use App\Services\ReservationService;
 use Illuminate\Http\JsonResponse;
+use Vyuldashev\LaravelOpenApi\Attributes as OpenApi;
 
+#[OpenApi\PathItem]
 class AvailabilityCalendarController extends Controller
 {
+    /**
+     * Fetch availability data for the venues and timeslots.
+     */
+    #[OpenApi\Operation]
     public function __invoke(CalendarRequest $request): JsonResponse
     {
         $validatedData = $request->validated();

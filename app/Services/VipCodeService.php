@@ -6,10 +6,11 @@ use App\Models\User;
 use App\Models\VipCode;
 use App\Models\VipSession;
 use Illuminate\Support\Facades\Log;
+use Laravel\Sanctum\PersonalAccessToken;
 
 class VipCodeService
 {
-    private const DEMO_USER_EMAIL = 'demo@primavip.co';
+    private const string DEMO_USER_EMAIL = 'demo@primavip.co';
 
     public function findByCode(string $code): ?VipCode
     {
@@ -20,7 +21,7 @@ class VipCodeService
     }
 
     /**
-     * Create a VIP session and return Sanctum token
+     * Create a VIP session and return a Sanctum token
      */
     public function createVipSession(string $code): ?array
     {
@@ -46,7 +47,7 @@ class VipCodeService
         $token = $user->createToken('vip-session-'.$code, ['*'], now()->addHours(24));
 
         // Store session tracking info
-        VipSession::create([
+        VipSession::query()->create([
             'vip_code_id' => $vipCode->id,
             'token' => hash('sha256', $token->plainTextToken), // Store hash for tracking
             'expires_at' => now()->addHours(24),
@@ -77,7 +78,7 @@ class VipCodeService
     public function validateSessionToken(string $token): ?array
     {
         // Find the Sanctum token
-        $sanctumToken = \Laravel\Sanctum\PersonalAccessToken::findToken($token);
+        $sanctumToken = PersonalAccessToken::findToken($token);
 
         if (! $sanctumToken || $sanctumToken->expires_at < now()) {
             // Log failed validation for analytics
@@ -95,7 +96,7 @@ class VipCodeService
             ->first();
 
         if (! $session) {
-            // This might be a demo token or other non-VIP token
+            // This might be a demo token or another non-VIP token
             return null;
         }
 
@@ -115,12 +116,12 @@ class VipCodeService
     }
 
     /**
-     * Create demo session for fallback behavior (uses demo user's Sanctum token)
+     * Create a demo session for fallback behavior (uses demo user's Sanctum token)
      */
     public function createDemoSession(): array
     {
-        // Get or create demo user
-        $demoUser = User::where('email', self::DEMO_USER_EMAIL)->first();
+        // Get or create a demo user
+        $demoUser = User::query()->where('email', self::DEMO_USER_EMAIL)->first();
 
         if (! $demoUser) {
             throw new \Exception('Demo user not found. Please run: php artisan vip:setup-demo-user');
@@ -174,7 +175,7 @@ class VipCodeService
         foreach ($expiredSessions as $session) {
             // Delete the corresponding Sanctum token
             if ($session->sanctum_token_id) {
-                \Laravel\Sanctum\PersonalAccessToken::where('id', $session->sanctum_token_id)->delete();
+                PersonalAccessToken::where('id', $session->sanctum_token_id)->delete();
             }
         }
 

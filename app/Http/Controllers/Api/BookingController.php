@@ -23,9 +23,15 @@ use Illuminate\Contracts\Database\Query\Builder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Response;
 use Stripe\Exception\ApiErrorException;
+use Vyuldashev\LaravelOpenApi\Attributes as OpenApi;
 
+#[OpenApi\PathItem]
 class BookingController extends Controller
 {
+    /**
+     * Create a new booking.
+     */
+    #[OpenApi\Operation]
     public function store(BookingCreateRequest $request): JsonResponse|Response
     {
         $validatedData = $request->validated();
@@ -121,8 +127,11 @@ class BookingController extends Controller
     }
 
     /**
+     * Update an existing booking.
+     *
      * @throws ApiErrorException
      */
+    #[OpenApi\Operation]
     public function update(BookingUpdateRequest $request, Booking $booking): JsonResponse
     {
         $validatedData = $request->validated();
@@ -187,6 +196,12 @@ class BookingController extends Controller
         ]);
     }
 
+    /**
+     * Delete (abandon) a booking by ID.
+     *
+     * @param  int  $id
+     */
+    #[OpenApi\Operation]
     public function destroy($id): JsonResponse
     {
         /** @var Booking $booking */
@@ -225,7 +240,10 @@ class BookingController extends Controller
         ]);
     }
 
-    public function dayDisplay($timezone, $booking): string
+    /**
+     * Generate a human-readable display of the booking's date and time.
+     */
+    public function dayDisplay(string $timezone, mixed $booking): string
     {
         $time = $booking->format('g:i a');
         $bookingDate = $booking->startOfDay();
@@ -244,6 +262,8 @@ class BookingController extends Controller
     }
 
     /**
+     * Handle updates for non-prime bookings.
+     *
      * @throws ApiErrorException
      */
     private function handleNonPrimeBooking(Booking $booking, array $validatedData): JsonResponse
