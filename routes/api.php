@@ -38,6 +38,9 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/hub', ReservationHubController::class);
     Route::post('/bookings', [BookingController::class, 'store']);
     Route::put('/bookings/{booking}', [BookingController::class, 'update']);
+    Route::post('/bookings/{booking}/complete', [BookingController::class, 'complete']);
+    Route::get('/bookings/{booking}/invoice-status', [BookingController::class, 'invoiceStatus']);
+    Route::post('/bookings/{booking}/email-invoice', [BookingController::class, 'emailInvoice']);
     Route::delete('/bookings/{booking}', [BookingController::class, 'destroy']);
     Route::post('/contact', [ContactFormController::class, 'submit']);
     Route::get('/profiles', [RoleProfileController::class, 'index']);
