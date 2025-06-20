@@ -117,7 +117,7 @@ class VipCodeService
     /**
      * Create demo session for fallback behavior (uses demo user's Sanctum token)
      */
-    private function createDemoSession(): array
+    public function createDemoSession(): array
     {
         // Get or create demo user
         $demoUser = User::where('email', self::DEMO_USER_EMAIL)->first();
