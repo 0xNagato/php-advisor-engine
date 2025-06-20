@@ -2,7 +2,7 @@
 
 namespace App\Http\Resources;
 
-use App\Actions\Region\GetUserRegion;
+use App\Models\Region;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
@@ -16,7 +16,8 @@ class VenueScheduleResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
-        $region = GetUserRegion::run();
+        // Get the venue's region currency using the static method since Region is a Sushi model
+        $venueCurrency = Region::query()->where('id', $this->venue->region)->value('currency') ?? 'USD';
 
         return [
             'id' => $this->id,
@@ -30,7 +31,7 @@ class VenueScheduleResource extends JsonResource
             'date' => $this->booking_date->format('Y-m-d'),
             'fee' => moneyWithoutCents(
                 $this->resource->fee($request->guest_count),
-                $region->currency
+                $venueCurrency
             ),
             'has_low_inventory' => (bool) $this->has_low_inventory,
         ];
