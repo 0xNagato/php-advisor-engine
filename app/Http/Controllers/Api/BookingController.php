@@ -21,8 +21,12 @@ use App\Models\Booking;
 use App\Models\Region;
 use App\Models\Venue;
 use App\Notifications\Booking\SendCustomerBookingPaymentForm;
+use App\OpenApi\RequestBodies\BookingCompleteRequestBody;
 use App\OpenApi\RequestBodies\BookingCreateRequestBody;
+use App\OpenApi\RequestBodies\BookingEmailInvoiceRequestBody;
 use App\OpenApi\RequestBodies\BookingUpdateRequestBody;
+use App\OpenApi\Responses\BookingCompleteResponse;
+use App\OpenApi\Responses\BookingEmailInvoiceResponse;
 use App\OpenApi\Responses\BookingInvoiceStatusResponse;
 use App\OpenApi\Responses\BookingResponse;
 use App\OpenApi\Responses\MessageResponse;
@@ -227,7 +231,8 @@ class BookingController extends Controller
         tags: ['Bookings'],
         security: 'BearerTokenSecurityScheme'
     )]
-    #[RequestBody(factory: BookingUpdateRequestBody::class)]
+    #[RequestBody(factory: BookingCompleteRequestBody::class)]
+    #[OpenApiResponse(factory: BookingCompleteResponse::class)]
     public function complete(BookingCompleteRequest $request, Booking $booking): JsonResponse
     {
         $validatedData = $request->validated();
@@ -521,6 +526,9 @@ class BookingController extends Controller
         tags: ['Bookings'],
         security: 'BearerTokenSecurityScheme'
     )]
+    #[RequestBody(factory: BookingEmailInvoiceRequestBody::class)]
+    #[OpenApiResponse(factory: MessageResponse::class, statusCode: 422)]
+    #[OpenApiResponse(factory: BookingEmailInvoiceResponse::class, statusCode: 200)]
     public function emailInvoice(BookingEmailInvoiceRequest $request, Booking $booking): JsonResponse
     {
         $validatedData = $request->validated();
