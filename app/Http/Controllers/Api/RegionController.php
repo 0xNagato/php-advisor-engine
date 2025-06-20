@@ -5,10 +5,12 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Api\RegionRequest;
 use App\Models\Region;
+use App\OpenApi\RequestBodies\RegionRequestBody;
 use App\Traits\ManagesBookingForms;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Response;
 use Vyuldashev\LaravelOpenApi\Attributes as OpenApi;
+use Vyuldashev\LaravelOpenApi\Attributes\RequestBody;
 
 #[OpenApi\PathItem]
 class RegionController extends Controller
@@ -23,7 +25,9 @@ class RegionController extends Controller
      *
      * @return JsonResponse A JSON response containing the regions.
      */
-    #[OpenApi\Operation]
+    #[OpenApi\Operation(
+        tags: ['Regions'],
+    )]
     public function index(): JsonResponse
     {
         return response()->json([
@@ -37,10 +41,17 @@ class RegionController extends Controller
      * This endpoint allows authenticated users to update
      * their preferred region settings.
      *
+     * Request body parameters:
+     * - region (string, required): The ID of an active region to set as the user's preferred region.
+     *   This must be a valid ID of an existing active region in the database.
+     *
      * @param  RegionRequest  $request  The validated request containing the region data.
      * @return JsonResponse|Response An empty JSON response indicating success.
      */
-    #[OpenApi\Operation]
+    #[OpenApi\Operation(
+        tags: ['Regions'],
+    )]
+    #[RequestBody(factory: RegionRequestBody::class)]
     public function store(RegionRequest $request): JsonResponse|Response
     {
         $request->user()->update([

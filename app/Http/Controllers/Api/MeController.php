@@ -14,7 +14,9 @@ class MeController extends Controller
     /**
      * Retrieve the authenticated user's profile data.
      */
-    #[OpenApi\Operation]
+    #[OpenApi\Operation(
+        tags: ['Me'],
+    )]
     public function __invoke(Request $request): JsonResponse
     {
         $user = $request->user();

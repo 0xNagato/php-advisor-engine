@@ -15,7 +15,9 @@ class VenueController extends Controller
     /**
      * Retrieve available venues in the current region.
      */
-    #[OpenApi\Operation]
+    #[OpenApi\Operation(
+        tags: ['Venues'],
+    )]
     public function __invoke(): JsonResponse
     {
         $region = GetUserRegion::run();

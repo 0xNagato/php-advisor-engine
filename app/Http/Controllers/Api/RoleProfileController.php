@@ -14,7 +14,9 @@ class RoleProfileController extends Controller
     /**
      * Get the list of role profiles for the authenticated user.
      */
-    #[OpenApi\Operation]
+    #[OpenApi\Operation(
+        tags: ['Role Profiles'],
+    )]
     public function index(Request $request): JsonResponse
     {
         $profiles = $request->user()
@@ -36,7 +38,9 @@ class RoleProfileController extends Controller
     /**
      * Attempt to switch the active role profile.
      */
-    #[OpenApi\Operation]
+    #[OpenApi\Operation(
+        tags: ['Role Profiles'],
+    )]
     public function switch(Request $request, RoleProfile $profile): JsonResponse
     {
         return response()->json([

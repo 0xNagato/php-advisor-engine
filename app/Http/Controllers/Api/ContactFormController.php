@@ -16,7 +16,9 @@ class ContactFormController extends Controller
      *
      * Validates the request and sends the contact form data via email.
      */
-    #[OpenApi\Operation]
+    #[OpenApi\Operation(
+        tags: ['Contact Forms'],
+    )]
     public function submit(Request $request): JsonResponse
     {
         $request->validate([

@@ -16,7 +16,9 @@ class AvailabilityCalendarController extends Controller
     /**
      * Fetch availability data for the venues and timeslots.
      */
-    #[OpenApi\Operation]
+    #[OpenApi\Operation(
+        tags: ['Availability Calendars'],
+    )]
     public function __invoke(CalendarRequest $request): JsonResponse
     {
         $validatedData = $request->validated();

@@ -14,7 +14,9 @@ class ReservationHubController extends Controller
     /**
      * Fetch venue schedules for a specific venue based on reservation criteria.
      */
-    #[OpenApi\Operation]
+    #[OpenApi\Operation(
+        tags: ['Reservation Hubs'],
+    )]
     public function __invoke(HubRequest $request): JsonResponse
     {
         $validatedData = $request->validated();

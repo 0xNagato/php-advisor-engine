@@ -19,7 +19,9 @@ class SpecialtyController extends Controller
      *
      * @return JsonResponse A JSON response containing the cuisines.
      */
-    #[OpenApi\Operation]
+    #[OpenApi\Operation(
+        tags: ['Specialties'],
+    )]
     public function __invoke(Request $request): JsonResponse
     {
         $data = when(

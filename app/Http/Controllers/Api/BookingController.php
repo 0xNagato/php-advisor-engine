@@ -31,7 +31,9 @@ class BookingController extends Controller
     /**
      * Create a new booking.
      */
-    #[OpenApi\Operation]
+    #[OpenApi\Operation(
+        tags: ['Bookings'],
+    )]
     public function store(BookingCreateRequest $request): JsonResponse|Response
     {
         $validatedData = $request->validated();
@@ -131,7 +133,9 @@ class BookingController extends Controller
      *
      * @throws ApiErrorException
      */
-    #[OpenApi\Operation]
+    #[OpenApi\Operation(
+        tags: ['Bookings'],
+    )]
     public function update(BookingUpdateRequest $request, Booking $booking): JsonResponse
     {
         $validatedData = $request->validated();
@@ -201,7 +205,9 @@ class BookingController extends Controller
      *
      * @param  int  $id
      */
-    #[OpenApi\Operation]
+    #[OpenApi\Operation(
+        tags: ['Bookings'],
+    )]
     public function destroy($id): JsonResponse
     {
         /** @var Booking $booking */

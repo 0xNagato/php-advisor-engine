@@ -19,7 +19,9 @@ class VipSessionController extends Controller
     /**
      * Create a VIP session from a VIP code.
      */
-    #[OpenApi\Operation]
+    #[OpenApi\Operation(
+        tags: ['VIP Sessions'],
+    )]
     public function createSession(Request $request): JsonResponse
     {
         $request->validate([
@@ -65,7 +67,9 @@ class VipSessionController extends Controller
     /**
      * Validate a VIP session token.
      */
-    #[OpenApi\Operation]
+    #[OpenApi\Operation(
+        tags: ['VIP Sessions'],
+    )]
     public function validateSession(Request $request): JsonResponse
     {
         $request->validate([
@@ -109,6 +113,9 @@ class VipSessionController extends Controller
     /**
      * Get session analytics (admin only)
      */
+    #[OpenApi\Operation(
+        tags: ['VIP Sessions'],
+    )]
     public function getSessionAnalytics(Request $request): JsonResponse
     {
         // This would require admin authentication

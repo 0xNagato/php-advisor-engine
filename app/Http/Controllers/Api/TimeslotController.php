@@ -31,7 +31,9 @@ class TimeslotController extends Controller
      * @param  TimeslotRequest  $request  The validated request containing the date and optional region ID.
      * @return JsonResponse A JSON response containing the timeslots, specifying whether each timeslot is available.
      */
-    #[OpenApi\Operation]
+    #[OpenApi\Operation(
+        tags: ['Timeslots'],
+    )]
     public function __invoke(TimeslotRequest $request): JsonResponse
     {
         $validatedData = $request->validated();

@@ -19,7 +19,9 @@ class NeighborhoodController extends Controller
      *
      * @return JsonResponse A JSON response containing the neighborhoods.
      */
-    #[OpenApi\Operation]
+    #[OpenApi\Operation(
+        tags: ['Neighborhoods'],
+    )]
     public function __invoke(Request $request): JsonResponse
     {
         $data = Neighborhood::query()

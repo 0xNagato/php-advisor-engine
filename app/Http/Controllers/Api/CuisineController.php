@@ -18,7 +18,9 @@ class CuisineController extends Controller
      *
      * @return JsonResponse A JSON response containing the cuisines.
      */
-    #[OpenApi\Operation]
+    #[OpenApi\Operation(
+        tags: ['Cuisines'],
+    )]
     public function __invoke(): JsonResponse
     {
         return response()->json([

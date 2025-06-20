@@ -18,7 +18,9 @@ class AppConfigController extends Controller
      * This endpoint provides the application-wide configuration settings
      * such as booking status and login page customization.
      */
-    #[OpenApi\Operation]
+    #[OpenApi\Operation(
+        tags: ['App Config'],
+    )]
     public function __invoke(): JsonResponse
     {
         return $this->cache->remember('app_config', 3600, fn () => response()->json([

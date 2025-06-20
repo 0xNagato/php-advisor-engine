@@ -13,7 +13,9 @@ class UpdatePushTokenController extends Controller
     /**
      * Update the Expo push token for the authenticated user.
      */
-    #[OpenApi\Operation]
+    #[OpenApi\Operation(
+        tags: ['Update Push Tokens'],
+    )]
     public function __invoke(Request $request): JsonResponse
     {
         $request->validate([
