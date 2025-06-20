@@ -19,6 +19,8 @@ use App\Models\Venue;
 use App\Notifications\Booking\SendCustomerBookingPaymentForm;
 use App\OpenApi\RequestBodies\BookingCreateRequestBody;
 use App\OpenApi\RequestBodies\BookingUpdateRequestBody;
+use App\OpenApi\Responses\BookingResponse;
+use App\OpenApi\Responses\MessageResponse;
 use App\Services\BookingService;
 use Exception;
 use Illuminate\Contracts\Database\Query\Builder;
@@ -27,6 +29,7 @@ use Illuminate\Http\Response;
 use Stripe\Exception\ApiErrorException;
 use Vyuldashev\LaravelOpenApi\Attributes as OpenApi;
 use Vyuldashev\LaravelOpenApi\Attributes\RequestBody;
+use Vyuldashev\LaravelOpenApi\Attributes\Response as OpenApiResponse;
 
 #[OpenApi\PathItem]
 class BookingController extends Controller
@@ -38,6 +41,7 @@ class BookingController extends Controller
         tags: ['Bookings'],
     )]
     #[RequestBody(factory: BookingCreateRequestBody::class)]
+    #[OpenApiResponse(factory: BookingResponse::class)]
     public function store(BookingCreateRequest $request): JsonResponse|Response
     {
         $validatedData = $request->validated();
@@ -141,6 +145,7 @@ class BookingController extends Controller
         tags: ['Bookings'],
     )]
     #[RequestBody(factory: BookingUpdateRequestBody::class)]
+    #[OpenApiResponse(factory: MessageResponse::class)]
     public function update(BookingUpdateRequest $request, Booking $booking): JsonResponse
     {
         $validatedData = $request->validated();
@@ -211,6 +216,7 @@ class BookingController extends Controller
     #[OpenApi\Operation(
         tags: ['Bookings'],
     )]
+    #[OpenApiResponse(factory: MessageResponse::class)]
     public function destroy(int $id): JsonResponse
     {
         /** @var Booking $booking */

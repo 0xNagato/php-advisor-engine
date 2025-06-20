@@ -7,10 +7,12 @@ use App\Http\Requests\Api\CalendarRequest;
 use App\Http\Resources\VenueResource;
 use App\Models\Region;
 use App\OpenApi\Parameters\CalendarParameter;
+use App\OpenApi\Responses\CalendarResponse;
 use App\Services\ReservationService;
 use Illuminate\Http\JsonResponse;
 use Vyuldashev\LaravelOpenApi\Attributes as OpenApi;
 use Vyuldashev\LaravelOpenApi\Attributes\Parameters;
+use Vyuldashev\LaravelOpenApi\Attributes\Response as OpenApiResponse;
 
 #[OpenApi\PathItem]
 class AvailabilityCalendarController extends Controller
@@ -22,6 +24,7 @@ class AvailabilityCalendarController extends Controller
         tags: ['Availability Calendars'],
     )]
     #[Parameters(factory: CalendarParameter::class)]
+    #[OpenApiResponse(factory: CalendarResponse::class)]
     public function __invoke(CalendarRequest $request): JsonResponse
     {
         $validatedData = $request->validated();

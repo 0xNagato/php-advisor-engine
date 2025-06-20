@@ -5,10 +5,12 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Api\HubRequest;
 use App\OpenApi\Parameters\HubParameter;
+use App\OpenApi\Responses\HubResponse;
 use App\Services\ReservationService;
 use Illuminate\Http\JsonResponse;
 use Vyuldashev\LaravelOpenApi\Attributes as OpenApi;
 use Vyuldashev\LaravelOpenApi\Attributes\Parameters;
+use Vyuldashev\LaravelOpenApi\Attributes\Response as OpenApiResponse;
 
 #[OpenApi\PathItem]
 class ReservationHubController extends Controller
@@ -20,6 +22,7 @@ class ReservationHubController extends Controller
         tags: ['Reservation Hubs'],
     )]
     #[Parameters(factory: HubParameter::class)]
+    #[OpenApiResponse(factory: HubResponse::class)]
     public function __invoke(HubRequest $request): JsonResponse
     {
         $validatedData = $request->validated();
