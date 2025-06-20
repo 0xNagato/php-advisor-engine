@@ -24,7 +24,9 @@ class VenueScheduleSchema extends SchemaFactory implements Reusable
                     ),
                 Schema::string('date')->description('The booking date in YYYY-MM-DD format')->example('2025-07-01'),
                 Schema::string('fee')->description('The fee for the booking')->example('$50'),
-                Schema::boolean('has_low_inventory')->description('Whether the schedule has low inventory')
+                Schema::boolean('has_low_inventory')->description('Whether the schedule has low inventory'),
+                Schema::boolean('is_available')->description('Whether the venue was open/available for this specific time slot'),
+                Schema::boolean('remaining_tables')->description('Number of tables still available for booking at this time slot'),
             );
     }
 }
