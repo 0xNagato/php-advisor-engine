@@ -4,9 +4,11 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\RoleProfile;
+use App\OpenApi\Parameters\RoleProfileParameter;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Vyuldashev\LaravelOpenApi\Attributes as OpenApi;
+use Vyuldashev\LaravelOpenApi\Attributes\Parameters;
 
 #[OpenApi\PathItem]
 class RoleProfileController extends Controller
@@ -41,6 +43,7 @@ class RoleProfileController extends Controller
     #[OpenApi\Operation(
         tags: ['Role Profiles'],
     )]
+    #[Parameters(factory: RoleProfileParameter::class)]
     public function switch(Request $request, RoleProfile $profile): JsonResponse
     {
         return response()->json([

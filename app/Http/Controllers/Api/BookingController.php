@@ -17,6 +17,8 @@ use App\Models\Booking;
 use App\Models\Region;
 use App\Models\Venue;
 use App\Notifications\Booking\SendCustomerBookingPaymentForm;
+use App\OpenApi\RequestBodies\BookingCreateRequestBody;
+use App\OpenApi\RequestBodies\BookingUpdateRequestBody;
 use App\Services\BookingService;
 use Exception;
 use Illuminate\Contracts\Database\Query\Builder;
@@ -25,8 +27,6 @@ use Illuminate\Http\Response;
 use Stripe\Exception\ApiErrorException;
 use Vyuldashev\LaravelOpenApi\Attributes as OpenApi;
 use Vyuldashev\LaravelOpenApi\Attributes\RequestBody;
-use App\OpenApi\RequestBodies\BookingCreateRequestBody;
-use App\OpenApi\RequestBodies\BookingUpdateRequestBody;
 
 #[OpenApi\PathItem]
 class BookingController extends Controller
@@ -207,9 +207,6 @@ class BookingController extends Controller
 
     /**
      * Delete (abandon) a booking by ID.
-     *
-     * @param  int  $id
-     * @return JsonResponse
      */
     #[OpenApi\Operation(
         tags: ['Bookings'],

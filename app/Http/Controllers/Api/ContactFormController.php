@@ -4,9 +4,11 @@ namespace App\Http\Controllers\Api;
 
 use App\Actions\SendContactFormEmail;
 use App\Http\Controllers\Controller;
+use App\OpenApi\RequestBodies\ContactFormRequestBody;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Vyuldashev\LaravelOpenApi\Attributes as OpenApi;
+use Vyuldashev\LaravelOpenApi\Attributes\RequestBody;
 
 #[OpenApi\PathItem]
 class ContactFormController extends Controller
@@ -19,6 +21,7 @@ class ContactFormController extends Controller
     #[OpenApi\Operation(
         tags: ['Contact Forms'],
     )]
+    #[RequestBody(factory: ContactFormRequestBody::class)]
     public function submit(Request $request): JsonResponse
     {
         $request->validate([

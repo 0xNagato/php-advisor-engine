@@ -3,9 +3,11 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\OpenApi\RequestBodies\PushTokenRequestBody;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Vyuldashev\LaravelOpenApi\Attributes as OpenApi;
+use Vyuldashev\LaravelOpenApi\Attributes\RequestBody;
 
 #[OpenApi\PathItem]
 class UpdatePushTokenController extends Controller
@@ -16,6 +18,7 @@ class UpdatePushTokenController extends Controller
     #[OpenApi\Operation(
         tags: ['Update Push Tokens'],
     )]
+    #[RequestBody(factory: PushTokenRequestBody::class)]
     public function __invoke(Request $request): JsonResponse
     {
         $request->validate([
