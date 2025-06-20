@@ -284,6 +284,445 @@ or
 }
 ```
 
+## Complete Booking
+
+### Request
+
+- **Method:** POST
+- **URL:** `/api/bookings/{booking}/complete`
+- **Authentication:** Required
+
+#### Headers
+
+| Header | Value | Required | Description |
+|--------|-------|----------|-------------|
+| Authorization | Bearer {token} | Yes | Authentication token |
+| Accept | application/json | Yes | Specifies the expected response format |
+| Content-Type | application/json | Yes | Specifies the request format |
+
+#### URL Parameters
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| booking | integer | Yes | The ID of the booking to complete |
+
+#### Request Body
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| first_name | string | Yes | The first name of the guest (max: 255 characters) |
+| last_name | string | Yes | The last name of the guest (max: 255 characters) |
+| phone | string | Yes | The phone number of the guest (must be a valid phone number) |
+| email | string | No | The email address of the guest (must be a valid email) |
+| notes | string | No | Additional notes for the booking (max: 1000 characters) |
+| payment_intent_id | string | Conditional | **Required for prime bookings** - Stripe payment intent ID from client-side payment processing |
+| r | string | No | Referral code |
+
+#### Example Request
+
+**Prime Booking:**
+
+```bash
+curl -X POST \
+  https://api.example.com/api/bookings/456/complete \
+  -H 'Authorization: Bearer your-api-token' \
+  -H 'Content-Type: application/json' \
+  -H 'Accept: application/json' \
+  -d '{
+    "first_name": "John",
+    "last_name": "Doe",
+    "phone": "+1 (555) 123-4567",
+    "email": "john.doe@example.com",
+    "notes": "Celebrating anniversary",
+    "payment_intent_id": "pi_1234567890abcdef",
+    "r": "friend_referral"
+  }'
+```
+
+**Non-Prime Booking:**
+
+```bash
+curl -X POST \
+  https://api.example.com/api/bookings/456/complete \
+  -H 'Authorization: Bearer your-api-token' \
+  -H 'Content-Type: application/json' \
+  -H 'Accept: application/json' \
+  -d '{
+    "first_name": "John",
+    "last_name": "Doe",
+    "phone": "+1 (555) 123-4567",
+    "email": "john.doe@example.com",
+    "notes": "Table by the window please"
+  }'
+```
+
+### Response
+
+#### Success Response
+
+- **Status Code:** 200 OK
+
+##### Response Body
+
+**Prime Booking Response:**
+
+```json
+{
+  "message": "Booking completed successfully",
+  "data": {
+    "booking": {
+      "bookings_enabled": true,
+      "bookings_disabled_message": "Bookings are currently disabled while we are onboarding venues and concierges. We expect to be live by mid-November.",
+      "id": 288706,
+      "guest_count": "4",
+      "dayDisplay": "Sun, Jun 15 at 8:00 pm",
+      "status": "confirmed",
+      "venue": "Gekko",
+      "logo": "https://prima-bucket.nyc3.digitaloceanspaces.com/venues/gekko.png",
+      "total": "$150.00",
+      "subtotal": "$130.43",
+      "tax_rate_term": "NYC Tax",
+      "tax_amount": "$19.57",
+      "bookingUrl": "http://localhost:8000/checkout/ba52e84f-9dd2-41e1-a80f-d928ac2e5a6d?r=sms",
+      "qrCode": "data:image/svg+xml;base64,PD94b...",
+      "is_prime": 1,
+      "booking_at": "2025-06-15T20:00:00.000000Z"
+    },
+    "invoice_download_url": "https://api.example.com/customer/invoice/download/ba52e84f-9dd2-41e1-a80f-d928ac2e5a6d",
+    "result": {
+      "success": true,
+      "booking_confirmed": true,
+      "payment_processed": true
+    }
+  }
+}
+```
+
+**Non-Prime Booking Response:**
+
+```json
+{
+  "message": "Booking completed successfully",
+  "data": {
+    "booking": {
+      "bookings_enabled": true,
+      "bookings_disabled_message": "Bookings are currently disabled while we are onboarding venues and concierges. We expect to be live by mid-November.",
+      "id": 288705,
+      "guest_count": "2",
+      "dayDisplay": "Sun, Jun 15 at 6:00 pm",
+      "status": "confirmed",
+      "venue": "Gekko",
+      "logo": "https://prima-bucket.nyc3.digitaloceanspaces.com/venues/gekko.png",
+      "total": "$0.00",
+      "subtotal": "$0.00",
+      "tax_rate_term": null,
+      "tax_amount": null,
+      "bookingUrl": "http://localhost:8000/checkout/ba52e84f-9dd2-41e1-a80f-d928ac2e5a6d?r=sms",
+      "qrCode": "data:image/svg+xml;base64,PD74b...",
+      "is_prime": 0,
+      "booking_at": "2025-06-15T18:00:00.000000Z"
+    },
+    "invoice_status": "processing",
+    "invoice_message": "Invoice is being generated and will be available shortly. You can check back or it will be emailed once ready."
+  }
+}
+```
+
+##### Response Fields
+
+| Field | Type | Description |
+|-------|------|-------------|
+| booking | object | Complete booking resource with updated status |
+| booking.dayDisplay | string | Human-readable booking time (e.g., "Today at 6:00 pm", "Tomorrow at 8:00 pm", "Sun, Jun 15 at 6:00 pm") |
+| invoice_download_url | string | Direct download URL for the customer invoice PDF (only present if invoice is ready) |
+| invoice_status | string | Status of invoice generation ("processing" when PDF is being generated) |
+| invoice_message | string | Message explaining invoice status |
+| result | object | Result details from the completion process |
+
+#### Error Responses
+
+##### 401 Unauthorized
+
+```json
+{
+  "message": "Unauthenticated."
+}
+```
+
+##### 422 Unprocessable Entity
+
+**Invalid booking status:**
+
+```json
+{
+  "message": "Booking already confirmed or cancelled"
+}
+```
+
+**Venue not active:**
+
+```json
+{
+  "message": "Venue is not currently accepting bookings"
+}
+```
+
+**Missing payment intent (prime bookings):**
+
+```json
+{
+  "message": "Payment intent ID is required for prime bookings"
+}
+```
+
+**Duplicate booking (non-prime):**
+
+```json
+{
+  "message": "Customer already has a non-prime booking for this day"
+}
+```
+
+**Validation errors:**
+
+```json
+{
+  "first_name": [
+    "The first name field is required."
+  ],
+  "last_name": [
+    "The last name field is required."
+  ],
+  "phone": [
+    "The phone field is required."
+  ]
+}
+```
+
+##### 500 Internal Server Error
+
+**Prime booking completion failure:**
+
+```json
+{
+  "message": "Booking completion failed: Payment processing error"
+}
+```
+
+## Check Invoice Status
+
+### Request
+
+- **Method:** GET
+- **URL:** `/api/bookings/{booking}/invoice-status`
+- **Authentication:** Required
+
+#### Headers
+
+| Header | Value | Required | Description |
+|--------|-------|----------|-------------|
+| Authorization | Bearer {token} | Yes | Authentication token |
+| Accept | application/json | Yes | Specifies the expected response format |
+
+#### URL Parameters
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| booking | integer | Yes | The ID of the booking to check invoice status for |
+
+#### Example Request
+
+```bash
+curl -X GET \
+  https://api.example.com/api/bookings/456/invoice-status \
+  -H 'Authorization: Bearer your-api-token' \
+  -H 'Accept: application/json'
+```
+
+### Response
+
+#### Success Response
+
+- **Status Code:** 200 OK
+
+##### Response Body
+
+**Invoice Ready:**
+
+```json
+{
+  "status": "ready",
+  "invoice_download_url": "https://api.example.com/customer/invoice/download/ba52e84f-9dd2-41e1-a80f-d928ac2e5a6d",
+  "message": "Invoice is ready for download"
+}
+```
+
+**Invoice Processing:**
+
+```json
+{
+  "status": "processing", 
+  "message": "Invoice is being generated and will be available shortly"
+}
+```
+
+##### Response Fields
+
+| Field | Type | Description |
+|-------|------|-------------|
+| status | string | Invoice status: "ready" or "processing" |
+| invoice_download_url | string | Direct download URL (only when status is "ready") |
+| message | string | Status description |
+
+#### Error Responses
+
+##### 401 Unauthorized
+
+```json
+{
+  "message": "Unauthenticated."
+}
+```
+
+##### 422 Unprocessable Entity
+
+```json
+{
+  "message": "Invoice not available for this booking"
+}
+```
+
+## Email Invoice
+
+### Request
+
+- **Method:** POST
+- **URL:** `/api/bookings/{booking}/email-invoice`
+- **Authentication:** Required
+
+#### Headers
+
+| Header | Value | Required | Description |
+|--------|-------|----------|-------------|
+| Authorization | Bearer {token} | Yes | Authentication token |
+| Accept | application/json | Yes | Specifies the expected response format |
+| Content-Type | application/json | Yes | Specifies the request format |
+
+#### URL Parameters
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| booking | integer | Yes | The ID of the booking to email the invoice for |
+
+#### Request Body
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| email | string | No | Email address to send the invoice to (falls back to booking's guest email if not provided) |
+
+#### Example Request
+
+**With custom email:**
+
+```bash
+curl -X POST \
+  https://api.example.com/api/bookings/456/email-invoice \
+  -H 'Authorization: Bearer your-api-token' \
+  -H 'Content-Type: application/json' \
+  -H 'Accept: application/json' \
+  -d '{
+    "email": "custom@example.com"
+  }'
+```
+
+**Using booking's guest email:**
+
+```bash
+curl -X POST \
+  https://api.example.com/api/bookings/456/email-invoice \
+  -H 'Authorization: Bearer your-api-token' \
+  -H 'Content-Type: application/json' \
+  -H 'Accept: application/json'
+```
+
+### Response
+
+#### Success Response
+
+- **Status Code:** 200 OK
+
+##### Response Body
+
+```json
+{
+  "message": "Invoice sent to customer@example.com",
+  "data": {
+    "email": "customer@example.com"
+  }
+}
+```
+
+##### Response Fields
+
+| Field | Type | Description |
+|-------|------|-------------|
+| message | string | Confirmation message |
+| data.email | string | Email address the invoice was sent to |
+
+#### Error Responses
+
+##### 401 Unauthorized
+
+```json
+{
+  "message": "Unauthenticated."
+}
+```
+
+##### 422 Unprocessable Entity
+
+**Booking not confirmed:**
+
+```json
+{
+  "message": "Invoice can only be emailed for confirmed bookings"
+}
+```
+
+**Invoice not ready:**
+
+```json
+{
+  "message": "Invoice is not yet available. Please try again shortly."
+}
+```
+
+**No email address:**
+
+```json
+{
+  "message": "No email address provided and no email address available for this booking"
+}
+```
+
+**Invalid email format:**
+
+```json
+{
+  "email": [
+    "The email field must be a valid email address."
+  ]
+}
+```
+
+##### 500 Internal Server Error
+
+```json
+{
+  "message": "Failed to send invoice email. Please try again."
+}
+```
+
 ## Delete Booking
 
 ### Request
@@ -356,11 +795,29 @@ curl -X DELETE \
 
 ## Notes
 
+### General Booking Flow
+
+1. **Create booking** using `POST /api/bookings` - Returns booking details and `paymentIntentSecret` for prime bookings
+2. **For prime bookings**: Process payment client-side using the `paymentIntentSecret` with Stripe's payment libraries
+3. **Complete booking** using `POST /api/bookings/{booking}/complete` - Finalizes the reservation and provides invoice
+
+### Endpoint-Specific Notes
+
 - When creating a booking, the `schedule_template_id` should be obtained from the availability calendar endpoint
 - When updating a booking, the booking must be in the "pending" status
+- **When completing a booking**, the booking must be in the "pending" or "guest_on_page" status
 - When deleting a booking, the booking must be in the "pending" or "guest_on_page" status
 - The delete operation doesn't actually delete the booking from the database, but changes its status to "abandoned"
 - For non-prime bookings, a customer can only have one booking per day at a venue
-- **Prime bookings** automatically include a `paymentIntentSecret` in the response for immediate payment processing
+
+### Payment Processing
+
+- **Prime bookings** automatically include a `paymentIntentSecret` in the create response for immediate payment processing
 - The `paymentIntentSecret` should be used with Stripe's client-side payment libraries to process the payment
 - Payment intent creation includes booking metadata for tracking purposes
+- **Complete endpoint** requires the processed `payment_intent_id` for prime bookings after successful client-side payment
+- **Invoice generation** is processed asynchronously via background jobs and uploaded to Digital Ocean storage
+- **All confirmed bookings** may return `invoice_status: "processing"` initially if the PDF is still being generated
+- Use the **invoice status endpoint** (`GET /api/bookings/{booking}/invoice-status`) to check when the invoice is ready for any confirmed booking
+- **Invoice download URL** is only returned when the PDF has been successfully generated and uploaded
+- Payment intent is handled entirely client-side by your app, server only validates the completed payment
