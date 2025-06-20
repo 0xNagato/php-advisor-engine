@@ -47,6 +47,7 @@ class CalendarRequest extends FormRequest
                 },
             ],
             'timeslot_count' => ['sometimes', 'integer', 'min:1', 'max:20'],
+            'time_slot_offset' => ['sometimes', 'integer', 'min:0', 'max:10'],
             'cuisine' => ['sometimes', 'array'],
             'cuisine.*' => ['string'],
             'neighborhood' => ['sometimes', 'string'],
