@@ -34,6 +34,8 @@ class VenueScheduleResource extends JsonResource
                 $venueCurrency
             ),
             'has_low_inventory' => (bool) $this->has_low_inventory,
+            'is_available' => (bool) $this->is_available,
+            'remaining_tables' => (int) $this->remaining_tables,
         ];
     }
 }

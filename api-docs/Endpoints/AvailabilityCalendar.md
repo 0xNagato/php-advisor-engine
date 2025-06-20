@@ -93,7 +93,9 @@ curl -X GET \
             },
             "date": "2025-06-17",
             "fee": "$100",
-            "has_low_inventory": false
+            "has_low_inventory": false,
+            "is_available": true,
+            "remaining_tables": 0
           },
           {
             "id": 102887,
@@ -106,7 +108,9 @@ curl -X GET \
             },
             "date": "2025-06-17",
             "fee": "$100",
-            "has_low_inventory": false
+            "has_low_inventory": false,
+            "is_available": true,
+            "remaining_tables": 0
           },
           {
             "id": 102892,
@@ -119,7 +123,9 @@ curl -X GET \
             },
             "date": "2025-06-17",
             "fee": "$100",
-            "has_low_inventory": true
+            "has_low_inventory": true,
+            "is_available": true,
+            "remaining_tables": 3
           }
         ]
       },
@@ -144,7 +150,9 @@ curl -X GET \
             },
             "date": "2025-06-17",
             "fee": "$200",
-            "has_low_inventory": true
+            "has_low_inventory": true,
+            "is_available": true,
+            "remaining_tables": 2
           },
           {
             "id": 81047,
@@ -157,7 +165,9 @@ curl -X GET \
             },
             "date": "2025-06-17",
             "fee": "$200",
-            "has_low_inventory": true
+            "has_low_inventory": true,
+            "is_available": true,
+            "remaining_tables": 1
           }
         ]
       }
@@ -196,6 +206,8 @@ curl -X GET \
 | data.venues[].schedules[].date | string | Date of the schedule (YYYY-MM-DD) |
 | data.venues[].schedules[].fee | string | Fee for the reservation at this time slot |
 | data.venues[].schedules[].has_low_inventory | boolean | Whether there is limited availability for this time slot |
+| data.venues[].schedules[].is_available | boolean | Whether the venue was open/available for this specific time slot |
+| data.venues[].schedules[].remaining_tables | integer | Number of tables still available for booking at this time slot |
 | data.timeslots | array | List of formatted time slots for the requested date |
 
 ### Error Responses
@@ -235,6 +247,20 @@ curl -X GET \
 - Time slots are returned in chronological order
 - The number of time slots returned can be controlled with the `timeslot_count` parameter
 - For same-day reservations, the reservation time must be at least 30 minutes from the current time
+
+### Availability Status Logic
+
+The new fields provide detailed information about venue availability:
+
+- `is_available`: Indicates if the venue was open/operating during this time slot
+- `remaining_tables`: Shows the number of tables still available for booking
+- `is_bookable`: Combines both availability and inventory (venue is open AND has tables available)
+
+**Availability scenarios:**
+
+- `is_available = true` + `remaining_tables > 0` + `is_bookable = true`: Available for booking
+- `is_available = true` + `remaining_tables = 0` + `is_bookable = false`: **SOLD OUT** (venue open but no tables)
+- `is_available = false` + `remaining_tables = 0` + `is_bookable = false`: **CLOSED** (venue not operating)
 
 ### Region Parameter Behavior
 
