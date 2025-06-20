@@ -42,7 +42,7 @@ class BookingController extends Controller
             })
             ->first();
 
-        if (! $venue || $venue->status !== VenueStatus::ACTIVE) {
+        if (! $venue || ! in_array($venue->status, [VenueStatus::ACTIVE, VenueStatus::HIDDEN])) {
             activity()
                 ->withProperties([
                     'venue_id' => $venue?->id,
@@ -50,7 +50,7 @@ class BookingController extends Controller
                     'concierge_id' => auth()->user()?->concierge?->id,
                     'concierge_name' => auth()->user()?->name,
                 ])
-                ->log('API - Booking creation failed - Venue not active');
+                ->log('API - Booking creation failed - Venue not accepting bookings');
 
             return response()->json([
                 'message' => 'Venue is not currently accepting bookings',
@@ -147,7 +147,7 @@ class BookingController extends Controller
             ], 404);
         }
 
-        if (! $booking->venue || $booking->venue->status !== VenueStatus::ACTIVE) {
+        if (! $booking->venue || ! in_array($booking->venue->status, [VenueStatus::ACTIVE, VenueStatus::HIDDEN])) {
             activity()
                 ->performedOn($booking)
                 ->withProperties([
@@ -156,7 +156,7 @@ class BookingController extends Controller
                     'concierge_id' => auth()->user()?->concierge?->id,
                     'concierge_name' => auth()->user()?->name,
                 ])
-                ->log('API - Booking update failed - Venue not active');
+                ->log('API - Booking update failed - Venue not accepting bookings');
 
             return response()->json([
                 'message' => 'Venue is not currently accepting bookings',
@@ -216,7 +216,7 @@ class BookingController extends Controller
             ], 422);
         }
 
-        if (! $booking->venue || $booking->venue->status !== VenueStatus::ACTIVE) {
+        if (! $booking->venue || ! in_array($booking->venue->status, [VenueStatus::ACTIVE, VenueStatus::HIDDEN])) {
             activity()
                 ->performedOn($booking)
                 ->withProperties([
@@ -225,7 +225,7 @@ class BookingController extends Controller
                     'concierge_id' => auth()->user()?->concierge?->id,
                     'concierge_name' => auth()->user()?->name,
                 ])
-                ->log('API - Booking completion failed - Venue not active');
+                ->log('API - Booking completion failed - Venue not accepting bookings');
 
             return response()->json([
                 'message' => 'Venue is not currently accepting bookings',
