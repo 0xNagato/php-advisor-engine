@@ -548,15 +548,15 @@ class ReservationService
     /**
      * Get the display label for a tier.
      *
-     * @param  int  $tier  The tier number
+     * @param  int|null  $tier  The tier number (null for Standard)
      * @return string The tier label
      */
-    public static function getTierLabel(int $tier): string
+    public static function getTierLabel(?int $tier): string
     {
         $labels = config('venue-tiers.tier_labels', [
             1 => 'Gold',
             2 => 'Silver',
-            3 => 'Standard',
+            null => 'Standard',
         ]);
 
         return $labels[$tier] ?? 'Standard';
