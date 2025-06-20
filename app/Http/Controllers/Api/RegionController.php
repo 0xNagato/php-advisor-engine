@@ -6,11 +6,14 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Api\RegionRequest;
 use App\Models\Region;
 use App\OpenApi\RequestBodies\RegionRequestBody;
+use App\OpenApi\Responses\NoContentResponse;
+use App\OpenApi\Responses\RegionListResponse;
 use App\Traits\ManagesBookingForms;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Response;
 use Vyuldashev\LaravelOpenApi\Attributes as OpenApi;
 use Vyuldashev\LaravelOpenApi\Attributes\RequestBody;
+use Vyuldashev\LaravelOpenApi\Attributes\Response as OpenApiResponse;
 
 #[OpenApi\PathItem]
 class RegionController extends Controller
@@ -28,6 +31,7 @@ class RegionController extends Controller
     #[OpenApi\Operation(
         tags: ['Regions'],
     )]
+    #[OpenApiResponse(factory: RegionListResponse::class)]
     public function index(): JsonResponse
     {
         return response()->json([
@@ -52,6 +56,7 @@ class RegionController extends Controller
         tags: ['Regions'],
     )]
     #[RequestBody(factory: RegionRequestBody::class)]
+    #[OpenApiResponse(factory: NoContentResponse::class)]
     public function store(RegionRequest $request): JsonResponse|Response
     {
         $request->user()->update([

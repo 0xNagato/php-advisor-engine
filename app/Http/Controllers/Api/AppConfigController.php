@@ -3,9 +3,11 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\OpenApi\Responses\AppConfigResponse;
 use Illuminate\Cache\CacheManager;
 use Illuminate\Http\JsonResponse;
 use Vyuldashev\LaravelOpenApi\Attributes as OpenApi;
+use Vyuldashev\LaravelOpenApi\Attributes\Response;
 
 #[OpenApi\PathItem]
 class AppConfigController extends Controller
@@ -21,6 +23,7 @@ class AppConfigController extends Controller
     #[OpenApi\Operation(
         tags: ['App Config'],
     )]
+    #[Response(factory: AppConfigResponse::class)]
     public function __invoke(): JsonResponse
     {
         return $this->cache->remember('app_config', 3600, fn () => response()->json([

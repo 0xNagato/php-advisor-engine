@@ -6,11 +6,15 @@ use App\Http\Controllers\Controller;
 use App\Models\VipSession;
 use App\OpenApi\RequestBodies\VipSessionCreateRequestBody;
 use App\OpenApi\RequestBodies\VipSessionValidateRequestBody;
+use App\OpenApi\Responses\VipSessionAnalyticsResponse;
+use App\OpenApi\Responses\VipSessionCreateResponse;
+use App\OpenApi\Responses\VipSessionValidateResponse;
 use App\Services\VipCodeService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Vyuldashev\LaravelOpenApi\Attributes as OpenApi;
 use Vyuldashev\LaravelOpenApi\Attributes\RequestBody;
+use Vyuldashev\LaravelOpenApi\Attributes\Response as OpenApiResponse;
 
 #[OpenApi\PathItem]
 class VipSessionController extends Controller
@@ -26,6 +30,7 @@ class VipSessionController extends Controller
         tags: ['VIP Sessions'],
     )]
     #[RequestBody(factory: VipSessionCreateRequestBody::class)]
+    #[OpenApiResponse(factory: VipSessionCreateResponse::class)]
     public function createSession(Request $request): JsonResponse
     {
         $request->validate([
@@ -75,6 +80,7 @@ class VipSessionController extends Controller
         tags: ['VIP Sessions'],
     )]
     #[RequestBody(factory: VipSessionValidateRequestBody::class)]
+    #[OpenApiResponse(factory: VipSessionValidateResponse::class)]
     public function validateSession(Request $request): JsonResponse
     {
         $request->validate([
@@ -121,6 +127,7 @@ class VipSessionController extends Controller
     #[OpenApi\Operation(
         tags: ['VIP Sessions'],
     )]
+    #[OpenApiResponse(factory: VipSessionAnalyticsResponse::class)]
     public function getSessionAnalytics(Request $request): JsonResponse
     {
         // This would require admin authentication

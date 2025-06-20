@@ -5,10 +5,12 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\Neighborhood;
 use App\OpenApi\Parameters\RegionParameter;
+use App\OpenApi\Responses\NeighborhoodListResponse;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Vyuldashev\LaravelOpenApi\Attributes as OpenApi;
 use Vyuldashev\LaravelOpenApi\Attributes\Parameters;
+use Vyuldashev\LaravelOpenApi\Attributes\Response as OpenApiResponse;
 
 #[OpenApi\PathItem]
 class NeighborhoodController extends Controller
@@ -25,6 +27,7 @@ class NeighborhoodController extends Controller
         tags: ['Neighborhoods'],
     )]
     #[Parameters(factory: RegionParameter::class)]
+    #[OpenApiResponse(factory: NeighborhoodListResponse::class)]
     public function __invoke(Request $request): JsonResponse
     {
         $data = Neighborhood::query()

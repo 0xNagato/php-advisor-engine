@@ -8,9 +8,11 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Api\TimeslotRequest;
 use App\Models\Region;
 use App\OpenApi\Parameters\TimeslotParameter;
+use App\OpenApi\Responses\TimeslotResponse;
 use Illuminate\Http\JsonResponse;
 use Vyuldashev\LaravelOpenApi\Attributes as OpenApi;
 use Vyuldashev\LaravelOpenApi\Attributes\Parameters;
+use Vyuldashev\LaravelOpenApi\Attributes\Response as OpenApiResponse;
 
 #[OpenApi\PathItem]
 /**
@@ -37,6 +39,7 @@ class TimeslotController extends Controller
         tags: ['Timeslots'],
     )]
     #[Parameters(factory: TimeslotParameter::class)]
+    #[OpenApiResponse(factory: TimeslotResponse::class)]
     public function __invoke(TimeslotRequest $request): JsonResponse
     {
         $validatedData = $request->validated();

@@ -4,8 +4,10 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\Cuisine;
+use App\OpenApi\Responses\CuisineListResponse;
 use Illuminate\Http\JsonResponse;
 use Vyuldashev\LaravelOpenApi\Attributes as OpenApi;
+use Vyuldashev\LaravelOpenApi\Attributes\Response as OpenApiResponse;
 
 #[OpenApi\PathItem]
 class CuisineController extends Controller
@@ -21,6 +23,7 @@ class CuisineController extends Controller
     #[OpenApi\Operation(
         tags: ['Cuisines'],
     )]
+    #[OpenApiResponse(factory: CuisineListResponse::class)]
     public function __invoke(): JsonResponse
     {
         return response()->json([

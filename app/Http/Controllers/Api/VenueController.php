@@ -6,8 +6,10 @@ use App\Actions\Region\GetUserRegion;
 use App\Enums\VenueStatus;
 use App\Http\Controllers\Controller;
 use App\Models\Venue;
+use App\OpenApi\Responses\VenueListResponse;
 use Illuminate\Http\JsonResponse;
 use Vyuldashev\LaravelOpenApi\Attributes as OpenApi;
+use Vyuldashev\LaravelOpenApi\Attributes\Response as OpenApiResponse;
 
 #[OpenApi\PathItem]
 class VenueController extends Controller
@@ -18,6 +20,7 @@ class VenueController extends Controller
     #[OpenApi\Operation(
         tags: ['Venues'],
     )]
+    #[OpenApiResponse(factory: VenueListResponse::class)]
     public function __invoke(): JsonResponse
     {
         $region = GetUserRegion::run();
