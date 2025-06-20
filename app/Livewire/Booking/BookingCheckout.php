@@ -4,6 +4,7 @@ namespace App\Livewire\Booking;
 
 use App\Actions\Booking\CheckCustomerHasNonPrimeBooking;
 use App\Actions\Booking\CompleteBooking;
+use App\Actions\Booking\CreateStripePaymentIntent;
 use App\Enums\BookingStatus;
 use App\Mail\CustomerInvoice;
 use App\Models\Booking;
@@ -18,7 +19,6 @@ use Illuminate\Support\Facades\Notification;
 use Livewire\Attributes\Url;
 use Livewire\Component;
 use Stripe\Exception\ApiErrorException;
-use Stripe\StripeClient;
 
 class BookingCheckout extends Component implements HasMingles
 {
@@ -61,15 +61,7 @@ class BookingCheckout extends Component implements HasMingles
      */
     public function createPaymentIntent(): string
     {
-        $stripe = app(StripeClient::class);
-
-        $paymentIntent = $stripe->paymentIntents->create([
-            'amount' => $this->booking->total_with_tax_in_cents,
-            'currency' => $this->booking->currency,
-            'payment_method_types' => ['card', 'link'],
-        ]);
-
-        return $paymentIntent->client_secret;
+        return CreateStripePaymentIntent::run($this->booking);
     }
 
     public function completeBooking(string $paymentIntentId, array $formData): array

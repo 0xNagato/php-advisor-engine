@@ -212,6 +212,17 @@ class Venue extends Model
         );
     }
 
+    protected function tierLabel(): Attribute
+    {
+        return Attribute::make(
+            get: fn () => match ($this->tier) {
+                1 => 'Gold',
+                2 => 'Silver',
+                default => 'Standard',
+            }
+        );
+    }
+
     protected static function boot(): void
     {
         parent::boot();

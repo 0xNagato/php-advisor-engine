@@ -8,6 +8,7 @@ use App\Http\Controllers\DownloadInvoiceController;
 use App\Http\Controllers\DownloadVenueGroupInvoiceController;
 use App\Http\Controllers\DownloadVenueInvoiceController;
 use App\Http\Controllers\ExceptionFormController;
+use App\Http\Controllers\PublicAnnouncementController;
 use App\Http\Controllers\VenueAgreementController;
 use App\Livewire\Booking\CreateBooking;
 use App\Livewire\Booking\CustomerInvoice;
@@ -27,7 +28,7 @@ Route::get('/privacy', function () {
     return view('privacy');
 });
 
-Route::get('/announcement/{message}', [\App\Http\Controllers\PublicAnnouncementController::class, 'show'])
+Route::get('/announcement/{message}', [PublicAnnouncementController::class, 'show'])
     ->name('public.announcement');
 
 Route::get('/about-us', static function () {
@@ -107,7 +108,7 @@ Route::get('/venues/contact-bookings', VenueContactRecentBookings::class)
 
 Route::post('/exception-form', ExceptionFormController::class)->name('exception.form');
 
-Route::get('vip/login/{code?}', fn ($code = null) => redirect($code ? "/v/{$code}" : '/'))->name('vip.login');
+Route::get('vip/login/{code?}', fn ($code = null) => redirect($code ? "/v/$code" : '/'))->name('vip.login');
 
 Route::get('v/{code}', AvailabilityCalendar::class)->name('v.booking');
 Route::get('v/calendar', AvailabilityCalendar::class)->name('v.calendar');

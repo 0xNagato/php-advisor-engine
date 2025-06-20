@@ -3,15 +3,20 @@
 namespace App\Http\Controllers\Api;
 
 use App\Actions\Booking\CheckCustomerHasNonPrimeBooking;
+use App\Actions\Booking\CompleteBooking;
 use App\Actions\Booking\CreateBooking;
+use App\Actions\Booking\CreateStripePaymentIntent;
 use App\Actions\Region\GetUserRegion;
 use App\Data\Booking\CreateBookingReturnData;
 use App\Enums\BookingStatus;
 use App\Enums\VenueStatus;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Api\BookingCompleteRequest;
 use App\Http\Requests\Api\BookingCreateRequest;
+use App\Http\Requests\Api\BookingEmailInvoiceRequest;
 use App\Http\Requests\Api\BookingUpdateRequest;
 use App\Http\Resources\BookingResource;
+use App\Mail\CustomerInvoice;
 use App\Models\Booking;
 use App\Models\Region;
 use App\Models\Venue;
@@ -21,6 +26,7 @@ use Exception;
 use Illuminate\Contracts\Database\Query\Builder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Response;
+use Illuminate\Support\Facades\Mail;
 use Stripe\Exception\ApiErrorException;
 
 class BookingController extends Controller
@@ -64,7 +70,6 @@ class BookingController extends Controller
                 'api',
                 $device
             );
-
         } catch (Exception $e) {
             activity()
                 ->withProperties([
@@ -85,10 +90,35 @@ class BookingController extends Controller
 
         $bookingResource = BookingResource::make($booking);
 
-        $bookingResource = $bookingResource->additional([
+        $additionalData = [
             'region' => $region,
             'dayDisplay' => $dayDisplay,
-        ]);
+        ];
+
+        // Create payment intent for prime bookings
+        if ($booking->booking->is_prime) {
+            try {
+                $paymentIntentSecret = CreateStripePaymentIntent::run($booking->booking);
+                $additionalData['paymentIntentSecret'] = $paymentIntentSecret;
+            } catch (ApiErrorException $e) {
+                activity()
+                    ->performedOn($booking->booking)
+                    ->withProperties([
+                        'venue_id' => $venue->id,
+                        'venue_name' => $venue->name,
+                        'concierge_id' => auth()->user()?->concierge?->id,
+                        'concierge_name' => auth()->user()?->name,
+                        'error' => $e->getMessage(),
+                    ])
+                    ->log('API - Payment intent creation failed');
+
+                return response()->json([
+                    'message' => 'Payment processing unavailable. Please try again.',
+                ], 500);
+            }
+        }
+
+        $bookingResource = $bookingResource->additional($additionalData);
 
         return response()->json([
             'data' => $bookingResource,
@@ -141,7 +171,7 @@ class BookingController extends Controller
             'guest_first_name' => $validatedData['first_name'],
             'guest_last_name' => $validatedData['last_name'],
             'guest_phone' => $validatedData['phone'],
-            'guest_email' => $validatedData['email'],
+            'guest_email' => $validatedData['email'] ?? null,
             'notes' => $validatedData['notes'],
         ]);
 
@@ -160,6 +190,220 @@ class BookingController extends Controller
         return response()->json([
             'message' => 'SMS Message Sent Successfully',
         ]);
+    }
+
+    /**
+     * Complete a booking with payment (for prime) or direct confirmation (for non-prime)
+     *
+     * @throws ApiErrorException
+     */
+    public function complete(BookingCompleteRequest $request, Booking $booking): JsonResponse
+    {
+        $validatedData = $request->validated();
+
+        if ($booking->status !== BookingStatus::PENDING && $booking->status !== BookingStatus::GUEST_ON_PAGE) {
+            activity()
+                ->performedOn($booking)
+                ->withProperties([
+                    'booking_status' => $booking->status,
+                    'concierge_id' => auth()->user()?->concierge?->id,
+                    'concierge_name' => auth()->user()?->name,
+                ])
+                ->log('API - Booking completion failed - Invalid status');
+
+            return response()->json([
+                'message' => 'Booking already confirmed or cancelled',
+            ], 422);
+        }
+
+        if (! $booking->venue || $booking->venue->status !== VenueStatus::ACTIVE) {
+            activity()
+                ->performedOn($booking)
+                ->withProperties([
+                    'venue_id' => $booking->venue?->id,
+                    'venue_status' => $booking->venue?->status,
+                    'concierge_id' => auth()->user()?->concierge?->id,
+                    'concierge_name' => auth()->user()?->name,
+                ])
+                ->log('API - Booking completion failed - Venue not active');
+
+            return response()->json([
+                'message' => 'Venue is not currently accepting bookings',
+            ], 422);
+        }
+
+        if ($booking->is_prime) {
+            // Prime booking - requires payment intent ID
+            if (empty($validatedData['payment_intent_id'])) {
+                activity()
+                    ->performedOn($booking)
+                    ->withProperties([
+                        'venue_id' => $booking->venue?->id,
+                        'venue_name' => $booking->venue?->name,
+                        'concierge_id' => auth()->user()?->concierge?->id,
+                        'concierge_name' => auth()->user()?->name,
+                    ])
+                    ->log('API - Prime booking completion failed - Missing payment intent ID');
+
+                return response()->json([
+                    'message' => 'Payment intent ID is required for prime bookings',
+                ], 422);
+            }
+
+            try {
+                $result = CompleteBooking::run(
+                    $booking,
+                    $validatedData['payment_intent_id'],
+                    [
+                        'firstName' => $validatedData['first_name'],
+                        'lastName' => $validatedData['last_name'],
+                        'phone' => $validatedData['phone'],
+                        'email' => $validatedData['email'] ?? null,
+                        'notes' => $validatedData['notes'] ?? '',
+                        'r' => $validatedData['r'] ?? '',
+                    ]
+                );
+
+                activity()
+                    ->performedOn($booking)
+                    ->withProperties([
+                        'venue_id' => $booking->venue?->id,
+                        'venue_name' => $booking->venue?->name,
+                        'payment_intent_id' => $validatedData['payment_intent_id'],
+                        'concierge_id' => auth()->user()?->concierge?->id,
+                        'concierge_name' => auth()->user()?->name,
+                    ])
+                    ->log('API - Prime booking completed successfully');
+
+                $booking->refresh();
+
+                // Load necessary relationships
+                $booking->load(['venue', 'venue.inRegion']);
+
+                /** @var Region $region */
+                $region = GetUserRegion::run();
+                $dayDisplay = $this->dayDisplay($region->timezone, $booking->booking_at);
+
+                $bookingResource = BookingResource::make($booking)->additional([
+                    'region' => $region,
+                    'dayDisplay' => $dayDisplay,
+                ]);
+
+                $responseData = [
+                    'booking' => $bookingResource,
+                    'result' => $result,
+                ];
+
+                // Only include invoice URL if the invoice has been processed and uploaded
+                if ($booking->invoice_path) {
+                    $responseData['invoice_download_url'] = route('customer.invoice.download', ['uuid' => $booking->uuid]);
+                } else {
+                    $responseData['invoice_status'] = 'processing';
+                    $responseData['invoice_message'] = 'Invoice is being generated and will be available shortly. You can check back or it will be emailed once ready.';
+                }
+
+                return response()->json([
+                    'message' => 'Booking completed successfully',
+                    'data' => $responseData,
+                ]);
+
+            } catch (Exception $e) {
+                activity()
+                    ->performedOn($booking)
+                    ->withProperties([
+                        'venue_id' => $booking->venue?->id,
+                        'venue_name' => $booking->venue?->name,
+                        'payment_intent_id' => $validatedData['payment_intent_id'],
+                        'error' => $e->getMessage(),
+                        'concierge_id' => auth()->user()?->concierge?->id,
+                        'concierge_name' => auth()->user()?->name,
+                    ])
+                    ->log('API - Prime booking completion failed - Exception');
+
+                return response()->json([
+                    'message' => 'Booking completion failed: '.$e->getMessage(),
+                ], 500);
+            }
+        } else {
+            // Non-prime booking - check for existing booking
+            $hasExistingBooking = CheckCustomerHasNonPrimeBooking::run(
+                $validatedData['phone'],
+                $booking->booking_at->format('Y-m-d'),
+                $booking->venue->timezone
+            );
+
+            if ($hasExistingBooking) {
+                activity()
+                    ->performedOn($booking)
+                    ->withProperties([
+                        'venue_id' => $booking->venue?->id,
+                        'venue_name' => $booking->venue?->name,
+                        'guest_phone' => $validatedData['phone'],
+                        'booking_date' => $booking->booking_at->format('Y-m-d'),
+                        'concierge_id' => auth()->user()?->concierge?->id,
+                        'concierge_name' => auth()->user()?->name,
+                    ])
+                    ->log('API - Non-prime booking completion failed - Customer already has booking for this day');
+
+                return response()->json([
+                    'message' => 'Customer already has a non-prime booking for this day',
+                ], 422);
+            }
+
+            // Complete non-prime booking
+            $formData = [
+                'first_name' => $validatedData['first_name'],
+                'last_name' => $validatedData['last_name'],
+                'phone' => $validatedData['phone'],
+                'email' => $validatedData['email'] ?? null,
+                'notes' => $validatedData['notes'] ?? '',
+            ];
+
+            app(BookingService::class)->processBooking($booking, $formData);
+
+            $booking->update(['concierge_referral_type' => 'app']);
+
+            activity()
+                ->performedOn($booking)
+                ->withProperties([
+                    'venue_id' => $booking->venue?->id,
+                    'venue_name' => $booking->venue?->name,
+                    'concierge_id' => auth()->user()?->concierge?->id,
+                    'concierge_name' => auth()->user()?->name,
+                ])
+                ->log('API - Non-prime booking completed successfully');
+
+            $booking->refresh();
+
+            // Load necessary relationships
+            $booking->load(['venue', 'venue.inRegion']);
+
+            /** @var Region $region */
+            $region = GetUserRegion::run();
+            $dayDisplay = $this->dayDisplay($region->timezone, $booking->booking_at);
+
+            $bookingResource = BookingResource::make($booking)->additional([
+                'region' => $region,
+                'dayDisplay' => $dayDisplay,
+            ]);
+
+            $responseData = [
+                'booking' => $bookingResource,
+            ];
+
+            // Include invoice status for all confirmed bookings
+            if ($booking->invoice_path) {
+                $responseData['invoice_download_url'] = route('customer.invoice.download', ['uuid' => $booking->uuid]);
+            } else {
+                $responseData['invoice_status'] = 'processing';
+                $responseData['invoice_message'] = 'Invoice is being generated and will be available shortly. You can check back or it will be emailed once ready.';
+            }
+
+            return response()->json([
+                'message' => 'Booking completed successfully',
+                'data' => $responseData,
+            ]);
+        }
     }
 
     public function destroy($id): JsonResponse
@@ -200,6 +444,104 @@ class BookingController extends Controller
         ]);
     }
 
+    /**
+     * Get invoice status and download URL for a booking
+     */
+    public function invoiceStatus(Booking $booking): JsonResponse
+    {
+        if ($booking->status !== BookingStatus::CONFIRMED) {
+            return response()->json([
+                'message' => 'Invoice not available for this booking',
+            ], 422);
+        }
+
+        if ($booking->invoice_path) {
+            return response()->json([
+                'status' => 'ready',
+                'invoice_download_url' => route('customer.invoice.download', ['uuid' => $booking->uuid]),
+                'message' => 'Invoice is ready for download',
+            ]);
+        }
+
+        return response()->json([
+            'status' => 'processing',
+            'message' => 'Invoice is being generated and will be available shortly',
+        ]);
+    }
+
+    /**
+     * Email invoice to customer
+     */
+    public function emailInvoice(BookingEmailInvoiceRequest $request, Booking $booking): JsonResponse
+    {
+        $validatedData = $request->validated();
+
+        if ($booking->status !== BookingStatus::CONFIRMED) {
+            return response()->json([
+                'message' => 'Invoice can only be emailed for confirmed bookings',
+            ], 422);
+        }
+
+        if (! $booking->invoice_path) {
+            return response()->json([
+                'message' => 'Invoice is not yet available. Please try again shortly.',
+            ], 422);
+        }
+
+        // Use provided email or fall back to booking's guest email
+        $emailAddress = $validatedData['email'] ?? $booking->guest_email;
+
+        if (blank($emailAddress)) {
+            return response()->json([
+                'message' => 'No email address provided and no email address available for this booking',
+            ], 422);
+        }
+
+        try {
+            $mailable = new CustomerInvoice($booking);
+            $mailable->attachFromStorageDisk('do', $booking->invoice_path)
+                ->from('welcome@primavip.co', 'PRIMA');
+
+            Mail::to($emailAddress)->send($mailable);
+
+            activity()
+                ->performedOn($booking)
+                ->withProperties([
+                    'venue_id' => $booking->venue?->id,
+                    'venue_name' => $booking->venue?->name,
+                    'email_sent_to' => $emailAddress,
+                    'email_provided' => isset($validatedData['email']),
+                    'concierge_id' => auth()->user()?->concierge?->id,
+                    'concierge_name' => auth()->user()?->name,
+                ])
+                ->log('API - Invoice emailed successfully');
+
+            return response()->json([
+                'message' => 'Invoice sent to '.$emailAddress,
+                'data' => [
+                    'email' => $emailAddress,
+                ],
+            ]);
+
+        } catch (Exception $e) {
+            activity()
+                ->performedOn($booking)
+                ->withProperties([
+                    'venue_id' => $booking->venue?->id,
+                    'venue_name' => $booking->venue?->name,
+                    'email_sent_to' => $emailAddress,
+                    'error' => $e->getMessage(),
+                    'concierge_id' => auth()->user()?->concierge?->id,
+                    'concierge_name' => auth()->user()?->name,
+                ])
+                ->log('API - Invoice email failed');
+
+            return response()->json([
+                'message' => 'Failed to send invoice email. Please try again.',
+            ], 500);
+        }
+    }
+
     public function dayDisplay($timezone, $booking): string
     {
         $time = $booking->format('g:i a');
@@ -223,7 +565,7 @@ class BookingController extends Controller
      */
     private function handleNonPrimeBooking(Booking $booking, array $validatedData): JsonResponse
     {
-        // Check if customer already has a non-prime booking for this day
+        // Check if the customer already has a non-prime booking for this day
         $hasExistingBooking = CheckCustomerHasNonPrimeBooking::run(
             $validatedData['phone'],
             $booking->booking_at->format('Y-m-d'),

@@ -1,6 +1,7 @@
 <?php
 
 /** @noinspection PhpPossiblePolymorphicInvocationInspection */
+
 /** @noinspection PhpUnreachableStatementInspection */
 
 namespace App\NotificationsChannels;
@@ -24,8 +25,10 @@ class SmsNotificationChannel
      */
     public function send($notifiable, Notification $notification): void
     {
-        throw_unless(method_exists($notification, 'toSms'), new RuntimeException('The notification must have a toSms method'));
-        throw_unless($notification->toSms($notifiable) instanceof SmsData, new Exception('toSms should return SmsData'));
+        throw_unless(method_exists($notification, 'toSms'),
+            new RuntimeException('The notification must have a toSms method'));
+        throw_unless($notification->toSms($notifiable) instanceof SmsData,
+            new Exception('toSms should return SmsData'));
 
         /** @var SmsData $data */
         $data = $notification->toSms($notifiable);
@@ -43,7 +46,7 @@ class SmsNotificationChannel
             }
         }
 
-        if (app()->isLocal()) {
+        if (! app()->isProduction()) {
             Log::info('Sending SMS to '.$data->phone, [
                 'templateKey' => $data->templateKey,
                 'text' => $data->text,
