@@ -26,13 +26,16 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 Route::post('/vip/sessions', [VipSessionController::class, 'createSession']);
 Route::post('/vip/sessions/validate', [VipSessionController::class, 'validateSession']);
 
+// Public endpoints (no authentication required)
+Route::get('/regions', [RegionController::class, 'index']);
+Route::get('/neighborhoods', NeighborhoodController::class);
+Route::get('/cuisines', CuisineController::class);
+Route::get('/specialties', SpecialtyController::class);
+Route::get('/timeslots', TimeslotController::class);
+Route::get('/app-config', AppConfigController::class)->name('app-config');
+
 Route::middleware('auth:sanctum')->group(function () {
-    Route::get('/regions', [RegionController::class, 'index']);
-    Route::get('/neighborhoods', NeighborhoodController::class);
-    Route::get('/cuisines', CuisineController::class);
-    Route::get('/specialties', SpecialtyController::class);
     Route::post('/regions', [RegionController::class, 'store']);
-    Route::get('/timeslots', TimeslotController::class);
     Route::get('/venues', VenueController::class);
     Route::get('/calendar', AvailabilityCalendarController::class);
     Route::get('/hub', ReservationHubController::class);
@@ -51,5 +54,3 @@ Route::middleware('auth:sanctum')->group(function () {
     // VIP Session analytics (authenticated)
     Route::get('/vip/sessions/analytics', [VipSessionController::class, 'getSessionAnalytics']);
 });
-
-Route::get('/app-config', AppConfigController::class)->name('app-config');

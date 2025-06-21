@@ -46,7 +46,7 @@ class TimeslotController extends Controller
         $validatedData = $request->validated();
         $date = $validatedData['date'];
 
-        // Get the region - either from the request parameter or fallback to the user's default region
+        // Get the region - either from the request parameter or fallback to user's default region
         $region = null;
         if (isset($validatedData['region'])) {
             $region = Region::query()->where('id', $validatedData['region'])->first();
