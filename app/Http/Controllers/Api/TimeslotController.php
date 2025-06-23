@@ -37,7 +37,6 @@ class TimeslotController extends Controller
      */
     #[OpenApi\Operation(
         tags: ['Timeslots'],
-        security: 'BearerTokenSecurityScheme'
     )]
     #[Parameters(factory: TimeslotParameter::class)]
     #[OpenApiResponse(factory: TimeslotResponse::class)]

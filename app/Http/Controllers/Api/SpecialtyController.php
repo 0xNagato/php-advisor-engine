@@ -25,7 +25,6 @@ class SpecialtyController extends Controller
      */
     #[OpenApi\Operation(
         tags: ['Specialties'],
-        security: 'BearerTokenSecurityScheme'
     )]
     #[Parameters(factory: RegionParameter::class)]
     #[OpenApiResponse(factory: SpecialtyListResponse::class)]

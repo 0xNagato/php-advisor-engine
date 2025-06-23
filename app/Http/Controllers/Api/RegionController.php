@@ -29,8 +29,7 @@ class RegionController extends Controller
      * @return JsonResponse A JSON response containing the regions.
      */
     #[OpenApi\Operation(
-        tags: ['Regions'],
-        security: 'BearerTokenSecurityScheme'
+        tags: ['Regions']
     )]
     #[OpenApiResponse(factory: RegionListResponse::class)]
     public function index(): JsonResponse
