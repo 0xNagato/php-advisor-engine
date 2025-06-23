@@ -43,6 +43,6 @@ class BookingCompleteSchema extends SchemaFactory implements Reusable
                     ->description('Referral Code')
                     ->format('r')
                     ->example('REF12345')
-            );
+            )->required('first_name', 'last_name', 'phone');
     }
 }

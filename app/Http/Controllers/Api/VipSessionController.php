@@ -126,6 +126,7 @@ class VipSessionController extends Controller
      */
     #[OpenApi\Operation(
         tags: ['VIP Sessions'],
+        security: 'BearerTokenSecurityScheme'
     )]
     #[OpenApiResponse(factory: VipSessionAnalyticsResponse::class)]
     public function getSessionAnalytics(Request $request): JsonResponse
