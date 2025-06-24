@@ -110,8 +110,10 @@ Route::post('/exception-form', ExceptionFormController::class)->name('exception.
 
 Route::get('vip/login/{code?}', fn ($code = null) => redirect($code ? "/v/$code" : '/'))->name('vip.login');
 
-Route::get('v/{code}', AvailabilityCalendar::class)->name('v.booking');
-Route::get('v/calendar', AvailabilityCalendar::class)->name('v.calendar');
+Route::get('vip/{code}', AvailabilityCalendar::class)->name('v.booking');
+Route::get('v/{code}', fn ($code) => redirect("https://ibiza.primaapp.com/vip/{$code}"))->name('v.booking');
+Route::get('v/calendar', fn () => redirect('https://ibiza.primaapp.com'))->name('v.calendar');
+
 Route::post('/role/switch/{profile}', [App\Http\Controllers\RoleSwitcherController::class, 'switch'])
     ->middleware(['web', 'auth'])
     ->name('role.switch');
