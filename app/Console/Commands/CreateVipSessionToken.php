@@ -2,6 +2,8 @@
 
 namespace App\Console\Commands;
 
+use Exception;
+use Illuminate\Contracts\Database\Query\Builder;
 use App\Models\VipCode;
 use App\Services\VipCodeService;
 use Illuminate\Console\Command;
@@ -59,7 +61,7 @@ class CreateVipSessionToken extends Command
                 $this->displaySessionInfo($sessionData, true);
 
                 return Command::SUCCESS;
-            } catch (\Exception $e) {
+            } catch (Exception $e) {
                 $this->error('Failed to create demo session: '.$e->getMessage());
                 $this->line('Make sure the demo user exists by running: php artisan vip:setup-demo-user');
 
@@ -68,7 +70,7 @@ class CreateVipSessionToken extends Command
         }
 
         // Validate VIP code exists
-        $vipCodeModel = VipCode::where('code', $vipCode)->first();
+        $vipCodeModel = VipCode::query()->where('code', $vipCode)->first();
 
         if (! $vipCodeModel) {
             $this->error("VIP code '{$vipCode}' not found in the database.");
@@ -100,7 +102,7 @@ class CreateVipSessionToken extends Command
 
             return Command::SUCCESS;
 
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             $this->error('Failed to create VIP session: '.$e->getMessage());
 
             return Command::FAILURE;
@@ -116,12 +118,12 @@ class CreateVipSessionToken extends Command
         $this->newLine();
 
         $vipCodes = VipCode::with('concierge.user')
-            ->whereHas('concierge.user', function ($query) use ($searchTerm) {
+            ->whereHas('concierge.user', function (Builder $query) use ($searchTerm) {
                 $query->where('first_name', 'like', "%{$searchTerm}%")
                     ->orWhere('last_name', 'like', "%{$searchTerm}%")
                     ->orWhere('email', 'like', "%{$searchTerm}%");
             })
-            ->orWhereHas('concierge', function ($query) use ($searchTerm) {
+            ->orWhereHas('concierge', function (Builder $query) use ($searchTerm) {
                 $query->where('hotel_name', 'like', "%{$searchTerm}%");
             })
             ->orWhere('code', 'like', "%{$searchTerm}%")
@@ -222,7 +224,7 @@ class CreateVipSessionToken extends Command
                 ])
             );
 
-            if (VipCode::count() > 10) {
+            if (VipCode::query()->count() > 10) {
                 $this->line('Showing first 10 results. Use --list to see all codes or --search to find specific ones.');
             }
         }

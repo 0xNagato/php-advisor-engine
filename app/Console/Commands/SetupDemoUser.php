@@ -26,16 +26,13 @@ class SetupDemoUser extends Command
         $this->info('Setting up demo user for VIP sessions...');
 
         // Create or find demo user
-        $demoUser = User::firstOrCreate(
-            ['email' => 'demo@primavip.co'],
-            [
-                'first_name' => 'Demo',
-                'last_name' => 'Concierge',
-                'email' => 'demo@primavip.co',
-                'password' => bcrypt('demo-password-not-used'),
-                'email_verified_at' => now(),
-            ]
-        );
+        $demoUser = User::query()->firstOrCreate(['email' => 'demo@primavip.co'], [
+            'first_name' => 'Demo',
+            'last_name' => 'Concierge',
+            'email' => 'demo@primavip.co',
+            'password' => bcrypt('demo-password-not-used'),
+            'email_verified_at' => now(),
+        ]);
 
         if ($demoUser->wasRecentlyCreated) {
             $this->info('✅ Created demo user: '.$demoUser->email);
@@ -44,15 +41,12 @@ class SetupDemoUser extends Command
         }
 
         // Create or find demo concierge
-        $demoConcierge = Concierge::firstOrCreate(
-            ['user_id' => $demoUser->id],
-            [
-                'user_id' => $demoUser->id,
-                'hotel_name' => 'Demo Hotel',
-                'phone' => '+1234567890',
-                'is_active' => true,
-            ]
-        );
+        $demoConcierge = Concierge::query()->firstOrCreate(['user_id' => $demoUser->id], [
+            'user_id' => $demoUser->id,
+            'hotel_name' => 'Demo Hotel',
+            'phone' => '+1234567890',
+            'is_active' => true,
+        ]);
 
         if ($demoConcierge->wasRecentlyCreated) {
             $this->info('✅ Created demo concierge: '.$demoConcierge->hotel_name);

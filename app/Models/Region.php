@@ -57,7 +57,7 @@ class Region extends Model
             'tax_rate_term' => 'VAT',
             'country' => 'Spain',
             'timezone' => 'Europe/Madrid',
-            'taxable' => false,
+            'taxable' => true,
         ],
         [
             'id' => 'mykonos',

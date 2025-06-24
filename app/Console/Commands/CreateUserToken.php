@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use Exception;
 use App\Models\User;
 use Illuminate\Console\Command;
 
@@ -44,7 +45,7 @@ class CreateUserToken extends Command
             $this->error("User not found: {$userIdentifier}");
             $this->line('Available users:');
 
-            $users = User::orderBy('name')
+            $users = User::query()->orderBy('name')
                 ->limit(10)
                 ->get(['id', 'name', 'email']);
 
@@ -78,7 +79,7 @@ class CreateUserToken extends Command
 
             return Command::SUCCESS;
 
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             $this->error('Failed to create token: '.$e->getMessage());
 
             return Command::FAILURE;
@@ -92,14 +93,14 @@ class CreateUserToken extends Command
     {
         // Try to find by ID first
         if (is_numeric($identifier)) {
-            $user = User::find($identifier);
+            $user = User::query()->find($identifier);
             if ($user) {
                 return $user;
             }
         }
 
         // Try to find by email
-        return User::where('email', $identifier)->first();
+        return User::query()->where('email', $identifier)->first();
     }
 
     /**

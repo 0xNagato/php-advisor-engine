@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Actions\Booking\CreateBooking;
 use App\Actions\Booking\SendConfirmationToVenueContacts;
 use App\Enums\BookingStatus;
 use App\Events\BookingPaid;
@@ -183,7 +184,10 @@ class BookingService
 
         $extraFee = $extraPeople * $venue->increment_fee;
 
-        return ($schedule->effective_fee + $extraFee) * 100;
+        $calculatedFee = ($schedule->effective_fee + $extraFee) * 100;
+
+        // Cap the fee at 500 in any currency (50000 cents)
+        return min($calculatedFee, CreateBooking::MAX_TOTAL_FEE_CENTS);
     }
 
     /**

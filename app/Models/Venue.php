@@ -321,6 +321,31 @@ class Venue extends Model
         );
     }
 
+    protected function images(): Attribute
+    {
+        return Attribute::make(
+            get: function () {
+                // Get the raw images array from the database
+                $rawImages = $this->getRawOriginal('images');
+
+                if (blank($rawImages)) {
+                    return [];
+                }
+
+                // Parse the JSON if it's a string
+                $images = is_string($rawImages)
+                    ? json_decode($rawImages, true)
+                    : $rawImages;
+
+                if (! is_array($images)) {
+                    return [];
+                }
+
+                return array_map(fn($imagePath) => Storage::disk('do')->url($imagePath), $images);
+            }
+        );
+    }
+
     protected function isAvailableForAdvanceBooking(): Attribute
     {
         return Attribute::make(
