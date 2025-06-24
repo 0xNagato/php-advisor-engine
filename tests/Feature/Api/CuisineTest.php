@@ -1,30 +1,13 @@
 <?php
 
 use App\Models\Cuisine;
-use App\Models\User;
 
 use function Pest\Laravel\getJson;
 
-beforeEach(function () {
-    // Create a test user
-    $this->user = User::factory()->create();
-    $this->user->assignRole('user');
-
-    // Create an authentication token
-    $this->token = $this->user->createToken('test-token')->plainTextToken;
-});
-
-test('unauthenticated user cannot access cuisines', function () {
-    getJson('/api/cuisines')
-        ->assertUnauthorized();
-});
-
-test('authenticated user can fetch all cuisines', function () {
+test('can fetch all cuisines', function () {
     $allCuisines = Cuisine::query()->pluck('name', 'id')->toArray();
 
-    $response = getJson('/api/cuisines', [
-        'Authorization' => 'Bearer '.$this->token,
-    ])
+    $response = getJson('/api/cuisines')
         ->assertSuccessful()
         ->assertJsonStructure([
             'data',
@@ -35,9 +18,7 @@ test('authenticated user can fetch all cuisines', function () {
 });
 
 test('cuisine response contains correct data structure', function () {
-    $response = getJson('/api/cuisines', [
-        'Authorization' => 'Bearer '.$this->token,
-    ])
+    $response = getJson('/api/cuisines')
         ->assertSuccessful()
         ->assertJsonStructure([
             'data',

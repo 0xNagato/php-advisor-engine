@@ -15,15 +15,8 @@ beforeEach(function () {
     $this->token = $this->user->createToken('test-token')->plainTextToken;
 });
 
-test('unauthenticated user cannot access regions', function () {
+test('can fetch regions', function () {
     getJson('/api/regions')
-        ->assertUnauthorized();
-});
-
-test('authenticated user can fetch regions', function () {
-    getJson('/api/regions', [
-        'Authorization' => 'Bearer '.$this->token,
-    ])
         ->assertSuccessful()
         ->assertJsonStructure([
             'data',
