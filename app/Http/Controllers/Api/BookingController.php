@@ -86,12 +86,14 @@ class BookingController extends Controller
             ], 404);
         }
 
-        $dayDisplay = $this->dayDisplay($region->timezone, $booking->booking->booking_at);
+        // Get the booking's venue region for proper tax info display
+        $venueRegion = Region::query()->find($venue->region);
+        $dayDisplay = $this->dayDisplay($venueRegion->timezone, $booking->booking->booking_at);
 
         $bookingResource = BookingResource::make($booking);
 
         $additionalData = [
-            'region' => $region,
+            'region' => $venueRegion,
             'dayDisplay' => $dayDisplay,
         ];
 
@@ -281,7 +283,7 @@ class BookingController extends Controller
                 $booking->load(['venue', 'venue.inRegion']);
 
                 /** @var Region $region */
-                $region = GetUserRegion::run();
+                $region = Region::query()->find($booking->venue->region);
                 $dayDisplay = $this->dayDisplay($region->timezone, $booking->booking_at);
 
                 $bookingResource = BookingResource::make($booking)->additional([
@@ -379,7 +381,7 @@ class BookingController extends Controller
             $booking->load(['venue', 'venue.inRegion']);
 
             /** @var Region $region */
-            $region = GetUserRegion::run();
+            $region = Region::query()->find($booking->venue->region);
             $dayDisplay = $this->dayDisplay($region->timezone, $booking->booking_at);
 
             $bookingResource = BookingResource::make($booking)->additional([

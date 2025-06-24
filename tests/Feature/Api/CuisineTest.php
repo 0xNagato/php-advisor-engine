@@ -14,9 +14,17 @@ beforeEach(function () {
     $this->token = $this->user->createToken('test-token')->plainTextToken;
 });
 
-test('unauthenticated user cannot access cuisines', function () {
-    getJson('/api/cuisines')
-        ->assertUnauthorized();
+test('unauthenticated user can access cuisines', function () {
+    $allCuisines = Cuisine::query()->pluck('name', 'id')->toArray();
+
+    $response = getJson('/api/cuisines')
+        ->assertSuccessful()
+        ->assertJsonStructure([
+            'data',
+        ]);
+
+    $responseData = $response->json('data');
+    expect($responseData)->toBe($allCuisines);
 });
 
 test('authenticated user can fetch all cuisines', function () {

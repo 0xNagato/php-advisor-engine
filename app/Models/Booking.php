@@ -155,10 +155,12 @@ class Booking extends Model
     public function totalFee(): int
     {
         if (! $this->booking_at || ! $this->schedule) {
-            return $this->total_fee ?? 0;
+            return min($this->total_fee ?? 0, \App\Actions\Booking\CreateBooking::MAX_TOTAL_FEE_CENTS); // Cap at 500 in any currency
         }
 
-        return $this->schedule->fee($this->guest_count);
+        $calculatedFee = $this->schedule->fee($this->guest_count);
+
+        return min($calculatedFee, \App\Actions\Booking\CreateBooking::MAX_TOTAL_FEE_CENTS); // Cap at 500 in any currency
     }
 
     public function scopeConfirmed($query)

@@ -13,9 +13,14 @@ beforeEach(function () {
     $this->token = $this->user->createToken('test-token')->plainTextToken;
 });
 
-test('unauthenticated user cannot access timeslots', function () {
-    getJson('/api/timeslots')
-        ->assertUnauthorized();
+test('unauthenticated user can access timeslots', function () {
+    $date = now()->format('Y-m-d');
+
+    getJson("/api/timeslots?date={$date}")
+        ->assertSuccessful()
+        ->assertJsonStructure([
+            'data',
+        ]);
 });
 
 test('authenticated user can fetch timeslots', function () {

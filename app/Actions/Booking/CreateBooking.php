@@ -28,6 +28,8 @@ class CreateBooking
 
     public const int MAX_DAYS_IN_ADVANCE = 30;
 
+    public const int MAX_TOTAL_FEE_CENTS = 50000; // 500 in any currency
+
     /**
      * @throws Exception
      * @throws Throwable

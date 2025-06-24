@@ -14,9 +14,12 @@ beforeEach(function () {
     $this->token = $this->user->createToken('test-token')->plainTextToken;
 });
 
-test('unauthenticated user cannot access neighborhoods', function () {
+test('unauthenticated user can access neighborhoods', function () {
     getJson('/api/neighborhoods')
-        ->assertUnauthorized();
+        ->assertSuccessful()
+        ->assertJsonStructure([
+            'data',
+        ]);
 });
 
 test('authenticated user can fetch all neighborhoods', function () {

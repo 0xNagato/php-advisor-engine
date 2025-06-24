@@ -60,8 +60,10 @@ class ScheduleWithBooking extends Model
             }
 
             $extraFee = $extraPeople * $this->venue->increment_fee;
+            $calculatedFee = ($this->effective_fee + $extraFee) * 100;
 
-            return ($this->effective_fee + $extraFee) * 100;
+            // Cap the fee at 500 in any currency (50000 cents)
+            return min($calculatedFee, \App\Actions\Booking\CreateBooking::MAX_TOTAL_FEE_CENTS);
         }
 
         return 0;

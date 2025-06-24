@@ -14,9 +14,17 @@ beforeEach(function () {
     $this->token = $this->user->createToken('test-token')->plainTextToken;
 });
 
-test('unauthenticated user cannot access specialties', function () {
-    getJson('/api/specialties')
-        ->assertUnauthorized();
+test('unauthenticated user can access specialties', function () {
+    $allSpecialties = Specialty::query()->pluck('name', 'id')->toArray();
+
+    $response = getJson('/api/specialties')
+        ->assertSuccessful()
+        ->assertJsonStructure([
+            'data',
+        ]);
+
+    $responseData = $response->json('data');
+    expect($responseData)->toBe($allSpecialties);
 });
 
 test('authenticated user can fetch all specialties', function () {

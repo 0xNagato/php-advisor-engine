@@ -15,9 +15,12 @@ beforeEach(function () {
     $this->token = $this->user->createToken('test-token')->plainTextToken;
 });
 
-test('unauthenticated user cannot access regions', function () {
+test('unauthenticated user can access regions', function () {
     getJson('/api/regions')
-        ->assertUnauthorized();
+        ->assertSuccessful()
+        ->assertJsonStructure([
+            'data',
+        ]);
 });
 
 test('authenticated user can fetch regions', function () {
