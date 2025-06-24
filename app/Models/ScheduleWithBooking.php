@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Actions\Booking\CreateBooking;
 use App\Services\ReservationService;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Casts\Attribute;
@@ -63,7 +64,7 @@ class ScheduleWithBooking extends Model
             $calculatedFee = ($this->effective_fee + $extraFee) * 100;
 
             // Cap the fee at 500 in any currency (50000 cents)
-            return min($calculatedFee, \App\Actions\Booking\CreateBooking::MAX_TOTAL_FEE_CENTS);
+            return min($calculatedFee, CreateBooking::MAX_TOTAL_FEE_CENTS);
         }
 
         return 0;

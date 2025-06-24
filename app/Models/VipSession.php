@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -12,9 +13,9 @@ use Laravel\Sanctum\PersonalAccessToken;
  * @property int $vip_code_id
  * @property string $token
  * @property int|null $sanctum_token_id
- * @property \Carbon\Carbon $expires_at
- * @property \Carbon\Carbon $created_at
- * @property \Carbon\Carbon $updated_at
+ * @property Carbon $expires_at
+ * @property Carbon $created_at
+ * @property Carbon $updated_at
  * @property-read VipCode $vipCode
  * @property-read PersonalAccessToken|null $sanctumToken
  */

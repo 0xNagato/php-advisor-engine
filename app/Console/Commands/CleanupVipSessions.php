@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use App\Models\VipSession;
 use App\Services\VipCodeService;
 use Illuminate\Console\Command;
 
@@ -35,7 +36,7 @@ class CleanupVipSessions extends Command
         $this->info('Starting VIP session cleanup...');
 
         if ($this->option('dry-run')) {
-            $count = \App\Models\VipSession::where('expires_at', '<', now())->count();
+            $count = VipSession::query()->where('expires_at', '<', now())->count();
             $this->info("Would delete {$count} expired sessions");
 
             return self::SUCCESS;

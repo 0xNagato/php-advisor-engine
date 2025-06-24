@@ -236,7 +236,7 @@ class BookingController extends Controller
 
         if ($booking->is_prime) {
             // Prime booking - requires payment intent ID
-            if (empty($validatedData['payment_intent_id'])) {
+            if (blank($validatedData['payment_intent_id'])) {
                 activity()
                     ->performedOn($booking)
                     ->withProperties([

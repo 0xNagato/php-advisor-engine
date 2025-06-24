@@ -2,8 +2,8 @@
 
 namespace App\Console\Commands;
 
+use Exception;
 use App\Models\Region;
-use App\Models\Specialty;
 use App\Models\Venue;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
@@ -60,7 +60,7 @@ class ImportVenuesFromCsv extends Command
         // Read and parse CSV
         $csvData = $this->parseCsv($filePath);
 
-        if (empty($csvData)) {
+        if (blank($csvData)) {
             $this->error('No data found in CSV file');
 
             return self::FAILURE;
@@ -114,7 +114,7 @@ class ImportVenuesFromCsv extends Command
 
         try {
             // Validate required fields
-            if (empty($row['restaurant_name'])) {
+            if (blank($row['restaurant_name'])) {
                 $this->logError($lineNumber, 'Missing restaurant name');
 
                 return;
@@ -130,7 +130,7 @@ class ImportVenuesFromCsv extends Command
             }
 
             // Only update existing venues
-            $existingVenue = Venue::where('name', $venueData['name'])->first();
+            $existingVenue = Venue::query()->where('name', $venueData['name'])->first();
 
             if ($existingVenue) {
                 $this->updateVenue($existingVenue, $venueData);
@@ -141,7 +141,7 @@ class ImportVenuesFromCsv extends Command
                 $this->warn("Venue not found: {$venueData['name']}");
             }
 
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             $this->logError($lineNumber, $e->getMessage());
         }
     }
@@ -149,9 +149,9 @@ class ImportVenuesFromCsv extends Command
     private function prepareVenueData(array $row): array
     {
         return [
-            'name' => trim($row['restaurant_name']), // Only for venue lookup
-            'address' => ! empty($row['google_address']) ? trim($row['google_address']) : null,
-            'description' => ! empty($row['short_description']) ? trim($row['short_description']) : null,
+            'name' => trim((string) $row['restaurant_name']), // Only for venue lookup
+            'address' => filled($row['google_address']) ? trim((string) $row['google_address']) : null,
+            'description' => filled($row['short_description']) ? trim((string) $row['short_description']) : null,
             'images' => $this->prepareImages($row['image_url'] ?? ''),
             'cuisines' => $this->parseCuisines($row['cuisine_type'] ?? ''),
             'specialty' => $this->parseSpecialties($row['tags'] ?? ''),
@@ -161,7 +161,7 @@ class ImportVenuesFromCsv extends Command
 
     private function prepareImages(string $imageUrl): array
     {
-        if (empty(trim($imageUrl))) {
+        if (blank(trim($imageUrl))) {
             return [];
         }
 
@@ -189,7 +189,7 @@ class ImportVenuesFromCsv extends Command
 
             return [$path];
 
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             $this->warn("Failed to process image {$imageUrl}: ".$e->getMessage());
 
             return [];
@@ -198,7 +198,7 @@ class ImportVenuesFromCsv extends Command
 
     private function parseCuisines(string $cuisineTypes): array
     {
-        if (empty(trim($cuisineTypes))) {
+        if (blank(trim($cuisineTypes))) {
             return [];
         }
 
@@ -206,7 +206,7 @@ class ImportVenuesFromCsv extends Command
         $types = array_map('trim', explode(',', $cuisineTypes));
 
         foreach ($types as $type) {
-            if (empty($type)) {
+            if (blank($type)) {
                 continue;
             }
 
@@ -271,7 +271,7 @@ class ImportVenuesFromCsv extends Command
 
     private function parseSpecialties(string $tags): array
     {
-        if (empty(trim($tags))) {
+        if (blank(trim($tags))) {
             return [];
         }
 
@@ -279,7 +279,7 @@ class ImportVenuesFromCsv extends Command
         $tagList = array_map('trim', explode(',', $tags));
 
         foreach ($tagList as $tag) {
-            if (empty($tag)) {
+            if (blank($tag)) {
                 continue;
             }
 
@@ -335,7 +335,7 @@ class ImportVenuesFromCsv extends Command
 
     private function inferRegion(string $city): ?string
     {
-        if (empty(trim($city))) {
+        if (blank(trim($city))) {
             return null;
         }
 
@@ -363,7 +363,7 @@ class ImportVenuesFromCsv extends Command
         }
 
         // Try to find region by name using partial matching
-        $region = Region::whereRaw('LOWER(name) LIKE ?', ['%'.$city.'%'])->first();
+        $region = Region::query()->whereRaw('LOWER(name) LIKE ?', ['%'.$city.'%'])->first();
 
         return $region?->id;
     }
@@ -390,26 +390,26 @@ class ImportVenuesFromCsv extends Command
             }
 
             // Always update images if provided (replaces existing images)
-            if (! empty($data['images'])) {
+            if (filled($data['images'])) {
                 $updateData['images'] = $data['images'];
             }
 
             // Only update neighborhood if venue doesn't have one
-            if (isset($data['neighborhood']) && $data['neighborhood'] && empty($venue->neighborhood)) {
+            if (isset($data['neighborhood']) && $data['neighborhood'] && blank($venue->neighborhood)) {
                 $updateData['neighborhood'] = $data['neighborhood'];
             }
 
             // Only update cuisines if venue doesn't have cuisines or has empty cuisines
-            if (! empty($data['cuisines']) && (empty($venue->cuisines) || ! is_array($venue->cuisines) || count($venue->cuisines) === 0)) {
+            if (filled($data['cuisines']) && (blank($venue->cuisines) || ! is_array($venue->cuisines) || count($venue->cuisines) === 0)) {
                 $updateData['cuisines'] = $data['cuisines'];
             }
 
             // Only update specialty if venue doesn't have specialty or has empty specialty
-            if (! empty($data['specialty']) && (empty($venue->specialty) || ! is_array($venue->specialty) || count($venue->specialty) === 0)) {
+            if (filled($data['specialty']) && (blank($venue->specialty) || ! is_array($venue->specialty) || count($venue->specialty) === 0)) {
                 $updateData['specialty'] = $data['specialty'];
             }
 
-            if (! empty($updateData)) {
+            if (filled($updateData)) {
                 $venue->update($updateData);
             }
         });
@@ -420,9 +420,9 @@ class ImportVenuesFromCsv extends Command
         $this->line("Line {$lineNumber}: {$data['name']}");
         $this->line('  Address: '.($data['address'] ?? 'N/A'));
         $this->line('  Description: '.Str::limit($data['description'] ?? 'N/A', 100));
-        $this->line('  Images: '.(empty($data['images']) ? 'None' : count($data['images']).' image(s)'));
-        $this->line('  Cuisines: '.(empty($data['cuisines']) ? 'None' : implode(', ', $data['cuisines'])));
-        $this->line('  Specialties: '.(empty($data['specialty']) ? 'None' : implode(', ', $data['specialty'])));
+        $this->line('  Images: '.(blank($data['images']) ? 'None' : count($data['images']).' image(s)'));
+        $this->line('  Cuisines: '.(blank($data['cuisines']) ? 'None' : implode(', ', $data['cuisines'])));
+        $this->line('  Specialties: '.(blank($data['specialty']) ? 'None' : implode(', ', $data['specialty'])));
         $this->line('  Neighborhood: '.($data['neighborhood'] ?? 'Not determined'));
         $this->line('');
     }
@@ -449,7 +449,7 @@ class ImportVenuesFromCsv extends Command
             ]
         );
 
-        if (! empty($this->errors)) {
+        if (filled($this->errors)) {
             $this->newLine();
             $this->error('Errors encountered:');
             foreach ($this->errors as $error) {

@@ -328,7 +328,7 @@ class Venue extends Model
                 // Get the raw images array from the database
                 $rawImages = $this->getRawOriginal('images');
 
-                if (empty($rawImages)) {
+                if (blank($rawImages)) {
                     return [];
                 }
 
@@ -341,9 +341,7 @@ class Venue extends Model
                     return [];
                 }
 
-                return array_map(function ($imagePath) {
-                    return Storage::disk('do')->url($imagePath);
-                }, $images);
+                return array_map(fn($imagePath) => Storage::disk('do')->url($imagePath), $images);
             }
         );
     }

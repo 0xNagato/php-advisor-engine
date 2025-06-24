@@ -40,7 +40,7 @@ class VenueController extends Controller
 
     public function show(int $id): JsonResponse
     {
-        $venue = Venue::find($id);
+        $venue = Venue::query()->find($id);
 
         if (! $venue) {
             return response()->json([
