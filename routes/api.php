@@ -36,7 +36,8 @@ Route::get('/app-config', AppConfigController::class)->name('app-config');
 
 Route::middleware('auth:sanctum')->group(function () {
     Route::post('/regions', [RegionController::class, 'store']);
-    Route::get('/venues', VenueController::class);
+    Route::get('/venues', [VenueController::class, 'index']);
+    Route::get('/venues/{id}', [VenueController::class, 'show']);
     Route::get('/calendar', AvailabilityCalendarController::class);
     Route::get('/hub', ReservationHubController::class);
     Route::post('/bookings', [BookingController::class, 'store']);

@@ -10,7 +10,7 @@ use Illuminate\Http\JsonResponse;
 
 class VenueController extends Controller
 {
-    public function __invoke(): JsonResponse
+    public function index(): JsonResponse
     {
         $region = GetUserRegion::run();
 
@@ -35,6 +35,35 @@ class VenueController extends Controller
 
         return response()->json([
             'data' => $venues,
+        ]);
+    }
+
+    public function show(int $id): JsonResponse
+    {
+        $venue = Venue::find($id);
+
+        if (! $venue) {
+            return response()->json([
+                'message' => 'Venue not found',
+            ], 404);
+        }
+
+        return response()->json([
+            'data' => [
+                'id' => $venue->id,
+                'name' => $venue->name,
+                'slug' => $venue->slug,
+                'address' => $venue->address,
+                'description' => $venue->description,
+                'images' => $venue->images ?? [],
+                'logo' => $venue->logo,
+                'cuisines' => $venue->cuisines ?? [],
+                'specialty' => $venue->specialty ?? [],
+                'neighborhood' => $venue->neighborhood,
+                'region' => $venue->region,
+                'status' => $venue->status->value,
+                'formatted_location' => $venue->getFormattedLocation(),
+            ],
         ]);
     }
 }
