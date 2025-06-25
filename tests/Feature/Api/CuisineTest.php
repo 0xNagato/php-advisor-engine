@@ -18,9 +18,7 @@ test('can fetch all cuisines', function () {
 });
 
 test('cuisine response contains correct data structure', function () {
-    $response = getJson('/api/cuisines', [
-        'Authorization' => 'Bearer '.$this->token,
-    ])
+    $response = getJson('/api/cuisines')
         ->assertSuccessful()
         ->assertJsonStructure([
             'data',

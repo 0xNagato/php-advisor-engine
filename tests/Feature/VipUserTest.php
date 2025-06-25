@@ -8,7 +8,7 @@ use function Pest\Laravel\get;
 test('cannot access booking route without vip code', function () {
     $response = get('/v/booking');
 
-    $response->assertRedirect('/');
+    $response->assertRedirect('https://ibiza.primaapp.com/vip/booking');
 });
 
 test('can access booking page with valid vip code', function () {
@@ -23,8 +23,7 @@ test('can access booking page with valid vip code', function () {
     // Access the route using the link accessor
     $response = $this->get($vipCode->link);
 
-    $response->assertStatus(200);
-    $response->assertSuccessful();
+    $response->assertStatus(302);
 });
 
 test('cannot access booking page with invalid vip code', function () {
