@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Actions\Booking\CreateBooking;
 use App\Actions\Booking\SendConfirmationToVenueContacts;
 use App\Enums\BookingStatus;
+use App\Events\BookingConfirmed;
 use App\Events\BookingPaid;
 use App\Models\Booking;
 use App\Models\Region;
@@ -38,6 +39,7 @@ class BookingService
         }
 
         BookingPaid::dispatch($booking);
+        BookingConfirmed::dispatch($booking);
     }
 
     public function convertToNonPrime(Booking $booking): void

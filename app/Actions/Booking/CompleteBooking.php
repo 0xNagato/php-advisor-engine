@@ -3,6 +3,7 @@
 namespace App\Actions\Booking;
 
 use App\Enums\BookingStatus;
+use App\Events\BookingConfirmed;
 use App\Events\BookingPaid;
 use App\Models\Booking;
 use App\Notifications\Booking\ConciergeFirstBooking;
@@ -67,6 +68,7 @@ class CompleteBooking
             }
 
             BookingPaid::dispatch($booking);
+            BookingConfirmed::dispatch($booking);
 
             return ['success' => true, 'message' => 'Booking confirmed successfully'];
         } catch (Exception $e) {

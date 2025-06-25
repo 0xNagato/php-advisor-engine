@@ -4,6 +4,7 @@ namespace App\Filament\Resources\VenueResource\Pages;
 
 use App\Enums\BookingStatus;
 use App\Enums\VenueStatus;
+use App\Events\BookingCancelled;
 use App\Filament\Resources\PartnerResource\Pages\ViewPartner;
 use App\Filament\Resources\VenueResource;
 use App\Models\Booking;
@@ -375,6 +376,11 @@ class ListVenues extends ListRecords
                         $booking->earnings()->delete();
                     } elseif ($this->bulkEditData['status'] === BookingStatus::CONFIRMED->value) {
                         $booking->earnings()->update(['confirmed_at' => now()]);
+                    }
+
+                    // Dispatch BookingCancelled event for cancelled bookings only
+                    if ($this->bulkEditData['status'] === BookingStatus::CANCELLED->value) {
+                        BookingCancelled::dispatch($booking);
                     }
                 }
 
@@ -960,6 +966,11 @@ class ListVenues extends ListRecords
                 // Remove earnings for cancelled and no-show bookings
                 if ($this->bulkStatus === BookingStatus::CANCELLED->value || $this->bulkStatus === BookingStatus::NO_SHOW->value) {
                     $booking->earnings()->delete();
+                }
+
+                // Dispatch BookingCancelled event for cancelled bookings only
+                if ($this->bulkStatus === BookingStatus::CANCELLED->value) {
+                    BookingCancelled::dispatch($booking);
                 }
 
                 // Log the activity

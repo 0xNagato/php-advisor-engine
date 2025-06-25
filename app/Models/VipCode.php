@@ -30,7 +30,7 @@ class VipCode extends Model
 
     public function link(): Attribute
     {
-        return Attribute::make(get: fn () => route('v.booking', $this->code));
+        return Attribute::make(get: fn () => route('v.redirect', $this->code));
     }
 
     public function scopeActive($query)

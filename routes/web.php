@@ -110,8 +110,17 @@ Route::post('/exception-form', ExceptionFormController::class)->name('exception.
 
 Route::get('vip/login/{code?}', fn ($code = null) => redirect($code ? "/v/$code" : '/'))->name('vip.login');
 
-Route::get('vip/{code}', AvailabilityCalendar::class)->name('v.booking');
-Route::get('v/{code}', fn ($code) => redirect("https://ibiza.primaapp.com/vip/{$code}"))->name('v.booking');
+Route::get('vip/{code}', AvailabilityCalendar::class)->name('vip.booking');
+Route::get('v/{code}', function ($code) {
+    $queryParams = request()->query();
+    $redirectUrl = "https://ibiza.primaapp.com/vip/{$code}";
+
+    if (! empty($queryParams)) {
+        $redirectUrl .= '?'.http_build_query($queryParams);
+    }
+
+    return redirect($redirectUrl);
+})->name('v.redirect');
 Route::get('v/calendar', fn () => redirect('https://ibiza.primaapp.com'))->name('v.calendar');
 
 Route::post('/role/switch/{profile}', [App\Http\Controllers\RoleSwitcherController::class, 'switch'])
