@@ -12,7 +12,7 @@ use Vyuldashev\LaravelOpenApi\Attributes as OpenApi;
 use Vyuldashev\LaravelOpenApi\Attributes\Parameters;
 use Vyuldashev\LaravelOpenApi\Attributes\Response as OpenApiResponse;
 
-#[OpenApi\PathItem]
+// #[OpenApi\PathItem]
 class ReservationHubController extends Controller
 {
     /**

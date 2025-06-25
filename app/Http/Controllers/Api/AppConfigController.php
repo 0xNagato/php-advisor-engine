@@ -9,7 +9,7 @@ use Illuminate\Http\JsonResponse;
 use Vyuldashev\LaravelOpenApi\Attributes as OpenApi;
 use Vyuldashev\LaravelOpenApi\Attributes\Response;
 
-#[OpenApi\PathItem]
+// #[OpenApi\PathItem]
 class AppConfigController extends Controller
 {
     public function __construct(private readonly CacheManager $cache) {}

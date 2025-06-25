@@ -154,12 +154,12 @@ class BookingController extends Controller
      *
      * @throws ApiErrorException
      */
-    #[OpenApi\Operation(
-        tags: ['Bookings'],
-        security: 'BearerTokenSecurityScheme'
-    )]
-    #[RequestBody(factory: BookingUpdateRequestBody::class)]
-    #[OpenApiResponse(factory: MessageResponse::class)]
+    //    #[OpenApi\Operation(
+    //        tags: ['Bookings'],
+    //        security: 'BearerTokenSecurityScheme'
+    //    )]
+    //    #[RequestBody(factory: BookingUpdateRequestBody::class)]
+    //    #[OpenApiResponse(factory: MessageResponse::class)]
     public function update(BookingUpdateRequest $request, Booking $booking): JsonResponse
     {
         $validatedData = $request->validated();

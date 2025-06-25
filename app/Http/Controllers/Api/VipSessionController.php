@@ -16,7 +16,7 @@ use Vyuldashev\LaravelOpenApi\Attributes as OpenApi;
 use Vyuldashev\LaravelOpenApi\Attributes\RequestBody;
 use Vyuldashev\LaravelOpenApi\Attributes\Response as OpenApiResponse;
 
-#[OpenApi\PathItem]
+// #[OpenApi\PathItem]
 class VipSessionController extends Controller
 {
     public function __construct(

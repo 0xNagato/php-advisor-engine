@@ -12,7 +12,7 @@ use Vyuldashev\LaravelOpenApi\Attributes as OpenApi;
 use Vyuldashev\LaravelOpenApi\Attributes\RequestBody;
 use Vyuldashev\LaravelOpenApi\Attributes\Response as OpenApiResponse;
 
-#[OpenApi\PathItem]
+// #[OpenApi\PathItem]
 class ContactFormController extends Controller
 {
     /**
