@@ -484,7 +484,7 @@ class ScheduleManager extends Component
         try {
             if ($this->editingSlot['time'] === '*' && $this->editingSlot['size']) {
                 if ($this->activeView === 'calendar') {
-                                        // Calendar mode: Update "VenueTimeSlot" overrides for a specific date
+                    // Calendar mode: Update "VenueTimeSlot" overrides for a specific date
                     throw_unless($this->editingSlot['date'],
                         new Exception('The booking date must be provided for calendar overrides.'));
 
