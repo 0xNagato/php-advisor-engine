@@ -12,7 +12,7 @@ test('vip code has fillable attributes', function () {
 test('vip code has correct link attribute', function () {
     $newCode = 'abc123';
     $vipCode = VipCode::factory()->create(['code' => $newCode]);
-    $expectedLink = route('v.redirect', $newCode);
+    $expectedLink = route('v.booking', $newCode);
     expect($vipCode->link)->toBe($expectedLink);
 });
 

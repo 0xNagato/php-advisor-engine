@@ -20,7 +20,7 @@ class GenerateVipReferralQRCode
         $qrLink = config('app.primary_domain').'/';
 
         // Generate the base route with just the code
-        $baseRoute = route('v.redirect', $vipCode->code, false);
+        $baseRoute = route('v.booking', $vipCode->code, false);
         $qrLink .= ltrim($baseRoute, '/');
 
         // Add concierge ID as query parameter if present
