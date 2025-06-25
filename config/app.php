@@ -2,6 +2,7 @@
 
 use App\Providers\AppServiceProvider;
 use App\Providers\AuthServiceProvider;
+use App\Providers\BookingPlatformServiceProvider;
 use App\Providers\EventServiceProvider;
 use App\Providers\Filament\AdminPanelProvider;
 use App\Providers\FilamentRenderHookProvider;
@@ -210,6 +211,7 @@ return [
         AdminPanelProvider::class,
         RouteServiceProvider::class,
         FilamentRenderHookProvider::class,
+        BookingPlatformServiceProvider::class,
     ])->toArray(),
 
     /*

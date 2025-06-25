@@ -6,9 +6,9 @@ use App\Models\VipCode;
 use function Pest\Laravel\get;
 
 test('cannot access booking route without vip code', function () {
-    $response = get('/v/booking');
+    $response = get('/vip/booking');
 
-    $response->assertRedirect('https://ibiza.primaapp.com/vip/booking');
+    $response->assertRedirect('/');
 });
 
 test('can access booking page with valid vip code', function () {
@@ -20,14 +20,15 @@ test('can access booking page with valid vip code', function () {
         'is_active' => true,
     ]);
 
-    // Access the route using the link accessor
+    // Access the route using the link accessor - this should redirect to external service
     $response = $this->get($vipCode->link);
 
     $response->assertStatus(302);
+    $response->assertRedirect('https://ibiza.primaapp.com/vip/VALIDCODE');
 });
 
 test('cannot access booking page with invalid vip code', function () {
-    $response = $this->get(route('v.booking', 'INVALIDCODE'));
+    $response = $this->get(route('vip.booking', 'INVALIDCODE'));
 
     $response->assertStatus(302);
 });

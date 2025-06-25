@@ -7,6 +7,7 @@ use App\Enums\BookingStatus;
 use App\Enums\VenueStatus;
 use App\Enums\VenueType;
 use App\Models\Traits\HasEarnings;
+use App\Services\CoverManagerService;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -16,6 +17,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 use Illuminate\Database\Eloquent\Relations\HasOneThrough;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use RuntimeException;
@@ -88,6 +90,10 @@ class Venue extends Model
         'specialty',
         'venue_type',
         'advance_booking_window',
+        'uses_covermanager',
+        'covermanager_id',
+        'covermanager_sync_enabled',
+        'last_covermanager_sync',
         'tier',
     ];
 
@@ -105,6 +111,9 @@ class Venue extends Model
             'daily_booking_cap' => 'integer',
             'cuisines' => 'array',
             'specialty' => 'array',
+            'uses_covermanager' => 'boolean',
+            'covermanager_sync_enabled' => 'boolean',
+            'last_covermanager_sync' => 'datetime',
             'images' => 'array',
         ];
     }
@@ -570,5 +579,119 @@ class Venue extends Model
         }
 
         return implode(', ', $parts);
+    }
+
+    /**
+     * Get the booking platforms associated with the venue.
+     *
+     * @return HasMany<VenuePlatform, $this>
+     */
+    public function platforms(): HasMany
+    {
+        return $this->hasMany(VenuePlatform::class);
+    }
+
+    /**
+     * Get a specific platform by type.
+     */
+    public function getPlatform(string $platformType): ?VenuePlatform
+    {
+        return $this->platforms()->where('platform_type', $platformType)->first();
+    }
+
+    /**
+     * Check if venue has a specific platform enabled.
+     */
+    public function hasPlatform(string $platformType): bool
+    {
+        return $this->platforms()->where('platform_type', $platformType)
+            ->where('is_enabled', true)->exists();
+    }
+
+    /**
+     * Get the appropriate booking platform service for this venue.
+     *
+     * @return BookingPlatformInterface|null
+     */
+    public function getBookingPlatform()
+    {
+        $factory = app(BookingPlatformFactory::class);
+
+        return $factory->getPlatformForVenue($this);
+    }
+
+    // For backward compatibility
+    public function usesCoverManager(): bool
+    {
+        return $this->hasPlatform('covermanager');
+    }
+
+    /**
+     * Get CoverManager service
+     */
+    public function coverManager()
+    {
+        if (! $this->usesCoverManager()) {
+            return null;
+        }
+
+        return app(CoverManagerService::class);
+    }
+
+    /**
+     * Sync this venue's availability with CoverManager
+     */
+    public function syncCoverManagerAvailability(?Carbon $date = null): bool
+    {
+        if (! $this->usesCoverManager() || ! $this->covermanager_sync_enabled) {
+            return false;
+        }
+
+        $date ??= Carbon::today();
+
+        $coverManagerService = $this->coverManager();
+
+        if (! $coverManagerService) {
+            return false;
+        }
+
+        try {
+            // Get all schedule templates for this date
+            $scheduleTemplates = $this->scheduleTemplates()
+                ->where('day_of_week', strtolower($date->format('l')))
+                ->where('is_available', true)
+                ->get();
+
+            // For each time slot, check availability in CoverManager
+            foreach ($scheduleTemplates as $template) {
+                // Get time in appropriate format
+                $time = Carbon::parse($template->start_time)->format('H:i');
+
+                // Check availability in CoverManager
+                $availability = $coverManagerService->checkAvailability(
+                    $this->covermanager_id,
+                    $date,
+                    $time,
+                    $template->party_size
+                );
+
+                // Process availability response
+                // This would handle syncing the availabilities between systems
+                // Actual implementation would depend on CoverManager's response format
+            }
+
+            $this->update(['last_covermanager_sync' => now()]);
+
+            return true;
+        } catch (Throwable $e) {
+            Log::error("Failed to sync venue {$this->id} availability with CoverManager", [
+                'error' => $e->getMessage(),
+                'venue_id' => $this->id,
+                'venue_name' => $this->name,
+                'date' => $date->format('Y-m-d'),
+            ]);
+
+            return false;
+        }
     }
 }

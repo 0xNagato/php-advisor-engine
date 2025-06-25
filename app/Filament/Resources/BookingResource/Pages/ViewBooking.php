@@ -13,6 +13,7 @@ use App\Actions\Booking\ConvertToPrime;
 use App\Actions\Booking\RefundBooking;
 use App\Enums\BookingStatus;
 use App\Enums\EarningType;
+use App\Events\BookingCancelled;
 use App\Events\BookingMarkedAsNoShow;
 use App\Filament\Resources\BookingResource;
 use App\Models\Booking;
@@ -272,6 +273,11 @@ class ViewBooking extends ViewRecord
                 'status' => $refundType === 'full' ? BookingStatus::REFUNDED : BookingStatus::PARTIALLY_REFUNDED,
             ]);
 
+            // Dispatch BookingCancelled event for full refunds only (not partial refunds)
+            if ($refundType === 'full') {
+                BookingCancelled::dispatch($this->record);
+            }
+
             activity()
                 ->performedOn($this->record)
                 ->withProperties([
@@ -432,6 +438,9 @@ class ViewBooking extends ViewRecord
         $this->record->update([
             'status' => BookingStatus::CANCELLED,
         ]);
+
+        // Dispatch BookingCancelled event for platform sync
+        BookingCancelled::dispatch($this->record);
 
         // Validate if the booking is older than created + 5 minutes
         if ($this->record->created_at->diffInMinutes(now()) > 5) {
