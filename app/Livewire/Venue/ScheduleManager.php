@@ -484,8 +484,7 @@ class ScheduleManager extends Component
         try {
             if ($this->editingSlot['time'] === '*' && $this->editingSlot['size']) {
                 if ($this->activeView === 'calendar') {
-                    ds('here we go', $this->editingSlot)->label('access logic');
-                    // Calendar mode: Update "VenueTimeSlot" overrides for a specific date
+                                        // Calendar mode: Update "VenueTimeSlot" overrides for a specific date
                     throw_unless($this->editingSlot['date'],
                         new Exception('The booking date must be provided for calendar overrides.'));
 
@@ -500,15 +499,6 @@ class ScheduleManager extends Component
                             ->where('start_time', $time)
                             ->where('party_size', $this->editingSlot['size'])
                             ->first();
-                        ds(
-                            $template,
-                            ScheduleTemplate::query()
-                                ->where('venue_id', $time->venue_id)
-                                ->where('day_of_week', $this->editingSlot['day'])
-                                ->where('start_time', $time)
-                                ->where('party_size', $this->editingSlot['size'])
-                                ->get()
-                        )->label('templates');
 
                         if ($template) {
                             // Fetch the existing VenueTimeSlot or create/update it
