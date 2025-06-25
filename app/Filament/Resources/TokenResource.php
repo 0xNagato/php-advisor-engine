@@ -2,11 +2,14 @@
 
 namespace App\Filament\Resources;
 
-use App\Filament\Resources\TokenResource\Pages;
+use App\Filament\Resources\TokenResource\Pages\ManageTokens;
 use App\Models\Token;
-use Filament\Forms\Form;
 use Filament\Resources\Resource;
-use Filament\Tables;
+use Filament\Tables\Actions\BulkActionGroup;
+use Filament\Tables\Actions\DeleteAction;
+use Filament\Tables\Actions\DeleteBulkAction;
+use Filament\Tables\Actions\EditAction;
+use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 
 class TokenResource extends Resource
@@ -15,30 +18,34 @@ class TokenResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
 
-    public static function form(Form $form): Form
+    protected static ?string $navigationGroup = 'User Management';
+
+    public static function canAccess(): bool
     {
-        return $form
-            ->schema([
-                //
-            ]);
+        return auth()->user()->hasActiveRole('super_admin');
     }
 
     public static function table(Table $table): Table
     {
         return $table
             ->columns([
-                //
+                TextColumn::make('name')->searchable(),
+                TextColumn::make('tokenable.name')->searchable(),
+                TextColumn::make('expires_at')->dateTime()->sortable(),
+                TextColumn::make('created_at')->dateTime()->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
             ])
+            ->defaultSort('created_at', 'desc')
             ->filters([
                 //
             ])
             ->actions([
-                Tables\Actions\EditAction::make(),
-                Tables\Actions\DeleteAction::make(),
+                EditAction::make(),
+                DeleteAction::make(),
             ])
             ->bulkActions([
-                Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
+                BulkActionGroup::make([
+                    DeleteBulkAction::make(),
                 ]),
             ]);
     }
@@ -46,7 +53,7 @@ class TokenResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ManageTokens::route('/'),
+            'index' => ManageTokens::route('/'),
         ];
     }
 }
