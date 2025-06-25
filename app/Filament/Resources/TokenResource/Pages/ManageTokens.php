@@ -24,6 +24,7 @@ class ManageTokens extends ManageRecords
                 ->modalWidth('md')
                 ->form([
                     Select::make('user_id')
+                        ->label('Concierge')
                         ->options(fn () => User::query()->role('concierge')
                             ->orderBy('first_name')->get()->pluck('name', 'id')
                         )
