@@ -6,6 +6,7 @@ use App\Actions\Region\GetUserRegion;
 use App\Enums\VenueStatus;
 use App\Http\Controllers\Controller;
 use App\Models\Venue;
+use App\OpenApi\Responses\ShowVenueResponse;
 use App\OpenApi\Responses\VenueListResponse;
 use Illuminate\Http\JsonResponse;
 use Vyuldashev\LaravelOpenApi\Attributes as OpenApi;
@@ -50,6 +51,14 @@ class VenueController extends Controller
         ]);
     }
 
+    /**
+     * View a venue by ID.
+     */
+    #[OpenApi\Operation(
+        tags: ['Venues'],
+        security: 'BearerTokenSecurityScheme'
+    )]
+    #[OpenApiResponse(factory: ShowVenueResponse::class)]
     public function show(int $id): JsonResponse
     {
         $venue = Venue::query()->find($id);

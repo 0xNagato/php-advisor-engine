@@ -2,11 +2,11 @@
 
 namespace App\Console\Commands;
 
-use Exception;
-use Illuminate\Contracts\Database\Query\Builder;
 use App\Models\VipCode;
 use App\Services\VipCodeService;
+use Exception;
 use Illuminate\Console\Command;
+use Illuminate\Contracts\Database\Query\Builder;
 
 class CreateVipSessionToken extends Command
 {

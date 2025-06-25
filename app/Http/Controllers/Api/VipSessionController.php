@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers\Api;
 
-use App\Models\VipSession;
 use App\Http\Controllers\Controller;
 use App\Models\VipSession;
 use App\OpenApi\RequestBodies\VipSessionCreateRequestBody;
