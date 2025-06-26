@@ -497,14 +497,16 @@ class Booking extends Model
         }
 
         // Create or update CoverManager reservation record
-        $coverManagerReservation = CoverManagerReservation::query()->where('booking_id', $this->id)->first()
-            ?? CoverManagerReservation::createFromBooking($this);
+        $platformReservation = PlatformReservation::query()
+            ->where('booking_id', $this->id)
+            ->where('platform_type', 'covermanager')
+            ->first() ?? PlatformReservation::createFromBooking($this, 'covermanager');
 
-        if (! $coverManagerReservation) {
+        if (! $platformReservation) {
             return false;
         }
 
-        return $coverManagerReservation->syncToCoverManager();
+        return $platformReservation->syncToPlatform();
     }
 
     /**
@@ -518,13 +520,15 @@ class Booking extends Model
         }
 
         // Create or update Restoo reservation record
-        $restooReservation = RestooReservation::query()->where('booking_id', $this->id)->first()
-            ?? RestooReservation::createFromBooking($this);
+        $platformReservation = PlatformReservation::query()
+            ->where('booking_id', $this->id)
+            ->where('platform_type', 'restoo')
+            ->first() ?? PlatformReservation::createFromBooking($this, 'restoo');
 
-        if (! $restooReservation) {
+        if (! $platformReservation) {
             return false;
         }
 
-        return $restooReservation->syncToRestoo();
+        return $platformReservation->syncToPlatform();
     }
 }

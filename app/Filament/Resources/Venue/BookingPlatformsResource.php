@@ -67,13 +67,9 @@ class BookingPlatformsResource extends Resource
                 TextColumn::make('reservations_count')
                     ->label('Reservations')
                     ->getStateUsing(function (VenuePlatform $record): int {
-                        if ($record->platform_type === 'covermanager') {
-                            return $record->venue->coverManagerReservations()->count();
-                        } elseif ($record->platform_type === 'restoo') {
-                            return $record->venue->restooReservations()->count();
-                        }
-
-                        return 0;
+                        return $record->venue->platformReservations()
+                            ->where('platform_type', $record->platform_type)
+                            ->count();
                     })
                     ->sortable(false)
                     ->alignCenter()

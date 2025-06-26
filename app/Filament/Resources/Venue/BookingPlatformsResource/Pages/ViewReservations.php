@@ -33,15 +33,12 @@ class ViewReservations extends ViewRecord implements HasTable
     {
         return $table
             ->query(
-                match ($this->record->platform_type) {
-                    'covermanager' => $this->record->venue->coverManagerReservations()->getQuery()->with(['booking' => function ($query) {
+                $this->record->venue->platformReservations()
+                    ->where('platform_type', $this->record->platform_type)
+                    ->with(['booking' => function ($query) {
                         $query->select('id', 'guest_first_name', 'guest_last_name', 'guest_count', 'booking_at');
-                    }]),
-                    'restoo' => $this->record->venue->restooReservations()->getQuery()->with(['booking' => function ($query) {
-                        $query->select('id', 'guest_first_name', 'guest_last_name', 'guest_count', 'booking_at');
-                    }]),
-                    default => throw new \InvalidArgumentException("Unknown platform type: {$this->record->platform_type}"),
-                }
+                    }])
+                    ->getQuery()
             )
             ->columns($this->getColumnsForPlatform())
             ->defaultSort('created_at', 'desc')
@@ -76,14 +73,16 @@ class ViewReservations extends ViewRecord implements HasTable
 
         // Add platform-specific date/time columns
         if ($this->record->platform_type === 'covermanager') {
-            $baseColumns[] = TextColumn::make('reservation_date')
+            $baseColumns[] = TextColumn::make('platform_data')
                 ->label('Date')
+                ->getStateUsing(fn ($record) => $record->platform_data['reservation_date'] ?? null)
                 ->date('M j, Y')
-                ->sortable();
-            $baseColumns[] = TextColumn::make('reservation_time')
+                ->sortable(false);
+            $baseColumns[] = TextColumn::make('platform_data')
                 ->label('Time')
-                ->time('g:i A')
-                ->sortable();
+                ->getStateUsing(fn ($record) => $record->platform_data['reservation_time'] ?? null)
+                ->formatStateUsing(fn ($state) => $state ? date('g:i A', strtotime($state)) : null)
+                ->sortable(false);
         } elseif ($this->record->platform_type === 'restoo') {
             $baseColumns[] = TextColumn::make('reservation_datetime')
                 ->label('Date & Time')
@@ -91,33 +90,23 @@ class ViewReservations extends ViewRecord implements HasTable
                 ->sortable();
         }
 
-        if ($this->record->platform_type === 'covermanager') {
-            $baseColumns[] = TextColumn::make('covermanager_reservation_id')
-                ->label('CoverManager ID')
-                ->searchable();
-            $baseColumns[] = TextColumn::make('covermanager_status')
-                ->label('Status')
-                ->badge()
-                ->color(fn (string $state): string => match ($state) {
-                    'cancelled' => 'danger',
-                    'confirmed' => 'success',
-                    'pending' => 'warning',
-                    default => 'gray',
-                });
-        } elseif ($this->record->platform_type === 'restoo') {
-            $baseColumns[] = TextColumn::make('restoo_reservation_id')
-                ->label('Restoo ID')
-                ->searchable();
-            $baseColumns[] = TextColumn::make('restoo_status')
-                ->label('Status')
-                ->badge()
-                ->color(fn (string $state): string => match ($state) {
-                    'cancelled' => 'danger',
-                    'confirmed' => 'success',
-                    'pending' => 'warning',
-                    default => 'gray',
-                });
-        }
+        $baseColumns[] = TextColumn::make('platform_reservation_id')
+            ->label(match ($this->record->platform_type) {
+                'covermanager' => 'CoverManager ID',
+                'restoo' => 'Restoo ID',
+                default => 'Platform ID',
+            })
+            ->searchable();
+
+        $baseColumns[] = TextColumn::make('platform_status')
+            ->label('Status')
+            ->badge()
+            ->color(fn (string $state): string => match ($state) {
+                'cancelled' => 'danger',
+                'confirmed' => 'success',
+                'pending' => 'warning',
+                default => 'gray',
+            });
 
         $baseColumns[] = TextColumn::make('created_at')
             ->label('Synced At')

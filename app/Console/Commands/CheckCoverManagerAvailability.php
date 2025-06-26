@@ -63,18 +63,7 @@ class CheckCoverManagerAvailability extends Command
         try {
             $coverManagerService = app(CoverManagerService::class);
 
-            // Test restaurant ID first
-            $this->info('🧪 Testing restaurant ID...');
-            $isValid = $coverManagerService->testRestaurantId($restaurantId);
-
-            if (! $isValid) {
-                $this->error("❌ Invalid restaurant ID: {$restaurantId}");
-
-                return self::FAILURE;
-            }
-
-            $this->info('✅ Restaurant ID is valid');
-            $this->newLine();
+            // Skip restaurant ID validation - we'll discover if it's invalid from the API response
 
             // Check availability
             $this->info('🔍 Checking availability...');

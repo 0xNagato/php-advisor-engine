@@ -115,7 +115,7 @@ class CoverManagerService implements BookingPlatformInterface
             'email' => $booking->guest_email,
             'phone' => $booking->guest_phone,
             'date' => $booking->booking_at->format('Y-m-d'),
-            'time' => $scheduleTemplate->start_time,
+            'hour' => $scheduleTemplate->start_time,
             'size' => $booking->guest_count,
             'notes' => $booking->notes ?? '',
         ];
@@ -275,7 +275,7 @@ class CoverManagerService implements BookingPlatformInterface
         $lastName = isset($nameParts[1]) ? $nameParts[1] : '';
 
         // Format time to HH:MM (remove seconds if present)
-        $formattedTime = Carbon::parse($bookingData['time'])->format('H:i');
+        $formattedTime = Carbon::parse($bookingData['hour'])->format('H:i');
 
         $requestData = [
             'restaurant' => $restaurantId,
