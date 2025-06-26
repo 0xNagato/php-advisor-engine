@@ -37,6 +37,16 @@ class BookingPlatformsResource extends Resource
 
     protected static ?string $pluralModelLabel = 'Platform Connections';
 
+    public static function shouldRegisterNavigation(): bool
+    {
+        return auth()->user()->hasActiveRole('super_admin');
+    }
+
+    public static function canAccess(): bool
+    {
+        return auth()->user()->hasActiveRole('super_admin');
+    }
+
     public static function getEloquentQuery(): Builder
     {
         return parent::getEloquentQuery()
