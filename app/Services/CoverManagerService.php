@@ -36,10 +36,6 @@ class CoverManagerService implements BookingPlatformInterface
         $this->baseUrl = Config::get('services.covermanager.base_url');
         $this->apiKey = Config::get('services.covermanager.api_key');
 
-        // Log the configuration for debugging
-        Log::debug('CoverManager service initialized', [
-            'baseUrl' => $this->baseUrl,
-        ]);
     }
 
     /**
@@ -149,29 +145,6 @@ class CoverManagerService implements BookingPlatformInterface
     }
 
     /**
-     * Test if a restaurant ID is valid
-     * This method can be used directly without requiring a venue
-     *
-     * @param  string  $restaurantId  The CoverManager restaurant ID to test
-     * @return bool Whether the restaurant ID is valid
-     */
-    public function testRestaurantId(string $restaurantId): bool
-    {
-        try {
-            $result = $this->getRestaurantData($restaurantId);
-
-            return ! blank($result);
-        } catch (Throwable $e) {
-            Log::error('CoverManager restaurant ID test failed', [
-                'error' => $e->getMessage(),
-                'restaurantId' => $restaurantId,
-            ]);
-
-            return false;
-        }
-    }
-
-    /**
      * Make a centralized API call with consistent logging and error handling
      *
      * @param  string  $method  HTTP method (GET, POST, etc.)
@@ -196,22 +169,6 @@ class CoverManagerService implements BookingPlatformInterface
                 'DELETE' => Http::withHeaders($requestHeaders)->delete($url),
                 default => throw new \InvalidArgumentException("Unsupported HTTP method: {$method}")
             };
-
-            // Log the API call details
-            $logData = [
-                'operation' => $operationName ?: $method.' '.$endpoint,
-                'url' => $url,
-                'method' => strtoupper($method),
-                'status' => $response->status(),
-                'response' => $response->json(),
-            ];
-
-            // Add request data to log for POST/PUT requests
-            if (! empty($data)) {
-                $logData['request_data'] = $data;
-            }
-
-            Log::info('CoverManager API Response - '.($operationName ?: 'API Call'), $logData);
 
             if ($response->successful()) {
                 return $response->json();
@@ -317,10 +274,13 @@ class CoverManagerService implements BookingPlatformInterface
         $firstName = $nameParts[0] ?? '';
         $lastName = isset($nameParts[1]) ? $nameParts[1] : '';
 
+        // Format time to HH:MM (remove seconds if present)
+        $formattedTime = Carbon::parse($bookingData['time'])->format('H:i');
+
         $requestData = [
             'restaurant' => $restaurantId,
             'date' => $bookingData['date'],
-            'hour' => $bookingData['time'],
+            'hour' => $formattedTime,
             'people' => (string) $bookingData['size'],
             'first_name' => $firstName,
             'last_name' => $lastName,
@@ -407,10 +367,6 @@ class CoverManagerService implements BookingPlatformInterface
         }
 
         if ($response) {
-            Log::info('CoverManager reservation cancelled successfully', [
-                'reservationId' => $reservationId,
-            ]);
-
             return true;
         }
 

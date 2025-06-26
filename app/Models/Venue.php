@@ -694,4 +694,24 @@ class Venue extends Model
             return false;
         }
     }
+
+    /**
+     * Get CoverManager reservations for this venue.
+     *
+     * @return HasMany<CoverManagerReservation, $this>
+     */
+    public function coverManagerReservations(): HasMany
+    {
+        return $this->hasMany(CoverManagerReservation::class);
+    }
+
+    /**
+     * Get Restoo reservations for this venue.
+     *
+     * @return HasMany<RestooReservation, $this>
+     */
+    public function restooReservations(): HasMany
+    {
+        return $this->hasMany(RestooReservation::class);
+    }
 }

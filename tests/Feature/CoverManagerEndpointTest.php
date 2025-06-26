@@ -282,26 +282,6 @@ class CoverManagerEndpointTest extends TestCase
     }
 
     #[Test]
-    public function test_restaurant_id_endpoint()
-    {
-        $mockResponse = [
-            'resp' => 1,
-            'restaurant' => [
-                'restaurant' => $this->testRestaurantId,
-                'name' => 'Test Restaurant',
-            ],
-        ];
-
-        Http::fake([
-            "https://beta.covermanager.com/api/restaurant/get/test-api-key/{$this->testRestaurantId}" => Http::response($mockResponse, 200),
-        ]);
-
-        $result = $this->coverManagerService->testRestaurantId($this->testRestaurantId);
-
-        $this->assertTrue($result);
-    }
-
-    #[Test]
     public function error_handling_for_failed_requests()
     {
         // Test 404 error

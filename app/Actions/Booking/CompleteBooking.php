@@ -68,7 +68,7 @@ class CompleteBooking
             }
 
             BookingPaid::dispatch($booking);
-            BookingConfirmed::dispatch($booking);
+            BookingConfirmed::dispatch($booking->load('schedule', 'venue'));
 
             return ['success' => true, 'message' => 'Booking confirmed successfully'];
         } catch (Exception $e) {

@@ -5,20 +5,13 @@ namespace App\Filament\Resources\Venue\BookingPlatformsResource\Pages;
 use App\Filament\Resources\Venue\BookingPlatformsResource;
 use App\Models\Venue;
 use App\Models\VenuePlatform;
-use App\Services\CoverManagerService;
-use App\Services\RestooService;
-use Filament\Forms\Components\Actions;
-use Filament\Forms\Components\Actions\Action;
 use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Forms\Form;
-use Filament\Notifications\Notification;
 use Filament\Resources\Pages\CreateRecord;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Facades\Log;
-use Throwable;
 
 class CreatePlatform extends CreateRecord
 {
@@ -82,63 +75,6 @@ class CreatePlatform extends CreateRecord
                             ->required()
                             ->visible(fn (callable $get) => $get('platform_type') === 'covermanager'),
 
-                        Actions::make([
-                            Action::make('testCoverManagerConnection')
-                                ->label('Test Connection')
-                                ->color('warning')
-                                ->icon('heroicon-o-arrow-path')
-                                ->action(function () {
-                                    try {
-                                        $restaurantId = $this->data['configuration']['restaurant_id'] ?? null;
-
-                                        Log::debug('CoverManager test connection attempt', [
-                                            'restaurantId' => $restaurantId,
-                                            'form_data' => $this->data,
-                                        ]);
-
-                                        if (empty($restaurantId)) {
-                                            Notification::make()
-                                                ->title('Connection failed')
-                                                ->body('Restaurant ID is required')
-                                                ->danger()
-                                                ->send();
-
-                                            return;
-                                        }
-
-                                        $service = app(CoverManagerService::class);
-                                        $result = $service->testRestaurantId($restaurantId);
-
-                                        if (! $result) {
-                                            Notification::make()
-                                                ->title('Connection failed')
-                                                ->body('Restaurant not found')
-                                                ->danger()
-                                                ->send();
-
-                                            return;
-                                        }
-
-                                        Notification::make()
-                                            ->title('Connection successful')
-                                            ->success()
-                                            ->send();
-                                    } catch (Throwable $e) {
-                                        Log::error('CoverManager test connection failed', [
-                                            'error' => $e->getMessage(),
-                                            'trace' => $e->getTraceAsString(),
-                                        ]);
-
-                                        Notification::make()
-                                            ->title('Connection failed')
-                                            ->body($e->getMessage())
-                                            ->danger()
-                                            ->send();
-                                    }
-                                })
-                                ->visible(fn (callable $get) => $get('platform_type') === 'covermanager'),
-                        ])->visible(fn (callable $get) => $get('platform_type') === 'covermanager'),
-
                         // Restoo Configuration
                         TextInput::make('configuration.api_key')
                             ->label('API Key')
@@ -151,65 +87,6 @@ class CreatePlatform extends CreateRecord
                             ->helperText('The Restoo account name')
                             ->required()
                             ->visible(fn (callable $get) => $get('platform_type') === 'restoo'),
-
-                        Actions::make([
-                            Action::make('testRestooConnection')
-                                ->label('Test Connection')
-                                ->color('warning')
-                                ->icon('heroicon-o-arrow-path')
-                                ->action(function () {
-                                    try {
-                                        $apiKey = $this->data['configuration']['api_key'] ?? null;
-                                        $account = $this->data['configuration']['account'] ?? null;
-
-                                        Log::debug('Restoo test connection attempt', [
-                                            'apiKey' => $apiKey,
-                                            'account' => $account,
-                                            'form_data' => $this->data,
-                                        ]);
-
-                                        if (empty($apiKey) || empty($account)) {
-                                            Notification::make()
-                                                ->title('Connection failed')
-                                                ->body('API key and account name are required')
-                                                ->danger()
-                                                ->send();
-
-                                            return;
-                                        }
-
-                                        $service = app(RestooService::class);
-                                        $result = $service->testCredentials($apiKey, $account);
-
-                                        if (! $result) {
-                                            Notification::make()
-                                                ->title('Connection failed')
-                                                ->body('Invalid credentials')
-                                                ->danger()
-                                                ->send();
-
-                                            return;
-                                        }
-
-                                        Notification::make()
-                                            ->title('Connection successful')
-                                            ->success()
-                                            ->send();
-                                    } catch (Throwable $e) {
-                                        Log::error('Restoo test connection failed', [
-                                            'error' => $e->getMessage(),
-                                            'trace' => $e->getTraceAsString(),
-                                        ]);
-
-                                        Notification::make()
-                                            ->title('Connection failed')
-                                            ->body($e->getMessage())
-                                            ->danger()
-                                            ->send();
-                                    }
-                                })
-                                ->visible(fn (callable $get) => $get('platform_type') === 'restoo'),
-                        ])->visible(fn (callable $get) => $get('platform_type') === 'restoo'),
                     ]),
 
                 Toggle::make('is_enabled')
