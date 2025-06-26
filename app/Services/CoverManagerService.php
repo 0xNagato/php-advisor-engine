@@ -31,18 +31,14 @@ class CoverManagerService implements BookingPlatformInterface
 
     protected string $apiKey;
 
-    protected string $environment;
-
     public function __construct()
     {
         $this->baseUrl = Config::get('services.covermanager.base_url');
         $this->apiKey = Config::get('services.covermanager.api_key');
-        $this->environment = Config::get('services.covermanager.environment', 'beta');
 
         // Log the configuration for debugging
         Log::debug('CoverManager service initialized', [
             'baseUrl' => $this->baseUrl,
-            'environment' => $this->environment,
         ]);
     }
 
