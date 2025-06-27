@@ -106,7 +106,7 @@ class VenueAgreementForm extends Component
         // Update any venues connected to this onboarding
         $this->updateConnectedVenues();
 
-        // Send notification to PRIMA team only if this is the first time accepting the agreement
+        // Send notification to the PRIMA team only if this is the first time accepting the agreement
         if ($wasNeverAccepted) {
             $this->sendAgreementAcceptedNotification();
         }
@@ -188,11 +188,11 @@ class VenueAgreementForm extends Component
     }
 
     /**
-     * Send notification to PRIMA team when agreement is accepted
+     * Send a notification to the PRIMA team when agreement is accepted
      */
     private function sendAgreementAcceptedNotification(): void
     {
-        // Send to the specified PRIMA team email addresses
+        // Send it to the specified PRIMA team email addresses
         $primaEmails = [
             'kevin@primavip.co',
             'prima+agreement@primavip.co',
