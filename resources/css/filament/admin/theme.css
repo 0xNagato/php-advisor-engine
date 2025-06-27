@@ -192,5 +192,7 @@ body::before {
 }
 
 .ms-auto {
-    margin-inline-start: initial;
+    margin-inline-start: unset;
+    width: 90% !important;
+    padding-right: 10px;
 }
