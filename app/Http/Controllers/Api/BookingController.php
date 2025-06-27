@@ -6,7 +6,6 @@ use App\Actions\Booking\CheckCustomerHasNonPrimeBooking;
 use App\Actions\Booking\CompleteBooking;
 use App\Actions\Booking\CreateBooking;
 use App\Actions\Booking\CreateStripePaymentIntent;
-use App\Actions\Region\GetUserRegion;
 use App\Data\Booking\CreateBookingReturnData;
 use App\Enums\BookingStatus;
 use App\Enums\VenueStatus;
@@ -24,7 +23,6 @@ use App\Notifications\Booking\SendCustomerBookingPaymentForm;
 use App\OpenApi\RequestBodies\BookingCompleteRequestBody;
 use App\OpenApi\RequestBodies\BookingCreateRequestBody;
 use App\OpenApi\RequestBodies\BookingEmailInvoiceRequestBody;
-use App\OpenApi\RequestBodies\BookingUpdateRequestBody;
 use App\OpenApi\Responses\BookingCompleteResponse;
 use App\OpenApi\Responses\BookingEmailInvoiceResponse;
 use App\OpenApi\Responses\BookingInvoiceStatusResponse;
@@ -78,9 +76,6 @@ class BookingController extends Controller
                 'message' => 'Venue is not currently accepting bookings',
             ], 422);
         }
-
-        /** @var Region $region */
-        $region = GetUserRegion::run();
 
         try {
             $device = isPrimaApp() ? 'mobile_app' : 'web';
