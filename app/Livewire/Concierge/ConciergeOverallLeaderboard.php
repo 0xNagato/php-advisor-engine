@@ -58,7 +58,7 @@ class ConciergeOverallLeaderboard extends Widget
             ->endOfDay()
             ->setTimezone('UTC');
 
-        $cacheKey = "concierge_leaderboard_{$tempStartDate->toDateTimeString()}_{$tempEndDate->toDateTimeString()}";
+        $cacheKey = "concierge_leaderboard_currency_{$tempStartDate->toDateTimeString()}_{$tempEndDate->toDateTimeString()}";
         Cache::forget($cacheKey);
 
         return Cache::remember(
