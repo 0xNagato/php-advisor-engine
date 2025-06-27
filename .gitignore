@@ -37,3 +37,4 @@ _ide_helper_models.php
 _ide_helper_actions.php
 .mcp.json
 .cursor/mcp.json
+merge_develop_into_main.bat

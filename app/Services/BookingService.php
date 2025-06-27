@@ -39,7 +39,7 @@ class BookingService
         }
 
         BookingPaid::dispatch($booking);
-        BookingConfirmed::dispatch($booking);
+        BookingConfirmed::dispatch($booking->load('schedule', 'venue'));
     }
 
     public function convertToNonPrime(Booking $booking): void

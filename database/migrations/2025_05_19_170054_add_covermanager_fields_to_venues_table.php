@@ -12,12 +12,13 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('venues', function (Blueprint $table) {
-            $table->boolean('uses_covermanager')->default(false);
-            $table->string('covermanager_id')->nullable();
-            $table->string('covermanager_api_key')->nullable();
-            $table->string('covermanager_slug')->nullable();
-            $table->boolean('covermanager_sync_enabled')->default(false);
-            $table->timestamp('last_covermanager_sync')->nullable();
+            // Only add columns that don't already exist
+            if (! Schema::hasColumn('venues', 'covermanager_api_key')) {
+                $table->string('covermanager_api_key')->nullable();
+            }
+            if (! Schema::hasColumn('venues', 'covermanager_slug')) {
+                $table->string('covermanager_slug')->nullable();
+            }
         });
     }
 

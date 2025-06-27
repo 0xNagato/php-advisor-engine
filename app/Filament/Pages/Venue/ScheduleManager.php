@@ -74,5 +74,6 @@ class ScheduleManager extends Page
         } else {
             abort(403, 'You are not authorized to access this page');
         }
+        $this->venue->load('scheduleTemplates');
     }
 }

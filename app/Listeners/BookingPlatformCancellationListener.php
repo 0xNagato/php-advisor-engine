@@ -4,8 +4,6 @@ namespace App\Listeners;
 
 use App\Events\BookingCancelled;
 use App\Factories\BookingPlatformFactory;
-use App\Models\CoverManagerReservation;
-use App\Models\RestooReservation;
 use GuzzleHttp\Exception\ConnectException;
 use GuzzleHttp\Exception\ServerException;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -98,7 +96,10 @@ class BookingPlatformCancellationListener implements ShouldQueue
     protected function cancelInCoverManager($booking): bool
     {
         // Find associated CoverManager reservation
-        $reservation = CoverManagerReservation::query()->where('booking_id', $booking->id)->first();
+        $reservation = PlatformReservation::query()
+            ->where('booking_id', $booking->id)
+            ->where('platform_type', 'covermanager')
+            ->first();
 
         if (! $reservation) {
             Log::info("No CoverManager reservation found for booking $booking->id to cancel");
@@ -107,17 +108,9 @@ class BookingPlatformCancellationListener implements ShouldQueue
         }
 
         // Cancel booking in CoverManager
-        $result = $reservation->cancelInCoverManager();
+        $result = $reservation->cancelInPlatform();
 
         if (! $result) {
-            Log::error("Failed to cancel booking $booking->id in CoverManager", [
-                'booking_id' => $booking->id,
-                'venue_id' => $booking->venue->id,
-                'venue_name' => $booking->venue->name,
-                'reservation_id' => $reservation->id,
-                'covermanager_reservation_id' => $reservation->covermanager_reservation_id,
-            ]);
-
             // Release the job to try again later
             $this->release(300); // 5 minutes
 
@@ -126,7 +119,7 @@ class BookingPlatformCancellationListener implements ShouldQueue
             Log::info("Successfully cancelled booking $booking->id in CoverManager", [
                 'booking_id' => $booking->id,
                 'reservation_id' => $reservation->id,
-                'covermanager_reservation_id' => $reservation->covermanager_reservation_id,
+                'platform_reservation_id' => $reservation->platform_reservation_id,
             ]);
 
             return true;
@@ -139,7 +132,10 @@ class BookingPlatformCancellationListener implements ShouldQueue
     protected function cancelInRestoo($booking): bool
     {
         // Find associated Restoo reservation
-        $reservation = RestooReservation::query()->where('booking_id', $booking->id)->first();
+        $reservation = PlatformReservation::query()
+            ->where('booking_id', $booking->id)
+            ->where('platform_type', 'restoo')
+            ->first();
 
         if (! $reservation) {
             Log::info("No Restoo reservation found for booking $booking->id to cancel");
@@ -148,17 +144,9 @@ class BookingPlatformCancellationListener implements ShouldQueue
         }
 
         // Cancel booking in Restoo
-        $result = $reservation->cancelInRestoo();
+        $result = $reservation->cancelInPlatform();
 
         if (! $result) {
-            Log::error("Failed to cancel booking $booking->id in Restoo", [
-                'booking_id' => $booking->id,
-                'venue_id' => $booking->venue->id,
-                'venue_name' => $booking->venue->name,
-                'reservation_id' => $reservation->id,
-                'restoo_reservation_id' => $reservation->restoo_reservation_id,
-            ]);
-
             // Release the job to try again later
             $this->release(300); // 5 minutes
 
@@ -167,7 +155,7 @@ class BookingPlatformCancellationListener implements ShouldQueue
             Log::info("Successfully cancelled booking $booking->id in Restoo", [
                 'booking_id' => $booking->id,
                 'reservation_id' => $reservation->id,
-                'restoo_reservation_id' => $reservation->restoo_reservation_id,
+                'platform_reservation_id' => $reservation->platform_reservation_id,
             ]);
 
             return true;

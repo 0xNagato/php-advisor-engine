@@ -10,23 +10,19 @@ use function Pest\Laravel\getJson;
 use function Pest\Laravel\postJson;
 
 beforeEach(function () {
-    // Create demo user for fallback sessions
-    $this->demoUser = User::factory()->create([
-        'first_name' => 'Demo',
-        'last_name' => 'Concierge',
-        'email' => 'demo@primavip.co',
-    ]);
-
-    $this->demoConcierge = Concierge::factory()->create([
-        'user_id' => $this->demoUser->id,
-        'hotel_name' => 'Demo Hotel',
-    ]);
-
     // Create a test concierge and VIP code
     $this->concierge = Concierge::factory()->create();
     $this->vipCode = VipCode::create([
         'code' => 'TESTCODE',
         'concierge_id' => $this->concierge->id,
+        'is_active' => true,
+    ]);
+
+    // Create fallback VIP code
+    $this->fallbackConcierge = Concierge::factory()->create();
+    $this->fallbackVipCode = VipCode::create([
+        'code' => 'ALEX',
+        'concierge_id' => $this->fallbackConcierge->id,
         'is_active' => true,
     ]);
 });
@@ -74,7 +70,7 @@ test('can create VIP session with valid code', function () {
     $this->assertNotNull(PersonalAccessToken::findToken($sessionToken));
 });
 
-test('creates demo session for invalid VIP code', function () {
+test('uses fallback code for invalid VIP code', function () {
     $response = postJson('/api/vip/sessions', [
         'vip_code' => 'INVALIDCODE',
     ]);
@@ -86,21 +82,37 @@ test('creates demo session for invalid VIP code', function () {
                 'session_token',
                 'expires_at',
                 'is_demo',
-                'demo_message',
+                'vip_code' => [
+                    'id',
+                    'code',
+                    'concierge' => [
+                        'id',
+                        'name',
+                        'hotel_name',
+                    ],
+                ],
             ],
         ])
         ->assertJson([
             'success' => true,
             'data' => [
-                'is_demo' => true,
+                'is_demo' => false,
+                'vip_code' => [
+                    'code' => 'ALEX',
+                ],
             ],
         ]);
 
-    // Check that a Sanctum token was created for demo user
+    // Check that a VIP session was created with fallback code
+    $this->assertDatabaseHas('vip_sessions', [
+        'vip_code_id' => $this->fallbackVipCode->id,
+    ]);
+
+    // Check that a Sanctum token was created for fallback concierge
     $sessionToken = $response->json('data.session_token');
     $sanctumToken = PersonalAccessToken::findToken($sessionToken);
     $this->assertNotNull($sanctumToken);
-    $this->assertEquals($this->demoUser->id, $sanctumToken->tokenable_id);
+    $this->assertEquals($this->fallbackConcierge->user->id, $sanctumToken->tokenable_id);
 });
 
 test('validates VIP session token correctly', function () {
@@ -291,15 +303,15 @@ test('VIP session token works with API authentication', function () {
     $this->assertEquals($this->concierge->user->id, $meResponse->json('data.user.id'));
 });
 
-test('demo session token works with API authentication', function () {
-    // Create a demo session with invalid code
+test('fallback session token works with API authentication', function () {
+    // Create a fallback session with invalid code
     $response = postJson('/api/vip/sessions', [
         'vip_code' => 'INVALIDCODE',
     ]);
 
     $sessionToken = $response->json('data.session_token');
 
-    // Test that the demo token works with authenticated endpoints
+    // Test that the fallback token works with authenticated endpoints
     $meResponse = getJson('/api/me', [
         'Authorization' => 'Bearer '.$sessionToken,
     ]);
@@ -316,7 +328,6 @@ test('demo session token works with API authentication', function () {
             ],
         ]);
 
-    // Should return the demo user
-    $this->assertEquals($this->demoUser->id, $meResponse->json('data.user.id'));
-    $this->assertEquals('demo@primavip.co', $meResponse->json('data.user.email'));
+    // Should return the fallback concierge user
+    $this->assertEquals($this->fallbackConcierge->user->id, $meResponse->json('data.user.id'));
 });

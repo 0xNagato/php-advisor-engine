@@ -694,4 +694,34 @@ class Venue extends Model
             return false;
         }
     }
+
+    /**
+     * Get all platform reservations for this venue.
+     *
+     * @return HasMany<PlatformReservation, $this>
+     */
+    public function platformReservations(): HasMany
+    {
+        return $this->hasMany(PlatformReservation::class);
+    }
+
+    /**
+     * Get CoverManager reservations for this venue.
+     *
+     * @return HasMany<PlatformReservation, $this>
+     */
+    public function coverManagerReservations(): HasMany
+    {
+        return $this->platformReservations()->where('platform_type', 'covermanager');
+    }
+
+    /**
+     * Get Restoo reservations for this venue.
+     *
+     * @return HasMany<PlatformReservation, $this>
+     */
+    public function restooReservations(): HasMany
+    {
+        return $this->platformReservations()->where('platform_type', 'restoo');
+    }
 }

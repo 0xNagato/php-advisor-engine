@@ -12,6 +12,13 @@ return new class extends Migration
      */
     public function up(): void
     {
+        // Check if old columns exist before migrating
+        if (! Schema::hasColumn('venues', 'uses_covermanager') ||
+            ! Schema::hasColumn('venues', 'covermanager_id')) {
+            // Old columns don't exist (fresh database), skip migration
+            return;
+        }
+
         // First, migrate any existing CoverManager venues to the new platform structure
         $coverManagerVenues = DB::table('venues')
             ->where('uses_covermanager', true)

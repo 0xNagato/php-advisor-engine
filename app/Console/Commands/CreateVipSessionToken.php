@@ -15,15 +15,13 @@ class CreateVipSessionToken extends Command
      */
     protected $signature = 'vip:create-session-token
                             {vip_code : The VIP code to create a session for}
-                            {--demo : Create a demo session instead of using a VIP code}
-                            {--expires=24 : Hours until the token expires (default: 24)}
                             {--search= : Search VIP codes by concierge name, hotel, or email}
                             {--list : List all VIP codes with details}';
 
     /**
      * The console command description.
      */
-    protected $description = 'Create a VIP session token for testing or administrative purposes';
+    protected $description = 'Create a VIP session token for testing or administrative purposes. Uses fallback code if invalid code is provided.';
 
     /**
      * Execute the console command.
@@ -31,8 +29,6 @@ class CreateVipSessionToken extends Command
     public function handle(VipCodeService $vipCodeService): int
     {
         $vipCode = $this->argument('vip_code');
-        $isDemo = $this->option('demo');
-        $expiresHours = (int) $this->option('expires');
         $searchTerm = $this->option('search');
         $listAll = $this->option('list');
 
@@ -48,57 +44,32 @@ class CreateVipSessionToken extends Command
 
         $this->info('Creating VIP session token...');
         $this->line("VIP Code: {$vipCode}");
-        $this->line('Demo Mode: '.($isDemo ? 'Yes' : 'No'));
-        $this->line("Expires in: {$expiresHours} hours");
 
-        if ($isDemo) {
-            // Create demo session
-            $this->info('Creating demo session...');
-
-            try {
-                $sessionData = $vipCodeService->createDemoSession();
-
-                $this->displaySessionInfo($sessionData, true);
-
-                return Command::SUCCESS;
-            } catch (Exception $e) {
-                $this->error('Failed to create demo session: '.$e->getMessage());
-                $this->line('Make sure the demo user exists by running: php artisan vip:setup-demo-user');
-
-                return Command::FAILURE;
-            }
+        $fallbackCode = config('app.vip.fallback_code');
+        if ($fallbackCode) {
+            $this->line("Fallback Code: {$fallbackCode} (used if main code is invalid)");
         }
 
-        // Validate VIP code exists
-        $vipCodeModel = VipCode::query()->where('code', $vipCode)->first();
-
-        if (! $vipCodeModel) {
-            $this->error("VIP code '{$vipCode}' not found in the database.");
-            $this->showAvailableVipCodes();
-
-            return Command::FAILURE;
-        }
-
-        if (! $vipCodeModel->is_active) {
-            $this->warn("VIP code '{$vipCode}' is inactive.");
-            if (! $this->confirm('Do you want to create a session anyway?')) {
-                return Command::FAILURE;
-            }
-        }
-
-        // Create VIP session
+        // Create VIP session (will use fallback code if original is invalid)
         $this->info('Creating VIP session...');
 
         try {
             $sessionData = $vipCodeService->createVipSession($vipCode);
 
             if (! $sessionData) {
-                $this->error('Failed to create VIP session.');
+                $this->error('Failed to create VIP session. Both the provided code and fallback code are invalid or inactive.');
+                $this->showAvailableVipCodes();
 
                 return Command::FAILURE;
             }
 
-            $this->displaySessionInfo($sessionData, false);
+            // Check if fallback code was used
+            $usedFallback = $sessionData['vip_code']->code !== strtoupper($vipCode);
+            if ($usedFallback) {
+                $this->warn("Original code '{$vipCode}' not found or inactive. Used fallback code '{$sessionData['vip_code']->code}'.");
+            }
+
+            $this->displaySessionInfo($sessionData, $usedFallback);
 
             return Command::SUCCESS;
 
@@ -233,13 +204,19 @@ class CreateVipSessionToken extends Command
         $this->line('Search options:');
         $this->line('  --search="name"     Search by concierge name, hotel, or email');
         $this->line('  --list              Show all VIP codes with details');
-        $this->line('  --demo              Create a demo session instead');
+
+        $fallbackCode = config('app.vip.fallback_code');
+        if ($fallbackCode) {
+            $this->newLine();
+            $this->line('Note: If an invalid code is provided, the system will automatically');
+            $this->line("      use the fallback code '{$fallbackCode}' if available.");
+        }
     }
 
     /**
      * Display session information in a formatted way
      */
-    private function displaySessionInfo(array $sessionData, bool $isDemo): void
+    private function displaySessionInfo(array $sessionData, bool $usedFallback): void
     {
         $this->newLine();
         $this->info('✅ VIP Session Token Created Successfully!');
@@ -255,22 +232,23 @@ class CreateVipSessionToken extends Command
         $this->line($sessionData['expires_at']);
         $this->newLine();
 
-        if ($isDemo) {
-            $this->line('Mode: <fg=blue>Demo Session</>');
-            $this->line('Message: '.($sessionData['demo_message'] ?? 'Demo mode active'));
+        if ($usedFallback) {
+            $this->line('Mode: <fg=yellow>VIP Session (Fallback Code Used)</>');
         } else {
             $this->line('Mode: <fg=green>VIP Session</>');
-            $this->line('VIP Code: '.$sessionData['vip_code']->code);
-            $this->line('Concierge: '.$sessionData['vip_code']->concierge->user->name);
-            $this->line('Hotel: '.$sessionData['vip_code']->concierge->hotel_name);
         }
+
+        $this->line('VIP Code: '.$sessionData['vip_code']->code);
+        $this->line('Concierge: '.$sessionData['vip_code']->concierge->user->name);
+        $this->line('Hotel: '.$sessionData['vip_code']->concierge->hotel_name);
 
         $this->newLine();
         $this->line('Usage Examples:');
         $this->line('  curl -H "Authorization: Bearer '.$sessionData['token'].'" '.config('app.url').'/api/me');
         $this->line('  curl -H "Authorization: Bearer '.$sessionData['token'].'" '.config('app.url').'/api/venues');
 
+        $sessionDurationHours = config('app.vip.session_duration_hours', 24);
         $this->newLine();
-        $this->line('⚠️  This token will expire in 24 hours and should only be used for testing.');
+        $this->line("⚠️  This token will expire in {$sessionDurationHours} hours and should only be used for testing.");
     }
 }

@@ -6,6 +6,7 @@ use App\Services\RestooService;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Support\Facades\Log;
 
 class RestooReservation extends Model
 {
@@ -76,21 +77,56 @@ class RestooReservation extends Model
             return null;
         }
 
-        // Format date and time per Restoo requirements
-        $bookingTime = $booking->booking_at;
+        $restooService = app(RestooService::class);
 
-        // Create a new Restoo reservation
-        return self::query()->create([
+        if (! $restooService) {
+            return null;
+        }
+
+        // Call the Restoo API first
+        $response = $restooService->createReservation($venue, $booking);
+
+        if (! $response) {
+            Log::error("Restoo create reservation failed for booking {$booking->id} at {$venue->name}: API returned null", [
+                'venue_id' => $venue->id,
+                'venue_name' => $venue->name,
+                'booking_id' => $booking->id,
+            ]);
+
+            return null;
+        }
+
+        // Only create the database record after successful API call
+        $reservation = self::query()->create([
             'venue_id' => $venue->id,
             'booking_id' => $booking->id,
-            'reservation_datetime' => $bookingTime,
+            'restoo_reservation_id' => $response['uuid'] ?? null,
+            'restoo_status' => $response['status'] ?? 'unknown',
+            'reservation_datetime' => $booking->booking_at,
             'party_size' => $booking->guest_count,
             'customer_name' => $booking->guest_name,
             'customer_email' => $booking->guest_email,
             'customer_phone' => $booking->guest_phone,
             'notes' => $booking->notes,
-            'synced_to_restoo' => false,
+            'restoo_response' => $response,
+            'synced_to_restoo' => true,
+            'last_synced_at' => Carbon::now(),
         ]);
+
+        Log::info("Restoo create reservation successful for booking {$booking->id} at {$venue->name}", [
+            'booking_id' => $booking->id,
+            'venue_id' => $venue->id,
+            'venue_name' => $venue->name,
+            'reservation_id' => $reservation->id,
+            'restoo_reservation_id' => $response['uuid'] ?? null,
+            'reservation_date' => $booking->booking_at->format('Y-m-d'),
+            'reservation_time' => $booking->booking_at->format('H:i'),
+            'party_size' => $booking->guest_count,
+            'customer_name' => $booking->guest_name,
+            'status' => $response['status'] ?? 'unknown',
+        ]);
+
+        return $reservation;
     }
 
     /**
@@ -98,15 +134,10 @@ class RestooReservation extends Model
      */
     public function syncToRestoo(): bool
     {
-        \Log::debug('RestooReservation::syncToRestoo called', [
-            'reservation_id' => $this->id,
-            'booking_id' => $this->booking_id,
-        ]);
-
         $venue = $this->venue;
 
         if (! $venue->hasPlatform('restoo')) {
-            \Log::warning('Venue does not have Restoo platform', [
+            Log::error("Restoo sync reservation failed for venue {$venue->name}: Venue does not have Restoo platform", [
                 'venue_id' => $venue?->id,
                 'reservation_id' => $this->id,
             ]);
@@ -117,7 +148,7 @@ class RestooReservation extends Model
         $booking = $this->booking;
 
         if (! $booking) {
-            \Log::error('No booking found for reservation', [
+            Log::error("Restoo sync reservation failed for reservation {$this->id}: No booking found for reservation", [
                 'reservation_id' => $this->id,
                 'booking_id' => $this->booking_id,
             ]);
@@ -128,28 +159,20 @@ class RestooReservation extends Model
         $restooService = app(RestooService::class);
 
         if (! $restooService) {
-            \Log::error('Failed to instantiate RestooService');
+            Log::error("Restoo sync reservation failed for reservation {$this->id}: Failed to instantiate RestooService");
 
             return false;
         }
 
-        \Log::debug('Calling RestooService::createReservation', [
-            'venue_id' => $venue->id,
-            'booking_id' => $booking->id,
-        ]);
-
         // Call the Restoo API
         $response = $restooService->createReservation($venue, $booking);
 
-        \Log::debug('RestooService::createReservation response', [
-            'response' => $response,
-            'is_null' => $response === null,
-        ]);
-
         if (! $response) {
-            \Log::error('RestooService::createReservation returned null', [
+            Log::error("Restoo sync reservation failed for booking {$booking->id} at {$venue->name}: API returned null", [
                 'venue_id' => $venue->id,
+                'venue_name' => $venue->name,
                 'booking_id' => $booking->id,
+                'reservation_id' => $this->id,
             ]);
 
             return false;
@@ -164,10 +187,14 @@ class RestooReservation extends Model
             'last_synced_at' => Carbon::now(),
         ]);
 
-        \Log::info('Restoo reservation synced successfully', [
+        Log::info("Restoo sync reservation successful for booking {$booking->id} at {$venue->name}", [
             'reservation_id' => $this->id,
+            'venue_id' => $venue->id,
+            'venue_name' => $venue->name,
             'booking_id' => $booking->id,
-            'external_id' => $response['uuid'] ?? null,
+            'restoo_reservation_id' => $response['uuid'] ?? null,
+            'customer_name' => $this->customer_name,
+            'status' => $response['status'] ?? 'unknown',
         ]);
 
         return true;
@@ -201,6 +228,22 @@ class RestooReservation extends Model
             $this->update([
                 'restoo_status' => 'cancelled',
                 'last_synced_at' => Carbon::now(),
+            ]);
+
+            Log::info("Restoo cancel reservation successful for reservation {$this->id} at {$this->venue->name}", [
+                'reservation_id' => $this->id,
+                'venue_id' => $this->venue->id,
+                'venue_name' => $this->venue->name,
+                'restoo_reservation_id' => $this->restoo_reservation_id,
+                'customer_name' => $this->customer_name,
+            ]);
+        } else {
+            Log::error("Restoo cancel reservation failed for reservation {$this->id} at {$this->venue->name}", [
+                'reservation_id' => $this->id,
+                'venue_id' => $this->venue->id,
+                'venue_name' => $this->venue->name,
+                'restoo_reservation_id' => $this->restoo_reservation_id,
+                'customer_name' => $this->customer_name,
             ]);
         }
 

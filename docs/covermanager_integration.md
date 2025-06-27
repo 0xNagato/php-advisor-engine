@@ -56,25 +56,30 @@ When a booking is confirmed in PRIMA, it is automatically synchronized to CoverM
 
 Reservations are automatically cancelled in CoverManager when they are cancelled in PRIMA through the `CoverManagerBookingCancellationListener`. This happens when the `BookingCancelled` event is fired.
 
-You can also manually cancel reservations using the CoverManager service:
+You can also manually manage reservations using the unified model:
 
 ```php
-// Get the CoverManager service
-$coverManagerService = app(\App\Services\CoverManagerService::class);
+// Using the new unified model (Recommended)
+$reservation = PlatformReservation::createFromBooking($booking, 'covermanager');
+$success = $reservation->syncToPlatform();
+$cancelled = $reservation->cancelInPlatform();
 
-// Cancel a reservation
+// Or using the CoverManager service directly
+$coverManagerService = app(\App\Services\CoverManagerService::class);
 $success = $coverManagerService->cancelReservation(
     $venue->covermanager_id, 
-    $coverManagerReservation->covermanager_reservation_id
+    $reservation->platform_reservation_id
 );
 ```
 
 ## Architecture
 
-### Database Models
+### Database Models (Updated June 2025)
 
-- **Venue**: Contains CoverManager configuration (`uses_covermanager`, `covermanager_id`)
-- **CoverManagerReservation**: Maps PRIMA bookings to CoverManager reservations
+- **Venue**: Contains legacy CoverManager fields (backward compatible)
+- **VenuePlatform**: New platform configuration model with `platform_type: 'covermanager'`
+- **PlatformReservation**: **Unified reservation model** that handles CoverManager and all other platforms ✅ **NEW**
+- ~~**CoverManagerReservation**~~: **DEPRECATED** - replaced by PlatformReservation (will be removed post-migration)
 
 ### Services
 
@@ -90,10 +95,12 @@ $success = $coverManagerService->cancelReservation(
 
 - **SyncCoverManagerAvailability**: Synchronizes venue availability with CoverManager
 
-### Event Listeners
+### Event Listeners (Updated June 2025)
 
-- **CoverManagerBookingListener**: Listens for booking confirmations and syncs to CoverManager
-- **CoverManagerBookingCancellationListener**: Listens for booking cancellations and removes reservations from CoverManager
+- **BookingPlatformSyncListener**: **Unified listener** that syncs bookings to all enabled platforms including CoverManager ✅ **NEW**
+- **BookingPlatformCancellationListener**: **Unified listener** that cancels reservations across all platforms including CoverManager ✅ **NEW**
+- ~~**CoverManagerBookingListener**~~: **DEPRECATED** - replaced by unified listeners
+- ~~**CoverManagerBookingCancellationListener**~~: **DEPRECATED** - replaced by unified listeners
 
 ## Troubleshooting
 
