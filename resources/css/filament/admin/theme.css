@@ -191,7 +191,7 @@ body::before {
     @apply bg-indigo-100;
 }
 
-.ms-auto {
+nav .ms-auto {
     margin-inline-start: unset;
     width: 90% !important;
     padding-right: 10px;
