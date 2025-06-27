@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Models\User;
 use App\Models\VipCode;
 use App\Models\VipSession;
+use Exception;
 use Illuminate\Support\Facades\Log;
 use Laravel\Sanctum\PersonalAccessToken;
 

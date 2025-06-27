@@ -21,6 +21,15 @@ use App\Models\Booking;
 use App\Models\Region;
 use App\Models\Venue;
 use App\Notifications\Booking\SendCustomerBookingPaymentForm;
+use App\OpenApi\RequestBodies\BookingCompleteRequestBody;
+use App\OpenApi\RequestBodies\BookingCreateRequestBody;
+use App\OpenApi\RequestBodies\BookingEmailInvoiceRequestBody;
+use App\OpenApi\RequestBodies\BookingUpdateRequestBody;
+use App\OpenApi\Responses\BookingCompleteResponse;
+use App\OpenApi\Responses\BookingEmailInvoiceResponse;
+use App\OpenApi\Responses\BookingInvoiceStatusResponse;
+use App\OpenApi\Responses\BookingResponse;
+use App\OpenApi\Responses\MessageResponse;
 use App\Services\BookingService;
 use Exception;
 use Illuminate\Contracts\Database\Query\Builder;
@@ -28,9 +37,22 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Mail;
 use Stripe\Exception\ApiErrorException;
+use Vyuldashev\LaravelOpenApi\Attributes as OpenApi;
+use Vyuldashev\LaravelOpenApi\Attributes\RequestBody;
+use Vyuldashev\LaravelOpenApi\Attributes\Response as OpenApiResponse;
 
+#[OpenApi\PathItem]
 class BookingController extends Controller
 {
+    /**
+     * Create a new booking.
+     */
+    #[OpenApi\Operation(
+        tags: ['Bookings'],
+        security: 'BearerTokenSecurityScheme'
+    )]
+    #[RequestBody(factory: BookingCreateRequestBody::class)]
+    #[OpenApiResponse(factory: BookingResponse::class)]
     public function store(BookingCreateRequest $request): JsonResponse|Response
     {
         $validatedData = $request->validated();
@@ -128,8 +150,16 @@ class BookingController extends Controller
     }
 
     /**
+     * Update an existing booking.
+     *
      * @throws ApiErrorException
      */
+    //    #[OpenApi\Operation(
+    //        tags: ['Bookings'],
+    //        security: 'BearerTokenSecurityScheme'
+    //    )]
+    //    #[RequestBody(factory: BookingUpdateRequestBody::class)]
+    //    #[OpenApiResponse(factory: MessageResponse::class)]
     public function update(BookingUpdateRequest $request, Booking $booking): JsonResponse
     {
         $validatedData = $request->validated();
@@ -199,6 +229,12 @@ class BookingController extends Controller
      *
      * @throws ApiErrorException
      */
+    #[OpenApi\Operation(
+        tags: ['Bookings'],
+        security: 'BearerTokenSecurityScheme'
+    )]
+    #[RequestBody(factory: BookingCompleteRequestBody::class)]
+    #[OpenApiResponse(factory: BookingCompleteResponse::class)]
     public function complete(BookingCompleteRequest $request, Booking $booking): JsonResponse
     {
         $validatedData = $request->validated();
@@ -218,7 +254,7 @@ class BookingController extends Controller
             ], 422);
         }
 
-        if (! $booking->venue || ! in_array($booking->venue->status, [VenueStatus::ACTIVE, VenueStatus::HIDDEN])) {
+        if (! $booking->venue || $booking->venue->status !== VenueStatus::ACTIVE) {
             activity()
                 ->performedOn($booking)
                 ->withProperties([
@@ -227,7 +263,7 @@ class BookingController extends Controller
                     'concierge_id' => auth()->user()?->concierge?->id,
                     'concierge_name' => auth()->user()?->name,
                 ])
-                ->log('API - Booking completion failed - Venue not accepting bookings');
+                ->log('API - Booking completion failed - Venue not active');
 
             return response()->json([
                 'message' => 'Venue is not currently accepting bookings',
@@ -279,7 +315,7 @@ class BookingController extends Controller
 
                 $booking->refresh();
 
-                // Load necessary relationships
+                // Load the necessary relationships
                 $booking->load(['venue', 'venue.inRegion']);
 
                 /** @var Region $region */
@@ -296,9 +332,10 @@ class BookingController extends Controller
                     'result' => $result,
                 ];
 
-                // Only include invoice URL if the invoice has been processed and uploaded
+                // Only include the invoice URL if the invoice has been processed and uploaded
                 if ($booking->invoice_path) {
-                    $responseData['invoice_download_url'] = route('customer.invoice.download', ['uuid' => $booking->uuid]);
+                    $responseData['invoice_download_url'] = route('customer.invoice.download',
+                        ['uuid' => $booking->uuid]);
                 } else {
                     $responseData['invoice_status'] = 'processing';
                     $responseData['invoice_message'] = 'Invoice is being generated and will be available shortly. You can check back or it will be emailed once ready.';
@@ -377,7 +414,7 @@ class BookingController extends Controller
 
             $booking->refresh();
 
-            // Load necessary relationships
+            // Load the necessary relationships
             $booking->load(['venue', 'venue.inRegion']);
 
             /** @var Region $region */
@@ -408,7 +445,15 @@ class BookingController extends Controller
         }
     }
 
-    public function destroy($id): JsonResponse
+    /**
+     * Delete (abandon) a booking by ID.
+     */
+    #[OpenApi\Operation(
+        tags: ['Bookings'],
+        security: 'BearerTokenSecurityScheme'
+    )]
+    #[OpenApiResponse(factory: MessageResponse::class)]
+    public function destroy(int $id): JsonResponse
     {
         /** @var Booking $booking */
         $booking = Booking::query()->findOrFail($id);
@@ -449,6 +494,11 @@ class BookingController extends Controller
     /**
      * Get invoice status and download URL for a booking
      */
+    #[OpenApi\Operation(
+        tags: ['Bookings'],
+        security: 'BearerTokenSecurityScheme'
+    )]
+    #[OpenApiResponse(factory: BookingInvoiceStatusResponse::class)]
     public function invoiceStatus(Booking $booking): JsonResponse
     {
         if ($booking->status !== BookingStatus::CONFIRMED) {
@@ -472,8 +522,15 @@ class BookingController extends Controller
     }
 
     /**
-     * Email invoice to customer
+     * Email invoice to a customer
      */
+    #[OpenApi\Operation(
+        tags: ['Bookings'],
+        security: 'BearerTokenSecurityScheme'
+    )]
+    #[RequestBody(factory: BookingEmailInvoiceRequestBody::class)]
+    #[OpenApiResponse(factory: MessageResponse::class, statusCode: 422)]
+    #[OpenApiResponse(factory: BookingEmailInvoiceResponse::class, statusCode: 200)]
     public function emailInvoice(BookingEmailInvoiceRequest $request, Booking $booking): JsonResponse
     {
         $validatedData = $request->validated();
@@ -544,7 +601,10 @@ class BookingController extends Controller
         }
     }
 
-    public function dayDisplay($timezone, $booking): string
+    /**
+     * Generate a human-readable display of the booking's date and time.
+     */
+    private function dayDisplay(string $timezone, mixed $booking): string
     {
         $time = $booking->format('g:i a');
         $bookingDate = $booking->startOfDay();
@@ -563,6 +623,8 @@ class BookingController extends Controller
     }
 
     /**
+     * Handle updates for non-prime bookings.
+     *
      * @throws ApiErrorException
      */
     private function handleNonPrimeBooking(Booking $booking, array $validatedData): JsonResponse
