@@ -20,6 +20,7 @@ use Throwable;
  * Current Status:
  * ✅ Working: Restaurant list (/restaurant/list/{apiKey}/)
  * ✅ Working: Availability check (POST /reserv/availability with ApiKey header)
+ * ✅ Working: Calendar availability (POST /reserv/availability_calendar_total with ApiKey header)
  * 🔧 Testing: Reservation creation (POST /reserv/create with ApiKey header)
  * 🔧 Testing: Reservation cancellation (POST /reserv/cancel with ApiKey header)
  *
@@ -86,6 +87,27 @@ class CoverManagerService implements BookingPlatformInterface
         }
 
         return $this->checkAvailabilityRaw($restaurantId, $date, $time, $partySize);
+    }
+
+    /**
+     * Check calendar availability for a specific venue with optional date range
+     */
+    public function checkAvailabilityCalendar(Venue $venue, ?Carbon $dateStart = null, ?Carbon $dateEnd = null, string $discount = 'all', string $productType = '1'): array
+    {
+        // Get CoverManager restaurant ID from venue platform configuration
+        $platform = $venue->getPlatform('covermanager');
+
+        if (! $platform || ! $platform->is_enabled) {
+            return [];
+        }
+
+        $restaurantId = $platform->getConfig('restaurant_id');
+
+        if (blank($restaurantId)) {
+            return [];
+        }
+
+        return $this->checkAvailabilityCalendarRaw($restaurantId, $dateStart, $dateEnd, $discount, $productType);
     }
 
     /**
@@ -407,5 +429,49 @@ class CoverManagerService implements BookingPlatformInterface
         }
 
         return true;
+    }
+
+    /**
+     * Check calendar availability for a specific restaurant with optional date range (internal implementation)
+     */
+    public function checkAvailabilityCalendarRaw(string $restaurantId, ?Carbon $dateStart = null, ?Carbon $dateEnd = null, string $discount = 'all', string $productType = '1'): array
+    {
+        $requestData = [
+            'restaurant' => $restaurantId,
+            'discount' => $discount,
+            'product_type' => $productType,
+        ];
+
+        // Add optional date filters
+        if ($dateStart) {
+            $requestData['dateStart'] = $dateStart->format('Y-m-d');
+        }
+
+        if ($dateEnd) {
+            $requestData['dateEnd'] = $dateEnd->format('Y-m-d');
+        }
+
+        $response = $this->makeApiCall(
+            'POST',
+            '/reserv/availability_calendar_total',
+            $requestData,
+            ['apikey' => $this->apiKey],
+            'Check Calendar Availability'
+        );
+
+        // Handle CoverManager's error response format
+        if ($response && isset($response['resp']) && $response['resp'] === 0) {
+            Log::error('CoverManager calendar availability API error', [
+                'error' => $response['error'] ?? $response['status'] ?? 'Unknown error',
+                'restaurantId' => $restaurantId,
+                'dateStart' => $dateStart?->format('Y-m-d'),
+                'dateEnd' => $dateEnd?->format('Y-m-d'),
+                'requestData' => $requestData,
+            ]);
+
+            return [];
+        }
+
+        return $response ?? [];
     }
 }
