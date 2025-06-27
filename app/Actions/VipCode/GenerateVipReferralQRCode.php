@@ -17,16 +17,16 @@ class GenerateVipReferralQRCode
     public function execute(VipCode $vipCode): array
     {
         // Create the URL for the QR code
-        $qrLinkData = [
-            'code' => $vipCode->code,
-        ];
-
-        if (isset($vipCode->concierge_id)) {
-            $qrLinkData['cid'] = $vipCode->concierge_id;
-        }
-
         $qrLink = config('app.primary_domain').'/';
-        $qrLink .= ltrim(route('v.booking', $qrLinkData, false), '/');
+
+        // Generate the base route with just the code
+        $baseRoute = route('v.booking', $vipCode->code, false);
+        $qrLink .= ltrim($baseRoute, '/');
+
+        // Add concierge ID as query parameter if present
+        if (isset($vipCode->concierge_id)) {
+            $qrLink .= '?cid='.$vipCode->concierge_id;
+        }
 
         // Generate QR code for display (PNG)
         $qrDisplayOptions = new QROptions([

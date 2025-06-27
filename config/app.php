@@ -2,6 +2,7 @@
 
 use App\Providers\AppServiceProvider;
 use App\Providers\AuthServiceProvider;
+use App\Providers\BookingPlatformServiceProvider;
 use App\Providers\EventServiceProvider;
 use App\Providers\Filament\AdminPanelProvider;
 use App\Providers\FilamentRenderHookProvider;
@@ -210,6 +211,7 @@ return [
         AdminPanelProvider::class,
         RouteServiceProvider::class,
         FilamentRenderHookProvider::class,
+        BookingPlatformServiceProvider::class,
     ])->toArray(),
 
     /*
@@ -229,7 +231,7 @@ return [
 
     'default_timezone' => env('LOCAL_ENV_TIMEZONE', 'America/New_York'),
     'default_region' => env('LOCAL_ENV_REGION', 'miami'),
-    'no_tax' => env('NO_TAX', true),
+    'no_tax' => env('NO_TAX', false),
     'active_regions' => ['miami', 'los_angeles', 'ibiza'],
 
     /*
@@ -384,5 +386,18 @@ return [
     |
     */
     'god_ids' => [1, 2, 204],
+
+    /*
+    |--------------------------------------------------------------------------
+    | VIP Code Configuration
+    |--------------------------------------------------------------------------
+    |
+    | Configuration for VIP code behavior and session management.
+    |
+    */
+    'vip' => [
+        'fallback_code' => env('VIP_FALLBACK_CODE', 'ALEX'),
+        'session_duration_hours' => env('VIP_SESSION_DURATION_HOURS', 24),
+    ],
 
 ];

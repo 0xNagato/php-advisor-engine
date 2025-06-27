@@ -9,6 +9,7 @@ use App\Models\Region;
 use App\Models\Venue;
 use App\Services\ReservationService;
 use App\Traits\ManagesBookingForms;
+use Cache;
 use Filament\Forms\Form;
 use Filament\Pages\Page;
 use Illuminate\Database\Eloquent\Collection;
@@ -43,11 +44,14 @@ class EarningsPotential extends Page
      */
     public array $timeslotHeaders = [];
 
+    public ?Concierge $concierge = null;
+
     public function mount(): void
     {
         $region = Region::query()->find(session('region', GetUserRegion::run()->id));
         $this->timezone = $region?->timezone;
         $this->currency = $region?->currency;
+        $this->concierge = $this->getConcierge();
         $this->form->fill();
     }
 
@@ -74,8 +78,7 @@ class EarningsPotential extends Page
 
     public function conciergePayout(Venue $venue, bool $isPrime): int
     {
-        $concierge = Concierge::query()->where('user_id', auth()->id())->first();
-        if (! $concierge) {
+        if (! $this->concierge) {
             return 0;
         }
 
@@ -87,7 +90,7 @@ class EarningsPotential extends Page
                 $totalFee += $venue->increment_fee * ($guestCount - 2);
             }
 
-            return (int) ($totalFee * ($concierge->payout_percentage / 100) * 100);
+            return (int) ($totalFee * ($this->concierge->payout_percentage / 100) * 100);
         }
 
         $totalFee = $venue->non_prime_fee_per_head * $guestCount;
@@ -141,5 +144,14 @@ class EarningsPotential extends Page
 
         $this->venues = null;
         $this->form->fill();
+    }
+
+    /**
+     * Retrieve or cache the Concierge instance for the given user.
+     */
+    protected function getConcierge(): ?Concierge
+    {
+        return Cache::remember('concierge_user_'.auth()->id(), 4 * 60 * 60,
+            fn () => Concierge::query()->where('user_id', auth()->id())->first());
     }
 }

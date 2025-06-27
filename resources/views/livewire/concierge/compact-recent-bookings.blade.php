@@ -4,7 +4,7 @@
 
 <div class="overflow-x-auto">
     <div class="inline-block min-w-full align-middle">
-        <div class="overflow-hidden border rounded-lg">
+        <div class="overflow-hidden rounded-lg border">
             <table class="min-w-full divide-y divide-gray-200">
                 <thead class="bg-gray-50">
                     <tr>
@@ -18,7 +18,7 @@
                         <tr class="cursor-pointer hover:bg-gray-50"
                             onclick="window.location='{{ ViewBooking::getUrl([$booking]) }}'">
                             <td class="px-3 py-2 text-xs text-gray-900 whitespace-nowrap">
-                                {{ Str::limit($booking->venue->name, 20) }}
+                                {{ Str::limit($booking->venue?->name, 20) }}
                             </td>
                             <td class="px-3 py-2 text-xs text-gray-500 whitespace-nowrap">
                                 {{ $booking->booking_at->format('M j') }}

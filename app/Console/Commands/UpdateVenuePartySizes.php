@@ -64,6 +64,7 @@ class UpdateVenuePartySizes extends Command
                     if (! $isDryRun) {
                         $this->addMissingPartySizes($venue, $missingPartySizes);
                         $this->createMissingSchedules($missingSchedules);
+
                         $this->info('✓ Changes applied successfully');
                     }
                 }
@@ -161,8 +162,8 @@ class UpdateVenuePartySizes extends Command
                     'start_time' => $startTime->format('H:i:s'),
                     'end_time' => $startTime->copy()->addMinutes(30)->format('H:i:s'),
                     'is_available' => $isAvailable,
-                    'prime_time' => $isAvailable, // Prime time follows "is_available" logic
-                    'available_tables' => $isAvailable ? Venue::DEFAULT_TABLES : 0,
+                    'prime_time' => false,
+                    'available_tables' => $isAvailable ? 1 : 0,
                     'created_at' => now(),
                     'updated_at' => now(),
                 ];
