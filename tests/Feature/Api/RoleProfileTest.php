@@ -29,7 +29,7 @@ test('authenticated user can fetch their role profiles', function () {
                 ],
             ],
         ]);
-})->skip('Skipping role profile tests');
+});
 
 test('user can switch to their own profile', function () {
     // Get any profile that isn't currently active
@@ -45,7 +45,7 @@ test('user can switch to their own profile', function () {
         if ($otherProfile) {
             $inactiveProfile = $otherProfile;
         } else {
-            // Create a new profile if user doesn't have multiple profiles
+            // Create a new profile if a user doesn't have multiple profiles
             $inactiveProfile = RoleProfile::create([
                 'user_id' => $this->user->id,
                 'role_id' => $this->user->roles->first()->id,
@@ -58,13 +58,13 @@ test('user can switch to their own profile', function () {
     postJson("/api/profiles/{$inactiveProfile->id}/switch", [], [
         'Authorization' => 'Bearer '.$this->token,
     ])
-        ->assertSuccessful()
+        ->assertStatus(403)
         ->assertJson([
-            'message' => 'Profile switched successfully',
+            'message' => 'Role switching is currently disabled from the mobile app, please use the web app to switch roles.',
         ]);
 
-    expect($inactiveProfile->fresh()->is_active)->toBeTrue();
-})->skip('Skipping role profile tests');
+    expect($inactiveProfile->fresh()->is_active)->toBeFalse();
+});
 
 test('user cannot switch to another users profile', function () {
     $otherUser = User::role('venue')->first();
@@ -73,12 +73,12 @@ test('user cannot switch to another users profile', function () {
     postJson("/api/profiles/{$otherProfile->id}/switch", [], [
         'Authorization' => 'Bearer '.$this->token,
     ])
-        ->assertForbidden()
+        ->assertStatus(403)
         ->assertJson([
-            'message' => 'Profile does not belong to this user',
+            'message' => 'Role switching is currently disabled from the mobile app, please use the web app to switch roles.',
         ]);
-})->skip('Skipping role profile tests');
+});
 
 test('unauthenticated user cannot access profiles', function () {
     getJson('/api/profiles')->assertUnauthorized();
-})->skip('Skipping role profile tests');
+});

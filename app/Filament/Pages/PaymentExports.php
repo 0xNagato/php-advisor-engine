@@ -403,10 +403,10 @@ class PaymentExports extends Page implements HasTable
             // Re‑use the earlier groupManagersQuery construction
             $groupManagersQuery = User::query()
                 ->join('venue_groups', 'users.id', '=', 'venue_groups.primary_manager_id')
-                ->leftJoin(DB::raw('(
+                ->leftJoin(DB::raw("(
                     SELECT v.venue_group_id,
-                           SUM(CASE WHEN b.is_prime = 1 AND e.type = "'.EarningType::VENUE->value.'" THEN e.amount
-                                    WHEN b.is_prime = 0 AND e.type = "'.EarningType::VENUE_PAID->value.'" THEN -ABS(e.amount)
+                           SUM(CASE WHEN b.is_prime = true AND e.type = '".EarningType::VENUE->value."' THEN e.amount
+                                    WHEN b.is_prime = false AND e.type = '".EarningType::VENUE_PAID->value."' THEN -ABS(e.amount)
                                     ELSE 0 END)               as total_earnings,
                            COUNT(DISTINCT e.booking_id)      as bookings_count,
                            e.currency
@@ -416,12 +416,12 @@ class PaymentExports extends Page implements HasTable
                     JOIN earnings e            ON e.booking_id = b.id AND e.user_id = (
                         SELECT vg.primary_manager_id FROM venue_groups vg WHERE vg.id = v.venue_group_id
                     )
-                    WHERE b.status IN ("'.implode('","',
-                    array_map(fn ($s) => $s->value, BookingStatus::PAYOUT_STATUSES)).'")
-                      AND e.type IN ("'.implode('","', [EarningType::VENUE->value, EarningType::VENUE_PAID->value]).'")
-                      AND b.booking_at_utc BETWEEN "'.$startUtc->format('Y-m-d H:i:s').'" AND "'.$endUtc->format('Y-m-d H:i:s').'"
+                    WHERE b.status IN ('".implode("','",
+                    array_map(fn ($s) => $s->value, BookingStatus::PAYOUT_STATUSES))."')
+                      AND e.type IN ('".implode("','", [EarningType::VENUE->value, EarningType::VENUE_PAID->value])."')
+                      AND b.booking_at_utc BETWEEN '".$startUtc->format('Y-m-d H:i:s')."' AND '".$endUtc->format('Y-m-d H:i:s')."'
                     GROUP BY v.venue_group_id, e.currency
-                ) as venue_earnings'), 'venue_groups.id', '=', 'venue_earnings.venue_group_id')
+                ) as venue_earnings"), 'venue_groups.id', '=', 'venue_earnings.venue_group_id')
                 ->select([
                     'users.*',
                     'venue_groups.name as venue_group_name',
@@ -484,8 +484,11 @@ class PaymentExports extends Page implements HasTable
             ->headerActions($this->getExportHeaderActions($role));
     }
 
-    protected function hasExistingVenueInvoice(Venue $venue, string $startDate, string $endDate): bool
+    protected function hasExistingVenueInvoice(Venue $venue, ?string $startDate, ?string $endDate): bool
     {
+        if (blank($startDate) || blank($endDate)) {
+            return false;
+        }
         $userTimezone = auth()->user()->timezone ?? config('app.timezone');
         $startDateCarbon = Carbon::parse($startDate, $userTimezone);
         $endDateCarbon = Carbon::parse($endDate, $userTimezone);

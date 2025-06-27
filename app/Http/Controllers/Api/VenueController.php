@@ -6,16 +6,29 @@ use App\Actions\Region\GetUserRegion;
 use App\Enums\VenueStatus;
 use App\Http\Controllers\Controller;
 use App\Models\Venue;
+use App\OpenApi\Responses\ShowVenueResponse;
+use App\OpenApi\Responses\VenueListResponse;
 use Illuminate\Http\JsonResponse;
+use Vyuldashev\LaravelOpenApi\Attributes as OpenApi;
+use Vyuldashev\LaravelOpenApi\Attributes\Response as OpenApiResponse;
 
+#[OpenApi\PathItem]
 class VenueController extends Controller
 {
-    public function __invoke(): JsonResponse
+    /**
+     * Retrieve available venues in the current region.
+     */
+    #[OpenApi\Operation(
+        tags: ['Venues'],
+        security: 'BearerTokenSecurityScheme'
+    )]
+    #[OpenApiResponse(factory: VenueListResponse::class)]
+    public function index(): JsonResponse
     {
         $region = GetUserRegion::run();
 
         // Get all available venues in the region
-        $query = Venue::available()
+        $query = Venue::query()
             ->where('region', $region->id)
             ->where('status', VenueStatus::ACTIVE);
 
@@ -35,6 +48,43 @@ class VenueController extends Controller
 
         return response()->json([
             'data' => $venues,
+        ]);
+    }
+
+    /**
+     * View a venue by ID.
+     */
+    #[OpenApi\Operation(
+        tags: ['Venues'],
+        security: 'BearerTokenSecurityScheme'
+    )]
+    #[OpenApiResponse(factory: ShowVenueResponse::class)]
+    public function show(int $id): JsonResponse
+    {
+        $venue = Venue::query()->find($id);
+
+        if (! $venue) {
+            return response()->json([
+                'message' => 'Venue not found',
+            ], 404);
+        }
+
+        return response()->json([
+            'data' => [
+                'id' => $venue->id,
+                'name' => $venue->name,
+                'slug' => $venue->slug,
+                'address' => $venue->address,
+                'description' => $venue->description,
+                'images' => $venue->images ?? [],
+                'logo' => $venue->logo,
+                'cuisines' => $venue->cuisines ?? [],
+                'specialty' => $venue->specialty ?? [],
+                'neighborhood' => $venue->neighborhood,
+                'region' => $venue->region,
+                'status' => $venue->status->value,
+                'formatted_location' => $venue->getFormattedLocation(),
+            ],
         ]);
     }
 }

@@ -5,7 +5,6 @@ namespace App\Filament\Pages\Concierge;
 use App\Actions\Booking\CheckCustomerHasNonPrimeBooking;
 use App\Actions\Booking\CreateBooking;
 use App\Enums\BookingStatus;
-use App\Enums\VenueStatus;
 use App\Enums\VenueType;
 use App\Filament\Pages\IbizaHikeStationBooking;
 use App\Models\Booking;
@@ -146,8 +145,7 @@ class ReservationHub extends Page
                     ->prefixIcon('heroicon-m-building-storefront')
                     ->options(
                         function () {
-                            $query = Venue::available()
-                                ->where('status', VenueStatus::ACTIVE)
+                            $query = Venue::query()->active()
                                 ->where('region', session('region', 'miami'))
                                 ->where('venue_type', '!=', VenueType::HIKE_STATION);
 
@@ -483,8 +481,7 @@ class ReservationHub extends Page
         // 1. Prioritize redirect back to Hike Station if that was the source
         if ($bookingSource === 'hike_station_booking_form') {
             $this->redirect(IbizaHikeStationBooking::getUrl());
-        }
-        // 2. Otherwise, check if came from Availability Calendar (using stored values)
+        } // 2. Otherwise, check if came from Availability Calendar (using stored values)
         elseif ($scheduleTemplateId && $date) {
             $this->redirect(AvailabilityCalendar::getUrl());
         }

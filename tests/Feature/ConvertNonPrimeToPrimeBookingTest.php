@@ -2,20 +2,26 @@
 
 use App\Models\Booking;
 use App\Models\Concierge;
+use App\Models\ScheduleTemplate;
 use App\Models\Venue;
 use App\Services\Booking\BookingCalculationService;
 use App\Services\BookingService;
+use Illuminate\Support\Facades\DB;
 
 beforeEach(function () {
     $this->service = app(BookingCalculationService::class);
     $this->venue = Venue::factory()->create(['payout_venue' => 60]);
     $this->concierge = Concierge::factory()->create();
+    $this->scheduleTemplate = ScheduleTemplate::factory()->create([
+        'venue_id' => $this->venue->id,
+    ]);
+    //    DB::statement('REFRESH MATERIALIZED VIEW schedule_with_bookings_mv;');
 });
 
 test('non-prime booking is converted to a prime booking correctly', function () {
     Booking::withoutEvents(function () {
         // Step 1: Create a non-prime booking
-        $booking = createNonPrimeBooking($this->venue, $this->concierge, 10000);
+        $booking = createNonPrimeBooking($this->venue, $this->concierge, 10000, $this->scheduleTemplate);
         $this->service->calculateEarnings($booking);
 
         $nonPrimeEarningsAmounts =

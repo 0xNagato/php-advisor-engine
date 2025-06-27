@@ -169,7 +169,7 @@ class GenerateVenueInvoice
                 $query->where('user_id', $user->id);
             }]);
 
-            // Calculate sum based on loaded earnings for the specific user
+            // Calculate a sum based on loaded earnings for the specific user
             if ($booking->is_prime) {
                 // For prime bookings, we pay the venue (positive amount)
                 return abs($booking->earnings
@@ -177,7 +177,7 @@ class GenerateVenueInvoice
                     ->where('type', EarningType::VENUE->value)
                     ->sum('amount'));
             } else {
-                // For non-prime bookings, venue pays us (negative amount)
+                // For non-prime bookings, the venue pays us (negative amount)
                 return -abs($booking->earnings
                     // Already filtered by user_id in loadMissing or eager loading
                     ->where('type', EarningType::VENUE_PAID->value)

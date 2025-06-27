@@ -6,6 +6,7 @@ use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 /**
  * @mixin IdeHelperScheduleTemplate
@@ -36,6 +37,14 @@ class ScheduleTemplate extends Model
         return $this->belongsTo(Venue::class);
     }
 
+    /**
+     * @return HasMany<VenueTimeSlot, $this>
+     */
+    public function timeSlots(): HasMany
+    {
+        return $this->hasMany(VenueTimeSlot::class);
+    }
+
     protected function casts(): array
     {
         return [
@@ -52,7 +61,7 @@ class ScheduleTemplate extends Model
      */
     public static function findTemplateForDateTime(int $venueId, Carbon $dateTime, int $partySize): ?self
     {
-        // Get lowercase day name (e.g., 'wednesday') consistent with DB storage
+        // Get a lowercase day name (e.g., 'wednesday') consistent with DB storage
         $dayName = strtolower($dateTime->format('l'));
         $time = $dateTime->format('H:i:s'); // Time in HH:MM:SS format based on venue timezone
 

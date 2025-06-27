@@ -7,6 +7,7 @@ use App\Models\User;
 use App\Models\Venue;
 use App\Models\VenueOnboarding;
 use App\Notifications\AgreementAcceptedNotification;
+use App\Notifications\VenueAgreementAccepted;
 use App\Notifications\VenueAgreementCopy;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\View\View;
@@ -86,6 +87,10 @@ class VenueAgreementForm extends Component
 
     private function updateOnboarding(): void
     {
+        // Check if this is the first time the agreement is being accepted
+        // by checking if agreement_accepted_at is null in the database
+        $wasNeverAccepted = is_null($this->onboarding->fresh()->agreement_accepted_at);
+
         $this->onboarding->update([
             'first_name' => $this->first_name,
             'last_name' => $this->last_name,
@@ -100,6 +105,11 @@ class VenueAgreementForm extends Component
 
         // Update any venues connected to this onboarding
         $this->updateConnectedVenues();
+
+        // Send notification to PRIMA team only if this is the first time accepting the agreement
+        if ($wasNeverAccepted) {
+            $this->sendAgreementAcceptedNotification();
+        }
     }
 
     /**
@@ -174,6 +184,24 @@ class VenueAgreementForm extends Component
 
             $venue->contacts = $contacts;
             $venue->save();
+        }
+    }
+
+    /**
+     * Send notification to PRIMA team when agreement is accepted
+     */
+    private function sendAgreementAcceptedNotification(): void
+    {
+        // Send to the specified PRIMA team email addresses
+        $primaEmails = [
+            'kevin@primavip.co',
+            'prima+agreement@primavip.co',
+            'aj@primavip.co',
+        ];
+
+        foreach ($primaEmails as $email) {
+            Notification::route('mail', $email)
+                ->notify(new VenueAgreementAccepted($this->onboarding));
         }
     }
 

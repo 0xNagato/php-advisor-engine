@@ -62,55 +62,59 @@
                 <div class="overflow-x-auto">
                     <table class="w-full">
                         <thead>
+                        <tr>
+                            <th class="w-16 px-1 py-1 text-xs font-semibold text-left text-gray-900">
+                                Time
+                            </th>
+                            @foreach ($venue->party_sizes as $size => $label)
+                                @unless ($size === 'Special Request')
+                                    <th class="w-16 px-1 py-1 text-xs font-semibold text-center text-gray-900">
+                                        <button wire:click="openBulkTemplateSizeEditModal('{{ $size }}')"
+                                                class="w-full underline transition-colors hover:text-primary-600"
+                                                title="Edit all party sizes for this time slot">
+                                            {{ $size }}
+                                        </button>
+                                    </th>
+                                @endunless
+                            @endforeach
+                        </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-100">
+                        @foreach ($timeSlots as $slot)
                             <tr>
-                                <th class="w-16 px-1 py-1 text-xs font-semibold text-left text-gray-900">
-                                    Time
-                                </th>
+                                <td class="px-1 py-1 text-xs text-gray-500">
+                                    <button wire:click="openBulkTemplateEditModal('{{ $slot['time'] }}')"
+                                            class="w-full text-left underline transition-colors hover:text-primary-600"
+                                            title="Edit all party sizes for this time slot">
+                                        {{ Carbon::parse($slot['time'])->format('g:i A') }}
+                                    </button>
+                                </td>
                                 @foreach ($venue->party_sizes as $size => $label)
                                     @unless ($size === 'Special Request')
-                                        <th class="w-16 px-1 py-1 text-xs font-semibold text-center text-gray-900">
-                                            {{ $size }}
-                                        </th>
+                                        <td class="px-1 py-1">
+                                            <button type="button"
+                                                    wire:click="openEditModal('template', '{{ $slot['time'] }}', '{{ $size }}')"
+                                                @class([
+                                                    'w-full px-2 py-1 text-xs font-medium rounded',
+                                                    'bg-green-50 hover:bg-green-100 text-green-700' =>
+                                                        $schedules[$selectedDay][$slot['time']][$size]['is_prime'] &&
+                                                        $schedules[$selectedDay][$slot['time']][$size]['is_available'],
+                                                    'bg-blue-50 hover:bg-blue-100 text-blue-700' =>
+                                                        !$schedules[$selectedDay][$slot['time']][$size]['is_prime'] &&
+                                                        $schedules[$selectedDay][$slot['time']][$size]['is_available'],
+                                                    'bg-red-50 hover:bg-red-100 text-red-700' => !$schedules[$selectedDay][
+                                                        $slot['time']
+                                                    ][$size]['is_available'],
+                                                ])>
+                                                {{ $schedules[$selectedDay][$slot['time']][$size]['is_available']
+                                                    ? $schedules[$selectedDay][$slot['time']][$size]['available_tables']
+                                                    : '--' }}
+                                            </button>
+                                        </td>
                                     @endunless
                                 @endforeach
                             </tr>
-                        </thead>
-                        <tbody class="divide-y divide-gray-100">
-                            @foreach ($timeSlots as $slot)
-                                <tr>
-                                    <td class="px-1 py-1 text-xs text-gray-500">
-                                        <button wire:click="openBulkTemplateEditModal('{{ $slot['time'] }}')"
-                                            class="w-full text-left underline transition-colors hover:text-primary-600"
-                                            title="Edit all party sizes for this time slot">
-                                            {{ Carbon::parse($slot['time'])->format('g:i A') }}
-                                        </button>
-                                    </td>
-                                    @foreach ($venue->party_sizes as $size => $label)
-                                        @unless ($size === 'Special Request')
-                                            <td class="px-1 py-1">
-                                                <button type="button"
-                                                    wire:click="openEditModal('template', '{{ $slot['time'] }}', '{{ $size }}')"
-                                                    @class([
-                                                        'w-full px-2 py-1 text-xs font-medium rounded',
-                                                        'bg-green-50 hover:bg-green-100 text-green-700' =>
-                                                            $schedules[$selectedDay][$slot['time']][$size]['is_prime'] &&
-                                                            $schedules[$selectedDay][$slot['time']][$size]['is_available'],
-                                                        'bg-blue-50 hover:bg-blue-100 text-blue-700' =>
-                                                            !$schedules[$selectedDay][$slot['time']][$size]['is_prime'] &&
-                                                            $schedules[$selectedDay][$slot['time']][$size]['is_available'],
-                                                        'bg-red-50 hover:bg-red-100 text-red-700' => !$schedules[$selectedDay][
-                                                            $slot['time']
-                                                        ][$size]['is_available'],
-                                                    ])>
-                                                    {{ $schedules[$selectedDay][$slot['time']][$size]['is_available']
-                                                        ? $schedules[$selectedDay][$slot['time']][$size]['available_tables']
-                                                        : '--' }}
-                                                </button>
-                                            </td>
-                                        @endunless
-                                    @endforeach
-                                </tr>
-                            @endforeach
+                        @endforeach
                         </tbody>
                     </table>
                 </div>
@@ -129,8 +133,10 @@
             <div class="space-y-4">
                 <!-- Calendar Component -->
                 <div>
-                    <livewire:components.calendar :selected-date="$selectedDate" :today-date="$todayDate" :timezone="$venue->timezone ?? config('app.timezone')"
-                        :dates-with-overrides="$this->getDatesWithOverrides()" wire:key="calendar-{{ $selectedDate }}" />
+                    <livewire:components.calendar :selected-date="$selectedDate" :today-date="$todayDate"
+                                                  :timezone="$venue->timezone ?? config('app.timezone')"
+                                                  :dates-with-overrides="$this->getDatesWithOverrides()"
+                                                  wire:key="calendar-{{ $selectedDate }}" />
                 </div>
 
                 <!-- Schedule Grid -->
@@ -154,27 +160,27 @@
 
                                     <div class="grid grid-cols-2 gap-2 mt-2 sm:mt-0 sm:flex sm:gap-3">
                                         <x-filament::button wire:click="makeDayPrime" size="xs" color="success"
-                                            class="justify-center">
+                                                            class="justify-center">
                                             Make Day Prime
                                         </x-filament::button>
 
                                         <x-filament::button wire:click="makeDayNonPrime" size="xs" color="info"
-                                            class="justify-center">
+                                                            class="justify-center">
                                             Make Day Non-Prime
                                         </x-filament::button>
 
                                         <x-filament::button wire:click="openPricePerHeadModal" size="xs"
-                                            color="primary" class="justify-center">
+                                                            color="primary" class="justify-center">
                                             Set Concierge Incentive
                                         </x-filament::button>
 
                                         <x-filament::button wire:click="closeDay" size="xs" color="danger"
-                                            class="justify-center">
+                                                            class="justify-center">
                                             Close Day
                                         </x-filament::button>
 
                                         <x-filament::button wire:click="markDaySoldOut" size="xs" color="warning"
-                                            class="justify-center">
+                                                            class="justify-center">
                                             Mark Day Sold Out
                                         </x-filament::button>
                                     </div>
@@ -188,66 +194,72 @@
                             @else
                                 <table class="w-full">
                                     <thead>
-                                        <tr>
-                                            <th class="w-20 px-1 py-1 text-xs font-semibold text-left text-gray-900">
-                                                Time
-                                            </th>
-                                            @foreach ($venue->party_sizes as $size => $label)
-                                                @unless ($size === 'Special Request')
-                                                    <th
-                                                        class="px-1 py-1 text-xs font-semibold text-center text-gray-900 w-14">
+                                    <tr>
+                                        <th class="w-20 px-1 py-1 text-xs font-semibold text-left text-gray-900">
+                                            Time
+                                        </th>
+                                        @foreach ($venue->party_sizes as $size => $label)
+                                            @unless ($size === 'Special Request')
+                                                <th
+                                                    class="px-1 py-1 text-xs font-semibold text-center text-gray-900 w-14">
+                                                    <button
+                                                        wire:click="openBulkEditPartySizeModal('{{ Carbon::parse($selectedDate)->format('l') }}', '{{ $size }}')"
+                                                        class="w-full underline transition-colors hover:text-primary-600"
+                                                        title="Edit all party sizes for this time slot">
                                                         {{ $size }}
-                                                    </th>
-                                                @endunless
-                                            @endforeach
-                                        </tr>
+                                                    </button>
+                                                </th>
+                                            @endunless
+                                        @endforeach
+                                    </tr>
                                     </thead>
                                     <tbody class="divide-y divide-gray-100">
-                                        @foreach ($timeSlots as $slot)
-                                            @if (isset($calendarSchedules[$slot['time']]))
-                                                <tr>
-                                                    <td class="px-1 py-1 text-xs text-gray-500">
-                                                        <button
-                                                            wire:click="openBulkEditModal('{{ Carbon::parse($selectedDate)->format('l') }}', '{{ $slot['time'] }}')"
-                                                            class="w-full text-left underline transition-colors hover:text-primary-600"
-                                                            title="Edit all party sizes for this time slot">
-                                                            {{ $slot['formatted_time'] }}
-                                                        </button>
-                                                    </td>
-                                                    @foreach ($venue->party_sizes as $size => $label)
-                                                        @unless ($size === 'Special Request')
-                                                            <td class="px-1 py-1">
-                                                                <button type="button"
+                                    @foreach ($timeSlots as $slot)
+                                        @if (isset($calendarSchedules[$slot['time']]))
+                                            <tr>
+                                                <td class="px-1 py-1 text-xs text-gray-500">
+                                                    <button
+                                                        wire:click="openBulkEditModal('{{ Carbon::parse($selectedDate)->format('l') }}', '{{ $slot['time'] }}')"
+                                                        class="w-full text-left underline transition-colors hover:text-primary-600"
+                                                        title="Edit all party sizes for this time slot">
+                                                        {{ $slot['formatted_time'] }}
+                                                    </button>
+                                                </td>
+                                                @foreach ($venue->party_sizes as $size => $label)
+                                                    @unless ($size === 'Special Request')
+                                                        <td class="px-1 py-1">
+                                                            <button type="button"
                                                                     wire:click="openEditModal('{{ $selectedDate }}', '{{ $slot['time'] }}', '{{ $size }}')"
-                                                                    @class([
-                                                                        'w-full px-2 py-1 text-xs font-medium rounded',
-                                                                        'bg-green-50 hover:bg-green-100 text-green-700' =>
-                                                                            $calendarSchedules[$slot['time']][$size]['is_prime'] &&
-                                                                            $calendarSchedules[$slot['time']][$size]['is_available'],
-                                                                        'bg-blue-50 hover:bg-blue-100 text-blue-700' =>
-                                                                            !$calendarSchedules[$slot['time']][$size]['is_prime'] &&
-                                                                            $calendarSchedules[$slot['time']][$size]['is_available'],
-                                                                        'bg-red-50 hover:bg-red-100 text-red-700' => !$calendarSchedules[
-                                                                            $slot['time']
-                                                                        ][$size]['is_available'],
-                                                                        'ring-2 ring-indigo-500 ring-opacity-50' =>
-                                                                            $calendarSchedules[$slot['time']][$size]['has_override'],
-                                                                    ])>
-                                                                    {{ $calendarSchedules[$slot['time']][$size]['is_available']
-                                                                        ? $calendarSchedules[$slot['time']][$size]['available_tables']
-                                                                        : '--' }}
-                                                                </button>
-                                                            </td>
-                                                        @endunless
-                                                    @endforeach
-                                                </tr>
-                                            @else
-                                                <tr>
-                                                    <td class="px-1 py-1 text-red-500">Missing schedule for
-                                                        {{ $slot['time'] }}</td>
-                                                </tr>
-                                            @endif
-                                        @endforeach
+                                                                @class([
+                                                                    'w-full px-2 py-1 text-xs font-medium rounded',
+                                                                    'bg-green-50 hover:bg-green-100 text-green-700' =>
+                                                                        $calendarSchedules[$slot['time']][$size]['is_prime'] &&
+                                                                        $calendarSchedules[$slot['time']][$size]['is_available'],
+                                                                    'bg-blue-50 hover:bg-blue-100 text-blue-700' =>
+                                                                        !$calendarSchedules[$slot['time']][$size]['is_prime'] &&
+                                                                        $calendarSchedules[$slot['time']][$size]['is_available'],
+                                                                    'bg-red-50 hover:bg-red-100 text-red-700' => !$calendarSchedules[
+                                                                        $slot['time']
+                                                                    ][$size]['is_available'],
+                                                                    'ring-2 ring-indigo-500 ring-opacity-50' =>
+                                                                        $calendarSchedules[$slot['time']][$size]['has_override'],
+                                                                ])>
+                                                                {{ $calendarSchedules[$slot['time']][$size]['is_available']
+                                                                    ? $calendarSchedules[$slot['time']][$size]['available_tables']
+                                                                    : '--' }}
+                                                            </button>
+                                                        </td>
+                                                    @endunless
+                                                @endforeach
+                                            </tr>
+                                        @else
+                                            <tr>
+                                                <td class="px-1 py-1 text-red-500">
+                                                    Missing schedule for {{ $slot['time'] }}
+                                                </td>
+                                            </tr>
+                                        @endif
+                                    @endforeach
                                     </tbody>
                                 </table>
                             @endif
@@ -266,10 +278,19 @@
         <x-slot name="header">
             <div class="flex items-center justify-between w-full">
                 <span class="text-sm text-gray-600">
-                    @if ($activeView === 'calendar' && isset($editingSlot['date']))
-                        {{ $this->getFormattedDate($editingSlot['date']) }} at {{ $this->getFormattedTime() }}
+                    @if ($activeView === 'calendar')
+                        @if($editingSlot['time'] === '*')
+                            {{ $this->getFormattedDate($editingSlot['date']) }} for Party
+                            Size: {{ $editingSlot['size'] }}
+                        @elseif(isset($editingSlot['date']))
+                            {{ $this->getFormattedDate($editingSlot['date']) }} at {{ $this->getFormattedTime() }}
+                        @endif
                     @else
-                        {{ ucfirst($editingSlot['day']) }} at {{ $this->getFormattedTime() }}
+                        @if ($editingSlot['time'] === '*')
+                            {{ ucfirst($editingSlot['day']) }} for Party Size: {{ $editingSlot['size'] }}
+                        @else
+                            {{ ucfirst($editingSlot['day']) }} at {{ $this->getFormattedTime() }}
+                        @endif
                     @endif
                 </span>
             </div>
@@ -300,25 +321,29 @@
                     <div class="space-y-2">
                         <span class="text-sm font-medium">Available Tables</span>
                         <input type="number" wire:model="editingSlot.available_tables"
-                            x-bind:disabled="!$wire.editingSlot.is_available" min="0" max="30"
-                            class="block w-full text-sm border-gray-300 rounded-lg shadow-sm focus:border-primary-500 focus:ring-1 focus:ring-primary-500 disabled:bg-gray-100 disabled:cursor-not-allowed" />
+                               x-bind:disabled="!$wire.editingSlot.is_available" min="0" max="30"
+                               class="block w-full text-sm border-gray-300 rounded-lg shadow-sm focus:border-primary-500 focus:ring-1 focus:ring-primary-500 disabled:bg-gray-100 disabled:cursor-not-allowed" />
                     </div>
 
                     <div class="space-y-2">
                         <span class="text-sm font-medium">Min. Spend Per Guest</span>
                         <div class="relative">
-                            <span class="absolute inset-y-0 flex items-center text-gray-500 left-3">$</span>
+                            <span class="absolute inset-y-0 flex items-center text-gray-500 left-3">
+                                {{ $currencySymbol }}
+                            </span>
                             <input type="number" wire:model="editingSlot.minimum_spend_per_guest" min="0"
-                                class="block w-full text-sm border-gray-300 rounded-lg shadow-sm pl-7 focus:border-primary-500 focus:ring-1 focus:ring-primary-500" />
+                                   class="block w-full text-sm border-gray-300 rounded-lg shadow-sm pl-7 focus:border-primary-500 focus:ring-1 focus:ring-primary-500" />
                         </div>
                     </div>
 
                     <div class="col-span-2 mt-2 space-y-2" x-show="!isPrime">
                         <span class="text-sm font-medium">Concierge Incentive Per Customer</span>
                         <div class="relative">
-                            <span class="absolute inset-y-0 flex items-center text-gray-500 left-3">$</span>
+                            <span class="absolute inset-y-0 flex items-center text-gray-500 left-3">
+                                {{ $currencySymbol }}
+                            </span>
                             <input type="number" wire:model="editingSlot.price_per_head" min="0"
-                                class="block w-full text-sm border-gray-300 rounded-lg shadow-sm pl-7 focus:border-primary-500 focus:ring-1 focus:ring-primary-500" />
+                                   class="block w-full text-sm border-gray-300 rounded-lg shadow-sm pl-7 focus:border-primary-500 focus:ring-1 focus:ring-primary-500" />
                         </div>
                     </div>
                 </div>
@@ -328,16 +353,18 @@
                     <div class="space-y-2">
                         <span class="text-sm font-medium">Available Tables</span>
                         <input type="number" wire:model="editingSlot.available_tables"
-                            x-bind:disabled="!$wire.editingSlot.is_available" min="0" max="30"
-                            class="block w-full text-sm border-gray-300 rounded-lg shadow-sm focus:border-primary-500 focus:ring-1 focus:ring-primary-500 disabled:bg-gray-100 disabled:cursor-not-allowed" />
+                               x-bind:disabled="!$wire.editingSlot.is_available" min="0" max="30"
+                               class="block w-full text-sm border-gray-300 rounded-lg shadow-sm focus:border-primary-500 focus:ring-1 focus:ring-primary-500 disabled:bg-gray-100 disabled:cursor-not-allowed" />
                     </div>
 
                     <div class="space-y-2">
                         <span class="text-sm font-medium">Min. Spend Per Guest</span>
                         <div class="relative">
-                            <span class="absolute inset-y-0 flex items-center text-gray-500 left-3">$</span>
+                            <span class="absolute inset-y-0 flex items-center text-gray-500 left-3">
+                                {{ $currencySymbol }}
+                            </span>
                             <input type="number" wire:model="editingSlot.minimum_spend_per_guest" min="0"
-                                class="block w-full text-sm border-gray-300 rounded-lg shadow-sm pl-7 focus:border-primary-500 focus:ring-1 focus:ring-primary-500" />
+                                   class="block w-full text-sm border-gray-300 rounded-lg shadow-sm pl-7 focus:border-primary-500 focus:ring-1 focus:ring-primary-500" />
                         </div>
                     </div>
                 </div>
@@ -349,7 +376,9 @@
                 <x-filament::button color="gray" wire:click="closeEditModal" size="sm">
                     Cancel
                 </x-filament::button>
-                <x-filament::button wire:click="saveEditingSlot" size="sm">
+                <x-filament::button
+                    wire:click="{{ $editingSlot['time'] === '*' ? 'saveEditingPartySize' : 'saveEditingSlot' }}"
+                    size="sm">
                     Save
                 </x-filament::button>
             </div>
@@ -369,9 +398,11 @@
             <div class="space-y-2">
                 <span class="text-sm font-medium">Concierge Incentive Per Customer</span>
                 <div class="relative">
-                    <span class="absolute inset-y-0 flex items-center text-gray-500 left-3">$</span>
+                    <span class="absolute inset-y-0 flex items-center text-gray-500 left-3">
+                        {{ $currencySymbol }}
+                    </span>
                     <input type="number" wire:model="dayPricePerHead" min="0" step="0.01"
-                        class="block w-full text-sm border-gray-300 rounded-lg shadow-sm pl-7 focus:border-primary-500 focus:ring-1 focus:ring-primary-500" />
+                           class="block w-full text-sm border-gray-300 rounded-lg shadow-sm pl-7 focus:border-primary-500 focus:ring-1 focus:ring-primary-500" />
                 </div>
                 <p class="text-xs text-gray-500">
                     This will set the concierge incentive per customer for all non-prime time slots on this day. Prime
@@ -383,7 +414,7 @@
         <x-slot name="footer">
             <div class="flex justify-end gap-2">
                 <x-filament::button color="gray"
-                    wire:click="$dispatch('close-modal', { id: 'set-price-per-head-modal' })" size="sm">
+                                    wire:click="$dispatch('close-modal', { id: 'set-price-per-head-modal' })" size="sm">
                     Cancel
                 </x-filament::button>
                 <x-filament::button wire:click="setPricePerHeadForDay" size="sm">
@@ -406,9 +437,11 @@
             <div class="space-y-2">
                 <span class="text-sm font-medium">Concierge Incentive Per Customer</span>
                 <div class="relative">
-                    <span class="absolute inset-y-0 flex items-center text-gray-500 left-3">$</span>
+                    <span class="absolute inset-y-0 flex items-center text-gray-500 left-3">
+                        {{ $currencySymbol }}
+                    </span>
                     <input type="number" wire:model="weeklyPricePerHead" min="0" step="0.01"
-                        class="block w-full text-sm border-gray-300 rounded-lg shadow-sm pl-7 focus:border-primary-500 focus:ring-1 focus:ring-primary-500" />
+                           class="block w-full text-sm border-gray-300 rounded-lg shadow-sm pl-7 focus:border-primary-500 focus:ring-1 focus:ring-primary-500" />
                 </div>
                 <p class="text-xs text-gray-500">
                     This will set the concierge incentive per customer for all non-prime time slots on
@@ -421,7 +454,8 @@
         <x-slot name="footer">
             <div class="flex justify-end gap-2">
                 <x-filament::button color="gray"
-                    wire:click="$dispatch('close-modal', { id: 'set-template-price-per-head-modal' })" size="sm">
+                                    wire:click="$dispatch('close-modal', { id: 'set-template-price-per-head-modal' })"
+                                    size="sm">
                     Cancel
                 </x-filament::button>
                 <x-filament::button wire:click="setTemplateWeeklyPricePerHead" size="sm">
