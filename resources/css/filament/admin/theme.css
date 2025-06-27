@@ -191,8 +191,10 @@ body::before {
     @apply bg-indigo-100;
 }
 
-nav .ms-auto {
-    margin-inline-start: unset;
-    width: 90% !important;
-    padding-right: 10px;
+@media only screen and (max-width: 768px) {
+    nav > .ms-auto {
+        margin-inline-start: unset;
+        width: 90% !important;
+        padding-right: 10px;
+    }
 }
