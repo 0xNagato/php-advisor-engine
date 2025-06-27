@@ -144,12 +144,21 @@ class PlatformReservation extends Model
 
         if (! $response || ! isset($response['id_reserv'])) {
             $errorMessage = 'Unknown error';
+            $httpStatus = null;
+            $httpError = null;
+
             if ($response && isset($response['status'])) {
                 $errorMessage = $response['status'];
             } elseif ($response && isset($response['error'])) {
                 $errorMessage = $response['error'];
             } elseif (! $response) {
                 $errorMessage = 'No response from CoverManager API';
+            }
+
+            // Extract HTTP status and error details if available
+            if ($response) {
+                $httpStatus = $response['_http_status'] ?? null;
+                $httpError = $response['_http_error'] ?? null;
             }
 
             Log::error("CoverManager create reservation failed for booking {$booking->id} at {$venue->name}: {$errorMessage}", [
@@ -160,6 +169,8 @@ class PlatformReservation extends Model
                 'booking_data' => $bookingData,
                 'api_response' => $response,
                 'error_summary' => $errorMessage,
+                'http_status' => $httpStatus,
+                'http_error' => $httpError,
             ]);
 
             return null;
@@ -260,11 +271,33 @@ class PlatformReservation extends Model
         // Call the Restoo API first
         $response = $restooService->createReservation($venue, $booking);
 
-        if (! $response) {
-            Log::error("Restoo create reservation failed for booking {$booking->id} at {$venue->name}: API returned null", [
+        if (! $response || ! isset($response['uuid'])) {
+            $errorMessage = 'Unknown error';
+            $httpStatus = null;
+            $httpError = null;
+
+            if ($response && isset($response['error'])) {
+                $errorMessage = $response['error'];
+            } elseif ($response && isset($response['message'])) {
+                $errorMessage = $response['message'];
+            } elseif (! $response) {
+                $errorMessage = 'No response from Restoo API';
+            }
+
+            // Extract HTTP status and error details if available
+            if ($response) {
+                $httpStatus = $response['_http_status'] ?? null;
+                $httpError = $response['_http_error'] ?? null;
+            }
+
+            Log::error("Restoo create reservation failed for booking {$booking->id} at {$venue->name}: {$errorMessage}", [
+                'booking_id' => $booking->id,
                 'venue_id' => $venue->id,
                 'venue_name' => $venue->name,
-                'booking_id' => $booking->id,
+                'api_response' => $response,
+                'error_summary' => $errorMessage,
+                'http_status' => $httpStatus,
+                'http_error' => $httpError,
             ]);
 
             return null;
@@ -382,12 +415,21 @@ class PlatformReservation extends Model
 
         if (! $response || ! isset($response['id_reserv'])) {
             $errorMessage = 'Unknown error';
+            $httpStatus = null;
+            $httpError = null;
+
             if ($response && isset($response['status'])) {
                 $errorMessage = $response['status'];
             } elseif ($response && isset($response['error'])) {
                 $errorMessage = $response['error'];
             } elseif (! $response) {
                 $errorMessage = 'No response from CoverManager API';
+            }
+
+            // Extract HTTP status and error details if available
+            if ($response) {
+                $httpStatus = $response['_http_status'] ?? null;
+                $httpError = $response['_http_error'] ?? null;
             }
 
             Log::error("CoverManager sync reservation failed for reservation {$this->id} at {$this->venue->name}: {$errorMessage}", [
@@ -398,6 +440,8 @@ class PlatformReservation extends Model
                 'booking_data' => $bookingData,
                 'api_response' => $response,
                 'error_summary' => $errorMessage,
+                'http_status' => $httpStatus,
+                'http_error' => $httpError,
             ]);
 
             return false;
@@ -463,12 +507,34 @@ class PlatformReservation extends Model
         // Call the Restoo API
         $response = $restooService->createReservation($venue, $booking);
 
-        if (! $response) {
-            Log::error("Restoo sync reservation failed for booking {$booking->id} at {$venue->name}: API returned null", [
-                'venue_id' => $venue->id,
-                'venue_name' => $venue->name,
-                'booking_id' => $booking->id,
+        if (! $response || ! isset($response['uuid'])) {
+            $errorMessage = 'Unknown error';
+            $httpStatus = null;
+            $httpError = null;
+
+            if ($response && isset($response['error'])) {
+                $errorMessage = $response['error'];
+            } elseif ($response && isset($response['message'])) {
+                $errorMessage = $response['message'];
+            } elseif (! $response) {
+                $errorMessage = 'No response from Restoo API';
+            }
+
+            // Extract HTTP status and error details if available
+            if ($response) {
+                $httpStatus = $response['_http_status'] ?? null;
+                $httpError = $response['_http_error'] ?? null;
+            }
+
+            Log::error("Restoo sync reservation failed for reservation {$this->id} at {$this->venue->name}: {$errorMessage}", [
                 'reservation_id' => $this->id,
+                'venue_id' => $this->venue->id,
+                'venue_name' => $this->venue->name,
+                'booking_id' => $booking->id,
+                'api_response' => $response,
+                'error_summary' => $errorMessage,
+                'http_status' => $httpStatus,
+                'http_error' => $httpError,
             ]);
 
             return false;
@@ -489,8 +555,8 @@ class PlatformReservation extends Model
 
         Log::info("Restoo sync reservation successful for booking {$booking->id} at {$venue->name}", [
             'reservation_id' => $this->id,
-            'venue_id' => $venue->id,
-            'venue_name' => $venue->name,
+            'venue_id' => $this->venue->id,
+            'venue_name' => $this->venue->name,
             'booking_id' => $booking->id,
             'platform_reservation_id' => $response['uuid'] ?? null,
             'customer_name' => $platformData['customer_name'] ?? '',
@@ -614,7 +680,7 @@ class PlatformReservation extends Model
                 'customer_name' => $this->platform_data['customer_name'] ?? '',
             ]);
         } else {
-            Log::error("CoverManager cancel reservation failed for reservation {$this->id} at {$this->venue->name}", [
+            Log::error("CoverManager cancel reservation failed for reservation {$this->id} at {$this->venue->name}: API error", [
                 'reservation_id' => $this->id,
                 'venue_id' => $this->venue->id,
                 'venue_name' => $this->venue->name,
@@ -666,7 +732,7 @@ class PlatformReservation extends Model
                 'customer_name' => $this->platform_data['customer_name'] ?? '',
             ]);
         } else {
-            Log::error("Restoo cancel reservation failed for reservation {$this->id} at {$this->venue->name}", [
+            Log::error("Restoo cancel reservation failed for reservation {$this->id} at {$this->venue->name}: API error", [
                 'reservation_id' => $this->id,
                 'venue_id' => $this->venue->id,
                 'venue_name' => $this->venue->name,

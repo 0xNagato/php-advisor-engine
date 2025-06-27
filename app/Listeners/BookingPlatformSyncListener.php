@@ -73,12 +73,7 @@ class BookingPlatformSyncListener implements ShouldQueue
                 }
 
                 if (! $success) {
-                    Log::error("Failed to sync booking {$booking->id} to {$platform->platform_type}", [
-                        'booking_id' => $booking->id,
-                        'venue_id' => $venue->id,
-                        'venue_name' => $venue->name,
-                        'platform' => $platform->platform_type,
-                    ]);
+                    // Removed duplicate error logging - errors are already logged at the PlatformReservation level with more context
                 }
             } catch (Throwable $e) {
                 Log::error("Exception syncing booking {$booking->id} to {$platform->platform_type}", [

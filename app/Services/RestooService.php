@@ -217,24 +217,25 @@ class RestooService implements BookingPlatformInterface
                 'Content-Type' => 'application/json',
             ])->post($url, $payload);
 
+            $responseData = $response->json() ?? [];
+
+            // Add HTTP status and error information to the response
+            $responseData['_http_status'] = $response->status();
+            $responseData['_http_error'] = $response->failed() ? $response->body() : null;
+
             if ($response->successful()) {
-                return $response->json();
+                return $responseData;
             }
 
-            Log::error('Restoo reservation creation failed', [
-                'status' => $response->status(),
-                'response' => $response->body(),
-                'payload' => $payload,
-            ]);
-
-            return null;
+            // Removed duplicate error logging - errors are logged at the PlatformReservation level with more context
+            return $responseData;
         } catch (Throwable $e) {
-            Log::error('Restoo reservation creation exception', [
-                'error' => $e->getMessage(),
-                'payload' => $payload,
-            ]);
-
-            return null;
+            // Removed duplicate error logging - errors are logged at the PlatformReservation level with more context
+            return [
+                '_http_status' => null,
+                '_http_error' => $e->getMessage(),
+                'exception' => $e->getMessage(),
+            ];
         }
     }
 
@@ -265,18 +266,20 @@ class RestooService implements BookingPlatformInterface
                 return true;
             }
 
+            // Log cancellation failures with HTTP status code
             Log::error('Restoo reservation cancellation failed', [
-                'status' => $response->status(),
-                'response' => $response->body(),
-                'externalReservationId' => $externalReservationId,
+                'http_status' => $response->status(),
+                'response_body' => $response->body(),
+                'external_reservation_id' => $externalReservationId,
                 'payload' => $payload,
             ]);
 
             return false;
         } catch (Throwable $e) {
+            // Log cancellation exceptions
             Log::error('Restoo reservation cancellation exception', [
                 'error' => $e->getMessage(),
-                'externalReservationId' => $externalReservationId,
+                'external_reservation_id' => $externalReservationId,
             ]);
 
             return false;

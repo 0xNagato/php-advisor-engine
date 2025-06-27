@@ -99,10 +99,26 @@ class CoverManagerEndpointTest extends TestCase
                     'city' => 'Madrid',
                 ],
             ],
+            '_http_status' => 200,
+            '_http_successful' => true,
         ];
 
         Http::fake([
-            'https://beta.covermanager.com/api/restaurant/list/test-api-key/Madrid' => Http::response($mockResponse, 200),
+            'https://beta.covermanager.com/api/restaurant/list/test-api-key/Madrid' => Http::response([
+                'resp' => 1,
+                'restaurants' => [
+                    [
+                        'restaurant' => 'restaurant-1',
+                        'name' => 'Test Restaurant 1',
+                        'city' => 'Madrid',
+                    ],
+                    [
+                        'restaurant' => 'restaurant-2',
+                        'name' => 'Test Restaurant 2',
+                        'city' => 'Madrid',
+                    ],
+                ],
+            ], 200),
         ]);
 
         $result = $this->coverManagerService->getRestaurants('Madrid');
@@ -127,10 +143,21 @@ class CoverManagerEndpointTest extends TestCase
                 'phone' => '+34123456789',
                 'email' => 'test@restaurant.com',
             ],
+            '_http_status' => 200,
+            '_http_successful' => true,
         ];
 
         Http::fake([
-            "https://beta.covermanager.com/api/restaurant/get/test-api-key/{$this->testRestaurantId}" => Http::response($mockResponse, 200),
+            "https://beta.covermanager.com/api/restaurant/get/test-api-key/{$this->testRestaurantId}" => Http::response([
+                'resp' => 1,
+                'restaurant' => [
+                    'restaurant' => $this->testRestaurantId,
+                    'name' => 'Test Restaurant',
+                    'address' => '123 Test Street',
+                    'phone' => '+34123456789',
+                    'email' => 'test@restaurant.com',
+                ],
+            ], 200),
         ]);
 
         $result = $this->coverManagerService->getRestaurantData($this->testRestaurantId);
@@ -163,10 +190,25 @@ class CoverManagerEndpointTest extends TestCase
                     '19:30' => ['4' => ['discount' => false]],
                 ],
             ],
+            '_http_status' => 200,
+            '_http_successful' => true,
         ];
 
         Http::fake([
-            'https://beta.covermanager.com/api/reserv/availability' => Http::response($mockResponse, 200),
+            'https://beta.covermanager.com/api/reserv/availability' => Http::response([
+                'availability' => [
+                    'people' => [
+                        '4' => [
+                            '19:00' => ['discount' => false],
+                            '19:30' => ['discount' => false],
+                        ],
+                    ],
+                    'hours' => [
+                        '19:00' => ['4' => ['discount' => false]],
+                        '19:30' => ['4' => ['discount' => false]],
+                    ],
+                ],
+            ], 200),
         ]);
 
         $result = $this->coverManagerService->checkAvailability($this->testVenue, $date, $time, $partySize);
@@ -224,10 +266,16 @@ class CoverManagerEndpointTest extends TestCase
             'resp' => 1,
             'id_reserv' => 'SGwzEu',
             'status' => '1',
+            '_http_status' => 200,
+            '_http_successful' => true,
         ];
 
         Http::fake([
-            'https://beta.covermanager.com/api/reserv/reserv' => Http::response($mockResponse, 200),
+            'https://beta.covermanager.com/api/reserv/reserv' => Http::response([
+                'resp' => 1,
+                'id_reserv' => 'SGwzEu',
+                'status' => '1',
+            ], 200),
         ]);
 
         $result = $this->coverManagerService->createReservation($this->testVenue, $booking);
@@ -284,7 +332,7 @@ class CoverManagerEndpointTest extends TestCase
     #[Test]
     public function error_handling_for_failed_requests()
     {
-        // Test 404 error
+        // Test 404 error - now expects the new error structure instead of empty array
         Http::fake([
             'https://beta.covermanager.com/api/restaurant/get/test-api-key/invalid-id' => Http::response([
                 'resp' => 0,
@@ -293,7 +341,12 @@ class CoverManagerEndpointTest extends TestCase
         ]);
 
         $result = $this->coverManagerService->getRestaurantData('invalid-id');
-        $this->assertEquals([], $result);
+
+        // Should return error structure with HTTP status information
+        $this->assertArrayHasKey('_http_status', $result);
+        $this->assertEquals(404, $result['_http_status']);
+        $this->assertArrayHasKey('_http_error', $result);
+        $this->assertFalse($result['_http_successful']);
 
         // Test 500 error
         Http::fake([
@@ -316,7 +369,13 @@ class CoverManagerEndpointTest extends TestCase
         });
 
         $result = $this->coverManagerService->getRestaurants('Madrid');
-        $this->assertEquals([], $result);
+
+        // Should return error structure with exception information
+        $this->assertArrayHasKey('_http_status', $result);
+        $this->assertNull($result['_http_status']);
+        $this->assertArrayHasKey('_http_error', $result);
+        $this->assertEquals('Connection timeout', $result['_http_error']);
+        $this->assertFalse($result['_http_successful']);
 
         $result = $this->coverManagerService->checkAuth($this->testVenue);
         $this->assertFalse($result);

@@ -171,7 +171,15 @@ class CoverManagerService implements BookingPlatformInterface
             };
 
             if ($response->successful()) {
-                return $response->json();
+                $responseData = $response->json();
+
+                // Include HTTP metadata for error handling
+                if (is_array($responseData)) {
+                    $responseData['_http_status'] = $response->status();
+                    $responseData['_http_successful'] = true;
+                }
+
+                return $responseData;
             }
 
             // Log failed requests
@@ -184,7 +192,14 @@ class CoverManagerService implements BookingPlatformInterface
                 'request_data' => $data,
             ]);
 
-            return null;
+            // Return error information with HTTP status
+            return [
+                '_http_status' => $response->status(),
+                '_http_successful' => false,
+                '_http_error' => $response->body(),
+                'error' => 'HTTP request failed',
+                'resp' => 0, // CoverManager format for errors
+            ];
         } catch (Throwable $e) {
             Log::error('CoverManager API exception', [
                 'operation' => $operationName,
@@ -194,7 +209,14 @@ class CoverManagerService implements BookingPlatformInterface
                 'request_data' => $data,
             ]);
 
-            return null;
+            // Return exception information
+            return [
+                '_http_status' => null,
+                '_http_successful' => false,
+                '_http_error' => $e->getMessage(),
+                'error' => 'API call exception',
+                'resp' => 0, // CoverManager format for errors
+            ];
         }
     }
 
@@ -312,14 +334,8 @@ class CoverManagerService implements BookingPlatformInterface
                     'restaurantId' => $restaurantId,
                     'message' => 'API key does not have reservation creation permissions. Contact CoverManager support to enable this feature.',
                 ]);
-            } else {
-                Log::error('CoverManager reservation creation API error', [
-                    'error' => $errorMessage,
-                    'restaurantId' => $restaurantId,
-                    'bookingData' => $bookingData,
-                    'requestData' => $requestData,
-                ]);
             }
+            // Removed duplicate error logging - errors are logged at the PlatformReservation level with more context
 
             return null;
         }
@@ -355,22 +371,13 @@ class CoverManagerService implements BookingPlatformInterface
                     'reservationId' => $reservationId,
                     'message' => 'API key does not have reservation cancellation permissions. Contact CoverManager support to enable this feature.',
                 ]);
-            } else {
-                Log::error('CoverManager reservation cancellation API error', [
-                    'error' => $errorMessage,
-                    'reservationId' => $reservationId,
-                    'requestData' => $requestData,
-                ]);
             }
+            // Removed duplicate error logging - errors are logged at the PlatformReservation level with more context
 
             return false;
         }
 
-        if ($response) {
-            return true;
-        }
-
-        return false;
+        return $response !== null;
     }
 
     /**
@@ -384,6 +391,21 @@ class CoverManagerService implements BookingPlatformInterface
             operationName: 'Check Credentials'
         );
 
-        return $response !== null;
+        // Check if the response indicates success
+        if (! $response) {
+            return false;
+        }
+
+        // Check for HTTP errors
+        if (isset($response['_http_successful']) && ! $response['_http_successful']) {
+            return false;
+        }
+
+        // Check for CoverManager API errors
+        if (isset($response['resp']) && $response['resp'] === 0) {
+            return false;
+        }
+
+        return true;
     }
 }

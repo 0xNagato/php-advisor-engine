@@ -111,14 +111,6 @@ class BookingPlatformCancellationListener implements ShouldQueue
         $result = $reservation->cancelInPlatform();
 
         if (! $result) {
-            Log::error("Failed to cancel booking $booking->id in CoverManager", [
-                'booking_id' => $booking->id,
-                'venue_id' => $booking->venue->id,
-                'venue_name' => $booking->venue->name,
-                'reservation_id' => $reservation->id,
-                'platform_reservation_id' => $reservation->platform_reservation_id,
-            ]);
-
             // Release the job to try again later
             $this->release(300); // 5 minutes
 
@@ -155,14 +147,6 @@ class BookingPlatformCancellationListener implements ShouldQueue
         $result = $reservation->cancelInPlatform();
 
         if (! $result) {
-            Log::error("Failed to cancel booking $booking->id in Restoo", [
-                'booking_id' => $booking->id,
-                'venue_id' => $booking->venue->id,
-                'venue_name' => $booking->venue->name,
-                'reservation_id' => $reservation->id,
-                'platform_reservation_id' => $reservation->platform_reservation_id,
-            ]);
-
             // Release the job to try again later
             $this->release(300); // 5 minutes
 
