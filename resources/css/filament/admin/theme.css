@@ -3,190 +3,194 @@
 @config 'tailwind.config.js';
 
 @layer utilities {
-  .striped div:nth-child(even) {
-    @apply bg-gray-100;
-  }
+    .striped div:nth-child(even) {
+        @apply bg-gray-100;
+    }
 }
 
 [x-cloak] {
-  display: none;
+    display: none;
 }
 
 .fi-topbar,
 .fi-sidebar-nav {
-  @apply prima-native:hidden;
+    @apply prima-native:hidden;
 }
 
 body {
-  background: none !important;
-  @apply dark:bg-none !important;
+    background: none !important;
+    @apply dark:bg-none !important;
 }
 
 body::before {
-  content: '';
-  position: fixed;
-  top: 0;
-  right: 0;
-  bottom: 0;
-  left: 0;
-  background-image: url('../../../../public/images/new-waves.svg');
-  background-repeat: repeat-x;
-  background-position: center; /* Change this to 'top' if you want the image to start from the top */
-  z-index: -1;
-  background-size: cover;
-  background-color: white;
-  @apply dark:bg-white;
+    content: '';
+    position: fixed;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    background-image: url('../../../../public/images/new-waves.svg');
+    background-repeat: repeat-x;
+    background-position: center; /* Change this to 'top' if you want the image to start from the top */
+    z-index: -1;
+    background-size: cover;
+    background-color: white;
+    @apply dark:bg-white;
 }
 
 .fi-tabs-item {
-  @apply flex-1 items-center justify-center !important;
+    @apply flex-1 items-center justify-center !important;
 }
 
 .fi-btn-group {
-  @apply w-full !important;
+    @apply w-full !important;
 }
 
 .fi-section-header {
-  @apply px-4 py-3 !important;
+    @apply px-4 py-3 !important;
 }
 
 .fi-sidebar-item-active .fi-sidebar-item-icon,
 .fi-sidebar-item-active .fi-sidebar-item-label {
-  @apply text-indigo-600 !important;
+    @apply text-indigo-600 !important;
 }
 
 .fi-sidebar-item-icon {
-  @apply text-black !important;
+    @apply text-black !important;
 }
 
 .fi-sidebar-item-label {
-  @apply text-black text-lg font-bold !important;
+    @apply text-black text-lg font-bold !important;
 }
 
 .fi-sidebar-nav-groups {
-  @apply gap-y-4 !important;
+    @apply gap-y-4 !important;
 }
 
 .fi-input-wrp-icon {
-  @apply h-4 w-4 !important;
+    @apply h-4 w-4 !important;
 }
 
 .inline-form {
-  @apply gap-4 gap-x-2 !important;
+    @apply gap-4 gap-x-2 !important;
 }
 
 .inline-form .fi-section-content {
-  @apply p-4 !important;
+    @apply p-4 !important;
 }
 
 .inline-form .fi-section-content .fi-fo-component-ctn {
-  @apply gap-4 gap-x-2 !important;
+    @apply gap-4 gap-x-2 !important;
 }
 
 .submit-btn {
-  @apply text-base !important;
+    @apply text-base !important;
 }
 
 .single-col-tabs .fi-fo-component-ctn {
-  @apply gap-x-0 gap-y-4;
+    @apply gap-x-0 gap-y-4;
 }
 
 .fi-tabs-item {
-  @apply font-semibold text-slate-500;
+    @apply font-semibold text-slate-500;
 }
 
 .fi-tabs-item-active {
-  @apply text-indigo-600;
+    @apply text-indigo-600;
 }
 
 .fi-header {
-  @apply -my-4 !important;
+    @apply -my-4 !important;
 }
 
 .fi-header-heading {
-  font-family: 'DM Serif Display', serif;
-  font-weight: 400;
-  font-style: normal;
-  /*@apply -my-4 tracking-wide text-3xl !important;*/
+    font-family: 'DM Serif Display', serif;
+    font-weight: 400;
+    font-style: normal;
+    /*@apply -my-4 tracking-wide text-3xl !important;*/
 }
 
 .fi-ta-text-item,
 .fi-ta-text-item-label {
-  @apply w-full;
+    @apply w-full;
 }
 
 [x-persist='topbar.end'] {
-  margin: 0 !important;
-  padding-right: 1rem !important;
-  @apply w-full flex items-center gap-x-4 !important;
+    margin: 0 !important;
+    padding-right: 1rem !important;
+    @apply w-full flex items-center gap-x-4 !important;
 }
 
 .inter-font {
-  font-family: 'Inter', sans-serif;
-  font-style: normal;
+    font-family: 'Inter', sans-serif;
+    font-style: normal;
 }
 
 .dm-serif display-regular {
-  font-family: 'DM Serif Display', serif;
-  font-weight: 400;
-  font-style: normal;
+    font-family: 'DM Serif Display', serif;
+    font-weight: 400;
+    font-style: normal;
 }
 
 .dm-serif display-regular-italic {
-  font-family: 'DM Serif Display', serif;
-  font-weight: 400;
-  font-style: italic;
+    font-family: 'DM Serif Display', serif;
+    font-weight: 400;
+    font-style: italic;
 }
 
 .wavy-background {
-  background-image: url('../../../../public/images/waves-8.svg');
-  background-repeat: repeat-x;
-  background-position: bottom;
-  background-color: white;
+    background-image: url('../../../../public/images/waves-8.svg');
+    background-repeat: repeat-x;
+    background-position: bottom;
+    background-color: white;
 }
 
 .fi-header {
-  @apply flex flex-row items-center;
-  @media only screen and (max-width: 640px) {
-  }
+    @apply flex flex-row items-center;
+    @media only screen and (max-width: 640px) {
+    }
 }
 
 .fi-header-heading {
-  font-family: 'DM Serif Display', serif;
-  font-weight: 400;
-  font-style: normal;
+    font-family: 'DM Serif Display', serif;
+    font-weight: 400;
+    font-style: normal;
 
-  @media only screen and (max-width: 640px) {
-    font-size: 22px !important;
-  }
+    @media only screen and (max-width: 640px) {
+        font-size: 22px !important;
+    }
 }
 
 .fi-header-subheading {
-  @apply text-xs sm:text-sm md:text-base mt-0;
+    @apply text-xs sm:text-sm md:text-base mt-0;
 }
 
 .fi-header {
-  @apply flex items-center justify-between;
+    @apply flex items-center justify-between;
 }
 
 .fi-header .fi-ac {
-  @apply ml-auto flex justify-end gap-1.5 sm:gap-3;
+    @apply ml-auto flex justify-end gap-1.5 sm:gap-3;
 }
 
 .fi-header > div:first-child {
-  @apply text-left;
+    @apply text-left;
 }
 
 @media only screen and (max-width: 768px) {
-  .fi-otp-input {
-    padding: 6px;
-  }
+    .fi-otp-input {
+        padding: 6px;
+    }
 
-  .fi-otp-input-container {
-    gap: 12px;
-  }
+    .fi-otp-input-container {
+        gap: 12px;
+    }
 }
 
 .filepond--image-preview {
-  @apply bg-indigo-100;
+    @apply bg-indigo-100;
+}
+
+.ms-auto {
+    margin-inline-start: initial;
 }
