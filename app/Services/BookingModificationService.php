@@ -44,7 +44,9 @@ class BookingModificationService
                     'booking_at_utc' => $booking_at_utc,
                 ]);
 
-            app(BookingCalculationService::class)->calculateEarnings($modificationRequest->booking->refresh());
+            $refreshedBooking = $modificationRequest->booking->refresh();
+
+            app(BookingCalculationService::class)->calculateEarnings($refreshedBooking);
 
             $modificationRequest->notify(new CustomerModificationApproved);
             $modificationRequest->notify(new ConciergeModificationApproved);

@@ -7,6 +7,7 @@ use App\Enums\BookingStatus;
 use App\Models\Booking;
 use App\Models\ScheduleTemplate;
 use App\Models\VenueTimeSlot;
+use App\Notifications\Booking\CustomerBookingConfirmed;
 use Carbon\Carbon;
 use Exception;
 use Filament\Actions\Action;
@@ -56,17 +57,27 @@ class VenueBookingConfirmation extends Page
         }
 
         if ($this->booking->venue_confirmed_at === null) {
+            $this->booking->load('venue.inRegion');
             $payload = [
                 'venue_confirmed_at' => now(),
-                'status' => BookingStatus::VENUE_CONFIRMED,
             ];
+
             activity()
                 ->performedOn($this->booking)
                 ->withProperties($payload)
                 ->log('Venue '.$this->booking->venue->name.' confirmed booking');
 
+            Log::info('Venue confirmed booking', [
+                'name' => $this->booking->venue->name,
+                'booking' => $this->booking->id,
+            ]);
+
             $this->booking->update($payload);
             $this->showUndoButton = true;
+
+            if ($this->booking->is_non_prime_ibiza_big_group) {
+                $this->booking->notify(new CustomerBookingConfirmed);
+            }
         }
 
         Notification::make()
@@ -185,24 +196,6 @@ class VenueBookingConfirmation extends Page
             ->size('lg')
             ->extraAttributes(['class' => 'w-full'])
             ->disabled($this->isBookingCancelled())
-            ->action(function () {
-                if ($this->isBookingCancelled()) {
-                    return;
-                }
-
-                if ($this->booking->venue_confirmed_at === null) {
-                    Log::info('Venue confirmed booking', [
-                        'name' => $this->booking->venue->name,
-                        'booking' => $this->booking->id,
-                    ]);
-                    $this->booking->update(['venue_confirmed_at' => now()]);
-                    $this->showUndoButton = true;
-                }
-
-                Notification::make()
-                    ->title('Thank you for confirming the booking')
-                    ->success()
-                    ->send();
-            });
+            ->action(fn () => $this->confirmBooking());
     }
 }

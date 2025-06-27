@@ -4,6 +4,7 @@ namespace App\Filament\Resources\VenueResource\Pages;
 
 use App\Enums\BookingStatus;
 use App\Enums\VenueStatus;
+use App\Events\BookingCancelled;
 use App\Filament\Resources\PartnerResource\Pages\ViewPartner;
 use App\Filament\Resources\VenueResource;
 use App\Models\Booking;
@@ -12,6 +13,7 @@ use App\Models\ScheduleTemplate;
 use App\Models\Venue;
 use App\Notifications\Booking\CustomerBookingConfirmed;
 use App\Services\Booking\BookingCalculationService;
+use App\Services\ReservationService;
 use App\Traits\HandlesPartySizeMapping;
 use App\Traits\ImpersonatesOther;
 use Carbon\Carbon;
@@ -375,6 +377,11 @@ class ListVenues extends ListRecords
                     } elseif ($this->bulkEditData['status'] === BookingStatus::CONFIRMED->value) {
                         $booking->earnings()->update(['confirmed_at' => now()]);
                     }
+
+                    // Dispatch BookingCancelled event for cancelled bookings only
+                    if ($this->bulkEditData['status'] === BookingStatus::CANCELLED->value) {
+                        BookingCancelled::dispatch($booking);
+                    }
                 }
 
                 // Send confirmation if requested
@@ -441,11 +448,18 @@ class ListVenues extends ListRecords
                     ->withCount(['confirmedBookings'])
                     ->leftJoin('users', 'venues.user_id', '=', 'users.id')
                     ->when($this->onlyWithBookings, fn ($query) => $query->has('confirmedBookings'))
-                    ->when($this->onlyActiveStatus, fn ($query) => $query->where('venues.status', VenueStatus::ACTIVE->value))
+                    ->when($this->onlyActiveStatus,
+                        fn ($query) => $query->where('venues.status', VenueStatus::ACTIVE->value))
                     ->when($this->region, fn ($query) => $query->where('venues.region', $this->region))
                     ->orderByDesc('users.updated_at')
             )
             ->headerActions([
+                Action::make('bulkEdit')
+                    ->label('Bulk Edit Venues')
+                    ->icon('heroicon-o-pencil-square')
+                    ->color('primary')
+                    ->url('/platform/bulk-edit-venues')
+                    ->visible(fn () => auth()->user()->hasRole(['super_admin', 'admin'])),
                 ExportAction::make('export')
                     ->label('Export CSV')
                     ->icon('heroicon-o-arrow-down-tray')
@@ -458,6 +472,37 @@ class ListVenues extends ListRecords
                     ]),
             ])
             ->columns([
+                TextColumn::make('tier')
+                    ->label('Tier')
+                    ->formatStateUsing(function (?int $state, Venue $record): string {
+                        // Check if venue is in tier 1 (either DB tier=1 OR in config tier_1)
+                        $goldVenues = ReservationService::getVenuesInTier($record->region, 1);
+                        $silverVenues = ReservationService::getVenuesInTier($record->region, 2);
+
+                        if ($record->tier === 1 || in_array($record->id, $goldVenues)) {
+                            return 'Gold';
+                        } elseif ($record->tier === 2 || in_array($record->id, $silverVenues)) {
+                            return 'Silver';
+                        } else {
+                            return 'Standard';
+                        }
+                    })
+                    ->badge()
+                    ->color(function (?int $state, Venue $record): string {
+                        // Check if venue is in tier 1 (either DB tier=1 OR in config tier_1)
+                        $goldVenues = ReservationService::getVenuesInTier($record->region, 1);
+                        $silverVenues = ReservationService::getVenuesInTier($record->region, 2);
+
+                        if ($record->tier === 1 || in_array($record->id, $goldVenues)) {
+                            return 'warning'; // Gold
+                        } elseif ($record->tier === 2 || in_array($record->id, $silverVenues)) {
+                            return 'gray';    // Silver
+                        } else {
+                            return 'primary'; // Standard (blue)
+                        }
+                    })
+                    ->default(0)
+                    ->size('xs'),
                 TextColumn::make('name')
                     ->size('xs')
                     ->searchable(),
@@ -471,8 +516,13 @@ class ListVenues extends ListRecords
                     ->label('Venue Group')
                     ->grow(false)
                     ->size('xs')
-                    ->formatStateUsing(fn ($state, Venue $record) => $record->venueGroup ? $record->venueGroup->name : '-')
-                    ->visibleFrom('md'),
+                    ->default('-')
+                    ->formatStateUsing(fn (
+                        $state,
+                        Venue $record
+                    ) => $record->venueGroup ? $record->venueGroup->name : '-')
+                    ->visibleFrom('md')
+                    ->searchable(),
                 TextColumn::make('partnerReferral.user.name')->label('Partner')
                     ->url(fn (Venue $record) => $record->partnerReferral?->user?->partner
                         ? ViewPartner::getUrl(['record' => $record->partnerReferral->user->partner])
@@ -531,7 +581,8 @@ class ListVenues extends ListRecords
                 SelectFilter::make('region')
                     ->label('Region')
                     ->options(fn () => Region::all()->pluck('name', 'id')->toArray())
-                    ->query(fn (Builder $query, array $data): Builder => $data['value'] ? $query->where('venues.region', $data['value']) : $query
+                    ->query(fn (Builder $query, array $data): Builder => $data['value'] ? $query->where('venues.region',
+                        $data['value']) : $query
                     )
                     ->preload(),
             ])
@@ -539,7 +590,7 @@ class ListVenues extends ListRecords
                 Action::make('impersonate')
                     ->iconButton()
                     ->icon('impersonate-icon')
-                    ->action(fn (Venue $record) => $this->impersonate($record->user))
+                    ->action(fn (Venue $record) => $this->impersonateVenue($record->user, $record))
                     ->hidden(fn () => isPrimaApp()),
                 EditAction::make()
                     ->iconButton()
@@ -915,6 +966,11 @@ class ListVenues extends ListRecords
                 // Remove earnings for cancelled and no-show bookings
                 if ($this->bulkStatus === BookingStatus::CANCELLED->value || $this->bulkStatus === BookingStatus::NO_SHOW->value) {
                     $booking->earnings()->delete();
+                }
+
+                // Dispatch BookingCancelled event for cancelled bookings only
+                if ($this->bulkStatus === BookingStatus::CANCELLED->value) {
+                    BookingCancelled::dispatch($booking);
                 }
 
                 // Log the activity

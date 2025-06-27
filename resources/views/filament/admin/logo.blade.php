@@ -2,12 +2,12 @@
     $user = auth()->user();
     $venueGroup = null;
 
-    // Check if user is a concierge and has a venue group
+    // Check if the user is a concierge and has a venue group
     if ($user && $user->hasActiveRole('concierge')) {
         // Use the direct relationship to get the concierge
         $concierge = $user->concierge;
 
-        // If concierge exists and has a venue group, get the venue group
+        // If a concierge exists and has a venue group, get the venue group
         if ($concierge && $concierge->venue_group_id) {
             $venueGroup = $concierge->venueGroup;
         }

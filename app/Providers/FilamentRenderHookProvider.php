@@ -121,7 +121,6 @@ class FilamentRenderHookProvider extends ServiceProvider
         );
 
         Filament::registerRenderHook(
-            // PanelsRenderHook::USER_MENU_PROFILE_AFTER,
             PanelsRenderHook::SIDEBAR_NAV_START,
             static fn () => view('partials.concierge-user-menu')
         );

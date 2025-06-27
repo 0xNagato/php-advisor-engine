@@ -100,6 +100,11 @@ class CreateVenue extends CreateRecord
                             ->placeholder('Select Region')
                             ->options(Region::all()->sortBy('id')->pluck('name', 'id'))
                             ->required(),
+                        Select::make('tier')
+                            ->placeholder('Select Tier')
+                            ->options([1 => 'Top', 2 => 'Normal'])
+                            ->default(3)
+                            ->required(),
                         TextInput::make('primary_contact_name')
                             ->label('Primary Contact Name')
                             ->required(),

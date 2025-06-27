@@ -76,6 +76,16 @@ class VenueOnboardingResource extends Resource
                             ->content(fn (VenueOnboarding $record): string => $record->phone),
                     ])->columns(3),
 
+                Section::make('Agreement')
+                    ->schema([
+                        Placeholder::make('agreement_accepted')
+                            ->label('Agreement Accepted')
+                            ->content(fn (VenueOnboarding $record): string => $record->agreement_accepted ? 'Yes' : 'No'),
+                        Placeholder::make('agreement_accepted_at')
+                            ->label('Agreement Accepted At')
+                            ->content(fn (VenueOnboarding $record): string => $record->agreement_accepted_at?->format('M j Y, g:ia') ?? 'Not accepted'),
+                    ])->columns(2),
+
                 Section::make('Venues')
                     ->schema([
                         Placeholder::make('venues')
@@ -140,6 +150,11 @@ class VenueOnboardingResource extends Resource
                 TextColumn::make('venue_count')
                     ->label('Venues')
                     ->sortable(),
+                TextColumn::make('agreement_accepted')
+                    ->label('Agreement')
+                    ->formatStateUsing(fn (bool $state): string => $state ? 'Accepted' : 'Pending')
+                    ->badge()
+                    ->color(fn (bool $state): string => $state ? 'success' : 'warning'),
                 TextColumn::make('status')
                     ->badge()
                     ->color(fn (string $state): string => match ($state) {

@@ -54,7 +54,7 @@ class QrCode extends Model
     /**
      * Get the ShortURL model for this QR code
      *
-     * @return BelongsTo<\AshAllenDesign\ShortURL\Models\ShortURL, $this>
+     * @return BelongsTo<ShortURL, $this>
      */
     public function shortUrlModel(): BelongsTo
     {

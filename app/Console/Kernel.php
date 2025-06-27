@@ -48,9 +48,9 @@ class Kernel extends ConsoleKernel
                 ->withoutOverlapping();
 
             // Send booking reminders
-            $schedule->command('prima:bookings-send-customer-reminder')
-                ->everyMinute()
-                ->withoutOverlapping();
+            //            $schedule->command('prima:bookings-send-customer-reminder')
+            //                ->everyMinute()
+            //                ->withoutOverlapping();
 
             // Send booking reminders
             $schedule->command('prima:bookings-send-daily-customer-follow-up')

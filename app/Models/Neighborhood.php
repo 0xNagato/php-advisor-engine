@@ -201,6 +201,31 @@ class Neighborhood extends Model
             'region' => 'ibiza',
             'name' => 'Formentera',
         ],
+        [
+            'id' => 'salinas',
+            'region' => 'ibiza',
+            'name' => 'Salinas',
+        ],
+        [
+            'id' => 'marina_botafoch',
+            'region' => 'ibiza',
+            'name' => 'Marina Botafoch',
+        ],
+        [
+            'id' => 'cala_jondal',
+            'region' => 'ibiza',
+            'name' => 'Cala Jondal',
+        ],
+        [
+            'id' => 'st_jordi',
+            'region' => 'ibiza',
+            'name' => 'St Jordi',
+        ],
+        [
+            'id' => 'es_pujols',
+            'region' => 'ibiza',
+            'name' => 'Es Pujols',
+        ],
 
         // Mykonos
         [
