@@ -166,9 +166,11 @@ class ReservationService
 
                 if ($isToday && $currentTimeCarbon->gt($cutoffTimeCarbon)) {
                     $venue->schedules->each(function ($schedule) {
-                        $schedule->is_available = true;
-                        $schedule->remaining_tables = 0;
-                        $schedule->is_bookable = false;
+                        if ($schedule->is_bookable) {
+                            $schedule->is_available = true;
+                            $schedule->remaining_tables = 0;
+                            $schedule->is_bookable = false;
+                        }
                     });
                 }
             }
