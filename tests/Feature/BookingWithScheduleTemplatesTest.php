@@ -8,6 +8,7 @@ use App\Models\ScheduleTemplate;
 use App\Models\Venue;
 use App\Models\VenueTimeSlot;
 use App\Services\Booking\BookingCalculationService;
+use App\Services\Booking\ConciergePromotionalEarningsService;
 use App\Services\Booking\EarningCreationService;
 use App\Services\Booking\NonPrimeEarningsCalculationService;
 use App\Services\Booking\PrimeEarningsCalculationService;
@@ -16,7 +17,9 @@ use function Pest\Laravel\actingAs;
 
 beforeEach(function () {
     $earningCreationService = new EarningCreationService;
-    $primeEarningsCalculationService = new PrimeEarningsCalculationService($earningCreationService);
+    $promotionalService = new ConciergePromotionalEarningsService;
+    $primeEarningsCalculationService = new PrimeEarningsCalculationService($earningCreationService,
+        $promotionalService);
     $nonPrimeEarningsCalculationService = new NonPrimeEarningsCalculationService($earningCreationService);
 
     $this->service = new BookingCalculationService(
@@ -27,6 +30,8 @@ beforeEach(function () {
     $this->venue = Venue::factory()->create([
         'payout_venue' => 60,
         'non_prime_fee_per_head' => 10,
+        'timezone' => 'UTC',
+        'region' => 'miami',
     ]);
     $this->concierge = Concierge::factory()->create();
     $this->partner = Partner::factory()->create(['percentage' => 6]);
@@ -66,7 +71,7 @@ test('Non-prime booking with VenueTimeSlot override calculates earnings correctl
     // Create a VenueTimeSlot as an override for the schedule template
     $override = VenueTimeSlot::factory()->create([
         'schedule_template_id' => $this->scheduleTemplate->id,
-        'booking_date' => now()->toDateString(),
+        'booking_date' => now()->addDay()->toDateString(),
         'prime_time' => false,
         'price_per_head' => 25, // Override price
     ]);
@@ -74,11 +79,9 @@ test('Non-prime booking with VenueTimeSlot override calculates earnings correctl
     $result = $this->action::run(
         $this->scheduleTemplate->id,
         [
-            'date' => now()->format('Y-m-d'),
+            'date' => now()->addDay()->format('Y-m-d'),
             'guest_count' => $guestCount,
-        ],
-        'UTC',
-        'USD'
+        ]
     );
 
     $pricePerHead = $override->price_per_head;

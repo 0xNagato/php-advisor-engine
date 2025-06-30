@@ -11,6 +11,7 @@ use App\Models\User;
 use App\Observers\ConciergeObserver;
 use App\Observers\UserManyChatObserver;
 use App\Services\Booking\BookingCalculationService;
+use App\Services\Booking\ConciergePromotionalEarningsService;
 use App\Services\Booking\EarningCreationService;
 use App\Services\Booking\NonPrimeEarningsCalculationService;
 use App\Services\Booking\PrimeEarningsCalculationService;
@@ -22,7 +23,7 @@ use Filament\Support\Facades\FilamentColor;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Support\Facades\Blade;
-use Illuminate\Support\Facades\URL;
+// use Illuminate\Support\Facades\URL;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Validation\ValidationException;
 use Laravel\Telescope\TelescopeApplicationServiceProvider;
@@ -51,10 +52,10 @@ class AppServiceProvider extends ServiceProvider
             });
         }
 
-        if (app()->isLocal()) {
-            ($this->{'app'}['request'] ?? null)?->server?->set('HTTPS', 'on');
-            URL::forceScheme('https');
-        }
+        //        if (app()->isLocal()) {
+        //            ($this->{'app'}['request'] ?? null)?->server?->set('HTTPS', 'on');
+        //            URL::forceScheme('https');
+        //        }
 
         Actions::registerCommands();
 
@@ -109,8 +110,11 @@ class AppServiceProvider extends ServiceProvider
 
         $this->app->bind(EarningCreationService::class, fn () => new EarningCreationService);
 
+        $this->app->bind(ConciergePromotionalEarningsService::class, fn () => new ConciergePromotionalEarningsService);
+
         $this->app->bind(PrimeEarningsCalculationService::class, fn ($app) => new PrimeEarningsCalculationService(
-            $app->make(EarningCreationService::class)
+            $app->make(EarningCreationService::class),
+            $app->make(ConciergePromotionalEarningsService::class)
         ));
 
         $this->app->bind(NonPrimeEarningsCalculationService::class, fn ($app) => new NonPrimeEarningsCalculationService(

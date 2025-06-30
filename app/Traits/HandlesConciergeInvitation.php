@@ -7,7 +7,6 @@ use App\Models\Partner;
 use App\Models\Referral;
 use App\Models\Region;
 use App\Models\User;
-use App\Notifications\Concierge\ConciergeCreated;
 use App\Notifications\Concierge\ConciergeRegisteredEmail;
 use DanHarrin\LivewireRateLimiting\Exceptions\TooManyRequestsException;
 use Exception;
@@ -35,6 +34,8 @@ trait HandlesConciergeInvitation
 
     public ?Concierge $invitingConcierge = null;
 
+    public ?User $invitingVenueManager = null;
+
     public ?array $data = [];
 
     public ?string $invitationUsedMessage = null;
@@ -56,12 +57,26 @@ trait HandlesConciergeInvitation
     public function getSubheading(): string|Htmlable|null
     {
         if ($this->referral) {
+            // If using a standard referral, the referrer is always a User
             return "You were referred by: {$this->referral->referrer->name}";
         }
 
-        $inviter = $this->invitingPartner ?? $this->invitingConcierge;
+        // Handle direct link invitations
+        $inviter = $this->invitingPartner ?? $this->invitingConcierge ?? $this->invitingVenueManager ?? null;
 
-        return "You were referred by: {$inviter?->user->name}";
+        if (! $inviter) {
+            return null;
+        }
+
+        // Determine the inviter's name based on their type
+        $inviterName = match (true) {
+            $inviter instanceof Partner => $inviter->user?->name,
+            $inviter instanceof Concierge => $inviter->user?->name,
+            $inviter instanceof User => $inviter->name, // Access name directly for User (Venue Manager)
+            default => null,
+        };
+
+        return $inviterName ? "You were referred by: {$inviterName}" : null;
     }
 
     public function form(Form $form): Form
@@ -188,14 +203,34 @@ trait HandlesConciergeInvitation
             DB::beginTransaction();
 
             if (! $this->referral) {
+                $referrerType = match (true) {
+                    ! is_null($this->invitingPartner) => 'partner',
+                    ! is_null($this->invitingConcierge) => 'concierge',
+                    property_exists($this,
+                        'invitingVenueManager') && ! is_null($this->invitingVenueManager) => 'venue_manager',
+                    default => null,
+                };
+                $referrerId = $this->invitingPartner?->user_id ?? $this->invitingConcierge?->user_id ?? $this->invitingVenueManager?->id ?? null;
+
+                throw_if(! $referrerType || ! $referrerId,
+                    new Exception('Could not determine referrer for direct invitation.'));
+
+                $inviterRegion = match ($referrerType) {
+                    'partner' => $this->invitingPartner?->user?->region,
+                    'concierge' => $this->invitingConcierge?->user?->region,
+                    'venue_manager' => $this->invitingVenueManager?->region,
+                    default => null,
+                } ?? config('app.default_region');
+
                 $this->referral = Referral::query()->create([
-                    'referrer_id' => $this->invitingPartner?->user_id ?? $this->invitingConcierge->user_id,
+                    'referrer_id' => $referrerId,
                     'email' => $data['email'],
                     'phone' => $data['phone'],
                     'first_name' => $data['first_name'],
                     'last_name' => $data['last_name'],
                     'type' => 'concierge',
-                    'referrer_type' => $this->invitingPartner ? 'partner' : 'concierge',
+                    'referrer_type' => $referrerType,
+                    'region_id' => $inviterRegion,
                 ]);
             }
 
@@ -214,8 +249,9 @@ trait HandlesConciergeInvitation
                 $userData['partner_referral_id'] = $this->referral->referrer->partner->id;
             } elseif ($this->referral->referrer_type === 'concierge') {
                 $userData['concierge_referral_id'] = $this->referral->referrer->concierge->id;
+            } elseif ($this->referral->referrer_type === 'venue_manager') {
+                $userData['venue_group_id'] = $this->referral->referrer?->currentVenueGroup()?->id;
             }
-            // No need to set a referral ID for venue_manager referrals
 
             $user = User::query()->create([
                 ...$userData,
@@ -243,13 +279,21 @@ trait HandlesConciergeInvitation
             ];
 
             // Handle venue restrictions if this is a venue manager referral
-            if ($this->referral->referrer_type === 'venue_manager' && isset($this->referral->meta['venue_group_id'])) {
-                $conciergeData['venue_group_id'] = $this->referral->meta['venue_group_id'];
+            if (
+                $this->referral->referrer_type === 'venue_manager' &&
+                ($venueGroup = $this->referral->referrer?->currentVenueGroup())
+            ) {
+                $conciergeData['venue_group_id'] = $venueGroup->id;
 
-                if (isset($this->referral->meta['allowed_venue_ids'])) {
-                    // Cast allowed_venue_ids to integers to ensure proper comparison in venue checks
-                    $conciergeData['allowed_venue_ids'] = array_map('intval', $this->referral->meta['allowed_venue_ids']);
+                $allowedVenueIds = $venueGroup->getAllowedVenueIds($this->referral->referrer);
+                if (filled($allowedVenueIds)) {
+                    $conciergeData['allowed_venue_ids'] = array_map('intval', $allowedVenueIds);
+                } else {
+                    $conciergeData['allowed_venue_ids'] = [];
+                    Log::info("Venue manager {$this->referral->referrer_id} has no specific allowed venues in group {$venueGroup->id}. Referred concierge {$user->id} granted access to none initially.");
                 }
+            } elseif ($this->referral->referrer_type === 'venue_manager') {
+                Log::error("Could not determine venue group for venue manager referral: Referral ID {$this->referral->id}, Referrer ID {$this->referral->referrer_id}");
             }
 
             $user->concierge()->create($conciergeData);
@@ -262,8 +306,6 @@ trait HandlesConciergeInvitation
                     'date' => now()->format('F j, Y'),
                 ]
             ));
-
-            $user->notify(new ConciergeCreated($user));
 
             DB::commit();
 

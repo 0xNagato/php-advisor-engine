@@ -62,6 +62,9 @@ interface MingleData {
   isOmakase: boolean;
   omakaseDetails: string;
   minimumSpendPerGuest?: number;
+  venueName?: string;
+  venueRegion: string;
+  guestCount: number;
 }
 
 interface Props {
@@ -111,7 +114,9 @@ const showMultipleBookingModal = ref(false);
 const customerMessage = ref('');
 
 const validatePhone = (): boolean => {
-  const phoneInput = document.querySelector('#phone') as HTMLInputElement | null;
+  const phoneInput = document.querySelector(
+    '#phone',
+  ) as HTMLInputElement | null;
   if (!phoneInput) return false;
 
   const number = phoneInput.value.trim();
@@ -131,7 +136,9 @@ const validatePhone = (): boolean => {
 };
 
 const formatPhoneOnBlur = async () => {
-  const phoneInput = document.querySelector('#phone') as HTMLInputElement | null;
+  const phoneInput = document.querySelector(
+    '#phone',
+  ) as HTMLInputElement | null;
   if (!phoneInput) return;
 
   const number = phoneInput.value.trim();
@@ -154,7 +161,9 @@ const formatPhoneOnBlur = async () => {
       phoneError.value = '';
     } else {
       // Server returned an error or empty formatted number - use the server's message or a default
-      phoneError.value = result.message || 'Please enter a valid phone number that can receive SMS';
+      phoneError.value =
+        result.message ||
+        'Please enter a valid phone number that can receive SMS';
       phone.value = ''; // Clear the phone value since it's invalid
     }
   } catch (error) {
@@ -227,7 +236,7 @@ onMounted(async () => {
         elements.value = stripe.value.elements({
           clientSecret: clientSecret.value,
           appearance,
-          loader: 'auto'
+          loader: 'auto',
         });
 
         const paymentElement = elements.value.create('payment', options);
@@ -254,7 +263,7 @@ onMounted(async () => {
     phoneInput.addEventListener('blur', formatPhoneOnBlur);
 
     // Add input handler to clear errors
-    phoneInput.addEventListener('input', function() {
+    phoneInput.addEventListener('input', function () {
       phoneError.value = '';
     });
   }
@@ -276,7 +285,9 @@ const handleSubmit = async (event: Event) => {
   phoneError.value = '';
 
   // Get the phone input for validation
-  const phoneInput = document.querySelector('#phone') as HTMLInputElement | null;
+  const phoneInput = document.querySelector(
+    '#phone',
+  ) as HTMLInputElement | null;
   if (!phoneInput || !phoneInput.value.trim()) {
     // Don't set error for empty field - browser will handle required validation
     return;
@@ -292,13 +303,16 @@ const handleSubmit = async (event: Event) => {
         phone.value = result.formattedNumber;
         phoneInput.value = result.formattedNumber; // Update the input display
       } else {
-        phoneError.value = result.message || 'Please enter a valid phone number that can receive SMS';
+        phoneError.value =
+          result.message ||
+          'Please enter a valid phone number that can receive SMS';
         isLoading.value = false;
         return;
       }
     } catch (e) {
-      console.error("Error formatting phone during submission:", e);
-      phoneError.value = 'Please enter a valid phone number that can receive SMS';
+      console.error('Error formatting phone during submission:', e);
+      phoneError.value =
+        'Please enter a valid phone number that can receive SMS';
       isLoading.value = false;
       return;
     }
@@ -355,9 +369,9 @@ const handleSubmit = async (event: Event) => {
               billing_details: {
                 name: `${firstName.value} ${lastName.value}`,
                 email: email.value,
-                phone: phone.value
-              }
-            }
+                phone: phone.value,
+              },
+            },
           },
           redirect: 'if_required',
         });
@@ -365,13 +379,18 @@ const handleSubmit = async (event: Event) => {
         if (error) {
           // More specific handling for different error types
           if (error.type === 'validation_error') {
-            errorMessage.value = 'Please check your payment information and try again.';
+            errorMessage.value =
+              'Please check your payment information and try again.';
           } else if (error.type === 'card_error') {
-            errorMessage.value = error.message || 'Your card was declined. Please try a different payment method.';
+            errorMessage.value =
+              error.message ||
+              'Your card was declined. Please try a different payment method.';
           } else if (error.message && error.message.includes('Apple Pay')) {
-            errorMessage.value = 'Something went wrong. Unable to show Apple Pay. Please choose a different payment method and try again.';
+            errorMessage.value =
+              'Something went wrong. Unable to show Apple Pay. Please choose a different payment method and try again.';
           } else {
-            errorMessage.value = error.message || 'An error occurred during payment.';
+            errorMessage.value =
+              error.message || 'An error occurred during payment.';
           }
         } else if (paymentIntent) {
           const additionalData = {
@@ -396,7 +415,8 @@ const handleSubmit = async (event: Event) => {
         }
       } catch (stripeError) {
         console.error('Stripe exception:', stripeError);
-        errorMessage.value = 'Payment processing failed. Please try again or use a different payment method.';
+        errorMessage.value =
+          'Payment processing failed. Please try again or use a different payment method.';
       }
     }
   } catch (error) {
@@ -477,14 +497,23 @@ const emailInvoice = async () => {
       <h1
         class="text-2xl font-semibold tracking-tight text-center dm-serif text-gray-950 dark:text-white sm:text-3xl"
       >
-        Secure Your Reservation
+        Secure Your Table
       </h1>
-      <p class="mb-4 text-center">
+      <p class="mb-1 font-semibold text-center">
         {{
           mingleData.totalWithTaxesInCents > 0
             ? 'Enter Payment Information To Confirm.'
             : 'Enter Contact Information To Confirm.'
         }}
+      </p>
+      <p
+        class="mb-2 text-xs text-gray-600"
+        v-if="mingleData.totalWithTaxesInCents > 0"
+      >
+        Enter payment details below so that PRIMA may secure your table request.
+        60% of the fee paid is paid to
+        {{ mingleData.venueName }} management for opening a previously sold-out
+        table.
       </p>
       <p class="mb-4 text-xl font-semibold text-center">
         Time Remaining: {{ formattedTime }}
@@ -505,6 +534,18 @@ const emailInvoice = async () => {
           }}
           per diner minimum spend. Booking fees do not apply toward minimum
           spend or restaurant bill.
+        </p>
+      </div>
+      <div
+        v-if="mingleData.venueRegion === 'ibiza' && mingleData.guestCount >= 8"
+        class="mb-4 text-justify"
+      >
+        <p>
+          Note: Parties of 8 or more require additional approval by
+          {{ mingleData.venueName }}. Please submit the reservation request
+          below. Approvals typically take 15-30 minutes (during operating
+          hours). We will notify you as soon as the booking has been approved.
+          Thank you!
         </p>
       </div>
       <form class="w-full" @submit.prevent="handleSubmit">
@@ -541,7 +582,9 @@ const emailInvoice = async () => {
             class="focus:ring-opacity/50 w-full rounded-md border-gray-300 shadow-sm transition duration-200 ease-in-out focus:border-[#A7A4F2] focus:ring focus:ring-[#D1CFF5] sm:text-sm"
             required
           />
-          <p v-if="phoneError" class="mt-1 text-sm font-medium text-red-600">{{ phoneError }}</p>
+          <p v-if="phoneError" class="mt-1 text-sm font-medium text-red-600">
+            {{ phoneError }}
+          </p>
         </div>
         <div class="mb-2">
           <label for="email" class="sr-only">Email</label>
@@ -626,7 +669,7 @@ const emailInvoice = async () => {
           :disabled="isLoading"
           class="w-full px-4 py-2 mt-4 font-semibold text-white bg-indigo-600 rounded hover:bg-indigo-700 disabled:opacity-50"
         >
-          {{ isLoading ? 'Processing...' : 'Complete Reservation' }}
+          {{ isLoading ? 'Processing...' : 'Secure Your Table' }}
         </button>
         <a
           v-if="mingleData.vipCode"
@@ -685,4 +728,3 @@ const emailInvoice = async () => {
 <style>
 /* Remove intlTelInput styling */
 </style>
-

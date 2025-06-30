@@ -1,3 +1,6 @@
+@php
+    use App\Models\Region;
+@endphp
 <x-layouts.simple-wrapper>
     <div class="max-w-xl mx-auto">
         @if ($submitted)
@@ -15,7 +18,7 @@ try {
                             } catch (\Exception $e) {
                                 echo url('/venue-manager');
                             } @endphp"
-                            class="inline-flex items-center px-4 py-2 bg-indigo-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-indigo-700 focus:bg-indigo-700 active:bg-indigo-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition ease-in-out duration-150">
+                           class="inline-flex items-center px-4 py-2 bg-indigo-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-indigo-700 focus:bg-indigo-700 active:bg-indigo-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition ease-in-out duration-150">
                             Return to Dashboard
                         </a>
                     </div>
@@ -62,7 +65,7 @@ try {
             </div>
 
             <form wire:submit.prevent="{{ $step === 'agreement' ? 'submit' : 'nextStep' }}" x-data
-                x-on:submit="window.scrollTo({top: 0, behavior: 'smooth'})">
+                  x-on:submit="window.scrollTo({top: 0, behavior: 'smooth'})">
                 <div class="space-y-6">
                     {{-- Existing Account Notice --}}
                     @if ($existingAccountDetected)
@@ -70,10 +73,10 @@ try {
                             <div class="flex items-start">
                                 <div class="flex-shrink-0">
                                     <svg class="w-5 h-5 text-blue-600" xmlns="http://www.w3.org/2000/svg"
-                                        viewBox="0 0 20 20" fill="currentColor">
+                                         viewBox="0 0 20 20" fill="currentColor">
                                         <path fill-rule="evenodd"
-                                            d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z"
-                                            clip-rule="evenodd" />
+                                              d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z"
+                                              clip-rule="evenodd" />
                                     </svg>
                                 </div>
                                 <div class="ml-3">
@@ -87,13 +90,13 @@ try {
                                         </ul>
                                         <div class="mt-3">
                                             <a href="{{ route('login') }}"
-                                                class="inline-flex items-center text-sm font-medium text-blue-600 hover:text-blue-800">
+                                               class="inline-flex items-center text-sm font-medium text-blue-600 hover:text-blue-800">
                                                 Go to login page
                                                 <svg class="w-4 h-4 ml-1" xmlns="http://www.w3.org/2000/svg"
-                                                    viewBox="0 0 20 20" fill="currentColor">
+                                                     viewBox="0 0 20 20" fill="currentColor">
                                                     <path fill-rule="evenodd"
-                                                        d="M10.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L12.586 11H5a1 1 0 110-2h7.586l-2.293-2.293a1 1 0 010-1.414z"
-                                                        clip-rule="evenodd" />
+                                                          d="M10.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L12.586 11H5a1 1 0 110-2h7.586l-2.293-2.293a1 1 0 010-1.414z"
+                                                          clip-rule="evenodd" />
                                                 </svg>
                                             </a>
                                         </div>
@@ -109,10 +112,10 @@ try {
                             <div>
                                 <label class="block mb-2 text-sm text-gray-700">Company or Restaurant Group Name</label>
                                 <input type="text" wire:model="company_name"
-                                    class="w-full border-gray-300 rounded-lg shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-                                    placeholder="Enter company name">
+                                       class="w-full border-gray-300 rounded-lg shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                                       placeholder="Enter company name">
                                 @error('company_name')
-                                    <span class="mt-1 text-xs text-red-600">{{ $message }}</span>
+                                <span class="mt-1 text-xs text-red-600">{{ $message }}</span>
                                 @enderror
                             </div>
 
@@ -127,27 +130,28 @@ try {
                                 </div>
                             @else
                                 <x-type-ahead label="Name of PRIMA Partner" placeholder="Search for a partner..."
-                                    :items="$partners" wire-model="partner_id" :error="$errors->first('partner_id')" />
+                                              :items="$partners" wire-model="partner_id"
+                                              :error="$errors->first('partner_id')" />
                             @endif
 
                             <div class="grid grid-cols-2 gap-4">
                                 <div>
                                     <label class="block mb-2 text-sm text-gray-700">First Name</label>
                                     <input type="text" wire:model="first_name"
-                                        class="w-full border-gray-300 rounded-lg shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-                                        placeholder="Enter first name">
+                                           class="w-full border-gray-300 rounded-lg shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                                           placeholder="Enter first name">
                                     @error('first_name')
-                                        <span class="mt-1 text-xs text-red-600">{{ $message }}</span>
+                                    <span class="mt-1 text-xs text-red-600">{{ $message }}</span>
                                     @enderror
                                 </div>
 
                                 <div>
                                     <label class="block mb-2 text-sm text-gray-700">Last Name</label>
                                     <input type="text" wire:model="last_name"
-                                        class="w-full border-gray-300 rounded-lg shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-                                        placeholder="Enter last name">
+                                           class="w-full border-gray-300 rounded-lg shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                                           placeholder="Enter last name">
                                     @error('last_name')
-                                        <span class="mt-1 text-xs text-red-600">{{ $message }}</span>
+                                    <span class="mt-1 text-xs text-red-600">{{ $message }}</span>
                                     @enderror
                                 </div>
                             </div>
@@ -155,20 +159,20 @@ try {
                             <div>
                                 <label class="block mb-2 text-sm text-gray-700">Email Address</label>
                                 <input type="email" wire:model="email"
-                                    class="w-full border-gray-300 rounded-lg shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-                                    placeholder="Enter email address">
+                                       class="w-full border-gray-300 rounded-lg shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                                       placeholder="Enter email address">
                                 @error('email')
-                                    <span class="mt-1 text-xs text-red-600">{{ $message }}</span>
+                                <span class="mt-1 text-xs text-red-600">{{ $message }}</span>
                                 @enderror
                             </div>
 
                             <div>
                                 <label class="block mb-2 text-sm text-gray-700">Phone Number</label>
                                 <input type="tel" wire:model="phone"
-                                    class="w-full border-gray-300 rounded-lg shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-                                    placeholder="Enter phone number">
+                                       class="w-full border-gray-300 rounded-lg shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                                       placeholder="Enter phone number">
                                 @error('phone')
-                                    <span class="mt-1 text-xs text-red-600">{{ $message }}</span>
+                                <span class="mt-1 text-xs text-red-600">{{ $message }}</span>
                                 @enderror
                             </div>
                         </div>
@@ -186,7 +190,7 @@ try {
                                     @endif
                                 </label>
                                 <select wire:model.live="venue_count"
-                                    class="w-full border-gray-300 rounded-lg shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                                        class="w-full border-gray-300 rounded-lg shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
                                     @foreach (range(1, 5) as $count)
                                         <option value="{{ $count }}">
                                             {{ $count }}
@@ -195,7 +199,7 @@ try {
                                     @endforeach
                                 </select>
                                 @error('venue_count')
-                                    <span class="mt-1 text-xs text-red-600">{{ $message }}</span>
+                                <span class="mt-1 text-xs text-red-600">{{ $message }}</span>
                                 @enderror
                             </div>
 
@@ -212,15 +216,15 @@ try {
                                         <div class="col-span-3">
                                             <label class="block mb-2 text-sm text-gray-700">Venue Name</label>
                                             <input type="text" wire:model="venue_names.{{ $index }}"
-                                                class="w-full border-gray-300 rounded-lg shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                                                   class="w-full border-gray-300 rounded-lg shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
                                             @error("venue_names.{$index}")
-                                                <span class="mt-1 text-xs text-red-600">{{ $message }}</span>
+                                            <span class="mt-1 text-xs text-red-600">{{ $message }}</span>
                                             @enderror
                                         </div>
                                         <div class="col-span-2">
                                             <label class="block mb-2 text-sm text-gray-700">Region</label>
                                             <select wire:model="venue_regions.{{ $loop->index }}"
-                                                class="w-full border-gray-300 rounded-lg shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                                                    class="w-full border-gray-300 rounded-lg shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
                                                 @foreach ($availableRegions as $region)
                                                     <option value="{{ $region['value'] }}">
                                                         {{ $region['label'] }}
@@ -235,7 +239,7 @@ try {
                             <div>
                                 <label class="flex items-start space-x-4">
                                     <input type="checkbox" wire:model.live="has_logos"
-                                        class="w-6 h-6 mt-0.5 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500">
+                                           class="w-6 h-6 mt-0.5 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500">
                                     <span class="text-sm">
                                         <span class="block font-medium text-gray-700">Upload Venue Logos</span>
                                         <span class="text-gray-500">Provide logos for each venue or let PRIMA source
@@ -246,10 +250,12 @@ try {
                                 @if ($has_logos)
                                     <div class="mt-6 space-y-6">
                                         @foreach ($venue_names as $index => $name)
-                                            <x-file-upload name="logo_{{ $index }}" :label="$name ?: 'Venue ' . ($index + 1) . ' Logo'"
-                                                model="logo_files.{{ $index }}" :file="$logo_files[$index] ?? null"
-                                                :error="$errors->first('logo_files.' . $index)"
-                                                wire:click="deleteUpload([], {{ $index }})" />
+                                            <x-file-upload name="logo_{{ $index }}"
+                                                           :label="$name ?: 'Venue ' . ($index + 1) . ' Logo'"
+                                                           model="logo_files.{{ $index }}"
+                                                           :file="$logo_files[$index] ?? null"
+                                                           :error="$errors->first('logo_files.' . $index)"
+                                                           wire:click="deleteUpload([], {{ $index }})" />
                                         @endforeach
                                     </div>
                                 @endif
@@ -274,17 +280,17 @@ try {
                             <div class="space-y-3">
                                 <label class="flex items-center space-x-4">
                                     <input type="checkbox" wire:model="agreement_accepted"
-                                        class="w-6 h-6 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500">
+                                           class="w-6 h-6 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500">
                                     <span class="text-sm font-medium text-gray-700">I accept the terms of the
                                         agreement</span>
                                 </label>
                                 @error('agreement_accepted')
-                                    <span class="block mt-1 text-xs text-red-600">{{ $message }}</span>
+                                <span class="block mt-1 text-xs text-red-600">{{ $message }}</span>
                                 @enderror
 
                                 <label class="flex items-center space-x-4">
                                     <input type="checkbox" wire:model="send_agreement_copy"
-                                        class="w-6 h-6 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500">
+                                           class="w-6 h-6 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500">
                                     <span class="text-sm font-medium text-gray-700">Send me a copy of this agreement
                                         via email</span>
                                 </label>
@@ -331,8 +337,8 @@ try {
                                                 @foreach ($timeSlots as $time)
                                                     <label class="relative flex items-center justify-center">
                                                         <input type="checkbox"
-                                                            wire:model="venue_prime_hours.{{ $current_venue_index }}.{{ $day }}.{{ $time }}"
-                                                            class="sr-only peer" />
+                                                               wire:model="venue_prime_hours.{{ $current_venue_index }}.{{ $day }}.{{ $time }}"
+                                                               class="sr-only peer" />
                                                         <div
                                                             class="w-full py-2 text-sm text-center bg-white border border-gray-200 rounded-lg cursor-pointer peer-checked:bg-indigo-50 peer-checked:border-indigo-600 peer-checked:text-indigo-600">
                                                             {{ Carbon\Carbon::createFromFormat('H:i:s', $time)->format('g:i A') }}
@@ -374,8 +380,8 @@ try {
                                     </h4>
                                     <label class="flex items-start mt-4 space-x-4">
                                         <input type="checkbox"
-                                            wire:model.live="venue_use_non_prime_incentive.{{ $current_venue_index }}"
-                                            class="w-6 h-6 mt-0.5 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500">
+                                               wire:model.live="venue_use_non_prime_incentive.{{ $current_venue_index }}"
+                                               class="w-6 h-6 mt-0.5 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500">
                                         <span class="text-sm">
                                             <span class="block font-medium text-gray-700">Enable Non-Prime
                                                 Incentives</span>
@@ -392,12 +398,15 @@ try {
                                             <div class="relative rounded-lg shadow-sm">
                                                 <div
                                                     class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-                                                    <span class="text-gray-500 sm:text-sm">$</span>
+                                                    <span
+                                                        class="text-gray-500 sm:text-sm">
+                                                        {{ Region::getCurrencySymbolForRegion($venue_regions[$current_venue_index]) }}
+                                                    </span>
                                                 </div>
                                                 <input type="number"
-                                                    wire:model="venue_non_prime_per_diem.{{ $current_venue_index }}"
-                                                    step="0.01" min="0"
-                                                    class="block w-full border-gray-300 rounded-lg pl-7 focus:border-indigo-500 focus:ring-indigo-500">
+                                                       wire:model="venue_non_prime_per_diem.{{ $current_venue_index }}"
+                                                       step="0.01" min="0"
+                                                       class="block w-full border-gray-300 rounded-lg pl-7 focus:border-indigo-500 focus:ring-indigo-500">
                                             </div>
                                         </div>
                                     @endif
@@ -433,8 +442,8 @@ try {
                                             <h4 class="text-sm font-medium text-gray-700">{{ $dayName }}</h4>
                                             <label class="relative inline-flex items-center cursor-pointer">
                                                 <input type="checkbox"
-                                                    wire:model="venue_booking_hours.{{ $current_venue_index }}.{{ $day }}.closed"
-                                                    class="sr-only peer">
+                                                       wire:model="venue_booking_hours.{{ $current_venue_index }}.{{ $day }}.closed"
+                                                       class="sr-only peer">
                                                 <div
                                                     class="w-9 h-5 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-indigo-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-indigo-600">
                                                 </div>
@@ -443,30 +452,30 @@ try {
                                         </div>
 
                                         <div class="grid grid-cols-2 gap-4" x-data
-                                            x-show="!$wire.venue_booking_hours[{{ $current_venue_index }}]['{{ $day }}'].closed">
+                                             x-show="!$wire.venue_booking_hours[{{ $current_venue_index }}]['{{ $day }}'].closed">
                                             <div>
                                                 <label for="start-{{ $day }}"
-                                                    class="block text-sm font-medium text-gray-700 sr-only">Opening
+                                                       class="block text-sm font-medium text-gray-700 sr-only">Opening
                                                     Time</label>
                                                 <input type="time" id="start-{{ $day }}"
-                                                    wire:model="venue_booking_hours.{{ $current_venue_index }}.{{ $day }}.start"
-                                                    class="block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-                                                    step="1800">
+                                                       wire:model="venue_booking_hours.{{ $current_venue_index }}.{{ $day }}.start"
+                                                       class="block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                                                       step="1800">
                                                 @error("venue_booking_hours.{$current_venue_index}.{$day}.start")
-                                                    <p class="mt-1 text-xs text-red-600">{{ $message }}</p>
+                                                <p class="mt-1 text-xs text-red-600">{{ $message }}</p>
                                                 @enderror
                                             </div>
 
                                             <div>
                                                 <label for="end-{{ $day }}"
-                                                    class="block text-sm font-medium text-gray-700 sr-only">Closing
+                                                       class="block text-sm font-medium text-gray-700 sr-only">Closing
                                                     Time</label>
                                                 <input type="time" id="end-{{ $day }}"
-                                                    wire:model="venue_booking_hours.{{ $current_venue_index }}.{{ $day }}.end"
-                                                    class="block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-                                                    step="1800">
+                                                       wire:model="venue_booking_hours.{{ $current_venue_index }}.{{ $day }}.end"
+                                                       class="block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                                                       step="1800">
                                                 @error("venue_booking_hours.{$current_venue_index}.{$day}.end")
-                                                    <p class="mt-1 text-xs text-red-600">{{ $message }}</p>
+                                                <p class="mt-1 text-xs text-red-600">{{ $message }}</p>
                                                 @enderror
                                             </div>
                                         </div>
@@ -482,13 +491,13 @@ try {
                             <div class="flex gap-2">
                                 @if ($step !== 'company' && !($isExistingVenueManager && $step === 'venues'))
                                     <button type="button" wire:click="previousStep"
-                                        class="px-6 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50">
+                                            class="px-6 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50">
                                         Back
                                     </button>
 
                                     @if (config('app.env') === 'local')
                                         <button type="button" wire:click="resetForm"
-                                            class="px-6 py-2 text-sm font-medium text-red-700 bg-white border border-red-300 rounded-lg hover:bg-red-50">
+                                                class="px-6 py-2 text-sm font-medium text-red-700 bg-white border border-red-300 rounded-lg hover:bg-red-50">
                                             Reset
                                         </button>
                                     @endif
@@ -496,7 +505,7 @@ try {
                             </div>
 
                             <button type="submit"
-                                class="{{ $step === 'company' ? 'w-full' : 'ml-auto' }} bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg px-6 py-2 text-sm font-medium">
+                                    class="{{ $step === 'company' ? 'w-full' : 'ml-auto' }} bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg px-6 py-2 text-sm font-medium">
                                 {{ $step === 'agreement' ? 'Submit' : 'Continue' }}
                             </button>
                         </div>

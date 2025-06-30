@@ -44,7 +44,7 @@ class BookingsOverview extends BaseWidget
                 DB::raw('COUNT(*) as count'),
                 DB::raw('SUM(total_fee - total_refunded) as total_amount'),
                 DB::raw('SUM(platform_earnings - platform_earnings_refunded) as platform_earnings'),
-                DB::raw('SUM(CASE WHEN is_prime = 1 THEN total_fee ELSE (venue_earnings*-1) END) as platform_revenue'),
+                DB::raw('SUM(CASE WHEN is_prime = true THEN total_fee ELSE (venue_earnings*-1) END) as platform_revenue'),
                 'currency'
             )
             ->groupBy('currency')
@@ -87,7 +87,7 @@ class BookingsOverview extends BaseWidget
                 DB::raw('COUNT(*) as bookings'),
                 DB::raw('SUM(total_fee) as total_amount'),
                 DB::raw('SUM(platform_earnings) as platform_earnings'),
-                DB::raw('SUM(CASE WHEN is_prime = 1 THEN total_fee ELSE ABS(venue_earnings) END) as platform_revenue'),
+                DB::raw('SUM(CASE WHEN is_prime = true THEN total_fee ELSE ABS(venue_earnings) END) as platform_revenue'),
                 'currency'
             )
             ->groupBy('date', 'currency')

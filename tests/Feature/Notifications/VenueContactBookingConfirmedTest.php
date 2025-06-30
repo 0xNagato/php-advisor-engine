@@ -2,6 +2,7 @@
 
 use App\Actions\Booking\CreateBooking;
 use App\Enums\BookingStatus;
+use App\Models\Booking;
 use App\Models\Concierge;
 use App\Models\ScheduleTemplate;
 use App\Models\Venue;
@@ -12,17 +13,18 @@ use Illuminate\Support\Facades\Notification;
 use function Pest\Laravel\actingAs;
 
 beforeEach(function () {
-    // Create a venue with factory (includes contacts)
+    // Create a venue with a factory (includes contacts)
     $this->venue = Venue::factory()->create([
         'payout_venue' => 60,
         'non_prime_fee_per_head' => 10,
         'timezone' => 'UTC',
+        'region' => 'miami',
     ]);
 
     // Create a schedule template for the venue
     $this->scheduleTemplate = ScheduleTemplate::factory()->create([
         'venue_id' => $this->venue->id,
-        'start_time' => Carbon::now('UTC')->addMinutes(30)->format('H:i:s'),
+        'start_time' => Carbon::now('UTC')->addMinutes(40)->format('H:i:s'),
         'day_of_week' => Carbon::now('UTC')->format('l'),
         'party_size' => 4,
     ]);
@@ -48,14 +50,13 @@ it('sends notification with a 5-minute delay to venue contacts if booking is con
         'guest_count' => 2,
     ];
 
-    $result = $this->action::run(
-        $this->scheduleTemplate->id,
-        $bookingData,
-        'UTC',
-        'USD'
-    );
-
-    $booking = $result->booking;
+    $booking = Booking::factory()->create([
+        'guest_count' => $bookingData['guest_count'],
+        'booking_at' => $bookingData['date'].' '.$this->scheduleTemplate->start_time,
+        'booking_at_utc' => Carbon::parse($bookingData['date'].' '.$this->scheduleTemplate->start_time, 'UTC'),
+        'concierge_id' => $this->concierge->id,
+        'schedule_template_id' => $this->scheduleTemplate->id,
+    ]);
 
     // Update the booking status to "confirmed"
     $booking->update(['status' => BookingStatus::CONFIRMED]);
@@ -91,14 +92,13 @@ it('does not send notification to venue contacts if booking is canceled', functi
         'guest_count' => 2,
     ];
 
-    $result = $this->action::run(
-        $this->scheduleTemplate->id,
-        $bookingData,
-        'UTC',
-        'USD'
-    );
-
-    $booking = $result->booking;
+    $booking = Booking::factory()->create([
+        'guest_count' => $bookingData['guest_count'],
+        'booking_at' => $bookingData['date'].' '.$this->scheduleTemplate->start_time,
+        'booking_at_utc' => Carbon::parse($bookingData['date'].' '.$this->scheduleTemplate->start_time, 'UTC'),
+        'concierge_id' => $this->concierge->id,
+        'schedule_template_id' => $this->scheduleTemplate->id,
+    ]);
 
     // Update the booking status to "canceled"
     $booking->update(['status' => BookingStatus::CANCELLED]);

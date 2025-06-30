@@ -73,6 +73,16 @@ class Cuisine extends Model
             'description' => 'Spicy, aromatic dishes like Pad Thai, green curry, and tom yum soup.',
         ],
         [
+            'id' => 'greek',
+            'name' => 'Greek',
+            'description' => 'Features moussaka, souvlaki, tzatziki, and feta-based dishes with olive oil and herbs.',
+        ],
+        [
+            'id' => 'turkish',
+            'name' => 'Turkish',
+            'description' => 'Known for kebabs, baklava, meze platters, and rich flavors from the Ottoman cuisine.',
+        ],
+        [
             'id' => 'vegan',
             'name' => 'Vegan',
             'description' => 'A cuisine that excludes all animal products.',
@@ -81,6 +91,51 @@ class Cuisine extends Model
             'id' => 'gluten_free',
             'name' => 'Gluten-Free',
             'description' => 'A cuisine that excludes gluten-containing ingredients.',
+        ],
+        [
+            'id' => 'spanish',
+            'name' => 'Spanish',
+            'description' => 'Features tapas, paella, and regional Spanish dishes.',
+        ],
+        [
+            'id' => 'grill',
+            'name' => 'Grill',
+            'description' => 'Specializes in grilled meats and seafood.',
+        ],
+        [
+            'id' => 'seafood',
+            'name' => 'Seafood',
+            'description' => 'Focuses on fresh fish and shellfish preparations.',
+        ],
+        [
+            'id' => 'international',
+            'name' => 'International',
+            'description' => 'Offers a diverse menu with dishes from various global cuisines.',
+        ],
+        [
+            'id' => 'fusion',
+            'name' => 'Fusion',
+            'description' => 'Blends culinary traditions from two or more cultures.',
+        ],
+        [
+            'id' => 'middle_eastern',
+            'name' => 'Middle Eastern',
+            'description' => 'Includes dishes like falafel, shawarma, and tagines.',
+        ],
+        [
+            'id' => 'peruvian',
+            'name' => 'Peruvian',
+            'description' => 'Known for ceviche, lomo saltado, and aji amarillo-based sauces.',
+        ],
+        [
+            'id' => 'asian',
+            'name' => 'Asian',
+            'description' => 'A broad category covering various East and Southeast Asian cuisines.',
+        ],
+        [
+            'id' => 'steakhouse',
+            'name' => 'Steakhouse',
+            'description' => 'Primarily serves steaks and chops.',
         ],
     ];
 

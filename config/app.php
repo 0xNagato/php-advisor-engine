@@ -2,6 +2,7 @@
 
 use App\Providers\AppServiceProvider;
 use App\Providers\AuthServiceProvider;
+use App\Providers\BookingPlatformServiceProvider;
 use App\Providers\EventServiceProvider;
 use App\Providers\Filament\AdminPanelProvider;
 use App\Providers\FilamentRenderHookProvider;
@@ -210,6 +211,7 @@ return [
         AdminPanelProvider::class,
         RouteServiceProvider::class,
         FilamentRenderHookProvider::class,
+        BookingPlatformServiceProvider::class,
     ])->toArray(),
 
     /*
@@ -229,8 +231,38 @@ return [
 
     'default_timezone' => env('LOCAL_ENV_TIMEZONE', 'America/New_York'),
     'default_region' => env('LOCAL_ENV_REGION', 'miami'),
-    'no_tax' => env('NO_TAX', true),
-    'active_regions' => ['miami', 'los_angeles', 'ibiza', 'formentera'],
+    'no_tax' => env('NO_TAX', false),
+    'active_regions' => ['miami', 'los_angeles', 'ibiza'],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Region Geolocation Configuration
+    |--------------------------------------------------------------------------
+    |
+    | Configuration for mapping region codes and country codes to Prima regions
+    |
+    */
+    'region_code_mapping' => [
+        'FL' => 'miami',
+        'CA' => 'los_angeles',
+        'IB' => 'ibiza',
+    ],
+    'country_region_mapping' => [
+        // North America
+        'US' => 'miami',
+        'CA' => 'los_angeles',
+        'MX' => 'los_angeles',
+
+        // Europe
+        'ES' => 'ibiza',
+        'PT' => 'ibiza',
+        'FR' => 'ibiza',
+        'IT' => 'ibiza',
+        'DE' => 'ibiza',
+        'GB' => 'ibiza',
+        'IE' => 'ibiza',
+    ],
+
     'dev_ip_address' => env('DEV_IP_ADDRESS'),
     'native_key' => env('APP_NATIVE_KEY'),
     'primary_domain' => env('PRIMARY_DOMAIN', env('APP_URL', 'https://primavip.co')),
@@ -244,6 +276,9 @@ return [
     'widget_cache_timeout_minutes' => (int) env('WIDGET_CACHE_TIMEOUT_MINUTES', 5),
     'override_venues' => env('OVERRIDE_VENUES', ''),
     'closure_venues' => env('CLOSURE_VENUES', '73,76,95,112,129'),
+    'ibiza_top_tier_venues' => env('IBIZA_TOP_TIER_VENUES', '189,195'),
+    'los_angeles_top_tier_venues' => env('LOS_ANGELES_TOP_TIER_VENUES', ''),
+    'miami_top_tier_venues' => env('MIAMI_TOP_TIER_VENUES', ''),
     'allow_advanced_toggle' => env('ALLOW_ADVANCED_TOGGLE', false),
     'test_stripe_email' => env('TEST_STRIPE_EMAIL', 'test@primavip.co'),
 
@@ -274,6 +309,35 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Venue Onboarding Settings
+    |--------------------------------------------------------------------------
+    |
+    | Configuration flags for venue onboarding process
+    |
+    */
+    'venue_onboarding_unique_phone' => env('VENUE_ONBOARDING_UNIQUE_PHONE', false),
+    'public_venue_onboarding_enabled' => env('PUBLIC_VENUE_ONBOARDING_ENABLED', true),
+    'venue_onboarding_steps' => env('VENUE_ONBOARDING_STEPS', 'company,venues,agreement'),
+
+    /*
+    |--------------------------------------------------------------------------
+    | Venue display options
+    |--------------------------------------------------------------------------
+    */
+    'show_venue_modals' => env('SHOW_VENUE_MODALS', default: false),
+
+    /*
+    |--------------------------------------------------------------------------
+    | Specialty Filter Configuration
+    |--------------------------------------------------------------------------
+    |
+    | Define which regions should show the specialty filter in the availability calendar
+    |
+    */
+    'specialty_filter_regions' => ['ibiza'],
+
+    /*
+    |--------------------------------------------------------------------------
     | App Login Customization
     |--------------------------------------------------------------------------
     |
@@ -299,5 +363,41 @@ return [
     */
 
     'invoice_html_preview' => env('INVOICE_HTML_PREVIEW', false),
+
+    /*
+    |--------------------------------------------------------------------------
+    | Feature Flags
+    |--------------------------------------------------------------------------
+    |
+    | Feature flags to control certain functionality in the application
+    |
+    */
+    'features' => [
+        'show_qr_code_print_button' => env('FEATURE_SHOW_QR_PRINT_BUTTON', false),
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | GOD IDs
+    |--------------------------------------------------------------------------
+    |
+    | List of user IDs that have full administrative (God mode) access.
+    | These users bypass all restrictions and have complete system access.
+    |
+    */
+    'god_ids' => [1, 2, 204],
+
+    /*
+    |--------------------------------------------------------------------------
+    | VIP Code Configuration
+    |--------------------------------------------------------------------------
+    |
+    | Configuration for VIP code behavior and session management.
+    |
+    */
+    'vip' => [
+        'fallback_code' => env('VIP_FALLBACK_CODE', 'ALEX'),
+        'session_duration_hours' => env('VIP_SESSION_DURATION_HOURS', 24),
+    ],
 
 ];

@@ -5,17 +5,20 @@ namespace App\Models;
 use App\Casts\VenueContactCollection;
 use App\Enums\BookingStatus;
 use App\Enums\VenueStatus;
+use App\Enums\VenueType;
 use App\Models\Traits\HasEarnings;
+use App\Services\CoverManagerService;
 use Carbon\Carbon;
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasManyThrough;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\HasOneThrough;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use RuntimeException;
@@ -49,6 +52,8 @@ class Venue extends Model
         'user_id',
         'name',
         'slug',
+        'address',
+        'description',
         'contact_phone',
         'payout_venue',
         'payout_charity',
@@ -66,6 +71,7 @@ class Venue extends Model
         'party_sizes',
         'minimum_spend',
         'logo_path',
+        'images',
         'region',
         'timezone',
         'increment_fee',
@@ -82,6 +88,14 @@ class Venue extends Model
         'omakase_concierge_fee',
         'cuisines',
         'neighborhood',
+        'specialty',
+        'venue_type',
+        'advance_booking_window',
+        'uses_covermanager',
+        'covermanager_id',
+        'covermanager_sync_enabled',
+        'last_covermanager_sync',
+        'tier',
     ];
 
     protected function casts(): array
@@ -93,10 +107,130 @@ class Venue extends Model
             'business_hours' => 'array',
             'party_sizes' => 'array',
             'status' => VenueStatus::class,
+            'venue_type' => VenueType::class,
             'cutoff_time' => 'datetime',
             'daily_booking_cap' => 'integer',
             'cuisines' => 'array',
+            'specialty' => 'array',
+            'uses_covermanager' => 'boolean',
+            'covermanager_sync_enabled' => 'boolean',
+            'last_covermanager_sync' => 'datetime',
+            'images' => 'array',
         ];
+    }
+
+    /**
+     * Get a formatted neighborhood name
+     */
+    protected function formattedNeighborhood(): Attribute
+    {
+        return Attribute::make(
+            get: function () {
+                if (blank($this->neighborhood)) {
+                    return '';
+                }
+
+                try {
+                    // Use the Neighborhood model to get the properly formatted name
+                    $model = Neighborhood::query()->find($this->neighborhood);
+
+                    return $model ? $model->name : '';
+                } catch (Throwable) {
+                    return '';
+                }
+            }
+        );
+    }
+
+    /**
+     * Get formatted region name
+     */
+    protected function formattedRegion(): Attribute
+    {
+        return Attribute::make(
+            get: function () {
+                if (blank($this->region)) {
+                    return '';
+                }
+
+                try {
+                    // Use the Region model to get the properly formatted name
+                    $model = Region::query()->find($this->region);
+
+                    return $model ? $model->name : '';
+                } catch (Throwable) {
+                    return '';
+                }
+            }
+        );
+    }
+
+    /**
+     * Get a full formatted address
+     */
+    protected function formattedAddress(): Attribute
+    {
+        return Attribute::make(
+            get: function () {
+                $parts = [];
+
+                if (filled($this->address)) {
+                    $parts[] = $this->address;
+                }
+
+                $location = [];
+                if (filled($this->formattedNeighborhood)) {
+                    $location[] = $this->formattedNeighborhood;
+                }
+
+                if (filled($this->formattedRegion)) {
+                    $location[] = $this->formattedRegion;
+                }
+
+                if (filled($location)) {
+                    $parts[] = implode(', ', $location);
+                }
+
+                return $parts;
+            }
+        );
+    }
+
+    /**
+     * Get the venue description with cite tags removed
+     */
+    protected function cleanDescription(): Attribute
+    {
+        return Attribute::make(get: function () {
+            if (blank($this->description)) {
+                return '';
+            }
+            // Remove all cite tags and their attributes
+            $cleanDescription = preg_replace('/<\/?cite[^>]*>/', '', $this->description);
+
+            return $cleanDescription;
+        });
+    }
+
+    /**
+     * Get formatted address with line breaks converted to HTML
+     */
+    protected function formattedAddressHtml(): Attribute
+    {
+        return Attribute::make(
+            get: fn () => $this->address ? nl2br(e($this->address)) : ''
+        );
+    }
+
+    protected function tierLabel(): Attribute
+    {
+        return Attribute::make(
+            get: fn () => match ($this->tier) {
+                1 => 'Gold',
+                2 => 'Silver',
+                default => 'Standard',
+            }
+        );
     }
 
     protected static function boot(): void
@@ -108,10 +242,11 @@ class Venue extends Model
 
             // Generate base slug
             $baseSlug = Str::slug("{$venue->region}-{$venue->name}");
+            $baseSlug = strtolower($baseSlug);
 
             // Find if any similar slugs exist and get the count
             $count = static::query()
-                ->where('slug', 'like', $baseSlug.'%')
+                ->whereRaw('LOWER(slug) like ?', [$baseSlug.'%'])
                 ->count();
 
             // If similar slugs exist, append the next number
@@ -133,6 +268,12 @@ class Venue extends Model
                 '4' => 4,
                 '6' => 6,
                 '8' => 8,
+                '10' => 10,
+                '12' => 12,
+                '14' => 14,
+                '16' => 16,
+                '18' => 18,
+                '20' => 20,
             ];
         });
 
@@ -177,9 +318,9 @@ class Venue extends Model
         $this->scheduleTemplates()->insert($schedulesData);
     }
 
-    public function scopeAvailable(Builder $query): Builder
+    public function scopeActive($query)
     {
-        return $query;
+        return $query->where('status', VenueStatus::ACTIVE);
     }
 
     protected function logo(): Attribute
@@ -187,6 +328,47 @@ class Venue extends Model
         return Attribute::make(get: fn () => $this->logo_path
             ? Storage::disk('do')->url($this->logo_path)
             : 'https://ui-avatars.com/api/?background=312596&color=fff&name='.urlencode($this->name)
+        );
+    }
+
+    protected function images(): Attribute
+    {
+        return Attribute::make(
+            get: function () {
+                // Get the raw images array from the database
+                $rawImages = $this->getRawOriginal('images');
+
+                if (blank($rawImages)) {
+                    return [];
+                }
+
+                // Parse the JSON if it's a string
+                $images = is_string($rawImages)
+                    ? json_decode($rawImages, true)
+                    : $rawImages;
+
+                if (! is_array($images)) {
+                    return [];
+                }
+
+                return array_map(fn ($imagePath) => Storage::disk('do')->url($imagePath), $images);
+            }
+        );
+    }
+
+    protected function isAvailableForAdvanceBooking(): Attribute
+    {
+        return Attribute::make(
+            get: function () {
+                if ($this->advance_booking_window === null) {
+                    return false;
+                }
+
+                $today = Carbon::now();
+                $endDate = $today->copy()->addDays($this->advance_booking_window - 1);
+
+                return $today->between($today, $endDate);
+            }
         );
     }
 
@@ -209,11 +391,11 @@ class Venue extends Model
     /**
      * Get the schedules for the venue.
      *
-     * @return HasMany<ScheduleWithBooking, $this>
+     * @return HasMany<ScheduleWithBookingMV, $this>
      */
     public function schedules(): HasMany
     {
-        return $this->hasMany(ScheduleWithBooking::class, 'venue_id');
+        return $this->hasMany(ScheduleWithBookingMV::class, 'venue_id');
     }
 
     public function scopeWithSchedulesForDate($query, string $date, int $partySize, string $startTime, string $endTime)
@@ -368,5 +550,193 @@ class Venue extends Model
     public function venueGroup(): BelongsTo
     {
         return $this->belongsTo(VenueGroup::class);
+    }
+
+    /**
+     * Get a formatted location string for display in modals
+     */
+    public function getFormattedLocation(): string
+    {
+        $neighborhood = null;
+        $region = null;
+
+        try {
+            if (filled($this->neighborhood)) {
+                $neighborhood = Neighborhood::query()->find($this->neighborhood);
+            }
+
+            if (filled($this->region)) {
+                $region = Region::query()->find($this->region);
+            }
+        } catch (Throwable) {
+            // Silently handle errors
+        }
+
+        $parts = [];
+
+        if ($neighborhood) {
+            $parts[] = $neighborhood->name;
+        }
+
+        if ($region) {
+            $parts[] = $region->name;
+        }
+
+        return implode(', ', $parts);
+    }
+
+    /**
+     * Get the booking platforms associated with the venue.
+     *
+     * @return HasMany<VenuePlatform, $this>
+     */
+    public function platforms(): HasMany
+    {
+        return $this->hasMany(VenuePlatform::class);
+    }
+
+    /**
+     * Get a specific platform by type.
+     */
+    public function getPlatform(string $platformType): ?VenuePlatform
+    {
+        return $this->platforms()->where('platform_type', $platformType)->first();
+    }
+
+    /**
+     * Check if venue has a specific platform enabled.
+     */
+    public function hasPlatform(string $platformType): bool
+    {
+        return $this->platforms()->where('platform_type', $platformType)
+            ->where('is_enabled', true)->exists();
+    }
+
+    /**
+     * Get the appropriate booking platform service for this venue.
+     *
+     * @return BookingPlatformInterface|null
+     */
+    public function getBookingPlatform()
+    {
+        $factory = app(BookingPlatformFactory::class);
+
+        return $factory->getPlatformForVenue($this);
+    }
+
+    // For backward compatibility
+    public function usesCoverManager(): bool
+    {
+        return $this->hasPlatform('covermanager');
+    }
+
+    /**
+     * Get CoverManager service
+     */
+    public function coverManager()
+    {
+        if (! $this->usesCoverManager()) {
+            return null;
+        }
+
+        return app(CoverManagerService::class);
+    }
+
+    /**
+     * Sync this venue's availability with CoverManager
+     */
+    public function syncCoverManagerAvailability(?Carbon $date = null): bool
+    {
+        if (! $this->usesCoverManager() || ! $this->covermanager_sync_enabled) {
+            return false;
+        }
+
+        $date ??= Carbon::today();
+
+        $coverManagerService = $this->coverManager();
+
+        if (! $coverManagerService) {
+            return false;
+        }
+
+        try {
+            // Get all schedule templates for this date
+            $scheduleTemplates = $this->scheduleTemplates()
+                ->where('day_of_week', strtolower($date->format('l')))
+                ->where('is_available', true)
+                ->get();
+
+            // For each time slot, check availability in CoverManager
+            foreach ($scheduleTemplates as $template) {
+                // Get time in appropriate format
+                $time = Carbon::parse($template->start_time)->format('H:i');
+
+                // Check availability in CoverManager
+                $availability = $coverManagerService->checkAvailability(
+                    $this->covermanager_id,
+                    $date,
+                    $time,
+                    $template->party_size
+                );
+
+                // Process availability response
+                // This would handle syncing the availabilities between systems
+                // Actual implementation would depend on CoverManager's response format
+            }
+
+            $this->update(['last_covermanager_sync' => now()]);
+
+            return true;
+        } catch (Throwable $e) {
+            Log::error("Failed to sync venue {$this->id} availability with CoverManager", [
+                'error' => $e->getMessage(),
+                'venue_id' => $this->id,
+                'venue_name' => $this->name,
+                'date' => $date->format('Y-m-d'),
+            ]);
+
+            return false;
+        }
+    }
+
+    /**
+     * Get all platform reservations for this venue.
+     *
+     * @return HasMany<PlatformReservation, $this>
+     */
+    public function platformReservations(): HasMany
+    {
+        return $this->hasMany(PlatformReservation::class);
+    }
+
+    /**
+     * Get CoverManager reservations for this venue.
+     *
+     * @return HasMany<PlatformReservation, $this>
+     */
+    public function coverManagerReservations(): HasMany
+    {
+        return $this->platformReservations()->where('platform_type', 'covermanager');
+    }
+
+    /**
+     * Get Restoo reservations for this venue.
+     *
+     * @return HasMany<PlatformReservation, $this>
+     */
+    public function restooReservations(): HasMany
+    {
+        return $this->platformReservations()->where('platform_type', 'restoo');
+    }
+
+    /**
+     * @return HasOne<VenueOnboarding, $this>
+     */
+    public function venueOnboarding(): HasOne
+    {
+        return $this->hasOne(VenueOnboarding::class, 'venue_group_id', 'venue_group_id')
+            ->orWhere(function ($query) {
+                $query->where('company_name', $this->name);
+            });
     }
 }

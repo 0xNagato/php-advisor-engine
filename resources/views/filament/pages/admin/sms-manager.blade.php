@@ -1,37 +1,41 @@
-<x-filament-panels::page>
-    <form wire:submit="send">
-        {{ $this->form }}
+<x-filament-panels::page class="space-y-0">
+    <div class="mb-0">
+        <form wire:submit="send">
+            {{ $this->form }}
 
-        <div class="mt-4">
-            <x-filament::button type="submit">
-                Send SMS
-            </x-filament::button>
-        </div>
-    </form>
+            <div class="mt-4">
+                <x-filament::button type="submit">
+                    {{ $isScheduling ? 'Schedule SMS' : 'Send SMS Now' }}
+                </x-filament::button>
+            </div>
+        </form>
 
-    {{-- @if (config('app.env') === 'local') --}}
-    <div class="h-64 p-4 mt-4 overflow-y-auto font-mono text-xs text-white bg-gray-800 rounded-lg">
-        <div class="mb-2 text-yellow-400">
-            Selected Regions: {{ implode(', ', $this->data['regions'] ?? []) }}
+        @if (auth()->id() === 1)
+        <div class="h-64 p-4 mt-4 overflow-y-auto font-mono text-xs text-white bg-gray-800 rounded-lg">
+            <div class="mb-2 text-yellow-400">
+                Selected Regions: {{ implode(', ', $this->data['regions'] ?? []) }}
+            </div>
+            <div class="mb-2 text-yellow-400">
+                Selected Recipients: {{ implode(', ', $this->data['recipients'] ?? []) }}
+            </div>
+            <div class="space-y-1">
+                @foreach ($this->getSelectedRecipients() as $recipient)
+                    <div>
+                        <span class="text-purple-400">{{ $recipient->role_type }}</span>
+                        <span class="text-blue-400">{{ $recipient->first_name }} {{ $recipient->last_name }}</span>
+                        <span class="text-gray-400">{{ $recipient->phone }}</span>
+                        @if (property_exists($recipient, 'notification_regions'))
+                            <span class="text-green-400">(Regions:
+                                {{ json_encode($recipient->notification_regions) }})</span>
+                        @endif
+                    </div>
+                @endforeach
+            </div>
         </div>
-        <div class="mb-2 text-yellow-400">
-            Selected Recipients: {{ implode(', ', $this->data['recipients'] ?? []) }}
-        </div>
-        <div class="space-y-1">
-            @foreach ($this->getSelectedRecipients() as $recipient)
-                <div>
-                    <span class="text-purple-400">{{ $recipient->role_type }}</span>
-                    <span class="text-blue-400">{{ $recipient->first_name }} {{ $recipient->last_name }}</span>
-                    <span class="text-gray-400">{{ $recipient->phone }}</span>
-                    @if (property_exists($recipient, 'notification_regions'))
-                        <span class="text-green-400">(Regions:
-                            {{ json_encode($recipient->notification_regions) }})</span>
-                    @endif
-                </div>
-            @endforeach
-        </div>
+        @endif
     </div>
-    {{-- @endif --}}
+
+    {{ $this->table }}
 
     <x-filament-actions::modals />
 </x-filament-panels::page>

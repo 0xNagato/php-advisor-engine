@@ -4,9 +4,10 @@ declare(strict_types=1);
 
 namespace App\Actions;
 
+use App\Enums\BookingStatus;
 use App\Enums\EarningType;
 use App\Enums\VenueInvoiceStatus;
-use App\Models\User;
+use App\Models\Venue;
 use App\Models\VenueInvoice;
 use Carbon\Carbon;
 use Illuminate\Support\Collection;
@@ -20,10 +21,14 @@ class GenerateVenueInvoice
 {
     use AsAction;
 
-    public function handle(User $user, string $startDate, string $endDate): VenueInvoice
+    public function handle(Venue $venue, string $startDate, string $endDate): VenueInvoice
     {
-        // Get the user's timezone
-        $userTimezone = auth()->user()->timezone ?? config('app.timezone');
+        // Get the associated user
+        $user = $venue->user;
+        throw_unless($user, new RuntimeException('Venue does not have an associated user.'));
+
+        // Get the user's timezone (using the venue owner's timezone now)
+        $userTimezone = $user->timezone ?? config('app.timezone');
 
         // Parse dates in user's timezone - store them as UTC date at start/end of day
         // but maintain the actual date as selected by the user
@@ -34,7 +39,8 @@ class GenerateVenueInvoice
         $startDateUtc = (clone $startDateCarbon)->startOfDay()->setTimezone('UTC');
         $endDateUtc = (clone $endDateCarbon)->endOfDay()->setTimezone('UTC');
 
-        $bookings = $user->venue->bookings()
+        // Fetch bookings related to the VENUE, then load earnings for the VENUE OWNER
+        $bookings = $venue->bookings()
             ->with(['earnings' => function ($query) use ($user) {
                 $query->where('user_id', $user->id)
                     ->where(function ($q) {
@@ -53,32 +59,35 @@ class GenerateVenueInvoice
                 'bookings.guest_phone',
                 'bookings.guest_email',
                 'bookings.is_prime',
+                'bookings.booking_at_utc',
+                'bookings.status',
             ])
             ->whereBetween('booking_at_utc', [$startDateUtc, $endDateUtc])
+            ->whereIn('bookings.status', BookingStatus::PAYOUT_STATUSES)
             ->orderBy('booking_at')
             ->get();
 
-        throw_if($bookings->isEmpty(), new RuntimeException('No bookings found for the specified date range.'));
+        throw_if($bookings->isEmpty(), new RuntimeException('No bookings eligible for payout found for the specified date range.'));
 
         // Split bookings into prime and non-prime
         $primeBookings = $bookings->where('is_prime', true);
         $nonPrimeBookings = $bookings->where('is_prime', false);
 
-        // Calculate totals for each type
-        $primeTotalAmount = $this->calculateTotal($primeBookings, $user);
-        $nonPrimeTotalAmount = $this->calculateTotal($nonPrimeBookings, $user);
+        // Calculate totals for each type using the venue
+        $primeTotalAmount = $this->calculateTotal($primeBookings, $venue);
+        $nonPrimeTotalAmount = $this->calculateTotal($nonPrimeBookings, $venue);
 
-        return DB::transaction(function () use ($user, $startDateCarbon, $endDateCarbon, $bookings, $primeBookings, $nonPrimeBookings, $primeTotalAmount, $nonPrimeTotalAmount) {
+        return DB::transaction(function () use ($venue, $user, $startDateCarbon, $endDateCarbon, $bookings, $primeBookings, $nonPrimeBookings, $primeTotalAmount, $nonPrimeTotalAmount) {
             // Create the invoice record
             $invoice = VenueInvoice::query()->create([
-                'venue_id' => $user->venue->id,
+                'venue_id' => $venue->id,
                 'created_by' => auth()->user()->id,
-                'start_date' => $startDateCarbon->format('Y-m-d'), // Store only the date portion
-                'end_date' => $endDateCarbon->format('Y-m-d'),     // Store only the date portion
+                'start_date' => $startDateCarbon->format('Y-m-d'),
+                'end_date' => $endDateCarbon->format('Y-m-d'),
                 'prime_total' => $primeTotalAmount,
                 'non_prime_total' => $nonPrimeTotalAmount,
                 'total_amount' => $primeTotalAmount + $nonPrimeTotalAmount,
-                'currency' => $bookings->first()?->currency ?? 'USD',
+                'currency' => $bookings->first()?->currency ?? $venue->currency ?? 'USD',
                 'due_date' => now()->addDays(15),
                 'status' => VenueInvoiceStatus::DRAFT,
                 'booking_ids' => $bookings->pluck('id')->toArray(),
@@ -89,7 +98,7 @@ class GenerateVenueInvoice
 
             pdf()
                 ->view('pdfs.venue-invoice', [
-                    'venue' => $user->venue,
+                    'venue' => $venue,
                     'bookings' => $bookings,
                     'primeBookings' => $primeBookings,
                     'nonPrimeBookings' => $nonPrimeBookings,
@@ -99,8 +108,8 @@ class GenerateVenueInvoice
                     'endDate' => $endDateCarbon,
                     'invoiceNumber' => $invoice->invoice_number,
                     'dueDate' => $invoice->due_date,
-                    'currency' => $bookings->first()?->currency ?? 'USD',
-                    'invoice' => $invoice, // Pass the invoice object for Stripe URL access
+                    'currency' => $invoice->currency,
+                    'invoice' => $invoice,
                 ])
                 ->disk('do', 'public')
                 ->save($pdfPath);
@@ -126,7 +135,7 @@ class GenerateVenueInvoice
                     // Regenerate the PDF now that we have the payment link
                     pdf()
                         ->view('pdfs.venue-invoice', [
-                            'venue' => $user->venue,
+                            'venue' => $venue,
                             'bookings' => $bookings,
                             'primeBookings' => $primeBookings,
                             'nonPrimeBookings' => $nonPrimeBookings,
@@ -136,8 +145,8 @@ class GenerateVenueInvoice
                             'endDate' => $endDateCarbon,
                             'invoiceNumber' => $invoice->invoice_number,
                             'dueDate' => $invoice->due_date,
-                            'currency' => $bookings->first()?->currency ?? 'USD',
-                            'invoice' => $invoice, // Now includes Stripe URL
+                            'currency' => $invoice->currency,
+                            'invoice' => $invoice,
                         ])
                         ->disk('do', 'public')
                         ->save($pdfPath);
@@ -148,19 +157,29 @@ class GenerateVenueInvoice
         });
     }
 
-    private function calculateTotal(Collection $bookings, User $user): float
+    private function calculateTotal(Collection $bookings, Venue $venue): int
     {
-        return $bookings->sum(function ($booking) use ($user) {
+        // Get the associated user for checking earnings
+        $user = $venue->user;
+        throw_unless($user, new RuntimeException('Venue does not have an associated user.'));
+
+        return (int) $bookings->sum(function ($booking) use ($user) {
+            // Ensure earnings relation is loaded if not already
+            $booking->loadMissing(['earnings' => function ($query) use ($user) {
+                $query->where('user_id', $user->id);
+            }]);
+
+            // Calculate a sum based on loaded earnings for the specific user
             if ($booking->is_prime) {
                 // For prime bookings, we pay the venue (positive amount)
                 return abs($booking->earnings
-                    ->where('user_id', $user->id)
+                    // Already filtered by user_id in loadMissing or eager loading
                     ->where('type', EarningType::VENUE->value)
                     ->sum('amount'));
             } else {
-                // For non-prime bookings, venue pays us (negative amount)
+                // For non-prime bookings, the venue pays us (negative amount)
                 return -abs($booking->earnings
-                    ->where('user_id', $user->id)
+                    // Already filtered by user_id in loadMissing or eager loading
                     ->where('type', EarningType::VENUE_PAID->value)
                     ->sum('amount'));
             }
@@ -171,14 +190,17 @@ class GenerateVenueInvoice
      * Prepare the data needed for the venue invoice view.
      * This can be used both by the PDF generator and the HTML preview.
      */
-    public static function prepareViewData(User $user, Carbon $startDate, Carbon $endDate, VenueInvoice $invoice): array
+    public static function prepareViewData(Venue $venue, Carbon $startDate, Carbon $endDate, VenueInvoice $invoice): array
     {
-        $venue = $user->venue;
+        // Get the associated user
+        $user = $venue->user;
+        throw_unless($user, new RuntimeException('Venue does not have an associated user.'));
 
         // Prepare the date range for queries (in UTC)
         $startDateUtc = (clone $startDate)->startOfDay()->setTimezone('UTC');
         $endDateUtc = (clone $endDate)->endOfDay()->setTimezone('UTC');
 
+        // Fetch bookings related to the VENUE, then load earnings for the VENUE OWNER
         $bookings = $venue->bookings()
             ->with(['earnings' => function ($query) use ($user) {
                 $query->where('user_id', $user->id)
@@ -198,22 +220,24 @@ class GenerateVenueInvoice
                 'bookings.guest_phone',
                 'bookings.guest_email',
                 'bookings.is_prime',
-                // No venue_id in bookings table, it's accessed through schedule_templates
+                'bookings.booking_at_utc',
+                'bookings.status',
             ])
             ->whereBetween('booking_at_utc', [$startDateUtc, $endDateUtc])
+            ->whereIn('bookings.status', BookingStatus::PAYOUT_STATUSES)
             ->orderBy('booking_at')
             ->get();
 
-        throw_if($bookings->isEmpty(), new RuntimeException('No bookings found for the specified date range.'));
+        throw_if($bookings->isEmpty(), new RuntimeException('No bookings eligible for payout found for the specified date range.'));
 
         // Split bookings into prime and non-prime
         $primeBookings = $bookings->where('is_prime', true);
         $nonPrimeBookings = $bookings->where('is_prime', false);
 
-        // Use the user instance to call the calculateTotal method
+        // Use the venue instance to call the calculateTotal method
         $instance = new self;
-        $primeTotalAmount = $instance->calculateTotal($primeBookings, $user);
-        $nonPrimeTotalAmount = $instance->calculateTotal($nonPrimeBookings, $user);
+        $primeTotalAmount = $instance->calculateTotal($primeBookings, $venue);
+        $nonPrimeTotalAmount = $instance->calculateTotal($nonPrimeBookings, $venue);
 
         return [
             'venue' => $venue,
@@ -225,7 +249,7 @@ class GenerateVenueInvoice
             'endDate' => $endDate,
             'invoiceNumber' => $invoice->invoice_number,
             'invoice' => $invoice,
-            'currency' => $bookings->first()?->currency ?? 'USD',
+            'currency' => $invoice->currency,
             'dueDate' => $invoice->due_date,
         ];
     }

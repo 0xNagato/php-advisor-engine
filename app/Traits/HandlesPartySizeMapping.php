@@ -11,7 +11,7 @@ trait HandlesPartySizeMapping
      */
     public function getAllowedGuestCounts(): array
     {
-        return range(2, 8);
+        return range(2, 20);
     }
 
     /**
@@ -27,7 +27,7 @@ trait HandlesPartySizeMapping
      */
     public function getMaxGuestCount(): int
     {
-        return 8;
+        return 20;
     }
 
     /**
@@ -39,7 +39,7 @@ trait HandlesPartySizeMapping
     public function getTargetPartySize(int $guestCount): ?int
     {
         if (! in_array($guestCount, $this->getAllowedGuestCounts())) {
-            return null; // Guest count outside allowed range
+            return null; // Guest count outside the allowed range
         }
 
         return match (true) {
@@ -47,7 +47,13 @@ trait HandlesPartySizeMapping
             $guestCount <= 4 => 4,
             $guestCount <= 6 => 6,
             $guestCount <= 8 => 8,
-            default => null // Should not be reached due to initial check, but good practice
+            $guestCount <= 10 => 10,
+            $guestCount <= 12 => 12,
+            $guestCount <= 14 => 14,
+            $guestCount <= 16 => 16,
+            $guestCount <= 18 => 18,
+            $guestCount <= 20 => 20,
+            default => null // Should not be reached due to initial check but good practice
         };
     }
 }

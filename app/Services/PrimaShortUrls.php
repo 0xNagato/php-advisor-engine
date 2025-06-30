@@ -48,6 +48,45 @@ class PrimaShortUrls
     }
 
     /**
+     * Get a short URL for viewing a specific announcement message
+     *
+     * @param  int  $messageId  The ID of the message
+     * @return string The short URL for viewing the message
+     */
+    public static function getMessageUrl(int $messageId): string
+    {
+        $cacheKey = "public_message_url_{$messageId}";
+
+        return Cache::rememberForever($cacheKey, function () use ($messageId) {
+            try {
+                // Generate the destination URL for viewing the message publicly
+                $destinationUrl = route('public.announcement', ['message' => $messageId]);
+
+                // First check if a short URL already exists for this message
+                $existingUrl = \AshAllenDesign\ShortURL\Models\ShortURL::query()
+                    ->where('destination_url', $destinationUrl)
+                    ->first();
+
+                if ($existingUrl) {
+                    return $existingUrl->default_short_url;
+                }
+
+                // Create a new short URL
+                $shortUrl = ShortURL::destinationUrl($destinationUrl)
+                    ->trackVisits()
+                    ->make();
+
+                return $shortUrl->default_short_url;
+            } catch (ShortURLException $e) {
+                // If there's an error, log it and return the original URL as fallback
+                Log::warning("Error creating message URL for message ID {$messageId}: ".$e->getMessage());
+
+                return route('public.announcement', ['message' => $messageId]);
+            }
+        });
+    }
+
+    /**
      * Get or create a partner-specific venue onboarding URL
      *
      * @param  string  $partnerId  The ID of the partner

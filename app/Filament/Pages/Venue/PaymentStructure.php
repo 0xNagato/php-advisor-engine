@@ -36,10 +36,18 @@ class PaymentStructure extends Page
 
     public ?array $specialPricingFormData = [];
 
+    public function getHeading(): string
+    {
+        return "Booking Fees: {$this->venue->name}";
+    }
+
     public static function getNavigationGroup(): ?string
     {
         if (auth()->user()?->hasActiveRole('venue_manager')) {
             $currentVenue = auth()->user()?->currentVenueGroup()?->currentVenue(auth()->user());
+            if (session()->has('impersonate.venue_id')) {
+                $currentVenue = Venue::query()->find(session()->get('impersonate.venue_id'));
+            }
 
             return $currentVenue?->name ?? 'Venue Management';
         }
@@ -69,7 +77,9 @@ class PaymentStructure extends Page
     {
         abort_unless(auth()->user()->hasActiveRole(['venue', 'venue_manager']), 403);
 
-        if (auth()->user()->hasActiveRole('venue')) {
+        if (session()->has('impersonate.venue_id')) {
+            $this->venue = Venue::query()->find(session()->get('impersonate.venue_id'));
+        } elseif (auth()->user()->hasActiveRole('venue')) {
             $this->venue = auth()->user()->venue;
         } elseif (auth()->user()->hasActiveRole('venue_manager')) {
             $venueGroup = auth()->user()->currentVenueGroup();
@@ -111,7 +121,7 @@ class PaymentStructure extends Page
                 ->mask(RawJs::make('$money($input)'))
                 ->stripCharacters(',')
                 ->numeric()
-                ->disabled(true)
+                ->disabled()
                 ->prefix(fn () => $this->region->currency_symbol)
                 ->required(),
             TextInput::make('increment_fee')
@@ -119,7 +129,7 @@ class PaymentStructure extends Page
                 ->helperText('The base reservation is for 2 people. For each additional diner, this fee will apply.')
                 ->mask(RawJs::make('$money($input)'))
                 ->stripCharacters(',')
-                ->disabled(true)
+                ->disabled()
                 ->numeric()
                 ->prefix(fn () => $this->region->currency_symbol),
         ])
@@ -153,7 +163,7 @@ class PaymentStructure extends Page
                 ->schema([
                     DatePicker::make('date')
                         ->label('Date')
-                        ->native(true)
+                        ->native()
                         ->required(),
                     TextInput::make('fee')
                         ->label('Fee')

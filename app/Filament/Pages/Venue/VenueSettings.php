@@ -25,6 +25,9 @@ class VenueSettings extends Page
     {
         if (auth()->user()?->hasActiveRole('venue_manager')) {
             $currentVenue = auth()->user()?->currentVenueGroup()?->currentVenue(auth()->user());
+            if (session()->has('impersonate.venue_id')) {
+                $currentVenue = Venue::query()->find(session()->get('impersonate.venue_id'));
+            }
 
             return $currentVenue?->name ?? 'Venue Management';
         }
@@ -54,7 +57,9 @@ class VenueSettings extends Page
     {
         abort_unless(auth()->user()->hasActiveRole(['venue', 'venue_manager']), 403);
 
-        if (auth()->user()->hasActiveRole('venue')) {
+        if (session()->has('impersonate.venue_id')) {
+            $this->venue = Venue::query()->find(session()->get('impersonate.venue_id'));
+        } elseif (auth()->user()->hasActiveRole('venue')) {
             $this->venue = auth()->user()->venue;
         } elseif (auth()->user()->hasActiveRole('venue_manager')) {
             $venueGroup = auth()->user()->currentVenueGroup();

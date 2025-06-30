@@ -24,21 +24,22 @@ class VenueGroupOverview extends BaseWidget
 
     protected function getStats(): array
     {
+        $this->venues->load('inRegion');
         $startDate = Carbon::parse($this->startDate ?? now()->subDays(30))->startOfDay();
         $endDate = Carbon::parse($this->endDate ?? now())->endOfDay();
+        $currencySymbol = $this->venues->pluck('inRegion.currency_symbol')->unique()->first();
 
         $earnings = $this->getEarnings($startDate, $endDate);
         $prevEarnings = $this->getEarnings($startDate->copy()->subDays($startDate->diffInDays($endDate)), $startDate);
         $chartData = $this->getChartData($startDate, $endDate);
 
-        $currencyService = app(CurrencyConversionService::class);
-        $venueEarningsUSD = $currencyService->convertToUSD($earnings['venue_earnings']);
-        $venuePaidUSD = $currencyService->convertToUSD($earnings['venue_paid']);
-        $totalEarningsUSD = $venueEarningsUSD - abs($venuePaidUSD);
+        $venueEarnings = $this->sumScaledValues($earnings['venue_earnings']);
+        $venuePaid = $this->sumScaledValues($earnings['venue_paid']);
+        $totalEarnings = $venueEarnings - abs($venuePaid);
 
-        $prevVenueEarningsUSD = $currencyService->convertToUSD($prevEarnings['venue_earnings']);
-        $prevVenuePaidUSD = $currencyService->convertToUSD($prevEarnings['venue_paid']);
-        $prevTotalEarningsUSD = $prevVenueEarningsUSD - abs($prevVenuePaidUSD);
+        $prevVenueEarnings = $this->sumScaledValues($prevEarnings['venue_earnings']);
+        $prevVenuePaid = $this->sumScaledValues($prevEarnings['venue_paid']);
+        $prevTotalEarnings = $prevVenueEarnings - abs($prevVenuePaid);
 
         return [
             $this->createStat('Total Bookings', $earnings['total_bookings'], null, $prevEarnings['total_bookings'])
@@ -55,13 +56,13 @@ class VenueGroupOverview extends BaseWidget
             )
                 ->chart($chartData['incentivised_bookings'])
                 ->color('warning'),
-            $this->createStat('Total Earnings', $totalEarningsUSD, '$', $prevTotalEarningsUSD)
+            $this->createStat('Total Earnings', $totalEarnings, $currencySymbol, $prevTotalEarnings)
                 ->chart($chartData['total_earnings'])
                 ->color('success'),
-            $this->createStat('Prime Earnings', $venueEarningsUSD, '$', $prevVenueEarningsUSD)
+            $this->createStat('Prime Earnings', $venueEarnings, $currencySymbol, $prevVenueEarnings)
                 ->chart($chartData['prime_earnings'])
                 ->color('primary'),
-            $this->createStat('Incentivised Cost', $venuePaidUSD, '$', $prevVenuePaidUSD)
+            $this->createStat('Incentivised Cost', $venuePaid, $currencySymbol, $prevVenuePaid)
                 ->chart($chartData['incentivised_cost'])
                 ->color('warning'),
         ];
@@ -76,10 +77,10 @@ class VenueGroupOverview extends BaseWidget
             ->whereIn('schedule_templates.venue_id', $this->venues->pluck('id'))
             ->whereBetween('bookings.confirmed_at', [$startDate, $endDate])
             ->select(
-                DB::raw('COUNT(DISTINCT CASE WHEN bookings.is_prime = 1 THEN bookings.id END) as prime_bookings'),
-                DB::raw('COUNT(DISTINCT CASE WHEN bookings.is_prime = 0 THEN bookings.id END) as incentivised_bookings'),
-                DB::raw('SUM(CASE WHEN earnings.type IN ("'.EarningType::VENUE->value.'", "'.EarningType::REFUND->value.'") THEN earnings.amount ELSE 0 END) as venue_earnings'),
-                DB::raw('SUM(CASE WHEN earnings.type = "venue_paid" THEN earnings.amount ELSE 0 END) as venue_paid'),
+                DB::raw('COUNT(DISTINCT CASE WHEN bookings.is_prime = true THEN bookings.id END) as prime_bookings'),
+                DB::raw('COUNT(DISTINCT CASE WHEN bookings.is_prime = false THEN bookings.id END) as incentivised_bookings'),
+                DB::raw("SUM(CASE WHEN earnings.type IN ('".EarningType::VENUE->value."', '".EarningType::REFUND->value."') THEN earnings.amount ELSE 0 END) as venue_earnings"),
+                DB::raw("SUM(CASE WHEN earnings.type = 'venue_paid' THEN earnings.amount ELSE 0 END) as venue_paid"),
                 'earnings.currency'
             )
             ->groupBy('earnings.currency')
@@ -102,14 +103,14 @@ class VenueGroupOverview extends BaseWidget
             ->join('schedule_templates', 'bookings.schedule_template_id', '=', 'schedule_templates.id')
             ->whereIn('schedule_templates.venue_id', $this->venues->pluck('id'))
             ->whereBetween('bookings.confirmed_at', [$startDate, $endDate])
-            ->selectRaw('
+            ->selectRaw("
                 DATE(bookings.confirmed_at) as date,
                 earnings.currency,
-                COUNT(DISTINCT CASE WHEN bookings.is_prime = 1 THEN bookings.id END) as prime_bookings,
-                COUNT(DISTINCT CASE WHEN bookings.is_prime = 0 THEN bookings.id END) as incentivised_bookings,
-                SUM(CASE WHEN earnings.type IN ("'.EarningType::VENUE->value.'", "'.EarningType::REFUND->value.'") THEN earnings.amount ELSE 0 END) as prime_earnings,
-                SUM(CASE WHEN earnings.type = "venue_paid" THEN earnings.amount ELSE 0 END) as incentivised_cost
-            ')
+                COUNT(DISTINCT CASE WHEN bookings.is_prime = true THEN bookings.id END) as prime_bookings,
+                COUNT(DISTINCT CASE WHEN bookings.is_prime = false THEN bookings.id END) as incentivised_bookings,
+                SUM(CASE WHEN earnings.type IN ('".EarningType::VENUE->value."', '".EarningType::REFUND->value."') THEN earnings.amount ELSE 0 END) as prime_earnings,
+                SUM(CASE WHEN earnings.type = 'venue_paid' THEN earnings.amount ELSE 0 END) as incentivised_cost
+            ")
             ->groupBy('date', 'earnings.currency')
             ->orderBy('date')
             ->get();
@@ -119,8 +120,10 @@ class VenueGroupOverview extends BaseWidget
         $chartData = $dailyData->groupBy('date')->map(function ($dayData) use ($currencyService) {
             $primeBookings = $dayData->sum('prime_bookings');
             $incentivisedBookings = $dayData->sum('incentivised_bookings');
-            $primeEarningsUSD = $currencyService->convertToUSD($dayData->pluck('prime_earnings', 'currency')->toArray());
-            $incentivisedCostUSD = $currencyService->convertToUSD($dayData->pluck('incentivised_cost', 'currency')->toArray());
+            $primeEarningsUSD = $currencyService->convertToUSD($dayData->pluck('prime_earnings',
+                'currency')->toArray());
+            $incentivisedCostUSD = $currencyService->convertToUSD($dayData->pluck('incentivised_cost',
+                'currency')->toArray());
 
             return [
                 'total_bookings' => $primeBookings + $incentivisedBookings,
@@ -142,8 +145,12 @@ class VenueGroupOverview extends BaseWidget
         ];
     }
 
-    protected function createStat(string $label, float $value, ?string $currencySymbol = null, float $previousValue = 0): Stat
-    {
+    protected function createStat(
+        string $label,
+        float $value,
+        ?string $currencySymbol = null,
+        float $previousValue = 0
+    ): Stat {
         $formattedValue = $currencySymbol
             ? $currencySymbol.number_format($value, 2)
             : number_format($value);
@@ -158,5 +165,22 @@ class VenueGroupOverview extends BaseWidget
         }
 
         return $stat;
+    }
+
+    /**
+     * Sums monetary values in cents across multiple currencies and scales to units.
+     *
+     * @param  array  $values  Key-value array of amounts grouped by currency (e.g., ['USD' => 12345, 'EUR' => 67890]).
+     * @return float The total amount scaled to unit (e.g., dollars).
+     */
+    protected function sumScaledValues(array $values): float
+    {
+        $total = 0;
+
+        foreach ($values as $amount) {
+            $total += $amount / 100; // Convert cents to units
+        }
+
+        return $total;
     }
 }

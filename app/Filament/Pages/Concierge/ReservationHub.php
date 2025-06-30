@@ -5,11 +5,12 @@ namespace App\Filament\Pages\Concierge;
 use App\Actions\Booking\CheckCustomerHasNonPrimeBooking;
 use App\Actions\Booking\CreateBooking;
 use App\Enums\BookingStatus;
-use App\Enums\VenueStatus;
+use App\Enums\VenueType;
+use App\Filament\Pages\IbizaHikeStationBooking;
 use App\Models\Booking;
 use App\Models\Region;
 use App\Models\ScheduleTemplate;
-use App\Models\ScheduleWithBooking;
+use App\Models\ScheduleWithBookingMV;
 use App\Models\Venue;
 use App\Services\BookingService;
 use App\Traits\FormatsPhoneNumber;
@@ -84,6 +85,9 @@ class ReservationHub extends Page
     #[Url]
     public ?int $guestCount = null;
 
+    #[Url]
+    public ?string $source = null;
+
     public static function canAccess(): bool
     {
         return auth()->user()->hasActiveRole(['concierge', 'partner']);
@@ -127,7 +131,8 @@ class ReservationHub extends Page
                 'radio_date' => now($this->timezone)->format('Y-m-d'),
             ]);
 
-            $this->createBooking($this->scheduleTemplateId, $this->date, 'availability_calendar');
+            $bookingSource = $this->source ?? 'availability_calendar';
+            $this->createBooking($this->scheduleTemplateId, $this->date, $bookingSource);
         }
     }
 
@@ -140,9 +145,9 @@ class ReservationHub extends Page
                     ->prefixIcon('heroicon-m-building-storefront')
                     ->options(
                         function () {
-                            $query = Venue::available()
-                                ->where('status', VenueStatus::ACTIVE)
-                                ->where('region', session('region', 'miami'));
+                            $query = Venue::query()->active()
+                                ->where('region', session('region', 'miami'))
+                                ->where('venue_type', '!=', VenueType::HIKE_STATION);
 
                             // Filter by concierge's allowed venues if applicable
                             if (auth()->user()->hasActiveRole('concierge') && auth()->user()->concierge) {
@@ -270,7 +275,7 @@ class ReservationHub extends Page
 
     protected function getSchedulesToday($venueId, $reservationTime, $endTimeForQuery, $guestCount): Collection
     {
-        $schedules = ScheduleWithBooking::with('venue')
+        $schedules = ScheduleWithBookingMV::with('venue')
             ->where('venue_id', $venueId)
             ->where('booking_date', $this->form->getState()['date'])
             ->where('party_size', $guestCount)
@@ -306,7 +311,7 @@ class ReservationHub extends Page
         $guestCount
     ): Collection {
         if ($requestedDate->isSameDay($currentDate)) {
-            return ScheduleWithBooking::with('venue')
+            return ScheduleWithBookingMV::with('venue')
                 ->where('venue_id', $venueId)
                 ->where('start_time', $this->form->getState()['reservation_time'])
                 ->where('party_size', $guestCount)
@@ -324,9 +329,11 @@ class ReservationHub extends Page
         $this->schedulesThisWeek = new Collection;
     }
 
-    public function createBooking(int $scheduleTemplateId, ?string $date = null, ?string $source = 'reservation_hub'): void
-    {
-        $userTimezone = $this->timezone;
+    public function createBooking(
+        int $scheduleTemplateId,
+        ?string $date = null,
+        ?string $source = 'reservation_hub'
+    ): void {
         $data = $this->form->getState();
         $data['date'] = $date ?? $data['date'];
 
@@ -335,9 +342,6 @@ class ReservationHub extends Page
             $result = CreateBooking::run(
                 scheduleTemplateId: $scheduleTemplateId,
                 data: $data,
-                timezone: $userTimezone,
-                currency: $this->currency,
-                vipCode: null,
                 source: $source,
                 device: $device
             );
@@ -453,6 +457,11 @@ class ReservationHub extends Page
             ])
             ->log('ReservationHub - Booking marked as abandoned');
 
+        // Store booking source and calendar params before nullifying booking
+        $bookingSource = $this->booking?->source;
+        $scheduleTemplateId = $this->scheduleTemplateId; // Store before potential reset
+        $date = $this->date; // Store before potential reset
+
         $this->booking->update(['status' => BookingStatus::ABANDONED]);
         $this->booking = null;
         $this->qrCode = null;
@@ -468,9 +477,15 @@ class ReservationHub extends Page
             ");
         }
 
-        if ($this->scheduleTemplateId && $this->date) {
+        // --- Corrected Redirect Logic ---
+        // 1. Prioritize redirect back to Hike Station if that was the source
+        if ($bookingSource === 'hike_station_booking_form') {
+            $this->redirect(IbizaHikeStationBooking::getUrl());
+        } // 2. Otherwise, check if came from Availability Calendar (using stored values)
+        elseif ($scheduleTemplateId && $date) {
             $this->redirect(AvailabilityCalendar::getUrl());
         }
+        // 3. If neither, stay on ReservationHub (no redirect)
     }
 
     public function resetBooking(): void

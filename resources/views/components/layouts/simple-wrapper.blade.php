@@ -17,12 +17,25 @@
         @if ($logoUrl)
             <div class="flex items-center justify-between p-4">
                 <a href="{{ $logoUrl }}">PRIMA</a>
-                <div class="w-full max-w-[200px] md:max-w-[300px] pt-2">
-                    <livewire:vip.region-selector />
+                <div class="flex justify-end pt-2">
+                    <livewire:availability.advance-filters />
                 </div>
             </div>
         @else
-            PRIMA
+            <div class="flex items-center justify-between">
+                <div>PRIMA</div>
+                <div>
+                    @auth
+                        <a href="{{ config('app.platform_url') }}" class="text-sm font-medium text-indigo-600 hover:text-indigo-500">
+                            Dashboard
+                        </a>
+                    @else
+                        <a href="{{ route('filament.admin.auth.login') }}" class="text-sm font-medium text-indigo-600 hover:text-indigo-500">
+                            Login
+                        </a>
+                    @endauth
+                </div>
+            </div>
         @endif
     </div>
     <div @class([

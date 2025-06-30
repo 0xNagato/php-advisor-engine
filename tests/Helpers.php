@@ -25,14 +25,20 @@ if (! function_exists('createBooking')) {
 }
 
 if (! function_exists('createNonPrimeBooking')) {
-    function createNonPrimeBooking(Venue $venue, Concierge $concierge, int $guestCount = 2): Booking
-    {
+    function createNonPrimeBooking(
+        Venue $venue,
+        Concierge $concierge,
+        int $guestCount = 2,
+        ?ScheduleTemplate $scheduleTemplate = null
+    ): Booking {
+        $st = $scheduleTemplate ?? ScheduleTemplate::factory()->create(['venue_id' => $venue->id])->id;
+
         return Booking::factory()->create([
             'uuid' => Str::uuid(),
             'is_prime' => false,
             'guest_count' => $guestCount,
             'concierge_id' => $concierge->id,
-            'schedule_template_id' => ScheduleTemplate::factory()->create(['venue_id' => $venue->id])->id,
+            'schedule_template_id' => $st,
             'total_fee' => $venue->non_prime_fee_per_head * $guestCount * 100,
             'booking_at' => now()->addDays(2),
         ]);

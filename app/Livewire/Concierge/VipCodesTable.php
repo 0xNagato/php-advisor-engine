@@ -2,10 +2,12 @@
 
 namespace App\Livewire\Concierge;
 
+use App\Actions\VipCode\GenerateVipReferralQRCode;
 use App\Enums\BookingStatus;
 use App\Models\VipCode;
 use App\Services\CurrencyConversionService;
 use Filament\Support\Enums\IconPosition;
+use Filament\Support\Enums\MaxWidth;
 use Filament\Tables\Actions\Action;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Columns\ToggleColumn;
@@ -13,6 +15,7 @@ use Filament\Tables\Concerns\HasFilters;
 use Filament\Tables\Table;
 use Filament\Widgets\TableWidget;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\HtmlString;
 
 class VipCodesTable extends TableWidget
 {
@@ -101,6 +104,54 @@ class VipCodesTable extends TableWidget
                     ->size('xs'),
             ])
             ->actions([
+                Action::make('viewQR')
+                    ->iconButton()
+                    ->icon('tabler-qrcode')
+                    ->size('xs')
+                    ->modalWidth(MaxWidth::ExtraSmall)
+                    ->modalHeading('')
+                    ->modalContent(function (VipCode $vipCode): HtmlString {
+                        $qrCodeData = $this->getQr($vipCode);
+                        $showPrintButton = config('app.features.show_qr_code_print_button', false);
+
+                        $printButton = '';
+                        if ($showPrintButton) {
+                            $printUrl = route('vip-code.print', [
+                                'code' => $vipCode->code,
+                                'svg_path' => $qrCodeData['svgPath'],
+                            ]);
+
+                            $printButton = <<<HTML
+                                <a href="{$printUrl}"
+                                target="_blank"
+                                class="inline-flex items-center justify-center w-full px-4 py-2 text-sm font-semibold text-white transition-colors bg-green-600 rounded-md shadow-sm hover:bg-green-700 sm:text-base">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 mr-2 sm:h-5 sm:w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
+                                    </svg>
+                                    Print QR Code
+                                </a>
+                            HTML;
+                        }
+
+                        return new HtmlString(<<<HTML
+                                    <div class="flex flex-col items-center">
+                                      <img src="{$qrCodeData['image']}" alt="{$vipCode->code} QR Code" class="mb-4 w-85 h-85">
+                                      <div class="flex flex-col w-full max-w-xs mt-2 space-y-3">
+                                        <a href="{$qrCodeData['downloadURL']}" download="prima-referral-{$vipCode->code}.svg"
+                                          class="inline-flex items-center justify-center w-full px-4 py-2 text-sm font-semibold text-white transition-colors bg-indigo-600 rounded-md shadow-sm hover:bg-indigo-700 sm:text-base">
+                                          <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 mr-2 sm:h-5 sm:w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                                          </svg>
+                                          Download QR Code
+                                        </a>
+                                        {$printButton}
+                                      </div>
+                                    </div>
+                                HTML
+                        );
+                    })
+                    ->modalSubmitAction(false)
+                    ->modalCancelAction(false),
                 Action::make('viewVipBookings')
                     ->iconButton()
                     ->icon('tabler-maximize')
@@ -118,5 +169,10 @@ class VipCodesTable extends TableWidget
             ->recordAction(fn (): string => 'viewVipBookings')
             ->defaultSortOptionLabel('Created')
             ->defaultSort('created_at', 'desc');
+    }
+
+    private function getQr(VipCode $vipCode): array
+    {
+        return app(GenerateVipReferralQRCode::class)->execute($vipCode);
     }
 }

@@ -1,10 +1,6 @@
 @php
     use App\Models\VipCode;
-    $vipCode = Cache::remember(
-        'available_calendar_button_vip_code_1',
-        60,
-        fn() => VipCode::query()->where('concierge_id', 1)->active()->first(),
-    );
+    $vipCode = 'PRIMA';
 @endphp
 <x-layouts.web>
 
@@ -88,7 +84,7 @@
                                     Get guaranteed access to exclusive venues in Miami, New York, LA, and more.
                                 </p>
                             </div>
-                            <a href="{{ config('app.primary_domain') . '/' . ltrim(route('v.booking', ['code' => $vipCode->code], false), '/') }}"
+                            <a href="{{ config('app.primary_domain') . '/' . ltrim(route('v.booking', ['code' => $vipCode], false), '/') }}"
                                class="intro_cta-box_btn">
                                 Book Your Dining Experience
                             </a>
@@ -136,7 +132,7 @@
                                 Enjoy VIP access to exclusive dining experiences.
                             </li>
                         </ul>
-                        <a href="{{ config('app.primary_domain') . '/' . ltrim(route('v.booking', ['code' => $vipCode->code], false), '/') }}"
+                        <a href="{{ config('app.primary_domain') . '/' . ltrim(route('v.booking', ['code' => $vipCode], false), '/') }}"
                            class="text-white btn bg-gradient-to-b from-primary to-primary_light btn_full">
                             Book Your Dining Experience
                         </a>

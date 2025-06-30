@@ -7,8 +7,12 @@ use App\Filament\Resources\AnnouncementResource\Pages\CreateAnnouncement;
 use App\Filament\Resources\AnnouncementResource\Pages\EditAnnouncement;
 use App\Filament\Resources\AnnouncementResource\Pages\ListAnnouncements;
 use App\Models\Announcement;
+use App\Models\Message;
 use App\Models\Region;
 use App\Models\User;
+use App\Services\PrimaShortUrls;
+use AshAllenDesign\ShortURL\Models\ShortURL;
+use AshAllenDesign\ShortURL\Models\ShortURLVisit;
 use Filament\Forms\Components\MarkdownEditor;
 use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Select;
@@ -87,6 +91,65 @@ class AnnouncementResource extends Resource
             ])
             ->defaultSort('created_at', 'desc')
             ->actions([
+                Action::make('copyLink')
+                    ->label('Copy Link')
+                    ->icon('heroicon-o-link')
+                    ->tooltip('Copy shareable link to clipboard')
+                    ->color('gray')
+                    ->visible(fn (Announcement $announcement) => $announcement->published_at !== null)
+                    ->modalHeading('Share Announcement Link')
+                    ->modalDescription('Copy this link to share the announcement with partners and concierges.')
+                    ->modalSubmitAction(false)
+                    ->modalCancelAction(false)
+                    ->modalContent(function (Announcement $announcement) {
+                        // Find or create a message for this announcement
+                        $message = Message::query()->firstOrCreate([
+                            'announcement_id' => $announcement->id,
+                            'user_id' => auth()->id(),
+                        ]);
+
+                        // Generate short URL
+                        $shortUrl = PrimaShortUrls::getMessageUrl($message->id);
+
+                        // Get the short URL record to find visits data
+                        $destinationUrl = route('public.announcement', ['message' => $message->id]);
+                        $shortUrlRecord = ShortURL::query()->where('destination_url', $destinationUrl)->first();
+
+                        $visitsPerDay = collect();
+
+                        if ($shortUrlRecord) {
+                            // Get visits grouped by day
+                            $visitsPerDay = ShortURLVisit::query()->where('short_url_id', $shortUrlRecord->id)
+                                ->selectRaw(
+                                    'DATE(visited_at) as visit_date, COUNT(DISTINCT ip_address) as unique_visits'
+                                )
+                                ->groupBy('visit_date')
+                                ->orderBy('visit_date', 'desc')
+                                ->get()
+                                ->map(function ($item) {
+                                    $date = \Carbon\Carbon::parse($item->visit_date);
+
+                                    return [
+                                        'date' => $date->format('D M j, y'),
+                                        'unique_visits' => $item->unique_visits,
+                                    ];
+                                });
+
+                            // Get total unique visits
+                            $totalUniqueVisits = ShortURLVisit::query()->where('short_url_id', $shortUrlRecord->id)
+                                ->distinct('ip_address')
+                                ->count('ip_address');
+                        } else {
+                            $totalUniqueVisits = 0;
+                        }
+
+                        // Return a view with copy functionality
+                        return view('filament.resources.announcement-resource.pages.copy-link-modal', [
+                            'shortUrl' => $shortUrl,
+                            'visitsPerDay' => $visitsPerDay,
+                            'totalUniqueVisits' => $totalUniqueVisits,
+                        ]);
+                    }),
                 Action::make('Publish')
                     ->icon('fas-paper-plane')
                     ->requiresConfirmation()

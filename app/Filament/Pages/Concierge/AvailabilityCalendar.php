@@ -3,6 +3,7 @@
 namespace App\Filament\Pages\Concierge;
 
 use App\Models\Region;
+use App\Models\Specialty;
 use App\Models\Venue;
 use App\Services\ReservationService;
 use App\Traits\ManagesBookingForms;
@@ -54,6 +55,7 @@ class AvailabilityCalendar extends Page
 
         $this->region = Region::query()->where('id', $region)->first();
         $this->neighborhoods = $this->region->neighborhoods->pluck('name', 'id');
+        $this->specialties = Specialty::getSpecialtiesByRegion($region);
         $this->timezone = $this->region->timezone;
         $this->currency = $this->region->currency;
         $this->toggleAdvance(session('advanceFilters', false));
@@ -115,8 +117,9 @@ class AvailabilityCalendar extends Page
                 reservationTime: $this->data['reservation_time'],
                 timeslotCount: $this->data['timeslot_count'] ?? 5,
                 timeSlotOffset: 2,
-                cuisines: $this->data['cuisine'],
-                neighborhood: $this->data['neighborhood'],
+                cuisines: $this->data['cuisine'] ?? [],
+                neighborhood: $this->data['neighborhood'] ?? null,
+                specialty: $this->data['specialty'] ?? [],
             );
 
             $this->venues = $reservation->getAvailableVenues();
@@ -157,5 +160,31 @@ class AvailabilityCalendar extends Page
         $this->advanced = $value;
         $this->venues = null;
         $this->form->fill();
+    }
+
+    #[On('formentera-selected')]
+    public function formenteraSelected(): void
+    {
+        if ($this->region?->id === 'ibiza') {
+            // Find the Formentera neighborhood ID
+            $formenteraNeighborhood = $this->neighborhoods->search('Formentera');
+            if ($formenteraNeighborhood) {
+                $this->data['neighborhood'] = $formenteraNeighborhood;
+                $this->venues = null;
+                $this->form->fill($this->data);
+                $this->updatedData($this->data, 'neighborhood');
+            }
+        }
+    }
+
+    #[On('formentera-unselected')]
+    public function formenteraUnselected(): void
+    {
+        if ($this->region?->id === 'ibiza') {
+            $this->data['neighborhood'] = null;
+            $this->venues = null;
+            $this->form->fill($this->data);
+            $this->updatedData($this->data, 'neighborhood');
+        }
     }
 }

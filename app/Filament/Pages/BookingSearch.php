@@ -212,7 +212,8 @@ class BookingSearch extends Page implements HasTable
                 $query = Booking::query()
                     ->when(
                         filled($this->data['start_date']) && filled($this->data['end_date']),
-                        fn (\Illuminate\Contracts\Database\Query\Builder $query) => $query->whereBetween($dateColumn, [$startDate, $endDate])
+                        fn (\Illuminate\Contracts\Database\Query\Builder $query) => $query->whereBetween($dateColumn,
+                            [$startDate, $endDate])
                     );
 
                 // Apply filters
@@ -226,10 +227,11 @@ class BookingSearch extends Page implements HasTable
 
                     $query->where(function ($query) use ($terms) {
                         foreach ($terms as $term) {
-                            $query->orWhere('guest_first_name', 'like', "%{$term}%")
-                                ->orWhere('guest_last_name', 'like', "%{$term}%")
-                                ->orWhere('guest_email', 'like', "%{$term}%")
-                                ->orWhere('guest_phone', 'like', "%{$term}%");
+                            $term = strtolower($term);
+                            $query->orWhereRaw('LOWER(guest_first_name) like ?', ['%'.$term.'%'])
+                                ->orWhereRaw('LOWER(guest_last_name) like ?', ['%'.$term.'%'])
+                                ->orWhereRaw('LOWER(guest_email) like ?', ['%'.$term.'%'])
+                                ->orWhereRaw('LOWER(guest_phone) like ?', ['%'.$term.'%']);
                         }
                     });
                 }
@@ -240,7 +242,9 @@ class BookingSearch extends Page implements HasTable
 
                 if ($this->data['venue_search'] ?? null) {
                     $search = $this->data['venue_search'];
-                    $query->whereHas('venue', fn (Builder $q) => $q->where('name', 'like', "%{$search}%"));
+                    $search = strtolower($search);
+                    $query->whereHas('venue', fn (Builder $q) => $q->whereRaw('LOWER(name) like ?',
+                        ['%'.$search.'%']));
                 }
 
                 if ($this->data['region'] ?? null) {
@@ -254,15 +258,17 @@ class BookingSearch extends Page implements HasTable
                     $query->where(function ($query) use ($terms, $search) {
                         // Search for hotel name directly
                         $query->whereHas('concierge', function (Builder $q) use ($search) {
-                            $q->where('hotel_name', 'like', "%{$search}%");
+                            $search = strtolower((string) $search);
+                            $q->whereRaw('LOWER(hotel_name) like ?', ["%{$search}%"]);
                         });
 
                         // Or search for concierge name
                         $query->orWhereHas('concierge.user', function (Builder $q) use ($terms) {
                             foreach ($terms as $term) {
+                                $term = strtolower($term);
                                 $q->where(function ($q) use ($term) {
-                                    $q->where('first_name', 'like', "%{$term}%")
-                                        ->orWhere('last_name', 'like', "%{$term}%");
+                                    $q->whereRaw('LOWER(first_name) like ?', ["%{$term}%"])
+                                        ->orWhereRaw('LOWER(last_name) like ?', ["%{$term}%"]);
                                 });
                             }
                         });
@@ -277,10 +283,10 @@ class BookingSearch extends Page implements HasTable
                 return $query;
             })
             ->heading('Bookings: '.($this->data['start_date']
-                ? Carbon::parse($this->data['start_date'])->format('M j, Y')
-                : 'All Time').' to '.($this->data['end_date']
-                ? Carbon::parse($this->data['end_date'])->format('M j, Y')
-                : 'Present'))
+                    ? Carbon::parse($this->data['start_date'])->format('M j, Y')
+                    : 'All Time').' to '.($this->data['end_date']
+                    ? Carbon::parse($this->data['end_date'])->format('M j, Y')
+                    : 'Present'))
             ->headerActions([
                 ExportAction::make('export')
                     ->label('Export Results')
@@ -300,7 +306,8 @@ class BookingSearch extends Page implements HasTable
                     ->label('Booking ID')
                     ->hidden(),
                 TextColumn::make('created_at')
-                    ->tooltip(fn (Booking $record): string => "ID: {$record->id}".($record->source && $record->device ? " | Source: {$record->source} | Device: {$record->device}" : ''))
+                    ->tooltip(fn (Booking $record
+                    ): string => "ID: {$record->id}".($record->source && $record->device ? " | Source: {$record->source} | Device: {$record->device}" : ''))
                     ->label('Created')
                     ->size('xs')
                     ->formatStateUsing(fn (Booking $record): string => Carbon::parse($record->created_at)
@@ -320,7 +327,8 @@ class BookingSearch extends Page implements HasTable
                             <span class="truncate block max-w-[150px]" title="{$record->guest_name}">{$record->guest_name}</span>
                             <span class="truncate block max-w-[150px]" title="{$record->guest_phone}">{$record->guest_phone}</span>
                             <span class="truncate block max-w-[150px]" title="{$record->guest_email}">{$record->guest_email}</span>
-                        HTML)),
+                        HTML
+                    )),
                 TextColumn::make('guest_name')
                     ->hidden(),
                 TextColumn::make('guest_email')
@@ -344,7 +352,8 @@ class BookingSearch extends Page implements HasTable
                         return new HtmlString(<<<HTML
                             <span class="font-semibold text-primary">{$record->venue?->name}</span>
                             <br><span class="text-xs text-gray-500">{$regionName}</span>
-                        HTML);
+                        HTML
+                        );
                     })
                     ->action(
                         Action::make('viewVenue')
@@ -377,24 +386,28 @@ class BookingSearch extends Page implements HasTable
                                         </div>
                                     </div>
                                     </div>
-                                HTML);
+                                HTML
+                                );
                             })
                             ->modalActions([
                                 Action::make('edit')
                                     ->label('Edit')
-                                    ->url(fn (Booking $record) => route('filament.admin.resources.venues.edit', ['record' => $record->venue?->id]))
+                                    ->url(fn (Booking $record) => route('filament.admin.resources.venues.edit',
+                                        ['record' => $record->venue?->id]))
                                     ->openUrlInNewTab()
                                     ->icon('heroicon-m-pencil-square')
                                     ->color('warning'),
                                 Action::make('overview')
                                     ->label('Overview')
-                                    ->url(fn (Booking $record) => route('filament.admin.resources.venues.view', ['record' => $record->venue?->id]))
+                                    ->url(fn (Booking $record) => route('filament.admin.resources.venues.view',
+                                        ['record' => $record->venue?->id]))
                                     ->openUrlInNewTab()
                                     ->icon('heroicon-m-document-text')
                                     ->color('info'),
                                 Action::make('bookings')
                                     ->label('Bookings')
-                                    ->url(fn (Booking $record) => route('filament.admin.pages.booking-search', ['filters' => ['venue_search' => $record->venue?->name]]))
+                                    ->url(fn (Booking $record) => route('filament.admin.pages.booking-search',
+                                        ['filters' => ['venue_search' => $record->venue?->name]]))
                                     ->openUrlInNewTab()
                                     ->icon('heroicon-m-calendar')
                                     ->color('success'),
@@ -415,10 +428,12 @@ class BookingSearch extends Page implements HasTable
                     ->state(fn (Booking $record): HtmlString => new HtmlString(<<<HTML
                             <span class="font-semibold text-primary">{$record->concierge?->user?->name}</span>
                             <br><span class="text-xs text-gray-500">{$record->concierge?->hotel_name}</span>
-                        HTML))
+                        HTML
+                    ))
                     ->action(
                         Action::make('viewConcierge')
-                            ->modalHeading(fn (Booking $record): string => $record->concierge?->user?->name ?? 'No Concierge')
+                            ->modalHeading(fn (Booking $record
+                            ): string => $record->concierge?->user?->name ?? 'No Concierge')
                             ->modalContent(fn (Booking $record): HtmlString => new HtmlString(<<<HTML
                                     <div class='space-y-4'>
                                         <div class='grid grid-cols-2 gap-4 text-sm'>
@@ -436,23 +451,27 @@ class BookingSearch extends Page implements HasTable
                                             </div>
                                         </div>
                                     </div>
-                                HTML))
+                                HTML
+                            ))
                             ->modalActions([
                                 Action::make('edit')
                                     ->label('Edit')
-                                    ->url(fn (Booking $record) => route('filament.admin.resources.users.edit', ['record' => $record->concierge?->user_id]))
+                                    ->url(fn (Booking $record) => route('filament.admin.resources.users.edit',
+                                        ['record' => $record->concierge?->user_id]))
                                     ->openUrlInNewTab()
                                     ->icon('heroicon-m-pencil-square')
                                     ->color('warning'),
                                 Action::make('overview')
                                     ->label('Overview')
-                                    ->url(fn (Booking $record) => route('filament.admin.resources.concierges.view', ['record' => $record->concierge?->id]))
+                                    ->url(fn (Booking $record) => route('filament.admin.resources.concierges.view',
+                                        ['record' => $record->concierge?->id]))
                                     ->openUrlInNewTab()
                                     ->icon('heroicon-m-document-text')
                                     ->color('info'),
                                 Action::make('bookings')
                                     ->label('Bookings')
-                                    ->url(fn (Booking $record) => route('filament.admin.pages.booking-search', ['filters' => ['concierge_search' => $record->concierge?->user?->name]]))
+                                    ->url(fn (Booking $record) => route('filament.admin.pages.booking-search',
+                                        ['filters' => ['concierge_search' => $record->concierge?->user?->name]]))
                                     ->openUrlInNewTab()
                                     ->icon('heroicon-m-calendar')
                                     ->color('success'),

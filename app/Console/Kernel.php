@@ -18,6 +18,11 @@ class Kernel extends ConsoleKernel
     {
         $schedule->command('telescope:prune --hours=48')->daily();
 
+        // Check for scheduled SMS messages every minute
+        $schedule->command('sms:process-scheduled')
+            ->everyMinute()
+            ->withoutOverlapping();
+
         /**
          * Production-only scheduled tasks
          */
@@ -43,8 +48,18 @@ class Kernel extends ConsoleKernel
                 ->withoutOverlapping();
 
             // Send booking reminders
-            $schedule->command('prima:bookings-send-customer-reminder')
-                ->everyMinute()
+            //            $schedule->command('prima:bookings-send-customer-reminder')
+            //                ->everyMinute()
+            //                ->withoutOverlapping();
+
+            // Send booking reminders
+            $schedule->command('prima:bookings-send-daily-customer-follow-up')
+                ->hourly()
+                ->withoutOverlapping();
+
+            // Sync QR code visit statistics
+            $schedule->command('qr-codes:sync-stats')
+                ->hourly()
                 ->withoutOverlapping();
 
             // $schedule->command('app:send-daily-summary-email')->dailyAt('08:00')->timezone('America/New_York');

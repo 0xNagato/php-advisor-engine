@@ -84,6 +84,13 @@
                         class="px-3 py-1 text-sm border rounded-md h-9 w-44 focus:outline-none focus:border-primary-500 focus:ring-1 focus:ring-primary-500"
                         wire:model.live="endDate">
                 </div>
+                
+                <div>
+                    <label for="customer-search" class="block mb-1 text-xs font-medium text-gray-600">Customer Search</label>
+                    <input type="text" id="customer-search" placeholder="Name, email or phone"
+                        class="px-3 py-1 text-sm border rounded-md h-9 w-64 focus:outline-none focus:border-primary-500 focus:ring-1 focus:ring-primary-500"
+                        wire:model.live="customerSearch">
+                </div>
 
                 <button type="button"
                     class="px-5 py-1 text-sm font-medium text-white rounded-md h-9 bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500"
@@ -95,6 +102,51 @@
                     wire:click="resetFilter">
                     Reset
                 </button>
+            </div>
+            
+            <!-- Bulk ID Status Update Tool -->
+            <div class="p-4 mb-5 border rounded-lg bg-gray-50">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-lg font-semibold">Bulk ID Status Update</h3>
+                    <div class="text-xs text-gray-500">
+                        Enter multiple booking IDs to update their status
+                    </div>
+                </div>
+                
+                <form wire:submit.prevent="bulkUpdateBookingStatuses">
+                    <div class="grid grid-cols-3 gap-4">
+                        <div class="col-span-2">
+                            <label for="bulk-ids" class="block mb-1 text-xs font-medium text-gray-600">Booking IDs</label>
+                            <textarea id="bulk-ids" 
+                                placeholder="Enter IDs separated by commas, spaces, or new lines"
+                                class="w-full h-20 px-3 py-2 text-sm border-gray-300 rounded-md shadow-sm focus:border-primary-500 focus:ring-1 focus:ring-primary-500"
+                                wire:model="bulkIdsInput"></textarea>
+                            <div class="mt-1 text-xs text-gray-500">
+                                Example: 1234, 5678, 9012
+                            </div>
+                        </div>
+                        
+                        <div>
+                            <label for="bulk-status" class="block mb-1 text-xs font-medium text-gray-600">Status to Apply</label>
+                            <select id="bulk-status"
+                                class="w-full h-9 text-sm border-gray-300 rounded-md shadow-sm focus:border-primary-500 focus:ring-1 focus:ring-primary-500"
+                                wire:model="bulkStatus">
+                                <option value="">Select Status</option>
+                                <option value="{{ \App\Enums\BookingStatus::CANCELLED->value }}">
+                                    {{ \App\Enums\BookingStatus::CANCELLED->label() }}</option>
+                                <option value="{{ \App\Enums\BookingStatus::NO_SHOW->value }}">
+                                    {{ \App\Enums\BookingStatus::NO_SHOW->label() }}</option>
+                            </select>
+                            
+                            <div class="flex justify-end mt-6">
+                                <button type="submit"
+                                    class="px-3 py-1 text-sm font-medium text-white rounded-md shadow-sm bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500">
+                                    Update Status
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </form>
             </div>
 
             <!-- Edit form -->

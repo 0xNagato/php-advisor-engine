@@ -63,10 +63,14 @@ class ViewVenue extends ViewRecord
 
         if ($referrer) {
             $referrerName = $referrer->name;
-            $referrerType = $referrer->main_role;
             $referrerUrl = $this->getReferrerUrl($referrer);
 
             $subheading .= "<div class='mt-1 text-xs'>Referred by: <a href='$referrerUrl' class='text-primary-600 hover:underline'>$referrerName</a></div>";
+        }
+
+        $onboarding = $this->getRecord()->venueOnboarding()->first();
+        if ($onboarding?->agreement_accepted_at) {
+            $subheading .= "<div class='mt-1 text-xs'>Agreement Accepted at: {$onboarding->agreement_accepted_at->format('M d, Y h:i A')} </div>";
         }
 
         return new HtmlString("<div class='flex flex-col'>$subheading</div>");

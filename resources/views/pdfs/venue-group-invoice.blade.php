@@ -26,9 +26,13 @@
                 <div class="flex items-start justify-between mb-4">
                     <div>
                         <div>
-                            <span class="inline-block px-4 py-1 mb-4 text-2xl font-bold bg-indigo-800 rounded-lg">
+                            <span class="inline-block px-4 py-1 mb-1 text-2xl font-bold bg-indigo-800 rounded-lg">
                                 PRIMA
                             </span>
+                            <div class="mb-4 ml-1 text-xs">
+                                1040 Biscayne Blvd, Unit 2008<br>
+                                Miami, FL 33132
+                            </div>
                         </div>
                         <div>
                             <div class="text-xs opacity-75">Date</div>

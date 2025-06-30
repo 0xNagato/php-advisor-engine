@@ -84,4 +84,14 @@ return [
             'GB' => env('CLICKSEND_FROM_GB'),
         ],
     ],
+
+    'covermanager' => [
+        'api_key' => env('COVERMANAGER_API_KEY'),
+        'base_url' => env('COVERMANAGER_BASE_URL'),
+    ],
+
+    'restoo' => [
+        'base_url' => env('RESTOO_BASE_URL', 'https://integration-dev.myrestoo.net'),
+        'partner_id' => env('RESTOO_PARTNER_ID', 'prima'),
+    ],
 ];

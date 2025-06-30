@@ -8,13 +8,15 @@ use App\Events\BookingCreated;
 use App\Models\Booking;
 use App\Models\Concierge;
 use App\Models\ScheduleTemplate;
-use App\Models\ScheduleWithBooking;
+use App\Models\ScheduleWithBookingMV;
 use App\Models\VipCode;
+use App\Services\ReservationService;
 use App\Services\SalesTaxService;
 use chillerlan\QRCode\QRCode;
 use Exception;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 use Lorisleiva\Actions\Concerns\AsAction;
 use RuntimeException;
 use Sentry;
@@ -26,6 +28,8 @@ class CreateBooking
 
     public const int MAX_DAYS_IN_ADVANCE = 30;
 
+    public const int MAX_TOTAL_FEE_CENTS = 50000; // 500 in any currency
+
     /**
      * @throws Exception
      * @throws Throwable
@@ -33,25 +37,27 @@ class CreateBooking
     public function handle(
         int $scheduleTemplateId,
         array $data,
-        string $timezone,
-        string $currency,
         ?VipCode $vipCode = null,
         ?string $source = null,
         ?string $device = null
     ): CreateBookingReturnData {
-        $scheduleTemplate = ScheduleTemplate::query()->findOrFail($scheduleTemplateId);
+        $scheduleTemplate = ScheduleTemplate::query()->with('venue.inRegion')->findOrFail($scheduleTemplateId);
+        $venue = $scheduleTemplate->venue;
 
         // Get the schedule with override data
-        $schedule = ScheduleWithBooking::query()->where('schedule_template_id', $scheduleTemplateId)
+        $schedule = ScheduleWithBookingMV::query()->where('schedule_template_id', $scheduleTemplateId)
             ->where('booking_date', Carbon::parse($data['date'])->format('Y-m-d'))
             ->first();
 
         if (! $schedule) {
-            // If no schedule view record exists, fall back to template
+            // If no schedule view record exists, fall back to the template
             $isPrime = $scheduleTemplate->prime_time;
         } else {
             $isPrime = $schedule->prime_time;
         }
+
+        $timezone = $venue->inRegion->timezone ?? $scheduleTemplate->venue->timezone;
+        $currency = $venue->inRegion->currency ?? $scheduleTemplate->venue->currency;
 
         /**
          * @var Carbon $bookingAt
@@ -68,6 +74,59 @@ class CreateBooking
             new RuntimeException('Booking cannot be created more than '.self::MAX_DAYS_IN_ADVANCE.' days in advance.')
         );
 
+        // Validate booking time restrictions for today's bookings
+        if ($bookingAt->isToday()) {
+            // Check minimum advance booking time (global setting)
+            $minAdvanceTime = $currentDate->copy()->addMinutes(ReservationService::MINUTES_PAST);
+            throw_if(
+                $bookingAt->lt($minAdvanceTime),
+                new RuntimeException('Booking cannot be created less than '.ReservationService::MINUTES_PAST.' minutes in advance for today.')
+            );
+
+            // Check venue's specific cutoff time if set
+            if ($venue->cutoff_time) {
+                /*
+                 * This is a complete rewrite of the venue cutoff time logic to fix timezone issues.
+                 * The issue was that comparing dates with different timezones leads to incorrect results.
+                 */
+
+                // Step 1: Get the venue's timezone
+                $venueTimezone = $venue->timezone;
+
+                // Step 2: Get current time in the venue's timezone
+                $currentTime = Carbon::now($venueTimezone);
+
+                // Step 3: Extract just the time portion (not the date) from the venue's cutoff time
+                $cutoffHour = (int) $venue->cutoff_time->format('H');
+                $cutoffMinute = (int) $venue->cutoff_time->format('i');
+                $cutoffSecond = (int) $venue->cutoff_time->format('s');
+
+                // Step 4: Create today's cutoff time in the venue timezone
+                $todayCutoffTime = Carbon::now($venueTimezone)
+                    ->setTime($cutoffHour, $cutoffMinute, $cutoffSecond);
+
+                // Step 5: Compare current time with cutoff time (both in venue timezone)
+                $isPastCutoff = $currentTime->greaterThan($todayCutoffTime);
+
+                // Detailed logging to verify times are created and compared correctly
+                Log::debug('Cutoff time check', [
+                    'venue_id' => $venue->id,
+                    'venue_name' => $venue->name,
+                    'current_time' => $currentTime->toDateTimeString(),
+                    'current_time_timezone' => $currentTime->timezone->getName(),
+                    'cutoff_time' => $todayCutoffTime->toDateTimeString(),
+                    'cutoff_time_timezone' => $todayCutoffTime->timezone->getName(),
+                    'cutoff_raw' => sprintf('%02d:%02d:%02d', $cutoffHour, $cutoffMinute, $cutoffSecond),
+                    'is_past_cutoff' => $isPastCutoff,
+                ]);
+
+                throw_if(
+                    $isPastCutoff,
+                    new RuntimeException('Booking cannot be created after the venue\'s cutoff time for today.')
+                );
+            }
+        }
+
         $conciergeId = $this->getConciergeId($vipCode);
         $concierge = Concierge::with('user')->find($conciergeId);
 
@@ -76,9 +135,15 @@ class CreateBooking
 
         // Check if concierge is restricted to specific venues
         if ($concierge && $concierge->venue_group_id && filled($concierge->allowed_venue_ids)) {
-            throw_unless(in_array($venue->id, $concierge->allowed_venue_ids), new RuntimeException('You are not authorized to book at this venue.'));
+            throw_unless(
+                in_array($venue->id, $concierge->allowed_venue_ids),
+                new RuntimeException('You are not authorized to book at this venue.')
+            );
 
-            throw_if($venue->venue_group_id !== $concierge->venue_group_id, new RuntimeException('You are not authorized to book at venues outside your venue group.'));
+            throw_if(
+                $venue->venue_group_id !== $concierge->venue_group_id,
+                new RuntimeException('You are not authorized to book at venues outside your venue group.')
+            );
         }
 
         // Prepare meta data for non-prime bookings
@@ -122,8 +187,7 @@ class CreateBooking
 
         $taxData = app(SalesTaxService::class)->calculateTax(
             $booking->venue->region,
-            $booking->total_fee,
-            noTax: config('app.no_tax')
+            $booking->total_fee
         );
 
         $totalWithTaxInCents = $booking->total_fee + $taxData->amountInCents;
@@ -160,6 +224,9 @@ class CreateBooking
         }
 
         BookingCreated::dispatch($booking);
+
+        // Dispatch the job to handle refreshing
+        //        RefreshMaterializedView::dispatch();
 
         return CreateBookingReturnData::from([
             'booking' => $booking,

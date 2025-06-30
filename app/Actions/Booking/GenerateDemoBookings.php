@@ -6,7 +6,7 @@ use App\Enums\BookingStatus;
 use App\Models\Booking;
 use App\Models\Concierge;
 use App\Models\Region;
-use App\Models\ScheduleWithBooking;
+use App\Models\ScheduleWithBookingMV;
 use App\Models\Venue;
 use App\Models\VipCode;
 use App\Services\SalesTaxService;
@@ -33,9 +33,13 @@ class GenerateDemoBookings
 
     protected const int BOOKINGS_PER_DAY = 5;
 
-    private array $fakeNames = ['John', 'Jane', 'Alice', 'Bob', 'Charlie', 'Diana', 'Edward', 'Fiona', 'George', 'Hannah'];
+    private array $fakeNames = [
+        'John', 'Jane', 'Alice', 'Bob', 'Charlie', 'Diana', 'Edward', 'Fiona', 'George', 'Hannah',
+    ];
 
-    private array $fakeEmails = ['john@example.com', 'jane@example.com', 'alice@example.com', 'bob@example.com', 'charlie@example.com'];
+    private array $fakeEmails = [
+        'john@example.com', 'jane@example.com', 'alice@example.com', 'bob@example.com', 'charlie@example.com',
+    ];
 
     private array $fakePhones = ['+11234567890', '+19876543210', '+15551234567', '+14159876543', '+17778889999'];
 
@@ -43,8 +47,12 @@ class GenerateDemoBookings
      * @throws Exception
      * @throws Throwable
      */
-    public function handle(?string $startDate = null, ?string $endDate = null, int $daysToGenerate = 4, ?Command $command = null): string
-    {
+    public function handle(
+        ?string $startDate = null,
+        ?string $endDate = null,
+        int $daysToGenerate = 4,
+        ?Command $command = null
+    ): string {
         try {
             $startDateCarbon = $startDate ? Carbon::parse($startDate) : now();
 
@@ -76,7 +84,8 @@ class GenerateDemoBookings
 
             if ($command) {
                 $command->info('Starting demo bookings generation');
-                $command->table(['Key', 'Value'], collect($summaryInfo)->map(fn ($value, $key) => [$key, $value])->toArray());
+                $command->table(['Key', 'Value'],
+                    collect($summaryInfo)->map(fn ($value, $key) => [$key, $value])->toArray());
             }
 
             $concierges = Concierge::all();
@@ -90,7 +99,8 @@ class GenerateDemoBookings
             }
 
             foreach ($venues as $venue) {
-                $this->generateBookingsForVenue($venue, $concierges, $salesTaxService, $regions, $startDateCarbon, $endDateCarbon, $progressBar);
+                $this->generateBookingsForVenue($venue, $concierges, $salesTaxService, $regions, $startDateCarbon,
+                    $endDateCarbon, $progressBar);
             }
 
             if ($progressBar) {
@@ -130,13 +140,20 @@ class GenerateDemoBookings
     /**
      * @throws Exception|Throwable
      */
-    protected function generateBookingsForVenue(Venue $venue, Collection $concierges, SalesTaxService $salesTaxService, Collection $regions, Carbon $startDate, Carbon $endDate, ?ProgressBar $progressBar): void
-    {
+    protected function generateBookingsForVenue(
+        Venue $venue,
+        Collection $concierges,
+        SalesTaxService $salesTaxService,
+        Collection $regions,
+        Carbon $startDate,
+        Carbon $endDate,
+        ?ProgressBar $progressBar
+    ): void {
         try {
             $dateRange = collect($startDate->daysUntil($endDate));
 
             foreach ($dateRange as $date) {
-                $availableSchedules = ScheduleWithBooking::query()->where('venue_id', $venue->id)
+                $availableSchedules = ScheduleWithBookingMV::query()->where('venue_id', $venue->id)
                     ->where('is_available', true)
                     ->where('booking_date', $date->format('Y-m-d'))
                     ->inRandomOrder()
@@ -159,8 +176,13 @@ class GenerateDemoBookings
      *
      * @throws Exception|Throwable
      */
-    protected function createBooking(Venue $venue, ScheduleWithBooking $schedule, Concierge $concierge, SalesTaxService $salesTaxService, Collection $regions): void
-    {
+    protected function createBooking(
+        Venue $venue,
+        ScheduleWithBookingMV $schedule,
+        Concierge $concierge,
+        SalesTaxService $salesTaxService,
+        Collection $regions
+    ): void {
         $bookingDate = Carbon::parse($schedule->booking_date)->setTimeFromTimeString($schedule->start_time);
 
         $region = $regions->firstWhere('id', $venue->region);
@@ -187,7 +209,7 @@ class GenerateDemoBookings
             'vip_code_id' => $vipCode?->id,
         ]);
 
-        $taxData = $salesTaxService->calculateTax($region->id, $booking->total_fee, noTax: config('app.no_tax'));
+        $taxData = $salesTaxService->calculateTax($region->id, $booking->total_fee);
         $totalWithTaxInCents = $booking->total_fee + $taxData->amountInCents;
 
         $booking->update([
@@ -203,8 +225,12 @@ class GenerateDemoBookings
     /**
      * @throws Throwable
      */
-    public function generateBookingsForConcierge(Concierge $concierge, Carbon $startDate, Carbon $endDate, int $count): void
-    {
+    public function generateBookingsForConcierge(
+        Concierge $concierge,
+        Carbon $startDate,
+        Carbon $endDate,
+        int $count
+    ): void {
         $salesTaxService = new SalesTaxService;
         $regions = Region::all()->keyBy('id');
         $venues = Venue::query()->inRandomOrder()->take(5)->get();
@@ -220,7 +246,7 @@ class GenerateDemoBookings
                     break 2;
                 }
 
-                $availableSchedules = ScheduleWithBooking::query()
+                $availableSchedules = ScheduleWithBookingMV::query()
                     ->where('venue_id', $venue->id)
                     ->where('is_available', true)
                     ->where('booking_date', $date->format('Y-m-d'))

@@ -13,9 +13,14 @@ class ViewMessage extends ViewRecord
 {
     protected static string $resource = MessageResource::class;
 
-    protected ?string $heading = 'Announcements';
+    protected ?string $heading = '';
 
     protected static string $view = 'filament.pages.messages.view-message';
+
+    public static function canAccess(array $parameters = []): bool
+    {
+        return true;
+    }
 
     public Message $message;
 

@@ -5,7 +5,7 @@ namespace Database\Seeders;
 use App\Enums\BookingStatus;
 use App\Models\Booking;
 use App\Models\Concierge;
-use App\Models\ScheduleWithBooking;
+use App\Models\ScheduleWithBookingMV;
 use App\Models\Venue;
 use App\Services\SalesTaxService;
 use Carbon\Carbon;
@@ -27,11 +27,13 @@ class BookingSeeder extends Seeder
         /**
          * @var Collection<Venue> $venues
          */
-        $venues = Venue::with(['schedules' => function ($query) use ($startDate, $endDate) {
-            $query->where('is_available', true)
-                ->whereBetween('booking_date', [$startDate->format('Y-m-d'), $endDate->format('Y-m-d')])
-                ->with('venue');
-        }, 'inRegion'])->get();
+        $venues = Venue::with([
+            'schedules' => function ($query) use ($startDate, $endDate) {
+                $query->where('is_available', true)
+                    ->whereBetween('booking_date', [$startDate->format('Y-m-d'), $endDate->format('Y-m-d')])
+                    ->with('venue');
+            }, 'inRegion',
+        ])->get();
 
         foreach ($venues as $venue) {
             $availableSchedules = $venue->schedules->shuffle()->take(self::BOOKINGS_COUNT);
@@ -42,8 +44,12 @@ class BookingSeeder extends Seeder
         }
     }
 
-    private function createBooking(Venue $venue, ScheduleWithBooking $schedule, Collection $concierges, SalesTaxService $salesTaxService): void
-    {
+    private function createBooking(
+        Venue $venue,
+        ScheduleWithBookingMV $schedule,
+        Collection $concierges,
+        SalesTaxService $salesTaxService
+    ): void {
         $bookingDate = Carbon::parse($schedule->booking_date)->setTimeFromTimeString($schedule->start_time);
 
         /**
@@ -61,7 +67,7 @@ class BookingSeeder extends Seeder
             'is_prime' => true,
         ]);
 
-        $taxData = $salesTaxService->calculateTax($venue->region, $booking->total_fee, noTax: config('app.no_tax'));
+        $taxData = $salesTaxService->calculateTax($venue->region, $booking->total_fee);
         $totalWithTaxInCents = $booking->total_fee + $taxData->amountInCents;
 
         $booking->update([

@@ -2,24 +2,37 @@
 
 namespace App\Filament\Pages\Admin;
 
+use App\Jobs\ProcessScheduledSmsJob;
 use App\Jobs\SendBulkSmsJob;
 use App\Models\Referral;
 use App\Models\Region;
+use App\Models\ScheduledSms;
 use App\Models\User;
+use Carbon\Carbon;
 use Exception;
 use Filament\Forms\Components\CheckboxList;
+use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\Grid;
 use Filament\Forms\Components\Placeholder;
 use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\Toggle;
 use Filament\Forms\Form;
 use Filament\Notifications\Notification;
 use Filament\Pages\Page;
+use Filament\Tables\Actions\Action;
+use Filament\Tables\Actions\BulkAction;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Concerns\InteractsWithTable;
+use Filament\Tables\Contracts\HasTable;
+use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\HtmlString;
 
-class SmsManager extends Page
+class SmsManager extends Page implements HasTable
 {
+    use InteractsWithTable;
+
     protected static ?string $navigationIcon = 'heroicon-o-chat-bubble-left-right';
 
     protected static ?string $title = 'SMS Manager';
@@ -29,6 +42,8 @@ class SmsManager extends Page
     protected static string $view = 'filament.pages.admin.sms-manager';
 
     public ?array $data = [];
+
+    public bool $isScheduling = false;
 
     public static function canAccess(): bool
     {
@@ -46,6 +61,40 @@ class SmsManager extends Page
 
         return $form->schema([
             Grid::make(2)->schema([
+                Toggle::make('isScheduling')
+                    ->label('Schedule for later')
+                    ->live()
+                    ->afterStateUpdated(function (bool $state) {
+                        if (! $state) {
+                            // Reset scheduling data if toggled off
+                            $this->data['scheduled_time'] = null;
+                        } elseif (blank($this->data['scheduled_time'])) {
+                            // Set default to 10 minutes in the future
+                            $userTimezone = auth()->user()->timezone ?? config('app.timezone');
+                            $this->data['scheduled_time'] = now()->timezone($userTimezone)->addMinutes(10)->format('Y-m-d H:i:s');
+                        }
+                    })
+                    ->columnSpanFull(),
+
+                DateTimePicker::make('data.scheduled_time')
+                    ->label('Scheduled Time (Your Local Time)')
+                    ->seconds(false)
+                    ->native(false)
+                    ->displayFormat('M j, Y g:i A')
+                    // Use user's local timezone for input
+                    ->timezone(auth()->user()->timezone)
+                    ->statePath('data.scheduled_time')
+                    ->required()
+                    ->hidden(fn () => ! $this->isScheduling)
+                    ->live(false)
+                    ->helperText(function () {
+                        $userTimezone = auth()->user()->timezone ?? config('app.timezone');
+
+                        return "Enter time in your timezone ({$userTimezone})";
+                    })
+                    ->extraInputAttributes(['autocomplete' => 'off']) // Prevent browser autocomplete
+                    ->columnSpanFull(),
+
                 CheckboxList::make('data.recipients')
                     ->hiddenLabel()
                     ->options([
@@ -59,7 +108,6 @@ class SmsManager extends Page
                     ->columns(2)
                     ->gridDirection('row')
                     ->required()
-                    ->live()
                     ->columnSpanFull(),
 
                 CheckboxList::make('data.regions')
@@ -67,16 +115,12 @@ class SmsManager extends Page
                     ->helperText('Only send to users in selected regions. Leave empty to send to all regions.')
                     ->options(Region::query()->orderBy('name')->pluck('name', 'id'))
                     ->gridDirection('row')
-                    ->live()
-                    ->afterStateUpdated(function () {
-                        $this->form->fill([
-                            'data' => [
-                                'recipients' => $this->data['recipients'] ?? [],
-                                'regions' => $this->data['regions'] ?? [],
-                                'message' => $this->data['message'] ?? '',
-                            ],
-                        ]);
-                    })
+                    ->columnSpanFull(),
+
+                Toggle::make('data.test_mode')
+                    ->label('Test Mode (Send to yourself only)')
+                    ->helperText('When enabled, SMS will only be sent to user ID 1 for testing')
+                    ->hidden(fn () => auth()->id() !== 1)
                     ->columnSpanFull(),
 
                 Textarea::make('data.message')
@@ -174,32 +218,144 @@ class SmsManager extends Page
         try {
             $message = $this->data['message'];
             $recipients = $this->getSelectedRecipients();
+            $recipientCount = $recipients->count();
+
+            if ($recipientCount === 0) {
+                Notification::make()
+                    ->title('Error')
+                    ->body('No recipients selected or match the criteria')
+                    ->danger()
+                    ->send();
+
+                return;
+            }
+
+            // Check if test mode is enabled
+            $testMode = $this->data['test_mode'] ?? false;
+
+            if ($testMode) {
+                // In test mode, only send to user ID 1 (yourself)
+                $testUser = User::query()->find(1);
+
+                if ($testUser && $testUser->phone) {
+                    logger()->info('TEST MODE: SMS will only be sent to user ID 1');
+                    $recipients = collect([$testUser]);
+                    $recipientCount = 1;
+                } else {
+                    Notification::make()
+                        ->title('Error')
+                        ->body('Test user (ID 1) not found or has no phone number.')
+                        ->danger()
+                        ->send();
+
+                    return;
+                }
+            }
 
             // Log total count and recipient details
-            logger()->info('SMS Recipients Count: '.$recipients->count());
+            logger()->info('SMS Recipients Count: '.$recipientCount);
             logger()->info('SMS Recipients:', $recipients->map(fn ($recipient) => [
                 'name' => $recipient->first_name.' '.$recipient->last_name,
                 'phone' => $recipient->phone,
-                'role' => $recipient->role_type,
+                'role' => $testMode ? 'TEST_USER' : ($recipient->role_type ?? 'unknown'),
             ])->toArray());
 
             $phoneNumbers = $recipients->pluck('phone')->filter()->unique();
+            $phoneNumberChunks = $phoneNumbers->chunk(50)->map->toArray()->toArray();
 
-            $phoneNumbers->chunk(50)->each(function ($chunk) use ($message) {
-                dispatch(new SendBulkSmsJob($chunk->toArray(), $message));
-            });
+            // Handle scheduled SMS
+            if ($this->isScheduling && filled($this->data['scheduled_time'])) {
+                // Parse the time from the form in the user's timezone
+                $userTimezone = auth()->user()->timezone ?? config('app.timezone');
+                $localScheduledTime = Carbon::parse($this->data['scheduled_time'], $userTimezone);
 
-            Notification::make()
-                ->title('Success')
-                ->body('SMS messages have been queued for sending')
-                ->success()
-                ->send();
+                // Convert to UTC for storage
+                $utcScheduledTime = $localScheduledTime->copy()->setTimezone('UTC');
+
+                // Validate it's at least 5 minutes in the future (comparing in user's timezone)
+                $minValidTime = now()->timezone($userTimezone)->addMinutes(5);
+
+                if ($localScheduledTime->lessThan($minValidTime)) {
+                    $minutesNeeded = max(5, $minValidTime->diffInMinutes($localScheduledTime) + 5);
+
+                    Notification::make()
+                        ->title('Error')
+                        ->body("Please select a time at least {$minutesNeeded} minutes in the future.")
+                        ->danger()
+                        ->send();
+
+                    return;
+                }
+
+                // Get current time in user's timezone
+                $currentInUserTimezone = now()->setTimezone($userTimezone);
+
+                // Log all info for debugging
+                logger()->info('Scheduled SMS times:', [
+                    'raw_input' => $this->data['scheduled_time'],
+                    'local_time' => $localScheduledTime->toDateTimeString(),
+                    'utc_time' => $utcScheduledTime->toDateTimeString(),
+                    'user_timezone' => $userTimezone,
+                    'current_in_user_tz' => $currentInUserTimezone->toDateTimeString(),
+                ]);
+
+                // Create a scheduled SMS record
+                $scheduledSms = ScheduledSms::query()->create([
+                    'message' => $message,
+                    'scheduled_at' => $localScheduledTime, // User's local time
+                    'scheduled_at_utc' => $utcScheduledTime, // UTC time for processing
+                    'status' => 'scheduled',
+                    'recipient_data' => $phoneNumberChunks,
+                    'regions' => $this->data['regions'] ?? [],
+                    'created_by' => auth()->id(),
+                    'total_recipients' => $phoneNumbers->count(),
+                    'meta' => [
+                        'test_mode' => $testMode,
+                    ],
+                ]);
+
+                // Build a clear, accurate message showing current time vs scheduled time
+                $currentUserTime = now()->setTimezone($userTimezone);
+
+                Notification::make()
+                    ->title('Success')
+                    ->body(sprintf(
+                        'SMS scheduled for %s (%s). Current time there: %s. UTC time: %s',
+                        $localScheduledTime->format('g:i A'),
+                        $userTimezone,
+                        $currentUserTime->format('g:i A'),
+                        $utcScheduledTime->format('g:i A')
+                    ))
+                    ->success()
+                    ->send();
+            } else {
+                // Send immediately
+                foreach ($phoneNumberChunks as $chunk) {
+                    dispatch(new SendBulkSmsJob($chunk, $message));
+                }
+
+                Notification::make()
+                    ->title('Success')
+                    ->body('SMS messages have been queued for immediate sending')
+                    ->success()
+                    ->send();
+            }
+
+            // Reset the form
+            $this->isScheduling = false;
+            $this->form->fill();
+
         } catch (Exception $e) {
             Notification::make()
                 ->title('Error')
-                ->body('Failed to queue SMS messages: '.$e->getMessage())
+                ->body('Failed to process SMS: '.$e->getMessage())
                 ->danger()
                 ->send();
+
+            logger()->error('SMS Error: '.$e->getMessage(), [
+                'exception' => $e,
+                'data' => $this->data,
+            ]);
         }
     }
 
@@ -375,5 +531,113 @@ class SmsManager extends Page
         }
 
         return $query;
+    }
+
+    public function table(Table $table): Table
+    {
+        return $table
+            ->query(ScheduledSms::query()->where('status', '!=', 'cancelled'))
+            ->defaultSort('scheduled_at_utc', 'desc')
+            ->columns([
+                TextColumn::make('message')
+                    ->label('Message')
+                    ->limit(20)
+                    ->size('xs'),
+                TextColumn::make('total_recipients')
+                    ->label('Recipients')
+                    ->numeric()
+                    ->sortable()
+                    ->size('xs'),
+                TextColumn::make('scheduled_at_utc')
+                    ->label('Scheduled')
+                    ->dateTime('M j, g:i A')
+                    ->timezone(auth()->user()->timezone)
+                    ->sortable()
+                    ->size('xs'),
+                TextColumn::make('status')
+                    ->badge()
+                    ->color(fn (string $state): string => match ($state) {
+                        'scheduled' => 'warning',
+                        'processing' => 'info',
+                        'sent' => 'success',
+                        'cancelled' => 'gray',
+                        'failed' => 'danger',
+                    })
+                    ->size('xs'),
+                TextColumn::make('creator.name')
+                    ->label('By')
+                    ->size('xs'),
+                TextColumn::make('created_at')
+                    ->label('Created')
+                    ->dateTime('M j, g:i A')
+                    ->timezone(auth()->user()->timezone)
+                    ->sortable()
+                    ->size('xs'),
+            ])
+            ->filters([])
+            ->actions([
+                Action::make('send_now')
+                    ->label('Send Now')
+                    ->icon('heroicon-o-paper-airplane')
+                    ->color('success')
+                    ->requiresConfirmation()
+                    ->visible(fn (ScheduledSms $record): bool => $record->status === 'scheduled')
+                    ->action(function (ScheduledSms $record): void {
+                        ProcessScheduledSmsJob::dispatch($record->id);
+
+                        Notification::make()
+                            ->title('Success')
+                            ->body('SMS has been queued for immediate sending')
+                            ->success()
+                            ->send();
+                    }),
+                Action::make('cancel')
+                    ->label('Cancel')
+                    ->icon('heroicon-o-x-mark')
+                    ->color('danger')
+                    ->requiresConfirmation()
+                    ->visible(fn (ScheduledSms $record): bool => $record->status === 'scheduled')
+                    ->action(function (ScheduledSms $record): void {
+                        $record->update(['status' => 'cancelled']);
+
+                        Notification::make()
+                            ->title('Cancelled')
+                            ->body('Scheduled SMS has been cancelled')
+                            ->success()
+                            ->send();
+                    }),
+            ])
+            ->bulkActions([
+                BulkAction::make('cancel_selected')
+                    ->label('Cancel Selected')
+                    ->icon('heroicon-o-x-mark')
+                    ->color('danger')
+                    ->requiresConfirmation()
+                    ->deselectRecordsAfterCompletion()
+                    ->action(function (Collection $records): void {
+                        $records = $records->filter(fn (ScheduledSms $record) => $record->status === 'scheduled');
+
+                        $count = $records->count();
+                        if ($count === 0) {
+                            Notification::make()
+                                ->title('No Action')
+                                ->body('No scheduled SMS messages were found to cancel')
+                                ->info()
+                                ->send();
+
+                            return;
+                        }
+
+                        $records->each(fn (ScheduledSms $record) => $record->update(['status' => 'cancelled']));
+
+                        Notification::make()
+                            ->title('Success')
+                            ->body("Cancelled {$count} scheduled SMS messages")
+                            ->success()
+                            ->send();
+                    }),
+            ])
+            ->striped()
+            ->paginated([10, 25, 50]);
     }
 }

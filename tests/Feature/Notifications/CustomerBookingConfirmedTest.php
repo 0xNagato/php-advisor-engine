@@ -18,6 +18,8 @@ beforeEach(function () {
         'name' => 'The Fancy Restaurant',
         'payout_venue' => 60,
         'non_prime_fee_per_head' => 10,
+        'timezone' => 'UTC',
+        'region' => 'miami',
     ]);
     $this->concierge = Concierge::factory()->create();
     $this->partner = Partner::factory()->create(['percentage' => 6]);
@@ -26,20 +28,20 @@ beforeEach(function () {
         $mock->shouldReceive('getAttribute')->with('payout_percentage')->andReturn(10);
     });
 
-    // Create base template (party_size = 0)
-    $baseTemplate = ScheduleTemplate::factory()->create([
+    // Get a base template (party_size = 0)
+    $baseTemplate = ScheduleTemplate::where([
         'venue_id' => $this->venue->id,
         'start_time' => '14:00:00',
         'party_size' => 0,
-    ]);
+    ])->get()->first();
 
-    // Create guest count template
-    $this->scheduleTemplate = ScheduleTemplate::factory()->create([
+    // Get a guest count template
+    $this->scheduleTemplate = ScheduleTemplate::where([
         'venue_id' => $this->venue->id,
         'start_time' => '14:00:00',
         'day_of_week' => $baseTemplate->day_of_week,
         'party_size' => 2,
-    ]);
+    ])->get()->first();
 
     $this->action = new CreateBooking;
     actingAs($this->concierge->user);
@@ -57,11 +59,9 @@ it('ensures the customer_booking_confirmed_non_prime SMS content is correct', fu
     $result = $this->action::run(
         $this->scheduleTemplate->id,
         [
-            'date' => now()->format('Y-m-d'),
+            'date' => now()->addDay()->format('Y-m-d'),
             'guest_count' => $guestCount,
-        ],
-        'UTC',
-        'USD'
+        ]
     );
     $booking = $result->booking;
     $booking->update(['guest_phone' => '+12015557894']);
@@ -75,8 +75,11 @@ it('ensures the customer_booking_confirmed_non_prime SMS content is correct', fu
     // Parse template manually
     $templateKey = 'customer_booking_confirmed_non_prime';
     $templateContent = SmsTemplates::TEMPLATES[$templateKey];
-    $parsedMessage = preg_replace_callback('/\{(\w+)\}/',
-        fn ($matches) => $smsData->templateData[$matches[1]] ?? $matches[0], $templateContent);
+    $parsedMessage = preg_replace_callback(
+        '/\{(\w+)}/',
+        fn ($matches) => $smsData->templateData[$matches[1]] ?? $matches[0],
+        $templateContent
+    );
 
     // Generate the expected message dynamically
     $expectedMessage = sprintf(

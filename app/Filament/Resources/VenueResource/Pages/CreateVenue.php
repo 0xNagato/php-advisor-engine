@@ -100,6 +100,11 @@ class CreateVenue extends CreateRecord
                             ->placeholder('Select Region')
                             ->options(Region::all()->sortBy('id')->pluck('name', 'id'))
                             ->required(),
+                        Select::make('tier')
+                            ->placeholder('Select Tier')
+                            ->options([1 => 'Top', 2 => 'Normal'])
+                            ->default(3)
+                            ->required(),
                         TextInput::make('primary_contact_name')
                             ->label('Primary Contact Name')
                             ->required(),
@@ -163,7 +168,7 @@ class CreateVenue extends CreateRecord
                     ->schema([
                         TextInput::make('booking_fee')
                             ->label('Booking Fee')
-                            ->prefix('$')
+                            ->prefix(fn (Get $get) => Region::getCurrencySymbolForRegion($get('region') ?? 'miami'))
                             ->default(200)
                             ->numeric()
                             ->required(),
@@ -175,7 +180,7 @@ class CreateVenue extends CreateRecord
                             ->required(),
                         TextInput::make('minimum_spend')
                             ->label('Minimum Spend')
-                            ->prefix('$')
+                            ->prefix(fn (Get $get) => Region::getCurrencySymbolForRegion($get('region') ?? 'miami'))
                             ->numeric(),
                         Toggle::make('is_omakase')
                             ->label('Is Omakase')
@@ -187,7 +192,7 @@ class CreateVenue extends CreateRecord
                             ->nullable(),
                         TextInput::make('omakase_concierge_fee')
                             ->label('Omakase Concierge Fee')
-                            ->prefix('$')
+                            ->prefix(fn (Get $get) => Region::getCurrencySymbolForRegion($get('region') ?? 'miami'))
                             ->numeric()
                             ->visible(fn (Get $get): bool => $get('is_omakase'))
                             ->helperText('Flat fee paid to concierge for each Omakase booking')

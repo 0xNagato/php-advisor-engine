@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Livewire;
 
+use App\Actions\SendVenueOnboardingInquiryEmail;
 use App\Data\VenueOnboardingData;
 use App\Models\Region;
 use App\Models\User;
@@ -41,6 +42,18 @@ class VenueOnboarding extends Component
 
     public string $existingAccountIdentifier = '';
 
+    // Contact form properties for when public onboarding is disabled
+    public array $contact = [
+        'name' => '',
+        'email' => '',
+        'phone' => '',
+        'region' => '',
+        'venue_name' => '',
+        'message' => '',
+    ];
+
+    public bool $formSubmitted = false;
+
     // Flag to determine if this is an existing venue manager adding a new venue
     public bool $isExistingVenueManager = false;
 
@@ -55,7 +68,10 @@ class VenueOnboarding extends Component
     ];
 
     /** @var array<string,string> */
-    public array $steps = [
+    public array $steps = [];
+
+    /** @var array<string,string> */
+    private const array ALL_AVAILABLE_STEPS = [
         'company' => 'Company',
         'venues' => 'Venues',
         'booking-hours' => 'Hours',
@@ -93,6 +109,12 @@ class VenueOnboarding extends Component
     /** @var array<int, ?float> */
     public array $venue_non_prime_per_diem = [];
 
+    /** Default value for non-prime incentives */
+    private const bool DEFAULT_USE_NON_PRIME_INCENTIVE = true;
+
+    /** Default per diem amount (usually 10% of average per-diner check size) */
+    private const float DEFAULT_NON_PRIME_PER_DIEM = 10.0;
+
     public bool $send_agreement_copy = false;
 
     #[Validate('required|string|max:255')]
@@ -129,6 +151,9 @@ class VenueOnboarding extends Component
 
     public function mount(?string $token = null): void
     {
+        // Initialize the steps from configuration
+        $this->initializeSteps();
+
         // Initialize available regions
         $this->availableRegions = Region::active()
             ->get()
@@ -137,6 +162,9 @@ class VenueOnboarding extends Component
                 'label' => $region->name,
             ])
             ->toArray();
+
+        // Set default region for contact form
+        $this->contact['region'] = Region::active()->first()?->id ?? '';
 
         // Check if the user is a logged-in venue manager
         if (Auth::check() && Auth::user()->hasActiveRole('venue_manager')) {
@@ -176,16 +204,28 @@ class VenueOnboarding extends Component
                 }
             }
             $this->step = $savedState['step'] ?? 'company';
+
+            // Ensure the step is valid based on current configuration
+            if (! array_key_exists($this->step, $this->steps)) {
+                $this->step = array_key_first($this->steps) ?: 'company';
+            }
         } else {
             $this->venue_names = array_fill(0, $this->venue_count, '');
             $this->venue_prime_hours = array_fill(0, $this->venue_count, []);
-            $this->venue_use_non_prime_incentive = array_fill(0, $this->venue_count, true);
-            $this->venue_non_prime_per_diem = array_fill(0, $this->venue_count, 10.0);
+            $this->venue_use_non_prime_incentive = array_fill(0, $this->venue_count, self::DEFAULT_USE_NON_PRIME_INCENTIVE);
+            $this->venue_non_prime_per_diem = array_fill(0, $this->venue_count, self::DEFAULT_NON_PRIME_PER_DIEM);
             $this->logo_files = array_fill(0, $this->venue_count, null);
             $this->venue_regions = array_fill(0, $this->venue_count, 'miami');
 
             // Skip directly to venues step for existing venue managers
-            $this->step = $this->isExistingVenueManager ? 'venues' : 'company';
+            $initialStep = $this->isExistingVenueManager ? 'venues' : 'company';
+
+            // If the initial step doesn't exist in configured steps, use the first step
+            if (! array_key_exists($initialStep, $this->steps)) {
+                $initialStep = array_key_first($this->steps) ?: 'company';
+            }
+
+            $this->step = $initialStep;
         }
 
         $this->initializeBookingHours();
@@ -206,6 +246,32 @@ class VenueOnboarding extends Component
             })
             ->values()
             ->toArray();
+    }
+
+    /**
+     * Initialize onboarding steps from configuration
+     */
+    private function initializeSteps(): void
+    {
+        // Get configured steps from the config or use default
+        $configSteps = config('app.venue_onboarding_steps', 'company,venues,incentive,agreement');
+        $stepKeys = array_filter(explode(',', (string) $configSteps));
+
+        // Build the steps array from the available steps, keeping only configured ones
+        foreach ($stepKeys as $stepKey) {
+            $stepKey = trim($stepKey);
+            if (isset(self::ALL_AVAILABLE_STEPS[$stepKey])) {
+                $this->steps[$stepKey] = self::ALL_AVAILABLE_STEPS[$stepKey];
+            }
+        }
+
+        // Ensure we always have at least company and agreement steps
+        if (blank($this->steps)) {
+            $this->steps = [
+                'company' => self::ALL_AVAILABLE_STEPS['company'],
+                'agreement' => self::ALL_AVAILABLE_STEPS['agreement'],
+            ];
+        }
     }
 
     /**
@@ -301,8 +367,8 @@ class VenueOnboarding extends Component
         if ($this->venue_count > count($this->venue_names)) {
             $this->venue_names = array_pad($this->venue_names, $this->venue_count, '');
             $this->venue_prime_hours = array_pad($this->venue_prime_hours, $this->venue_count, []);
-            $this->venue_use_non_prime_incentive = array_pad($this->venue_use_non_prime_incentive, $this->venue_count, true);
-            $this->venue_non_prime_per_diem = array_pad($this->venue_non_prime_per_diem, $this->venue_count, 10.0);
+            $this->venue_use_non_prime_incentive = array_pad($this->venue_use_non_prime_incentive, $this->venue_count, self::DEFAULT_USE_NON_PRIME_INCENTIVE);
+            $this->venue_non_prime_per_diem = array_pad($this->venue_non_prime_per_diem, $this->venue_count, self::DEFAULT_NON_PRIME_PER_DIEM);
             $this->venue_regions = array_pad($this->venue_regions, $this->venue_count, 'miami');
             $this->venue_booking_hours = array_pad($this->venue_booking_hours, $this->venue_count, self::DEFAULT_BOOKING_HOURS);
         } else {
@@ -326,7 +392,8 @@ class VenueOnboarding extends Component
 
         $this->validateStep();
 
-        if ($this->step === 'booking-hours' || $this->step === 'prime-hours' || $this->step === 'incentive') {
+        // Handle multi-venue steps that need to cycle through venues before advancing
+        if (in_array($this->step, ['booking-hours', 'prime-hours', 'incentive']) && array_key_exists($this->step, $this->steps)) {
             if ($this->current_venue_index < count($this->venue_names) - 1) {
                 $this->current_venue_index++;
 
@@ -334,14 +401,14 @@ class VenueOnboarding extends Component
             }
         }
 
-        $this->step = match ($this->step) {
-            'company' => 'venues',
-            'venues' => 'booking-hours',
-            'booking-hours' => 'prime-hours',
-            'prime-hours' => 'incentive',
-            'incentive' => 'agreement',
-            default => $this->step
-        };
+        // Get ordered keys of steps
+        $stepKeys = array_keys($this->steps);
+        $currentStepIndex = array_search($this->step, $stepKeys);
+
+        // If current step is found and not the last step, move to next step
+        if ($currentStepIndex !== false && $currentStepIndex < count($stepKeys) - 1) {
+            $this->step = $stepKeys[$currentStepIndex + 1];
+        }
 
         $this->current_venue_index = 0;
 
@@ -353,17 +420,18 @@ class VenueOnboarding extends Component
 
     public function previousStep(): void
     {
-        if (($this->step === 'prime-hours' || $this->step === 'incentive') && $this->current_venue_index > 0) {
+        // Handle multi-venue steps where we need to go back through venues first
+        if (in_array($this->step, ['prime-hours', 'incentive']) && array_key_exists($this->step, $this->steps) && $this->current_venue_index > 0) {
             $this->current_venue_index--;
 
             return;
         }
 
-        $steps = array_keys($this->steps);
-        $currentIndex = array_search($this->step, $steps);
+        $stepKeys = array_keys($this->steps);
+        $currentIndex = array_search($this->step, $stepKeys);
 
         if ($currentIndex > 0) {
-            $previousStep = $steps[$currentIndex - 1];
+            $previousStep = $stepKeys[$currentIndex - 1];
 
             // Prevent existing venue managers from going back to the company step
             if ($this->isExistingVenueManager && $previousStep === 'company') {
@@ -434,15 +502,16 @@ class VenueOnboarding extends Component
         ]);
 
         foreach ($this->venue_names as $index => $name) {
+            $useNonPrimeIncentive = $this->venue_use_non_prime_incentive[$index] ?? self::DEFAULT_USE_NON_PRIME_INCENTIVE;
+            $nonPrimePerDiem = $this->venue_non_prime_per_diem[$index] ?? self::DEFAULT_NON_PRIME_PER_DIEM;
+
             $location = $onboarding->locations()->create([
                 'name' => $name,
                 'region' => $this->venue_regions[$index],
                 'prime_hours' => $this->venue_prime_hours[$index] ?? [],
                 'booking_hours' => $this->venue_booking_hours[$index] ?? [],
-                'use_non_prime_incentive' => $this->venue_use_non_prime_incentive[$index] ?? false,
-                'non_prime_per_diem' => $this->venue_use_non_prime_incentive[$index] ?
-                    $this->venue_non_prime_per_diem[$index] :
-                    null,
+                'use_non_prime_incentive' => $useNonPrimeIncentive,
+                'non_prime_per_diem' => $useNonPrimeIncentive ? $nonPrimePerDiem : null,
                 'logo_path' => $this->has_logos ? $this->storeLogo($index, $name) : null,
             ]);
         }
@@ -496,15 +565,16 @@ class VenueOnboarding extends Component
         ]);
 
         foreach ($this->venue_names as $index => $name) {
+            $useNonPrimeIncentive = $this->venue_use_non_prime_incentive[$index] ?? self::DEFAULT_USE_NON_PRIME_INCENTIVE;
+            $nonPrimePerDiem = $this->venue_non_prime_per_diem[$index] ?? self::DEFAULT_NON_PRIME_PER_DIEM;
+
             $location = $onboarding->locations()->create([
                 'name' => $name,
                 'region' => $this->venue_regions[$index],
                 'prime_hours' => $this->venue_prime_hours[$index] ?? [],
                 'booking_hours' => $this->venue_booking_hours[$index] ?? [],
-                'use_non_prime_incentive' => $this->venue_use_non_prime_incentive[$index] ?? false,
-                'non_prime_per_diem' => $this->venue_use_non_prime_incentive[$index] ?
-                    $this->venue_non_prime_per_diem[$index] :
-                    null,
+                'use_non_prime_incentive' => $useNonPrimeIncentive,
+                'non_prime_per_diem' => $useNonPrimeIncentive ? $nonPrimePerDiem : null,
                 'logo_path' => $this->has_logos ? $this->storeLogo($index, $name) : null,
                 'venue_group_id' => $venueGroup->id,
             ]);
@@ -574,14 +644,17 @@ class VenueOnboarding extends Component
                             return;
                         }
 
-                        // Check for uniqueness of the phone number in the users table
-                        $phoneE164 = $phone->formatE164();
-                        $exists = User::query()->where('phone', $phoneE164)->exists();
-                        if ($exists) {
-                            $this->existingAccountDetected = true;
-                            $this->existingAccountType = 'phone';
-                            $this->existingAccountIdentifier = $phoneE164;
-                            $fail('The phone number is already registered with another account.');
+                        // Only check for uniqueness if the config flag is enabled
+                        if (config('app.venue_onboarding_unique_phone', false)) {
+                            // Check for uniqueness of the phone number in the users table
+                            $phoneE164 = $phone->formatE164();
+                            $exists = User::query()->where('phone', $phoneE164)->exists();
+                            if ($exists) {
+                                $this->existingAccountDetected = true;
+                                $this->existingAccountType = 'phone';
+                                $this->existingAccountIdentifier = $phoneE164;
+                                $fail('The phone number is already registered with another account.');
+                            }
                         }
                     },
                 ],
@@ -672,7 +745,18 @@ class VenueOnboarding extends Component
 
     public function render(): View
     {
-        $partners = null;
+        // Check if public venue onboarding is disabled and current user is not logged in
+        // or doesn't have required roles to access this page
+        $publicOnboardingEnabled = config('app.public_venue_onboarding_enabled', false);
+        $hasAccess = Auth::check() && Auth::user()->hasActiveRole('venue_manager');
+
+        if (! $publicOnboardingEnabled && ! $hasAccess) {
+            // If onboarding is disabled for public users, render a contact form
+            return view('livewire.venue-onboarding-contact')->layout('components.layouts.app', [
+                'title' => 'Contact Us About Venue Onboarding',
+            ]);
+        }
+
         $partnerId = $this->partner_id;
         $partnerName = $this->partner_name;
 
@@ -708,6 +792,40 @@ class VenueOnboarding extends Component
         Session::forget('venue_onboarding');
         $this->reset();
         $this->mount();
+    }
+
+    /**
+     * Submit the contact form when public onboarding is disabled
+     */
+    public function submitContactForm(): void
+    {
+        $this->validate([
+            'contact.name' => 'required|string|max:255',
+            'contact.email' => 'required|email|max:255',
+            'contact.phone' => 'required|string',
+            'contact.region' => 'required|string',
+            'contact.venue_name' => 'required|string|max:255',
+            'contact.message' => 'required|string|max:1000',
+        ]);
+
+        // Format phone number
+        $this->contact['phone'] = $this->getInternationalFormattedPhoneNumber($this->contact['phone']);
+
+        // Send the contact email
+        SendVenueOnboardingInquiryEmail::run($this->contact);
+
+        // Reset form and show success message
+        $this->formSubmitted = true;
+
+        // Clear form fields
+        $this->contact = [
+            'name' => '',
+            'email' => '',
+            'phone' => '',
+            'region' => '',
+            'venue_name' => '',
+            'message' => '',
+        ];
     }
 
     public function updatedHasLogos(bool $value): void

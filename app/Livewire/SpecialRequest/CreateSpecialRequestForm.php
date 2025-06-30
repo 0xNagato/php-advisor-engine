@@ -58,7 +58,7 @@ class CreateSpecialRequestForm extends Widget implements HasForms
                 Select::make('venue')
                     ->prefixIcon('heroicon-m-building-storefront')
                     ->options(
-                        fn () => Venue::available()
+                        fn () => Venue::query()
                             ->where('region', session('region', 'miami'))
                             ->pluck('name', 'id')
                     )

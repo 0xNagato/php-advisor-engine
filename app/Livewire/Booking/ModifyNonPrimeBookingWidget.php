@@ -5,8 +5,9 @@ namespace App\Livewire\Booking;
 use App\Actions\Booking\SendModificationRequestToVenueContacts;
 use App\Models\Booking;
 use App\Models\BookingModificationRequest;
-use App\Models\ScheduleWithBooking;
+use App\Models\ScheduleWithBookingMV;
 use App\Notifications\Booking\CustomerModificationRequested;
+use App\Traits\HandlesPartySizeMapping;
 use Exception;
 use Filament\Forms\Components\Grid;
 use Filament\Forms\Components\Select;
@@ -20,6 +21,7 @@ use Illuminate\Database\Eloquent\Builder;
 
 class ModifyNonPrimeBookingWidget extends Widget implements HasForms
 {
+    use HandlesPartySizeMapping;
     use InteractsWithForms;
 
     protected static string $view = 'livewire.booking.modify-non-prime-booking-widget';
@@ -78,15 +80,10 @@ class ModifyNonPrimeBookingWidget extends Widget implements HasForms
                             ->columnSpan($this->showDetails ? 2 : 1),
                         Select::make('guest_count')
                             ->label('Party Size')
-                            ->options([
-                                2 => '2 Guests',
-                                3 => '3 Guests',
-                                4 => '4 Guests',
-                                5 => '5 Guests',
-                                6 => '6 Guests',
-                                7 => '7 Guests',
-                                8 => '8 Guests',
-                            ])
+                            ->options(array_combine(
+                                $this->getAllowedGuestCounts(),
+                                array_map(fn ($i) => "$i Guests", $this->getAllowedGuestCounts())
+                            ))
                             ->default(fn () => $this->pendingGuestCount ?? 2)
                             ->required()
                             ->live()
@@ -126,19 +123,25 @@ class ModifyNonPrimeBookingWidget extends Widget implements HasForms
         $formState = $this->form->getState();
         $guestCount = $this->pendingGuestCount ?? intval($formState['guest_count']) ?? $this->booking->guest_count;
 
-        // Round up guest count to nearest table size (2,4,6,8)
+        // Round up guest count to the nearest table size (2,4,6,8,10,12,14,16,18,20)
         $tableSize = match (true) {
             $guestCount <= 2 => 2,
             $guestCount <= 4 => 4,
             $guestCount <= 6 => 6,
-            default => 8,
+            $guestCount <= 8 => 8,
+            $guestCount <= 10 => 10,
+            $guestCount <= 12 => 12,
+            $guestCount <= 14 => 14,
+            $guestCount <= 16 => 16,
+            $guestCount <= 18 => 18,
+            default => 20,
         };
 
-        $schedules = ScheduleWithBooking::query()
+        $schedules = ScheduleWithBookingMV::query()
             ->with('venue')
             ->where('venue_id', $this->booking->venue->id)
             ->where('booking_date', $this->booking->booking_at->format('Y-m-d'))
-            ->where('party_size', $tableSize)  // Use rounded up table size
+            ->where('party_size', $tableSize)  // Use rounded-up table size
             ->where('prime_time', false)
             ->where('remaining_tables', '>', 0)
             ->where('is_available', true)
@@ -172,7 +175,7 @@ class ModifyNonPrimeBookingWidget extends Widget implements HasForms
 
         try {
             $formState = $this->form->getState();
-            $schedule = $this->selectedTimeSlotId ? ScheduleWithBooking::query()->find($this->selectedTimeSlotId) : null;
+            $schedule = $this->selectedTimeSlotId ? ScheduleWithBookingMV::query()->find($this->selectedTimeSlotId) : null;
 
             // Determine request source and user
             $requestSource = auth()->check() ? auth()->user()->main_role : 'customer';

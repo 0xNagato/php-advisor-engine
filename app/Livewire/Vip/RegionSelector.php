@@ -5,6 +5,7 @@ namespace App\Livewire\Vip;
 use App\Models\Region;
 use App\Models\VipCode;
 use App\Services\VipCodeService;
+use App\Traits\HandlesRegionValidation;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
@@ -17,6 +18,7 @@ use Filament\Widgets\Widget;
  */
 class RegionSelector extends Widget implements HasForms
 {
+    use HandlesRegionValidation;
     use InteractsWithForms;
 
     protected static string $view = 'livewire.vip.region-selector';
@@ -30,7 +32,12 @@ class RegionSelector extends Widget implements HasForms
     public function mount(): void
     {
         $this->code = $this->getCodeFromURL();
-        $this->form->fill();
+        $region = $this->resolveRegion();
+        session(['vip-region' => $region]);
+
+        $this->form->fill([
+            'region' => $region,
+        ]);
     }
 
     public function form(Form $form): Form
@@ -48,7 +55,6 @@ class RegionSelector extends Widget implements HasForms
                 })
                 ->selectablePlaceholder(false)
                 ->searchable()
-                ->default($this->code->concierge->user->region)
                 ->visible(fn () => count(config('app.active_regions', [])) > 1),
         ])
             ->statePath('data')

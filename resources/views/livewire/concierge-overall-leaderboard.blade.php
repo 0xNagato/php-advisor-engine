@@ -80,7 +80,7 @@
                                 </td>
                                 <td
                                     class="whitespace-nowrap px-3 text-xs py-[1rem] text-gray-950 first-of-type:ps-4 last-of-type:pe-4 sm:first-of-type:ps-6 sm:last-of-type:pe-6">
-                                    ${{ number_format($concierge['total_usd'], 2) }}
+                                    {{ money($concierge['total_earned'],$concierge['currency']) }}
                                 </td>
                             </tr>
                         @endforeach

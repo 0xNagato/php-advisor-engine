@@ -8,6 +8,8 @@ use App\Http\Controllers\DownloadInvoiceController;
 use App\Http\Controllers\DownloadVenueGroupInvoiceController;
 use App\Http\Controllers\DownloadVenueInvoiceController;
 use App\Http\Controllers\ExceptionFormController;
+use App\Http\Controllers\PublicAnnouncementController;
+use App\Http\Controllers\VenueAgreementController;
 use App\Livewire\Booking\CreateBooking;
 use App\Livewire\Booking\CustomerInvoice;
 use App\Livewire\Concierge\ConciergeInvitation;
@@ -25,6 +27,9 @@ use AshAllenDesign\ShortURL\Controllers\ShortURLController;
 Route::get('/privacy', function () {
     return view('privacy');
 });
+
+Route::get('/announcement/{message}', [PublicAnnouncementController::class, 'show'])
+    ->name('public.announcement');
 
 Route::get('/about-us', static function () {
     return view('web.about-us');
@@ -45,7 +50,9 @@ Route::get('/concierges', static function () {
 Route::get('/story', Story::class)->name('story');
 
 Route::get('/onboarding/{token?}', VenueOnboarding::class)->name('onboarding');
-/** @deprecated */
+/**
+ * @deprecated
+ */
 Route::get('/onboarding/token/{token?}', VenueOnboarding::class)->name('onboarding.token');
 
 Route::redirect('/app', config('app.apple_app_store_url'));
@@ -101,9 +108,22 @@ Route::get('/venues/contact-bookings', VenueContactRecentBookings::class)
 
 Route::post('/exception-form', ExceptionFormController::class)->name('exception.form');
 
-Route::get('vip/login/{code?}', fn ($code = null) => redirect($code ? "/v/{$code}" : '/'))->name('vip.login');
+Route::get('vip/login/{code?}', fn ($code = null) => redirect($code ? "/v/$code" : '/'))->name('vip.login');
 
-Route::get('v/{code}', AvailabilityCalendar::class)->name('v.booking');
+Route::get('vip/{code}', AvailabilityCalendar::class)->name('vip.booking');
+Route::get('v/{code}', function ($code) {
+    $queryParams = request()->query();
+    $redirectUrl = "https://book.primaapp.com/vip/{$code}";
+
+    if (! empty($queryParams)) {
+        $redirectUrl .= '?'.http_build_query($queryParams);
+    }
+
+    return redirect($redirectUrl);
+})
+    ->name('v.booking');
+Route::get('v/calendar', fn () => redirect('https://book.primaapp.com'))->name('v.calendar');
+
 Route::post('/role/switch/{profile}', [App\Http\Controllers\RoleSwitcherController::class, 'switch'])
     ->middleware(['web', 'auth'])
     ->name('role.switch');
@@ -115,6 +135,21 @@ Route::prefix('venue')->name('venue.')->group(function () {
         ->missing(function () {
             return response()->view('errors.modification-request-expired', [], 403);
         });
+
+    // Venue Agreement routes
+    Route::get('agreement/{onboarding}', [VenueAgreementController::class, 'show'])
+        ->name('agreement')
+        ->where('onboarding', '.*'); // Allow any character in the encrypted ID
+
+    // Create a public download endpoint
+    Route::get(
+        'public-agreement-download/{onboarding}',
+        [VenueAgreementController::class, 'publicDownload']
+    )
+        ->name('agreement.public-download')
+        ->where('onboarding', '.*'); // Allow any character in the encrypted ID
+
+    // Email endpoint removed as it's now handled by the Livewire component
 });
 
 Route::get('/join/{type}/{id}', DirectConciergeInvitation::class)
@@ -132,7 +167,7 @@ Route::get('venue-manager/invitation/{referral}', App\Filament\Pages\VenueManage
     ->name('venue-manager.invitation')
     ->middleware(['signed']);
 
-Route::get('venue-invoice/{user}/{startDate}/{endDate}', DownloadVenueInvoiceController::class)
+Route::get('venue-invoice/{venue}/{startDate}/{endDate}', DownloadVenueInvoiceController::class)
     ->name('venue.invoice.download')
     ->middleware('auth');
 
@@ -149,5 +184,8 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/admin/booking-calculator', [BookingCalculatorController::class, 'index'])
         ->name('admin.booking-calculator');
 });
+
+// VIP Code print route
+Route::get('/vip-code/print', [App\Http\Controllers\VipCodeController::class, 'printQRCode'])->name('vip-code.print');
 
 require __DIR__.'/auth.php';

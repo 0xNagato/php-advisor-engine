@@ -7,11 +7,13 @@ use App\Filament\Resources\BookingResource\Pages\EditBooking;
 use App\Filament\Resources\BookingResource\Pages\ListBookings;
 use App\Filament\Resources\BookingResource\Pages\ViewBooking;
 use App\Models\Booking;
+use DB;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
 
 class BookingResource extends Resource
 {
@@ -19,13 +21,68 @@ class BookingResource extends Resource
 
     protected static ?string $navigationIcon = 'gmdi-restaurant-menu-o';
 
+    public static function getEloquentQuery(): Builder
+    {
+        $query = parent::getEloquentQuery();
+
+        $user = auth()->user();
+
+        // If user is a venue manager, only show bookings for their venues
+        if ($user->hasActiveRole('venue_manager')) {
+            $venueGroups = $user->managedVenueGroups;
+
+            if ($venueGroups && $venueGroups->count() > 0) {
+                $query->where(function ($subquery) use ($venueGroups, $user) {
+                    foreach ($venueGroups as $venueGroup) {
+                        $allowedVenueIds = $venueGroup->getAllowedVenueIds($user);
+
+                        if (blank($allowedVenueIds)) {
+                            // If no specific venues are set, show all bookings from venues in the group
+                            $venueIds = $venueGroup->venues()->pluck('id')->toArray();
+
+                            // Use join to check schedule_template.venue_id
+                            $subquery->orWhereExists(function ($scheduleQuery) use ($venueIds) {
+                                $scheduleQuery->select(DB::raw(1))
+                                    ->from('schedule_templates')
+                                    ->whereIn('schedule_templates.venue_id', $venueIds)
+                                    ->whereColumn('schedule_templates.id', 'bookings.schedule_template_id');
+                            });
+
+                            // Also check meta->venue->id for bookings that might not have schedule_template relation
+                            $subquery->orWhereIn(DB::raw("(meta->'venue'->>'id')::int"), $venueIds);
+                        } else {
+                            // Use join to check schedule_template.venue_id
+                            $subquery->orWhereExists(function ($scheduleQuery) use ($allowedVenueIds) {
+                                $scheduleQuery->select(DB::raw(1))
+                                    ->from('schedule_templates')
+                                    ->whereIn('schedule_templates.venue_id', $allowedVenueIds)
+                                    ->whereColumn('schedule_templates.id', 'bookings.schedule_template_id');
+                            });
+
+                            // Also check meta->venue->id for bookings that might not have schedule_template relation
+                            $subquery->orWhereRaw("(meta->'venue'->>'id')::int IN (".implode(
+                                ',',
+                                $allowedVenueIds
+                            ).')');
+                        }
+                    }
+                });
+            } else {
+                // No venue groups assigned, don't show any bookings
+                $query->whereRaw('1 = 0');
+            }
+        }
+
+        return $query;
+    }
+
     public static function shouldRegisterNavigation(): bool
     {
         if (session()->exists('simpleMode')) {
             return ! session('simpleMode');
         }
 
-        return auth()->user()->hasActiveRole(['super_admin', 'partner', 'concierge']);
+        return auth()->user()->hasActiveRole(['super_admin', 'partner', 'concierge', 'venue_manager']);
     }
 
     public static function form(Form $form): Form
@@ -66,7 +123,6 @@ class BookingResource extends Resource
     {
         return $table
             ->columns([
-
                 TextColumn::make('concierge.user.name')
                     ->label('Concierge')
                     ->numeric()

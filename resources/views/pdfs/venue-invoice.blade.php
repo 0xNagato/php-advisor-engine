@@ -26,9 +26,13 @@
                 <div class="flex items-start justify-between mb-4">
                     <div>
                         <div>
-                            <span class="inline-block px-4 py-1 mb-4 text-2xl font-bold bg-indigo-800 rounded-lg">
+                            <span class="inline-block px-4 py-1 mb-1 text-2xl font-bold bg-indigo-800 rounded-lg">
                                 PRIMA
                             </span>
+                            <div class="mb-4 ml-1 text-xs">
+                                1040 Biscayne Blvd, Unit 2008<br>
+                                Miami, FL 33132
+                            </div>
                         </div>
                         <div>
                             <div class="text-xs opacity-75">Date</div>
@@ -62,7 +66,7 @@
                     <div class="overflow-x-auto">
                         <table class="w-full">
                             <thead>
-                                <tr class="border-b border-gray-200"></tr>
+                                <tr class="border-b border-gray-200">
                                 <th class="px-3 py-2 text-xs font-medium text-left text-gray-600">Date</th>
                                 <th class="px-3 py-2 text-xs font-medium text-left text-gray-600">Reference</th>
                                 <th class="px-3 py-2 text-xs font-medium text-center text-gray-600">Guests</th>
@@ -77,16 +81,10 @@
                             <tbody>
                                 @foreach ($nonPrimeBookings as $booking)
                                     @php
-                                        // Calculate incentive fee (stored in cents)
-                                        $incentiveFee = $booking->guest_count * ($venue->non_prime_fee_per_head * 100);
-
-                                        // Calculate PRIMA fee (10% of incentive fee)
-                                        $primaFee =
-                                            $incentiveFee *
-                                            (\App\Constants\BookingPercentages::NON_PRIME_PROCESSING_FEE_PERCENTAGE /
-                                                100);
-
-                                        $totalAmount = $primaFee + $incentiveFee;
+                                        $amount = abs($booking->earnings->where('type', \App\Enums\EarningType::VENUE_PAID->value)->sum('amount'));
+                                        $processingFee = $amount * (\App\Constants\BookingPercentages::NON_PRIME_PROCESSING_FEE_PERCENTAGE / 100);
+                                        $incentiveFee = $amount - $processingFee;
+                                        $totalAmount = $incentiveFee + $processingFee;
                                     @endphp
                                     <tr class="border-b border-gray-100">
                                         <td class="px-3 py-2">
@@ -111,7 +109,7 @@
                                             {{ money($incentiveFee, $booking->currency) }}
                                         </td>
                                         <td class="px-3 py-2 font-medium text-center">
-                                            {{ money($primaFee, $booking->currency) }}
+                                            {{ money($processingFee, $booking->currency) }}
                                         </td>
                                         <td class="px-3 py-2 font-medium text-center">
                                             {{ money($totalAmount, $booking->currency) }}

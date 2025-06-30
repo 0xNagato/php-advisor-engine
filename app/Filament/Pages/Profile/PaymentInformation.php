@@ -18,6 +18,8 @@ class PaymentInformation extends Page
 
     protected static string $view = 'filament.pages.payment-information';
 
+    protected static ?string $navigationGroup = 'Financials';
+
     protected static ?int $navigationSort = 100;
 
     public string $payout_type;

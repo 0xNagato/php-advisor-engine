@@ -37,7 +37,6 @@ class VenueGroupRecentBookings extends BaseWidget
 
         $query = Booking::query()
             ->recentBookings()
-            ->limit(10)
             ->with(['earnings', 'venue.user'])
             ->orderByDesc('booking_at')
             ->whereBetween('created_at', [$startDate, $endDate])
@@ -98,6 +97,8 @@ class VenueGroupRecentBookings extends BaseWidget
                         return money($total, $booking->currency);
                     }),
             ])
-            ->paginated(false);
+            ->paginated(true)
+            ->defaultPaginationPageOption(10)
+            ->paginationPageOptions([10, 25, 50, 100]);
     }
 }

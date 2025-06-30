@@ -14,4 +14,9 @@
             @include('partials.availability-empty-state')
         @endif
     </div>
+    <style>
+        .gap-6 {
+            gap: 1rem;
+        }
+    </style>
 </x-filament-panels::page>

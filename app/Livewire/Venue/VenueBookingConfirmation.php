@@ -5,6 +5,9 @@ namespace App\Livewire\Venue;
 use App\Constants\BookingPercentages;
 use App\Enums\BookingStatus;
 use App\Models\Booking;
+use App\Models\ScheduleTemplate;
+use App\Models\VenueTimeSlot;
+use App\Notifications\Booking\CustomerBookingConfirmed;
 use Carbon\Carbon;
 use Exception;
 use Filament\Actions\Action;
@@ -16,7 +19,7 @@ use Livewire\Attributes\Computed;
 
 class VenueBookingConfirmation extends Page
 {
-    public const MINUTES_BEFORE_BOOKING_CUTOFF = 15;
+    public const int MINUTES_BEFORE_BOOKING_CUTOFF = 5;
 
     public Booking $booking;
 
@@ -49,18 +52,32 @@ class VenueBookingConfirmation extends Page
 
     public function confirmBooking(): void
     {
+        if ($this->isBookingCancelled()) {
+            return;
+        }
+
         if ($this->booking->venue_confirmed_at === null) {
+            $this->booking->load('venue.inRegion');
             $payload = [
                 'venue_confirmed_at' => now(),
-                'status' => BookingStatus::VENUE_CONFIRMED,
             ];
+
             activity()
                 ->performedOn($this->booking)
                 ->withProperties($payload)
                 ->log('Venue '.$this->booking->venue->name.' confirmed booking');
 
+            Log::info('Venue confirmed booking', [
+                'name' => $this->booking->venue->name,
+                'booking' => $this->booking->id,
+            ]);
+
             $this->booking->update($payload);
             $this->showUndoButton = true;
+
+            if ($this->booking->is_non_prime_ibiza_big_group) {
+                $this->booking->notify(new CustomerBookingConfirmed);
+            }
         }
 
         Notification::make()
@@ -114,6 +131,12 @@ class VenueBookingConfirmation extends Page
     }
 
     #[Computed]
+    public function isBookingCancelled(): bool
+    {
+        return $this->booking->status === BookingStatus::CANCELLED;
+    }
+
+    #[Computed]
     public function bookingDetails(): array
     {
         if ($this->booking->is_prime) {
@@ -128,6 +151,27 @@ class VenueBookingConfirmation extends Page
         }
 
         $perDinerFee = $this->booking->venue->non_prime_fee_per_head;
+
+        if ($this->booking->schedule_template_id) {
+            $scheduleTemplate = ScheduleTemplate::query()->find($this->booking->schedule_template_id);
+
+            // Override price per head from the schedule template if available
+            if ($scheduleTemplate?->price_per_head) {
+                $perDinerFee = $scheduleTemplate->price_per_head;
+            }
+
+            // Check for an override in a specific venue time slot
+            $override = VenueTimeSlot::query()
+                ->where('schedule_template_id', $this->booking->schedule_template_id)
+                ->whereDate('booking_date', $this->booking->booking_at)
+                ->value('price_per_head');
+
+            // Override price per diner fee if a specific price is set
+            if (! is_null($override)) {
+                $perDinerFee = $override;
+            }
+        }
+
         $subtotal = $perDinerFee * $this->booking->guest_count;
         $venueFee = $subtotal * (BookingPercentages::NON_PRIME_PROCESSING_FEE_PERCENTAGE / 100);
         $totalFee = $subtotal + $venueFee;
@@ -151,20 +195,7 @@ class VenueBookingConfirmation extends Page
             ->button()
             ->size('lg')
             ->extraAttributes(['class' => 'w-full'])
-            ->action(function () {
-                if ($this->booking->venue_confirmed_at === null) {
-                    Log::info('Venue confirmed booking', [
-                        'name' => $this->booking->venue->name,
-                        'booking' => $this->booking->id,
-                    ]);
-                    $this->booking->update(['venue_confirmed_at' => now()]);
-                    $this->showUndoButton = true;
-                }
-
-                Notification::make()
-                    ->title('Thank you for confirming the booking')
-                    ->success()
-                    ->send();
-            });
+            ->disabled($this->isBookingCancelled())
+            ->action(fn () => $this->confirmBooking());
     }
 }

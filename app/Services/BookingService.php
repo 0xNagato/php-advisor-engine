@@ -2,8 +2,10 @@
 
 namespace App\Services;
 
+use App\Actions\Booking\CreateBooking;
 use App\Actions\Booking\SendConfirmationToVenueContacts;
 use App\Enums\BookingStatus;
+use App\Events\BookingConfirmed;
 use App\Events\BookingPaid;
 use App\Models\Booking;
 use App\Models\Region;
@@ -11,7 +13,6 @@ use App\Notifications\Booking\ConciergeFirstBooking;
 use App\Notifications\Booking\CustomerBookingConfirmed;
 use App\Traits\FormatsPhoneNumber;
 use Exception;
-use Illuminate\Support\Facades\Activity;
 use Illuminate\Support\Facades\DB;
 use Stripe\Charge;
 use Stripe\Customer;
@@ -38,6 +39,7 @@ class BookingService
         }
 
         BookingPaid::dispatch($booking);
+        BookingConfirmed::dispatch($booking->load('schedule', 'venue'));
     }
 
     public function convertToNonPrime(Booking $booking): void
@@ -134,8 +136,7 @@ class BookingService
 
             $taxData = app(SalesTaxService::class)->calculateTax(
                 $booking->venue->region,
-                $booking->total_fee,
-                noTax: config('app.no_tax')
+                $booking->total_fee
             );
 
             $totalWithTaxInCents = $booking->total_fee + $taxData->amountInCents;
@@ -185,7 +186,10 @@ class BookingService
 
         $extraFee = $extraPeople * $venue->increment_fee;
 
-        return ($schedule->effective_fee + $extraFee) * 100;
+        $calculatedFee = ($schedule->effective_fee + $extraFee) * 100;
+
+        // Cap the fee at 500 in any currency (50000 cents)
+        return min($calculatedFee, CreateBooking::MAX_TOTAL_FEE_CENTS);
     }
 
     /**
@@ -224,7 +228,7 @@ class BookingService
             'guest_first_name' => $form['first_name'],
             'guest_last_name' => $form['last_name'],
             'guest_phone' => $formattedPhone,
-            'guest_email' => $form['email'],
+            'guest_email' => $form['email'] ?? null,
             'status' => BookingStatus::CONFIRMED,
             'stripe_charge' => $booking->prime_time ? $stripeCharge->toArray() : null,
             'stripe_charge_id' => $booking->prime_time ? $stripeCharge->id : null,

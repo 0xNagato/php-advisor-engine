@@ -14,7 +14,7 @@
                 Email Invoice
             </x-filament::button>
             <x-filament::button color="indigo" class="w-1/2" size="sm" icon="gmdi-file-download-o" tag="a"
-                :href="route('customer.invoice.download', ['uuid' => $booking->uuid])">
+                                :href="route('customer.invoice.download', ['uuid' => $booking->uuid])">
                 Download PDF
             </x-filament::button>
         </div>
@@ -23,7 +23,7 @@
             <form wire:submit="emailInvoice" class="max-w-3xl p-4 mx-auto my-4 bg-gray-100 border rounded-lg">
                 {{ $this->form }}
                 <button type="submit"
-                    class="w-full px-4 py-2 mt-4 text-xs font-semibold text-white bg-indigo-600 rounded-lg sm:text-xs">
+                        class="w-full px-4 py-2 mt-4 text-xs font-semibold text-white bg-indigo-600 rounded-lg sm:text-xs">
                     Send Email
                 </button>
             </form>
@@ -43,7 +43,7 @@
             <!-- SVG Background Element -->
             <figure class="absolute inset-x-0 bottom-0 -mb-px ">
                 <svg preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg" x="0px" y="0px"
-                    viewBox="0 0 1920 100.1">
+                     viewBox="0 0 1920 100.1">
                     <path fill="currentColor" class="fill-white" d="M0,0c0,0,934.4,93.4,1920,0v100.1H0L0,0z"></path>
                 </svg>
             </figure>
@@ -137,7 +137,12 @@
                 <div>
                     <span class="block text-xs text-gray-500 uppercase">Booking Time:</span>
                     <span class="block text-xs font-medium text-gray-800 sm:text-sm dark:text-gray-200">
-                        {{ $booking->booking_at->format('M d, Y g:i A') }}
+                        @if ($booking->venue->venue_type === \App\Enums\VenueType::HIKE_STATION)
+                            {{ $booking->booking_at->format('M d, Y') }} -
+                            {{ $booking->booking_at->format('H:i') === '10:00' ? 'Morning Hike' : 'Sunset Hike' }}
+                        @else
+                            {{ $booking->booking_at->format('M d, Y g:i A') }}
+                        @endif
                     </span>
                 </div>
 
@@ -152,7 +157,7 @@
                 <div>
                     <span class="block text-xs text-gray-500 uppercase">Concierge:</span>
                     <span class="block text-xs font-medium text-gray-800 sm:text-sm dark:text-gray-200">
-                        @if (!$download && $booking->concierge && auth()->check() && auth()->user()->hasActiveRole('super_admin'))
+                        @if (!$download && $booking->concierge && auth()->check() && auth()->user()->hasActiveRole('super_admin') && !isset($customerInvoice))
                             {{ $this->viewConciergeAction }}
                         @elseif ($booking->concierge)
                             {{ $booking->concierge->user->name }}
@@ -242,7 +247,7 @@
                             @endif
                         </div>
                     </li>
-                    @if ($booking->tax > 0)
+                    @if ($booking->tax > 0 && $booking->is_prime)
                         <li
                             class="inline-flex items-center px-4 py-3 text-xs text-gray-800 border-b sm:text-sm last:border-b-0 dark:border-gray-700 dark:text-gray-200">
                             <div class="flex items-center justify-between w-full">
@@ -272,6 +277,8 @@
                                 <span>
                                     @if (in_array($booking->status, [BookingStatus::REFUNDED, BookingStatus::PARTIALLY_REFUNDED]))
                                         {{ money($booking->final_total, $booking->currency) }}
+                                    @elseif (!$booking->is_prime)
+                                        {{ money($booking->total_fee, $booking->currency) }}
                                     @else
                                         {{ money($booking->total_with_tax_in_cents, $booking->currency) }}
                                     @endif
@@ -350,7 +357,7 @@
             @endif
 
             @if (
-                !$download &&
+                !$download && !isset($customerInvoice) &&
                     auth()->check() &&
                     auth()->user()->hasActiveRole('super_admin') &&
                     $booking->status !== BookingStatus::PENDING &&
@@ -373,7 +380,8 @@
                     </div>
                 </div>
             @endif
-            @if (!$download && auth()->check() && auth()->user()->hasActiveRole('super_admin'))
+            
+            @if (!$download && auth()->check() && auth()->user()->hasActiveRole('super_admin') && !isset($customerInvoice))
                 <x-filament::actions :actions="[
                     $this->resendInvoiceAction,
                     $this->refundBookingAction,
@@ -396,7 +404,8 @@
                     isset($this->canModifyBooking) &&
                     $this->canModifyBooking &&
                     !auth()->user()->hasActiveRole('super_admin'))
-                <x-filament::actions class="w-full mt-4" :actions="[$this->cancelBookingAction, $this->modifyGuestInfoAction, $this->modifyBookingAction]" />
+                <x-filament::actions class="w-full mt-4"
+                                     :actions="[$this->cancelBookingAction, $this->modifyGuestInfoAction, $this->modifyBookingAction]" />
             @endif
         </div>
         <!-- End Body -->

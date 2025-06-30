@@ -89,4 +89,22 @@ class VipCode extends Model
             }
         );
     }
+
+    /**
+     * @return HasMany<VipSession, $this>
+     */
+    public function sessions(): HasMany
+    {
+        return $this->hasMany(VipSession::class);
+    }
+
+    /**
+     * Clean up expired sessions
+     */
+    public function cleanExpiredSessions(): void
+    {
+        $this->sessions()
+            ->where('expires_at', '<', now())
+            ->delete();
+    }
 }

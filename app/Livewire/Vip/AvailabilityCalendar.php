@@ -4,10 +4,12 @@ namespace App\Livewire\Vip;
 
 use App\Actions\Booking\CreateBooking;
 use App\Models\Region;
+use App\Models\Specialty;
 use App\Models\Venue;
 use App\Models\VipCode;
 use App\Services\ReservationService;
 use App\Services\VipCodeService;
+use App\Traits\HandlesRegionValidation;
 use App\Traits\ManagesBookingForms;
 use Exception;
 use Filament\Forms\Form;
@@ -21,6 +23,7 @@ use Livewire\Attributes\On;
  */
 class AvailabilityCalendar extends Page
 {
+    use HandlesRegionValidation;
     use ManagesBookingForms;
 
     protected static string $layout = 'components.layouts.app';
@@ -56,11 +59,14 @@ class AvailabilityCalendar extends Page
             $this->redirect('/');
         }
 
-        $region_id = $this->vipCode->concierge->user->region ?? config('app.default_region');
+        $region_id = $this->resolveRegion();
 
         $this->region = Region::query()->where('id', $region_id)->first();
         $this->timezone = $this->region->timezone;
         $this->currency = $this->region->currency;
+        $this->neighborhoods = $this->region->neighborhoods->pluck('name', 'id');
+        $this->specialties = Specialty::getSpecialtiesByRegion($this->region->id);
+        $this->advanced = session('advanceFilters', false);
         $this->form->fill();
     }
 
@@ -88,13 +94,47 @@ class AvailabilityCalendar extends Page
     {
         $region = session('vip-region') ?? $this->vipCode->concierge->user->region;
         $this->region = Region::query()->where('id', $region)->first();
-
         $this->neighborhoods = $this->region->neighborhoods->pluck('name', 'id');
+        $this->specialties = Specialty::getSpecialtiesByRegion($this->region->id);
         $this->timezone = $this->region->timezone;
         $this->currency = $this->region->currency;
         $this->venues = null;
 
         $this->form->fill();
+    }
+
+    #[On('formentera-selected')]
+    public function formenteraSelected(): void
+    {
+        if ($this->region?->id === 'ibiza') {
+            // Find the Formentera neighborhood ID
+            $formenteraNeighborhood = $this->neighborhoods->search('Formentera');
+            if ($formenteraNeighborhood) {
+                $this->data['neighborhood'] = $formenteraNeighborhood;
+                $this->venues = null;
+                $this->form->fill($this->data);
+                $this->loadVenues();
+            }
+        }
+    }
+
+    #[On('formentera-unselected')]
+    public function formenteraUnselected(): void
+    {
+        if ($this->region?->id === 'ibiza') {
+            $this->data['neighborhood'] = null;
+            $this->venues = null;
+            $this->form->fill($this->data);
+            $this->loadVenues();
+        }
+    }
+
+    #[On('advanceToggled')]
+    public function advanceToggled(bool $state): void
+    {
+        $this->advanced = $state;
+        $this->form->fill($this->data);
+        $this->loadVenues();
     }
 
     public function createBooking(int $scheduleTemplateId, ?string $date = null): void
@@ -110,8 +150,6 @@ class AvailabilityCalendar extends Page
             $result = CreateBooking::run(
                 scheduleTemplateId: $scheduleTemplateId,
                 data: $data,
-                timezone: $this->region->timezone,
-                currency: $this->region->currency,
                 vipCode: $this->vipCode,
                 source: 'vip',
                 device: $device
@@ -149,6 +187,9 @@ class AvailabilityCalendar extends Page
                 timeslotCount: $this->data['timeslot_count'] ?? 5,
                 timeSlotOffset: 2,
                 region: $this->region,
+                neighborhood: $this->data['neighborhood'] ?? null,
+                cuisines: $this->data['cuisine'] ?? [],
+                specialty: $this->data['specialty'] ?? [],
             );
 
             $this->venues = $reservation->getAvailableVenues();

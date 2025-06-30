@@ -3,6 +3,7 @@
 namespace App\Console\Commands;
 
 use App\Enums\BookingStatus;
+use App\Enums\VenueType;
 use App\Models\Booking;
 use App\Models\BookingCustomerReminderLog;
 use App\Notifications\Booking\CustomerReminder;
@@ -29,6 +30,10 @@ class SendBookingReminderSms extends Command
             ->whereBetween('booking_at_utc', [$nowUtc->copy()->addMinutes(29), $nowUtc->copy()->addMinutes(34)])
             ->whereDoesntHave('reminderLogs', function (Builder $query) {
                 $query->whereColumn('booking_id', 'bookings.id');
+            })
+            ->whereHas('venue', function (Builder $query) {
+                // Exclude Ibiza Hike Station venues (venue_type = 'hike_station')
+                $query->where('venue_type', '!=', VenueType::HIKE_STATION->value);
             })
             ->get();
 

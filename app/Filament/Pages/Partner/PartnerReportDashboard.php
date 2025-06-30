@@ -29,6 +29,8 @@ class PartnerReportDashboard extends Dashboard
 
     protected ?string $heading = 'My Earnings';
 
+    protected static ?string $navigationGroup = 'Financials';
+
     protected static ?int $navigationSort = -100;
 
     public static function canAccess(): bool

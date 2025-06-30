@@ -31,7 +31,9 @@ readonly class NonPrimeEarningsCalculationService
             }
             // Check for Overrides
             if ($override = $this->getOverride($booking)) {
-                $pricePerHead = $override->price_per_head;
+                if ($override->price_per_head !== null) {
+                    $pricePerHead = $override->price_per_head;
+                }
             }
         }
 

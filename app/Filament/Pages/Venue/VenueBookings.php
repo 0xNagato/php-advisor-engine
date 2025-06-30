@@ -72,7 +72,9 @@ class VenueBookings extends Page implements HasTable
 
         return $table
             ->query($query)
-            ->recordUrl(fn ($record) => VenueDailyBookings::getUrl(['venue' => $this->venues->first(), 'date' => $record->booking_date]))
+            ->recordUrl(fn ($record) => VenueDailyBookings::getUrl([
+                'venue' => $this->venues->first(), 'date' => $record->booking_date,
+            ]))
             ->columns([
                 TextColumn::make('booking_date')
                     ->date('D, M d, Y')

@@ -24,6 +24,8 @@ class ConciergeReportDashboard extends Dashboard
 
     protected static ?string $navigationIcon = 'heroicon-o-currency-dollar';
 
+    protected static ?string $navigationGroup = 'Financials';
+
     protected ?string $heading = 'My Earnings';
 
     protected static ?int $navigationSort = -1;

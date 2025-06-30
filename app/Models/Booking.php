@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Actions\Booking\CreateBooking;
 use App\Data\Stripe\StripeChargeData;
 use App\Enums\BookingStatus;
 use App\Services\Booking\BookingCalculationService;
@@ -17,10 +18,12 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOneThrough;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use InvalidArgumentException;
 use Spatie\Activitylog\LogOptions;
 use Spatie\Activitylog\Traits\LogsActivity;
+use Throwable;
 
 /**
  * @mixin IdeHelperBooking
@@ -155,10 +158,12 @@ class Booking extends Model
     public function totalFee(): int
     {
         if (! $this->booking_at || ! $this->schedule) {
-            return $this->total_fee ?? 0;
+            return min($this->total_fee ?? 0, CreateBooking::MAX_TOTAL_FEE_CENTS); // Cap at 500 in any currency
         }
 
-        return $this->schedule->fee($this->guest_count);
+        $calculatedFee = $this->schedule->fee($this->guest_count);
+
+        return min($calculatedFee, CreateBooking::MAX_TOTAL_FEE_CENTS); // Cap at 500 in any currency
     }
 
     public function scopeConfirmed($query)
@@ -201,11 +206,11 @@ class Booking extends Model
     }
 
     /**
-     * @return BelongsTo<ScheduleWithBooking, $this>
+     * @return BelongsTo<ScheduleWithBookingMV, $this>
      */
     public function schedule(): BelongsTo
     {
-        $relation = $this->belongsTo(ScheduleWithBooking::class, 'schedule_template_id', 'schedule_template_id');
+        $relation = $this->belongsTo(ScheduleWithBookingMV::class, 'schedule_template_id', 'schedule_template_id');
 
         if ($this->booking_at) {
             $booking_date = $this->booking_at->format('Y-m-d');
@@ -370,6 +375,15 @@ class Booking extends Model
         );
     }
 
+    protected function isNonPrimeIbizaBigGroup(): Attribute
+    {
+        return Attribute::make(
+            get: fn () => ! $this->is_prime &&
+                $this->venue?->inRegion?->id === 'ibiza' &&
+                $this->guest_count >= 8
+        );
+    }
+
     /**
      * @return HasMany<BookingModificationRequest, $this>
      */
@@ -425,5 +439,96 @@ class Booking extends Model
                 ])
                 ->log('Booking transferred to new concierge');
         });
+    }
+
+    /**
+     * Sync this booking to external booking platforms
+     */
+    public function syncToBookingPlatforms(): bool
+    {
+        // Skip if no venue
+        if (! $this->venue) {
+            return false;
+        }
+
+        // Get enabled platforms for the venue
+        $platforms = $this->venue->platforms()->where('is_enabled', true)->get();
+
+        if ($platforms->isEmpty()) {
+            return false;
+        }
+
+        $success = false;
+
+        // Process each platform
+        foreach ($platforms as $platform) {
+            try {
+                switch ($platform->platform_type) {
+                    case 'covermanager':
+                        $success = $this->syncToCoverManager() || $success;
+                        break;
+                    case 'restoo':
+                        $success = $this->syncToRestoo() || $success;
+                        break;
+                }
+            } catch (Throwable $e) {
+                // Log exception but continue with other platforms
+                Log::error("Error syncing booking to {$platform->platform_type}", [
+                    'booking_id' => $this->id,
+                    'platform' => $platform->platform_type,
+                    'error' => $e->getMessage(),
+                ]);
+            }
+        }
+
+        return $success;
+    }
+
+    /**
+     * Sync this booking to CoverManager when confirmed
+     *
+     * @deprecated Use syncToBookingPlatforms() instead for multiple platform support
+     */
+    public function syncToCoverManager(): bool
+    {
+        // Skip if already synced or if venue doesn't use CoverManager
+        if (! $this->venue || ! $this->venue->usesCoverManager() || $this->status !== BookingStatus::CONFIRMED) {
+            return false;
+        }
+
+        // Create or update CoverManager reservation record
+        $platformReservation = PlatformReservation::query()
+            ->where('booking_id', $this->id)
+            ->where('platform_type', 'covermanager')
+            ->first() ?? PlatformReservation::createFromBooking($this, 'covermanager');
+
+        if (! $platformReservation) {
+            return false;
+        }
+
+        return $platformReservation->syncToPlatform();
+    }
+
+    /**
+     * Sync this booking to Restoo when confirmed
+     */
+    public function syncToRestoo(): bool
+    {
+        // Skip if venue doesn't use Restoo
+        if (! $this->venue || ! $this->venue->hasPlatform('restoo') || $this->status !== BookingStatus::CONFIRMED) {
+            return false;
+        }
+
+        // Create or update Restoo reservation record
+        $platformReservation = PlatformReservation::query()
+            ->where('booking_id', $this->id)
+            ->where('platform_type', 'restoo')
+            ->first() ?? PlatformReservation::createFromBooking($this, 'restoo');
+
+        if (! $platformReservation) {
+            return false;
+        }
+
+        return $platformReservation->syncToPlatform();
     }
 }

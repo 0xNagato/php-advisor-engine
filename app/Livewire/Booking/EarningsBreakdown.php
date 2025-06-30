@@ -4,12 +4,10 @@ namespace App\Livewire\Booking;
 
 use App\Models\Booking;
 use Illuminate\View\View;
-use Livewire\Attributes\Reactive;
 use Livewire\Component;
 
 class EarningsBreakdown extends Component
 {
-    #[Reactive]
     public Booking $booking;
 
     public function mount(Booking $booking): void
@@ -49,6 +47,8 @@ class EarningsBreakdown extends Component
         $viewName = auth()->id() === 1
             ? 'livewire.booking.earnings-breakdown-advanced'
             : 'livewire.booking.earnings-breakdown';
+
+        $viewName = 'livewire.booking.earnings-breakdown';
 
         return view($viewName, [
             'groupedEarnings' => $this->booking->earnings->sumByUserAndType(),

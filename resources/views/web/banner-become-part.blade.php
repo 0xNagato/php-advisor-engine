@@ -1,10 +1,6 @@
 @php
     use App\Models\VipCode;
-    $vipCode = Cache::remember(
-        'available_calendar_button_vip_code_1',
-        60,
-        fn() => VipCode::query()->where('concierge_id', 1)->active()->first(),
-    );
+    $vipCode = 'PRIMA';
 @endphp
 <section
     class="mt-16 max-w-[1320px] mx-auto px-6 sm:px-8 md:px-12 rounded-2xl overflow-hidden bg-cover bg-center h-[350px] bg-indigo-500 mb-10"
@@ -27,7 +23,7 @@
                 Talk to PRIMA
             </button>
             <!-- Book Your Dining Experience Button -->
-            <a href="{{ config('app.primary_domain') . '/' . ltrim(route('v.booking', ['code' => $vipCode->code], false), '/') }}"
+            <a href="{{ config('app.primary_domain') . '/' . ltrim(route('v.booking', ['code' => $vipCode], false), '/') }}"
                 class="bg-gradient-to-b from-[#34AFF1] to-[#3954C7] text-white px-6 py-3 rounded-md border-[3px] border-white hover:bg-opacity-90 w-full sm:w-auto">
                 Book Your Dining Experience
             </a>

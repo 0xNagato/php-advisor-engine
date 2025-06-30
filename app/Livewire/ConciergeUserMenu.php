@@ -60,6 +60,8 @@ class ConciergeUserMenu extends Widget implements HasForms
                     $user->region = $get('region');
                     $user->save();
                     $this->dispatch('region-changed', $get('region'));
+                    // Refresh the page to apply the new region
+                    $this->redirect(request()->header('Referer'));
                 })
                 ->selectablePlaceholder(false)
                 ->searchable()

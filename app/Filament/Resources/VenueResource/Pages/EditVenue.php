@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\VenueResource\Pages;
 
+use App\Actions\Venue\DeleteVenueAction;
 use App\Actions\Venue\UpdateVenueGroupEarnings;
 use App\Enums\VenueStatus;
 use App\Filament\Resources\VenueResource;
@@ -11,9 +12,11 @@ use App\Models\Cuisine;
 use App\Models\Neighborhood;
 use App\Models\Partner;
 use App\Models\Region;
+use App\Models\Specialty;
 use App\Models\User;
 use App\Models\Venue;
 use App\Models\VenueGroup;
+use App\Services\ReservationService;
 use Carbon\Carbon;
 use Exception;
 use Filament\Actions\Action;
@@ -168,11 +171,62 @@ class EditVenue extends EditRecord
                                     ->orderBy('name')->pluck('name', 'id');
                                 $set('neighborhood', null);
                                 $set('neighborhoodOptions', $neighborhoods);
+
+                                $specialities = Specialty::getSpecialtiesByRegion($state);
+                                $set('specialty', null);
+                                $set('specialtyOptions', $specialities);
                             }),
                         Select::make('neighborhood')
                             ->placeholder('Select Neighborhood')
                             ->options(fn (callable $get) => $get('neighborhoodOptions') ?? [])
                             ->reactive(),
+                        Select::make('specialty')
+                            ->placeholder('Select Specialty')
+                            ->options(fn (callable $get) => $get('specialtyOptions') ?? [])
+                            ->multiple()
+                            ->reactive(),
+                        Select::make('tier')
+                            ->placeholder('Select Tier')
+                            ->options([
+                                1 => 'Gold',
+                                2 => 'Silver',
+                                null => 'Standard',
+                            ])
+                            ->default(null)
+                            ->helperText('Gold venues appear first in search results, followed by Silver, then Standard. Ordering within tiers is managed through configuration.'),
+                        Placeholder::make('tier_position')
+                            ->label('Tier Position')
+                            ->content(function () use ($venue) {
+                                if (! $venue->region) {
+                                    return 'Set region first to see tier position';
+                                }
+
+                                $tier1Venues = ReservationService::getVenuesInTier($venue->region, 1);
+                                $tier2Venues = ReservationService::getVenuesInTier($venue->region, 2);
+
+                                $tier1Position = array_search($venue->id, $tier1Venues);
+                                $tier2Position = array_search($venue->id, $tier2Venues);
+
+                                // Check if venue is in Gold tier (DB tier=1 OR config tier_1)
+                                if ($venue->tier === 1 || $tier1Position !== false) {
+                                    if ($tier1Position !== false) {
+                                        return new HtmlString('<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">Position '.($tier1Position + 1).' in Gold (configured)</span>');
+                                    } else {
+                                        return new HtmlString('<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">Gold tier (database only)</span>');
+                                    }
+                                }
+                                // Check if venue is in Silver tier (DB tier=2 OR config tier_2)
+                                elseif ($venue->tier === 2 || $tier2Position !== false) {
+                                    if ($tier2Position !== false) {
+                                        return new HtmlString('<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">Position '.($tier2Position + 1).' in Silver (configured)</span>');
+                                    } else {
+                                        return new HtmlString('<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">Silver tier (database only)</span>');
+                                    }
+                                } else {
+                                    return new HtmlString('<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">Standard tier</span>');
+                                }
+                            })
+                            ->helperText('This shows if the venue is configured in the tier ordering system. Contact admin to change tier positions.'),
                         TextInput::make('primary_contact_name')
                             ->label('Primary Contact Name')
                             ->required(),
@@ -218,8 +272,14 @@ class EditVenue extends EditRecord
                                     return null;
                                 }
 
-                                return $state instanceof Carbon ? $state->format('H:i') : date('H:i', strtotime($state));
+                                return $state instanceof Carbon ? $state->format('H:i') : date('H:i',
+                                    strtotime($state));
                             }),
+                        Select::make('advance_booking_window')
+                            ->label('Advance Booking Window')
+                            ->options(array_combine(range(0, 7), range(0, 7))) // Generates options from 0 to 7
+                            ->default(0)
+                            ->helperText('Set the number of days in advance that reservations can be made. Use 0 for no restrictions.'),
                         Toggle::make('no_wait')
                             ->label('No Wait')
                             ->helperText('When enabled, guests will be seated immediately upon arrival')
@@ -235,7 +295,7 @@ class EditVenue extends EditRecord
                             ->nullable(),
                         TextInput::make('omakase_concierge_fee')
                             ->label('Omakase Concierge Fee Per Guest')
-                            ->prefix('$')
+                            ->prefix(fn (Get $get) => Region::getCurrencySymbolForRegion($get('region') ?? 'miami'))
                             ->numeric()
                             ->visible(fn (Get $get): bool => $get('is_omakase'))
                             ->helperText('Amount paid to concierge per guest for each Omakase booking')
@@ -269,13 +329,13 @@ class EditVenue extends EditRecord
                     ->schema([
                         TextInput::make('booking_fee')
                             ->label('Booking Fee')
-                            ->prefix('$')
+                            ->prefix(fn (Get $get) => Region::getCurrencySymbolForRegion($get('region') ?? 'miami'))
                             ->default(200)
                             ->numeric()
                             ->required(),
                         TextInput::make('increment_fee')
                             ->label('Increment Fee')
-                            ->prefix('$')
+                            ->prefix(fn (Get $get) => Region::getCurrencySymbolForRegion($get('region') ?? 'miami'))
                             ->default(0)
                             ->numeric(),
                         TextInput::make('payout_venue')
@@ -300,7 +360,8 @@ class EditVenue extends EditRecord
                                     ->required(),
                                 TextInput::make('fee')
                                     ->label('Fee')
-                                    ->prefix('$')
+                                    ->prefix(fn (
+                                    ) => Region::getCurrencySymbolForRegion($this->getRecord()->region ?? 'miami'))
                                     ->numeric()
                                     ->required(),
                             ]),
@@ -786,6 +847,47 @@ class EditVenue extends EditRecord
                     ->requiresConfirmation()
                     ->modalHeading('Change Venue Status')
                     ->modalDescription('Are you sure you want to change the status of this venue?'),
+
+                Action::make('delete')
+                    ->label('Delete Venue')
+                    ->icon('heroicon-o-trash')
+                    ->color('danger')
+                    ->visible(fn () => in_array(auth()->id(), config('app.god_ids', [])))
+                    ->requiresConfirmation()
+                    ->modalHeading('Delete Venue')
+                    ->modalDescription('Are you sure you want to delete this venue? This action cannot be undone and all venue data will be permanently removed.')
+                    ->action(function () use ($venue) {
+                        try {
+                            // Check if this is the only venue in a group before deleting
+                            $isOnlyVenueInGroup = $venue->venue_group_id !== null &&
+                                $venue->venueGroup &&
+                                $venue->venueGroup->venues()->count() === 1;
+
+                            DeleteVenueAction::run($venue);
+
+                            if ($isOnlyVenueInGroup) {
+                                Notification::make()
+                                    ->title('Venue and Venue Group Deleted')
+                                    ->body('The venue and its venue group have been successfully deleted. Any managers or concierges who were only associated with this venue group have been suspended.')
+                                    ->success()
+                                    ->send();
+                            } else {
+                                Notification::make()
+                                    ->title('Venue Deleted')
+                                    ->body('The venue has been successfully deleted.')
+                                    ->success()
+                                    ->send();
+                            }
+
+                            $this->redirect(VenueResource::getUrl('index'));
+                        } catch (RuntimeException $e) {
+                            Notification::make()
+                                ->title('Error')
+                                ->body($e->getMessage())
+                                ->danger()
+                                ->send();
+                        }
+                    }),
             ])
                 ->icon('heroicon-o-ellipsis-vertical')
                 ->color('primary')
@@ -799,6 +901,7 @@ class EditVenue extends EditRecord
         if (isset($data['region'])) {
             $data['neighborhoodOptions'] = Neighborhood::query()->where('region', $data['region'])
                 ->orderBy('name')->pluck('name', 'id');
+            $data['specialtyOptions'] = Specialty::getSpecialtiesByRegion($data['region']);
         }
 
         if (! isset($data['contacts'])) {
