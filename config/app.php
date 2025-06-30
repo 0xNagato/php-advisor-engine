@@ -387,4 +387,17 @@ return [
     */
     'god_ids' => [1, 2, 204],
 
+    /*
+    |--------------------------------------------------------------------------
+    | VIP Code Configuration
+    |--------------------------------------------------------------------------
+    |
+    | Configuration for VIP code behavior and session management.
+    |
+    */
+    'vip' => [
+        'fallback_code' => env('VIP_FALLBACK_CODE', 'ALEX'),
+        'session_duration_hours' => env('VIP_SESSION_DURATION_HOURS', 24),
+    ],
+
 ];

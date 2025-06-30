@@ -8,12 +8,11 @@ This endpoint provides functionality for retrieving a list of specialties, with 
 ### Request
 - **Method:** GET
 - **URL:** `/api/specialties`
-- **Authentication:** Required
+- **Authentication:** Not required (public endpoint)
 
 #### Headers
 | Header | Value | Required | Description |
 |--------|-------|----------|-------------|
-| Authorization | Bearer {token} | Yes | Authentication token |
 | Accept | application/json | Yes | Specifies the expected response format |
 
 #### Parameters
@@ -25,7 +24,6 @@ This endpoint provides functionality for retrieving a list of specialties, with 
 ```bash
 curl -X GET \
   https://api.example.com/api/specialties \
-  -H 'Authorization: Bearer your-api-token' \
   -H 'Accept: application/json'
 ```
 
@@ -33,7 +31,6 @@ curl -X GET \
 ```bash
 curl -X GET \
   https://api.example.com/api/specialties?region=miami \
-  -H 'Authorization: Bearer your-api-token' \
   -H 'Accept: application/json'
 ```
 
@@ -57,15 +54,6 @@ curl -X GET \
 ```
 
 The response is a key-value object where the keys are specialty IDs and the values are specialty names.
-
-#### Error Responses
-
-##### 401 Unauthorized
-```json
-{
-  "message": "Unauthenticated."
-}
-```
 
 ## Notes
 - The endpoint returns all specialties if no region filter is provided

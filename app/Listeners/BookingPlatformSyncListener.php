@@ -4,8 +4,7 @@ namespace App\Listeners;
 
 use App\Events\BookingConfirmed;
 use App\Factories\BookingPlatformFactory;
-use App\Models\CoverManagerReservation;
-use App\Models\RestooReservation;
+use App\Models\PlatformReservation;
 use GuzzleHttp\Exception\ConnectException;
 use GuzzleHttp\Exception\ServerException;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -74,12 +73,7 @@ class BookingPlatformSyncListener implements ShouldQueue
                 }
 
                 if (! $success) {
-                    Log::error("Failed to sync booking {$booking->id} to {$platform->platform_type}", [
-                        'booking_id' => $booking->id,
-                        'venue_id' => $venue->id,
-                        'venue_name' => $venue->name,
-                        'platform' => $platform->platform_type,
-                    ]);
+                    // Removed duplicate error logging - errors are already logged at the PlatformReservation level with more context
                 }
             } catch (Throwable $e) {
                 Log::error("Exception syncing booking {$booking->id} to {$platform->platform_type}", [
@@ -112,15 +106,16 @@ class BookingPlatformSyncListener implements ShouldQueue
     protected function syncToCoverManager($booking): bool
     {
         // Create or update CoverManager reservation record
-        $coverManagerReservation = CoverManagerReservation::query()
+        $platformReservation = PlatformReservation::query()
             ->where('booking_id', $booking->id)
-            ->first() ?? CoverManagerReservation::createFromBooking($booking);
+            ->where('platform_type', 'covermanager')
+            ->first() ?? PlatformReservation::createFromBooking($booking, 'covermanager');
 
-        if (! $coverManagerReservation) {
+        if (! $platformReservation) {
             return false;
         }
 
-        return $coverManagerReservation->syncToCoverManager();
+        return $platformReservation->syncToPlatform();
     }
 
     /**
@@ -129,14 +124,15 @@ class BookingPlatformSyncListener implements ShouldQueue
     protected function syncToRestoo($booking): bool
     {
         // Create or update Restoo reservation record
-        $restooReservation = RestooReservation::query()
+        $platformReservation = PlatformReservation::query()
             ->where('booking_id', $booking->id)
-            ->first() ?? RestooReservation::createFromBooking($booking);
+            ->where('platform_type', 'restoo')
+            ->first() ?? PlatformReservation::createFromBooking($booking, 'restoo');
 
-        if (! $restooReservation) {
+        if (! $platformReservation) {
             return false;
         }
 
-        return $restooReservation->syncToRestoo();
+        return $platformReservation->syncToPlatform();
     }
 }

@@ -254,8 +254,9 @@
                                             </tr>
                                         @else
                                             <tr>
-                                                <td class="px-1 py-1 text-red-500">Missing schedule for
-                                                    {{ $slot['time'] }}</td>
+                                                <td class="px-1 py-1 text-red-500">
+                                                    Missing schedule for {{ $slot['time'] }}
+                                                </td>
                                             </tr>
                                         @endif
                                     @endforeach

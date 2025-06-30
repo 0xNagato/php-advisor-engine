@@ -15,6 +15,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasManyThrough;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\HasOneThrough;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -693,5 +694,46 @@ class Venue extends Model
 
             return false;
         }
+    }
+
+    /**
+     * Get all platform reservations for this venue.
+     *
+     * @return HasMany<PlatformReservation, $this>
+     */
+    public function platformReservations(): HasMany
+    {
+        return $this->hasMany(PlatformReservation::class);
+    }
+
+    /**
+     * Get CoverManager reservations for this venue.
+     *
+     * @return HasMany<PlatformReservation, $this>
+     */
+    public function coverManagerReservations(): HasMany
+    {
+        return $this->platformReservations()->where('platform_type', 'covermanager');
+    }
+
+    /**
+     * Get Restoo reservations for this venue.
+     *
+     * @return HasMany<PlatformReservation, $this>
+     */
+    public function restooReservations(): HasMany
+    {
+        return $this->platformReservations()->where('platform_type', 'restoo');
+    }
+
+    /**
+     * @return HasOne<VenueOnboarding, $this>
+     */
+    public function venueOnboarding(): HasOne
+    {
+        return $this->hasOne(VenueOnboarding::class, 'venue_group_id', 'venue_group_id')
+            ->orWhere(function ($query) {
+                $query->where('company_name', $this->name);
+            });
     }
 }

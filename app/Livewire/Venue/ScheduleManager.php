@@ -12,6 +12,7 @@ use Filament\Notifications\Notification;
 use Illuminate\Contracts\Database\Query\Builder;
 use Illuminate\Support\Facades\Log;
 use Livewire\Component;
+use Throwable;
 
 class ScheduleManager extends Component
 {
@@ -83,10 +84,10 @@ class ScheduleManager extends Component
             if (! $this->selectedDate) {
                 $today = now($timezone);
 
-                // If venue is closed today, find the next open day
+                // If a venue is closed today, find the next open day
                 $dayOfWeek = strtolower($today->format('l'));
                 if ($this->venue->open_days[$dayOfWeek] === 'closed') {
-                    // Check next 7 days for an open day
+                    // Check the next 7 days for an open day
                     for ($i = 1; $i <= 7; $i++) {
                         $nextDay = $today->copy()->addDays($i);
                         $nextDayOfWeek = strtolower($nextDay->format('l'));
@@ -103,7 +104,7 @@ class ScheduleManager extends Component
             // Load the schedules for the selected date
             $this->handleDateSelection($this->selectedDate);
         } else {
-            // Clear calendar data when switching to template view
+            // Clear calendar data when switching to the template view
             $this->calendarSchedules = [];
         }
     }
@@ -179,6 +180,9 @@ class ScheduleManager extends Component
         }
     }
 
+    /**
+     * @throws Exception
+     */
     public function saveTemplate(): void
     {
         try {
@@ -366,7 +370,7 @@ class ScheduleManager extends Component
                 if ($this->editingSlot['size'] === '*') {
                     // Bulk edit for all party sizes
                     $templates = $this->venue->scheduleTemplates()
-                        ->where('day_of_week', $this->editingSlot['day'])
+                        ->where('day_of_week', strtolower($this->editingSlot['day']))
                         ->where('start_time', $this->editingSlot['time'])
                         ->get();
 
@@ -401,8 +405,8 @@ class ScheduleManager extends Component
                         ];
                     }
                 } else {
-                    $template = $this->venue->scheduleTemplates()
-                        ->where('day_of_week', $this->editingSlot['day'])
+                    $template = $this->venue->scheduleTemplates
+                        ->where('day_of_week', strtolower($this->editingSlot['day']))
                         ->where('start_time', $this->editingSlot['time'])
                         ->where('party_size', $this->editingSlot['size'])
                         ->first();
@@ -495,7 +499,7 @@ class ScheduleManager extends Component
                         $time = $slot['time'];
 
                         $template = $this->venue->scheduleTemplates()
-                            ->where('day_of_week', $this->editingSlot['day'])
+                            ->where('day_of_week', strtolower($this->editingSlot['day']))
                             ->where('start_time', $time)
                             ->where('party_size', $this->editingSlot['size'])
                             ->first();
@@ -548,6 +552,7 @@ class ScheduleManager extends Component
                         ->success()
                         ->send();
 
+                    $this->handleDateSelection($this->selectedDate);
                 } else {
                     // Template mode (original logic remains for batch updates across templates)
                     foreach ($this->timeSlots as $slot) {
@@ -596,7 +601,7 @@ class ScheduleManager extends Component
 
             $this->closeEditModal();
 
-        } catch (Exception $e) {
+        } catch (Exception|Throwable $e) {
             Log::error('Error saving party size schedule', [
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
@@ -611,6 +616,9 @@ class ScheduleManager extends Component
         }
     }
 
+    /**
+     * @throws Exception
+     */
     protected function saveOverride(ScheduleTemplate $template): void
     {
         try {
@@ -817,7 +825,7 @@ class ScheduleManager extends Component
             ->where('booking_date', $date)
             ->get();
 
-        // Group templates and overrides for easier lookup
+        // Group templates and overrides for an easier lookup
         $groupedTemplates = $templates->groupBy(fn ($template) => $template->start_time.'|'.$template->party_size);
 
         $groupedOverrides = $overrides->groupBy('schedule_template_id');
@@ -833,7 +841,7 @@ class ScheduleManager extends Component
                     continue;
                 }
 
-                // Find template for this time and party size
+                // Find a template for this time and party size
                 $template = $groupedTemplates->get($slot['time'].'|'.$size)?->first();
                 $override = null;
 
@@ -1313,7 +1321,7 @@ class ScheduleManager extends Component
 
             // Create overrides for each template setting price_per_head only for non-prime slots
             foreach ($templates as $template) {
-                // Check if slot is prime or has an override already
+                // Check if the slot is prime or has an override already
                 $override = VenueTimeSlot::query()
                     ->where('schedule_template_id', $template->id)
                     ->where('booking_date', $this->selectedDate)
@@ -1321,7 +1329,7 @@ class ScheduleManager extends Component
 
                 $isPrime = $override?->prime_time ?? $template->prime_time;
 
-                // Only update if slot is not prime
+                // Only update if the slot is not prime
                 if (! $isPrime) {
                     // If override exists, just update price_per_head
                     if ($override) {

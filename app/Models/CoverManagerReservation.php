@@ -8,9 +8,6 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Facades\Log;
 
-/**
- * @mixin IdeHelperCoverManagerReservation
- */
 class CoverManagerReservation extends Model
 {
     /**
@@ -60,25 +57,105 @@ class CoverManagerReservation extends Model
      */
     public static function createFromBooking(Booking $booking): ?self
     {
-        $venue = $booking->scheduleTemplate->venue;
+        $venue = $booking->schedule->venue;
 
         if (! $venue->usesCoverManager()) {
             return null;
         }
 
-        // Create a new CoverManager reservation
-        return self::query()->create([
+        $coverManagerService = app(CoverManagerService::class);
+
+        if (! $coverManagerService) {
+            return null;
+        }
+
+        // Get restaurant ID from venue platform configuration
+        $platform = $venue->getPlatform('covermanager');
+
+        if (! $platform || ! $platform->is_enabled) {
+            Log::error("CoverManager platform not enabled for venue {$venue->id}");
+
+            return null;
+        }
+
+        $restaurantId = $platform->getConfig('restaurant_id');
+
+        if (! $restaurantId) {
+            Log::error("Missing CoverManager restaurant ID for venue {$venue->id}");
+
+            return null;
+        }
+
+        // Format data for CoverManager API
+        $bookingData = [
+            'name' => $booking->guest_name,
+            'email' => $booking->guest_email,
+            'phone' => $booking->guest_phone,
+            'date' => $booking->booking_at->format('Y-m-d'),
+            'time' => $booking->booking_at->format('H:i:s'),
+            'size' => $booking->guest_count,
+            'notes' => $booking->notes,
+        ];
+
+        // Call the CoverManager API first
+        $response = $coverManagerService->createReservationRaw($restaurantId, $bookingData);
+
+        if (! $response || ! isset($response['id_reserv'])) {
+            $errorMessage = 'Unknown error';
+
+            if ($response && isset($response['status'])) {
+                $errorMessage = $response['status'];
+            } elseif ($response && isset($response['error'])) {
+                $errorMessage = $response['error'];
+            } elseif (! $response) {
+                $errorMessage = 'No response from CoverManager API';
+            }
+
+            Log::error("CoverManager create reservation failed for booking {$booking->id} at {$venue->name}: {$errorMessage}", [
+                'booking_id' => $booking->id,
+                'venue_id' => $venue->id,
+                'venue_name' => $venue->name,
+                'restaurant_id' => $restaurantId,
+                'booking_data' => $bookingData,
+                'api_response' => $response,
+                'error_summary' => $errorMessage,
+            ]);
+
+            return null;
+        }
+
+        // Only create the database record after successful API call
+        $reservation = self::query()->create([
             'venue_id' => $venue->id,
             'booking_id' => $booking->id,
-            'reservation_date' => $booking->booking_date,
-            'reservation_time' => $booking->scheduleTemplate->start_time,
-            'party_size' => $booking->party_size,
-            'customer_name' => $booking->customer_name,
-            'customer_email' => $booking->customer_email,
-            'customer_phone' => $booking->customer_phone,
+            'covermanager_reservation_id' => $response['id_reserv'],
+            'covermanager_status' => $response['status'] ?? 'unknown',
+            'reservation_date' => $booking->booking_at,
+            'reservation_time' => $booking->booking_at->format('H:i:s'),
+            'party_size' => $booking->guest_count,
+            'customer_name' => $booking->guest_name,
+            'customer_email' => $booking->guest_email,
+            'customer_phone' => $booking->guest_phone,
             'notes' => $booking->notes,
-            'synced_to_covermanager' => false,
+            'covermanager_response' => $response,
+            'synced_to_covermanager' => true,
+            'last_synced_at' => Carbon::now(),
         ]);
+
+        Log::info("CoverManager create reservation successful for booking {$booking->id} at {$venue->name}", [
+            'booking_id' => $booking->id,
+            'venue_id' => $venue->id,
+            'venue_name' => $venue->name,
+            'restaurant_id' => $restaurantId,
+            'covermanager_reservation_id' => $response['id_reserv'],
+            'reservation_date' => $booking->booking_at->format('Y-m-d'),
+            'reservation_time' => $booking->booking_at->format('H:i'),
+            'party_size' => $booking->guest_count,
+            'customer_name' => $booking->guest_name,
+            'status' => $response['status'] ?? 'unknown',
+        ]);
+
+        return $reservation;
     }
 
     /**
@@ -86,6 +163,11 @@ class CoverManagerReservation extends Model
      */
     public function syncToCoverManager(): bool
     {
+        // If already synced, return true
+        if ($this->synced_to_covermanager && $this->covermanager_reservation_id) {
+            return true;
+        }
+
         if (! $this->venue->usesCoverManager()) {
             return false;
         }
@@ -96,8 +178,16 @@ class CoverManagerReservation extends Model
             return false;
         }
 
-        // Get restaurant ID from venue
-        $restaurantId = $this->venue->covermanager_id;
+        // Get restaurant ID from venue platform configuration
+        $platform = $this->venue->getPlatform('covermanager');
+
+        if (! $platform || ! $platform->is_enabled) {
+            Log::error("CoverManager platform not enabled for venue {$this->venue->id}");
+
+            return false;
+        }
+
+        $restaurantId = $platform->getConfig('restaurant_id');
 
         if (! $restaurantId) {
             Log::error("Missing CoverManager restaurant ID for venue {$this->venue->id}");
@@ -117,19 +207,52 @@ class CoverManagerReservation extends Model
         ];
 
         // Call the CoverManager API
-        $response = $coverManagerService->createReservation($restaurantId, $bookingData);
+        $response = $coverManagerService->createReservationRaw($restaurantId, $bookingData);
 
-        if (! $response) {
+        if (! $response || ! isset($response['id_reserv'])) {
+            $errorMessage = 'Unknown error';
+
+            if ($response && isset($response['status'])) {
+                $errorMessage = $response['status'];
+            } elseif ($response && isset($response['error'])) {
+                $errorMessage = $response['error'];
+            } elseif (! $response) {
+                $errorMessage = 'No response from CoverManager API';
+            }
+
+            Log::error("CoverManager sync reservation failed for reservation {$this->id} at {$this->venue->name}: {$errorMessage}", [
+                'reservation_id' => $this->id,
+                'venue_id' => $this->venue->id,
+                'venue_name' => $this->venue->name,
+                'restaurant_id' => $restaurantId,
+                'booking_data' => $bookingData,
+                'api_response' => $response,
+                'error_summary' => $errorMessage,
+            ]);
+
             return false;
         }
 
         // Update the CoverManager reservation record
         $this->update([
-            'covermanager_reservation_id' => $response['id'] ?? null,
+            'covermanager_reservation_id' => $response['id_reserv'],
             'covermanager_status' => $response['status'] ?? 'unknown',
             'covermanager_response' => $response,
             'synced_to_covermanager' => true,
             'last_synced_at' => Carbon::now(),
+        ]);
+
+        Log::info("CoverManager sync reservation successful for reservation {$this->id} at {$this->venue->name}", [
+            'reservation_id' => $this->id,
+            'venue_id' => $this->venue->id,
+            'venue_name' => $this->venue->name,
+            'restaurant_id' => $restaurantId,
+            'covermanager_reservation_id' => $response['id_reserv'],
+            'reservation_date' => $this->reservation_date->format('Y-m-d'),
+            'reservation_time' => $this->reservation_time,
+            'party_size' => $this->party_size,
+            'customer_name' => $this->customer_name,
+            'status' => $response['status'] ?? 'unknown',
         ]);
 
         return true;
@@ -155,8 +278,16 @@ class CoverManagerReservation extends Model
             return false;
         }
 
-        // Get restaurant ID from venue
-        $restaurantId = $this->venue->covermanager_id;
+        // Get restaurant ID from venue platform configuration
+        $platform = $this->venue->getPlatform('covermanager');
+
+        if (! $platform || ! $platform->is_enabled) {
+            Log::error("CoverManager platform not enabled for venue {$this->venue->id}");
+
+            return false;
+        }
+
+        $restaurantId = $platform->getConfig('restaurant_id');
 
         if (! $restaurantId) {
             Log::error("Missing CoverManager restaurant ID for venue {$this->venue->id}");
@@ -165,13 +296,31 @@ class CoverManagerReservation extends Model
         }
 
         // Call the CoverManager API to cancel the reservation
-        $result = $coverManagerService->cancelReservation($restaurantId, $this->covermanager_reservation_id);
+        $result = $coverManagerService->cancelReservationRaw($restaurantId, $this->covermanager_reservation_id);
 
         if ($result) {
             // Update the CoverManager reservation record
             $this->update([
                 'covermanager_status' => 'cancelled',
                 'last_synced_at' => Carbon::now(),
+            ]);
+
+            Log::info("CoverManager cancel reservation successful for reservation {$this->id} at {$this->venue->name}", [
+                'reservation_id' => $this->id,
+                'venue_id' => $this->venue->id,
+                'venue_name' => $this->venue->name,
+                'restaurant_id' => $restaurantId,
+                'covermanager_reservation_id' => $this->covermanager_reservation_id,
+                'customer_name' => $this->customer_name,
+            ]);
+        } else {
+            Log::error("CoverManager cancel reservation failed for reservation {$this->id} at {$this->venue->name}", [
+                'reservation_id' => $this->id,
+                'venue_id' => $this->venue->id,
+                'venue_name' => $this->venue->name,
+                'restaurant_id' => $restaurantId,
+                'covermanager_reservation_id' => $this->covermanager_reservation_id,
+                'customer_name' => $this->customer_name,
             ]);
         }
 

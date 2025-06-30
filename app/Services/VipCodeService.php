@@ -2,16 +2,29 @@
 
 namespace App\Services;
 
-use Laravel\Sanctum\PersonalAccessToken;
-use Exception;
 use App\Models\User;
 use App\Models\VipCode;
 use App\Models\VipSession;
 use Illuminate\Support\Facades\Log;
+use Laravel\Sanctum\PersonalAccessToken;
 
 class VipCodeService
 {
-    private const string DEMO_USER_EMAIL = 'demo@primavip.co';
+    /**
+     * Get the configured fallback VIP code
+     */
+    private function getFallbackCode(): ?string
+    {
+        return config('app.vip.fallback_code');
+    }
+
+    /**
+     * Get the configured session duration in hours
+     */
+    private function getSessionDurationHours(): int
+    {
+        return config('app.vip.session_duration_hours', 24);
+    }
 
     public function findByCode(string $code): ?VipCode
     {
@@ -22,7 +35,7 @@ class VipCodeService
     }
 
     /**
-     * Create a VIP session and return Sanctum token
+     * Create a VIP session and return a Sanctum token
      */
     public function createVipSession(string $code): ?array
     {
@@ -36,22 +49,40 @@ class VipCodeService
                 'user_agent' => request()->userAgent(),
             ]);
 
-            // Return demo session for fallback
-            return $this->createDemoSession();
+            // Try fallback code if configured
+            $fallbackCode = $this->getFallbackCode();
+            if ($fallbackCode) {
+                $vipCode = $this->findByCode($fallbackCode);
+
+                if ($vipCode) {
+                    // Log that we're using fallback code
+                    $this->logVipSessionEvent('vip_session_fallback_code_used', [
+                        'original_code' => $code,
+                        'fallback_code' => $fallbackCode,
+                        'vip_code_id' => $vipCode->id,
+                        'ip_address' => request()->ip(),
+                    ]);
+                }
+            }
+
+            if (! $vipCode) {
+                return null;
+            }
         }
 
         // Clean up expired sessions for this VIP code
         $vipCode->cleanExpiredSessions();
 
-        // Create Sanctum token for the concierge user
+        // Create a Sanctum token for the concierge user
         $user = $vipCode->concierge->user;
-        $token = $user->createToken('vip-session-'.$code, ['*'], now()->addHours(24));
+        $sessionDuration = $this->getSessionDurationHours();
+        $token = $user->createToken('vip-session-'.$code, ['*'], now()->addHours($sessionDuration));
 
         // Store session tracking info
         VipSession::query()->create([
             'vip_code_id' => $vipCode->id,
             'token' => hash('sha256', (string) $token->plainTextToken), // Store hash for tracking
-            'expires_at' => now()->addHours(24),
+            'expires_at' => now()->addHours($sessionDuration),
             'sanctum_token_id' => $token->accessToken->id, // Link to Sanctum token
         ]);
 
@@ -67,7 +98,7 @@ class VipCodeService
 
         return [
             'token' => $token->plainTextToken, // Return the actual Sanctum token
-            'expires_at' => now()->addHours(24)->toISOString(),
+            'expires_at' => now()->addHours($sessionDuration)->toISOString(),
             'vip_code' => $vipCode,
             'is_demo' => false,
         ];
@@ -97,7 +128,7 @@ class VipCodeService
             ->first();
 
         if (! $session) {
-            // This might be a demo token or other non-VIP token
+            // This might be a demo token or another non-VIP token
             return null;
         }
 
@@ -117,36 +148,6 @@ class VipCodeService
     }
 
     /**
-     * Create demo session for fallback behavior (uses demo user's Sanctum token)
-     */
-    public function createDemoSession(): array
-    {
-        // Get or create demo user
-        $demoUser = User::query()->where('email', self::DEMO_USER_EMAIL)->first();
-
-        throw_unless($demoUser, new Exception('Demo user not found. Please run: php artisan vip:setup-demo-user'));
-
-        // Create Sanctum token for demo user
-        $token = $demoUser->createToken('demo-session-'.time(), ['*'], now()->addHours(24));
-
-        // Log demo session creation for analytics
-        $this->logVipSessionEvent('vip_demo_session_created', [
-            'demo_user_id' => $demoUser->id,
-            'sanctum_token_id' => $token->accessToken->id,
-            'ip_address' => request()->ip(),
-            'user_agent' => request()->userAgent(),
-        ]);
-
-        return [
-            'token' => $token->plainTextToken, // Return actual Sanctum token
-            'expires_at' => now()->addHours(24)->toISOString(),
-            'vip_code' => null,
-            'is_demo' => true,
-            'demo_message' => 'You are viewing in demo mode. Some features may be limited.',
-        ];
-    }
-
-    /**
      * Log VIP session events for analytics
      */
     private function logVipSessionEvent(string $event, array $data = []): void
@@ -158,12 +159,12 @@ class VipCodeService
             ]))
             ->log($event);
 
-        // Also log to application log for debugging
+        // Also log to the application log for debugging
         Log::info("VIP Session Event: {$event}", $data);
     }
 
     /**
-     * Clean up all expired sessions (can be run via scheduled task)
+     * Clean up all expired sessions (can be run via a scheduled task)
      */
     public function cleanupExpiredSessions(): int
     {

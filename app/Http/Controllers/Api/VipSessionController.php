@@ -2,12 +2,21 @@
 
 namespace App\Http\Controllers\Api;
 
-use App\Models\VipSession;
 use App\Http\Controllers\Controller;
+use App\Models\VipSession;
+use App\OpenApi\RequestBodies\VipSessionCreateRequestBody;
+use App\OpenApi\RequestBodies\VipSessionValidateRequestBody;
+use App\OpenApi\Responses\VipSessionAnalyticsResponse;
+use App\OpenApi\Responses\VipSessionCreateResponse;
+use App\OpenApi\Responses\VipSessionValidateResponse;
 use App\Services\VipCodeService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Vyuldashev\LaravelOpenApi\Attributes as OpenApi;
+use Vyuldashev\LaravelOpenApi\Attributes\RequestBody;
+use Vyuldashev\LaravelOpenApi\Attributes\Response as OpenApiResponse;
 
+// #[OpenApi\PathItem]
 class VipSessionController extends Controller
 {
     public function __construct(
@@ -15,8 +24,13 @@ class VipSessionController extends Controller
     ) {}
 
     /**
-     * Create a VIP session from a VIP code
+     * Create a VIP session from a VIP code.
      */
+    #[OpenApi\Operation(
+        tags: ['VIP Sessions'],
+    )]
+    #[RequestBody(factory: VipSessionCreateRequestBody::class)]
+    #[OpenApiResponse(factory: VipSessionCreateResponse::class)]
     public function createSession(Request $request): JsonResponse
     {
         $request->validate([
@@ -40,7 +54,7 @@ class VipSessionController extends Controller
             ],
         ];
 
-        // Add demo message if in demo mode
+        // Add a demo message if in demo mode
         if ($sessionData['is_demo']) {
             $response['data']['demo_message'] = $sessionData['demo_message'];
         } else {
@@ -60,8 +74,13 @@ class VipSessionController extends Controller
     }
 
     /**
-     * Validate a VIP session token
+     * Validate a VIP session token.
      */
+    #[OpenApi\Operation(
+        tags: ['VIP Sessions'],
+    )]
+    #[RequestBody(factory: VipSessionValidateRequestBody::class)]
+    #[OpenApiResponse(factory: VipSessionValidateResponse::class)]
     public function validateSession(Request $request): JsonResponse
     {
         $request->validate([
@@ -105,10 +124,15 @@ class VipSessionController extends Controller
     /**
      * Get session analytics (admin only)
      */
+    #[OpenApi\Operation(
+        tags: ['VIP Sessions'],
+        security: 'BearerTokenSecurityScheme'
+    )]
+    #[OpenApiResponse(factory: VipSessionAnalyticsResponse::class)]
     public function getSessionAnalytics(Request $request): JsonResponse
     {
         // This would require admin authentication
-        // For now, just return basic stats
+        // For now, return basic stats
 
         $totalSessions = VipSession::query()->count();
         $activeSessions = VipSession::query()->where('expires_at', '>', now())->count();

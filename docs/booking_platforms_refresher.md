@@ -151,32 +151,38 @@ Http::withHeaders([
 
 ## 🗄️ Database Models
 
-### CoverManagerReservation
+### PlatformReservation (Unified Model) ✅ **NEW ARCHITECTURE**
 
-**Location:** `app/Models/CoverManagerReservation.php`
+**Location:** `app/Models/PlatformReservation.php`
 
-Tracks CoverManager reservations with methods:
+**Unified reservation model** that handles all booking platforms through a single table with platform-specific data stored in JSON.
 
-- `createFromBooking(Booking $booking)` - Creates reservation record
-- `syncToCoverManager()` - Syncs to CoverManager API
-- `cancelInCoverManager()` - Cancels via CoverManager API
+**Core Fields:**
 
-### RestooReservation  
+- `venue_id` - Foreign key to venue
+- `booking_id` - Foreign key to booking  
+- `platform_type` - Platform identifier ('covermanager', 'restoo', etc.)
+- `platform_reservation_id` - External platform's reservation ID
+- `platform_status` - Status from external platform
+- `synced_to_platform` - Whether synced successfully
+- `last_synced_at` - Last sync timestamp
+- `platform_data` - JSON field for platform-specific data
 
-**Location:** `app/Models/RestooReservation.php`
+**Unified Methods:**
 
-Similar structure to CoverManagerReservation:
+- `createFromBooking(Booking $booking, string $platformType)` - Creates reservation for any platform
+- `syncToPlatform()` - Syncs to appropriate platform based on platform_type
+- `cancelInPlatform()` - Cancels in appropriate platform
 
-- `createFromBooking(Booking $booking)` - Creates reservation record
-- `syncToRestoo()` - Syncs to Restoo API
-- `cancelInRestoo()` - Cancels via Restoo API ✅ **UPDATED**
+**Platform-Specific Data Storage:**
 
-**Important:** Uses correct booking property mappings:
+- **CoverManager:** `reservation_date`, `reservation_time`, `customer_name`, `party_size`, etc.
+- **Restoo:** `reservation_datetime`, `customer_name`, `party_size`, etc.
+- **Future platforms:** Can store any platform-specific fields
 
-- `booking_at` (not `booking_date`)
-- `guest_count` (not `party_size`)
-- `guest_name` (not `customer_name`)
-- `booking.venue` (not `booking.scheduleTemplate.venue`)
+### Legacy Models (Deprecated)
+
+**⚠️ DEPRECATED:** `CoverManagerReservation` and `RestooReservation` models are deprecated and will be removed after production migration. All new code should use `PlatformReservation`.
 
 ## 🎯 Venue Integration
 
@@ -194,6 +200,17 @@ public function hasPlatform(string $platformType): bool
 
 // Get platform service instance
 public function getBookingPlatform(): ?BookingPlatformInterface
+```
+
+### Unified Reservation Relationships ✅ **NEW**
+
+```php
+// Get all platform reservations
+public function platformReservations(): HasMany
+
+// Get platform-specific reservations (backward compatible)
+public function coverManagerReservations(): HasMany  // Filters by platform_type
+public function restooReservations(): HasMany        // Filters by platform_type
 ```
 
 ### Backward Compatibility Methods
@@ -337,13 +354,56 @@ if ($venue->hasPlatform('covermanager')) {
 }
 ```
 
-### Creating reservations
+### Creating reservations with Unified Model ✅ **NEW**
 
 ```php
-// This automatically syncs to all enabled platforms
+// Create reservation for specific platform
+$reservation = PlatformReservation::createFromBooking($booking, 'covermanager');
+$reservation = PlatformReservation::createFromBooking($booking, 'restoo');
+
+// Sync existing reservation to platform
+$reservation->syncToPlatform();
+
+// Cancel reservation in platform
+$reservation->cancelInPlatform();
+
+// This automatically syncs to all enabled platforms (uses unified model internally)
 $booking = Booking::create([...]);
 $booking->syncToBookingPlatforms();
 ```
+
+## 📦 Database Migration (June 2025)
+
+### Unified Platform Reservations Migration
+
+**Migration:** `database/migrations/2025_06_26_165751_create_platform_reservations_table.php`
+
+Creates the new unified `platform_reservations` table with:
+
+- Core reservation fields (venue_id, booking_id, platform_type, etc.)
+- JSON platform_data column for platform-specific fields
+- Proper indexes for performance
+
+**Data Migration:** `database/migrations/2025_06_26_170117_migrate_existing_reservations_to_platform_reservations.php`
+
+Migrates existing data from:
+
+- `cover_manager_reservations` → `platform_reservations` (platform_type: 'covermanager')
+- `restoo_reservations` → `platform_reservations` (platform_type: 'restoo')
+
+**Post-Migration Cleanup:**
+After production migration and verification, these files can be deleted:
+
+- `app/Models/CoverManagerReservation.php`
+- `app/Models/RestooReservation.php`
+
+### Updated Architecture Benefits
+
+✅ **Single Source of Truth:** All reservations in one table  
+✅ **Easier Maintenance:** One set of methods for all platforms  
+✅ **Better Scalability:** Adding new platforms requires minimal changes  
+✅ **Unified Reporting:** Query across all platforms easily  
+✅ **Type Safety:** Consistent interface for all operations  
 
 ## 🚨 Important Notes
 
@@ -396,21 +456,23 @@ Restoo now supports these cancel reasons:
 - `app/Contracts/BookingPlatformInterface.php` - Interface contract
 - `app/Factories/BookingPlatformFactory.php` - Service factory
 - `app/Models/VenuePlatform.php` - Platform configuration model
+- `app/Models/PlatformReservation.php` - **Unified reservation model** ✅ **NEW**
 
 ### Services
 
 - `app/Services/CoverManagerService.php` - CoverManager API integration
 - `app/Services/RestooService.php` - Restoo API integration ✅ **UPDATED**
 
-### Models
+### Models (Updated Architecture)
 
-- `app/Models/CoverManagerReservation.php` - CoverManager reservations
-- `app/Models/RestooReservation.php` - Restoo reservations
+- `app/Models/PlatformReservation.php` - **Unified reservations for all platforms** ✅ **NEW**
+- ~~`app/Models/CoverManagerReservation.php`~~ - **DEPRECATED** (will be removed post-migration)
+- ~~`app/Models/RestooReservation.php`~~ - **DEPRECATED** (will be removed post-migration)
 
 ### Event Handling
 
-- `app/Listeners/BookingPlatformSyncListener.php` - Multi-platform sync
-- `app/Listeners/BookingPlatformCancellationListener.php` - Multi-platform cancellation ✅ **UPDATED**
+- `app/Listeners/BookingPlatformSyncListener.php` - Multi-platform sync ✅ **UPDATED for unified model**
+- `app/Listeners/BookingPlatformCancellationListener.php` - Multi-platform cancellation ✅ **UPDATED for unified model**
 
 ### API Controllers
 

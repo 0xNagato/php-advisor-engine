@@ -88,7 +88,6 @@ return [
     'covermanager' => [
         'api_key' => env('COVERMANAGER_API_KEY'),
         'base_url' => env('COVERMANAGER_BASE_URL'),
-        'environment' => env('COVERMANAGER_ENVIRONMENT', 'beta'),
     ],
 
     'restoo' => [

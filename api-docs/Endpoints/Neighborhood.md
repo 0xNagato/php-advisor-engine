@@ -8,12 +8,11 @@ This endpoint provides functionality for retrieving a list of neighborhoods, wit
 ### Request
 - **Method:** GET
 - **URL:** `/api/neighborhoods`
-- **Authentication:** Required
+- **Authentication:** Not required (public endpoint)
 
 #### Headers
 | Header | Value | Required | Description |
 |--------|-------|----------|-------------|
-| Authorization | Bearer {token} | Yes | Authentication token |
 | Accept | application/json | Yes | Specifies the expected response format |
 
 #### Parameters
@@ -25,7 +24,6 @@ This endpoint provides functionality for retrieving a list of neighborhoods, wit
 ```bash
 curl -X GET \
   https://api.example.com/api/neighborhoods \
-  -H 'Authorization: Bearer your-api-token' \
   -H 'Accept: application/json'
 ```
 
@@ -33,7 +31,6 @@ curl -X GET \
 ```bash
 curl -X GET \
   https://api.example.com/api/neighborhoods?region=miami \
-  -H 'Authorization: Bearer your-api-token' \
   -H 'Accept: application/json'
 ```
 
@@ -55,15 +52,6 @@ curl -X GET \
 ```
 
 The response is a key-value object where the keys are neighborhood IDs and the values are neighborhood names.
-
-#### Error Responses
-
-##### 401 Unauthorized
-```json
-{
-  "message": "Unauthenticated."
-}
-```
 
 ## Notes
 - The endpoint returns all neighborhoods if no region filter is provided

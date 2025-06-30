@@ -5,22 +5,18 @@ namespace App\Filament\Resources\Venue;
 use App\Filament\Resources\Venue\BookingPlatformsResource\Pages\CreatePlatform;
 use App\Filament\Resources\Venue\BookingPlatformsResource\Pages\EditPlatform;
 use App\Filament\Resources\Venue\BookingPlatformsResource\Pages\ListPlatforms;
-use App\Models\Venue;
-use Filament\Notifications\Notification;
+use App\Filament\Resources\Venue\BookingPlatformsResource\Pages\ViewReservations;
+use App\Models\VenuePlatform;
 use Filament\Resources\Resource;
-use Filament\Tables;
 use Filament\Tables\Actions\EditAction;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Support\Facades\Log;
-use Throwable;
 
 class BookingPlatformsResource extends Resource
 {
-    protected static ?string $model = Venue::class;
+    protected static ?string $model = VenuePlatform::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
 
@@ -37,35 +33,48 @@ class BookingPlatformsResource extends Resource
 
     protected static ?string $pluralModelLabel = 'Platform Connections';
 
-    public static function getEloquentQuery(): Builder
+    public static function shouldRegisterNavigation(): bool
     {
-        return parent::getEloquentQuery()
-            ->whereHas('platforms');
+        return auth()->user()->hasActiveRole('super_admin');
+    }
+
+    public static function canAccess(): bool
+    {
+        return auth()->user()->hasActiveRole('super_admin');
     }
 
     public static function table(Table $table): Table
     {
         return $table
+            ->modifyQueryUsing(fn ($query) => $query->with('venue'))
             ->columns([
-                TextColumn::make('name')
+                TextColumn::make('venue.name')
                     ->label('Venue')
                     ->searchable()
                     ->sortable(),
-                TextColumn::make('platforms.platform_type')
+                TextColumn::make('platform_type')
                     ->label('Connected Platform')
                     ->formatStateUsing(fn (string $state): string => match ($state) {
                         'covermanager' => 'CoverManager',
                         'restoo' => 'Restoo',
-                        default => $state,
-                    }),
-                IconColumn::make('platforms.is_enabled')
+                        default => ucfirst($state),
+                    })
+                    ->sortable(),
+                IconColumn::make('is_enabled')
                     ->label('Connection Active')
                     ->boolean()
                     ->sortable(),
-                TextColumn::make('platforms.last_synced_at')
-                    ->label('Last Sync')
-                    ->dateTime()
-                    ->sortable(),
+                TextColumn::make('reservations_count')
+                    ->label('Reservations')
+                    ->getStateUsing(function (VenuePlatform $record): int {
+                        return $record->venue->platformReservations()
+                            ->where('platform_type', $record->platform_type)
+                            ->count();
+                    })
+                    ->sortable(false)
+                    ->alignCenter()
+                    ->url(fn (VenuePlatform $record): string => static::getUrl('view-reservations', ['record' => $record->id]))
+                    ->color('primary'),
             ])
             ->filters([
                 SelectFilter::make('platform_type')
@@ -73,71 +82,19 @@ class BookingPlatformsResource extends Resource
                     ->options([
                         'covermanager' => 'CoverManager',
                         'restoo' => 'Restoo',
-                    ])
-                    ->query(function (Builder $query, array $data) {
-                        if (isset($data['value'])) {
-                            $query->whereHas('platforms', function ($query) use ($data) {
-                                $query->where('platform_type', $data['value']);
-                            });
-                        }
-                    }),
+                    ]),
                 SelectFilter::make('is_enabled')
                     ->label('Connection Status')
                     ->options([
                         '1' => 'Active',
                         '0' => 'Inactive',
-                    ])
-                    ->query(function (Builder $query, array $data) {
-                        if (isset($data['value'])) {
-                            $query->whereHas('platforms', function ($query) use ($data) {
-                                $query->where('is_enabled', $data['value']);
-                            });
-                        }
-                    }),
+                    ]),
             ])
             ->actions([
                 EditAction::make()
                     ->label('Edit Connection'),
-                Tables\Actions\Action::make('syncCoverManager')
-                    ->label('Sync with Platform')
-                    ->icon('heroicon-o-arrow-path')
-                    ->action(function (Venue $record) {
-                        try {
-                            // For backward compatibility, we'll use the old method for now
-                            $result = $record->syncCoverManagerAvailability();
-
-                            if ($result) {
-                                Notification::make()
-                                    ->title('Sync complete')
-                                    ->body('Successfully synced with platform')
-                                    ->success()
-                                    ->send();
-
-                                return;
-                            }
-
-                            Notification::make()
-                                ->title('Sync failed')
-                                ->body('Check logs for details')
-                                ->danger()
-                                ->send();
-                        } catch (Throwable $e) {
-                            Log::error('Manual platform sync failed', [
-                                'error' => $e->getMessage(),
-                                'venue_id' => $record->id,
-                            ]);
-
-                            Notification::make()
-                                ->title('Sync failed')
-                                ->body($e->getMessage())
-                                ->danger()
-                                ->send();
-                        }
-                    })
-                    ->visible(function (Venue $record) {
-                        return $record->hasPlatform('covermanager');
-                    }),
-            ]);
+            ])
+            ->defaultSort('venue.name');
     }
 
     public static function getPages(): array
@@ -146,6 +103,7 @@ class BookingPlatformsResource extends Resource
             'index' => ListPlatforms::route('/'),
             'create' => CreatePlatform::route('/create'),
             'edit' => EditPlatform::route('/{record}/edit'),
+            'view-reservations' => ViewReservations::route('/{record}/reservations'),
         ];
     }
 }

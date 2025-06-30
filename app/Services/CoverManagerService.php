@@ -31,19 +31,11 @@ class CoverManagerService implements BookingPlatformInterface
 
     protected string $apiKey;
 
-    protected string $environment;
-
     public function __construct()
     {
         $this->baseUrl = Config::get('services.covermanager.base_url');
         $this->apiKey = Config::get('services.covermanager.api_key');
-        $this->environment = Config::get('services.covermanager.environment', 'beta');
 
-        // Log the configuration for debugging
-        Log::debug('CoverManager service initialized', [
-            'baseUrl' => $this->baseUrl,
-            'environment' => $this->environment,
-        ]);
     }
 
     /**
@@ -123,7 +115,7 @@ class CoverManagerService implements BookingPlatformInterface
             'email' => $booking->guest_email,
             'phone' => $booking->guest_phone,
             'date' => $booking->booking_at->format('Y-m-d'),
-            'time' => $scheduleTemplate->start_time,
+            'hour' => $scheduleTemplate->start_time,
             'size' => $booking->guest_count,
             'notes' => $booking->notes ?? '',
         ];
@@ -153,29 +145,6 @@ class CoverManagerService implements BookingPlatformInterface
     }
 
     /**
-     * Test if a restaurant ID is valid
-     * This method can be used directly without requiring a venue
-     *
-     * @param  string  $restaurantId  The CoverManager restaurant ID to test
-     * @return bool Whether the restaurant ID is valid
-     */
-    public function testRestaurantId(string $restaurantId): bool
-    {
-        try {
-            $result = $this->getRestaurantData($restaurantId);
-
-            return ! blank($result);
-        } catch (Throwable $e) {
-            Log::error('CoverManager restaurant ID test failed', [
-                'error' => $e->getMessage(),
-                'restaurantId' => $restaurantId,
-            ]);
-
-            return false;
-        }
-    }
-
-    /**
      * Make a centralized API call with consistent logging and error handling
      *
      * @param  string  $method  HTTP method (GET, POST, etc.)
@@ -201,24 +170,16 @@ class CoverManagerService implements BookingPlatformInterface
                 default => throw new \InvalidArgumentException("Unsupported HTTP method: {$method}")
             };
 
-            // Log the API call details
-            $logData = [
-                'operation' => $operationName ?: $method.' '.$endpoint,
-                'url' => $url,
-                'method' => strtoupper($method),
-                'status' => $response->status(),
-                'response' => $response->json(),
-            ];
-
-            // Add request data to log for POST/PUT requests
-            if (! empty($data)) {
-                $logData['request_data'] = $data;
-            }
-
-            Log::info('CoverManager API Response - '.($operationName ?: 'API Call'), $logData);
-
             if ($response->successful()) {
-                return $response->json();
+                $responseData = $response->json();
+
+                // Include HTTP metadata for error handling
+                if (is_array($responseData)) {
+                    $responseData['_http_status'] = $response->status();
+                    $responseData['_http_successful'] = true;
+                }
+
+                return $responseData;
             }
 
             // Log failed requests
@@ -231,7 +192,14 @@ class CoverManagerService implements BookingPlatformInterface
                 'request_data' => $data,
             ]);
 
-            return null;
+            // Return error information with HTTP status
+            return [
+                '_http_status' => $response->status(),
+                '_http_successful' => false,
+                '_http_error' => $response->body(),
+                'error' => 'HTTP request failed',
+                'resp' => 0, // CoverManager format for errors
+            ];
         } catch (Throwable $e) {
             Log::error('CoverManager API exception', [
                 'operation' => $operationName,
@@ -241,7 +209,14 @@ class CoverManagerService implements BookingPlatformInterface
                 'request_data' => $data,
             ]);
 
-            return null;
+            // Return exception information
+            return [
+                '_http_status' => null,
+                '_http_successful' => false,
+                '_http_error' => $e->getMessage(),
+                'error' => 'API call exception',
+                'resp' => 0, // CoverManager format for errors
+            ];
         }
     }
 
@@ -321,10 +296,13 @@ class CoverManagerService implements BookingPlatformInterface
         $firstName = $nameParts[0] ?? '';
         $lastName = isset($nameParts[1]) ? $nameParts[1] : '';
 
+        // Format time to HH:MM (remove seconds if present)
+        $formattedTime = Carbon::parse($bookingData['hour'])->format('H:i');
+
         $requestData = [
             'restaurant' => $restaurantId,
             'date' => $bookingData['date'],
-            'hour' => $bookingData['time'],
+            'hour' => $formattedTime,
             'people' => (string) $bookingData['size'],
             'first_name' => $firstName,
             'last_name' => $lastName,
@@ -356,14 +334,8 @@ class CoverManagerService implements BookingPlatformInterface
                     'restaurantId' => $restaurantId,
                     'message' => 'API key does not have reservation creation permissions. Contact CoverManager support to enable this feature.',
                 ]);
-            } else {
-                Log::error('CoverManager reservation creation API error', [
-                    'error' => $errorMessage,
-                    'restaurantId' => $restaurantId,
-                    'bookingData' => $bookingData,
-                    'requestData' => $requestData,
-                ]);
             }
+            // Removed duplicate error logging - errors are logged at the PlatformReservation level with more context
 
             return null;
         }
@@ -399,26 +371,13 @@ class CoverManagerService implements BookingPlatformInterface
                     'reservationId' => $reservationId,
                     'message' => 'API key does not have reservation cancellation permissions. Contact CoverManager support to enable this feature.',
                 ]);
-            } else {
-                Log::error('CoverManager reservation cancellation API error', [
-                    'error' => $errorMessage,
-                    'reservationId' => $reservationId,
-                    'requestData' => $requestData,
-                ]);
             }
+            // Removed duplicate error logging - errors are logged at the PlatformReservation level with more context
 
             return false;
         }
 
-        if ($response) {
-            Log::info('CoverManager reservation cancelled successfully', [
-                'reservationId' => $reservationId,
-            ]);
-
-            return true;
-        }
-
-        return false;
+        return $response !== null;
     }
 
     /**
@@ -432,6 +391,21 @@ class CoverManagerService implements BookingPlatformInterface
             operationName: 'Check Credentials'
         );
 
-        return $response !== null;
+        // Check if the response indicates success
+        if (! $response) {
+            return false;
+        }
+
+        // Check for HTTP errors
+        if (isset($response['_http_successful']) && ! $response['_http_successful']) {
+            return false;
+        }
+
+        // Check for CoverManager API errors
+        if (isset($response['resp']) && $response['resp'] === 0) {
+            return false;
+        }
+
+        return true;
     }
 }

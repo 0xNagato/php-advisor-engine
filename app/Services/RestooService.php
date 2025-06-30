@@ -22,11 +22,6 @@ class RestooService implements BookingPlatformInterface
         $this->baseUrl = Config::get('services.restoo.base_url');
         $this->partnerId = Config::get('services.restoo.partner_id', 'prima');
 
-        // Log the configuration for debugging
-        Log::debug('Restoo service initialized', [
-            'baseUrl' => $this->baseUrl,
-            'partnerId' => $this->partnerId,
-        ]);
     }
 
     /**
@@ -84,11 +79,6 @@ class RestooService implements BookingPlatformInterface
      */
     public function createReservation(Venue $venue, Booking $booking): ?array
     {
-        Log::debug('RestooService::createReservation called', [
-            'venue_id' => $venue->id,
-            'booking_id' => $booking->id,
-        ]);
-
         $platform = $venue->getPlatform('restoo');
 
         if (! $platform) {
@@ -117,12 +107,6 @@ class RestooService implements BookingPlatformInterface
         $venueTimezone = $venue->timezone ?? 'UTC';
         $bookingTime->setTimezone($venueTimezone);
 
-        Log::debug('Parsed booking time', [
-            'original' => $booking->booking_at,
-            'parsed' => $bookingTime->toDateTimeString(),
-            'timezone' => $venueTimezone,
-        ]);
-
         // Round to nearest 15 minutes as required by Restoo
         $minutes = $bookingTime->minute;
         $roundedMinutes = round($minutes / 15) * 15;
@@ -140,12 +124,8 @@ class RestooService implements BookingPlatformInterface
             ],
         ];
 
-        Log::debug('Restoo reservation payload', ['payload' => $payload]);
-
         try {
-            Log::debug('About to call createReservationRaw');
             $result = $this->createReservationRaw($apiKey, $account, $payload);
-            Log::debug('createReservationRaw completed', ['result' => $result]);
 
             return $result;
         } catch (Throwable $e) {
@@ -177,90 +157,6 @@ class RestooService implements BookingPlatformInterface
         }
 
         return $this->cancelReservationRaw($apiKey, $account, $externalReservationId);
-    }
-
-    /**
-     * Test if provided API credentials are valid
-     * This method doesn't require a venue and can be used during setup
-     */
-    public function testCredentials(string $apiKey, string $account): bool
-    {
-        return $this->checkCredentialsValid($apiKey, $account);
-    }
-
-    /**
-     * Check if the API credentials are valid (internal implementation)
-     */
-    protected function checkCredentialsValid(string $apiKey, string $account): bool
-    {
-        try {
-            // Use the endpoint we found that works
-            $url = "{$this->baseUrl}/partners/{$this->partnerId}/v3/status";
-
-            // Log the request details
-            Log::debug('Restoo testing credentials', [
-                'url' => $url,
-                'account' => $account,
-                'apiKey' => substr($apiKey, 0, 5).'...',
-            ]);
-
-            // Make API call with credentials
-            $response = Http::withHeaders([
-                'Account' => $account,
-                'Authorization' => "Bearer {$apiKey}",
-                'Content-Type' => 'application/json',
-            ])->get($url);
-
-            Log::debug('Restoo API response', [
-                'status' => $response->status(),
-                'body' => $response->body(),
-            ]);
-
-            // If we get a 200 response, that means the endpoint is accessible
-            // We should check if there's specific error content in the HTML response
-            // that might indicate invalid credentials
-            if ($response->status() === 200) {
-                $body = $response->body();
-
-                // Check if the response body contains error messages related to authentication
-                if (str_contains($body, 'Invalid credentials') ||
-                    str_contains($body, 'Authentication failed') ||
-                    str_contains($body, 'Unauthorized')) {
-                    Log::warning('Restoo credentials appear invalid based on response content', [
-                        'status' => $response->status(),
-                    ]);
-
-                    return false;
-                }
-
-                // For now, assume the credentials are valid if we get a 200 response
-                return true;
-            }
-
-            // If we get a 401 or 403, that specifically means the credentials are invalid
-            if (in_array($response->status(), [401, 403])) {
-                Log::warning('Restoo credentials are invalid', [
-                    'status' => $response->status(),
-                ]);
-
-                return false;
-            }
-
-            // For other response codes, assume there's a configuration issue
-            Log::error('Restoo authentication check failed with unexpected status code', [
-                'status' => $response->status(),
-            ]);
-
-            return false;
-        } catch (Throwable $e) {
-            Log::error('Restoo authentication failed with exception', [
-                'error' => $e->getMessage(),
-                'account' => $account,
-                'trace' => $e->getTraceAsString(),
-            ]);
-
-            return false;
-        }
     }
 
     /**
@@ -312,21 +208,8 @@ class RestooService implements BookingPlatformInterface
      */
     protected function createReservationRaw(string $apiKey, string $account, array $payload): ?array
     {
-        Log::debug('createReservationRaw method called', [
-            'apiKey' => substr($apiKey, 0, 5).'...',
-            'account' => $account,
-            'payload_size' => count($payload),
-        ]);
-
         try {
             $url = "{$this->baseUrl}/api/{$this->partnerId}/v3/booking";
-
-            Log::debug('Making Restoo API request', [
-                'url' => $url,
-                'account' => $account,
-                'api_key' => substr($apiKey, 0, 5).'...',
-                'payload' => $payload,
-            ]);
 
             $response = Http::withHeaders([
                 'Account' => $account,
@@ -334,35 +217,25 @@ class RestooService implements BookingPlatformInterface
                 'Content-Type' => 'application/json',
             ])->post($url, $payload);
 
-            Log::debug('Restoo API response', [
-                'status' => $response->status(),
-                'headers' => $response->headers(),
-                'body' => $response->body(),
-            ]);
+            $responseData = $response->json() ?? [];
+
+            // Add HTTP status and error information to the response
+            $responseData['_http_status'] = $response->status();
+            $responseData['_http_error'] = $response->failed() ? $response->body() : null;
 
             if ($response->successful()) {
-                $responseData = $response->json();
-                Log::info('Restoo reservation created successfully', [
-                    'response' => $responseData,
-                ]);
-
                 return $responseData;
             }
 
-            Log::error('Restoo reservation creation failed', [
-                'status' => $response->status(),
-                'response' => $response->body(),
-                'payload' => $payload,
-            ]);
-
-            return null;
+            // Removed duplicate error logging - errors are logged at the PlatformReservation level with more context
+            return $responseData;
         } catch (Throwable $e) {
-            Log::error('Restoo reservation creation exception', [
-                'error' => $e->getMessage(),
-                'payload' => $payload,
-            ]);
-
-            return null;
+            // Removed duplicate error logging - errors are logged at the PlatformReservation level with more context
+            return [
+                '_http_status' => null,
+                '_http_error' => $e->getMessage(),
+                'exception' => $e->getMessage(),
+            ];
         }
     }
 
@@ -390,26 +263,23 @@ class RestooService implements BookingPlatformInterface
             ])->post("{$this->baseUrl}/api/{$this->partnerId}/v3/booking/{$externalReservationId}/cancel", $payload);
 
             if ($response->successful()) {
-                Log::info('Restoo reservation cancelled successfully', [
-                    'externalReservationId' => $externalReservationId,
-                    'cancelReason' => $payload['cancelReason'],
-                ]);
-
                 return true;
             }
 
+            // Log cancellation failures with HTTP status code
             Log::error('Restoo reservation cancellation failed', [
-                'status' => $response->status(),
-                'response' => $response->body(),
-                'externalReservationId' => $externalReservationId,
+                'http_status' => $response->status(),
+                'response_body' => $response->body(),
+                'external_reservation_id' => $externalReservationId,
                 'payload' => $payload,
             ]);
 
             return false;
         } catch (Throwable $e) {
+            // Log cancellation exceptions
             Log::error('Restoo reservation cancellation exception', [
                 'error' => $e->getMessage(),
-                'externalReservationId' => $externalReservationId,
+                'external_reservation_id' => $externalReservationId,
             ]);
 
             return false;
