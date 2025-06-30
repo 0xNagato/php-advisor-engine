@@ -407,6 +407,9 @@ class Venue extends Model
                     ->where('start_time', '>=', $startTime)
                     ->where('start_time', '<=', $endTime);
             },
+            'schedules.timeSlots' => function ($query) use ($date) {
+                $query->where('booking_date', $date);
+            },
         ]);
     }
 
