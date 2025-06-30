@@ -6,7 +6,7 @@ use App\Actions\Region\GetUserRegion;
 use App\Constants\BookingPercentages;
 use App\Models\Concierge;
 use App\Models\Region;
-use App\Models\ScheduleWithBooking;
+use App\Models\ScheduleWithBookingMV;
 use App\Models\Venue;
 use App\Services\ReservationService;
 use App\Traits\ManagesBookingForms;
@@ -77,7 +77,7 @@ class EarningsPotential extends Page
             ->statePath('data');
     }
 
-    public function conciergePayout(Venue $venue, ScheduleWithBooking $schedule, bool $isPrime): int
+    public function conciergePayout(Venue $venue, ScheduleWithBookingMV $schedule, bool $isPrime): int
     {
         if (! $this->concierge) {
             return 0;

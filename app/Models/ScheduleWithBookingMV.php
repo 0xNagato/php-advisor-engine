@@ -44,12 +44,36 @@ class ScheduleWithBookingMV extends Model
         'is_within_buffer',
     ];
 
+    protected function casts(): array
+    {
+        return [
+            'booking_date' => 'date',
+            'booking_at' => 'datetime',
+        ];
+    }
+
     /**
      * @return BelongsTo<Venue, $this>
      */
     public function venue(): BelongsTo
     {
         return $this->belongsTo(Venue::class);
+    }
+
+    /**
+     * @return HasMany<VenueTimeSlot, $this>
+     */
+    public function timeSlots(): HasMany
+    {
+        return $this->hasMany(VenueTimeSlot::class, 'schedule_template_id');
+    }
+
+    /**
+     * @return HasMany<Booking, $this>
+     */
+    public function bookings(): HasMany
+    {
+        return $this->hasMany(Booking::class);
     }
 
     public function fee(int $partySize): int
@@ -69,14 +93,6 @@ class ScheduleWithBookingMV extends Model
         }
 
         return 0;
-    }
-
-    /**
-     * @return HasMany<Booking, $this>
-     */
-    public function bookings(): HasMany
-    {
-        return $this->hasMany(Booking::class);
     }
 
     protected function bookingAt(): Attribute
@@ -102,14 +118,6 @@ class ScheduleWithBookingMV extends Model
     protected function hasLowInventory(): Attribute
     {
         return Attribute::make(get: fn () => $this->is_bookable && $this->remaining_tables <= 5);
-    }
-
-    protected function casts(): array
-    {
-        return [
-            'booking_date' => 'date',
-            'booking_at' => 'datetime',
-        ];
     }
 
     protected function noWait(): Attribute
