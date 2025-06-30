@@ -25,7 +25,7 @@ class ManageTokens extends ManageRecords
                 ->form([
                     Select::make('user_id')
                         ->label('Concierge')
-                        ->options(fn () => User::query()->role('concierge')
+                        ->options(fn () => User::query()
                             ->orderBy('first_name')->get()->pluck('name', 'id')
                         )
                         ->searchable(['first_name', 'last_name'])
