@@ -16,7 +16,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property int $venue_id
  * @property string $schedule_start
  * @property string $schedule_end
- * @property int $is_available
+ * @property bool $is_available
  * @property bool $is_bookable
  * @property int $remaining_tables
  * @property int $effective_fee
@@ -47,6 +47,7 @@ class ScheduleWithBookingMV extends Model
     protected function casts(): array
     {
         return [
+            'is_available' => 'boolean',
             'booking_date' => 'date',
             'booking_at' => 'datetime',
         ];
