@@ -15,6 +15,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasManyThrough;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\HasOneThrough;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -406,6 +407,9 @@ class Venue extends Model
                     ->where('start_time', '>=', $startTime)
                     ->where('start_time', '<=', $endTime);
             },
+            'schedules.timeSlots' => function ($query) use ($date) {
+                $query->where('booking_date', $date);
+            },
         ]);
     }
 
@@ -723,5 +727,16 @@ class Venue extends Model
     public function restooReservations(): HasMany
     {
         return $this->platformReservations()->where('platform_type', 'restoo');
+    }
+
+    /**
+     * @return HasOne<VenueOnboarding, $this>
+     */
+    public function venueOnboarding(): HasOne
+    {
+        return $this->hasOne(VenueOnboarding::class, 'venue_group_id', 'venue_group_id')
+            ->orWhere(function ($query) {
+                $query->where('company_name', $this->name);
+            });
     }
 }

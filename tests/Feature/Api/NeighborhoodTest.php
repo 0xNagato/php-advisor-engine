@@ -1,20 +1,10 @@
 <?php
 
 use App\Models\Neighborhood;
-use App\Models\User;
 
 use function Pest\Laravel\getJson;
 
-beforeEach(function () {
-    // Create a test user
-    $this->user = User::factory()->create();
-    $this->user->assignRole('user');
-
-    // Create an authentication token
-    $this->token = $this->user->createToken('test-token')->plainTextToken;
-});
-
-test('unauthenticated user can access neighborhoods', function () {
+test('can fetch all neighborhoods', function () {
     getJson('/api/neighborhoods')
         ->assertSuccessful()
         ->assertJsonStructure([
@@ -22,23 +12,11 @@ test('unauthenticated user can access neighborhoods', function () {
         ]);
 });
 
-test('authenticated user can fetch all neighborhoods', function () {
-    getJson('/api/neighborhoods', [
-        'Authorization' => 'Bearer '.$this->token,
-    ])
-        ->assertSuccessful()
-        ->assertJsonStructure([
-            'data',
-        ]);
-});
-
-test('authenticated user can filter neighborhoods by region', function () {
+test('can filter neighborhoods by region', function () {
     $region = 'miami';
     $miamiNeighborhoods = Neighborhood::query()->where('region', $region)->pluck('name', 'id')->toArray();
 
-    $response = getJson('/api/neighborhoods?region='.$region, [
-        'Authorization' => 'Bearer '.$this->token,
-    ])
+    $response = getJson('/api/neighborhoods?region='.$region)
         ->assertSuccessful()
         ->assertJsonStructure([
             'data',

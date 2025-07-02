@@ -2,8 +2,8 @@
 
 namespace App\Console\Commands;
 
-use Exception;
 use App\Models\User;
+use Exception;
 use Illuminate\Console\Command;
 
 class CreateUserToken extends Command
@@ -78,7 +78,6 @@ class CreateUserToken extends Command
             $this->displayTokenInfo($token, $user);
 
             return Command::SUCCESS;
-
         } catch (Exception $e) {
             $this->error('Failed to create token: '.$e->getMessage());
 

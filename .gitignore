@@ -41,3 +41,6 @@ _ide_helper_actions.php
 # Database exports
 sync-db.sh
 /db_exports
+
+# Merge scripts
+merge_develop_into_main.bat

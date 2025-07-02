@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "397a85f5bcfba10a6d429f66f12af3d5",
+    "content-hash": "3617f6411882a0d3517cdc2b7d5bb54c",
     "packages": [
         {
             "name": "akaunting/laravel-money",
@@ -3932,6 +3932,66 @@
                 "source": "https://github.com/giggsey/libphonenumber-for-php-lite"
             },
             "time": "2025-05-29T10:02:14+00:00"
+        },
+        {
+            "name": "goldspecdigital/oooas",
+            "version": "v2.10.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/goldspecdigital/oooas.git",
+                "reference": "072f8d9f6e75f68df28b148103b38fdf843467b2"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/goldspecdigital/oooas/zipball/072f8d9f6e75f68df28b148103b38fdf843467b2",
+                "reference": "072f8d9f6e75f68df28b148103b38fdf843467b2",
+                "shasum": ""
+            },
+            "require": {
+                "ext-json": "*",
+                "php": ">=7.1.0"
+            },
+            "require-dev": {
+                "friendsofphp/php-cs-fixer": "^3",
+                "justinrainbow/json-schema": "^5.2",
+                "phpunit/phpunit": ">=7.3"
+            },
+            "suggest": {
+                "justinrainbow/json-schema": "Required to perform validation (^5.2)"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "GoldSpecDigital\\ObjectOrientedOAS\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Matthew Inamdar",
+                    "email": "matt@goldspecdigital.com"
+                },
+                {
+                    "name": "Vladimir Yuldashev",
+                    "email": "vladimir.yuldashev@gmail.com"
+                }
+            ],
+            "description": "An object oriented approach to generating OpenAPI specs, implemented in PHP.",
+            "homepage": "https://github.com/goldspecdigital/oooas",
+            "keywords": [
+                "oas",
+                "openapi",
+                "php",
+                "swagger"
+            ],
+            "support": {
+                "issues": "https://github.com/goldspecdigital/oooas/issues",
+                "source": "https://github.com/goldspecdigital/oooas/tree/v2.10.0"
+            },
+            "time": "2022-07-20T09:57:04+00:00"
         },
         {
             "name": "graham-campbell/result-type",
@@ -14732,6 +14792,70 @@
             "time": "2025-04-02T20:08:38+00:00"
         },
         {
+            "name": "tartanlegrand/laravel-openapi",
+            "version": "v2.1.2",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/Nova-Edge/laravel-openapi.git",
+                "reference": "64c20987ffcdadf2b4034c565349c0341c14af29"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/Nova-Edge/laravel-openapi/zipball/64c20987ffcdadf2b4034c565349c0341c14af29",
+                "reference": "64c20987ffcdadf2b4034c565349c0341c14af29",
+                "shasum": ""
+            },
+            "require": {
+                "ext-json": "*",
+                "goldspecdigital/oooas": "^2.7.1",
+                "laravel/framework": "^11.0|^12.0",
+                "php": "^8.0",
+                "phpdocumentor/reflection-docblock": "^5.0"
+            },
+            "require-dev": {
+                "orchestra/testbench": "^5.3|^6.0|^7.0|^8.0|^9.0||^10",
+                "phpunit/phpunit": "^9.5.13|^10.5||^11.5|^12.0"
+            },
+            "type": "library",
+            "extra": {
+                "laravel": {
+                    "providers": [
+                        "Vyuldashev\\LaravelOpenApi\\OpenApiServiceProvider"
+                    ]
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "Vyuldashev\\LaravelOpenApi\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Vladimir Yuldashev",
+                    "email": "misterio92@gmail.com"
+                }
+            ],
+            "description": "Generate OpenAPI Specification for Laravel Applications",
+            "keywords": [
+                "api",
+                "docs",
+                "documentation",
+                "laravel",
+                "openapi",
+                "rest",
+                "swagger"
+            ],
+            "support": {
+                "issues": "https://github.com/Nova-Edge/laravel-openapi/issues",
+                "source": "https://github.com/Nova-Edge/laravel-openapi/tree/v2.1.2"
+            },
+            "time": "2025-03-31T11:43:09+00:00"
+        },
+        {
             "name": "tijsverkoyen/css-to-inline-styles",
             "version": "v2.3.0",
             "source": {
@@ -22711,6 +22835,6 @@
     "platform": {
         "php": "^8.3"
     },
-    "platform-dev": {},
-    "plugin-api-version": "2.6.0"
+    "platform-dev": [],
+    "plugin-api-version": "2.3.0"
 }

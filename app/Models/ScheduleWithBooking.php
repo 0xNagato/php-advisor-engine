@@ -43,6 +43,14 @@ class ScheduleWithBooking extends Model
         'is_within_buffer',
     ];
 
+    protected function casts(): array
+    {
+        return [
+            'booking_date' => 'date',
+            'booking_at' => 'datetime',
+        ];
+    }
+
     /**
      * @return BelongsTo<Venue, $this>
      */
@@ -78,6 +86,14 @@ class ScheduleWithBooking extends Model
         return $this->hasMany(Booking::class);
     }
 
+    /**
+     * @return HasMany<VenueTimeSlot, $this>
+     */
+    public function timeSlots(): HasMany
+    {
+        return $this->hasMany(VenueTimeSlot::class, 'schedule_template_id');
+    }
+
     protected function bookingAt(): Attribute
     {
         return Attribute::make(get: fn () => $this->schedule_start);
@@ -101,14 +117,6 @@ class ScheduleWithBooking extends Model
     protected function hasLowInventory(): Attribute
     {
         return Attribute::make(get: fn () => $this->is_bookable && $this->remaining_tables <= 5);
-    }
-
-    protected function casts(): array
-    {
-        return [
-            'booking_date' => 'date',
-            'booking_at' => 'datetime',
-        ];
     }
 
     protected function noWait(): Attribute

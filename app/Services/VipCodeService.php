@@ -35,7 +35,7 @@ class VipCodeService
     }
 
     /**
-     * Create a VIP session and return Sanctum token
+     * Create a VIP session and return a Sanctum token
      */
     public function createVipSession(string $code): ?array
     {
@@ -73,7 +73,7 @@ class VipCodeService
         // Clean up expired sessions for this VIP code
         $vipCode->cleanExpiredSessions();
 
-        // Create Sanctum token for the concierge user
+        // Create a Sanctum token for the concierge user
         $user = $vipCode->concierge->user;
         $sessionDuration = $this->getSessionDurationHours();
         $token = $user->createToken('vip-session-'.$code, ['*'], now()->addHours($sessionDuration));
@@ -128,7 +128,7 @@ class VipCodeService
             ->first();
 
         if (! $session) {
-            // This might be a demo token or other non-VIP token
+            // This might be a demo token or another non-VIP token
             return null;
         }
 
@@ -159,12 +159,12 @@ class VipCodeService
             ]))
             ->log($event);
 
-        // Also log to application log for debugging
+        // Also log to the application log for debugging
         Log::info("VIP Session Event: {$event}", $data);
     }
 
     /**
-     * Clean up all expired sessions (can be run via scheduled task)
+     * Clean up all expired sessions (can be run via a scheduled task)
      */
     public function cleanupExpiredSessions(): int
     {

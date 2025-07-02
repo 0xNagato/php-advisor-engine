@@ -8,12 +8,11 @@ This endpoint provides functionality for retrieving a list of active regions and
 ### Request
 - **Method:** GET
 - **URL:** `/api/regions`
-- **Authentication:** Required
+- **Authentication:** Not required (public endpoint)
 
 #### Headers
 | Header | Value | Required | Description |
 |--------|-------|----------|-------------|
-| Authorization | Bearer {token} | Yes | Authentication token |
 | Accept | application/json | Yes | Specifies the expected response format |
 
 #### Parameters
@@ -22,8 +21,7 @@ No parameters required.
 #### Example Request
 ```bash
 curl -X GET \
-  https://api.example.com/api/regions \
-  -H 'Authorization: Bearer your-api-token' \
+  https://api.example.com/api/regions \  
   -H 'Accept: application/json'
 ```
 
@@ -44,15 +42,6 @@ curl -X GET \
 ```
 
 The response is a key-value object where the keys are region IDs and the values are region names.
-
-#### Error Responses
-
-##### 401 Unauthorized
-```json
-{
-  "message": "Unauthenticated."
-}
-```
 
 ## Update User's Region
 
