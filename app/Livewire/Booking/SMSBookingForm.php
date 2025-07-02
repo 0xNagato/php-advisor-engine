@@ -14,6 +14,7 @@ use Filament\Forms\Contracts\HasForms;
 use Filament\Forms\Form;
 use Filament\Notifications\Notification;
 use Filament\Widgets\Widget;
+use Illuminate\Support\HtmlString;
 use Ysfkaya\FilamentPhoneInput\Forms\PhoneInput;
 use Ysfkaya\FilamentPhoneInput\PhoneInputNumberType;
 
@@ -61,13 +62,20 @@ class SMSBookingForm extends Widget implements HasForms
                     country: config('app.countries'),
                 )
                 ->columnSpan(2)
-                ->required(),
+                ->required()
+                ->helperText(new HtmlString(<<<'HTML'
+                    <span class="text-xs">Guest Phone Number is required. Please do not use concierge phone number here.</span>
+                HTML)),
             TextInput::make('email')
                 ->hiddenLabel()
                 ->email()
-                ->placeholder('Email Address (optional)')
+                ->placeholder('Email Address')
                 ->autocomplete(false)
-                ->columnSpan(2),
+                ->columnSpan(2)
+                ->required()
+                ->helperText(new HtmlString(<<<'HTML'
+                    <span class="text-xs">Email address is mandatory. If you cannot share the guest's email address, please enter prima@primavip.co</span>
+                HTML)),
             Textarea::make('notes')
                 ->hiddenLabel()
                 ->placeholder('Notes/Special Requests (optional)')

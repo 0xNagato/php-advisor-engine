@@ -478,7 +478,7 @@ const emailInvoice = async () => {
       <p class="mb-4 font-semibold text-center">Thank you for using PRIMA!</p>
       <div class="flex justify-center space-x-4">
         <button
-          class="flex items-center justify-center w-1/2 px-4 py-2 text-sm font-semibold text-white bg-indigo-600 rounded hover:bg-indigo-700"
+          class="flex justify-center items-center px-4 py-2 w-1/2 text-sm font-semibold text-white bg-indigo-600 rounded hover:bg-indigo-700"
           @click="emailInvoice"
         >
           <Mail class="mr-2 size-4" />
@@ -486,7 +486,7 @@ const emailInvoice = async () => {
         </button>
         <a
           :href="downloadInvoiceUrl"
-          class="flex items-center justify-center w-1/2 px-4 py-2 text-sm font-semibold text-center text-white bg-indigo-600 rounded hover:bg-indigo-700"
+          class="flex justify-center items-center px-4 py-2 w-1/2 text-sm font-semibold text-center text-white bg-indigo-600 rounded hover:bg-indigo-700"
         >
           <Download class="mr-2 size-4" />
           Download PDF
@@ -520,14 +520,14 @@ const emailInvoice = async () => {
       </p>
       <div v-if="mingleData.isOmakase" class="mb-4 text-center">
         <p
-          class="p-2 text-sm font-semibold text-indigo-600 border border-indigo-200 rounded-lg bg-indigo-50"
+          class="p-2 text-sm font-semibold text-indigo-600 bg-indigo-50 rounded-lg border border-indigo-200"
         >
           {{ mingleData.omakaseDetails }}
         </p>
       </div>
       <div v-if="mingleData.minimumSpendPerGuest" class="mb-4 text-center">
         <p
-          class="p-2 text-sm font-semibold text-blue-700 border border-blue-200 rounded-lg bg-blue-50"
+          class="p-2 text-sm font-semibold text-blue-700 bg-blue-50 rounded-lg border border-blue-200"
         >
           <strong>Important:</strong> This reservation requires a ${{
             mingleData.minimumSpendPerGuest
@@ -592,8 +592,9 @@ const emailInvoice = async () => {
             id="email"
             v-model="email"
             type="email"
-            placeholder="Email (Optional)"
+            placeholder="Email"
             class="focus:ring-opacity/50 w-full rounded-md border-gray-300 shadow-sm transition duration-200 ease-in-out focus:border-[#A7A4F2] focus:ring focus:ring-[#D1CFF5] sm:text-sm"
+            required
           />
         </div>
         <div class="mb-2">
@@ -667,14 +668,14 @@ const emailInvoice = async () => {
         <button
           type="submit"
           :disabled="isLoading"
-          class="w-full px-4 py-2 mt-4 font-semibold text-white bg-indigo-600 rounded hover:bg-indigo-700 disabled:opacity-50"
+          class="px-4 py-2 mt-4 w-full font-semibold text-white bg-indigo-600 rounded hover:bg-indigo-700 disabled:opacity-50"
         >
           {{ isLoading ? 'Processing...' : 'Secure Your Table' }}
         </button>
         <a
           v-if="mingleData.vipCode"
           :href="`/v/${mingleData.vipCode}`"
-          class="block w-full px-4 py-2 mt-4 font-semibold text-center text-white bg-gray-700 rounded hover:bg-gray-800"
+          class="block px-4 py-2 mt-4 w-full font-semibold text-center text-white bg-gray-700 rounded hover:bg-gray-800"
         >
           Return to Availability Calendar
         </a>
@@ -685,13 +686,13 @@ const emailInvoice = async () => {
     </template>
     <div
       v-if="showMultipleBookingModal"
-      class="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-0"
+      class="flex fixed inset-0 z-50 justify-center items-center p-4 sm:p-0"
     >
       <div
         class="fixed inset-0 bg-black/50"
         @click="showMultipleBookingModal = false"
       ></div>
-      <div class="relative w-full max-w-md p-6 bg-white rounded-lg">
+      <div class="relative p-6 w-full max-w-md bg-white rounded-lg">
         <h3 class="mb-4 text-lg font-medium">Multiple Booking Request</h3>
         <p class="mb-4 text-sm text-gray-600">
           You already have a non-prime reservation for this day. Please let us
@@ -700,14 +701,14 @@ const emailInvoice = async () => {
         </p>
         <textarea
           v-model="customerMessage"
-          class="w-full p-3 mb-4 text-sm border rounded"
+          class="p-3 mb-4 w-full text-sm rounded border"
           rows="3"
           placeholder="Please explain why you need another reservation..."
           required
         ></textarea>
-        <div class="flex justify-end gap-x-3">
+        <div class="flex gap-x-3 justify-end">
           <button
-            class="px-4 py-2 text-sm text-gray-600 border rounded hover:bg-gray-50"
+            class="px-4 py-2 text-sm text-gray-600 rounded border hover:bg-gray-50"
             @click="showMultipleBookingModal = false"
           >
             Cancel

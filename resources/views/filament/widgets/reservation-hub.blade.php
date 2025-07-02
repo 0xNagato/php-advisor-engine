@@ -2,7 +2,7 @@
     use App\Enums\BookingStatus;
     use App\Enums\VenueStatus;
 @endphp
-    <!--suppress JSUnresolvedReference, BadExpressionStatementJS -->
+<!--suppress JSUnresolvedReference, BadExpressionStatementJS -->
 <x-filament-panels::page>
     <div x-data="{}" x-init="() => {
         let script = document.createElement('script');
@@ -71,8 +71,7 @@
                         </div>
                         <div class="grid grid-cols-3 gap-2">
                             @foreach ($schedulesThisWeek as $schedule)
-                                <div
-                                    @if ($schedule->is_bookable && $schedule->venue->status === VenueStatus::ACTIVE) wire:click="createBooking({{ $schedule->schedule_template_id }}, '{{ $schedule->booking_date->format('Y-m-d') }}')" @endif
+                                <div @if ($schedule->is_bookable && $schedule->venue->status === VenueStatus::ACTIVE) wire:click="createBooking({{ $schedule->schedule_template_id }}, '{{ $schedule->booking_date->format('Y-m-d') }}')" @endif
                                     @class([
                                         'flex flex-col gap-1 items-center px-3 py-3 text-sm font-semibold leading-none rounded-xl',
                                         'bg-green-600 text-white cursor-pointer hover:bg-green-500' =>
@@ -120,37 +119,37 @@
             <div x-data="{ tab: '{{ $booking->prime_time ? 'smsPayment' : 'collectPayment' }}' }" id="tabs">
                 @if ($booking->prime_time)
                     <div class="flex space-x-4">
-                        <div class="flex w-full space-x-4 text-xs">
+                        <div class="flex space-x-4 w-full text-xs">
                             <button
                                 :class="{ 'bg-indigo-600 text-white': tab === 'smsPayment', 'bg-gray-100': tab !== 'smsPayment' }"
                                 @click="tab = 'smsPayment'"
-                                class="flex items-center gap-1 px-4 py-2 text-xs font-semibold bg-gray-100 rounded-lg shadow-lg shadow-gray-400">
+                                class="flex gap-1 items-center px-4 py-2 text-xs font-semibold bg-gray-100 rounded-lg shadow-lg shadow-gray-400">
                                 <x-gmdi-phone-android-r class="w-6 h-6 font-semibold" />
                                 <div>SMS</div>
                             </button>
                             <button
                                 :class="{ 'bg-indigo-600 text-white': tab === 'qrCode', 'bg-gray-100': tab !== 'qrCode' }"
                                 @click="tab = 'qrCode'"
-                                class="flex items-center gap-1 px-4 py-2 text-xs font-semibold bg-gray-100 rounded-lg shadow-lg shadow-gray-400">
+                                class="flex gap-1 items-center px-4 py-2 text-xs font-semibold bg-gray-100 rounded-lg shadow-lg shadow-gray-400">
                                 <x-gmdi-qr-code class="w-6 h-6 font-semibold" />
                                 <div>QR Code</div>
                             </button>
                             @nonmobileapp
-                            <button
-                                :class="{ 'bg-indigo-600 text-white': tab === 'collectPayment', 'bg-gray-100': tab !== 'collectPayment' }"
-                                @click="tab = 'collectPayment'"
-                                class="flex items-center gap-1 px-4 py-2 text-xs font-semibold bg-gray-100 rounded-lg shadow-lg shadow-gray-400">
-                                <x-gmdi-credit-card class="w-6 h-6 font-semibold text-center" />
-                                <div>Collect CC</div>
-                            </button>
+                                <button
+                                    :class="{ 'bg-indigo-600 text-white': tab === 'collectPayment', 'bg-gray-100': tab !== 'collectPayment' }"
+                                    @click="tab = 'collectPayment'"
+                                    class="flex gap-1 items-center px-4 py-2 text-xs font-semibold bg-gray-100 rounded-lg shadow-lg shadow-gray-400">
+                                    <x-gmdi-credit-card class="w-6 h-6 font-semibold text-center" />
+                                    <div>Collect CC</div>
+                                </button>
                             @endnonmobileapp
                         </div>
 
                     </div>
-                    <div class="w-full mt-2">
+                    <div class="mt-2 w-full">
                         @if ($booking->schedule->minimum_spend_per_guest > 0)
                             <div
-                                class="p-3 mb-2 text-sm font-medium text-blue-700 border border-blue-200 rounded-lg bg-blue-50">
+                                class="p-3 mb-2 text-sm font-medium text-blue-700 bg-blue-50 rounded-lg border border-blue-200">
                                 <strong>Important:</strong> This reservation requires a
                                 ${{ $booking->schedule->minimum_spend_per_guest }} per diner minimum spend. Booking
                                 fees do not apply toward minimum spend or restaurant bill.
@@ -159,7 +158,7 @@
                         <livewire:booking.invoice-small :booking="$booking" />
                         @if ($booking->venue->is_omakase)
                             <div
-                                class="p-3 mt-2 text-sm font-medium text-indigo-600 border border-indigo-200 rounded-lg bg-indigo-50">
+                                class="p-3 mt-2 text-sm font-medium text-indigo-600 bg-indigo-50 rounded-lg border border-indigo-200">
                                 {{ $booking->venue->omakase_details }}
                             </div>
                         @endif
@@ -171,8 +170,8 @@
                 <div x-show="tab === 'collectPayment'" class="mt-4">
                     <!-- @todo Refactor this to a separate component -->
 
-                    <div wire:ignore class="flex flex-col items-center gap-3" x-data="{}"
-                         x-init="() => {
+                    <div wire:ignore class="flex flex-col gap-3 items-center" x-data="{}"
+                        x-init="() => {
                             function initializeStripe() {
                                 if (window.Stripe) {
                                     setupStripe();
@@ -180,7 +179,7 @@
                                     setTimeout(initializeStripe, 10);
                                 }
                             }
-
+                        
                             function setupStripe() {
                                 const stripe = Stripe('{{ config('services.stripe.key') }}');
                                 const elements = stripe.elements();
@@ -189,40 +188,40 @@
                                     hidePostalCode: true
                                 });
                                 card.mount('#card-element');
-
+                        
                                 const form = document.getElementById('form');
-
+                        
                                 form.addEventListener('submit', async (e) => {
                                     e.preventDefault();
-
+                        
                                     // Phone validation
                                     const phoneInput = document.getElementById('phone');
                                     const phoneError = document.getElementById('phone-error');
-
+                        
                                     // Reset the error
                                     phoneError.classList.add('hidden');
                                     phoneError.textContent = '';
-
+                        
                                     // Check if the international telephone input has been initialized
                                     if (phoneInput.getAttribute('data-intl-tel-input-id')) {
                                         const iti = window.intlTelInputGlobals.getInstance(phoneInput);
-
+                        
                                         if (!iti.isValidNumber()) {
                                             phoneError.textContent = 'Please enter a valid phone number';
                                             phoneError.classList.remove('hidden');
                                             $wire.$set('isLoading', false);
                                             return;
                                         }
-
+                        
                                         // Set the phone number in E.164 format for submission
                                         phoneInput.value = iti.getNumber();
                                     }
-
+                        
                                     $wire.$set('isLoading', true);
-
+                        
                                     @if($booking->prime_time)
                                     const { token, error } = await stripe.createToken(card);
-
+                        
                                     if (error) {
                                         $wire.$set('isLoading', false);
                                         return;
@@ -230,7 +229,7 @@
                                     @else
                                     var token = { id: '' };
                                     @endif
-
+                        
                                     const formData = {
                                         first_name: document.querySelector('input[name=first_name]').value,
                                         last_name: document.querySelector('input[name=last_name]').value,
@@ -239,16 +238,16 @@
                                         notes: document.querySelector('textarea[name=notes]').value,
                                         token: token?.id ?? ''
                                     };
-
+                        
                                     @if(!$booking->prime_time)
                                     formData.real_customer_confirmation = document.querySelector('input[name=real_customer_confirmation]').checked;
                                     @endif
-
+                        
                                     $wire.$call('completeBooking', formData);
                                 })
-
+                        
                             }
-
+                        
                             initializeStripe();
                         }">
 
@@ -256,7 +255,7 @@
                             <div class="w-full">
                                 @if ($booking->schedule->minimum_spend_per_guest > 0)
                                     <div
-                                        class="p-3 mb-2 text-sm font-medium text-blue-700 border border-blue-200 rounded-lg bg-blue-50">
+                                        class="p-3 mb-2 text-sm font-medium text-blue-700 bg-blue-50 rounded-lg border border-blue-200">
                                         <strong>Important:</strong> This booking time requires a
                                         ${{ $booking->schedule->minimum_spend_per_guest }} per diner minimum spend.
                                         Booking fees do not apply toward minimum spend or restaurant bill.
@@ -267,18 +266,18 @@
                         @endif
 
                         <form id="form" class="w-full">
-                            <fieldset class="flex flex-col items-center gap-2 disabled:opacity-50">
-                                <div class="flex items-center w-full gap-2">
+                            <fieldset class="flex flex-col gap-2 items-center disabled:opacity-50">
+                                <div class="flex gap-2 items-center w-full">
                                     <label class="w-full">
                                         <input name="first_name" type="text"
-                                               class="w-full rounded-lg border border-gray-300 text-sm h-[40px] focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
-                                               placeholder="First Name" required>
+                                            class="w-full rounded-lg border border-gray-300 text-sm h-[40px] focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
+                                            placeholder="First Name" required>
                                     </label>
 
                                     <label class="w-full">
                                         <input name="last_name" type="text"
-                                               class="w-full rounded-lg border border-gray-300 text-sm h-[40px] focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
-                                               placeholder="Last Name" required>
+                                            class="w-full rounded-lg border border-gray-300 text-sm h-[40px] focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
+                                            placeholder="Last Name" required>
                                     </label>
 
                                 </div>
@@ -286,33 +285,40 @@
                                 <div class="w-full phone-input-container">
                                     <label class="w-full">
                                         <input name="phone" type="tel" id="phone"
-                                               class="w-full rounded-lg border border-gray-300 text-sm h-[40px] focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
-                                               placeholder="Cell Phone Number" required>
+                                            class="w-full rounded-lg border border-gray-300 text-sm h-[40px] focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
+                                            placeholder="Cell Phone Number" required>
                                     </label>
                                     <div id="phone-error" class="hidden mt-1 text-sm text-red-500"></div>
+                                    <div class="mt-1 w-full text-xs text-gray-500">
+                                        Guest Phone Number is required. Please do not use concierge phone number here.
+                                    </div>
                                 </div>
 
                                 <label class="w-full">
                                     <input name="email" type="email"
-                                           class="w-full rounded-lg border border-gray-300 text-sm h-[40px] focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
-                                           placeholder="Email Address (optional)">
+                                        class="w-full rounded-lg border border-gray-300 text-sm h-[40px] focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
+                                        placeholder="Email Address" required>
                                 </label>
+                                <div class="w-full text-xs text-gray-500">
+                                    Email address is mandatory. If you cannot share the guest's email address, please
+                                    enter prima@primavip.co
+                                </div>
 
                                 <label class="w-full">
                                     <textarea name="notes"
-                                              class="w-full text-sm border border-gray-300 rounded-lg focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
-                                              placeholder="Notes/Special Requests (optional)"></textarea>
+                                        class="w-full text-sm rounded-lg border border-gray-300 focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
+                                        placeholder="Notes/Special Requests (optional)"></textarea>
                                 </label>
 
                                 <div id="card-element"
-                                     class="-mt-1.5 w-full rounded-lg border border-gray-400 text-sm bg-white px-2 py-3 h-[40px] {{ !$booking->prime_time ? 'hidden' : '' }}">
+                                    class="-mt-1.5 w-full rounded-lg border border-gray-400 text-sm bg-white px-2 py-3 h-[40px] {{ !$booking->prime_time ? 'hidden' : '' }}">
                                     <!-- A Stripe Element will be inserted here. -->
                                 </div>
 
                                 @if (!$booking->prime_time)
-                                    <label class="flex items-center w-full mb-2 text-xs">
+                                    <label class="flex items-center mb-2 w-full text-xs">
                                         <input type="checkbox" name="real_customer_confirmation"
-                                               class="text-indigo-600 rounded form-checkbox">
+                                            class="text-indigo-600 rounded form-checkbox">
                                         <span class="ml-2 text-xs text-gray-700">I am booking this reservation for a
                                             real customer</span>
                                     </label>
@@ -329,10 +335,10 @@
                 <div x-show="tab === 'smsPayment'" class="flex flex-col gap-4 mt-2">
                     <!-- SMS Payment Link Tab Content -->
                     @env('local')
-                        <x-filament::button tag="a" href="{{ $bookingUrl }}" target="_blank" color="success"
-                                            icon="gmdi-open-in-new" class="w-full">
-                            Open Booking URL
-                        </x-filament::button>
+                    <x-filament::button tag="a" href="{{ $bookingUrl }}" target="_blank" color="success"
+                        icon="gmdi-open-in-new" class="w-full">
+                        Open Booking URL
+                    </x-filament::button>
                     @endenv
                     <livewire:booking.s-m-s-booking-form :booking="$booking" :booking-url="$bookingUrl" />
                 </div>
@@ -350,7 +356,7 @@
             </div>
 
             <x-filament::button x-on:click="$dispatch('open-modal', { id: 'confirm-cancel-booking' })"
-                                class="w-full opacity-50" color="gray">
+                class="w-full opacity-50" color="gray">
                 Abandon Reservation
             </x-filament::button>
 
@@ -374,32 +380,30 @@
                 </x-slot>
             </x-filament::modal>
         @elseif($booking && $booking->status === BookingStatus::CONFIRMED)
-            <div class="flex flex-col items-center gap-3" id="form">
+            <div class="flex flex-col gap-3 items-center" id="form">
                 <div class="text-xl font-semibold text-black divider divider-neutral">Reservation Received</div>
                 <p class="text-center">Thank you for the booking!<br>We are notifying the venue now.</p>
             </div>
 
             @if ($scheduleTemplateId && $date)
                 <x-filament::button wire:click="resetBookingAndReturnToAvailabilityCalendar"
-                                    class="w-full bg-[#421fff] h-[48px]" icon="gmdi-calendar-month">
+                    class="w-full bg-[#421fff] h-[48px]" icon="gmdi-calendar-month">
                     Back to Availability Calendar
                 </x-filament::button>
             @else
                 <x-filament::button wire:click="resetBooking" class="w-full bg-[#421fff] h-[48px]"
-                                    icon="gmdi-restaurant-menu">
+                    icon="gmdi-restaurant-menu">
                     Back to Reservation Hub
                 </x-filament::button>
             @endif
 
             <div class="flex gap-4">
 
-                <x-filament::button tag="a" class="w-1/2" color="gray"
-                                    :href="route('filament.admin.resources.bookings.view', ['record' => $booking])">
+                <x-filament::button tag="a" class="w-1/2" color="gray" :href="route('filament.admin.resources.bookings.view', ['record' => $booking])">
                     View Booking
                 </x-filament::button>
 
-                <x-filament::button tag="a" class="w-1/2" color="gray"
-                                    :href="route('customer.invoice', ['token' => $booking->uuid])">
+                <x-filament::button tag="a" class="w-1/2" color="gray" :href="route('customer.invoice', ['token' => $booking->uuid])">
                     View Invoice
                 </x-filament::button>
 
