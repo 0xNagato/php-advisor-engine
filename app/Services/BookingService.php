@@ -11,9 +11,11 @@ use App\Models\Booking;
 use App\Models\Region;
 use App\Notifications\Booking\ConciergeFirstBooking;
 use App\Notifications\Booking\CustomerBookingConfirmed;
+use App\Notifications\Booking\CustomerBookingRequestReceived;
 use App\Traits\FormatsPhoneNumber;
 use Exception;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Stripe\Charge;
 use Stripe\Customer;
 use Stripe\Exception\ApiErrorException;
@@ -31,7 +33,12 @@ class BookingService
         $stripeCharge = $this->handleStripeCharge($booking, $form);
         $this->updateBooking($booking, $form, $stripeCharge);
 
-        $booking->notify(new CustomerBookingConfirmed);
+        if ($booking->is_non_prime_big_group) {
+            $booking->notify(new CustomerBookingRequestReceived);
+        } else {
+            $booking->notify(new CustomerBookingConfirmed);
+        }
+
         SendConfirmationToVenueContacts::run($booking);
 
         if ($booking->concierge && $booking->concierge->bookings()->count() === 1) {

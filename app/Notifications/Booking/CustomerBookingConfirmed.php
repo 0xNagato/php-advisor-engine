@@ -1,6 +1,7 @@
 <?php
 
 /** @noinspection PhpUnused */
+
 /** @noinspection PhpUnusedParameterInspection */
 
 namespace App\Notifications\Booking;
@@ -20,8 +21,8 @@ class CustomerBookingConfirmed extends Notification
     /**
      * Create a new notification instance.
      */
-    public function __construct(
-    ) {
+    public function __construct()
+    {
         //
     }
 
@@ -43,6 +44,7 @@ class CustomerBookingConfirmed extends Notification
     public function toSMS(Booking $notifiable): SmsData
     {
         $templateKey = match (true) {
+            (bool) $notifiable->is_non_prime_big_group => 'customer_booking_confirmed_non_prime_big_group',
             (bool) $notifiable->is_prime && (bool) $notifiable->venue->is_omakase => 'customer_booking_confirmed_prime_omakase',
             (bool) $notifiable->is_prime => 'customer_booking_confirmed_prime',
             default => 'customer_booking_confirmed_non_prime',
@@ -56,7 +58,8 @@ class CustomerBookingConfirmed extends Notification
                 'booking_date' => $notifiable->booking_at->format('D M jS'),
                 'booking_time' => $notifiable->booking_at->format('g:ia'),
                 'guest_count' => $notifiable->guest_count,
-                'invoice_url' => ShortURL::destinationUrl(route('customer.invoice', $notifiable->uuid))->make()->default_short_url,
+                'invoice_url' => ShortURL::destinationUrl(route('customer.invoice',
+                    $notifiable->uuid))->make()->default_short_url,
                 'concierge_name' => $notifiable->concierge->user->name,
             ]
         );

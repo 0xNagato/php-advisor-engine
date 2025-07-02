@@ -375,11 +375,10 @@ class Booking extends Model
         );
     }
 
-    protected function isNonPrimeIbizaBigGroup(): Attribute
+    protected function isNonPrimeBigGroup(): Attribute
     {
         return Attribute::make(
             get: fn () => ! $this->is_prime &&
-                $this->venue?->inRegion?->id === 'ibiza' &&
                 $this->guest_count >= 8
         );
     }

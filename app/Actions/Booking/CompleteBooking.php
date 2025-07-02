@@ -56,7 +56,7 @@ class CompleteBooking
                 'notes' => $formData['notes'] ?? null,
             ]);
 
-            if ($booking->is_non_prime_ibiza_big_group) {
+            if ($booking->is_non_prime_big_group) {
                 $booking->notify(new CustomerBookingRequestReceived);
             } else {
                 $booking->notify(new CustomerBookingConfirmed);

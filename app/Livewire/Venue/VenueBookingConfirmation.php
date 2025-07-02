@@ -75,7 +75,7 @@ class VenueBookingConfirmation extends Page
             $this->booking->update($payload);
             $this->showUndoButton = true;
 
-            if ($this->booking->is_non_prime_ibiza_big_group) {
+            if ($this->booking->is_non_prime_big_group) {
                 $this->booking->notify(new CustomerBookingConfirmed);
             }
         }
