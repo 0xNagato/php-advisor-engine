@@ -26,7 +26,7 @@ class ListConcierges extends ListRecords
 
     const bool USE_SLIDE_OVER = false;
 
-    public ?string $tableSortColumn = 'user.secured_at';
+    public ?string $tableSortColumn = 'bookings_count';
 
     public ?string $tableSortDirection = 'desc';
 
@@ -121,6 +121,8 @@ class ListConcierges extends ListRecords
                     ->icon('impersonate-icon')
                     ->action(fn (Concierge $record) => $this->impersonate($record->user))
                     ->hidden(fn () => isPrimaApp()),
+                EditAction::make('edit')
+                    ->iconButton(),
                 Action::make('viewConcierge')
                     ->iconButton()
                     ->icon('tabler-maximize')
