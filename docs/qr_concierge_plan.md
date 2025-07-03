@@ -1,4 +1,4 @@
-# VIP Access (QR Concierge) Implementation Plan
+# QR Concierge Implementation Plan
 
 ## Executive Summary
 
@@ -60,8 +60,8 @@ The system already has a robust QR code generation and management system with:
 ### A. Database Changes
 
 - Add to `concierges` table:
-  - `is_vip_access` boolean flag
-  - `vip_revenue_percentage` integer field (default 50)
+  - `is_qr_concierge` boolean flag
+  - `revenue_percentage` integer field (default 50)
 
 - Create a new `qr_stand_requests` table for tracking stand requests:
   - `id` (primary key)

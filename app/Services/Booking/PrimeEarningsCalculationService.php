@@ -53,7 +53,12 @@ readonly class PrimeEarningsCalculationService
 
     private function calculateConciergeEarnings(Booking $booking): float
     {
-        // Calculate base earnings
+        // Check if this is a QR concierge and use their custom percentage
+        if ($booking->concierge->is_qr_concierge) {
+            return $booking->total_fee * ($booking->concierge->revenue_percentage / 100);
+        }
+
+        // Calculate base earnings for regular concierges
         $baseEarnings = 0;
         if ($booking->venue->is_omakase && $booking->venue->omakase_concierge_fee) {
             $baseEarnings = $booking->venue->omakase_concierge_fee * $booking->guest_count;

@@ -44,4 +44,10 @@ class BookingPercentages
      * The maximum percentage a partner can earn from the remainder after paying out the venue and concierge.
      */
     public const int MAX_PARTNER_EARNINGS_PERCENTAGE = 20;
+
+    /**
+     * The default revenue percentage for new VIP Access (QR) concierges.
+     * This provides a single place to update the default value for future concierges.
+     */
+    public const int VIP_ACCESS_DEFAULT_PERCENTAGE = 50;
 }

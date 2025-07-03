@@ -21,4 +21,12 @@ class ConciergeFactory extends Factory
             'user_id' => User::factory(),
         ];
     }
+
+    public function qr(int $percentage = 50): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'is_qr_concierge' => true,
+            'revenue_percentage' => $percentage,
+        ]);
+    }
 }

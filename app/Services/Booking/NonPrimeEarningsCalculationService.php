@@ -38,7 +38,14 @@ readonly class NonPrimeEarningsCalculationService
         }
 
         $fee = $pricePerHead * $booking->guest_count;
-        $concierge_earnings = $fee - ($fee * (BookingPercentages::PLATFORM_PERCENTAGE_CONCIERGE / 100));
+
+        // Check if this is a QR concierge and use their custom percentage
+        if ($booking->concierge->is_qr_concierge) {
+            $concierge_earnings = $fee * ($booking->concierge->revenue_percentage / 100);
+        } else {
+            $concierge_earnings = $fee - ($fee * (BookingPercentages::PLATFORM_PERCENTAGE_CONCIERGE / 100));
+        }
+
         $platform_concierge = $fee * (BookingPercentages::PLATFORM_PERCENTAGE_CONCIERGE / 100);
         $platform_venue = $fee * (BookingPercentages::PLATFORM_PERCENTAGE_VENUE / 100);
         $platform_earnings = $platform_concierge + $platform_venue;

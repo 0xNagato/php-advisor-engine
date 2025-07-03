@@ -31,6 +31,8 @@ class Concierge extends Model
         'hotel_name',
         'allowed_venue_ids',
         'venue_group_id',
+        'is_qr_concierge',
+        'revenue_percentage',
     ];
 
     /**
