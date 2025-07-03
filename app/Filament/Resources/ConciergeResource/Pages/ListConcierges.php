@@ -11,7 +11,9 @@ use Filament\Resources\Pages\ListRecords;
 use Filament\Tables\Actions\Action;
 use Filament\Tables\Actions\EditAction;
 use Filament\Tables\Actions\ViewAction;
+use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\Filter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\HtmlString;
@@ -39,6 +41,16 @@ class ListConcierges extends ListRecords
                 TextColumn::make('user.name')
                     ->size('xs')->sortable(['last_name'])
                     ->searchable(['first_name', 'last_name', 'phone']),
+                IconColumn::make('is_qr_concierge')
+                    ->label('QR')
+                    ->icon(fn (bool $state): string => $state ? 'heroicon-o-check-circle' : 'heroicon-o-x-circle')
+                    ->color(fn (bool $state): string => $state ? 'success' : 'gray')
+                    ->tooltip(fn (Concierge $record): string => $record->is_qr_concierge
+                            ? "QR Concierge: {$record->revenue_percentage}% revenue"
+                            : 'Regular concierge'
+                    )
+                    ->grow(false)
+                    ->alignCenter(),
                 TextColumn::make('user.referrer.name')
                     ->sortable(['referrer_first_name'])
                     ->url(fn (Concierge $concierge) => $concierge->user->referral?->referrer_route)
@@ -114,6 +126,12 @@ class ListConcierges extends ListRecords
                     })
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
+            ])
+            ->filters([
+                Filter::make('qr_concierges')
+                    ->label('QR Concierges Only')
+                    ->query(fn (Builder $query): Builder => $query->where('is_qr_concierge', true))
+                    ->toggle(),
             ])
             ->actions([
                 Action::make('impersonate')
