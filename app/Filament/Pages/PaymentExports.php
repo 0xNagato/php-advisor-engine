@@ -138,7 +138,7 @@ class PaymentExports extends Page implements HasTable
                         ->icon('heroicon-m-document-plus')
                         ->color('indigo')
                         ->requiresConfirmation()
-                        ->modalHeading(fn (Venue $venue) => "Generate Invoice for {$venue->name}")
+                        ->modalHeading(fn (Venue $venue) => "Generate Invoice for $venue->name")
                         ->modalDescription(fn (Venue $venue) => $this->getVenueInvoiceModalDescriptionForVenue($venue))
                         ->successNotification(
                             Notification::make()
@@ -213,7 +213,7 @@ class PaymentExports extends Page implements HasTable
                         "Group: {$venue->venueGroup->name}" :
                         ($venue->user?->name ?? 'Owner Unknown');
 
-                    return "<div class='flex flex-col gap-1'><span>{$venue->name}</span><span class='text-[10px] sm:text-xs text-gray-500'>{$subtext}</span></div>";
+                    return "<div class='flex flex-col gap-1'><span>$venue->name</span><span class='text-[10px] sm:text-xs text-gray-500'>$subtext</span></div>";
                 }),
             TextColumn::make('bookings_count')
                 ->label('Bookings')
@@ -263,12 +263,12 @@ class PaymentExports extends Page implements HasTable
                         } else {
                             $shownVenues = $venuesCollection->take(3)->pluck('name')->implode(', ');
                             $remainingCount = $venueCount - 3;
-                            $subtext = "{$shownVenues} +{$remainingCount} more";
+                            $subtext = "$shownVenues +$remainingCount more";
                         }
 
                         return new HtmlString(
-                            "<div class='flex flex-col gap-1'><span>{$groupName}</span>".
-                            ($subtext ? "<span class='text-[10px] sm:text-xs text-gray-500'>{$subtext}</span>" : '').
+                            "<div class='flex flex-col gap-1'><span>$groupName</span>".
+                            ($subtext ? "<span class='text-[10px] sm:text-xs text-gray-500'>$subtext</span>" : '').
                             '</div>'
                         );
                     }
@@ -590,7 +590,7 @@ class PaymentExports extends Page implements HasTable
         // Changed from nowdoc ('HTML') to heredoc (HTML) to allow variable interpolation
         $standardHtml = <<<HTML
             <div class="space-y-2 text-sm text-gray-600">
-                <p>This will generate an invoice for all bookings for <strong>{$venue->name}</strong> in the selected date range. The process may take a few moments.</p>
+                <p>This will generate an invoice for all bookings for <strong>$venue->name</strong> in the selected date range. The process may take a few moments.</p>
                 <p class="p-1 text-xs font-semibold text-gray-600 bg-gray-100 border border-gray-300 rounded-md">
                     This action will be logged for audit purposes.
                 </p>
@@ -729,8 +729,8 @@ class PaymentExports extends Page implements HasTable
             $invoiceItems[] = <<<HTML
                 {$divider}
                 <div class="px-3 py-2 text-left">
-                    <div class="text-xs font-medium text-left text-blue-700">{$invoice->invoice_number}</div>
-                    <div class="text-xs text-left text-gray-500">{$invoiceStartDate} - {$invoiceEndDate}</div>
+                    <div class="text-xs font-medium text-left text-blue-700">$invoice->invoice_number</div>
+                    <div class="text-xs text-left text-gray-500">$invoiceStartDate - $invoiceEndDate</div>
                 </div>
             HTML;
         }
@@ -741,7 +741,7 @@ class PaymentExports extends Page implements HasTable
 
         $html = <<<HTML
             <div class="p-3 mb-4 text-left border border-blue-200 rounded-lg bg-blue-50">
-                <h3 class="mb-2 text-sm font-medium text-center text-blue-600">{$title}</h3>
+                <h3 class="mb-2 text-sm font-medium text-center text-blue-600">$title</h3>
                 <div class="overflow-hidden bg-white border border-blue-100 rounded-md">
                     {$this->implodeHtml($invoiceItems)}
                 </div>
@@ -774,7 +774,7 @@ class PaymentExports extends Page implements HasTable
     {
         $venueGroup = VenueGroup::query()->where('primary_manager_id', $record->id)->first();
 
-        return $venueGroup ? "Generate Group Invoice for {$venueGroup->name}" : 'Generate Group Invoice';
+        return $venueGroup ? "Generate Group Invoice for $venueGroup->name" : 'Generate Group Invoice';
     }
 
     // ================= CSV Export Actions =================
@@ -784,18 +784,18 @@ class PaymentExports extends Page implements HasTable
         $tz = auth()->user()->timezone ?? config('app.timezone');
         $startDate = Carbon::parse($this->data['startDate'], $tz)->format('Y-m-d');
         $endDate = Carbon::parse($this->data['endDate'], $tz)->format('Y-m-d');
-        $dateRange = "{$startDate}_to_{$endDate}";
+        $dateRange = "{$startDate}_to_$endDate";
 
         // Base configurations
         $exportAllConfig = ExcelExport::make('table')
             ->fromTable()
             ->withWriterType(Excel::CSV)
-            ->withFilename("Payment-Exports-{$role}-{$dateRange}");
+            ->withFilename("Payment-Exports-$role-$dateRange");
 
         $exportMissingConfig = ExcelExport::make('table')
             ->fromTable()
             ->withWriterType(Excel::CSV)
-            ->withFilename("Missing-Banking-{$role}-{$dateRange}");
+            ->withFilename("Missing-Banking-$role-$dateRange");
 
         // Role-specific columns and modifications
         if ($role === 'venue') {

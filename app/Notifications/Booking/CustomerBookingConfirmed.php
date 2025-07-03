@@ -12,6 +12,7 @@ use App\NotificationsChannels\SmsNotificationChannel;
 use AshAllenDesign\ShortURL\Exceptions\ShortURLException;
 use Illuminate\Bus\Queueable;
 use Illuminate\Notifications\Notification;
+use Illuminate\Support\Facades\URL;
 use ShortURL;
 
 class CustomerBookingConfirmed extends Notification
@@ -50,6 +51,9 @@ class CustomerBookingConfirmed extends Notification
             default => 'customer_booking_confirmed_non_prime',
         };
 
+        $invoiceUrl = route('customer.invoice', $notifiable->uuid);
+        $modifyUrl = URL::signedRoute('modify.booking', $notifiable->uuid);
+
         return new SmsData(
             phone: $notifiable->guest_phone,
             templateKey: $templateKey,
@@ -58,8 +62,8 @@ class CustomerBookingConfirmed extends Notification
                 'booking_date' => $notifiable->booking_at->format('D M jS'),
                 'booking_time' => $notifiable->booking_at->format('g:ia'),
                 'guest_count' => $notifiable->guest_count,
-                'invoice_url' => ShortURL::destinationUrl(route('customer.invoice',
-                    $notifiable->uuid))->make()->default_short_url,
+                'invoice_url' => ShortURL::destinationUrl($invoiceUrl)->make()->default_short_url,
+                'modify_url' => ShortURL::destinationUrl($modifyUrl)->make()->default_short_url,
                 'concierge_name' => $notifiable->concierge->user->name,
             ]
         );

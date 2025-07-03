@@ -12,6 +12,7 @@ use App\Http\Controllers\PublicAnnouncementController;
 use App\Http\Controllers\VenueAgreementController;
 use App\Livewire\Booking\CreateBooking;
 use App\Livewire\Booking\CustomerInvoice;
+use App\Livewire\Booking\ModifyDetails;
 use App\Livewire\Concierge\ConciergeInvitation;
 use App\Livewire\Concierge\DirectConciergeInvitation;
 use App\Livewire\Story;
@@ -86,6 +87,7 @@ Route::get('/invoice/download/{uuid}', DownloadInvoiceController::class)
     ->name('customer.invoice.download');
 
 Route::get('/invoice/{token}', CustomerInvoice::class)->name('customer.invoice');
+Route::get('/modify/{token}', ModifyDetails::class)->name('modify.booking');
 
 Route::get('/venues/confirm/{booking:uuid}', VenueBookingConfirmation::class)
     ->name('venues.confirm');

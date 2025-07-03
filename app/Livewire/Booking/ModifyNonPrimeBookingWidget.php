@@ -5,11 +5,14 @@ namespace App\Livewire\Booking;
 use App\Actions\Booking\SendModificationRequestToVenueContacts;
 use App\Models\Booking;
 use App\Models\BookingModificationRequest;
+use App\Models\Region;
 use App\Models\ScheduleWithBookingMV;
 use App\Notifications\Booking\CustomerModificationRequested;
 use App\Traits\HandlesPartySizeMapping;
 use Exception;
+use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Grid;
+use Filament\Forms\Components\Hidden;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\ViewField;
 use Filament\Forms\Concerns\InteractsWithForms;
@@ -18,6 +21,7 @@ use Filament\Forms\Form;
 use Filament\Notifications\Notification;
 use Filament\Widgets\Widget;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Carbon;
 
 class ModifyNonPrimeBookingWidget extends Widget implements HasForms
 {
@@ -58,6 +62,8 @@ class ModifyNonPrimeBookingWidget extends Widget implements HasForms
 
             $this->form->fill([
                 'guest_count' => $this->booking->guest_count,
+                'date' => $this->booking->booking_at->format('Y-m-d'),
+                'select_date' => $this->booking->booking_at->format('Y-m-d'),
             ]);
 
             $this->loadAvailableSlots();
@@ -66,11 +72,16 @@ class ModifyNonPrimeBookingWidget extends Widget implements HasForms
 
     public function form(Form $form): Form
     {
+        $region = Region::query()->find($this->booking->venue->region);
+        $timezone = $region->timezone;
+
         return $form
             ->schema([
                 Grid::make()
                     ->columns($this->showDetails ? 2 : 1)
                     ->schema([
+                        Hidden::make('date')
+                            ->default($this->booking->booking_at->format('Y-m-d')),
                         ViewField::make('booking_details')
                             ->view('livewire.booking.partials.booking-details')
                             ->viewData([
@@ -78,6 +89,21 @@ class ModifyNonPrimeBookingWidget extends Widget implements HasForms
                             ])
                             ->hidden(! $this->showDetails)
                             ->columnSpan($this->showDetails ? 2 : 1),
+                        DatePicker::make('select_date')
+                            ->hiddenLabel()
+                            ->live()
+                            ->columnSpanFull()
+                            ->weekStartsOnSunday()
+                            ->default($this->booking->booking_at->format('Y-m-d'))
+                            ->minDate($this->booking->booking_at->format('Y-m-d'))
+                            ->maxDate(today($timezone)->addDays(30)->format('Y-m-d'))
+                            ->afterStateUpdated(function ($state, $set) {
+                                $set('date', Carbon::parse($state)->format('Y-m-d'));
+                                $this->loadAvailableSlots();
+                            })
+                            ->prefixIcon('heroicon-m-calendar')
+                            ->native(isPrimaApp())
+                            ->closeOnDateSelection(),
                         Select::make('guest_count')
                             ->label('Party Size')
                             ->options(array_combine(
@@ -122,6 +148,7 @@ class ModifyNonPrimeBookingWidget extends Widget implements HasForms
         // Use form state for guest count, fallback to original booking guest count
         $formState = $this->form->getState();
         $guestCount = $this->pendingGuestCount ?? intval($formState['guest_count']) ?? $this->booking->guest_count;
+        $selectedDate = Carbon::parse($formState['date']);
 
         // Round up guest count to the nearest table size (2,4,6,8,10,12,14,16,18,20)
         $tableSize = match (true) {
@@ -140,12 +167,13 @@ class ModifyNonPrimeBookingWidget extends Widget implements HasForms
         $schedules = ScheduleWithBookingMV::query()
             ->with('venue')
             ->where('venue_id', $this->booking->venue->id)
-            ->where('booking_date', $this->booking->booking_at->format('Y-m-d'))
+            ->where('booking_date', $selectedDate->format('Y-m-d'))
             ->where('party_size', $tableSize)  // Use rounded-up table size
             ->where('prime_time', false)
             ->where('remaining_tables', '>', 0)
             ->where('is_available', true)
-            ->when($this->booking->booking_at->isToday() && now()->timezone($this->booking->venue->timezone)->format('Y-m-d') === $this->booking->booking_at->format('Y-m-d'),
+            ->when($this->booking->booking_at->isToday() &&
+                now()->timezone($this->booking->venue->timezone)->isSameDay($selectedDate),
                 function (Builder $query) {
                     $query->where('start_time', '>', now()->timezone($this->booking->venue->timezone)->format('H:i:s'));
                 })
@@ -175,6 +203,7 @@ class ModifyNonPrimeBookingWidget extends Widget implements HasForms
 
         try {
             $formState = $this->form->getState();
+            $selectedDate = Carbon::parse($formState['date']);
             $schedule = $this->selectedTimeSlotId ? ScheduleWithBookingMV::query()->find($this->selectedTimeSlotId) : null;
 
             // Determine request source and user
@@ -191,6 +220,8 @@ class ModifyNonPrimeBookingWidget extends Widget implements HasForms
                 'requested_guest_count' => $formState['guest_count'],
                 'original_time' => $this->booking->booking_at->format('H:i:s'),
                 'requested_time' => $schedule ? $schedule->start_time : $this->booking->booking_at->format('H:i:s'),
+                'original_booking_at' => $this->booking->booking_at->format('Y-m-d'),
+                'request_booking_at' => $selectedDate->format('Y-m-d'),
                 'original_schedule_template_id' => $this->booking->schedule_template_id,
                 'requested_schedule_template_id' => $this->selectedTimeSlotId ?? $this->booking->schedule_template_id,
                 'status' => 'pending',
@@ -211,6 +242,8 @@ class ModifyNonPrimeBookingWidget extends Widget implements HasForms
                     'requested_time' => $schedule ? $schedule->formatted_start_time : $this->booking->booking_at->format('g:i A'),
                     'original_guest_count' => $this->booking->guest_count,
                     'requested_guest_count' => $formState['guest_count'],
+                    'original_booking_at' => $this->booking->booking_at->format('Y-m-d'),
+                    'request_booking_at' => $selectedDate->format('Y-m-d'),
                     'venue_id' => $this->booking->venue->id,
                     'venue_name' => $this->booking->venue->name,
                     'request_source' => $requestSource,
@@ -241,16 +274,5 @@ class ModifyNonPrimeBookingWidget extends Widget implements HasForms
                 ->body($e->getMessage())
                 ->send();
         }
-    }
-
-    protected function loadBookingDetails(): void
-    {
-        $this->bookingDetails = [
-            'guest_name' => $this->booking->guest_name,
-            'venue_name' => $this->booking->venue->name,
-            'current_time' => $this->booking->booking_at->format('g:i A'),
-            'guest_count' => $this->booking->guest_count,
-            'booking_date' => $this->booking->booking_at->format('M d, Y'),
-        ];
     }
 }

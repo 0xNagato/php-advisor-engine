@@ -327,10 +327,7 @@ class ViewBooking extends ViewRecord
             ->modalIconColor('danger')
             ->modalHeading('Cancel Booking')
             ->modalDescription(fn () => new HtmlString($modalDescription))
-            ->modalContent(fn (Action $action): View => view(
-                'partials.cancel-booking-action-modal',
-                ['action' => $action, 'canModifyBooking' => $this->canModifyBooking]
-            ))
+            ->modalContent(fn (Action $action): View => view('partials.cancel-booking-action-modal'))
             ->extraAttributes(['class' => 'w-full'])
             ->modalSubmitAction(false)
             ->modalCancelActionLabel('Abandon Cancellation')

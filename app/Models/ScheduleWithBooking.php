@@ -133,7 +133,7 @@ class ScheduleWithBooking extends Model
                 $bufferTime = $now->copy()->addMinutes(ReservationService::MINUTES_PAST);
                 $bookingTime = new Carbon($this->booking_at, $venueTimezone);
 
-                // Only check buffer if booking is for today
+                // Only check the buffer if booking is for today
                 if ($now->format('Y-m-d') !== $bookingTime->format('Y-m-d')) {
                     return false;
                 }

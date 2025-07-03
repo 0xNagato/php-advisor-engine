@@ -98,10 +98,8 @@ class BookingCheckout extends Component implements HasMingles
 
     public function emailInvoice(): void
     {
-        $invoicePath = $this->booking->invoice_path;
-
         $mailable = new CustomerInvoice($this->booking);
-        $mailable->attachFromStorageDisk('do', $invoicePath)
+        $mailable->attachFromStorageDisk('do', $this->booking->invoice_path)
             ->from('welcome@primavip.co', 'PRIMA');
 
         Mail::to($this->booking->guest_email)

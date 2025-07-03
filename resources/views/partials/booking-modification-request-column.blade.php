@@ -1,5 +1,5 @@
 @php use App\Enums\BookingStatus; @endphp
-@php use libphonenumber\PhoneNumberFormat; @endphp
+@php use Carbon\Carbon;use libphonenumber\PhoneNumberFormat; @endphp
 <div class='flex flex-col gap-1 text-xs w-full' data-cy="booking-card">
     <div class="font-semibold flex items-center gap-1">
         <div>
@@ -25,11 +25,15 @@
 
     <div class="flex items-center gap-1">
         <div class="font-semibold ">Current Details:</div>
-        <div class="text-xm text-gray-900">
+        <div class="text-xs text-gray-900">
+            <span class="font-semibold hidden md:inline">Date:</span>
+            {{ Carbon::parse($record->original_booking_at)->format('M j, Y') }}
+        </div>
+        <div class="text-xs text-gray-900">
             <span class="font-semibold hidden md:inline">Time:</span>
             {{ $record->formatted_original_time }}
         </div>
-        <div class="text-xm text-gray-900">
+        <div class="text-xs text-gray-900">
             <span class="font-semibold hidden md:inline">Party Size:</span>
             {{ $record->original_guest_count }} guests
         </div>
@@ -37,13 +41,20 @@
 
     <div class="flex items-center gap-1">
         <div class="font-semibold">Requested Changes:</div>
-        <div class="text-xm text-gray-900">
+        <div class="text-xs text-gray-900">
+            <span class="font-semibold hidden md:inline">Date:</span>
+            <span
+                class="{{ Carbon::parse($record->original_booking_at)->ne(Carbon::parse($record->request_booking_at)) ? 'text-red-600 font-semibold' : '' }}">
+            {{ Carbon::parse($record->request_booking_at)->format('M j, Y') }}
+            </span>
+        </div>
+        <div class="text-xs text-gray-900">
             <span class="font-semibold hidden md:inline">Time:</span>
             <span class="{{ $record->original_time !== $record->requested_time ? 'text-red-600 font-semibold' : '' }}">
                 {{ $record->formatted_requested_time }}
             </span>
         </div>
-        <div class="text-xm text-gray-900">
+        <div class="text-xs text-gray-900">
             <span class="font-semibold hidden md:inline">Party Size:</span>
             <span
                 class="{{ $record->original_guest_count !== $record->requested_guest_count ? 'text-red-600 font-semibold' : '' }}">

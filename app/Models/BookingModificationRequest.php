@@ -21,6 +21,8 @@ class BookingModificationRequest extends Model
         'requested_guest_count',
         'original_time',
         'requested_time',
+        'original_booking_at',
+        'request_booking_at',
         'original_schedule_template_id',
         'requested_schedule_template_id',
         'status',
@@ -38,7 +40,18 @@ class BookingModificationRequest extends Model
 
     const string STATUS_CANCELLED = 'cancelled';
 
+    protected function casts(): array
+    {
+        return [
+            'meta' => 'array',
+            'responded_at' => 'datetime',
+            'original_booking_at' => 'date',
+            'request_booking_at' => 'date',
+        ];
+    }
+
     // Relationships
+
     /**
      * @return BelongsTo<Booking, $this>
      */
@@ -150,13 +163,5 @@ class BookingModificationRequest extends Model
     protected function formattedRequestedTime(): Attribute
     {
         return Attribute::make(get: fn () => date('g:i A', strtotime($this->requested_time)));
-    }
-
-    protected function casts(): array
-    {
-        return [
-            'meta' => 'array',
-            'responded_at' => 'datetime',
-        ];
     }
 }

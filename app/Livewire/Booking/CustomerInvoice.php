@@ -9,8 +9,6 @@ use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
 use Filament\Forms\Form;
 use Filament\Notifications\Notification;
-use Illuminate\Contracts\Foundation\Application;
-use Illuminate\Contracts\View\Factory;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\View\View;
 use Livewire\Component;
@@ -42,7 +40,7 @@ class CustomerInvoice extends Component implements HasForms
         $this->region = Region::query()->find($this->booking->city);
     }
 
-    public function render(): \Illuminate\Contracts\View\View|\Illuminate\Foundation\Application|Factory|View|Application
+    public function render(): View
     {
         return view('livewire.customer-invoice');
     }
