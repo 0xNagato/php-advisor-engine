@@ -80,14 +80,16 @@ it('ensures the customer_booking_confirmed_non_prime SMS content is correct', fu
         fn ($matches) => $smsData->templateData[$matches[1]] ?? $matches[0],
         $templateContent
     );
+    $modifyUrl = getLastShortUrl();
 
     // Generate the expected message dynamically
     $expectedMessage = sprintf(
-        '👋 Hello from PRIMA VIP! Your reservation at %s on %s at %s has been booked by %s. Please arrive within 15 minutes of your reservation and mention PRIMA VIP when checking in! Thank you for booking with us. (https://primaapp.com)',
+        '👋 Hello from PRIMA VIP! Your reservation at %s on %s at %s has been booked by %s. Please arrive within 15 minutes of your reservation and mention PRIMA VIP when checking in! To Modify Reservation Click %s. Thank you for booking with us. (https://primaapp.com)',
         $booking->venue->name,
         $booking->booking_at->format('D M jS'),
         Carbon::parse($this->scheduleTemplate->start_time)->format('g:ia'),
-        $booking->concierge->user->name
+        $booking->concierge->user->name,
+        $modifyUrl->default_short_url
     );
 
     // Assert
@@ -96,3 +98,10 @@ it('ensures the customer_booking_confirmed_non_prime SMS content is correct', fu
         ->and($smsData->templateKey)->toBe('customer_booking_confirmed_non_prime')
         ->and($parsedMessage)->toBe($expectedMessage);
 });
+
+function getLastShortUrl()
+{
+    return \Illuminate\Support\Facades\DB::table('short_urls')
+        ->where('destination_url', 'like', '%modify%')
+        ->first();
+}
