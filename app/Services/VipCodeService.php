@@ -2,7 +2,6 @@
 
 namespace App\Services;
 
-use App\Models\User;
 use App\Models\VipCode;
 use App\Models\VipSession;
 use Illuminate\Support\Facades\Log;

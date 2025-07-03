@@ -66,11 +66,9 @@ class BookingPlatformsResource extends Resource
                     ->sortable(),
                 TextColumn::make('reservations_count')
                     ->label('Reservations')
-                    ->getStateUsing(function (VenuePlatform $record): int {
-                        return $record->venue->platformReservations()
-                            ->where('platform_type', $record->platform_type)
-                            ->count();
-                    })
+                    ->getStateUsing(fn (VenuePlatform $record): int => $record->venue->platformReservations()
+                        ->where('platform_type', $record->platform_type)
+                        ->count())
                     ->sortable(false)
                     ->alignCenter()
                     ->url(fn (VenuePlatform $record): string => static::getUrl('view-reservations', ['record' => $record->id]))

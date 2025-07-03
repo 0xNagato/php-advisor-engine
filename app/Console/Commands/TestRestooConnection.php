@@ -5,6 +5,7 @@ namespace App\Console\Commands;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Http;
+use Throwable;
 
 class TestRestooConnection extends Command
 {
@@ -75,7 +76,7 @@ class TestRestooConnection extends Command
                 } else {
                     $this->error('ENDPOINT NOT FOUND: Got a 404 response for this endpoint.');
                 }
-            } catch (\Throwable $e) {
+            } catch (Throwable $e) {
                 $this->error('Exception occurred: '.$e->getMessage());
             }
         }

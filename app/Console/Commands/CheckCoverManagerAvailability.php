@@ -69,7 +69,7 @@ class CheckCoverManagerAvailability extends Command
             $this->info('🔍 Checking availability...');
             $availability = $coverManagerService->checkAvailabilityRaw($restaurantId, $date, $time, $partySize);
 
-            if (empty($availability)) {
+            if (blank($availability)) {
                 $this->error('❌ No availability data returned from CoverManager');
 
                 return self::FAILURE;
@@ -136,7 +136,7 @@ class CheckCoverManagerAvailability extends Command
         // Try parsing natural language dates
         try {
             return Carbon::parse($dateString);
-        } catch (Throwable $e) {
+        } catch (Throwable) {
             throw new InvalidArgumentException("Unable to parse date: {$dateString}. Try formats like 'today', 'tomorrow', 'monday', 'June 30', or '2025-06-30'");
         }
     }
@@ -163,7 +163,7 @@ class CheckCoverManagerAvailability extends Command
 
         $timeSlots = $availability['availability']['people'][(string) $partySize];
 
-        if (empty($timeSlots)) {
+        if (blank($timeSlots)) {
             $this->warn("⚠️  No time slots available for party size {$partySize}");
 
             return;
@@ -198,7 +198,7 @@ class CheckCoverManagerAvailability extends Command
             // Show alternative times if available
             if (isset($availability['availability']['people'][(string) $partySize])) {
                 $alternativeTimes = array_keys($availability['availability']['people'][(string) $partySize]);
-                if (! empty($alternativeTimes)) {
+                if (filled($alternativeTimes)) {
                     $this->newLine();
                     $this->info("💡 Alternative times for {$partySize} people:");
                     foreach ($alternativeTimes as $altTime) {

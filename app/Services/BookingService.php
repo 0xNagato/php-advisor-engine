@@ -15,7 +15,6 @@ use App\Notifications\Booking\CustomerBookingRequestReceived;
 use App\Traits\FormatsPhoneNumber;
 use Exception;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
 use Stripe\Charge;
 use Stripe\Customer;
 use Stripe\Exception\ApiErrorException;

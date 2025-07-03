@@ -81,7 +81,7 @@ class ViewReservations extends ViewRecord implements HasTable
             $baseColumns[] = TextColumn::make('platform_data')
                 ->label('Time')
                 ->getStateUsing(fn ($record) => $record->platform_data['reservation_time'] ?? null)
-                ->formatStateUsing(fn ($state) => $state ? date('g:i A', strtotime($state)) : null)
+                ->formatStateUsing(fn ($state) => $state ? date('g:i A', strtotime((string) $state)) : null)
                 ->sortable(false);
         } elseif ($this->record->platform_type === 'restoo') {
             $baseColumns[] = TextColumn::make('reservation_datetime')

@@ -42,11 +42,9 @@ class CreatePlatform extends CreateRecord
                     ->schema([
                         Select::make('venue_id')
                             ->label('Venue')
-                            ->options(function () {
-                                return Venue::query()
-                                    ->orderBy('name')
-                                    ->pluck('name', 'id');
-                            })
+                            ->options(fn () => Venue::query()
+                                ->orderBy('name')
+                                ->pluck('name', 'id'))
                             ->searchable()
                             ->required(),
                     ]),
@@ -113,7 +111,7 @@ class CreatePlatform extends CreateRecord
     protected function handleRecordCreation(array $data): Model
     {
         // Get the venue by ID
-        $venue = Venue::findOrFail($data['venue_id']);
+        $venue = Venue::query()->findOrFail($data['venue_id']);
 
         // Create the platform connection
         $platform = new VenuePlatform;

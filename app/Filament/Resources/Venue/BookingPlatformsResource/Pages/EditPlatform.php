@@ -3,7 +3,6 @@
 namespace App\Filament\Resources\Venue\BookingPlatformsResource\Pages;
 
 use App\Filament\Resources\Venue\BookingPlatformsResource;
-use App\Models\VenuePlatform;
 use Filament\Actions\Action;
 use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Select;

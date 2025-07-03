@@ -15,6 +15,8 @@ use Filament\Forms\Contracts\HasForms;
 use Filament\Forms\Form;
 use Filament\Notifications\Notification;
 use Filament\Pages\Page;
+use Illuminate\Contracts\Database\Query\Builder;
+use Throwable;
 
 class CoverManagerAvailability extends Page implements HasForms
 {
@@ -148,7 +150,7 @@ class CoverManagerAvailability extends Page implements HasForms
 
     protected function getVenueOptions(): array
     {
-        return Venue::whereHas('platforms', function ($query) {
+        return Venue::query()->whereHas('platforms', function (Builder $query) {
             $query->where('platform_type', 'covermanager')
                 ->where('is_enabled', true);
         })
@@ -161,7 +163,7 @@ class CoverManagerAvailability extends Page implements HasForms
     {
         $this->validate();
 
-        $venue = Venue::find($this->data['venue_id']);
+        $venue = Venue::query()->find($this->data['venue_id']);
         if (! $venue) {
             Notification::make()
                 ->title('Error')
@@ -204,7 +206,7 @@ class CoverManagerAvailability extends Page implements HasForms
                 $this->checkSingleDateAvailability($venue, $coverManagerService, $restaurantId);
             }
 
-        } catch (\Throwable $e) {
+        } catch (Throwable $e) {
             Notification::make()
                 ->title('Error')
                 ->body('Failed to check availability: '.$e->getMessage())
@@ -225,7 +227,7 @@ class CoverManagerAvailability extends Page implements HasForms
             $partySize
         );
 
-        if (empty($availability)) {
+        if (blank($availability)) {
             Notification::make()
                 ->title('No Response')
                 ->body('No availability data returned from CoverManager')
@@ -281,7 +283,7 @@ class CoverManagerAvailability extends Page implements HasForms
             $productType
         );
 
-        if (empty($calendar)) {
+        if (blank($calendar)) {
             Notification::make()
                 ->title('No Response')
                 ->body('No calendar data returned from CoverManager')
@@ -343,9 +345,7 @@ class CoverManagerAvailability extends Page implements HasForms
             }
 
             // Sort by time
-            usort($parsed, function ($a, $b) {
-                return strcmp($a['time'], $b['time']);
-            });
+            usort($parsed, fn ($a, $b) => strcmp((string) $a['time'], (string) $b['time']));
 
             $allPartySizes[(int) $partySize] = $parsed;
         }
@@ -373,9 +373,7 @@ class CoverManagerAvailability extends Page implements HasForms
         }
 
         // Sort by time
-        usort($parsed, function ($a, $b) {
-            return strcmp($a['time'], $b['time']);
-        });
+        usort($parsed, fn ($a, $b) => strcmp((string) $a['time'], (string) $b['time']));
 
         return $parsed;
     }
@@ -430,10 +428,10 @@ class CoverManagerAvailability extends Page implements HasForms
                 'total_slots' => $totalSlots,
                 'party_sizes' => array_unique($partySizes),
                 'time_slots' => $timeSlots,
-                'min_party_size' => ! empty($partySizes) ? min($partySizes) : null,
-                'max_party_size' => ! empty($partySizes) ? max($partySizes) : null,
-                'first_available_time' => ! empty($timeSlots) ? $timeSlots[0] : null,
-                'last_available_time' => ! empty($timeSlots) ? end($timeSlots) : null,
+                'min_party_size' => filled($partySizes) ? min($partySizes) : null,
+                'max_party_size' => filled($partySizes) ? max($partySizes) : null,
+                'first_available_time' => filled($timeSlots) ? $timeSlots[0] : null,
+                'last_available_time' => filled($timeSlots) ? end($timeSlots) : null,
             ];
         }
 

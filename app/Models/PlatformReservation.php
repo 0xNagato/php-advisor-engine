@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Services\CoverManagerService;
 use App\Services\RestooService;
 use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Facades\Log;
@@ -177,7 +178,7 @@ class PlatformReservation extends Model
         }
 
         // Check if this reservation ID already exists (CoverManager may return existing ID for duplicates)
-        $existingReservation = self::where('platform_type', 'covermanager')
+        $existingReservation = self::query()->where('platform_type', 'covermanager')
             ->where('platform_reservation_id', $response['id_reserv'])
             ->first();
 
@@ -191,7 +192,7 @@ class PlatformReservation extends Model
             ]);
 
             // Still create a record for this booking, but mark it as linked to the existing reservation
-            $reservation = self::create([
+            $reservation = self::query()->create([
                 'venue_id' => $venue->id,
                 'booking_id' => $booking->id,
                 'platform_type' => 'covermanager',
@@ -215,7 +216,7 @@ class PlatformReservation extends Model
             ]);
         } else {
             // Create the database record after successful API call
-            $reservation = self::create([
+            $reservation = self::query()->create([
                 'venue_id' => $venue->id,
                 'booking_id' => $booking->id,
                 'platform_type' => 'covermanager',
@@ -304,7 +305,7 @@ class PlatformReservation extends Model
         }
 
         // Create the database record after successful API call
-        $reservation = self::create([
+        $reservation = self::query()->create([
             'venue_id' => $venue->id,
             'booking_id' => $booking->id,
             'platform_type' => 'restoo',
@@ -588,7 +589,7 @@ class PlatformReservation extends Model
 
         if ($isDuplicate) {
             // For duplicates, check if there are other active reservations using the same CoverManager reservation
-            $activeReservations = self::where('platform_type', 'covermanager')
+            $activeReservations = self::query()->where('platform_type', 'covermanager')
                 ->where('platform_status', '!=', 'cancelled')
                 ->where(function ($query) use ($actualReservationId) {
                     $query->where('platform_reservation_id', $actualReservationId)
@@ -650,7 +651,7 @@ class PlatformReservation extends Model
 
             // If this was the original reservation and there are duplicates, mark them as cancelled too
             if (! $isDuplicate) {
-                $duplicateReservations = self::where('platform_type', 'covermanager')
+                $duplicateReservations = self::query()->where('platform_type', 'covermanager')
                     ->where('platform_data->original_platform_reservation_id', $actualReservationId)
                     ->where('id', '!=', $this->id)
                     ->get();
@@ -747,37 +748,39 @@ class PlatformReservation extends Model
     /**
      * Get customer name from platform data.
      */
-    public function getCustomerNameAttribute(): ?string
+    protected function customerName(): Attribute
     {
-        return $this->platform_data['customer_name'] ?? null;
+        return Attribute::make(get: fn () => $this->platform_data['customer_name'] ?? null);
     }
 
     /**
      * Get party size from platform data.
      */
-    public function getPartySizeAttribute(): ?int
+    protected function partySize(): Attribute
     {
-        return $this->platform_data['party_size'] ?? null;
+        return Attribute::make(get: fn () => $this->platform_data['party_size'] ?? null);
     }
 
     /**
      * Get reservation datetime for display.
      */
-    public function getReservationDatetimeAttribute(): ?Carbon
+    protected function reservationDatetime(): Attribute
     {
-        if ($this->platform_type === 'covermanager') {
-            $date = $this->platform_data['reservation_date'] ?? null;
-            $time = $this->platform_data['reservation_time'] ?? null;
-            if ($date && $time) {
-                return Carbon::parse("{$date} {$time}");
+        return Attribute::make(get: function () {
+            if ($this->platform_type === 'covermanager') {
+                $date = $this->platform_data['reservation_date'] ?? null;
+                $time = $this->platform_data['reservation_time'] ?? null;
+                if ($date && $time) {
+                    return Carbon::parse("{$date} {$time}");
+                }
+            } elseif ($this->platform_type === 'restoo') {
+                $datetime = $this->platform_data['reservation_datetime'] ?? null;
+                if ($datetime) {
+                    return Carbon::parse($datetime);
+                }
             }
-        } elseif ($this->platform_type === 'restoo') {
-            $datetime = $this->platform_data['reservation_datetime'] ?? null;
-            if ($datetime) {
-                return Carbon::parse($datetime);
-            }
-        }
 
-        return null;
+            return null;
+        });
     }
 }

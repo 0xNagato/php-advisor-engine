@@ -370,7 +370,7 @@ class ScheduleManager extends Component
                 if ($this->editingSlot['size'] === '*') {
                     // Bulk edit for all party sizes
                     $templates = $this->venue->scheduleTemplates()
-                        ->where('day_of_week', strtolower($this->editingSlot['day']))
+                        ->where('day_of_week', strtolower((string) $this->editingSlot['day']))
                         ->where('start_time', $this->editingSlot['time'])
                         ->get();
 
@@ -406,7 +406,7 @@ class ScheduleManager extends Component
                     }
                 } else {
                     $template = $this->venue->scheduleTemplates
-                        ->where('day_of_week', strtolower($this->editingSlot['day']))
+                        ->where('day_of_week', strtolower((string) $this->editingSlot['day']))
                         ->where('start_time', $this->editingSlot['time'])
                         ->where('party_size', $this->editingSlot['size'])
                         ->first();
@@ -499,7 +499,7 @@ class ScheduleManager extends Component
                         $time = $slot['time'];
 
                         $template = $this->venue->scheduleTemplates()
-                            ->where('day_of_week', strtolower($this->editingSlot['day']))
+                            ->where('day_of_week', strtolower((string) $this->editingSlot['day']))
                             ->where('start_time', $time)
                             ->where('party_size', $this->editingSlot['size'])
                             ->first();

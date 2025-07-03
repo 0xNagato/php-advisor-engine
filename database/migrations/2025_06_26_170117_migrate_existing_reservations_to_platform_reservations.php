@@ -30,14 +30,14 @@ return new class extends Migration
     public function down(): void
     {
         // Clear the platform_reservations table
-        PlatformReservation::truncate();
+        PlatformReservation::query()->truncate();
     }
 
     private function migrateCoverManagerReservations(): void
     {
-        CoverManagerReservation::chunk(100, function ($reservations) {
+        CoverManagerReservation::query()->chunk(100, function ($reservations) {
             foreach ($reservations as $reservation) {
-                PlatformReservation::create([
+                PlatformReservation::query()->create([
                     'venue_id' => $reservation->venue_id,
                     'booking_id' => $reservation->booking_id,
                     'platform_type' => 'covermanager',
@@ -64,9 +64,9 @@ return new class extends Migration
 
     private function migrateRestooReservations(): void
     {
-        RestooReservation::chunk(100, function ($reservations) {
+        RestooReservation::query()->chunk(100, function ($reservations) {
             foreach ($reservations as $reservation) {
-                PlatformReservation::create([
+                PlatformReservation::query()->create([
                     'venue_id' => $reservation->venue_id,
                     'booking_id' => $reservation->booking_id,
                     'platform_type' => 'restoo',

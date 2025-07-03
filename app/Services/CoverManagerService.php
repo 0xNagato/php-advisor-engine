@@ -4,11 +4,13 @@ namespace App\Services;
 
 use App\Contracts\BookingPlatformInterface;
 use App\Models\Booking;
+use App\Models\ScheduleTemplate;
 use App\Models\Venue;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
+use InvalidArgumentException;
 use Throwable;
 
 /**
@@ -129,7 +131,7 @@ class CoverManagerService implements BookingPlatformInterface
         }
 
         // Get the schedule template to access start_time
-        $scheduleTemplate = \App\Models\ScheduleTemplate::find($booking->schedule_template_id);
+        $scheduleTemplate = ScheduleTemplate::query()->find($booking->schedule_template_id);
 
         // Format data for CoverManager API
         $bookingData = [
@@ -189,7 +191,7 @@ class CoverManagerService implements BookingPlatformInterface
                 'POST' => Http::withHeaders($requestHeaders)->post($url, $data),
                 'PUT' => Http::withHeaders($requestHeaders)->put($url, $data),
                 'DELETE' => Http::withHeaders($requestHeaders)->delete($url),
-                default => throw new \InvalidArgumentException("Unsupported HTTP method: {$method}")
+                default => throw new InvalidArgumentException("Unsupported HTTP method: {$method}")
             };
 
             if ($response->successful()) {
@@ -314,9 +316,9 @@ class CoverManagerService implements BookingPlatformInterface
     public function createReservationRaw(string $restaurantId, array $bookingData): ?array
     {
         // Split name into first_name and last_name
-        $nameParts = explode(' ', $bookingData['name'], 2);
+        $nameParts = explode(' ', (string) $bookingData['name'], 2);
         $firstName = $nameParts[0] ?? '';
-        $lastName = isset($nameParts[1]) ? $nameParts[1] : '';
+        $lastName = $nameParts[1] ?? '';
 
         // Format time to HH:MM (remove seconds if present)
         $formattedTime = Carbon::parse($bookingData['hour'])->format('H:i');
