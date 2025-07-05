@@ -139,7 +139,7 @@
                 </div>
 
                 <div>
-                    <span class="block text-xs text-gray-500 uppercase">Concierge --aaa:</span>
+                    <span class="block text-xs text-gray-500 uppercase">Concierge:</span>
                     <span class="block text-xs font-medium text-gray-800 sm:text-sm dark:text-gray-200">
                         @if ($record->concierge)
                             {{ $record->concierge->user->name }}
