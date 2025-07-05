@@ -31,7 +31,7 @@
     @endif
 
     <div
-            class="bg-white rounded-xl shadow sm:max-w-3xl lg:mx-auto invoice-container flex flex-col">
+        class="bg-white rounded-xl shadow sm:max-w-3xl lg:mx-auto invoice-container flex flex-col">
         <div class="relative overflow-hidden bg-indigo-800 min-h-32 rounded-t-xl">
             <!-- SVG Background Element -->
             <figure class="absolute inset-x-0 bottom-0 -mb-px ">
@@ -46,7 +46,7 @@
         <div class="relative z-10 -mt-12">
             <!-- Icon -->
             <span
-                    class="mx-auto flex justify-center items-center size-[62px] rounded-full border border-gray-200 bg-white text-gray-700 shadow-sm dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400">
+                class="mx-auto flex justify-center items-center size-[62px] rounded-full border border-gray-200 bg-white text-gray-700 shadow-sm dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400">
                 <x-polaris-receipt-icon class="w-10 h-10 text-gray-700" />
             </span>
             <!-- End Icon -->
@@ -132,7 +132,7 @@
 
                 <div>
                     <span
-                            class="block text-xs text-gray-500 uppercase">{{ $record->is_prime ? 'Date Paid' : 'Date Confirmed' }}:</span>
+                        class="block text-xs text-gray-500 uppercase">{{ $record->is_prime ? 'Date Paid' : 'Date Confirmed' }}:</span>
                     <span class="block text-xs font-medium text-gray-800 sm:text-sm dark:text-gray-200">
                         {{ $record->confirmed_at?->setTimezone(auth()->user()?->timezone ?? 'America/New_York')->format('M d, Y g:i A') }}
                     </span>
@@ -141,9 +141,7 @@
                 <div>
                     <span class="block text-xs text-gray-500 uppercase">Concierge:</span>
                     <span class="block text-xs font-medium text-gray-800 sm:text-sm dark:text-gray-200">
-                        @if ($record->concierge && auth()->check() && auth()->user()->hasActiveRole('super_admin'))
-                            {{ $this->viewConciergeAction }}
-                        @elseif ($record->concierge)
+                        @if ($record->concierge)
                             {{ $record->concierge->user->name }}
                             @if ($record->concierge->hotel_name)
                                 ({{ $record->concierge->hotel_name }})
@@ -209,7 +207,7 @@
 
                 <ul class="flex flex-col mt-3 overflow-hidden border rounded-lg">
                     <li
-                            class="inline-flex items-center px-4 py-3 text-xs text-gray-800 border-b sm:text-sm gap-x-2 last:border-b-0 dark:border-gray-700 dark:text-gray-200">
+                        class="inline-flex items-center px-4 py-3 text-xs text-gray-800 border-b sm:text-sm gap-x-2 last:border-b-0 dark:border-gray-700 dark:text-gray-200">
                         <div class="flex flex-col w-full">
                             <div class="flex items-center justify-between w-full">
                                 <span class="font-medium">
@@ -233,7 +231,7 @@
                     </li>
                     @if ($record->tax > 0)
                         <li
-                                class="inline-flex items-center px-4 py-3 text-xs text-gray-800 border-b sm:text-sm last:border-b-0 dark:border-gray-700 dark:text-gray-200">
+                            class="inline-flex items-center px-4 py-3 text-xs text-gray-800 border-b sm:text-sm last:border-b-0 dark:border-gray-700 dark:text-gray-200">
                             <div class="flex items-center justify-between w-full">
                                 <span>{{ $region->tax_rate_term }} ({{ $record->tax * 100 }}%)</span>
                                 <span>
@@ -244,7 +242,7 @@
                     @endif
                     @if (in_array($record->status, [BookingStatus::REFUNDED, BookingStatus::PARTIALLY_REFUNDED]))
                         <li
-                                class="inline-flex items-center px-4 py-3 text-xs text-gray-800 border-b sm:text-sm last:border-b-0 dark:border-gray-700 dark:text-gray-200">
+                            class="inline-flex items-center px-4 py-3 text-xs text-gray-800 border-b sm:text-sm last:border-b-0 dark:border-gray-700 dark:text-gray-200">
                             <div class="flex items-center justify-between w-full">
                                 <span>{{ $record->status->label() }}</span>
                                 <span class="text-red-500">
@@ -255,7 +253,7 @@
                     @endif
                     @if (!in_array($record->status, [BookingStatus::PENDING, BookingStatus::GUEST_ON_PAGE, BookingStatus::ABANDONED]))
                         <li
-                                class="inline-flex items-center px-4 py-3 text-xs font-semibold text-gray-800 sm:text-sm bg-gray-50 dark:bg-slate-800 dark:text-gray-200">
+                            class="inline-flex items-center px-4 py-3 text-xs font-semibold text-gray-800 sm:text-sm bg-gray-50 dark:bg-slate-800 dark:text-gray-200">
                             <div class="flex items-center justify-between w-full">
                                 <span>Amount Paid</span>
                                 <span>
@@ -281,9 +279,9 @@
 
                 @if($this->record->status !== BookingStatus::CANCELLED)
                     <x-filament::button
-                            wire:click="$dispatch('open-modal', { id: 'modify-booking-{{ $record->id }}' })"
-                            class="w-full mt-3" icon="heroicon-m-pencil-square"
-                            :disabled="$record->hasActiveModificationRequest()">
+                        wire:click="$dispatch('open-modal', { id: 'modify-booking-{{ $record->id }}' })"
+                        class="w-full mt-3" icon="heroicon-m-pencil-square"
+                        :disabled="$record->hasActiveModificationRequest()">
                         {{ $record->hasActiveModificationRequest() ? 'Modification Request Pending' : 'Modify Booking' }}
                     </x-filament::button>
                 @endif

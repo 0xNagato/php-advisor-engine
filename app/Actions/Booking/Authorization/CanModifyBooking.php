@@ -12,9 +12,9 @@ class CanModifyBooking
 {
     use AsAction;
 
-    public const MINUTES_BEFORE_BOOKING_TO_MODIFY = 30;
+    public const int MINUTES_BEFORE_BOOKING_TO_MODIFY = 30;
 
-    public function handle(Booking $booking, User $user): bool
+    public function handle(Booking $booking, ?User $user = null): bool
     {
         // Check for terminal statuses that can never be modified
         $nonModifiableStatuses = [
@@ -36,17 +36,6 @@ class CanModifyBooking
             return false;
         }
 
-        $isSuperAdmin = $user->hasActiveRole('super_admin');
-
-        // Check if the user is the booking's concierge or a super admin
-        $isBookingConcierge = $user->hasActiveRole('concierge') &&
-                             $user->id === $booking->concierge?->user_id;
-
-        // Must be super admin or the booking's concierge
-        if (! $isSuperAdmin && ! $isBookingConcierge) {
-            return false;
-        }
-
         // Check time restrictions for all users
         $bookingTime = Carbon::createFromFormat(
             'Y-m-d H:i:s',
@@ -62,6 +51,22 @@ class CanModifyBooking
 
         // Cannot modify after booking has started
         if ($now > $bookingTime) {
+            return false;
+        }
+
+        // If the user is null, skip user validation and allow modification
+        if (is_null($user)) {
+            return true;
+        }
+
+        $isSuperAdmin = $user->hasActiveRole('super_admin');
+
+        // Check if the user is the booking's concierge or a super admin
+        $isBookingConcierge = $user->hasActiveRole('concierge') &&
+            $user->id === $booking->concierge?->user_id;
+
+        // Must be super admin or the booking's concierge
+        if (! $isSuperAdmin && ! $isBookingConcierge) {
             return false;
         }
 
