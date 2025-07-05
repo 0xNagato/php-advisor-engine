@@ -6,7 +6,7 @@ use App\Jobs\ProcessScheduledSmsJob;
 use App\Jobs\SendBulkSmsJob;
 use App\Models\Referral;
 use App\Models\Region;
-use App\Models\ScheduledSms;
+use App\Models\SmsMessage;
 use App\Models\User;
 use Carbon\Carbon;
 use Exception;
@@ -300,18 +300,16 @@ class SmsManager extends Page implements HasTable
                 ]);
 
                 // Create a scheduled SMS record
-                $scheduledSms = ScheduledSms::query()->create([
+                $scheduledSms = SmsMessage::query()->create([
                     'message' => $message,
                     'scheduled_at' => $localScheduledTime, // User's local time
                     'scheduled_at_utc' => $utcScheduledTime, // UTC time for processing
                     'status' => 'scheduled',
+                    'type' => 'scheduled',
                     'recipient_data' => $phoneNumberChunks,
                     'regions' => $this->data['regions'] ?? [],
                     'created_by' => auth()->id(),
                     'total_recipients' => $phoneNumbers->count(),
-                    'meta' => [
-                        'test_mode' => $testMode,
-                    ],
                 ]);
 
                 // Build a clear, accurate message showing current time vs scheduled time
@@ -329,6 +327,20 @@ class SmsManager extends Page implements HasTable
                     ->success()
                     ->send();
             } else {
+                // Send immediately - create database record for tracking
+                $scheduledSms = SmsMessage::query()->create([
+                    'message' => $message,
+                    'scheduled_at' => now(), // Set to current time for immediate messages
+                    'scheduled_at_utc' => now()->utc(), // UTC time
+                    'status' => 'sent', // Mark as sent immediately
+                    'type' => 'immediate',
+                    'recipient_data' => $phoneNumberChunks,
+                    'regions' => $this->data['regions'] ?? [],
+                    'created_by' => auth()->id(),
+                    'total_recipients' => $phoneNumbers->count(),
+                    'sent_at' => now(),
+                ]);
+
                 // Send immediately
                 foreach ($phoneNumberChunks as $chunk) {
                     dispatch(new SendBulkSmsJob($chunk, $message));
@@ -536,7 +548,7 @@ class SmsManager extends Page implements HasTable
     public function table(Table $table): Table
     {
         return $table
-            ->query(ScheduledSms::query()->where('status', '!=', 'cancelled'))
+            ->query(SmsMessage::query()->where('status', '!=', 'cancelled'))
             ->defaultSort('scheduled_at_utc', 'desc')
             ->columns([
                 TextColumn::make('message')
@@ -547,6 +559,14 @@ class SmsManager extends Page implements HasTable
                     ->label('Recipients')
                     ->numeric()
                     ->sortable()
+                    ->size('xs'),
+                TextColumn::make('type')
+                    ->label('Type')
+                    ->badge()
+                    ->color(fn (string $state): string => match ($state) {
+                        'scheduled' => 'info',
+                        'immediate' => 'success',
+                    })
                     ->size('xs'),
                 TextColumn::make('scheduled_at_utc')
                     ->label('Scheduled')
@@ -581,8 +601,8 @@ class SmsManager extends Page implements HasTable
                     ->icon('heroicon-o-paper-airplane')
                     ->color('success')
                     ->requiresConfirmation()
-                    ->visible(fn (ScheduledSms $record): bool => $record->status === 'scheduled')
-                    ->action(function (ScheduledSms $record): void {
+                    ->visible(fn (SmsMessage $record): bool => $record->status === 'scheduled')
+                    ->action(function (SmsMessage $record): void {
                         ProcessScheduledSmsJob::dispatch($record->id);
 
                         Notification::make()
@@ -596,8 +616,8 @@ class SmsManager extends Page implements HasTable
                     ->icon('heroicon-o-x-mark')
                     ->color('danger')
                     ->requiresConfirmation()
-                    ->visible(fn (ScheduledSms $record): bool => $record->status === 'scheduled')
-                    ->action(function (ScheduledSms $record): void {
+                    ->visible(fn (SmsMessage $record): bool => $record->status === 'scheduled')
+                    ->action(function (SmsMessage $record): void {
                         $record->update(['status' => 'cancelled']);
 
                         Notification::make()
@@ -615,7 +635,7 @@ class SmsManager extends Page implements HasTable
                     ->requiresConfirmation()
                     ->deselectRecordsAfterCompletion()
                     ->action(function (Collection $records): void {
-                        $records = $records->filter(fn (ScheduledSms $record) => $record->status === 'scheduled');
+                        $records = $records->filter(fn (SmsMessage $record) => $record->status === 'scheduled');
 
                         $count = $records->count();
                         if ($count === 0) {
@@ -628,7 +648,7 @@ class SmsManager extends Page implements HasTable
                             return;
                         }
 
-                        $records->each(fn (ScheduledSms $record) => $record->update(['status' => 'cancelled']));
+                        $records->each(fn (SmsMessage $record) => $record->update(['status' => 'cancelled']));
 
                         Notification::make()
                             ->title('Success')

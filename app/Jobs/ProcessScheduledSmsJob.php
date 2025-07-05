@@ -2,7 +2,7 @@
 
 namespace App\Jobs;
 
-use App\Models\ScheduledSms;
+use App\Models\SmsMessage;
 use Exception;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -24,7 +24,7 @@ class ProcessScheduledSmsJob implements ShouldQueue
     public function handle(): void
     {
         try {
-            $scheduledSms = ScheduledSms::query()->find($this->scheduledSmsId);
+            $scheduledSms = SmsMessage::query()->find($this->scheduledSmsId);
 
             if (! $scheduledSms || $scheduledSms->status !== 'scheduled') {
                 return;
@@ -37,15 +37,7 @@ class ProcessScheduledSmsJob implements ShouldQueue
             $recipientData = $scheduledSms->recipient_data;
             $message = $scheduledSms->message;
 
-            // Check if this is a test message
-            $meta = $scheduledSms->meta ?? [];
-            $testMode = $meta['test_mode'] ?? false;
-
-            if ($testMode) {
-                Log::info("TEST MODE: Processing test scheduled SMS #{$scheduledSms->id}");
-            } else {
-                Log::info("Processing scheduled SMS #{$scheduledSms->id} with {$scheduledSms->total_recipients} recipients");
-            }
+            Log::info("Processing scheduled SMS #{$scheduledSms->id} with {$scheduledSms->total_recipients} recipients");
 
             foreach ($recipientData as $recipients) {
                 $phoneNumbers = collect($recipients);

@@ -3,7 +3,6 @@
 namespace App\Console\Commands;
 
 use App\Jobs\ProcessScheduledSmsJob;
-use App\Models\ScheduledSms;
 use Exception;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Log;
@@ -22,7 +21,7 @@ class ProcessScheduledSmsMessages extends Command
         $currentUtcTime = now()->setTimezone('UTC');
 
         // Find all scheduled SMS messages that are due to be sent
-        $scheduledMessages = ScheduledSms::query()->where('status', 'scheduled')
+        $scheduledMessages = SmsMessage::query()->where('status', 'scheduled')
             ->where('scheduled_at_utc', '<=', $currentUtcTime)
             ->get();
 

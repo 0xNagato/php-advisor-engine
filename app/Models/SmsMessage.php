@@ -7,17 +7,20 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 /**
- * @mixin IdeHelperScheduledSms
+ * @mixin IdeHelperSmsMessage
  */
-class ScheduledSms extends Model
+class SmsMessage extends Model
 {
     use HasFactory;
+
+    protected $table = 'sms_messages';
 
     protected $fillable = [
         'message',
         'scheduled_at',
         'scheduled_at_utc',
         'status',
+        'type',
         'recipient_data',
         'regions',
         'created_by',
