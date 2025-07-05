@@ -133,11 +133,6 @@ class ModifyDetails extends Component implements HasActions, HasForms
                     return false;
                 }
 
-                // Super admin can cancel any non-prime booking that's not in a non-cancellable status
-                if (auth()->user()->hasActiveRole('super_admin')) {
-                    return true;
-                }
-
                 // Regular users need to use canModifyBooking
                 return $this->canModifyBooking;
             })
