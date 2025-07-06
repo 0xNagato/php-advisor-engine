@@ -308,6 +308,7 @@ class SmsManager extends Page implements HasTable
                     'type' => 'scheduled',
                     'recipient_data' => $phoneNumberChunks,
                     'regions' => $this->data['regions'] ?? [],
+                    'recipient_types' => $this->data['recipients'] ?? [],
                     'created_by' => auth()->id(),
                     'total_recipients' => $phoneNumbers->count(),
                 ]);
@@ -336,6 +337,7 @@ class SmsManager extends Page implements HasTable
                     'type' => 'immediate',
                     'recipient_data' => $phoneNumberChunks,
                     'regions' => $this->data['regions'] ?? [],
+                    'recipient_types' => $this->data['recipients'] ?? [],
                     'created_by' => auth()->id(),
                     'total_recipients' => $phoneNumbers->count(),
                     'sent_at' => now(),
@@ -596,6 +598,16 @@ class SmsManager extends Page implements HasTable
             ])
             ->filters([])
             ->actions([
+                Action::make('view')
+                    ->label('View')
+                    ->icon('heroicon-o-eye')
+                    ->color('gray')
+                    ->modalHeading('SMS Message Details')
+                    ->modalContent(fn (SmsMessage $record): \Illuminate\Contracts\View\View => view('filament.pages.admin.partials.sms-details-modal', [
+                        'record' => $record,
+                    ]))
+                    ->modalSubmitAction(false)
+                    ->modalCancelActionLabel('Close'),
                 Action::make('send_now')
                     ->label('Send Now')
                     ->icon('heroicon-o-paper-airplane')

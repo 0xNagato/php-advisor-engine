@@ -3,6 +3,7 @@
 namespace App\Console\Commands;
 
 use App\Jobs\ProcessScheduledSmsJob;
+use App\Models\SmsMessage;
 use Exception;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Log;

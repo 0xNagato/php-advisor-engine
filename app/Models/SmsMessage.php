@@ -6,9 +6,6 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-/**
- * @mixin IdeHelperSmsMessage
- */
 class SmsMessage extends Model
 {
     use HasFactory;
@@ -23,6 +20,7 @@ class SmsMessage extends Model
         'type',
         'recipient_data',
         'regions',
+        'recipient_types',
         'created_by',
         'total_recipients',
     ];
@@ -40,6 +38,7 @@ class SmsMessage extends Model
         return [
             'recipient_data' => 'array',
             'regions' => 'array',
+            'recipient_types' => 'array',
             'scheduled_at' => 'datetime',
             'scheduled_at_utc' => 'datetime',
             'sent_at' => 'datetime',
