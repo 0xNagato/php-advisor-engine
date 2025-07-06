@@ -25,6 +25,7 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Concerns\InteractsWithTable;
 use Filament\Tables\Contracts\HasTable;
 use Filament\Tables\Table;
+use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\HtmlString;
@@ -603,7 +604,7 @@ class SmsManager extends Page implements HasTable
                     ->icon('heroicon-o-eye')
                     ->color('gray')
                     ->modalHeading('SMS Message Details')
-                    ->modalContent(fn (SmsMessage $record): \Illuminate\Contracts\View\View => view('filament.pages.admin.partials.sms-details-modal', [
+                    ->modalContent(fn (SmsMessage $record): View => view('filament.pages.admin.partials.sms-details-modal', [
                         'record' => $record,
                     ]))
                     ->modalSubmitAction(false)

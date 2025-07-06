@@ -33,8 +33,29 @@ class Twilio extends Connector
         );
     }
 
+    /**
+     * Get the Twilio Lookup connector instance
+     */
+    protected function getLookupConnector(): TwilioLookup
+    {
+        return new TwilioLookup;
+    }
+
+    /**
+     * Validate a phone number using Twilio's Lookup v2 API
+     */
+    public function lookupPhoneNumber(string $phone): bool
+    {
+        return $this->getLookupConnector()->isValidPhoneNumber($phone);
+    }
+
+    /**
+     * @throws Exception
+     */
     public function sms(string $phone, string $text): Response
     {
+        throw_unless($this->lookupPhoneNumber($phone), new Exception("Invalid phone number: {$phone}"));
+
         Log::info('Sending SMS to '.$phone, [
             'text' => $text,
             'provider' => 'TWILIO',
@@ -51,6 +72,8 @@ class Twilio extends Connector
     public function whatsapp(string $phone, string $text): Response
     {
         throw_if(Str::startsWith($phone, 'whatsapp:'), new Exception('Phone Number should not start with whatsapp:'));
+
+        throw_unless($this->lookupPhoneNumber($phone), new Exception("Invalid phone number: {$phone}"));
 
         Log::info('Sending WhatsApp message to '.$phone, [
             'text' => $text,
