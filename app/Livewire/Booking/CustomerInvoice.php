@@ -37,7 +37,10 @@ class CustomerInvoice extends Component implements HasForms
             ->with('earnings.user')
             ->firstOrFail();
 
-        $this->region = Region::query()->find($this->booking->city);
+        // Try to find region by city first, fallback to venue region if needed
+        $this->region = Region::query()->find($this->booking->city)
+            ?? Region::query()->find($this->booking->venue->region)
+            ?? Region::default();
     }
 
     public function render(): View

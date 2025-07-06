@@ -22,7 +22,9 @@ class CustomerInvoice extends Mailable
      */
     public function __construct(public Booking $booking)
     {
-        $this->region = Region::query()->find($this->booking->city);
+        $this->region = Region::query()->find($this->booking->city)
+            ?? Region::query()->find($this->booking->venue->region)
+            ?? Region::default();
     }
 
     /**

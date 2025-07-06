@@ -9,21 +9,21 @@
     'px-4' => isset($customerInvoice),
 ])>
     @if (!$download && isset($customerInvoice))
-        <div class="flex max-w-3xl mb-4 gap-x-2 lg:mx-auto">
+        <div class="flex gap-x-2 mb-4 max-w-3xl lg:mx-auto">
             <x-filament::button color="indigo" class="w-1/2" size="sm" icon="gmdi-email-o" wire:click="showEmailForm">
                 Email Invoice
             </x-filament::button>
             <x-filament::button color="indigo" class="w-1/2" size="sm" icon="gmdi-file-download-o" tag="a"
-                                :href="route('customer.invoice.download', ['uuid' => $booking->uuid])">
+                :href="route('customer.invoice.download', ['uuid' => $booking->uuid])">
                 Download PDF
             </x-filament::button>
         </div>
 
         @if (isset($emailOpen) && $emailOpen)
-            <form wire:submit="emailInvoice" class="max-w-3xl p-4 mx-auto my-4 bg-gray-100 border rounded-lg">
+            <form wire:submit="emailInvoice" class="p-4 mx-auto my-4 max-w-3xl bg-gray-100 rounded-lg border">
                 {{ $this->form }}
                 <button type="submit"
-                        class="w-full px-4 py-2 mt-4 text-xs font-semibold text-white bg-indigo-600 rounded-lg sm:text-xs">
+                    class="px-4 py-2 mt-4 w-full text-xs font-semibold text-white bg-indigo-600 rounded-lg sm:text-xs">
                     Send Email
                 </button>
             </form>
@@ -32,7 +32,7 @@
 
     <div
         class="bg-white rounded-xl shadow sm:max-w-3xl lg:mx-auto invoice-container flex flex-col @if ($download) min-h-[10in] @endif">
-        <div class="relative overflow-hidden bg-indigo-800 min-h-32 rounded-t-xl">
+        <div class="overflow-hidden relative bg-indigo-800 rounded-t-xl min-h-32">
             @if (!isset($customerInvoice) && !$download)
                 <div class="flex justify-between">
                     <button class="p-4 font-semibold text-white" onclick="window.history.back();">
@@ -41,9 +41,9 @@
                 </div>
             @endif
             <!-- SVG Background Element -->
-            <figure class="absolute inset-x-0 bottom-0 -mb-px ">
+            <figure class="absolute inset-x-0 bottom-0 -mb-px">
                 <svg preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg" x="0px" y="0px"
-                     viewBox="0 0 1920 100.1">
+                    viewBox="0 0 1920 100.1">
                     <path fill="currentColor" class="fill-white" d="M0,0c0,0,934.4,93.4,1920,0v100.1H0L0,0z"></path>
                 </svg>
             </figure>
@@ -62,7 +62,7 @@
         <!-- Body -->
         <div class="p-4 sm:p-7">
             <div class="text-center">
-                <h3 class="text-xl font-bold leading-5 tracking-tight text-gray-950">
+                <h3 class="text-xl font-bold tracking-tight leading-5 text-gray-950">
                     PRIMA
                 </h3>
                 <p class="text-xs text-gray-500 sm:text-xs">
@@ -87,7 +87,7 @@
 
                 <div>
                     <span class="block text-xs text-gray-500 uppercase">Payment Method:</span>
-                    <div class="flex items-center gap-x-2">
+                    <div class="flex gap-x-2 items-center">
                         @if ($booking->prime_time)
                             @if ($booking->stripe_charge && $booking->stripe_charge->paymentMethodDetails->card)
                                 @if ($booking->stripe_charge->paymentMethodDetails->card->brand === 'visa')
@@ -157,7 +157,12 @@
                 <div>
                     <span class="block text-xs text-gray-500 uppercase">Concierge:</span>
                     <span class="block text-xs font-medium text-gray-800 sm:text-sm dark:text-gray-200">
-                        @if (!$download && $booking->concierge && auth()->check() && auth()->user()->hasActiveRole('super_admin') && !isset($customerInvoice))
+                        @if (
+                            !$download &&
+                                $booking->concierge &&
+                                auth()->check() &&
+                                auth()->user()->hasActiveRole('super_admin') &&
+                                !isset($customerInvoice))
                             {{ $this->viewConciergeAction }}
                         @elseif ($booking->concierge)
                             {{ $booking->concierge->user->name }}
@@ -223,11 +228,11 @@
 
                 <h4 class="text-xs font-semibold text-gray-800 uppercase dark:text-gray-200">Summary</h4>
 
-                <ul class="flex flex-col mt-3 overflow-hidden border rounded-lg">
+                <ul class="flex overflow-hidden flex-col mt-3 rounded-lg border">
                     <li
-                        class="inline-flex items-center px-4 py-3 text-xs text-gray-800 border-b sm:text-sm gap-x-2 last:border-b-0 dark:border-gray-700 dark:text-gray-200">
+                        class="inline-flex gap-x-2 items-center px-4 py-3 text-xs text-gray-800 border-b sm:text-sm last:border-b-0 dark:border-gray-700 dark:text-gray-200">
                         <div class="flex flex-col w-full">
-                            <div class="flex items-center justify-between w-full">
+                            <div class="flex justify-between items-center w-full">
                                 <span class="font-medium">
                                     {{ $booking->venue->name }} ({{ $booking->guest_count }} guests)
                                 </span>
@@ -250,7 +255,7 @@
                     @if ($booking->tax > 0 && $booking->is_prime)
                         <li
                             class="inline-flex items-center px-4 py-3 text-xs text-gray-800 border-b sm:text-sm last:border-b-0 dark:border-gray-700 dark:text-gray-200">
-                            <div class="flex items-center justify-between w-full">
+                            <div class="flex justify-between items-center w-full">
                                 <span>{{ $region->tax_rate_term }} ({{ $booking->tax * 100 }}%)</span>
                                 <span>
                                     {{ money($booking->tax_amount_in_cents, $booking->currency) }}
@@ -261,7 +266,7 @@
                     @if (in_array($booking->status, [BookingStatus::REFUNDED, BookingStatus::PARTIALLY_REFUNDED]))
                         <li
                             class="inline-flex items-center px-4 py-3 text-xs text-gray-800 border-b sm:text-sm last:border-b-0 dark:border-gray-700 dark:text-gray-200">
-                            <div class="flex items-center justify-between w-full">
+                            <div class="flex justify-between items-center w-full">
                                 <span>{{ $booking->status->label() }}</span>
                                 <span class="text-red-500">
                                     -{{ money($booking->total_refunded, $booking->currency) }}
@@ -271,8 +276,8 @@
                     @endif
                     @if (!in_array($booking->status, [BookingStatus::PENDING, BookingStatus::GUEST_ON_PAGE, BookingStatus::ABANDONED]))
                         <li
-                            class="inline-flex items-center px-4 py-3 text-xs font-semibold text-gray-800 sm:text-sm bg-gray-50 dark:bg-slate-800 dark:text-gray-200">
-                            <div class="flex items-center justify-between w-full">
+                            class="inline-flex items-center px-4 py-3 text-xs font-semibold text-gray-800 bg-gray-50 sm:text-sm dark:bg-slate-800 dark:text-gray-200">
+                            <div class="flex justify-between items-center w-full">
                                 <span>Amount Paid</span>
                                 <span>
                                     @if (in_array($booking->status, [BookingStatus::REFUNDED, BookingStatus::PARTIALLY_REFUNDED]))
@@ -311,7 +316,7 @@
                     auth()->check() &&
                     auth()->user()->hasActiveRole('concierge') &&
                     $booking->concierge_id === auth()->user()->concierge->id)
-                <div class="p-4 mt-6 border border-gray-100 rounded-lg bg-gray-50/80">
+                <div class="p-4 mt-6 rounded-lg border border-gray-100 bg-gray-50/80">
                     <h4 class="text-sm font-semibold text-gray-800 uppercase dark:text-gray-200">Your Earnings</h4>
                     <div class="mt-3">
                         <dl class="grid grid-cols-2 gap-4 text-sm">
@@ -357,7 +362,8 @@
             @endif
 
             @if (
-                !$download && !isset($customerInvoice) &&
+                !$download &&
+                    !isset($customerInvoice) &&
                     auth()->check() &&
                     auth()->user()->hasActiveRole('super_admin') &&
                     $booking->status !== BookingStatus::PENDING &&
@@ -373,7 +379,7 @@
                             <livewire:booking.earnings-breakdown :booking="$booking" />
                         </div>
                         @if (!$booking->is_refunded)
-                            <div class="w-full -mt-2 lg:w-1/2">
+                            <div class="-mt-2 w-full lg:w-1/2">
                                 <livewire:payout-breakdown-chart :booking="$booking" />
                             </div>
                         @endif
@@ -395,7 +401,7 @@
                     $this->cancelBookingAction,
                     $this->modifyGuestInfoAction,
                     $this->modifyBookingAction,
-                ]" class="w-full mt-4" />
+                ]" class="mt-4 w-full" />
             @endif
 
             @if (
@@ -404,8 +410,7 @@
                     isset($this->canModifyBooking) &&
                     $this->canModifyBooking &&
                     !auth()->user()->hasActiveRole('super_admin'))
-                <x-filament::actions class="w-full mt-4"
-                                     :actions="[$this->cancelBookingAction, $this->modifyGuestInfoAction, $this->modifyBookingAction]" />
+                <x-filament::actions class="mt-4 w-full" :actions="[$this->cancelBookingAction, $this->modifyGuestInfoAction, $this->modifyBookingAction]" />
             @endif
         </div>
         <!-- End Body -->

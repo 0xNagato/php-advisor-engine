@@ -45,7 +45,9 @@ class ModifyDetails extends Component implements HasActions, HasForms
             ->with('earnings.user')
             ->firstOrFail();
 
-        $this->region = Region::query()->find($this->record->city);
+        $this->region = Region::query()->find($this->record->city)
+            ?? Region::query()->find($this->record->venue->region)
+            ?? Region::default();
         $this->canModifyBooking = CanModifyBooking::run($this->record, auth()->user());
     }
 
