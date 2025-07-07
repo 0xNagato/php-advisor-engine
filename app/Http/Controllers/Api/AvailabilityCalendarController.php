@@ -49,6 +49,7 @@ class AvailabilityCalendarController extends Controller
         );
 
         return response()->json([
+            'request' => $request->all(),
             'data' => [
                 'venues' => VenueResource::collection($reservation->getAvailableVenues()),
                 'timeslots' => $reservation->getTimeslotHeaders(),

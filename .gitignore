@@ -44,3 +44,4 @@ sync-db.sh
 
 # Merge scripts
 merge_develop_into_main.bat
+/.github/copilot-instructions.md

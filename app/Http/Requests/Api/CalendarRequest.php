@@ -18,14 +18,20 @@ class CalendarRequest extends FormRequest
             'guest_count' => ['required', 'integer', 'min:1'],
             'reservation_time' => [
                 'required',
-                'date_format:H:i:s',
                 function ($attribute, $value, $fail) {
+                    // Accept "H:i" or "H:i:s"
+                    if (! preg_match('/^\d{2}:\d{2}(:\d{2})?$/', $value)) {
+                        $fail('The reservation time must be in the format HH:MM or HH:MM:SS.');
+
+                        return;
+                    }
+
                     $date = $this->input('date');
                     if (! $date) {
                         return; // Date validation will fail separately
                     }
 
-                    // Get the region for timezone - use provided region or fallback to user's region
+                    // Get the region for timezone - use the provided region or fall back to the user's region
                     $regionId = $this->input('region');
                     $region = $regionId ? Region::query()->where('id', $regionId)->first() : null;
                     $region = $region ?: GetUserRegion::run();
@@ -64,6 +70,18 @@ class CalendarRequest extends FormRequest
                 },
             ],
         ];
+    }
+
+    protected function prepareForValidation(): void
+    {
+        if ($this->has('reservation_time')) {
+            $time = $this->input('reservation_time');
+            if (preg_match('/^\d{2}:\d{2}$/', $time)) {
+                $this->merge([
+                    'reservation_time' => $time.':00',
+                ]);
+            }
+        }
     }
 
     public function failedValidation(Validator $validator)
