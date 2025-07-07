@@ -41,6 +41,8 @@ class ModifyDetails extends Component implements HasActions, HasForms
 
     public bool $canModifyBooking = false;
 
+    public string $email;
+
     public function mount(string $token): void
     {
         $this->record = Booking::query()->where('uuid', $token)
