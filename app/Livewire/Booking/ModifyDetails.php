@@ -13,8 +13,10 @@ use Carbon\Carbon;
 use Filament\Actions\Action;
 use Filament\Actions\Concerns\InteractsWithActions;
 use Filament\Actions\Contracts\HasActions;
+use Filament\Forms\Components\TextInput;
 use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
+use Filament\Forms\Form;
 use Filament\Notifications\Notification;
 use Filament\Support\Enums\ActionSize;
 use Filament\Support\Enums\MaxWidth;
@@ -47,6 +49,20 @@ class ModifyDetails extends Component implements HasActions, HasForms
 
         $this->region = Region::query()->find($this->record->city);
         $this->canModifyBooking = CanModifyBooking::run($this->record, auth()->user());
+    }
+
+    public function form(Form $form): Form
+    {
+        return $form
+            ->schema([
+                TextInput::make('email')
+                    ->label('Email Address')
+                    ->prefixIcon('gmdi-mail-o')
+                    ->email()
+                    ->placeholder('Enter your email address')
+                    ->hiddenLabel()
+                    ->required(),
+            ]);
     }
 
     public function render(): View
