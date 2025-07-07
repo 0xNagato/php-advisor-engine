@@ -54,6 +54,11 @@ class ModifyDetails extends Component implements HasActions, HasForms
         return view('livewire.booking.modify-details');
     }
 
+    public function showEmailForm(): void
+    {
+        $this->emailOpen = ! $this->emailOpen;
+    }
+
     public function emailInvoice(): void
     {
         $invoicePath = $this->record->invoice_path;
