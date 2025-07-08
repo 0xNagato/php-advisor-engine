@@ -13,8 +13,10 @@ use Carbon\Carbon;
 use Filament\Actions\Action;
 use Filament\Actions\Concerns\InteractsWithActions;
 use Filament\Actions\Contracts\HasActions;
+use Filament\Forms\Components\TextInput;
 use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
+use Filament\Forms\Form;
 use Filament\Notifications\Notification;
 use Filament\Support\Enums\ActionSize;
 use Filament\Support\Enums\MaxWidth;
@@ -39,6 +41,8 @@ class ModifyDetails extends Component implements HasActions, HasForms
 
     public bool $canModifyBooking = false;
 
+    public string $email;
+
     public function mount(string $token): void
     {
         $this->record = Booking::query()->where('uuid', $token)
@@ -51,9 +55,28 @@ class ModifyDetails extends Component implements HasActions, HasForms
         $this->canModifyBooking = CanModifyBooking::run($this->record, auth()->user());
     }
 
+    public function form(Form $form): Form
+    {
+        return $form
+            ->schema([
+                TextInput::make('email')
+                    ->label('Email Address')
+                    ->prefixIcon('gmdi-mail-o')
+                    ->email()
+                    ->placeholder('Enter your email address')
+                    ->hiddenLabel()
+                    ->required(),
+            ]);
+    }
+
     public function render(): View
     {
         return view('livewire.booking.modify-details');
+    }
+
+    public function showEmailForm(): void
+    {
+        $this->emailOpen = ! $this->emailOpen;
     }
 
     public function emailInvoice(): void
