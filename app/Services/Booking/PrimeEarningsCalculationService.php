@@ -40,9 +40,9 @@ readonly class PrimeEarningsCalculationService
         $remainder -= $this->calculateAndCreateReferralEarnings($booking, $remainder);
         $remainder -= $this->calculateAndCreatePartnerEarnings($booking, $remainder);
 
-        $booking->venue_earnings = $venue_earnings;
-        $booking->concierge_earnings = $concierge_earnings;
-        $booking->platform_earnings = $remainder;
+        $booking->venue_earnings = floor($venue_earnings);
+        $booking->concierge_earnings = floor($concierge_earnings);
+        $booking->platform_earnings = floor($remainder);
         $booking->save();
     }
 

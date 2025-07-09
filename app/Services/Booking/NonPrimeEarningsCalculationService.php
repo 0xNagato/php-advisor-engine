@@ -66,9 +66,9 @@ readonly class NonPrimeEarningsCalculationService
             $this->createNonPrimeEarnings($booking, $venue_earnings, $concierge_earnings);
 
             $booking->update([
-                'concierge_earnings' => $concierge_earnings * 100,
-                'venue_earnings' => $venue_earnings * 100,
-                'platform_earnings' => $platform_earnings * 100,
+                'concierge_earnings' => floor($concierge_earnings * 100),
+                'venue_earnings' => floor($venue_earnings * 100),
+                'platform_earnings' => floor($platform_earnings * 100),
             ]);
         } catch (Exception $e) {
             Log::error('Failed to save earnings', [
