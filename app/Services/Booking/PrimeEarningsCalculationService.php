@@ -150,7 +150,7 @@ readonly class PrimeEarningsCalculationService
         );
 
         $booking->{$type->value.'_id'} = $partner->id;
-        $booking->{$type->value.'_fee'} = $amount;
+        $booking->{$type->value.'_fee'} = floor($amount);
 
         return $amount;
     }
