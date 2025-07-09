@@ -191,7 +191,7 @@ readonly class NonPrimeEarningsCalculationService
         );
 
         $booking->{$type->value.'_id'} = $partner->id;
-        $booking->{$type->value.'_fee'} = $amount * 100; // Convert to cents
+        $booking->{$type->value.'_fee'} = floor($amount * 100); // Convert to cents
         $booking->save();
 
         return $amount;
