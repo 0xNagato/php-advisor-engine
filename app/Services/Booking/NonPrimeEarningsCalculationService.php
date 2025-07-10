@@ -210,8 +210,8 @@ readonly class NonPrimeEarningsCalculationService
         float $maxPartnerEarnings
     ): void {
         $adjustmentFactor = $maxPartnerEarnings / $totalPartnerEarnings;
-        $booking->partner_concierge_fee *= floor($adjustmentFactor);
-        $booking->partner_venue_fee *= floor($adjustmentFactor);
+        $booking->partner_concierge_fee *= $adjustmentFactor;
+        $booking->partner_venue_fee *= $adjustmentFactor;
 
         // Update the earnings records
         $booking->earnings()

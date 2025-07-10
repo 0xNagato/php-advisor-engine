@@ -168,8 +168,8 @@ readonly class PrimeEarningsCalculationService
         float $maxPartnerEarnings
     ): void {
         $adjustmentFactor = $maxPartnerEarnings / $totalPartnerEarnings;
-        $booking->partner_concierge_fee *= floor($adjustmentFactor);
-        $booking->partner_venue_fee *= floor($adjustmentFactor);
+        $booking->partner_concierge_fee *= $adjustmentFactor;
+        $booking->partner_venue_fee *= $adjustmentFactor;
         Earning::query()->where('booking_id', $booking->id)
             ->where('type', EarningType::PARTNER_CONCIERGE)
             ->update(['amount' => (int) $booking->partner_concierge_fee]);

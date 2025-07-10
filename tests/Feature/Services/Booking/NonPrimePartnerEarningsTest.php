@@ -3,6 +3,7 @@
 use App\Constants\BookingPercentages;
 use App\Models\Booking;
 use App\Models\Concierge;
+use App\Models\Earning;
 use App\Models\Partner;
 use App\Models\Venue;
 use App\Services\Booking\BookingCalculationService;
@@ -40,7 +41,7 @@ test('non prime booking with partner referral for concierge', function () {
         // Calculate expected earnings
         $fee = $this->venue->non_prime_fee_per_head * $booking->guest_count;
         $platformEarnings = $fee * (BookingPercentages::PLATFORM_PERCENTAGE_CONCIERGE / 100) +
-                           $fee * (BookingPercentages::PLATFORM_PERCENTAGE_VENUE / 100);
+            $fee * (BookingPercentages::PLATFORM_PERCENTAGE_VENUE / 100);
         $partnerEarnings = $platformEarnings * ($this->partner->percentage / 100);
 
         // Check that partner earnings were created
@@ -67,7 +68,7 @@ test('non prime booking with partner referral for venue', function () {
         // Calculate expected earnings
         $fee = $this->venue->non_prime_fee_per_head * $booking->guest_count;
         $platformEarnings = $fee * (BookingPercentages::PLATFORM_PERCENTAGE_CONCIERGE / 100) +
-                           $fee * (BookingPercentages::PLATFORM_PERCENTAGE_VENUE / 100);
+            $fee * (BookingPercentages::PLATFORM_PERCENTAGE_VENUE / 100);
         $partnerEarnings = $platformEarnings * ($this->partner->percentage / 100);
 
         // Check that partner earnings were created
@@ -94,7 +95,7 @@ test('non prime booking with partner referral for both concierge and venue', fun
         // Calculate expected earnings
         $fee = $this->venue->non_prime_fee_per_head * $booking->guest_count;
         $platformEarnings = $fee * (BookingPercentages::PLATFORM_PERCENTAGE_CONCIERGE / 100) +
-                           $fee * (BookingPercentages::PLATFORM_PERCENTAGE_VENUE / 100);
+            $fee * (BookingPercentages::PLATFORM_PERCENTAGE_VENUE / 100);
 
         // Each partner earning is calculated independently
         $partnerEarningPerType = $platformEarnings * ($this->partner->percentage / 100);
@@ -127,7 +128,7 @@ test('non prime booking with partner referral exceeding max percentage', functio
         // Calculate expected earnings
         $fee = $this->venue->non_prime_fee_per_head * $booking->guest_count;
         $platformEarnings = $fee * (BookingPercentages::PLATFORM_PERCENTAGE_CONCIERGE / 100) +
-                           $fee * (BookingPercentages::PLATFORM_PERCENTAGE_VENUE / 100);
+            $fee * (BookingPercentages::PLATFORM_PERCENTAGE_VENUE / 100);
         $maxPartnerEarnings = $platformEarnings * (BookingPercentages::MAX_PARTNER_EARNINGS_PERCENTAGE / 100);
 
         // Check that partner earnings were capped
@@ -156,7 +157,7 @@ test('non prime booking with concierge referral', function () {
         // Calculate expected earnings
         $fee = $this->venue->non_prime_fee_per_head * $booking->guest_count;
         $platformEarnings = $fee * (BookingPercentages::PLATFORM_PERCENTAGE_CONCIERGE / 100) +
-                           $fee * (BookingPercentages::PLATFORM_PERCENTAGE_VENUE / 100);
+            $fee * (BookingPercentages::PLATFORM_PERCENTAGE_VENUE / 100);
         $referralEarnings = $platformEarnings * (BookingPercentages::PRIME_REFERRAL_LEVEL_1_PERCENTAGE / 100);
 
         // Check that referral earnings were created
@@ -183,7 +184,7 @@ test('non prime booking with two levels of concierge referral', function () {
         // Calculate expected earnings
         $fee = $this->venue->non_prime_fee_per_head * $booking->guest_count;
         $platformEarnings = $fee * (BookingPercentages::PLATFORM_PERCENTAGE_CONCIERGE / 100) +
-                           $fee * (BookingPercentages::PLATFORM_PERCENTAGE_VENUE / 100);
+            $fee * (BookingPercentages::PLATFORM_PERCENTAGE_VENUE / 100);
         $referralEarnings1 = $platformEarnings * (BookingPercentages::PRIME_REFERRAL_LEVEL_1_PERCENTAGE / 100);
         $referralEarnings2 = $platformEarnings * (BookingPercentages::PRIME_REFERRAL_LEVEL_2_PERCENTAGE / 100);
 
@@ -213,7 +214,7 @@ test('non prime booking with partner and concierge referrals', function () {
         // Calculate expected earnings
         $fee = $this->venue->non_prime_fee_per_head * $booking->guest_count;
         $platformEarnings = $fee * (BookingPercentages::PLATFORM_PERCENTAGE_CONCIERGE / 100) +
-                           $fee * (BookingPercentages::PLATFORM_PERCENTAGE_VENUE / 100);
+            $fee * (BookingPercentages::PLATFORM_PERCENTAGE_VENUE / 100);
         $partnerEarnings = $platformEarnings * ($this->partner->percentage / 100);
         $referralEarnings = $platformEarnings * (BookingPercentages::PRIME_REFERRAL_LEVEL_1_PERCENTAGE / 100);
 
