@@ -66,9 +66,9 @@ readonly class NonPrimeEarningsCalculationService
             $this->createNonPrimeEarnings($booking, $venue_earnings, $concierge_earnings);
 
             $booking->update([
-                'concierge_earnings' => $concierge_earnings * 100,
-                'venue_earnings' => $venue_earnings * 100,
-                'platform_earnings' => $platform_earnings * 100,
+                'concierge_earnings' => floor($concierge_earnings * 100),
+                'venue_earnings' => floor($venue_earnings * 100),
+                'platform_earnings' => floor($platform_earnings * 100),
             ]);
         } catch (Exception $e) {
             Log::error('Failed to save earnings', [
@@ -191,7 +191,7 @@ readonly class NonPrimeEarningsCalculationService
         );
 
         $booking->{$type->value.'_id'} = $partner->id;
-        $booking->{$type->value.'_fee'} = $amount * 100; // Convert to cents
+        $booking->{$type->value.'_fee'} = floor($amount * 100); // Convert to cents
         $booking->save();
 
         return $amount;
@@ -210,8 +210,8 @@ readonly class NonPrimeEarningsCalculationService
         float $maxPartnerEarnings
     ): void {
         $adjustmentFactor = $maxPartnerEarnings / $totalPartnerEarnings;
-        $booking->partner_concierge_fee *= $adjustmentFactor;
-        $booking->partner_venue_fee *= $adjustmentFactor;
+        $booking->partner_concierge_fee *= floor($adjustmentFactor);
+        $booking->partner_venue_fee *= floor($adjustmentFactor);
 
         // Update the earnings records
         $booking->earnings()

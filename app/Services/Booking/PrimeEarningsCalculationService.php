@@ -40,9 +40,9 @@ readonly class PrimeEarningsCalculationService
         $remainder -= $this->calculateAndCreateReferralEarnings($booking, $remainder);
         $remainder -= $this->calculateAndCreatePartnerEarnings($booking, $remainder);
 
-        $booking->venue_earnings = $venue_earnings;
-        $booking->concierge_earnings = $concierge_earnings;
-        $booking->platform_earnings = $remainder;
+        $booking->venue_earnings = floor($venue_earnings);
+        $booking->concierge_earnings = floor($concierge_earnings);
+        $booking->platform_earnings = floor($remainder);
         $booking->save();
     }
 
@@ -150,7 +150,7 @@ readonly class PrimeEarningsCalculationService
         );
 
         $booking->{$type->value.'_id'} = $partner->id;
-        $booking->{$type->value.'_fee'} = $amount;
+        $booking->{$type->value.'_fee'} = floor($amount);
 
         return $amount;
     }
@@ -168,8 +168,8 @@ readonly class PrimeEarningsCalculationService
         float $maxPartnerEarnings
     ): void {
         $adjustmentFactor = $maxPartnerEarnings / $totalPartnerEarnings;
-        $booking->partner_concierge_fee *= $adjustmentFactor;
-        $booking->partner_venue_fee *= $adjustmentFactor;
+        $booking->partner_concierge_fee *= floor($adjustmentFactor);
+        $booking->partner_venue_fee *= floor($adjustmentFactor);
         Earning::query()->where('booking_id', $booking->id)
             ->where('type', EarningType::PARTNER_CONCIERGE)
             ->update(['amount' => (int) $booking->partner_concierge_fee]);

@@ -8,13 +8,18 @@ use App\Models\Partner;
 
 class EarningCreationService
 {
-    public function createEarning(Booking $booking, string $type, float $amount, float $percentage, string $percentageOf): void
-    {
+    public function createEarning(
+        Booking $booking,
+        string $type,
+        float $amount,
+        float $percentage,
+        string $percentageOf
+    ): void {
         Earning::query()->create([
             'booking_id' => $booking->id,
             'user_id' => $this->getUserIdForEarningType($booking, $type),
             'type' => $type,
-            'amount' => $amount,
+            'amount' => floor($amount),
             'currency' => $booking->currency,
             'percentage' => $percentage,
             'percentage_of' => $percentageOf,
