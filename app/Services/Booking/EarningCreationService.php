@@ -19,7 +19,7 @@ class EarningCreationService
             'booking_id' => $booking->id,
             'user_id' => $this->getUserIdForEarningType($booking, $type),
             'type' => $type,
-            'amount' => floor($amount),
+            'amount' => (int) $amount,
             'currency' => $booking->currency,
             'percentage' => $percentage,
             'percentage_of' => $percentageOf,
