@@ -179,7 +179,7 @@
                                     setTimeout(initializeStripe, 10);
                                 }
                             }
-                        
+
                             function setupStripe() {
                                 const stripe = Stripe('{{ config('services.stripe.key') }}');
                                 const elements = stripe.elements();
@@ -188,40 +188,40 @@
                                     hidePostalCode: true
                                 });
                                 card.mount('#card-element');
-                        
+
                                 const form = document.getElementById('form');
-                        
+
                                 form.addEventListener('submit', async (e) => {
                                     e.preventDefault();
-                        
+
                                     // Phone validation
                                     const phoneInput = document.getElementById('phone');
                                     const phoneError = document.getElementById('phone-error');
-                        
+
                                     // Reset the error
                                     phoneError.classList.add('hidden');
                                     phoneError.textContent = '';
-                        
+
                                     // Check if the international telephone input has been initialized
                                     if (phoneInput.getAttribute('data-intl-tel-input-id')) {
                                         const iti = window.intlTelInputGlobals.getInstance(phoneInput);
-                        
+
                                         if (!iti.isValidNumber()) {
                                             phoneError.textContent = 'Please enter a valid phone number';
                                             phoneError.classList.remove('hidden');
                                             $wire.$set('isLoading', false);
                                             return;
                                         }
-                        
+
                                         // Set the phone number in E.164 format for submission
                                         phoneInput.value = iti.getNumber();
                                     }
-                        
+
                                     $wire.$set('isLoading', true);
-                        
+
                                     @if($booking->prime_time)
                                     const { token, error } = await stripe.createToken(card);
-                        
+
                                     if (error) {
                                         $wire.$set('isLoading', false);
                                         return;
@@ -229,7 +229,7 @@
                                     @else
                                     var token = { id: '' };
                                     @endif
-                        
+
                                     const formData = {
                                         first_name: document.querySelector('input[name=first_name]').value,
                                         last_name: document.querySelector('input[name=last_name]').value,
@@ -238,16 +238,16 @@
                                         notes: document.querySelector('textarea[name=notes]').value,
                                         token: token?.id ?? ''
                                     };
-                        
+
                                     @if(!$booking->prime_time)
                                     formData.real_customer_confirmation = document.querySelector('input[name=real_customer_confirmation]').checked;
                                     @endif
-                        
+
                                     $wire.$call('completeBooking', formData);
                                 })
-                        
+
                             }
-                        
+
                             initializeStripe();
                         }">
 
@@ -324,7 +324,15 @@
                                     </label>
                                 @endif
 
-                                <x-filament::button class="w-full" type="submit" size="xl">
+                                @if ($booking->prime_time)
+                                    <label class="flex items-center mt-4 mb-2 w-full text-xs">
+                                        <input type="checkbox" name="prime_time_fee_confirmation" required
+                                            class="text-indigo-600 rounded form-checkbox">
+                                        <span class="ml-2 text-xs text-gray-700 font-bold">I have informed the guest that this fee is for a prime time reservation and is not applied towards their bill at the restaurant.</span>
+                                    </label>
+                                @endif
+
+                                <x-filament::button class="mt-2 w-full" type="submit" size="xl">
                                     Complete Reservation
                                 </x-filament::button>
                             </fieldset>
@@ -332,7 +340,7 @@
                     </div>
                 </div>
 
-                <div x-show="tab === 'smsPayment'" class="flex flex-col gap-4 mt-2">
+                                                <div x-show="tab === 'smsPayment'" class="flex flex-col gap-4 mt-2">
                     <!-- SMS Payment Link Tab Content -->
                     @env('local')
                     <x-filament::button tag="a" href="{{ $bookingUrl }}" target="_blank" color="success"

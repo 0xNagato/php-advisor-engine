@@ -76,7 +76,7 @@ class CalendarRequest extends FormRequest
     {
         if ($this->has('reservation_time')) {
             $time = $this->input('reservation_time');
-            if (preg_match('/^\d{2}:\d{2}$/', $time)) {
+            if (preg_match('/^\d{2}:\d{2}$/', (string) $time)) {
                 $this->merge([
                     'reservation_time' => $time.':00',
                 ]);

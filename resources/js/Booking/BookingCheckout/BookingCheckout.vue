@@ -276,7 +276,7 @@ onMounted(async () => {
 });
 
 const agreeToText = ref(true);
-const agreeToArrival = ref(true);
+const agreeToArrival = ref(false);
 const agreeToMinimumSpend = ref(true);
 
 const handleSubmit = async (event: Event) => {

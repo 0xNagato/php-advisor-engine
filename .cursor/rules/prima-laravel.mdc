@@ -1,0 +1,385 @@
+---
+alwaysApply: true
+---
+
+# PRIMA Laravel Platform - Cursor Rules
+
+## Critical Development Rules
+
+⚠️ **NEVER DO THESE:**
+- **Never run `php artisan migrate:fresh`** - This will wipe all production data
+- **Never use `php artisan cache:clear`** or similar cache clearing commands - Use Laravel Horizon for queue management instead
+- **Never modify database structure without proper migration rollback strategy**
+- **Never deploy without running tests first**
+
+📚 **ALWAYS DO THIS:**
+- **When working on a new feature or existing feature, check the `docs/` directory** - Either create a new document or update an existing document to reflect your changes
+
+## Project Overview
+
+PRIMA is a sophisticated hospitality platform that connects venues (restaurants, clubs), concierges, and partners through a reservation management system. It handles both prime-time paid bookings and non-prime incentivized bookings with complex earnings calculations.
+
+## Architecture & Tech Stack
+
+### Core Stack
+- **PHP 8.3+** - Strictly adhere to PHP 8.3+ features
+- **Laravel 11** - Follow Laravel 11 conventions and best practices
+- **FilamentPHP 3** - For admin panel and CRUD operations
+- **Livewire 3** - For dynamic UI components and real-time features
+- **TailwindCSS** - For styling (TALL stack)
+- **PostgreSQL 17** - Database with advanced features like JSON columns and materialized views
+- **Laravel Actions** (lorisleiva/laravel-actions) - For business logic encapsulation
+
+### Key Dependencies
+- **Spatie Laravel Data** - For type-safe DTOs
+- **Laravel Sanctum** - API authentication
+- **Laravel Horizon** - Queue management
+- **Laravel Telescope** - Debugging and monitoring
+- **Stripe** - Payment processing
+- **Twilio** - SMS communications
+- **Pest** - Testing framework
+- **PostgreSQL MCP Server** - Available for AI agents to query database directly
+
+## Code Organization Patterns
+
+### 1. Action Pattern (Primary Business Logic)
+**Location**: `app/Actions/`
+- Use Laravel Actions for ALL business logic
+- Actions serve as controllers, commands, jobs, and functions
+- Ensure Actions are reusable across admin panel and API
+- Always use the `AsAction` trait
+- Structure: `app/Actions/Category/SpecificAction.php`
+
+```php
+<?php
+
+namespace App\Actions\Booking;
+
+use Lorisleiva\Actions\Concerns\AsAction;
+
+class CreateBooking
+{
+    use AsAction;
+
+    public function handle(int $scheduleTemplateId, array $data): CreateBookingReturnData
+    {
+        // Business logic here
+    }
+}
+```
+
+### 2. Service Layer Pattern
+**Location**: `app/Services/`
+- For complex business logic that doesn't fit in Actions
+- Platform integrations (CoverManagerService, RestooService)
+- Complex calculations (BookingCalculationService)
+- External API integrations
+
+### 3. Data Transfer Objects (DTOs)
+**Location**: `app/Data/`
+- Use Spatie Laravel Data for type safety
+- Required for API responses and complex data structures
+- Organize by feature: `app/Data/Booking/`, `app/Data/Stripe/`
+
+### 4. Livewire Components
+**Location**: `app/Livewire/`
+- Use Filament forms within Livewire components
+- Implement `HasForms` interface for form handling
+- Use `InteractsWithForms` trait
+- Always include proper type hints for properties
+
+### 5. Filament Resources
+**Location**: `app/Filament/Resources/`
+- Use role-based access control with `shouldRegisterNavigation()`
+- Implement `getEloquentQuery()` for row-level security
+- Use Filament's built-in components and patterns
+
+## Model Conventions
+
+### Eloquent Models
+- Use proper type hints and PHPDoc blocks
+- Always define `$fillable` arrays
+- Use `casts()` method for Laravel 11 casts
+- Implement proper relationships with return types
+- Use model observers for complex logic in static `boot()` methods
+
+```php
+class Booking extends Model
+{
+    protected $fillable = [
+        'schedule_template_id',
+        'guest_count',
+        // ...
+    ];
+
+    protected function casts(): array
+    {
+        return [
+            'booking_at' => 'datetime',
+            'meta' => 'array',
+            'is_prime' => 'boolean',
+        ];
+    }
+
+    public function venue(): HasOneThrough
+    {
+        return $this->hasOneThrough(Venue::class, ScheduleTemplate::class);
+    }
+}
+```
+
+### Database Patterns
+- Use JSON/JSONB columns for flexible metadata (`meta` field pattern)
+- Implement proper indexing for performance (including GIN indexes for JSON)
+- Use materialized views for complex queries and analytics
+- Follow Laravel migration conventions
+- Leverage PostgreSQL-specific features (arrays, JSON operators, window functions)
+- Use PostgreSQL MCP server for database queries during development
+
+## Business Logic Patterns
+
+### Earnings Calculation System
+- Complex multi-tiered earnings distribution
+- Prime bookings: venue (60%), concierge (10-15%), platform (remainder)
+- Non-prime bookings: venue pays, concierge gets bounty (80%)
+- Partner and referral earnings calculated as percentages
+- Use `BookingCalculationService` for all calculations
+
+### Booking Types
+- **Prime bookings**: Customer pays, earnings distributed
+- **Non-prime bookings**: Venue pays incentive, customer books free
+- **VIP Access**: 50/50 split for QR code bookings
+
+### Multi-Platform Integration
+- Use `BookingPlatformInterface` for external integrations
+- `BookingPlatformFactory` for dynamic platform resolution
+- `VenuePlatform` model for platform-specific configurations
+
+## API Development
+
+### REST API Structure
+- Use Laravel Sanctum for authentication
+- Implement proper API resources
+- Use Actions for business logic in API controllers
+- Follow OpenAPI documentation patterns in `app/OpenApi/`
+
+### API Conventions
+- Use proper HTTP status codes
+- Implement consistent error handling
+- Use Laravel's built-in validation
+- Return structured JSON responses
+
+## Testing Guidelines
+
+### Pest Testing Framework
+- Use Pest for all tests (not PHPUnit)
+- Implement proper test setup with `RefreshDatabase`
+- Use factories for test data creation
+- Test Actions independently from controllers
+
+```php
+test('concierge earnings are calculated correctly', function () {
+    Booking::withoutEvents(function () {
+        $concierge = Concierge::factory()->create();
+        $booking = createBooking($this->venue, $concierge, 20000);
+
+        $this->service->calculateEarnings($booking);
+
+        assertEarningExists($booking, 'concierge', 2000);
+    });
+});
+```
+
+### Test Organization
+- Feature tests in `tests/Feature/`
+- Unit tests in `tests/Unit/`
+- Use test helpers and custom assertions
+- Mock external services appropriately
+
+## Code Style & Standards
+
+### PHP Standards
+- Follow PSR-12 coding standards
+- Use PHP 8.3+ features (typed properties, enums, etc.)
+- Implement proper error handling with typed exceptions
+- Use meaningful variable and method names
+
+### Laravel Conventions
+- Follow Laravel naming conventions
+- Use Eloquent relationships properly
+- Implement proper validation rules
+- Use Laravel's built-in helpers and facades
+
+### Type Safety
+- Always use return types and parameter types
+- Use Laravel Data objects for complex data structures
+- Implement proper PHPDoc blocks
+- Use enums for fixed sets of values
+
+## Security Patterns
+
+### Authentication & Authorization
+- Use Laravel Sanctum for API authentication
+- Implement role-based access control with Spatie Permission
+- Use FilamentShield for admin panel permissions
+- Implement row-level security in Filament resources
+
+### Data Protection
+- Validate all user inputs
+- Use Laravel's built-in CSRF protection
+- Implement proper API rate limiting
+- Use encrypted fields for sensitive data
+
+## Performance Considerations
+
+### Database Optimization
+- Use proper indexing strategies (B-tree, GIN, GiST indexes)
+- Implement materialized views for complex queries and analytics
+- Use eager loading to prevent N+1 queries
+- Optimize queries with proper relations
+- Leverage PostgreSQL query planner and EXPLAIN ANALYZE
+- Use PostgreSQL-specific optimizations (partial indexes, expression indexes)
+- Consider PostgreSQL connection pooling for high-traffic scenarios
+
+### Caching Strategy
+- Use Laravel's cache system appropriately
+- Implement Redis for session and cache storage
+- Use database query caching where beneficial
+- **NEVER use `php artisan cache:clear`** - Use Laravel Horizon for queue management
+- Use proper cache invalidation strategies instead of blanket clearing
+- Leverage PostgreSQL's query result caching capabilities
+
+## Deployment & DevOps
+
+### Environment Configuration
+- Use Laravel Herd for local development
+- Implement proper environment variable management
+- Use Laravel Horizon for queue management
+- Configure proper logging and monitoring
+
+### Build Process
+- Use Vite for asset compilation
+- Implement proper asset versioning
+- Use Laravel Mix for complex asset pipelines
+
+## Common Patterns & Helpers
+
+### Helper Functions
+- Use global helper functions in `app/helpers.php`
+- Implement custom Blade directives
+- Use Laravel's built-in helpers appropriately
+
+### Event-Driven Architecture
+- Use Laravel events for decoupled operations
+- Implement proper event listeners
+- Use queued event handling for heavy operations
+
+### Notification System
+- Use Laravel notifications for communications
+- Implement custom notification channels (SMS, WhatsApp)
+- Use proper notification queuing
+
+## Error Handling & Logging
+
+### Exception Handling
+- Use typed exceptions for specific error cases
+- Implement proper exception logging
+- Use Sentry for error tracking
+- Provide meaningful error messages
+
+### Logging Strategy
+- Use Laravel's logging system
+- Implement structured logging
+- Use proper log levels
+- Include context in log messages
+
+## Development Workflow
+
+### Code Quality
+- Use PHP CS Fixer for code formatting
+- Implement PHPStan for static analysis
+- Use Laravel Pint for code style consistency
+- Follow Git conventional commits
+
+### Documentation
+- Maintain API documentation in `api-docs/`
+- Use proper PHPDoc blocks
+- Document complex business logic
+- Keep README files updated
+
+### Database Development & Debugging
+- Use PostgreSQL MCP server for direct database queries during development
+- Leverage PostgreSQL's built-in explain plans and query analysis
+- Use pgAdmin or similar tools for database management
+- Monitor query performance with PostgreSQL logs
+- Use PostgreSQL-specific debugging tools and extensions
+
+## Performance Monitoring
+
+### Monitoring Tools
+- Use Laravel Telescope for development debugging
+- Implement Laravel Horizon for queue monitoring
+- Use proper application performance monitoring
+- Monitor database query performance
+
+## Business Domain Knowledge
+
+### Key Business Rules
+- Prime bookings have variable venue payouts (default 60%)
+- Non-prime bookings have fixed venue fees and concierge bounties
+- Partner referrals are capped at 20% of remainder
+- VIP Access has simplified 50/50 splits
+- Tax calculations vary by region
+- Booking fees are capped at $500 (50000 cents)
+
+### Important Constants
+- Booking percentages defined in `BookingPercentages` class
+- Maximum advance booking: 30 days
+- Minimum advance booking: configurable minutes
+- Maximum total fee: $500 (50000 cents)
+
+## Common Gotchas & Best Practices
+
+### Timezone Handling
+- Always use venue timezone for booking calculations
+- Convert to UTC for storage in `booking_at_utc`
+- Handle timezone conversions properly in calculations
+
+### Money Handling
+- Always store money as integers (cents)
+- Use proper money formatting for display
+- Handle currency conversions appropriately
+
+### Booking State Management
+- Use proper booking status enums
+- Implement proper state transitions
+- Handle concurrent booking modifications
+
+### Platform Integration
+- Use the unified platform reservation system
+- Implement proper error handling for external APIs
+- Use retry logic for external service calls
+
+## Migration & Deployment
+
+### Database Migrations
+- **NEVER run `php artisan migrate:fresh`** - This destroys all data
+- Use proper migration naming conventions
+- Implement rollback strategies for every migration
+- Use indexes for performance (PostgreSQL-specific: GIN, GiST, partial indexes)
+- Handle large data migrations properly with batching
+- Test migrations on staging environment first
+- Use PostgreSQL-specific migration features when beneficial
+- Always backup before running migrations in production
+
+### Feature Deployment
+- Use feature flags for gradual rollouts
+- Implement proper testing strategies
+- Use proper backup strategies
+- Monitor deployment performance
+
+---
+
+Remember: This is a complex multi-tenant platform with sophisticated business rules. Always consider the impact on earnings calculations, partner relationships, and venue operations when making changes. Use the Action pattern for all business logic to ensure consistency across the admin panel and API.
+alwaysApply: true
+---
