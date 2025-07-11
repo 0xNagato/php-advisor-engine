@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Api\AppConfigController;
+use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\AvailabilityCalendarController;
 use App\Http\Controllers\Api\BookingController;
 use App\Http\Controllers\Api\ContactFormController;
@@ -13,18 +14,17 @@ use App\Http\Controllers\Api\RoleProfileController;
 use App\Http\Controllers\Api\SpecialtyController;
 use App\Http\Controllers\Api\TimeslotController;
 use App\Http\Controllers\Api\UpdatePushTokenController;
+use App\Http\Controllers\Api\UserController;
 use App\Http\Controllers\Api\VenueController;
 use App\Http\Controllers\Api\VipSessionController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
-Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
-    return $request->user();
-});
-
 // VIP Session endpoints (public - no authentication required)
 Route::post('/vip/sessions', [VipSessionController::class, 'createSession']);
 Route::post('/vip/sessions/validate', [VipSessionController::class, 'validateSession']);
+
+Route::post('/login', [AuthController::class, 'login']);
 
 // Public endpoints (no authentication required)
 Route::get('/regions', [RegionController::class, 'index']);
@@ -35,6 +35,9 @@ Route::get('/timeslots', TimeslotController::class);
 Route::get('/app-config', AppConfigController::class)->name('app-config');
 
 Route::middleware('auth:sanctum')->group(function () {
+    // Add the new logout route here
+    Route::post('/logout', [AuthController::class, 'logout']);
+
     Route::post('/regions', [RegionController::class, 'store']);
     Route::get('/venues', [VenueController::class, 'index']);
     Route::get('/venues/{id}', [VenueController::class, 'show']);
@@ -51,6 +54,13 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/profiles/{profile}/switch', [RoleProfileController::class, 'switch']);
     Route::get('/me', MeController::class);
     Route::post('/update-push-token', UpdatePushTokenController::class);
+
+    // Admin only User list endpoint
+    Route::get('/users', UserController::class);
+
+    Route::get('/user', function (Request $request) {
+        return $request->user();
+    });
 
     // VIP Session analytics (authenticated)
     Route::get('/vip/sessions/analytics', [VipSessionController::class, 'getSessionAnalytics']);
