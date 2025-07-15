@@ -80,7 +80,7 @@ it('ensures the customer_booking_confirmed_non_prime SMS content is correct', fu
         fn ($matches) => $smsData->templateData[$matches[1]] ?? $matches[0],
         $templateContent
     );
-    $modifyUrl = getLastShortUrl();
+    $modifyUrl = getLastShortUrl('modify');
 
     // Generate the expected message dynamically
     $expectedMessage = sprintf(
@@ -98,10 +98,3 @@ it('ensures the customer_booking_confirmed_non_prime SMS content is correct', fu
         ->and($smsData->templateKey)->toBe('customer_booking_confirmed_non_prime')
         ->and($parsedMessage)->toBe($expectedMessage);
 });
-
-function getLastShortUrl()
-{
-    return \Illuminate\Support\Facades\DB::table('short_urls')
-        ->where('destination_url', 'like', '%modify%')
-        ->first();
-}

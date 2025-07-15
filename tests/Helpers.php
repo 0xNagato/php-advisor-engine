@@ -158,3 +158,13 @@ if (! function_exists('getNonPrimeEarningsAmounts')) {
         ];
     }
 }
+
+if (! function_exists('getLastShortUrl')) {
+    function getLastShortUrl($term)
+    {
+        return \Illuminate\Support\Facades\DB::table('short_urls')
+            ->where('destination_url', 'like', '%'.$term.'%')
+            ->orderBy('id', 'desc')
+            ->first();
+    }
+}
