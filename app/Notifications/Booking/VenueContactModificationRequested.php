@@ -33,6 +33,10 @@ class VenueContactModificationRequested extends Notification implements ShouldQu
             $changes[] = "Party size: {$request->requested_guest_count}";
         }
 
+        if (! $request->original_booking_at->isSameDay($request->request_booking_at)) {
+            $changes[] = 'Date: '.$request->request_booking_at->format('M j, Y');
+        }
+
         if ($request->original_time !== $request->requested_time) {
             $changes[] = 'Time: '.date('g:ia', strtotime($request->requested_time));
         }
