@@ -39,10 +39,12 @@
                         <div class="p-2.5 bg-gray-50 rounded-lg">
                             <dt class="text-sm font-medium text-gray-500">Current Details</dt>
                             <dd class="mt-1.5 space-y-1.5">
-                                <div class="text-sm text-gray-900">
-                                    <span class="font-medium">Date:</span>
-                                    {{ $modificationRequest->original_booking_at->format('M j, Y') }}
-                                </div>
+                                @if($modificationRequest->original_booking_at)
+                                    <div class="text-sm text-gray-900">
+                                        <span class="font-medium">Date:</span>
+                                        {{ $modificationRequest->original_booking_at->format('M j, Y') }}
+                                    </div>
+                                @endif
                                 <div class="text-sm text-gray-900">
                                     <span class="font-medium">Time:</span>
                                     {{ $modificationRequest->formatted_original_time }}
@@ -57,13 +59,15 @@
                         <div class="p-2.5 bg-red-50 rounded-lg">
                             <dt class="text-sm font-medium">Requested Changes</dt>
                             <dd class="mt-1.5 space-y-1.5">
-                                <div class="text-sm text-gray-900">
-                                    <span class="font-medium">Date:</span>
-                                    <span
-                                        class="{{ $modificationRequest->original_booking_at->ne($modificationRequest->request_booking_at) ? 'text-red-600 font-medium' : '' }}">
+                                @if($modificationRequest->original_booking_at && $modificationRequest->request_booking_at)
+                                    <div class="text-sm text-gray-900">
+                                        <span class="font-medium">Date:</span>
+                                        <span
+                                            class="{{ $modificationRequest->original_booking_at->ne($modificationRequest->request_booking_at) ? 'text-red-600 font-medium' : '' }}">
                                         {{ $modificationRequest->request_booking_at->format('M j, Y') }}
                                     </span>
-                                </div>
+                                    </div>
+                                @endif
                                 <div class="text-sm text-gray-900">
                                     <span class="font-medium">Time:</span>
                                     <span
