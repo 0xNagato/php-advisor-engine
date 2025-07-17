@@ -106,11 +106,13 @@ class VipCodeManager extends Page
                     ->minLength(4)
                     ->maxLength(12)
                     ->unique(table: VipCode::class)
+                    ->rules(['alpha_num'])
                     ->validationMessages([
                         'required' => 'The VIP Code field is required.',
                         'unique' => 'The VIP Code has already been taken.',
                         'min' => 'The VIP Code field must be at least :min characters.',
                         'max' => 'The VIP Code field must be at least :max characters.',
+                        'alpha_num' => 'The VIP Code may only contain letters and numbers.',
                     ]),
                 Actions::make([
                     Action::make('createCode')
@@ -139,7 +141,13 @@ class VipCodeManager extends Page
 
     public function saveVipCode(): void
     {
+        // Trim whitespace from code before validation
+        if (isset($this->data['code'])) {
+            $this->data['code'] = trim($this->data['code']);
+        }
+
         $data = $this->form->getState();
+
         VipCode::query()->create([
             'code' => $data['code'],
             'concierge_id' => auth()->user()->concierge?->id ?? $data['conciergeId'],
