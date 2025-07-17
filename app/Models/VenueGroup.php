@@ -11,7 +11,6 @@ use Illuminate\Support\Facades\Storage;
 use InvalidArgumentException;
 
 /**
- * @mixin IdeHelperVenueGroup
  */
 class VenueGroup extends Model
 {

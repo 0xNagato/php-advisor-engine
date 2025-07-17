@@ -27,7 +27,6 @@ use Spatie\Activitylog\Traits\LogsActivity;
 use Throwable;
 
 /**
- * @mixin IdeHelperVenue
  */
 class Venue extends Model
 {

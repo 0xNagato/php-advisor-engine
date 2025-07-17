@@ -5,7 +5,6 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 
 /**
- * @mixin IdeHelperFeedback
  */
 class Feedback extends Model
 {

@@ -7,7 +7,6 @@ use Illuminate\Support\Collection;
 use Sushi\Sushi;
 
 /**
- * @mixin IdeHelperSpecialty
  */
 class Specialty extends Model
 {

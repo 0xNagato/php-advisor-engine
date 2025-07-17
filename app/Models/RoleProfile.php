@@ -7,7 +7,6 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Spatie\Permission\Models\Role;
 
 /**
- * @mixin IdeHelperRoleProfile
  */
 class RoleProfile extends Model
 {

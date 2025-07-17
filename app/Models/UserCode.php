@@ -8,7 +8,6 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Throwable;
 
 /**
- * @mixin IdeHelperUserCode
  */
 class UserCode extends Model
 {

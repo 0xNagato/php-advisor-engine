@@ -22,7 +22,6 @@ use Sushi\Sushi;
  * @property-read Collection<int, Neighborhood> $neighborhoods
  * @property-read Collection<int, Venue> $venues
  *
- * @mixin IdeHelperRegion
  */
 class Region extends Model
 {

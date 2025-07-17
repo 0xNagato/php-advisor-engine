@@ -14,7 +14,6 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Notifications\Notifiable;
 
 /**
- * @mixin IdeHelperReferral
  */
 class Referral extends Model
 {
