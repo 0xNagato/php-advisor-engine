@@ -103,6 +103,45 @@ Represents a user's role profile.
 - **Venue** has many **ScheduleTemplates**
 - **Booking** belongs to a **ScheduleTemplate**
 
+## API Response Models
+
+### LoginResponse
+Represents the response from the login endpoint.
+
+#### Properties
+| Property | Type | Description |
+|----------|------|-------------|
+| user | User | The authenticated user object |
+| token | string | The Sanctum API token for authentication |
+
+### LogoutResponse
+Represents the response from the logout endpoint.
+
+#### Properties
+| Property | Type | Description |
+|----------|------|-------------|
+| message | string | A success message indicating the user was logged out |
+
+### UsersResponse
+Represents the paginated response from the users endpoint.
+
+#### Properties
+| Property | Type | Description |
+|----------|------|-------------|
+| current_page | integer | The current page number |
+| data | array | Array of User objects with their relationships |
+| first_page_url | string | URL to the first page |
+| from | integer | The starting record index on the current page |
+| last_page | integer | The last page number |
+| last_page_url | string | URL to the last page |
+| links | array | Navigation links for pagination |
+| next_page_url | string | URL to the next page, or null if on last page |
+| path | string | Base URL for the endpoint |
+| per_page | integer | Number of records per page |
+| prev_page_url | string | URL to the previous page, or null if on first page |
+| to | integer | The ending record index on the current page |
+| total | integer | Total number of records |
+
 ## Enums
 
 ### BookingStatus

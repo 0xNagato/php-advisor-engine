@@ -99,6 +99,7 @@ class ModifyNonPrimeBookingWidget extends Widget implements HasForms
                             ->maxDate(today($timezone)->addDays(30)->format('Y-m-d'))
                             ->afterStateUpdated(function ($state, $set) {
                                 $set('date', Carbon::parse($state)->format('Y-m-d'));
+                                $this->selectedTimeSlotId = null;
                                 $this->loadAvailableSlots();
                             })
                             ->prefixIcon('heroicon-m-calendar')
@@ -134,9 +135,11 @@ class ModifyNonPrimeBookingWidget extends Widget implements HasForms
     {
         $formState = $this->form->getState();
         $guestCount = $this->pendingGuestCount ?? intval($formState['guest_count']);
+        $selectedDate = Carbon::parse($formState['date']);
 
         return filled($this->selectedTimeSlotId) && ($guestCount !== $this->booking?->guest_count ||
-                $this->selectedTimeSlotId !== $this->booking?->schedule_template_id);
+                $this->selectedTimeSlotId !== $this->booking?->schedule_template_id ||
+                ! $this->booking->booking_at->isSameDay($selectedDate));
     }
 
     protected function loadAvailableSlots(): void
