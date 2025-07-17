@@ -27,7 +27,7 @@ class BookingModificationService
             // Delete existing earnings before updating booking
             $modificationRequest->booking->earnings()->delete();
 
-            $newBookingAt = $modificationRequest->booking->booking_at->format('Y-m-d').' '.
+            $newBookingAt = $modificationRequest->request_booking_at->format('Y-m-d').' '.
                 $modificationRequest->requested_time;
 
             $booking_at_utc = Carbon::parse(
