@@ -259,7 +259,7 @@ class BookingController extends Controller
             ], 422);
         }
 
-        if (! $booking->venue || $booking->venue->status !== VenueStatus::ACTIVE) {
+        if (! $booking->venue || ! in_array($booking->venue->status, [VenueStatus::ACTIVE, VenueStatus::HIDDEN])) {
             activity()
                 ->performedOn($booking)
                 ->withProperties([
