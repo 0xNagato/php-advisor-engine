@@ -57,7 +57,7 @@ class PaymentInformation extends Page
     public static function canAccess(): bool
     {
         if (session()?->exists('simpleMode')) {
-            return ! session('simpleMode');
+            return !session('simpleMode');
         }
 
         $user = auth()->user();
@@ -82,6 +82,7 @@ class PaymentInformation extends Page
         if (auth()->user()->hasActiveRole('concierge')) {
             $this->payoutOptions = [
                 'Direct Deposit',
+                'IBAN',
             ];
         }
 
