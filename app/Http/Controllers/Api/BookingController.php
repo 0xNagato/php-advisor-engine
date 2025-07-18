@@ -19,6 +19,7 @@ use App\Mail\CustomerInvoice;
 use App\Models\Booking;
 use App\Models\Region;
 use App\Models\Venue;
+use App\Models\VipCode;
 use App\Notifications\Booking\SendCustomerBookingPaymentForm;
 use App\OpenApi\RequestBodies\BookingCompleteRequestBody;
 use App\OpenApi\RequestBodies\BookingCreateRequestBody;
@@ -55,6 +56,15 @@ class BookingController extends Controller
     {
         $validatedData = $request->validated();
 
+        // Look up VIP code if provided
+        $vipCode = null;
+        if (!empty($validatedData['vip_code'])) {
+            $vipCode = VipCode::query()
+                ->where('code', $validatedData['vip_code'])
+                ->where('is_active', true)
+                ->first();
+        }
+
         // Get the venue from the schedule template ID
         $venue = Venue::query()
             ->whereHas('scheduleTemplates', function (Builder $query) use ($validatedData) {
@@ -83,7 +93,7 @@ class BookingController extends Controller
             $booking = CreateBooking::run(
                 $validatedData['schedule_template_id'],
                 $validatedData,
-                null,
+                $vipCode,
                 'api',
                 $device
             );

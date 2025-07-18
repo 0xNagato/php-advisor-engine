@@ -22,7 +22,11 @@ class BookingCreateSchema extends SchemaFactory implements Reusable
                     ->example(1),
                 Schema::integer('guest_count')
                     ->description('The number of guests for the booking')
-                    ->example(2)
+                    ->example(2),
+                Schema::string('vip_code')
+                    ->description('The VIP code to associate with the booking (optional)')
+                    ->nullable()
+                    ->example('VIP123ABC')
             )
             ->required('date', 'schedule_template_id', 'guest_count');
     }

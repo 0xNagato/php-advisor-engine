@@ -1,6 +1,6 @@
 @php
     use App\Models\VipCode;
-    $vipCode = 'PRIMA';
+    $vipCode = 'HOME';
 @endphp
 <section
     class="mt-16 max-w-[1320px] mx-auto px-6 sm:px-8 md:px-12 rounded-2xl overflow-hidden bg-cover bg-center h-[350px] bg-indigo-500 mb-10"

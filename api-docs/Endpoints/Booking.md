@@ -15,7 +15,7 @@ This endpoint provides functionality for creating, updating, and deleting bookin
 #### Headers
 
 | Header        | Value            | Required | Description                            |
-|---------------|------------------|----------|----------------------------------------|
+| ------------- | ---------------- | -------- | -------------------------------------- |
 | Authorization | Bearer {token}   | Yes      | Authentication token                   |
 | Accept        | application/json | Yes      | Specifies the expected response format |
 | Content-Type  | application/json | Yes      | Specifies the request format           |
@@ -23,10 +23,11 @@ This endpoint provides functionality for creating, updating, and deleting bookin
 #### Request Body
 
 | Parameter            | Type                | Required | Description                                        |
-|----------------------|---------------------|----------|----------------------------------------------------|
+| -------------------- | ------------------- | -------- | -------------------------------------------------- |
 | date                 | string (YYYY-MM-DD) | Yes      | The date for the booking (must not be in the past) |
 | schedule_template_id | integer             | Yes      | The ID of the schedule template for the booking    |
 | guest_count          | integer             | Yes      | The number of guests for the booking               |
+| vip_code             | string              | No       | The VIP code to associate with the booking         |
 
 #### Example Request
 
@@ -39,7 +40,8 @@ curl -X POST \
   -d '{
     "date": "2023-06-15",
     "schedule_template_id": 123,
-    "guest_count": 4
+    "guest_count": 4,
+    "vip_code": "VIP123ABC"
   }'
 ```
 
@@ -55,24 +57,24 @@ curl -X POST \
 
 ```json
 {
-    "data": {
-        "bookings_enabled": true,
-        "bookings_disabled_message": "Bookings are currently disabled while we are onboarding venues and concierges. We expect to be live by mid-November.",
-        "id": 288705,
-        "guest_count": "2",
-        "dayDisplay": "Sun, Jun 15 at 6:00 pm",
-        "status": "pending",
-        "venue": "Gekko",
-        "logo": "https://prima-bucket.nyc3.digitaloceanspaces.com/venues/gekko.png",
-        "total": "$0.00",
-        "subtotal": "$0.00",
-        "tax_rate_term": null,
-        "tax_amount": null,
-        "bookingUrl": "http://localhost:8000/checkout/ba52e84f-9dd2-41e1-a80f-d928ac2e5a6d?r=sms",
-        "qrCode": "data:image/svg+xml;base64,PD94b...",
-        "is_prime": 0,
-        "booking_at": "2025-06-15T18:00:00.000000Z"
-    }
+  "data": {
+    "bookings_enabled": true,
+    "bookings_disabled_message": "Bookings are currently disabled while we are onboarding venues and concierges. We expect to be live by mid-November.",
+    "id": 288705,
+    "guest_count": "2",
+    "dayDisplay": "Sun, Jun 15 at 6:00 pm",
+    "status": "pending",
+    "venue": "Gekko",
+    "logo": "https://prima-bucket.nyc3.digitaloceanspaces.com/venues/gekko.png",
+    "total": "$0.00",
+    "subtotal": "$0.00",
+    "tax_rate_term": null,
+    "tax_amount": null,
+    "bookingUrl": "http://localhost:8000/checkout/ba52e84f-9dd2-41e1-a80f-d928ac2e5a6d?r=sms",
+    "qrCode": "data:image/svg+xml;base64,PD94b...",
+    "is_prime": 0,
+    "booking_at": "2025-06-15T18:00:00.000000Z"
+  }
 }
 ```
 
@@ -80,32 +82,32 @@ curl -X POST \
 
 ```json
 {
-    "data": {
-        "bookings_enabled": true,
-        "bookings_disabled_message": "Bookings are currently disabled while we are onboarding venues and concierges. We expect to be live by mid-November.",
-        "id": 288706,
-        "guest_count": "4",
-        "dayDisplay": "Sun, Jun 15 at 8:00 pm",
-        "status": "pending",
-        "venue": "Gekko",
-        "logo": "https://prima-bucket.nyc3.digitaloceanspaces.com/venues/gekko.png",
-        "total": "$150.00",
-        "subtotal": "$130.43",
-        "tax_rate_term": "NYC Tax",
-        "tax_amount": "$19.57",
-        "bookingUrl": "http://localhost:8000/checkout/ba52e84f-9dd2-41e1-a80f-d928ac2e5a6d?r=sms",
-        "qrCode": "data:image/svg+xml;base64,PD94b...",
-        "is_prime": 1,
-        "booking_at": "2025-06-15T20:00:00.000000Z",
-        "paymentIntentSecret": "pi_1234567890abcdef_secret_1234567890abcdef"
-    }
+  "data": {
+    "bookings_enabled": true,
+    "bookings_disabled_message": "Bookings are currently disabled while we are onboarding venues and concierges. We expect to be live by mid-November.",
+    "id": 288706,
+    "guest_count": "4",
+    "dayDisplay": "Sun, Jun 15 at 8:00 pm",
+    "status": "pending",
+    "venue": "Gekko",
+    "logo": "https://prima-bucket.nyc3.digitaloceanspaces.com/venues/gekko.png",
+    "total": "$150.00",
+    "subtotal": "$130.43",
+    "tax_rate_term": "NYC Tax",
+    "tax_amount": "$19.57",
+    "bookingUrl": "http://localhost:8000/checkout/ba52e84f-9dd2-41e1-a80f-d928ac2e5a6d?r=sms",
+    "qrCode": "data:image/svg+xml;base64,PD94b...",
+    "is_prime": 1,
+    "booking_at": "2025-06-15T20:00:00.000000Z",
+    "paymentIntentSecret": "pi_1234567890abcdef_secret_1234567890abcdef"
+  }
 }
 ```
 
 ## Response Fields
 
 | Field                     | Type    | Description                                                                |
-|---------------------------|---------|----------------------------------------------------------------------------|
+| ------------------------- | ------- | -------------------------------------------------------------------------- |
 | bookings_enabled          | boolean | Indicates whether bookings are enabled.                                    |
 | bookings_disabled_message | string  | Message displayed if bookings are disabled.                                |
 | id                        | integer | Unique identifier for the booking.                                         |
@@ -130,7 +132,7 @@ curl -X POST \
 
 ```json
 {
-    "message": "Unauthenticated."
+  "message": "Unauthenticated."
 }
 ```
 
@@ -138,7 +140,7 @@ curl -X POST \
 
 ```json
 {
-    "message": "Booking failed"
+  "message": "Booking failed"
 }
 ```
 
@@ -146,7 +148,7 @@ curl -X POST \
 
 ```json
 {
-    "message": "Venue is not currently accepting bookings"
+  "message": "Venue is not currently accepting bookings"
 }
 ```
 
@@ -154,16 +156,9 @@ or
 
 ```json
 {
-    "date": [
-        "The date field is required.",
-        "The date must not be in the past."
-    ],
-    "schedule_template_id": [
-        "The schedule template id field is required."
-    ],
-    "guest_count": [
-        "The guest count field is required."
-    ]
+  "date": ["The date field is required.", "The date must not be in the past."],
+  "schedule_template_id": ["The schedule template id field is required."],
+  "guest_count": ["The guest count field is required."]
 }
 ```
 
@@ -173,7 +168,7 @@ or
 
 ```json
 {
-    "message": "Payment processing unavailable. Please try again."
+  "message": "Payment processing unavailable. Please try again."
 }
 ```
 
@@ -188,7 +183,7 @@ or
 #### Headers
 
 | Header        | Value            | Required | Description                            |
-|---------------|------------------|----------|----------------------------------------|
+| ------------- | ---------------- | -------- | -------------------------------------- |
 | Authorization | Bearer {token}   | Yes      | Authentication token                   |
 | Accept        | application/json | Yes      | Specifies the expected response format |
 | Content-Type  | application/json | Yes      | Specifies the request format           |
@@ -196,13 +191,13 @@ or
 #### URL Parameters
 
 | Parameter | Type    | Required | Description                     |
-|-----------|---------|----------|---------------------------------|
+| --------- | ------- | -------- | ------------------------------- |
 | booking   | integer | Yes      | The ID of the booking to update |
 
 #### Request Body
 
 | Parameter  | Type   | Required | Description                                                  |
-|------------|--------|----------|--------------------------------------------------------------|
+| ---------- | ------ | -------- | ------------------------------------------------------------ |
 | first_name | string | Yes      | The first name of the guest (max: 255 characters)            |
 | last_name  | string | Yes      | The last name of the guest (max: 255 characters)             |
 | phone      | string | Yes      | The phone number of the guest (must be a valid phone number) |
@@ -238,7 +233,7 @@ curl -X PUT \
 
 ```json
 {
-    "message": "SMS Message Sent Successfully"
+  "message": "SMS Message Sent Successfully"
 }
 ```
 
@@ -248,7 +243,7 @@ curl -X PUT \
 
 ```json
 {
-    "message": "Unauthenticated."
+  "message": "Unauthenticated."
 }
 ```
 
@@ -256,7 +251,7 @@ curl -X PUT \
 
 ```json
 {
-    "message": "Booking already confirmed or cancelled"
+  "message": "Booking already confirmed or cancelled"
 }
 ```
 
@@ -264,7 +259,7 @@ curl -X PUT \
 
 ```json
 {
-    "message": "Venue is not currently accepting bookings"
+  "message": "Venue is not currently accepting bookings"
 }
 ```
 
@@ -272,7 +267,7 @@ or
 
 ```json
 {
-    "message": "Customer already has a non-prime booking for this day"
+  "message": "Customer already has a non-prime booking for this day"
 }
 ```
 
@@ -280,18 +275,10 @@ or
 
 ```json
 {
-    "first_name": [
-        "The first name field is required."
-    ],
-    "last_name": [
-        "The last name field is required."
-    ],
-    "phone": [
-        "The phone field must be a valid phone number."
-    ],
-    "bookingUrl": [
-        "The booking url field is required."
-    ]
+  "first_name": ["The first name field is required."],
+  "last_name": ["The last name field is required."],
+  "phone": ["The phone field must be a valid phone number."],
+  "bookingUrl": ["The booking url field is required."]
 }
 ```
 
@@ -306,7 +293,7 @@ or
 #### Headers
 
 | Header        | Value            | Required | Description                            |
-|---------------|------------------|----------|----------------------------------------|
+| ------------- | ---------------- | -------- | -------------------------------------- |
 | Authorization | Bearer {token}   | Yes      | Authentication token                   |
 | Accept        | application/json | Yes      | Specifies the expected response format |
 | Content-Type  | application/json | Yes      | Specifies the request format           |
@@ -314,13 +301,13 @@ or
 #### URL Parameters
 
 | Parameter | Type    | Required | Description                       |
-|-----------|---------|----------|-----------------------------------|
+| --------- | ------- | -------- | --------------------------------- |
 | booking   | integer | Yes      | The ID of the booking to complete |
 
 #### Request Body
 
 | Parameter         | Type   | Required    | Description                                                                                    |
-|-------------------|--------|-------------|------------------------------------------------------------------------------------------------|
+| ----------------- | ------ | ----------- | ---------------------------------------------------------------------------------------------- |
 | first_name        | string | Yes         | The first name of the guest (max: 255 characters)                                              |
 | last_name         | string | Yes         | The last name of the guest (max: 255 characters)                                               |
 | phone             | string | Yes         | The phone number of the guest (must be a valid phone number)                                   |
@@ -379,33 +366,33 @@ curl -X POST \
 
 ```json
 {
-    "message": "Booking completed successfully",
-    "data": {
-        "booking": {
-            "bookings_enabled": true,
-            "bookings_disabled_message": "Bookings are currently disabled while we are onboarding venues and concierges. We expect to be live by mid-November.",
-            "id": 288706,
-            "guest_count": "4",
-            "dayDisplay": "Sun, Jun 15 at 8:00 pm",
-            "status": "confirmed",
-            "venue": "Gekko",
-            "logo": "https://prima-bucket.nyc3.digitaloceanspaces.com/venues/gekko.png",
-            "total": "$150.00",
-            "subtotal": "$130.43",
-            "tax_rate_term": "NYC Tax",
-            "tax_amount": "$19.57",
-            "bookingUrl": "http://localhost:8000/checkout/ba52e84f-9dd2-41e1-a80f-d928ac2e5a6d?r=sms",
-            "qrCode": "data:image/svg+xml;base64,PD94b...",
-            "is_prime": 1,
-            "booking_at": "2025-06-15T20:00:00.000000Z"
-        },
-        "invoice_download_url": "https://api.example.com/customer/invoice/download/ba52e84f-9dd2-41e1-a80f-d928ac2e5a6d",
-        "result": {
-            "success": true,
-            "booking_confirmed": true,
-            "payment_processed": true
-        }
+  "message": "Booking completed successfully",
+  "data": {
+    "booking": {
+      "bookings_enabled": true,
+      "bookings_disabled_message": "Bookings are currently disabled while we are onboarding venues and concierges. We expect to be live by mid-November.",
+      "id": 288706,
+      "guest_count": "4",
+      "dayDisplay": "Sun, Jun 15 at 8:00 pm",
+      "status": "confirmed",
+      "venue": "Gekko",
+      "logo": "https://prima-bucket.nyc3.digitaloceanspaces.com/venues/gekko.png",
+      "total": "$150.00",
+      "subtotal": "$130.43",
+      "tax_rate_term": "NYC Tax",
+      "tax_amount": "$19.57",
+      "bookingUrl": "http://localhost:8000/checkout/ba52e84f-9dd2-41e1-a80f-d928ac2e5a6d?r=sms",
+      "qrCode": "data:image/svg+xml;base64,PD94b...",
+      "is_prime": 1,
+      "booking_at": "2025-06-15T20:00:00.000000Z"
+    },
+    "invoice_download_url": "https://api.example.com/customer/invoice/download/ba52e84f-9dd2-41e1-a80f-d928ac2e5a6d",
+    "result": {
+      "success": true,
+      "booking_confirmed": true,
+      "payment_processed": true
     }
+  }
 }
 ```
 
@@ -413,36 +400,36 @@ curl -X POST \
 
 ```json
 {
-    "message": "Booking completed successfully",
-    "data": {
-        "booking": {
-            "bookings_enabled": true,
-            "bookings_disabled_message": "Bookings are currently disabled while we are onboarding venues and concierges. We expect to be live by mid-November.",
-            "id": 288705,
-            "guest_count": "2",
-            "dayDisplay": "Sun, Jun 15 at 6:00 pm",
-            "status": "confirmed",
-            "venue": "Gekko",
-            "logo": "https://prima-bucket.nyc3.digitaloceanspaces.com/venues/gekko.png",
-            "total": "$0.00",
-            "subtotal": "$0.00",
-            "tax_rate_term": null,
-            "tax_amount": null,
-            "bookingUrl": "http://localhost:8000/checkout/ba52e84f-9dd2-41e1-a80f-d928ac2e5a6d?r=sms",
-            "qrCode": "data:image/svg+xml;base64,PD74b...",
-            "is_prime": 0,
-            "booking_at": "2025-06-15T18:00:00.000000Z"
-        },
-        "invoice_status": "processing",
-        "invoice_message": "Invoice is being generated and will be available shortly. You can check back or it will be emailed once ready."
-    }
+  "message": "Booking completed successfully",
+  "data": {
+    "booking": {
+      "bookings_enabled": true,
+      "bookings_disabled_message": "Bookings are currently disabled while we are onboarding venues and concierges. We expect to be live by mid-November.",
+      "id": 288705,
+      "guest_count": "2",
+      "dayDisplay": "Sun, Jun 15 at 6:00 pm",
+      "status": "confirmed",
+      "venue": "Gekko",
+      "logo": "https://prima-bucket.nyc3.digitaloceanspaces.com/venues/gekko.png",
+      "total": "$0.00",
+      "subtotal": "$0.00",
+      "tax_rate_term": null,
+      "tax_amount": null,
+      "bookingUrl": "http://localhost:8000/checkout/ba52e84f-9dd2-41e1-a80f-d928ac2e5a6d?r=sms",
+      "qrCode": "data:image/svg+xml;base64,PD74b...",
+      "is_prime": 0,
+      "booking_at": "2025-06-15T18:00:00.000000Z"
+    },
+    "invoice_status": "processing",
+    "invoice_message": "Invoice is being generated and will be available shortly. You can check back or it will be emailed once ready."
+  }
 }
 ```
 
 ## Response Fields
 
 | Campo                                  | Tipo    | Descripción                                                                                                               |
-|----------------------------------------|---------|---------------------------------------------------------------------------------------------------------------------------|
+| -------------------------------------- | ------- | ------------------------------------------------------------------------------------------------------------------------- |
 | message                                | string  | Mensaje de éxito indicando que la reserva se completó correctamente.                                                      |
 | data.booking.bookings_enabled          | boolean | Indica si las reservas están habilitadas.                                                                                 |
 | data.booking.bookings_disabled_message | string  | Mensaje mostrado si las reservas están deshabilitadas.                                                                    |
@@ -473,7 +460,7 @@ curl -X POST \
 
 ```json
 {
-    "message": "Unauthenticated."
+  "message": "Unauthenticated."
 }
 ```
 
@@ -483,7 +470,7 @@ curl -X POST \
 
 ```json
 {
-    "message": "Booking already confirmed or cancelled"
+  "message": "Booking already confirmed or cancelled"
 }
 ```
 
@@ -491,7 +478,7 @@ curl -X POST \
 
 ```json
 {
-    "message": "Venue is not currently accepting bookings"
+  "message": "Venue is not currently accepting bookings"
 }
 ```
 
@@ -499,7 +486,7 @@ curl -X POST \
 
 ```json
 {
-    "message": "Payment intent ID is required for prime bookings"
+  "message": "Payment intent ID is required for prime bookings"
 }
 ```
 
@@ -507,7 +494,7 @@ curl -X POST \
 
 ```json
 {
-    "message": "Customer already has a non-prime booking for this day"
+  "message": "Customer already has a non-prime booking for this day"
 }
 ```
 
@@ -515,15 +502,9 @@ curl -X POST \
 
 ```json
 {
-    "first_name": [
-        "The first name field is required."
-    ],
-    "last_name": [
-        "The last name field is required."
-    ],
-    "phone": [
-        "The phone field is required."
-    ]
+  "first_name": ["The first name field is required."],
+  "last_name": ["The last name field is required."],
+  "phone": ["The phone field is required."]
 }
 ```
 
@@ -533,7 +514,7 @@ curl -X POST \
 
 ```json
 {
-    "message": "Booking completion failed: Payment processing error"
+  "message": "Booking completion failed: Payment processing error"
 }
 ```
 
@@ -548,14 +529,14 @@ curl -X POST \
 #### Headers
 
 | Header        | Value            | Required | Description                            |
-|---------------|------------------|----------|----------------------------------------|
+| ------------- | ---------------- | -------- | -------------------------------------- |
 | Authorization | Bearer {token}   | Yes      | Authentication token                   |
 | Accept        | application/json | Yes      | Specifies the expected response format |
 
 #### URL Parameters
 
 | Parameter | Type    | Required | Description                                       |
-|-----------|---------|----------|---------------------------------------------------|
+| --------- | ------- | -------- | ------------------------------------------------- |
 | booking   | integer | Yes      | The ID of the booking to check invoice status for |
 
 #### Example Request
@@ -579,9 +560,9 @@ curl -X GET \
 
 ```json
 {
-    "status": "ready",
-    "invoice_download_url": "https://api.example.com/customer/invoice/download/ba52e84f-9dd2-41e1-a80f-d928ac2e5a6d",
-    "message": "Invoice is ready for download"
+  "status": "ready",
+  "invoice_download_url": "https://api.example.com/customer/invoice/download/ba52e84f-9dd2-41e1-a80f-d928ac2e5a6d",
+  "message": "Invoice is ready for download"
 }
 ```
 
@@ -589,15 +570,15 @@ curl -X GET \
 
 ```json
 {
-    "status": "processing",
-    "message": "Invoice is being generated and will be available shortly"
+  "status": "processing",
+  "message": "Invoice is being generated and will be available shortly"
 }
 ```
 
 ##### Response Fields
 
 | Field                | Type   | Description                                       |
-|----------------------|--------|---------------------------------------------------|
+| -------------------- | ------ | ------------------------------------------------- |
 | status               | string | Invoice status: "ready" or "processing"           |
 | invoice_download_url | string | Direct download URL (only when status is "ready") |
 | message              | string | Status description                                |
@@ -608,7 +589,7 @@ curl -X GET \
 
 ```json
 {
-    "message": "Unauthenticated."
+  "message": "Unauthenticated."
 }
 ```
 
@@ -616,7 +597,7 @@ curl -X GET \
 
 ```json
 {
-    "message": "Invoice not available for this booking"
+  "message": "Invoice not available for this booking"
 }
 ```
 
@@ -631,7 +612,7 @@ curl -X GET \
 #### Headers
 
 | Header        | Value            | Required | Description                            |
-|---------------|------------------|----------|----------------------------------------|
+| ------------- | ---------------- | -------- | -------------------------------------- |
 | Authorization | Bearer {token}   | Yes      | Authentication token                   |
 | Accept        | application/json | Yes      | Specifies the expected response format |
 | Content-Type  | application/json | Yes      | Specifies the request format           |
@@ -639,13 +620,13 @@ curl -X GET \
 #### URL Parameters
 
 | Parameter | Type    | Required | Description                                    |
-|-----------|---------|----------|------------------------------------------------|
+| --------- | ------- | -------- | ---------------------------------------------- |
 | booking   | integer | Yes      | The ID of the booking to email the invoice for |
 
 #### Request Body
 
 | Parameter | Type   | Required | Description                                                                                |
-|-----------|--------|----------|--------------------------------------------------------------------------------------------|
+| --------- | ------ | -------- | ------------------------------------------------------------------------------------------ |
 | email     | string | No       | Email address to send the invoice to (falls back to booking's guest email if not provided) |
 
 #### Example Request
@@ -683,17 +664,17 @@ curl -X POST \
 
 ```json
 {
-    "message": "Invoice sent to customer@example.com",
-    "data": {
-        "email": "customer@example.com"
-    }
+  "message": "Invoice sent to customer@example.com",
+  "data": {
+    "email": "customer@example.com"
+  }
 }
 ```
 
 ##### Response Fields
 
 | Field      | Type   | Description                           |
-|------------|--------|---------------------------------------|
+| ---------- | ------ | ------------------------------------- |
 | message    | string | Confirmation message                  |
 | data.email | string | Email address the invoice was sent to |
 
@@ -703,7 +684,7 @@ curl -X POST \
 
 ```json
 {
-    "message": "Unauthenticated."
+  "message": "Unauthenticated."
 }
 ```
 
@@ -713,7 +694,7 @@ curl -X POST \
 
 ```json
 {
-    "message": "Invoice can only be emailed for confirmed bookings"
+  "message": "Invoice can only be emailed for confirmed bookings"
 }
 ```
 
@@ -721,7 +702,7 @@ curl -X POST \
 
 ```json
 {
-    "message": "Invoice is not yet available. Please try again shortly."
+  "message": "Invoice is not yet available. Please try again shortly."
 }
 ```
 
@@ -729,7 +710,7 @@ curl -X POST \
 
 ```json
 {
-    "message": "No email address provided and no email address available for this booking"
+  "message": "No email address provided and no email address available for this booking"
 }
 ```
 
@@ -737,9 +718,7 @@ curl -X POST \
 
 ```json
 {
-    "email": [
-        "The email field must be a valid email address."
-    ]
+  "email": ["The email field must be a valid email address."]
 }
 ```
 
@@ -747,7 +726,7 @@ curl -X POST \
 
 ```json
 {
-    "message": "Failed to send invoice email. Please try again."
+  "message": "Failed to send invoice email. Please try again."
 }
 ```
 
@@ -762,14 +741,14 @@ curl -X POST \
 #### Headers
 
 | Header        | Value            | Required | Description                            |
-|---------------|------------------|----------|----------------------------------------|
+| ------------- | ---------------- | -------- | -------------------------------------- |
 | Authorization | Bearer {token}   | Yes      | Authentication token                   |
 | Accept        | application/json | Yes      | Specifies the expected response format |
 
 #### URL Parameters
 
 | Parameter | Type    | Required | Description                     |
-|-----------|---------|----------|---------------------------------|
+| --------- | ------- | -------- | ------------------------------- |
 | booking   | integer | Yes      | The ID of the booking to delete |
 
 #### Example Request
@@ -791,7 +770,7 @@ curl -X DELETE \
 
 ```json
 {
-    "message": "Booking Abandoned"
+  "message": "Booking Abandoned"
 }
 ```
 
@@ -801,7 +780,7 @@ curl -X DELETE \
 
 ```json
 {
-    "message": "Unauthenticated."
+  "message": "Unauthenticated."
 }
 ```
 
@@ -809,7 +788,7 @@ curl -X DELETE \
 
 ```json
 {
-    "message": "No query results for model [App\\Models\\Booking] 456"
+  "message": "No query results for model [App\\Models\\Booking] 456"
 }
 ```
 
@@ -817,7 +796,7 @@ curl -X DELETE \
 
 ```json
 {
-    "message": "Booking cannot be abandoned in its current status"
+  "message": "Booking cannot be abandoned in its current status"
 }
 ```
 
@@ -828,6 +807,13 @@ curl -X DELETE \
 1. **Create booking** using `POST /api/bookings` - Returns booking details and `paymentIntentSecret` for prime bookings
 2. **For prime bookings**: Process payment client-side using the `paymentIntentSecret` with Stripe's payment libraries
 3. **Complete booking** using `POST /api/bookings/{booking}/complete` - Finalizes the reservation and provides invoice
+
+### VIP Code Support
+
+- The `vip_code` parameter is optional when creating bookings
+- If provided, the system will look up the VIP code and associate it with the booking
+- If the VIP code doesn't exist or is inactive, the booking will proceed normally without the VIP code association
+- VIP codes are used for tracking and may affect concierge earnings distribution
 
 ### Endpoint-Specific Notes
 

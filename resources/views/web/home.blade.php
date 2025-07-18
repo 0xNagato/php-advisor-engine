@@ -1,11 +1,11 @@
 @php
     use App\Models\VipCode;
-    $vipCode = 'PRIMA';
+    $vipCode = 'HOME';
 @endphp
 <x-layouts.web>
 
     <section class="fade-in">
-        <div class="container ">
+        <div class="container">
             <div class="intro">
 
                 <!-- intro hero -->
@@ -43,7 +43,7 @@
 
                 <!-- cta -->
                 <div class="intro_cta">
-                    <div class="intro_cta-box bg-gradient-to-b from-blue to-green">
+                    <div class="bg-gradient-to-b intro_cta-box from-blue to-green">
                         <div class="intro_cta-box_container">
                             <div class="intro_cta-box_text">
                                 <h3 class="w-full">
@@ -59,7 +59,7 @@
                             </a>
                         </div>
                     </div>
-                    <div class="intro_cta-box bg-gradient-to-b from-salmon to-salmon_accent">
+                    <div class="bg-gradient-to-b intro_cta-box from-salmon to-salmon_accent">
                         <div class="intro_cta-box_container">
                             <div class="intro_cta-box_text">
                                 <h3 class="w-full">
@@ -74,7 +74,7 @@
                             </a>
                         </div>
                     </div>
-                    <div class="intro_cta-box bg-gradient-to-b from-purple to-primary">
+                    <div class="bg-gradient-to-b intro_cta-box from-purple to-primary">
                         <div class="intro_cta-box_container">
                             <div class="intro_cta-box_text">
                                 <h3 class="w-full">
@@ -105,7 +105,7 @@
                         <img src="{{ asset('/images/marketing/consumers.png') }}" alt="app-image"
                              class="img_full rounded-[20px]">
                     </div>
-                    <div class="flex flex-col items-start flex-1 gap-4">
+                    <div class="flex flex-col flex-1 gap-4 items-start">
                         <span class="gap-2 pl-2 tag">
                             <img src="{{ asset('/images/marketing/consumers_icon.svg') }}" alt="consumers-icon">
                             Consumers
@@ -118,7 +118,7 @@
                             challenge. With PRIMA, you can skip the wait and enjoy immediate access to the hottest
                             venues.
                         </p>
-                        <ul class="flex flex-col items-start flex-1 gap-4">
+                        <ul class="flex flex-col flex-1 gap-4 items-start">
                             <li class="px-2 py-1.5 tag">
                                 <img src="{{ asset('/images/marketing/check-salmon_icon.svg') }}" alt="check-icon">
                                 Experience hassle-free dining without long waits.
@@ -133,7 +133,7 @@
                             </li>
                         </ul>
                         <a href="{{ config('app.primary_domain') . '/' . ltrim(route('v.booking', ['code' => $vipCode], false), '/') }}"
-                           class="text-white btn bg-gradient-to-b from-primary to-primary_light btn_full">
+                           class="text-white bg-gradient-to-b btn from-primary to-primary_light btn_full">
                             Book Your Dining Experience
                         </a>
                     </div>
@@ -194,7 +194,7 @@
                             Cancellations.
                         </p>
                         <a href="#"
-                           class="text-white btn bg-gradient-to-b from-primary to-primary_light btn_full"
+                           class="text-white bg-gradient-to-b btn from-primary to-primary_light btn_full"
                            @click.prevent="$dispatch('prima-open-modal', { id: 'prima-contact' })">
                             Talk to PRIMA
                         </a>
@@ -309,7 +309,7 @@
 
                 <!-- Concierges + cards -->
                 <div class="flex-1 flex flex-col gap-4 items-start md:px-[12px]">
-                    <div class="flex flex-col items-start gap-4">
+                    <div class="flex flex-col gap-4 items-start">
                         <span class="gap-2 pl-2 tag">
                             <img src="{{ asset('images/marketing/group_icon.svg') }}" alt="group-icon">
                             Concierges
@@ -323,16 +323,16 @@
                             adventures.
                         </p>
                     </div>
-                    <div class="grid w-full grid-cols-1 gap-4 xl:grid-cols-2">
+                    <div class="grid grid-cols-1 gap-4 w-full xl:grid-cols-2">
                         <div class="card_lg">
-                            <div class="flex items-start justify-start gap-4">
-                                <div class="btn_icon btn bg-gradient-to-tl from-cyan to-blue_dark">
+                            <div class="flex gap-4 justify-start items-start">
+                                <div class="bg-gradient-to-tl btn_icon btn from-cyan to-blue_dark">
                                     <img src="{{ asset('images/marketing/vip_icon.svg') }}" alt="vip_icon"
                                          width="30">
                                 </div>
                                 <div class="flex-1">
                                     <p class="card_lg-title">
-                                        <span class="btn_icon btn bg-gradient-to-tl from-cyan to-blue_dark">
+                                        <span class="bg-gradient-to-tl btn_icon btn from-cyan to-blue_dark">
                                             <img src="{{ asset('images/marketing/vip_icon.svg') }}" alt="vip_icon"
                                                  width="30">
                                         </span>
@@ -345,13 +345,13 @@
                             </div>
                         </div>
                         <div class="card_lg">
-                            <div class="flex items-start justify-start gap-4">
-                                <div class="btn_icon btn bg-gradient-to-r from-pink to-pink_accent">
+                            <div class="flex gap-4 justify-start items-start">
+                                <div class="bg-gradient-to-r btn_icon btn from-pink to-pink_accent">
                                     <img src="{{ asset('images/marketing/money_icon.svg') }}" alt="money_icon">
                                 </div>
                                 <div class="flex-1">
                                     <p class="card_lg-title">
-                                        <span class="btn_icon btn bg-gradient-to-r from-pink to-pink_accent">
+                                        <span class="bg-gradient-to-r btn_icon btn from-pink to-pink_accent">
                                             <img src="{{ asset('images/marketing/money_icon.svg') }}"
                                                  alt="money_icon">
                                         </span>
@@ -365,14 +365,14 @@
                             </div>
                         </div>
                         <div class="card_lg">
-                            <div class="flex items-start justify-start gap-4">
-                                <div class="btn_icon btn bg-gradient-to-r from-purple_light to-purple_dark">
+                            <div class="flex gap-4 justify-start items-start">
+                                <div class="bg-gradient-to-r btn_icon btn from-purple_light to-purple_dark">
                                     <img src="{{ asset('images/marketing/date_icon.svg') }}" alt="money-icon"
                                          width="30">
                                 </div>
                                 <div class="flex-1">
                                     <p class="card_lg-title">
-                                        <span class="btn_icon btn bg-gradient-to-r from-purple_light to-purple_dark">
+                                        <span class="bg-gradient-to-r btn_icon btn from-purple_light to-purple_dark">
                                             <img src="{{ asset('images/marketing/date_icon.svg') }}" alt="money-icon"
                                                  width="30">
                                         </span>
@@ -385,14 +385,14 @@
                             </div>
                         </div>
                         <div class="card_lg">
-                            <div class="flex items-start justify-start gap-4">
-                                <div class="btn_icon btn bg-gradient-to-r from-blue_accent to-pink_strong">
+                            <div class="flex gap-4 justify-start items-start">
+                                <div class="bg-gradient-to-r btn_icon btn from-blue_accent to-pink_strong">
                                     <img src="{{ asset('images/marketing/champ_icon.svg') }}" alt="robot-icon"
                                          width="30">
                                 </div>
                                 <div class="flex-1">
                                     <p class="card_lg-title">
-                                        <span class="btn_icon btn bg-gradient-to-r from-blue_accent to-pink_strong">
+                                        <span class="bg-gradient-to-r btn_icon btn from-blue_accent to-pink_strong">
                                             <img src="{{ asset('images/marketing/champ_icon.svg') }}"
                                                  alt="robot-icon" width="30">
                                         </span>
@@ -406,7 +406,7 @@
                         </div>
                     </div>
                     <a href="#"
-                       class="flex-auto mt-4 text-white btn bg-gradient-to-b from-primary to-primary_light btn_full"
+                       class="flex-auto mt-4 text-white bg-gradient-to-b btn from-primary to-primary_light btn_full"
                        @click.prevent="$dispatch('prima-open-modal', { id: 'prima-contact' })">
                         Talk to PRIMA
                     </a>
@@ -417,7 +417,7 @@
 
     <section class="fade-in">
         <div class="container-small">
-            <div class="flex flex-col items-start gap-4 md:text-center md:items-center">
+            <div class="flex flex-col gap-4 items-start md:text-center md:items-center">
                 <span class="gap-2 pl-2 tag">
                     <img src="{{ asset('images/marketing/play_icon.svg') }}" alt="play-icon">
                     How It Works

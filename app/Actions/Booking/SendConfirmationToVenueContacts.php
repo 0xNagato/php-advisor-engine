@@ -33,7 +33,7 @@ class SendConfirmationToVenueContacts extends Action
         $url = route('venues.confirm', ['booking' => $booking]);
         $confirmationUrl = ShortURL::destinationUrl($url)->make()->default_short_url;
 
-        $mins = 5;
+        $mins = app()->isLocal() ? 0 : 5;
         $delay = now()->addMinutes($mins);
         $contacts->filter(fn ($contact) => $contact->use_for_reservations)
             ->each(fn ($contact) => $contact->notify((new VenueContactBookingConfirmed(
@@ -43,7 +43,7 @@ class SendConfirmationToVenueContacts extends Action
             ))->delay($delay)));
 
         logger()
-            ->info("Notifications for booking #$booking->id; will be send in $mins, ".$delay->format('H:i'));
+            ->info("Notifications for booking #$booking->id will be sent in $mins: ".$delay->format('H:i'));
 
         if (! $reminder) {
             $admin = User::query()->where('email', 'andru.weir@gmail.com')->first();

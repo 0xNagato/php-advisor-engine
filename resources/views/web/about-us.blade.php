@@ -1,6 +1,6 @@
 @php
     use App\Models\VipCode;
-    $vipCode = 'PRIMA';
+    $vipCode = 'HOME';
 @endphp
 <x-layouts.web>
     <x-slot name="title">About Us - PRIMA</x-slot>
