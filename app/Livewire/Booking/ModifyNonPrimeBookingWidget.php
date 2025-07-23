@@ -95,7 +95,7 @@ class ModifyNonPrimeBookingWidget extends Widget implements HasForms
                             ->columnSpanFull()
                             ->weekStartsOnSunday()
                             ->default($this->booking->booking_at->format('Y-m-d'))
-                            ->minDate(now($timezone)->format('Y-m-d'))
+                            ->minDate(now($timezone)->timezone($timezone)->format('Y-m-d'))
                             ->maxDate(today($timezone)->addDays(30)->format('Y-m-d'))
                             ->afterStateUpdated(function ($state, $set) {
                                 $set('date', Carbon::parse($state)->format('Y-m-d'));
@@ -151,6 +151,7 @@ class ModifyNonPrimeBookingWidget extends Widget implements HasForms
         // Use form state for guest count, fallback to original booking guest count
         $formState = $this->form->getState();
         $guestCount = $this->pendingGuestCount ?? intval($formState['guest_count']) ?? $this->booking->guest_count;
+        $timezone = $this->booking->venue->timezone;
         $selectedDate = Carbon::parse($formState['date']);
 
         // Round up guest count to the nearest table size (2,4,6,8,10,12,14,16,18,20)
@@ -182,9 +183,7 @@ class ModifyNonPrimeBookingWidget extends Widget implements HasForms
                     $query->where('start_time', '>', now()->timezone($this->booking->venue->timezone)->format('H:i:s'));
                 }
             )
-            ->when(
-                $selectedDate->isToday() &&
-                now()->timezone($this->booking->venue->timezone)->isSameDay($selectedDate),
+            ->when(now()->timezone($timezone)->isSameDay($selectedDate),
                 function (Builder $query) {
                     $query->where('start_time', '>', now()->timezone($this->booking->venue->timezone)->format('H:i:s'));
                 }
