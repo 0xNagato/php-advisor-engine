@@ -87,7 +87,7 @@ class ModifyNonPrimeBookingWidget extends Widget implements HasForms
                             ->viewData([
                                 'details' => $this->bookingDetails,
                             ])
-                            ->hidden(! $this->showDetails)
+                            ->hidden(!$this->showDetails)
                             ->columnSpan($this->showDetails ? 2 : 1),
                         DatePicker::make('select_date')
                             ->hiddenLabel()
@@ -95,7 +95,7 @@ class ModifyNonPrimeBookingWidget extends Widget implements HasForms
                             ->columnSpanFull()
                             ->weekStartsOnSunday()
                             ->default($this->booking->booking_at->format('Y-m-d'))
-                            ->minDate($this->booking->booking_at->format('Y-m-d'))
+                            ->minDate(now()->format('Y-m-d'))
                             ->maxDate(today($timezone)->addDays(30)->format('Y-m-d'))
                             ->afterStateUpdated(function ($state, $set) {
                                 $set('date', Carbon::parse($state)->format('Y-m-d'));
@@ -109,9 +109,9 @@ class ModifyNonPrimeBookingWidget extends Widget implements HasForms
                             ->label('Party Size')
                             ->options(array_combine(
                                 $this->getAllowedGuestCounts(),
-                                array_map(fn ($i) => "$i Guests", $this->getAllowedGuestCounts())
+                                array_map(fn($i) => "$i Guests", $this->getAllowedGuestCounts())
                             ))
-                            ->default(fn () => $this->pendingGuestCount ?? 2)
+                            ->default(fn() => $this->pendingGuestCount ?? 2)
                             ->required()
                             ->live()
                             ->afterStateUpdated(function ($state) {
@@ -139,12 +139,12 @@ class ModifyNonPrimeBookingWidget extends Widget implements HasForms
 
         return filled($this->selectedTimeSlotId) && ($guestCount !== $this->booking?->guest_count ||
                 $this->selectedTimeSlotId !== $this->booking?->schedule_template_id ||
-                ! $this->booking->booking_at->isSameDay($selectedDate));
+                !$this->booking->booking_at->isSameDay($selectedDate));
     }
 
     protected function loadAvailableSlots(): void
     {
-        if (! $this->booking) {
+        if (!$this->booking) {
             return;
         }
 
@@ -175,15 +175,24 @@ class ModifyNonPrimeBookingWidget extends Widget implements HasForms
             ->where('prime_time', false)
             ->where('remaining_tables', '>', 0)
             ->where('is_available', true)
-            ->when($this->booking->booking_at->isToday() &&
+            ->when(
+                $this->booking->booking_at->isToday() &&
                 now()->timezone($this->booking->venue->timezone)->isSameDay($selectedDate),
                 function (Builder $query) {
                     $query->where('start_time', '>', now()->timezone($this->booking->venue->timezone)->format('H:i:s'));
-                })
+                }
+            )
+            ->when(
+                $selectedDate->isToday() &&
+                now()->timezone($this->booking->venue->timezone)->isSameDay($selectedDate),
+                function (Builder $query) {
+                    $query->where('start_time', '>', now()->timezone($this->booking->venue->timezone)->format('H:i:s'));
+                }
+            )
             ->orderBy('start_time')
             ->get();
 
-        $this->availableSlots = $schedules->map(fn ($schedule) => [
+        $this->availableSlots = $schedules->map(fn($schedule) => [
             'id' => $schedule->schedule_template_id,
             'time' => $schedule->formatted_start_time,
             'remaining_tables' => $schedule->remaining_tables,
@@ -194,7 +203,7 @@ class ModifyNonPrimeBookingWidget extends Widget implements HasForms
 
     public function submitModificationRequest(): void
     {
-        if (! $this->hasChanges) {
+        if (!$this->hasChanges) {
             Notification::make()
                 ->warning()
                 ->title('No Changes Detected')
@@ -233,7 +242,7 @@ class ModifyNonPrimeBookingWidget extends Widget implements HasForms
                     'request_source_id' => auth()->id(), // Will be null for customer requests
                     'customer_notified' => false,
                     'venue_notified' => false,
-                    'customer_initiated' => ! auth()->check(), // Flag to indicate customer initiated request
+                    'customer_initiated' => !auth()->check(), // Flag to indicate customer initiated request
                 ],
             ]);
 
@@ -265,7 +274,7 @@ class ModifyNonPrimeBookingWidget extends Widget implements HasForms
                 ->send();
 
             // Close the modal
-            $this->dispatch('close-modal', id: 'modify-booking-'.$this->booking->id);
+            $this->dispatch('close-modal', id: 'modify-booking-' . $this->booking->id);
 
             // Reset form
             $this->selectedTimeSlotId = null;
