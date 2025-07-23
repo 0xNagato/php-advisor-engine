@@ -2,6 +2,7 @@
 
 use App\Actions\Booking\CreateBooking;
 use App\Enums\BookingStatus;
+use App\Enums\VenueType;
 use App\Models\Booking;
 use App\Models\Concierge;
 use App\Models\ScheduleTemplate;
@@ -116,4 +117,181 @@ it('does not send notification to venue contacts if booking is canceled', functi
 
     // Assert: No notifications were sent
     Notification::assertNothingSent();
+});
+
+// Test group for Ibiza Hike Station time formatting
+describe('Ibiza Hike Station time formatting', function () {
+    beforeEach(function () {
+        // Create a hike station venue
+        $this->hikeVenue = Venue::factory()->create([
+            'name' => 'Ibiza Hike Station',
+            'venue_type' => VenueType::HIKE_STATION,
+            'timezone' => 'Europe/Madrid',
+            'region' => 'ibiza',
+        ]);
+
+        // Create a schedule template for the hike venue
+        $this->hikeScheduleTemplate = ScheduleTemplate::factory()->create([
+            'venue_id' => $this->hikeVenue->id,
+            'start_time' => '10:00:00',
+            'day_of_week' => Carbon::now('Europe/Madrid')->format('l'),
+            'party_size' => 8,
+        ]);
+
+        // Get the first contact for testing
+        $this->contact = $this->hikeVenue->contacts->first();
+    });
+
+    it('formats morning hike times correctly (6 AM - 1:59 PM)', function () {
+        $morningTimes = [
+            '06:00:00' => 'Jul 25th - Morning Hike',
+            '10:00:00' => 'Jul 25th - Morning Hike',
+            '13:59:00' => 'Jul 25th - Morning Hike',
+        ];
+
+        foreach ($morningTimes as $time => $expectedFormat) {
+            // Create booking at specific time
+            $booking = Booking::factory()->create([
+                'booking_at' => '2024-07-25 '.$time,
+                'booking_at_utc' => Carbon::parse('2024-07-25 '.$time, 'Europe/Madrid')->utc(),
+                'status' => BookingStatus::CONFIRMED,
+                'concierge_id' => $this->concierge->id,
+                'schedule_template_id' => $this->hikeScheduleTemplate->id,
+            ]);
+
+            // Create notification
+            $notification = new VenueContactBookingConfirmed(
+                booking: $booking,
+                confirmationUrl: 'https://primavip.co/t/test123',
+                reminder: false
+            );
+
+            // Test SMS formatting
+            $smsData = $notification->toSMS($this->contact);
+
+            expect($smsData->templateKey)->toBe('venue_contact_booking_confirmed_hike')
+                ->and($smsData->templateData['booking_date_time'])->toBe($expectedFormat);
+        }
+    });
+
+    it('formats sunset hike times correctly (2 PM and later)', function () {
+        $sunsetTimes = [
+            '14:00:00' => 'Jul 25th - Sunset Hike',
+            '16:30:00' => 'Jul 25th - Sunset Hike',
+            '18:00:00' => 'Jul 25th - Sunset Hike',
+            '20:00:00' => 'Jul 25th - Sunset Hike',
+        ];
+
+        foreach ($sunsetTimes as $time => $expectedFormat) {
+            // Create booking at specific time
+            $booking = Booking::factory()->create([
+                'booking_at' => '2024-07-25 '.$time,
+                'booking_at_utc' => Carbon::parse('2024-07-25 '.$time, 'Europe/Madrid')->utc(),
+                'status' => BookingStatus::CONFIRMED,
+                'concierge_id' => $this->concierge->id,
+                'schedule_template_id' => $this->hikeScheduleTemplate->id,
+            ]);
+
+            // Create notification
+            $notification = new VenueContactBookingConfirmed(
+                booking: $booking,
+                confirmationUrl: 'https://primavip.co/t/test123',
+                reminder: false
+            );
+
+            // Test SMS formatting
+            $smsData = $notification->toSMS($this->contact);
+
+            expect($smsData->templateKey)->toBe('venue_contact_booking_confirmed_hike')
+                ->and($smsData->templateData['booking_date_time'])->toBe($expectedFormat);
+        }
+    });
+
+    it('uses special hike templates for SMS notifications', function () {
+        $booking = Booking::factory()->create([
+            'booking_at' => '2024-07-25 10:00:00',
+            'booking_at_utc' => Carbon::parse('2024-07-25 10:00:00', 'Europe/Madrid')->utc(),
+            'status' => BookingStatus::CONFIRMED,
+            'concierge_id' => $this->concierge->id,
+            'schedule_template_id' => $this->hikeScheduleTemplate->id,
+            'notes' => null,
+        ]);
+
+        // Test regular notification
+        $notification = new VenueContactBookingConfirmed(
+            booking: $booking,
+            confirmationUrl: 'https://primavip.co/t/test123',
+            reminder: false
+        );
+
+        $smsData = $notification->toSMS($this->contact);
+        expect($smsData->templateKey)->toBe('venue_contact_booking_confirmed_hike');
+
+        // Test reminder notification
+        $reminderNotification = new VenueContactBookingConfirmed(
+            booking: $booking,
+            confirmationUrl: 'https://primavip.co/t/test123',
+            reminder: true
+        );
+
+        $reminderSmsData = $reminderNotification->toSMS($this->contact);
+        expect($reminderSmsData->templateKey)->toBe('venue_contact_booking_confirmed_reminder_hike');
+    });
+
+    it('uses special hike templates with notes', function () {
+        $booking = Booking::factory()->create([
+            'booking_at' => '2024-07-25 14:00:00',
+            'booking_at_utc' => Carbon::parse('2024-07-25 14:00:00', 'Europe/Madrid')->utc(),
+            'status' => BookingStatus::CONFIRMED,
+            'concierge_id' => $this->concierge->id,
+            'schedule_template_id' => $this->hikeScheduleTemplate->id,
+            'notes' => 'Dietary restrictions: vegetarian',
+        ]);
+
+        // Test regular notification with notes
+        $notification = new VenueContactBookingConfirmed(
+            booking: $booking,
+            confirmationUrl: 'https://primavip.co/t/test123',
+            reminder: false
+        );
+
+        $smsData = $notification->toSMS($this->contact);
+        expect($smsData->templateKey)->toBe('venue_contact_booking_confirmed_notes_hike')
+            ->and($smsData->templateData['notes'])->toBe('Dietary restrictions: vegetarian');
+
+        // Test reminder notification with notes
+        $reminderNotification = new VenueContactBookingConfirmed(
+            booking: $booking,
+            confirmationUrl: 'https://primavip.co/t/test123',
+            reminder: true
+        );
+
+        $reminderSmsData = $reminderNotification->toSMS($this->contact);
+        expect($reminderSmsData->templateKey)->toBe('venue_contact_booking_confirmed_reminder_notes_hike');
+    });
+});
+
+// Test group for regular venue formatting
+describe('Regular venue time formatting', function () {
+    it('formats regular venue times with @ symbol', function () {
+        $booking = Booking::factory()->create([
+            'booking_at' => '2024-07-25 19:30:00',
+            'booking_at_utc' => Carbon::parse('2024-07-25 19:30:00', 'UTC')->utc(),
+            'status' => BookingStatus::CONFIRMED,
+            'concierge_id' => $this->concierge->id,
+            'schedule_template_id' => $this->scheduleTemplate->id,
+        ]);
+
+        $notification = new VenueContactBookingConfirmed(
+            booking: $booking,
+            confirmationUrl: 'https://primavip.co/t/test123',
+            reminder: false
+        );
+
+        $smsData = $notification->toSMS($this->venue->contacts->first());
+
+        expect($smsData->templateKey)->toBe('venue_contact_booking_confirmed')
+            ->and($smsData->templateData['booking_date'])->toBe('Jul 25th')
+            ->and($smsData->templateData['booking_time'])->toBe('7:30pm');
+    });
 });

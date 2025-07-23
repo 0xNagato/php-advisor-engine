@@ -4,6 +4,7 @@ namespace App\Notifications\Booking;
 
 use App\Data\SmsData;
 use App\Data\VenueContactData;
+use App\Enums\VenueType;
 use App\Models\Booking;
 use Carbon\Carbon;
 use Illuminate\Bus\Queueable;
@@ -62,25 +63,81 @@ class VenueContactBookingConfirmed extends Notification implements ShouldQueue
         return $bookingDate->format('M jS');
     }
 
+    private function formatBookingTime(Carbon $date): string
+    {
+        // Handle special experiences for Ibiza Hike Station
+        if ($this->booking->venue->venue_type == VenueType::HIKE_STATION) {
+            $hour = $date->hour;
+
+            // Determine hike type based on time of day (Ibiza sunset ~9:30 PM)
+            if ($hour >= 6 && $hour < 14) {
+                return 'Morning Hike';
+            } else {
+                // Anything 2 PM and later is sunset hike (ends around sunset time)
+                return 'Sunset Hike';
+            }
+        }
+
+        return $date->format('g:ia');
+    }
+
+    private function formatBookingDateTime(Carbon $date): string
+    {
+        $formattedDate = $this->formatBookingDate($date);
+
+        // Handle special experiences for Ibiza Hike Station
+        if ($this->booking->venue->venue_type == VenueType::HIKE_STATION) {
+            $experienceName = $this->formatBookingTime($date);
+
+            return "{$formattedDate} - {$experienceName}";
+        }
+
+        $formattedTime = $this->formatBookingTime($date);
+
+        return "{$formattedDate} @ {$formattedTime}";
+    }
+
     public function toSMS(VenueContactData $notifiable): SmsData
     {
-        $baseTemplate = $this->reminder
-            ? 'venue_contact_booking_confirmed_reminder'
-            : 'venue_contact_booking_confirmed';
+        // Handle different templates and formatting for hike stations
+        if ($this->booking->venue->venue_type == VenueType::HIKE_STATION) {
+            if ($this->reminder) {
+                $templateKey = filled($this->booking->notes)
+                    ? 'venue_contact_booking_confirmed_reminder_notes_hike'
+                    : 'venue_contact_booking_confirmed_reminder_hike';
+            } else {
+                $templateKey = filled($this->booking->notes)
+                    ? 'venue_contact_booking_confirmed_notes_hike'
+                    : 'venue_contact_booking_confirmed_hike';
+            }
 
-        $templateKey = filled($this->booking->notes)
-            ? $baseTemplate.'_notes'
-            : $baseTemplate;
+            $templateData = [
+                'venue_name' => $this->booking->venue->name,
+                'booking_date_time' => $this->formatBookingDateTime($this->booking->booking_at),
+                'guest_name' => $this->booking->guest_name,
+                'guest_count' => $this->booking->guest_count,
+                'guest_phone' => $this->booking->guest_phone,
+                'confirmation_url' => $this->confirmationUrl,
+            ];
+        } else {
+            $baseTemplate = $this->reminder
+                ? 'venue_contact_booking_confirmed_reminder'
+                : 'venue_contact_booking_confirmed';
 
-        $templateData = [
-            'venue_name' => $this->booking->venue->name,
-            'booking_date' => $this->formatBookingDate($this->booking->booking_at),
-            'booking_time' => $this->booking->booking_at->format('g:ia'),
-            'guest_name' => $this->booking->guest_name,
-            'guest_count' => $this->booking->guest_count,
-            'guest_phone' => $this->booking->guest_phone,
-            'confirmation_url' => $this->confirmationUrl,
-        ];
+            $templateKey = filled($this->booking->notes)
+                ? $baseTemplate.'_notes'
+                : $baseTemplate;
+
+            $templateData = [
+                'venue_name' => $this->booking->venue->name,
+                'booking_date' => $this->formatBookingDate($this->booking->booking_at),
+                'booking_time' => $this->formatBookingTime($this->booking->booking_at),
+                'guest_name' => $this->booking->guest_name,
+                'guest_count' => $this->booking->guest_count,
+                'guest_phone' => $this->booking->guest_phone,
+                'confirmation_url' => $this->confirmationUrl,
+            ];
+        }
 
         if (filled($this->booking->notes)) {
             $templateData['notes'] = $this->booking->notes;
@@ -95,8 +152,16 @@ class VenueContactBookingConfirmed extends Notification implements ShouldQueue
 
     public function toMail(): MailMessage
     {
-        $bookingDate = $this->formatBookingDate($this->booking->booking_at);
-        $bookingTime = $this->booking->booking_at->format('g:ia');
+        // Handle different formatting for hike stations
+        if ($this->booking->venue->venue_type == VenueType::HIKE_STATION) {
+            $bookingDateTime = $this->formatBookingDateTime($this->booking->booking_at);
+            $bookingTimeDisplay = $bookingDateTime; // For email, show the combined format
+        } else {
+            $bookingDate = $this->formatBookingDate($this->booking->booking_at);
+            $bookingTime = $this->formatBookingTime($this->booking->booking_at);
+            $bookingTimeDisplay = "{$bookingDate} @ {$bookingTime}";
+        }
+
         $notes = $this->booking->notes ?? 'NA';
 
         if ($this->reminder) {
@@ -115,8 +180,7 @@ class VenueContactBookingConfirmed extends Notification implements ShouldQueue
             ->greeting($greeting)
             ->line($introLine)
             ->line('**Booking Details:**')
-            ->line("Date: {$bookingDate}")
-            ->line("Time: {$bookingTime}")
+            ->line("When: {$bookingTimeDisplay}")
             ->line("Party Size: {$this->booking->guest_count}")
             ->line("Customer: {$this->booking->guest_name}")
             ->line("Customer phone: {$this->booking->guest_phone}")
