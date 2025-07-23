@@ -95,7 +95,7 @@ class ModifyNonPrimeBookingWidget extends Widget implements HasForms
                             ->columnSpanFull()
                             ->weekStartsOnSunday()
                             ->default($this->booking->booking_at->format('Y-m-d'))
-                            ->minDate(now()->format('Y-m-d'))
+                            ->minDate(now($timezone)->format('Y-m-d'))
                             ->maxDate(today($timezone)->addDays(30)->format('Y-m-d'))
                             ->afterStateUpdated(function ($state, $set) {
                                 $set('date', Carbon::parse($state)->format('Y-m-d'));
