@@ -33,13 +33,18 @@ class EarningsBreakdown extends Component
             : $this->booking->total_with_tax_in_cents;
     }
 
-    private function calculateGrossAmount()
+    private function calculateGrossRevenue(): int
     {
         if ($this->booking->is_prime) {
-            return $this->booking->total_fee - $this->booking->venue_earnings - $this->booking->concierge_earnings;
+            return $this->booking->total_fee;
         }
 
-        return $this->booking->platform_earnings + $this->booking->partner_venue_fee;
+        return abs($this->booking->venue_earnings);
+    }
+
+    private function calculatePrimaShare(): int
+    {
+        return $this->calculatePlatformEarnings();
     }
 
     public function render(): View
@@ -55,7 +60,8 @@ class EarningsBreakdown extends Component
             'platformEarnings' => $this->calculatePlatformEarnings(),
             'currency' => $this->booking->currency,
             'totalWithTax' => $this->calculateTotalWithTax(),
-            'grossAmount' => $this->calculateGrossAmount(),
+            'grossRevenue' => $this->calculateGrossRevenue(),
+            'primaShare' => $this->calculatePrimaShare(),
         ]);
     }
 }

@@ -173,6 +173,11 @@ readonly class NonPrimeEarningsCalculationService
 
         $partner = Partner::query()->find($user->partner_referral_id);
 
+        // Skip creating earnings if partner percentage is 0%
+        if ($partner->percentage <= 0) {
+            return 0;
+        }
+
         // Calculate the maximum allowed amount (20% of the remainder)
         $maxAllowedAmount = $remainder * (BookingPercentages::MAX_PARTNER_EARNINGS_PERCENTAGE / 100);
 
@@ -210,17 +215,17 @@ readonly class NonPrimeEarningsCalculationService
         float $maxPartnerEarnings
     ): void {
         $adjustmentFactor = $maxPartnerEarnings / $totalPartnerEarnings;
-        $booking->partner_concierge_fee *= $adjustmentFactor;
-        $booking->partner_venue_fee *= $adjustmentFactor;
+        $booking->partner_concierge_fee = (int) round($booking->partner_concierge_fee * $adjustmentFactor);
+        $booking->partner_venue_fee = (int) round($booking->partner_venue_fee * $adjustmentFactor);
 
         // Update the earnings records
         $booking->earnings()
             ->where('type', EarningType::PARTNER_CONCIERGE->value)
-            ->update(['amount' => $booking->partner_concierge_fee]);
+            ->update(['amount' => (int) round($booking->partner_concierge_fee)]);
 
         $booking->earnings()
             ->where('type', EarningType::PARTNER_VENUE->value)
-            ->update(['amount' => $booking->partner_venue_fee]);
+            ->update(['amount' => (int) round($booking->partner_venue_fee)]);
 
         // Save the booking to persist the changes
         $booking->save();

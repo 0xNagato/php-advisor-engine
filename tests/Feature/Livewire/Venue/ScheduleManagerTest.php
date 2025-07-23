@@ -23,7 +23,8 @@ beforeEach(function () {
         'party_sizes' => json_encode([4 => '4 people', 6 => '6 people']),
     ]);
 
-    $this->today = Carbon::now('UTC')->format('Y-m-d');
+    // Use the same timezone logic as the component
+    $this->today = Carbon::now('America/New_York')->format('Y-m-d');
 });
 
 it('initializes with default state for venue', function () {
