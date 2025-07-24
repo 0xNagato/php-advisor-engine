@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Concierge;
 
+use App\Enums\EarningType;
 use App\Models\Concierge;
 use App\Models\Earning;
 use Carbon\Carbon;
@@ -45,26 +46,25 @@ class ConciergeReferralStats extends Widget
         $previousStartDate = $startDate->copy()->subDays($dateDiffInDays);
         $previousEndDate = $endDate->copy()->subDays($dateDiffInDays);
 
-        $earningsQuery = Earning::confirmed()
-            ->whereIn('type', ['concierge_referral_1', 'concierge_referral_2'])
-            ->whereBetween('created_at', [$startDate, $endDate]);
-
-        $referralsQuery = Earning::confirmed()
-            ->whereIn('type', ['concierge_referral_1', 'concierge_referral_2'])
-            ->whereBetween('created_at', [$startDate, $endDate]);
-
-        if ($this->concierge->exists) {
-            $earningsQuery->whereHas('booking', function ($query) {
-                $query->where('concierge_id', $this->concierge->id);
+        $earningsQuery = Earning::query()
+            ->whereIn('type', [EarningType::CONCIERGE_REFERRAL_1, EarningType::CONCIERGE_REFERRAL_2])
+            ->whereBetween('created_at', [$startDate, $endDate])
+            ->whereHas('booking', function ($query) {
+                $query->whereNotNull('confirmed_at')
+                      ->whereNotIn('status', ['cancelled', 'refunded']);
             });
 
-            $referralsQuery->whereHas('booking', function ($query) {
-                $query->where('concierge_id', $this->concierge->id);
+        $referralsQuery = Earning::query()
+            ->whereIn('type', [EarningType::CONCIERGE_REFERRAL_1, EarningType::CONCIERGE_REFERRAL_2])
+            ->whereBetween('created_at', [$startDate, $endDate])
+            ->whereHas('booking', function ($query) {
+                $query->whereNotNull('confirmed_at')
+                      ->whereNotIn('status', ['cancelled', 'refunded']);
             });
-        } else {
-            $earningsQuery->where('user_id', $userId);
-            $referralsQuery->where('user_id', $userId);
-        }
+
+        // For referral earnings, always filter by the user who receives the earnings
+        $earningsQuery->where('user_id', $userId);
+        $referralsQuery->where('user_id', $userId);
 
         $this->stats['earnings'] = $earningsQuery->sum('amount');
         $this->stats['referrals'] = $referralsQuery->count();

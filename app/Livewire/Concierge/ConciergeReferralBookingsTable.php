@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Concierge;
 
+use App\Enums\EarningType;
 use App\Filament\Resources\BookingResource\Pages\ViewBooking;
 use App\Models\Concierge;
 use App\Models\Earning;
@@ -43,9 +44,10 @@ class ConciergeReferralBookingsTable extends BaseWidget
 
         $bookingsQuery = Earning::query()
             ->where('earnings.user_id', $userId)
-            ->whereIn('earnings.type', ['concierge_referral_1', 'concierge_referral_2'])
+            ->whereIn('earnings.type', [EarningType::CONCIERGE_REFERRAL_1, EarningType::CONCIERGE_REFERRAL_2])
             ->whereBetween('earnings.created_at', [$startDate, $endDate])
             ->whereNotNull('bookings.confirmed_at') // Explicitly specify the table name here
+            ->whereNotIn('bookings.status', ['cancelled', 'refunded'])
             ->join('bookings', 'earnings.booking_id', '=', 'bookings.id')
             ->orderBy('bookings.created_at', 'desc')
             ->with('booking.concierge.user');
@@ -66,13 +68,13 @@ class ConciergeReferralBookingsTable extends BaseWidget
                 IconColumn::make('type')
                     ->label('Level')
                     ->color(fn (string $state) => match ($state) {
-                        'concierge_referral_1' => 'gold',
-                        'concierge_referral_2' => 'silver',
+                        EarningType::CONCIERGE_REFERRAL_1->value => 'gold',
+                        EarningType::CONCIERGE_REFERRAL_2->value => 'silver',
                         default => null,
                     })
                     ->icon(fn (string $state) => match ($state) {
-                        'concierge_referral_1' => 'tabler-square-rounded-number-1-filled',
-                        'concierge_referral_2' => 'tabler-square-rounded-number-2-filled',
+                        EarningType::CONCIERGE_REFERRAL_1->value => 'tabler-square-rounded-number-1-filled',
+                        EarningType::CONCIERGE_REFERRAL_2->value => 'tabler-square-rounded-number-2-filled',
                         default => null,
                     }),
                 TextColumn::make('booking.concierge.user.name')

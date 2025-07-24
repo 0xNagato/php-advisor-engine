@@ -66,13 +66,21 @@ class DeleteOrSuspendUser
                     ]);
 
                 // Update any users that had this user as their referrer
-                User::query()
-                    ->where('concierge_referral_id', $user->concierge?->id)
-                    ->orWhere('partner_referral_id', $user->partner?->id)
-                    ->update([
-                        'partner_referral_id' => $housePartner->id,
-                        'concierge_referral_id' => null,
-                    ]);
+                if ($user->concierge) {
+                    User::query()
+                        ->where('concierge_referral_id', $user->concierge->id)
+                        ->update([
+                            'concierge_referral_id' => null,
+                        ]);
+                }
+                
+                if ($user->partner) {
+                    User::query()
+                        ->where('partner_referral_id', $user->partner->id)
+                        ->update([
+                            'partner_referral_id' => $housePartner->id,
+                        ]);
+                }
             }
 
             // Delete the referral where user was the referred user
