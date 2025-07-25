@@ -28,7 +28,7 @@ class SendModificationRequestToVenueContacts extends Action
         ]);
 
         $confirmationUrl = ShortURL::destinationUrl($url)->make()->default_short_url;
-        $delay = $modificationRequest->booking->is_prime ? 0 : now()->addMinutes(5);
+        $delay = ($modificationRequest->booking->is_prime || app()->isLocal()) ? 0 : now()->addMinutes(5);
 
         foreach ($contacts as $contact) {
             if ($contact->use_for_reservations) {
