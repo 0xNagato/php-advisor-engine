@@ -8,6 +8,7 @@ use App\Models\Earning;
 use Carbon\Carbon;
 use Filament\Widgets\Concerns\InteractsWithPageFilters;
 use Filament\Widgets\Widget;
+use Illuminate\Contracts\Database\Query\Builder;
 
 class ConciergeReferralStats extends Widget
 {
@@ -41,7 +42,7 @@ class ConciergeReferralStats extends Widget
         $earningsQuery = Earning::query()
             ->whereIn('type', [EarningType::CONCIERGE_REFERRAL_1, EarningType::CONCIERGE_REFERRAL_2])
             ->whereBetween('created_at', [$startDate, $endDate])
-            ->whereHas('booking', function ($query) {
+            ->whereHas('booking', function (Builder $query) {
                 $query->whereNotNull('confirmed_at')
                     ->whereNotIn('status', ['cancelled', 'refunded']);
             });
@@ -49,7 +50,7 @@ class ConciergeReferralStats extends Widget
         $referralsQuery = Earning::query()
             ->whereIn('type', [EarningType::CONCIERGE_REFERRAL_1, EarningType::CONCIERGE_REFERRAL_2])
             ->whereBetween('created_at', [$startDate, $endDate])
-            ->whereHas('booking', function ($query) {
+            ->whereHas('booking', function (Builder $query) {
                 $query->whereNotNull('confirmed_at')
                     ->whereNotIn('status', ['cancelled', 'refunded']);
             });

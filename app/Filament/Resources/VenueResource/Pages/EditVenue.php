@@ -855,21 +855,23 @@ class EditVenue extends EditRecord
                     ->visible(fn () => $venue->logo_path !== null)
                     ->action(function () use ($venue) {
                         try {
-                            if (!$venue->logo_path) {
+                            if (! $venue->logo_path) {
                                 Notification::make()
                                     ->title('No Logo')
                                     ->body('This venue does not have a logo to download.')
                                     ->warning()
                                     ->send();
+
                                 return;
                             }
 
-                            if (!Storage::disk('do')->exists($venue->logo_path)) {
+                            if (! Storage::disk('do')->exists($venue->logo_path)) {
                                 Notification::make()
                                     ->title('File Not Found')
                                     ->body('The logo file could not be found.')
                                     ->danger()
                                     ->send();
+
                                 return;
                             }
 
@@ -877,13 +879,13 @@ class EditVenue extends EditRecord
                             $extension = pathinfo($venue->logo_path, PATHINFO_EXTENSION);
 
                             // Create a clean filename
-                            $filename = str($venue->name)->slug() . '-logo.' . $extension;
+                            $filename = str($venue->name)->slug().'-logo.'.$extension;
 
                             return Storage::disk('do')->download($venue->logo_path, $filename);
                         } catch (Exception $e) {
                             Notification::make()
                                 ->title('Download Failed')
-                                ->body('Failed to download logo: ' . $e->getMessage())
+                                ->body('Failed to download logo: '.$e->getMessage())
                                 ->danger()
                                 ->send();
                         }

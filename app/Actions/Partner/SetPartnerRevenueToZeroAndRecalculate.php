@@ -63,7 +63,7 @@ class SetPartnerRevenueToZeroAndRecalculate
 
         if (! $dryRun && $partnersToUpdate->isNotEmpty()) {
             // Update all partner percentages to 0 in a single query
-            Partner::whereIn('id', $partnersToUpdate->pluck('id'))
+            Partner::query()->whereIn('id', $partnersToUpdate->pluck('id'))
                 ->update(['percentage' => 0]);
 
             $stats['partners_updated'] = $partnersToUpdate->count();
@@ -239,7 +239,7 @@ class SetPartnerRevenueToZeroAndRecalculate
      */
     public function getDryRunSummary(): array
     {
-        $partners = Partner::where('percentage', '!=', 0)->with('user')->get();
+        $partners = Partner::query()->where('percentage', '!=', 0)->with('user')->get();
         $bookings = $this->getBookingsWithPartnerEarnings();
 
         return [
@@ -251,11 +251,9 @@ class SetPartnerRevenueToZeroAndRecalculate
                 'user_name' => $partner->user->name ?? 'Unknown',
             ]),
             'bookings_to_recalculate' => $bookings->count(),
-            'estimated_partner_earnings_to_zero' => $bookings->sum(function ($booking) {
-                return $booking->earnings()
-                    ->whereIn('type', ['partner_concierge', 'partner_venue'])
-                    ->sum('amount');
-            }),
+            'estimated_partner_earnings_to_zero' => $bookings->sum(fn ($booking) => $booking->earnings()
+                ->whereIn('type', ['partner_concierge', 'partner_venue'])
+                ->sum('amount')),
         ];
     }
 }
