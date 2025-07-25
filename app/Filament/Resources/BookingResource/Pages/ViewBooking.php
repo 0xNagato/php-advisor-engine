@@ -355,6 +355,7 @@ class ViewBooking extends ViewRecord
                     BookingStatus::REFUNDED,
                     BookingStatus::PARTIALLY_REFUNDED,
                     BookingStatus::ABANDONED,
+                    BookingStatus::NO_SHOW,
                 ];
 
                 if (in_array($this->record->status, $nonCancellableStatuses)) {
