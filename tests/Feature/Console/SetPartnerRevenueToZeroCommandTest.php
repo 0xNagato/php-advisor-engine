@@ -2,6 +2,7 @@
 
 use App\Actions\Partner\SetPartnerRevenueToZeroAndRecalculate;
 use App\Console\Commands\SetPartnerRevenueToZeroCommand;
+use App\Enums\BookingStatus;
 use App\Models\Booking;
 use App\Models\Concierge;
 use App\Models\Partner;
@@ -88,7 +89,7 @@ test('command executes in live mode with --force flag', function () {
     // Verify completion
     expect($output)->toContain('OPERATION COMPLETED');
     expect($output)->toContain('Partners Updated');
-    expect($output)->toContain('Bookings Recalculated');
+    expect($output)->toContain('Bookings Processed');
 
     // Verify actual changes made
     expect($this->partner->fresh()->percentage)->toBe(0);
@@ -108,7 +109,8 @@ test('command displays statistics table correctly', function () {
     expect($output)->toContain('Count');
     expect($output)->toContain('Partners Found');
     expect($output)->toContain('Partners Updated');
-    expect($output)->toContain('Bookings Recalculated');
+    expect($output)->toContain('Bookings Processed');
+    expect($output)->toContain('Inactive Bookings Found');
     expect($output)->toContain('Errors');
 });
 
@@ -193,4 +195,29 @@ test('command can run with user confirmation', function () {
 
     // Verify changes were made
     expect($this->partner->fresh()->percentage)->toBe(0);
+});
+
+test('command displays inactive bookings statistics', function () {
+    Booking::withoutEvents(function () {
+        // Create an active booking
+        $activeBooking = createBooking($this->venue, $this->concierge);
+        $activeBooking->update(['status' => BookingStatus::CONFIRMED]);
+        app(\App\Services\Booking\BookingCalculationService::class)->calculateEarnings($activeBooking);
+
+        // Create an inactive booking with partner associations
+        $inactiveBooking = createBooking($this->venue, $this->concierge);
+        $inactiveBooking->update([
+            'status' => BookingStatus::CANCELLED,
+            'partner_venue_id' => $this->partner->id,
+            'partner_concierge_id' => $this->partner->id,
+        ]);
+    });
+
+    Artisan::call('prima:zero-partner-revenue', ['--force' => true]);
+    $output = Artisan::output();
+
+    // Verify both active and inactive bookings are mentioned in the output
+    expect($output)->toContain('Bookings Processed');
+    expect($output)->toContain('Inactive Bookings Found');
+    expect($output)->toContain('OPERATION COMPLETED');
 });
