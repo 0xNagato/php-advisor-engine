@@ -226,9 +226,10 @@
                     </p>
                 @endif
 
-                <h4 class="text-xs font-semibold text-gray-800 uppercase dark:text-gray-200">Summary</h4>
+                @if ($booking->is_prime)
+                    <h4 class="text-xs font-semibold text-gray-800 uppercase dark:text-gray-200">Summary</h4>
 
-                <ul class="flex overflow-hidden flex-col mt-3 rounded-lg border">
+                    <ul class="flex overflow-hidden flex-col mt-3 rounded-lg border">
                     <li
                         class="inline-flex gap-x-2 items-center px-4 py-3 text-xs text-gray-800 border-b sm:text-sm last:border-b-0 dark:border-gray-700 dark:text-gray-200">
                         <div class="flex flex-col w-full">
@@ -292,6 +293,7 @@
                         </li>
                     @endif
                 </ul>
+                @endif
 
                 @if (isset($customerInvoice) || $download)
                     <div class="mt-4 font-semibold text-center">
