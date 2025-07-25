@@ -21,11 +21,7 @@ class ConciergeReferralStats extends Widget
 
     public ?array $stats = [
         'earnings' => 0,
-        'earningsPrevious' => 0,
-        'earningsDifference' => 0,
         'referrals' => 0,
-        'referralsPrevious' => 0,
-        'referralsDifference' => 0,
     ];
 
     public int|string|array $columnSpan;
@@ -41,10 +37,6 @@ class ConciergeReferralStats extends Widget
 
         $startDate = Carbon::parse($this->filters['startDate'] ?? now()->subDays(30));
         $endDate = Carbon::parse($this->filters['endDate'] ?? now());
-
-        $dateDiffInDays = $startDate->diffInDays($endDate);
-        $previousStartDate = $startDate->copy()->subDays($dateDiffInDays);
-        $previousEndDate = $endDate->copy()->subDays($dateDiffInDays);
 
         $earningsQuery = Earning::query()
             ->whereIn('type', [EarningType::CONCIERGE_REFERRAL_1, EarningType::CONCIERGE_REFERRAL_2])
@@ -68,11 +60,5 @@ class ConciergeReferralStats extends Widget
 
         $this->stats['earnings'] = $earningsQuery->sum('amount');
         $this->stats['referrals'] = $referralsQuery->count();
-
-        $this->stats['earningsPrevious'] = (clone $earningsQuery)->whereBetween('created_at', [$previousStartDate, $previousEndDate])->sum('amount');
-        $this->stats['referralsPrevious'] = (clone $referralsQuery)->whereBetween('created_at', [$previousStartDate, $previousEndDate])->count();
-
-        $this->stats['earningsDifference'] = $this->stats['earnings'] - $this->stats['earningsPrevious'];
-        $this->stats['referralsDifference'] = $this->stats['referrals'] - $this->stats['referralsPrevious'];
     }
 }
