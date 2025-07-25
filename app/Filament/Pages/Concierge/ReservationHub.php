@@ -2,6 +2,7 @@
 
 namespace App\Filament\Pages\Concierge;
 
+use App\Actions\Booking\CheckCustomerHasConflictingNonPrimeBooking;
 use App\Actions\Booking\CheckCustomerHasNonPrimeBooking;
 use App\Actions\Booking\CreateBooking;
 use App\Enums\BookingStatus;
@@ -412,6 +413,26 @@ class ReservationHub extends Page
                 Notification::make()
                     ->title('Booking Not Allowed')
                     ->body('Customer already has a non-prime booking for this day.')
+                    ->danger()
+                    ->send();
+                $this->isLoading = false;
+
+                return;
+            }
+
+            // Check for conflicting non-prime booking within a 2-hour window
+            $hasConflictingBooking = CheckCustomerHasConflictingNonPrimeBooking::run(
+                $form['phone'],
+                $this->booking->booking_at
+            );
+
+            if ($hasConflictingBooking) {
+                $conflictDate = $hasConflictingBooking->booking_at->format('F j');
+                $conflictTime = $hasConflictingBooking->booking_at->format('g:i A');
+
+                Notification::make()
+                    ->title('Conflicting Booking Time')
+                    ->body("Customer already has a no‑fee booking on {$conflictDate} at {$conflictTime}. Bookings must be at least 2 hours apart. Please select a different time.")
                     ->danger()
                     ->send();
                 $this->isLoading = false;

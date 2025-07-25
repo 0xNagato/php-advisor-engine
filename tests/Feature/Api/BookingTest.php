@@ -225,3 +225,139 @@ test('user cannot delete booking on status confirmed', function () {
             'message' => 'Booking cannot be abandoned in its current status',
         ]);
 });
+
+test('cannot update conflicting non-prime booking within 2-hour window', function () {
+    // Create a non-prime schedule template for 6 PM
+    $firstTemplate = ScheduleTemplate::factory()->create([
+        'venue_id' => $this->venue->id,
+        'prime_time' => false,
+        'start_time' => '18:00:00',
+    ]);
+
+    // Create second template for 7 PM (1 hour later, within 2-hour window)
+    $secondTemplate = ScheduleTemplate::factory()->create([
+        'venue_id' => $this->venue->id,
+        'prime_time' => false,
+        'start_time' => '19:00:00',
+    ]);
+
+    $bookingDate = now()->addDays(2)->format('Y-m-d');
+
+    // Create first booking at 6 PM
+    $firstBookingResponse = postJson('/api/bookings', [
+        'schedule_template_id' => $firstTemplate->id,
+        'date' => $bookingDate,
+        'guest_count' => 2,
+    ], [
+        'Authorization' => 'Bearer '.$this->token,
+    ])->assertSuccessful();
+
+    $firstBooking = Booking::find($firstBookingResponse->json('data.id'));
+
+    // Update first booking with guest details
+    putJson("/api/bookings/{$firstBooking->id}", [
+        'first_name' => 'John',
+        'last_name' => 'Doe',
+        'phone' => '+12015556478',
+        'email' => 'john@example.com',
+        'notes' => '',
+        'bookingUrl' => 'https://example.com',
+    ], [
+        'Authorization' => 'Bearer '.$this->token,
+    ])->assertSuccessful();
+
+    // Create second booking at 7 PM
+    $secondBookingResponse = postJson('/api/bookings', [
+        'schedule_template_id' => $secondTemplate->id,
+        'date' => $bookingDate,
+        'guest_count' => 2,
+    ], [
+        'Authorization' => 'Bearer '.$this->token,
+    ])->assertSuccessful();
+
+    $secondBooking = Booking::find($secondBookingResponse->json('data.id'));
+
+    // Try to update second booking with same phone number (should be blocked)
+    putJson("/api/bookings/{$secondBooking->id}", [
+        'first_name' => 'John',
+        'last_name' => 'Doe',
+        'phone' => '+12015556478', // Same phone number as first booking
+        'email' => 'john@example.com',
+        'notes' => '',
+        'bookingUrl' => 'https://example.com',
+    ], [
+        'Authorization' => 'Bearer '.$this->token,
+    ])
+        ->assertStatus(422)
+        ->assertJsonPath('message', function ($message) {
+            return str_contains($message, 'You already have a no‑fee booking on') &&
+                   str_contains($message, 'Bookings must be at least 2 hours apart');
+        });
+});
+
+test('cannot complete conflicting non-prime booking within 2-hour window', function () {
+    // Create a non-prime schedule template for 6 PM
+    $firstTemplate = ScheduleTemplate::factory()->create([
+        'venue_id' => $this->venue->id,
+        'prime_time' => false,
+        'start_time' => '18:00:00',
+    ]);
+
+    // Create second template for 7 PM (1 hour later, within 2-hour window)
+    $secondTemplate = ScheduleTemplate::factory()->create([
+        'venue_id' => $this->venue->id,
+        'prime_time' => false,
+        'start_time' => '19:00:00',
+    ]);
+
+    $bookingDate = now()->addDays(2)->format('Y-m-d');
+
+    // Create first booking at 6 PM
+    $firstBookingResponse = postJson('/api/bookings', [
+        'schedule_template_id' => $firstTemplate->id,
+        'date' => $bookingDate,
+        'guest_count' => 2,
+    ], [
+        'Authorization' => 'Bearer '.$this->token,
+    ])->assertSuccessful();
+
+    $firstBooking = Booking::find($firstBookingResponse->json('data.id'));
+
+    // Complete first booking with guest details
+    postJson("/api/bookings/{$firstBooking->id}/complete", [
+        'first_name' => 'John',
+        'last_name' => 'Doe',
+        'phone' => '+12015556478',
+        'email' => 'john@example.com',
+        'notes' => '',
+    ], [
+        'Authorization' => 'Bearer '.$this->token,
+    ])->assertSuccessful();
+
+    // Create second booking at 7 PM
+    $secondBookingResponse = postJson('/api/bookings', [
+        'schedule_template_id' => $secondTemplate->id,
+        'date' => $bookingDate,
+        'guest_count' => 2,
+    ], [
+        'Authorization' => 'Bearer '.$this->token,
+    ])->assertSuccessful();
+
+    $secondBooking = Booking::find($secondBookingResponse->json('data.id'));
+
+    // Try to complete second booking with same phone number (should be blocked)
+    postJson("/api/bookings/{$secondBooking->id}/complete", [
+        'first_name' => 'John',
+        'last_name' => 'Doe',
+        'phone' => '+12015556478', // Same phone number as first booking
+        'email' => 'john@example.com',
+        'notes' => '',
+    ], [
+        'Authorization' => 'Bearer '.$this->token,
+    ])
+        ->assertStatus(422)
+        ->assertJsonPath('message', function ($message) {
+            return str_contains($message, 'You already have a no‑fee booking on') &&
+                   str_contains($message, 'Bookings must be at least 2 hours apart');
+        });
+});

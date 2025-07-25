@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Actions\Booking\CheckCustomerHasConflictingNonPrimeBooking;
 use App\Actions\Booking\CheckCustomerHasNonPrimeBooking;
 use App\Actions\Booking\CompleteBooking;
 use App\Actions\Booking\CreateBooking;
@@ -277,7 +278,7 @@ class BookingController extends Controller
 
         if ($booking->is_prime) {
             // Prime booking - requires payment intent ID
-            if (blank($validatedData['payment_intent_id'])) {
+            if (blank($validatedData['payment_intent_id'] ?? null)) {
                 activity()
                     ->performedOn($booking)
                     ->withProperties([
@@ -296,7 +297,7 @@ class BookingController extends Controller
             try {
                 $result = CompleteBooking::run(
                     $booking,
-                    $validatedData['payment_intent_id'],
+                    $validatedData['payment_intent_id'] ?? null,
                     [
                         'firstName' => $validatedData['first_name'],
                         'lastName' => $validatedData['last_name'],
@@ -312,7 +313,7 @@ class BookingController extends Controller
                     ->withProperties([
                         'venue_id' => $booking->venue?->id,
                         'venue_name' => $booking->venue?->name,
-                        'payment_intent_id' => $validatedData['payment_intent_id'],
+                        'payment_intent_id' => $validatedData['payment_intent_id'] ?? null,
                         'concierge_id' => auth()->user()?->concierge?->id,
                         'concierge_name' => auth()->user()?->name,
                     ])
@@ -357,7 +358,7 @@ class BookingController extends Controller
                     ->withProperties([
                         'venue_id' => $booking->venue?->id,
                         'venue_name' => $booking->venue?->name,
-                        'payment_intent_id' => $validatedData['payment_intent_id'],
+                        'payment_intent_id' => $validatedData['payment_intent_id'] ?? null,
                         'error' => $e->getMessage(),
                         'concierge_id' => auth()->user()?->concierge?->id,
                         'concierge_name' => auth()->user()?->name,
@@ -391,6 +392,33 @@ class BookingController extends Controller
 
                 return response()->json([
                     'message' => 'Customer already has a non-prime booking for this day',
+                ], 422);
+            }
+
+            // Check for conflicting non-prime booking within time window
+            $hasConflictingBooking = CheckCustomerHasConflictingNonPrimeBooking::run(
+                $validatedData['phone'],
+                $booking->booking_at
+            );
+
+            if ($hasConflictingBooking) {
+                activity()
+                    ->performedOn($booking)
+                    ->withProperties([
+                        'venue_id' => $booking->venue?->id,
+                        'venue_name' => $booking->venue?->name,
+                        'guest_phone' => $validatedData['phone'],
+                        'booking_date' => $booking->booking_at->format('Y-m-d'),
+                        'concierge_id' => auth()->user()?->concierge?->id,
+                        'concierge_name' => auth()->user()?->name,
+                    ])
+                    ->log('API - Non-prime booking completion failed - Customer has conflicting booking within '.CheckCustomerHasConflictingNonPrimeBooking::BOOKING_WINDOW_HOURS.'-hour window');
+
+                $conflictDate = $hasConflictingBooking->booking_at->format('F j');
+                $conflictTime = $hasConflictingBooking->booking_at->format('g:i A');
+
+                return response()->json([
+                    'message' => "You already have a no‑fee booking on {$conflictDate} at {$conflictTime}. Bookings must be at least 2 hours apart. Please select a different time.",
                 ], 422);
             }
 
@@ -656,6 +684,33 @@ class BookingController extends Controller
 
             return response()->json([
                 'message' => 'Customer already has a non-prime booking for this day',
+            ], 422);
+        }
+
+        // Check for conflicting non-prime booking within a 2-hour window
+        $hasConflictingBooking = CheckCustomerHasConflictingNonPrimeBooking::run(
+            $validatedData['phone'],
+            $booking->booking_at
+        );
+
+        if ($hasConflictingBooking) {
+            activity()
+                ->performedOn($booking)
+                ->withProperties([
+                    'venue_id' => $booking->venue?->id,
+                    'venue_name' => $booking->venue?->name,
+                    'guest_phone' => $validatedData['phone'],
+                    'booking_date' => $booking->booking_at->format('Y-m-d'),
+                    'concierge_id' => auth()->user()?->concierge?->id,
+                    'concierge_name' => auth()->user()?->name,
+                ])
+                ->log('API - Non-prime booking update failed - Customer has conflicting booking within '.CheckCustomerHasConflictingNonPrimeBooking::BOOKING_WINDOW_HOURS.'-hour window');
+
+            $conflictDate = $hasConflictingBooking->booking_at->format('F j');
+            $conflictTime = $hasConflictingBooking->booking_at->format('g:i A');
+
+            return response()->json([
+                'message' => "You already have a no‑fee booking on {$conflictDate} at {$conflictTime}. Bookings must be at least 2 hours apart. Please select a different time.",
             ], 422);
         }
 

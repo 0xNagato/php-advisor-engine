@@ -14,25 +14,23 @@ class AuthController extends Controller
     /**
      * Authenticate a user and return a new API token.
      *
-     * @throws \Illuminate\Validation\ValidationException
+     * @throws ValidationException
      */
     public function login(Request $request): JsonResponse
     {
         $request->validate([
-            'email' => 'required|email',
-            'password' => 'required|string',
-            'device_name' => 'required|string', // e.g., "John's iPhone"
+            'email' => ['required', 'email'],
+            'password' => ['required', 'string'],
+            'device_name' => ['required', 'string'], // e.g., "John's iPhone"
         ]);
 
         // Find the user by their email address
-        $user = User::where('email', $request->email)->first();
+        $user = User::query()->where('email', $request->email)->first();
 
         // Verify the user exists and the password is correct
-        if (! $user || ! Hash::check($request->password, $user->password)) {
-            throw ValidationException::withMessages([
-                'email' => ['The provided credentials do not match our records.'],
-            ]);
-        }
+        throw_if(! $user || ! Hash::check($request->password, $user->password), ValidationException::withMessages([
+            'email' => ['The provided credentials do not match our records.'],
+        ]));
 
         // Create a new Sanctum token for the user
         $token = $user->createToken($request->device_name)->plainTextToken;
