@@ -120,7 +120,9 @@ class ReservationHub extends Page
 
         // This is used by the availability calendar to pre-fill the form
         // this should eventually be refactored into its own service.
-        if ($this->scheduleTemplateId && $this->date) {
+        if ($this->scheduleTemplateId && $this->date && !$this->hasAlreadyProcessedTheseParameters()) {
+            $this->markParametersAsProcessed();
+            
             $schedule = ScheduleTemplate::query()->find($this->scheduleTemplateId);
 
             $this->form->fill([
@@ -544,5 +546,21 @@ class ReservationHub extends Page
     {
         $this->resetBooking();
         $this->redirect(AvailabilityCalendar::getUrl());
+    }
+
+    protected function hasAlreadyProcessedTheseParameters(): bool
+    {
+        if (!$this->scheduleTemplateId || !$this->date) {
+            return false;
+        }
+        
+        $key = "processed_booking_{$this->scheduleTemplateId}_{$this->date}_{$this->guestCount}";
+        return session()->has($key);
+    }
+
+    protected function markParametersAsProcessed(): void
+    {
+        $key = "processed_booking_{$this->scheduleTemplateId}_{$this->date}_{$this->guestCount}";
+        session()->put($key, true);
     }
 }
