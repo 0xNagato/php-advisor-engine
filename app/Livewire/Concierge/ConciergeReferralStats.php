@@ -69,8 +69,8 @@ class ConciergeReferralStats extends Widget
         $this->stats['earnings'] = $earningsQuery->sum('amount');
         $this->stats['referrals'] = $referralsQuery->count();
 
-        $this->stats['earningsPrevious'] = $earningsQuery->whereBetween('created_at', [$previousStartDate, $previousEndDate])->sum('amount');
-        $this->stats['referralsPrevious'] = $referralsQuery->whereBetween('created_at', [$previousStartDate, $previousEndDate])->count();
+        $this->stats['earningsPrevious'] = (clone $earningsQuery)->whereBetween('created_at', [$previousStartDate, $previousEndDate])->sum('amount');
+        $this->stats['referralsPrevious'] = (clone $referralsQuery)->whereBetween('created_at', [$previousStartDate, $previousEndDate])->count();
 
         $this->stats['earningsDifference'] = $this->stats['earnings'] - $this->stats['earningsPrevious'];
         $this->stats['referralsDifference'] = $this->stats['referrals'] - $this->stats['referralsPrevious'];
