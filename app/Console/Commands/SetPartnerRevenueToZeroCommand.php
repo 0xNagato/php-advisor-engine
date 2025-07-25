@@ -49,9 +49,10 @@ class SetPartnerRevenueToZeroCommand extends Command
         }
 
         // Get confirmation unless forced or dry-run
-        if (!$isDryRun && !$force) {
-            if (!$this->confirmOperation()) {
+        if (! $isDryRun && ! $force) {
+            if (! $this->confirmOperation()) {
                 $this->info('Operation cancelled by user.');
+
                 return self::SUCCESS;
             }
         }
@@ -63,10 +64,12 @@ class SetPartnerRevenueToZeroCommand extends Command
         try {
             $result = SetPartnerRevenueToZeroAndRecalculate::run($isDryRun);
             $this->displayResults($result);
+
             return self::SUCCESS;
         } catch (Throwable $e) {
             $this->error("❌ Operation failed: {$e->getMessage()}");
-            $this->error("See logs for full details.");
+            $this->error('See logs for full details.');
+
             return self::FAILURE;
         }
     }
@@ -81,17 +84,17 @@ class SetPartnerRevenueToZeroCommand extends Command
 
             $this->info("Partners to update: {$summary['partners_to_update']}");
             $this->info("Bookings to recalculate: {$summary['bookings_to_recalculate']}");
-            $this->info("Estimated partner earnings to zero: " . money($summary['estimated_partner_earnings_to_zero'], 'USD'));
+            $this->info('Estimated partner earnings to zero: '.money($summary['estimated_partner_earnings_to_zero'], 'USD'));
 
             if ($summary['partner_details']->isNotEmpty()) {
                 $this->newLine();
                 $this->info('🏢 Partners to be updated:');
 
-                $tableData = $summary['partner_details']->map(fn($partner) => [
+                $tableData = $summary['partner_details']->map(fn ($partner) => [
                     'ID' => $partner['id'],
                     'Company' => $partner['company_name'] ?: 'N/A',
                     'User' => $partner['user_name'],
-                    'Current %' => $partner['current_percentage'] . '%',
+                    'Current %' => $partner['current_percentage'].'%',
                 ])->toArray();
 
                 $this->table(['ID', 'Company', 'User', 'Current %'], $tableData);
@@ -145,7 +148,7 @@ class SetPartnerRevenueToZeroCommand extends Command
         $this->table(['Metric', 'Count'], array_slice($statsTable, 1));
 
         // Show errors if any
-        if (!empty($result['errors'])) {
+        if (! empty($result['errors'])) {
             $this->newLine();
             $this->error('❌ Errors encountered:');
 

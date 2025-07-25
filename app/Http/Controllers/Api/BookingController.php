@@ -59,7 +59,7 @@ class BookingController extends Controller
 
         // Look up VIP code if provided
         $vipCode = null;
-        if (!empty($validatedData['vip_code'])) {
+        if (! empty($validatedData['vip_code'])) {
             $vipCode = VipCode::query()
                 ->where('code', $validatedData['vip_code'])
                 ->where('is_active', true)

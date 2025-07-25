@@ -13,7 +13,6 @@ use Znck\Eloquent\Traits\BelongsToThrough as BelongsToThroughTrait;
  *
  * Represents a specific time slot for a venue. This is an override for a ScheduleTemplate.
  * If a VenueTimeSlot is found, it will be used by the ScheduleWithBookings view instead of the default ScheduleTemplate.
- *
  */
 class VenueTimeSlot extends Model
 {

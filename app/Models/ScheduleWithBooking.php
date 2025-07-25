@@ -26,7 +26,6 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property string $booking_at
  * @property string $start_time
  * @property string $end_time
- *
  */
 class ScheduleWithBooking extends Model
 {

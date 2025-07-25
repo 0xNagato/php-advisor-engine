@@ -1,7 +1,5 @@
 <?php
 
-use App\Actions\Partner\SetPartnerRevenueToZeroAndRecalculate;
-use App\Console\Commands\SetPartnerRevenueToZeroCommand;
 use App\Enums\BookingStatus;
 use App\Models\Booking;
 use App\Models\Concierge;
@@ -124,7 +122,7 @@ test('command handles and displays errors appropriately', function () {
     // Simulate an error scenario by just checking the output format
     // (We can't easily mock readonly classes, so we'll test error display differently)
 
-        Artisan::call('prima:zero-partner-revenue', ['--force' => true]);
+    Artisan::call('prima:zero-partner-revenue', ['--force' => true]);
     $output = Artisan::output();
 
     // Verify operation ran successfully (since we can't easily simulate errors)
@@ -159,7 +157,7 @@ test('command shows proper emojis and formatting', function () {
 });
 
 test('command works when no partners need updating', function () {
-    // Set all partners to 0% 
+    // Set all partners to 0%
     \App\Models\Partner::query()->update(['percentage' => 0]);
 
     Artisan::call('prima:zero-partner-revenue', ['--dry-run' => true]);

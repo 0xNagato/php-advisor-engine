@@ -33,7 +33,7 @@ test('dry run mode shows correct statistics without making changes', function ()
     // Create a booking with partner earnings
     $booking = createBooking($this->venue, $this->concierge);
 
-            // Set booking to confirmed status so it will be found by the query
+    // Set booking to confirmed status so it will be found by the query
     $booking->update(['status' => BookingStatus::CONFIRMED]);
 
     // Calculate earnings so the booking has partner earnings to be found
@@ -122,7 +122,7 @@ test('handles bookings with different partner associations correctly', function 
 
         // Verify concierge partner earnings exist
         expect($booking->partner_concierge_id)->toBe($conciergePartner->id);
-        
+
         // Verify initial partner earnings exist
         $initialPartnerEarnings = $booking->earnings()
             ->whereIn('type', ['partner_concierge', 'partner_venue'])
@@ -149,7 +149,7 @@ test('handles non-prime bookings with partner earnings', function () {
         // Ensure venue and concierge have partner associations
         $this->venue->user->update(['partner_referral_id' => $this->partnerWithEarnings->id]);
         $this->concierge->user->update(['partner_referral_id' => $this->partnerWithEarnings->id]);
-        
+
         $booking = createNonPrimeBooking($this->venue, $this->concierge);
         $booking->update(['status' => BookingStatus::CONFIRMED]);
         $this->calculationService->calculateEarnings($booking);
@@ -179,7 +179,7 @@ test('skips bookings without partner earnings', function () {
     Booking::withoutEvents(function () {
         // Clear all bookings to ensure clean test
         Booking::query()->delete();
-        
+
         // Create booking without any partner associations
         $this->venue->user->update(['partner_referral_id' => null]);
         $this->concierge->user->update(['partner_referral_id' => null]);
@@ -214,7 +214,7 @@ test('skips bookings without partner earnings', function () {
 
 test('getDryRunSummary returns accurate preview data', function () {
     Booking::withoutEvents(function () {
-                // Create multiple bookings with partner earnings
+        // Create multiple bookings with partner earnings
         $booking1 = createBooking($this->venue, $this->concierge);
         $booking1->update(['status' => BookingStatus::CONFIRMED]);
         $booking2 = createNonPrimeBooking($this->venue, $this->concierge);
@@ -226,7 +226,7 @@ test('getDryRunSummary returns accurate preview data', function () {
         // Get dry run summary
         $summary = app(SetPartnerRevenueToZeroAndRecalculate::class)->getDryRunSummary();
 
-                expect($summary['partners_to_update'])->toBe(12); // 10 seeded + partnerWithEarnings + partnerWithoutBookings
+        expect($summary['partners_to_update'])->toBe(12); // 10 seeded + partnerWithEarnings + partnerWithoutBookings
         expect($summary['bookings_to_recalculate'])->toBe(2);
         expect($summary['estimated_partner_earnings_to_zero'])->toBeGreaterThan(0);
 
@@ -260,7 +260,7 @@ test('logs activity for booking recalculations', function () {
         // Enable activity logging
         config(['activitylog.enabled' => true]);
 
-                        $booking = createBooking($this->venue, $this->concierge);
+        $booking = createBooking($this->venue, $this->concierge);
         $booking->update(['status' => BookingStatus::CONFIRMED]);
         $this->calculationService->calculateEarnings($booking);
 
@@ -310,7 +310,7 @@ test('handles inactive bookings by zeroing partner fields only', function () {
         // Clear any existing bookings and earnings to ensure clean test
         Booking::query()->delete();
         Earning::query()->delete();
-        
+
         // Create an active booking with partner earnings
         $activeBooking = createBooking($this->venue, $this->concierge);
         $activeBooking->update(['status' => BookingStatus::CONFIRMED]);

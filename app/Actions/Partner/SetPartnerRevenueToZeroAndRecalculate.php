@@ -20,8 +20,9 @@ class SetPartnerRevenueToZeroAndRecalculate
     /**
      * Set all partner revenue percentages to 0 and recalculate all affected bookings.
      *
-     * @param bool $dryRun If true, shows what would be changed without making changes
+     * @param  bool  $dryRun  If true, shows what would be changed without making changes
      * @return array Statistics about the operation
+     *
      * @throws Throwable
      */
     public function handle(bool $dryRun = false): array
@@ -60,7 +61,7 @@ class SetPartnerRevenueToZeroAndRecalculate
         $partnersToUpdate = $partners->where('percentage', '!=', 0);
         $stats['partners_with_non_zero_percentage'] = $partnersToUpdate->count();
 
-        if (!$dryRun && $partnersToUpdate->isNotEmpty()) {
+        if (! $dryRun && $partnersToUpdate->isNotEmpty()) {
             // Update all partner percentages to 0 in a single query
             Partner::whereIn('id', $partnersToUpdate->pluck('id'))
                 ->update(['percentage' => 0]);
@@ -72,7 +73,7 @@ class SetPartnerRevenueToZeroAndRecalculate
                 ->withProperties([
                     'partner_ids' => $partnersToUpdate->pluck('id')->toArray(),
                     'previous_percentages' => $partnersToUpdate->mapWithKeys(
-                        fn($partner) => [$partner->id => $partner->percentage]
+                        fn ($partner) => [$partner->id => $partner->percentage]
                     )->toArray(),
                 ])
                 ->log('Bulk updated partner percentages to 0');
@@ -94,7 +95,7 @@ class SetPartnerRevenueToZeroAndRecalculate
         $calculationService = app(BookingCalculationService::class);
 
         // Process active bookings with full recalculation
-        if (!$activeBookings->isEmpty()) {
+        if (! $activeBookings->isEmpty()) {
             $activeBookings->chunk(100)->each(function (Collection $bookingChunk) use ($dryRun, $calculationService, &$stats) {
                 foreach ($bookingChunk as $booking) {
                     $this->recalculateBooking($booking, $dryRun, $calculationService, $stats);
@@ -103,7 +104,7 @@ class SetPartnerRevenueToZeroAndRecalculate
         }
 
         // Process inactive bookings by zeroing partner fields only
-        if (!$inactiveBookings->isEmpty()) {
+        if (! $inactiveBookings->isEmpty()) {
             $inactiveBookings->chunk(100)->each(function (Collection $bookingChunk) use ($dryRun, &$stats) {
                 foreach ($bookingChunk as $booking) {
                     $this->zeroPartnerFieldsOnly($booking, $dryRun, $stats);
@@ -153,12 +154,12 @@ class SetPartnerRevenueToZeroAndRecalculate
         DB::beginTransaction();
 
         try {
-            if (!$dryRun) {
+            if (! $dryRun) {
                 // Store original earnings for logging
                 $originalEarnings = $booking->earnings()
                     ->whereIn('type', ['partner_concierge', 'partner_venue'])
                     ->get()
-                    ->mapWithKeys(fn($earning) => [$earning->type => $earning->amount])
+                    ->mapWithKeys(fn ($earning) => [$earning->type => $earning->amount])
                     ->toArray();
 
                 // Delete existing earnings
@@ -171,7 +172,7 @@ class SetPartnerRevenueToZeroAndRecalculate
                 $newEarnings = $booking->earnings()
                     ->whereIn('type', ['partner_concierge', 'partner_venue'])
                     ->get()
-                    ->mapWithKeys(fn($earning) => [$earning->type => $earning->amount])
+                    ->mapWithKeys(fn ($earning) => [$earning->type => $earning->amount])
                     ->toArray();
 
                 // Log the recalculation
@@ -207,7 +208,7 @@ class SetPartnerRevenueToZeroAndRecalculate
 
     private function zeroPartnerFieldsOnly(Booking $booking, bool $dryRun, array &$stats): void
     {
-        if (!$dryRun) {
+        if (! $dryRun) {
             // Zero out partner fee fields for inactive bookings
             $booking->update([
                 'partner_concierge_fee' => 0,
@@ -243,7 +244,7 @@ class SetPartnerRevenueToZeroAndRecalculate
 
         return [
             'partners_to_update' => $partners->count(),
-            'partner_details' => $partners->map(fn($partner) => [
+            'partner_details' => $partners->map(fn ($partner) => [
                 'id' => $partner->id,
                 'current_percentage' => $partner->percentage,
                 'company_name' => $partner->company_name,

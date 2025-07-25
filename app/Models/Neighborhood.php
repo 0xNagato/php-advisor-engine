@@ -11,7 +11,6 @@ use Sushi\Sushi;
  * @property string $name
  * @property string $region Region ID
  * @property-read Region $regionModel
- *
  */
 class Neighborhood extends Model
 {

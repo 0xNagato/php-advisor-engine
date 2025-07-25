@@ -26,8 +26,6 @@ use Spatie\Activitylog\LogOptions;
 use Spatie\Activitylog\Traits\LogsActivity;
 use Throwable;
 
-/**
- */
 class Venue extends Model
 {
     use HasEarnings, HasFactory, LogsActivity;

@@ -7,8 +7,6 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Throwable;
 
-/**
- */
 class UserCode extends Model
 {
     use HasFactory;

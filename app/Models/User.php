@@ -32,8 +32,6 @@ use Spatie\Permission\Models\Role;
 use Spatie\Permission\Traits\HasRoles;
 use Throwable;
 
-/**
- */
 class User extends Authenticatable implements FilamentUser, HasAvatar
 {
     use AuthenticationLoggable;

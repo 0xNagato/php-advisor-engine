@@ -35,8 +35,8 @@ class SendConfirmationToVenueContacts extends Action
 
         $mins = app()->isLocal() || $booking->is_prime ? 0 : 5;
         $delay = now()->addMinutes($mins);
-        $contacts->filter(fn($contact) => $contact->use_for_reservations)
-            ->each(fn($contact) => $contact->notify((new VenueContactBookingConfirmed(
+        $contacts->filter(fn ($contact) => $contact->use_for_reservations)
+            ->each(fn ($contact) => $contact->notify((new VenueContactBookingConfirmed(
                 booking: $booking,
                 confirmationUrl: $confirmationUrl,
                 reminder: $reminder
@@ -44,10 +44,10 @@ class SendConfirmationToVenueContacts extends Action
 
         if ($mins) {
             logger()
-                ->info("Notifications for booking #$booking->id will be sent in $mins: " . $delay->format('H:i'));
+                ->info("Notifications for booking #$booking->id will be sent in $mins: ".$delay->format('H:i'));
         }
 
-        if (!$reminder) {
+        if (! $reminder) {
             $admin = User::query()->where('email', 'andru.weir@gmail.com')->first();
             if ($admin) {
                 $admin->notify(new AdminBookingConfirmed($booking, $confirmationUrl));

@@ -73,7 +73,7 @@ class DeleteOrSuspendUser
                             'concierge_referral_id' => null,
                         ]);
                 }
-                
+
                 if ($user->partner) {
                     User::query()
                         ->where('partner_referral_id', $user->partner->id)

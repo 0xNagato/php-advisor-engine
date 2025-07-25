@@ -25,8 +25,6 @@ use Spatie\Activitylog\LogOptions;
 use Spatie\Activitylog\Traits\LogsActivity;
 use Throwable;
 
-/**
- */
 class Booking extends Model
 {
     use FormatsPhoneNumber;

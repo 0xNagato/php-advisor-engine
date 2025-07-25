@@ -7,10 +7,9 @@
  * venue specialty arrays without overwriting existing data.
  */
 
-use App\Models\Venue;
 use App\Models\Specialty;
+use App\Models\Venue;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Storage;
 
 // ==============================================
 // CONFIGURATION
@@ -25,8 +24,9 @@ $isDryRun = true;
 // Path to the CSV file
 $csvPath = storage_path('venue-specialties.csv');
 
-if (!file_exists($csvPath)) {
+if (! file_exists($csvPath)) {
     echo "❌ CSV file not found at: {$csvPath}\n";
+
     return;
 }
 
@@ -57,30 +57,32 @@ $specialtyMapping = [
 // Verify all specialties exist in the Specialty model
 $validSpecialtyIds = Specialty::all()->pluck('id')->toArray();
 foreach ($specialtyMapping as $csvName => $specialtyId) {
-    if (!in_array($specialtyId, $validSpecialtyIds)) {
+    if (! in_array($specialtyId, $validSpecialtyIds)) {
         echo "⚠️  Warning: Specialty ID '{$specialtyId}' not found in Specialty model\n";
     }
 }
 
 // Read CSV file
 $handle = fopen($csvPath, 'r');
-if (!$handle) {
+if (! $handle) {
     echo "❌ Could not open CSV file\n";
+
     return;
 }
 
 // Get header row to map column positions
 $headers = fgetcsv($handle, 0, ',', '"', '\\');
-if (!$headers) {
+if (! $headers) {
     echo "❌ Could not read CSV headers\n";
     fclose($handle);
+
     return;
 }
 
 // Map specialty columns (skip the first 3 columns: Venue Name, Venue Slug, Region)
 $specialtyColumns = array_slice($headers, 3);
-echo "📋 Found specialty columns: " . implode(', ', $specialtyColumns) . "\n";
-echo "📋 Mapped to specialty IDs: " . implode(', ', array_values(array_intersect_key($specialtyMapping, array_flip($specialtyColumns)))) . "\n";
+echo '📋 Found specialty columns: '.implode(', ', $specialtyColumns)."\n";
+echo '📋 Mapped to specialty IDs: '.implode(', ', array_values(array_intersect_key($specialtyMapping, array_flip($specialtyColumns))))."\n";
 
 $venuesUpdated = 0;
 $venuesNotFound = 0;
@@ -104,9 +106,10 @@ while (($row = fgetcsv($handle, 0, ',', '"', '\\')) !== false) {
         // Find venue by slug
         $venue = Venue::where('slug', $venueSlug)->first();
 
-        if (!$venue) {
+        if (! $venue) {
             echo "⚠️  Venue not found: {$venueSlug} ({$venueName})\n";
             $venuesNotFound++;
+
             continue;
         }
 
@@ -116,12 +119,12 @@ while (($row = fgetcsv($handle, 0, ',', '"', '\\')) !== false) {
         // Collect new specialties from CSV
         $newSpecialties = [];
 
-                // Check each specialty column (starting from index 3)
+        // Check each specialty column (starting from index 3)
         for ($i = 3; $i < count($headers) && $i < count($row); $i++) {
             $csvColumnName = trim($headers[$i]);
             $hasSpecialty = trim($row[$i]) === 'X';
 
-            if ($hasSpecialty && !empty($csvColumnName)) {
+            if ($hasSpecialty && ! empty($csvColumnName)) {
                 // Map CSV column name to specialty ID
                 if (isset($specialtyMapping[$csvColumnName])) {
                     $specialtyId = $specialtyMapping[$csvColumnName];
@@ -138,10 +141,11 @@ while (($row = fgetcsv($handle, 0, ',', '"', '\\')) !== false) {
             } else {
                 echo "ℹ️  No specialties to add for: {$venueName}\n";
             }
+
             continue;
         }
 
-                // Merge with existing specialties (remove duplicates)
+        // Merge with existing specialties (remove duplicates)
         $mergedSpecialties = array_unique(array_merge($currentSpecialties, $newSpecialties));
 
         // Sort for consistency
@@ -170,29 +174,29 @@ while (($row = fgetcsv($handle, 0, ',', '"', '\\')) !== false) {
 
         if ($isDryRun) {
             echo "🔍 [DRY RUN] Would update {$venueName}:\n";
-            echo "   Current specialties (" . count($currentSpecialties) . "): " . (empty($currentSpecialtyNames) ? 'None' : implode(', ', $currentSpecialtyNames)) . "\n";
-            echo "   Would add (" . count($newSpecialties) . "): " . implode(', ', $newSpecialtyNames) . "\n";
-            echo "   Total after update (" . count($mergedSpecialties) . "): " . implode(', ', $mergedSpecialtyNames) . "\n";
+            echo '   Current specialties ('.count($currentSpecialties).'): '.(empty($currentSpecialtyNames) ? 'None' : implode(', ', $currentSpecialtyNames))."\n";
+            echo '   Would add ('.count($newSpecialties).'): '.implode(', ', $newSpecialtyNames)."\n";
+            echo '   Total after update ('.count($mergedSpecialties).'): '.implode(', ', $mergedSpecialtyNames)."\n";
         } else {
             // Actually update the venue
             $venue->update(['specialty' => $mergedSpecialties]);
-            echo "✅ Updated {$venueName}: Added " . count($newSpecialties) . " specialties (" . implode(', ', $newSpecialtyNames) . ")\n";
-            echo "   Total specialties now: " . count($mergedSpecialties) . "\n";
+            echo "✅ Updated {$venueName}: Added ".count($newSpecialties).' specialties ('.implode(', ', $newSpecialtyNames).")\n";
+            echo '   Total specialties now: '.count($mergedSpecialties)."\n";
         }
 
         $venuesUpdated++;
 
     } catch (Exception $e) {
-        $error = "Error processing {$venueName} ({$venueSlug}): " . $e->getMessage();
+        $error = "Error processing {$venueName} ({$venueSlug}): ".$e->getMessage();
         $errors[] = $error;
         echo "❌ {$error}\n";
 
         // Only log actual errors during real updates, not dry runs
-        if (!$isDryRun) {
+        if (! $isDryRun) {
             Log::error('Venue specialty update error', [
                 'venue_slug' => $venueSlug,
                 'venue_name' => $venueName,
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
             ]);
         }
     }
@@ -208,9 +212,9 @@ if ($isDryRun) {
     echo "✅ Venues updated: {$venuesUpdated}\n";
 }
 echo "⚠️  Venues not found: {$venuesNotFound}\n";
-echo "❌ Errors: " . count($errors) . "\n";
+echo '❌ Errors: '.count($errors)."\n";
 
-if (!empty($errors)) {
+if (! empty($errors)) {
     echo "\n🔍 Error details:\n";
     foreach ($errors as $error) {
         echo "  - {$error}\n";
@@ -232,7 +236,7 @@ if ($isDryRun) {
 }
 
 $sampleVenues = Venue::whereNotNull('specialty')
-    ->where(function($query) {
+    ->where(function ($query) {
         $query->whereJsonLength('specialty', '>', 0);
     })
     ->take(5)
@@ -244,5 +248,5 @@ foreach ($sampleVenues as $venue) {
         $specialty = Specialty::find($specialtyId);
         $specialtyNames[] = $specialty ? $specialty->name : $specialtyId;
     }
-    echo "  • {$venue->name}: " . (empty($specialtyNames) ? 'None' : implode(', ', $specialtyNames)) . "\n";
+    echo "  • {$venue->name}: ".(empty($specialtyNames) ? 'None' : implode(', ', $specialtyNames))."\n";
 }

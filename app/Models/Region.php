@@ -21,7 +21,6 @@ use Sushi\Sushi;
  * @property string $timezone
  * @property-read Collection<int, Neighborhood> $neighborhoods
  * @property-read Collection<int, Venue> $venues
- *
  */
 class Region extends Model
 {

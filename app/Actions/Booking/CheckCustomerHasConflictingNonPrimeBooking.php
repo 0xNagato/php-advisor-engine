@@ -6,7 +6,6 @@ use App\Enums\BookingStatus;
 use App\Models\Booking;
 use App\Traits\FormatsPhoneNumber;
 use Carbon\Carbon;
-use Illuminate\Support\Facades\Log;
 use Lorisleiva\Actions\Concerns\AsAction;
 
 class CheckCustomerHasConflictingNonPrimeBooking

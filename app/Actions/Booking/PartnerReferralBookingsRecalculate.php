@@ -59,7 +59,7 @@ class PartnerReferralBookingsRecalculate
                 app(BookingCalculationService::class)->calculateEarnings($booking);
 
                 // Confirmed earnings for all confirmed bookings that aren't cancelled or refunded
-                if (!in_array($booking->status, ['cancelled', 'refunded'])) {
+                if (! in_array($booking->status, ['cancelled', 'refunded'])) {
                     $booking->earnings()->update(['confirmed_at' => $booking->confirmed_at]);
                 }
 

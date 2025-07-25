@@ -10,7 +10,6 @@ use Sushi\Sushi;
  * @property string $id
  * @property string $name
  * @property string $description
- *
  */
 class Cuisine extends Model
 {

@@ -43,7 +43,7 @@ class ConciergeReferralStats extends Widget
             ->whereBetween('created_at', [$startDate, $endDate])
             ->whereHas('booking', function ($query) {
                 $query->whereNotNull('confirmed_at')
-                      ->whereNotIn('status', ['cancelled', 'refunded']);
+                    ->whereNotIn('status', ['cancelled', 'refunded']);
             });
 
         $referralsQuery = Earning::query()
@@ -51,7 +51,7 @@ class ConciergeReferralStats extends Widget
             ->whereBetween('created_at', [$startDate, $endDate])
             ->whereHas('booking', function ($query) {
                 $query->whereNotNull('confirmed_at')
-                      ->whereNotIn('status', ['cancelled', 'refunded']);
+                    ->whereNotIn('status', ['cancelled', 'refunded']);
             });
 
         // For referral earnings, always filter by the user who receives the earnings
