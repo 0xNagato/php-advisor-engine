@@ -79,7 +79,7 @@ class EditVenue extends EditRecord
                                             ->content(function () use ($venue) {
                                                 if (! $venue->venueGroup || ! $venue->venueGroup->logo_path) {
                                                     return new HtmlString(
-                                                        '<div class="flex items-center justify-center w-24 h-24 bg-gray-100 rounded-lg">
+                                                        '<div class="flex justify-center items-center w-24 h-24 bg-gray-100 rounded-lg">
                                                             <svg class="w-10 h-10 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
                                                             </svg>
@@ -88,8 +88,8 @@ class EditVenue extends EditRecord
                                                 }
 
                                                 return new HtmlString(
-                                                    '<div class="flex items-center justify-center h-full">
-                                                        <img src="'.$venue->venueGroup->logo.'" alt="'.$venue->venueGroup->name.'" class="object-contain w-auto h-24 max-w-full" />
+                                                    '<div class="flex justify-center items-center h-full">
+                                                        <img src="'.$venue->venueGroup->logo.'" alt="'.$venue->venueGroup->name.'" class="object-contain w-auto max-w-full h-24" />
                                                     </div>'
                                                 );
                                             })
@@ -210,20 +210,20 @@ class EditVenue extends EditRecord
                                 // Check if venue is in Gold tier (DB tier=1 OR config tier_1)
                                 if ($venue->tier === 1 || $tier1Position !== false) {
                                     if ($tier1Position !== false) {
-                                        return new HtmlString('<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">Position '.($tier1Position + 1).' in Gold (configured)</span>');
+                                        return new HtmlString('<span class="inline-flex items-center px-2.5 py-0.5 text-xs font-medium text-yellow-800 bg-yellow-100 rounded-full">Position '.($tier1Position + 1).' in Gold (configured)</span>');
                                     } else {
-                                        return new HtmlString('<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">Gold tier (database only)</span>');
+                                        return new HtmlString('<span class="inline-flex items-center px-2.5 py-0.5 text-xs font-medium text-yellow-800 bg-yellow-100 rounded-full">Gold tier (database only)</span>');
                                     }
                                 }
                                 // Check if venue is in Silver tier (DB tier=2 OR config tier_2)
                                 elseif ($venue->tier === 2 || $tier2Position !== false) {
                                     if ($tier2Position !== false) {
-                                        return new HtmlString('<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">Position '.($tier2Position + 1).' in Silver (configured)</span>');
+                                        return new HtmlString('<span class="inline-flex items-center px-2.5 py-0.5 text-xs font-medium text-gray-800 bg-gray-100 rounded-full">Position '.($tier2Position + 1).' in Silver (configured)</span>');
                                     } else {
-                                        return new HtmlString('<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">Silver tier (database only)</span>');
+                                        return new HtmlString('<span class="inline-flex items-center px-2.5 py-0.5 text-xs font-medium text-gray-800 bg-gray-100 rounded-full">Silver tier (database only)</span>');
                                     }
                                 } else {
-                                    return new HtmlString('<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">Standard tier</span>');
+                                    return new HtmlString('<span class="inline-flex items-center px-2.5 py-0.5 text-xs font-medium text-blue-800 bg-blue-100 rounded-full">Standard tier</span>');
                                 }
                             })
                             ->helperText('This shows if the venue is configured in the tier ordering system. Contact admin to change tier positions.'),
@@ -847,6 +847,47 @@ class EditVenue extends EditRecord
                     ->requiresConfirmation()
                     ->modalHeading('Change Venue Status')
                     ->modalDescription('Are you sure you want to change the status of this venue?'),
+
+                Action::make('downloadLogo')
+                    ->label('Download Logo')
+                    ->icon('heroicon-o-arrow-down-tray')
+                    ->color('info')
+                    ->visible(fn () => $venue->logo_path !== null)
+                    ->action(function () use ($venue) {
+                        try {
+                            if (!$venue->logo_path) {
+                                Notification::make()
+                                    ->title('No Logo')
+                                    ->body('This venue does not have a logo to download.')
+                                    ->warning()
+                                    ->send();
+                                return;
+                            }
+
+                            if (!Storage::disk('do')->exists($venue->logo_path)) {
+                                Notification::make()
+                                    ->title('File Not Found')
+                                    ->body('The logo file could not be found.')
+                                    ->danger()
+                                    ->send();
+                                return;
+                            }
+
+                            // Get file extension from the stored path
+                            $extension = pathinfo($venue->logo_path, PATHINFO_EXTENSION);
+
+                            // Create a clean filename
+                            $filename = str($venue->name)->slug() . '-logo.' . $extension;
+
+                            return Storage::disk('do')->download($venue->logo_path, $filename);
+                        } catch (Exception $e) {
+                            Notification::make()
+                                ->title('Download Failed')
+                                ->body('Failed to download logo: ' . $e->getMessage())
+                                ->danger()
+                                ->send();
+                        }
+                    }),
 
                 Action::make('delete')
                     ->label('Delete Venue')
