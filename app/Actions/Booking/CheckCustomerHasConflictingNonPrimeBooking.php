@@ -23,7 +23,7 @@ class CheckCustomerHasConflictingNonPrimeBooking
         $windowStart = $bookingAt->copy()->subHours(self::BOOKING_WINDOW_HOURS);
         $windowEnd = $bookingAt->copy()->addHours(self::BOOKING_WINDOW_HOURS);
 
-        $query = Booking::query()
+        return Booking::query()
             ->where('guest_phone', $internationalPhoneNumber)
             ->where('is_prime', false)
             ->whereNotIn('status', [
@@ -32,16 +32,6 @@ class CheckCustomerHasConflictingNonPrimeBooking
                 BookingStatus::ABANDONED,
             ])
             ->where('booking_at', '>=', $windowStart)
-            ->where('booking_at', '<=', $windowEnd);
-
-        Log::debug('CheckCustomerHasConflictingNonPrimeBooking', [
-            'query' => $query->toRawSql(),
-            'booking_at' => $bookingAt->toISOString(),
-            'window_start' => $windowStart->toISOString(),
-            'window_end' => $windowEnd->toISOString(),
-        ]);
-
-        // Check for existing non-prime bookings
-        return $query->first();
+            ->where('booking_at', '<=', $windowEnd)->first();
     }
 }
