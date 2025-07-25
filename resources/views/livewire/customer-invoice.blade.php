@@ -366,10 +366,11 @@
                     !isset($customerInvoice) &&
                     auth()->check() &&
                     auth()->user()->hasActiveRole('super_admin') &&
-                    $booking->status !== BookingStatus::PENDING &&
-                    $booking->status !== BookingStatus::GUEST_ON_PAGE &&
-                    $booking->status !== BookingStatus::ABANDONED &&
-                    $booking->status !== BookingStatus::CANCELLED)
+                    in_array($booking->status, [
+                        BookingStatus::CONFIRMED,
+                        BookingStatus::VENUE_CONFIRMED,
+                        BookingStatus::PARTIALLY_REFUNDED,
+                    ]))
                 @php
                     $booking->load('earnings.user.venue', 'earnings.user.concierge', 'earnings.user.partner');
                 @endphp
