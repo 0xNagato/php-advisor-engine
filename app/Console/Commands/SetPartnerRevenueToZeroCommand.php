@@ -136,8 +136,9 @@ class SetPartnerRevenueToZeroCommand extends Command
             ['Partners Found', $result['partners_found']],
             ['Partners with Non-Zero %', $result['partners_with_non_zero_percentage']],
             ['Partners Updated', $result['partners_updated']],
-            ['Bookings Found', $result['bookings_found']],
-            ['Bookings Recalculated', $result['bookings_recalculated']],
+            ['Active Bookings Found', $result['bookings_found']],
+            ['Inactive Bookings Found', $result['inactive_bookings_found'] ?? 0],
+            ['Bookings Processed', $result['bookings_recalculated']],
             ['Errors', count($result['errors'])],
         ];
 

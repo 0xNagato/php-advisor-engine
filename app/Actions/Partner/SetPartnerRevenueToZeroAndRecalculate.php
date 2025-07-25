@@ -2,6 +2,7 @@
 
 namespace App\Actions\Partner;
 
+use App\Enums\BookingStatus;
 use App\Models\Booking;
 use App\Models\Partner;
 use App\Services\Booking\BookingCalculationService;
@@ -30,6 +31,7 @@ class SetPartnerRevenueToZeroAndRecalculate
             'partners_with_non_zero_percentage' => 0,
             'partners_updated' => 0,
             'bookings_found' => 0,
+            'inactive_bookings_found' => 0,
             'bookings_recalculated' => 0,
             'errors' => [],
             'dry_run' => $dryRun,
@@ -81,35 +83,67 @@ class SetPartnerRevenueToZeroAndRecalculate
 
     private function recalculateBookingsWithPartnerEarnings(bool $dryRun, array &$stats): void
     {
-        // Find all confirmed bookings that have partner earnings
-        $bookings = $this->getBookingsWithPartnerEarnings();
-        $stats['bookings_found'] = $bookings->count();
+        // Find all confirmed bookings that have partner earnings (for recalculation)
+        $activeBookings = $this->getBookingsWithPartnerEarnings();
+        $stats['bookings_found'] = $activeBookings->count();
 
-        if ($bookings->isEmpty()) {
-            return;
-        }
+        // Find all inactive bookings that have partner earnings (for field zeroing only)
+        $inactiveBookings = $this->getInactiveBookingsWithPartnerEarnings();
+        $stats['inactive_bookings_found'] = $inactiveBookings->count();
 
         $calculationService = app(BookingCalculationService::class);
 
-        // Process bookings in chunks to avoid memory issues
-        $bookings->chunk(100)->each(function (Collection $bookingChunk) use ($dryRun, $calculationService, &$stats) {
-            foreach ($bookingChunk as $booking) {
-                $this->recalculateBooking($booking, $dryRun, $calculationService, $stats);
-            }
-        });
+        // Process active bookings with full recalculation
+        if (!$activeBookings->isEmpty()) {
+            $activeBookings->chunk(100)->each(function (Collection $bookingChunk) use ($dryRun, $calculationService, &$stats) {
+                foreach ($bookingChunk as $booking) {
+                    $this->recalculateBooking($booking, $dryRun, $calculationService, $stats);
+                }
+            });
+        }
+
+        // Process inactive bookings by zeroing partner fields only
+        if (!$inactiveBookings->isEmpty()) {
+            $inactiveBookings->chunk(100)->each(function (Collection $bookingChunk) use ($dryRun, &$stats) {
+                foreach ($bookingChunk as $booking) {
+                    $this->zeroPartnerFieldsOnly($booking, $dryRun, $stats);
+                }
+            });
+        }
     }
 
     private function getBookingsWithPartnerEarnings(): Collection
     {
         return Booking::query()
             ->with(['venue.user', 'concierge.user', 'earnings'])
-            ->whereIn('status', ['confirmed', 'venue_confirmed', 'partially_refunded'])
+            ->whereIn('status', [
+                BookingStatus::CONFIRMED,
+                BookingStatus::VENUE_CONFIRMED,
+                BookingStatus::PARTIALLY_REFUNDED,
+            ])
             ->where(function ($query) {
                 $query->whereNotNull('partner_concierge_id')
                     ->orWhereNotNull('partner_venue_id')
                     ->orWhereHas('earnings', function ($earningsQuery) {
                         $earningsQuery->whereIn('type', ['partner_concierge', 'partner_venue']);
                     });
+            })
+            ->get();
+    }
+
+    private function getInactiveBookingsWithPartnerEarnings(): Collection
+    {
+        return Booking::query()
+            ->whereNotIn('status', [
+                BookingStatus::CONFIRMED,
+                BookingStatus::VENUE_CONFIRMED,
+                BookingStatus::PARTIALLY_REFUNDED,
+            ])
+            ->where(function ($query) {
+                $query->where('partner_concierge_fee', '>', 0)
+                    ->orWhere('partner_venue_fee', '>', 0)
+                    ->orWhereNotNull('partner_concierge_id')
+                    ->orWhereNotNull('partner_venue_id');
             })
             ->get();
     }
@@ -169,6 +203,34 @@ class SetPartnerRevenueToZeroAndRecalculate
 
             Log::error('Failed to recalculate booking after partner revenue zero', $error);
         }
+    }
+
+    private function zeroPartnerFieldsOnly(Booking $booking, bool $dryRun, array &$stats): void
+    {
+        if (!$dryRun) {
+            // Zero out partner fee fields for inactive bookings
+            $booking->update([
+                'partner_concierge_fee' => 0,
+                'partner_venue_fee' => 0,
+            ]);
+
+            // Remove partner earnings from earnings table
+            $booking->earnings()
+                ->whereIn('type', ['partner_concierge', 'partner_venue'])
+                ->delete();
+
+            // Log the change
+            activity()
+                ->performedOn($booking)
+                ->withProperties([
+                    'action' => 'partner_revenue_zeroed_inactive_booking',
+                    'original_partner_concierge_fee' => $booking->getOriginal('partner_concierge_fee'),
+                    'original_partner_venue_fee' => $booking->getOriginal('partner_venue_fee'),
+                ])
+                ->log('Partner earnings zeroed for inactive booking');
+        }
+
+        $stats['bookings_recalculated']++;
     }
 
     /**
