@@ -24,7 +24,7 @@ class GenerateCustomerInvoice implements ShouldQueue
     {
         info('Generating invoice for booking', ['booking_id' => $event->booking->id]);
 
-        $path = config('app.env').'/invoices/prima-invoice-'.$event->booking->id.'.pdf';
+        $path = config('app.env').'/invoices/prima-invoice-'.$event->booking->uuid.'.pdf';
 
         try {
             pdf()

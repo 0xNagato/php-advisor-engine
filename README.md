@@ -6,7 +6,9 @@
 
 ## Overview
 
-PRIMA (Platform for Restaurant Intermediation and Management Application) is an innovative solution designed to address revenue loss in the restaurant industry due to third-party reservation trading and no-shows. By facilitating prime-time reservation sales through a trusted concierge network and optimizing non-prime bookings, PRIMA creates a win-win-win situation for restaurants, concierges, and diners.
+**PRIMA** (Platform for Restaurant Intermediation and Management Application) is a comprehensive restaurant reservation ecosystem that transforms how venues monetize their inventory while creating sustainable income streams for concierges. Unlike traditional booking platforms, PRIMA addresses three critical business challenges: revenue loss from third-party reservation trading, operational inefficiency from manual booking processes, and untapped revenue during non-prime hours.
+
+The platform creates multiple revenue streams through prime-time reservation sales, automated small-party bookings, location-based QR discovery, and relationship-driven repeat business - generating sustainable income for all stakeholders while reducing operational overhead. By facilitating prime-time reservation sales through a trusted concierge network and optimizing non-prime bookings, PRIMA creates a win-win-win situation for restaurants, concierges, and diners.
 
 ## Table of Contents
 
@@ -51,13 +53,27 @@ PRIMA revolutionizes restaurant reservation management by:
 
 ## Key Features
 
+### **Automated Revenue Optimization**
+- **Smart Auto-Approval**: Small bookings (≤7 guests) automatically approve when restaurants have platform integration
+- **Business Impact**: Eliminates manual processing costs, reduces booking abandonment, and captures time-sensitive reservations
+
+### **Restaurant System Integration**
+- **Platform Connections**: Direct integration with restaurant management systems (CoverManager, Restoo)
+- **Business Impact**: Eliminates double-entry, reduces errors, provides real-time inventory, and streamlines operations
+
+### **Location-Based Discovery Network**
+- **QR Concierge Program**: QR codes placed at hotels and high-traffic locations enable instant booking access
+- **Business Impact**: Creates new customer acquisition channels, generates passive income for property partners
+
+### **Relationship-Driven Business Model**
+- **Customer Attribution**: System maintains customer-concierge relationships across all future bookings
+- **Business Impact**: Builds customer loyalty, increases lifetime value, creates predictable income streams
+
+### **Comprehensive Revenue Management**
 - Dual booking system for prime and non-prime reservations
-- Concierge-mediated bookings
-- Automated reservation management system integration
-- Real-time analytics for restaurants and concierges
 - Sophisticated earnings calculation and distribution system
-- Partner and referral management
-- Comprehensive venue management tools
+- Multi-stakeholder revenue sharing (venues, concierges, partners)
+- Real-time analytics and reporting
 
 ## How It Works
 
@@ -91,24 +107,29 @@ PRIMA revolutionizes restaurant reservation management by:
 
 ## Technology Stack
 
-- PHP 8.3
-- Laravel 11
-- FilamentPHP 3
-- Livewire
-- TailwindCSS
-- Laravel Actions (lorisleiva/laravel-actions)
-- MySQL Version 8.0 or higher
+- **PHP 8.3+** - Modern PHP with performance optimizations
+- **Laravel 11** - Full-stack web application framework
+- **Filament 3** - Admin panel and form builder
+- **Livewire 3** - Real-time UI components
+- **Laravel Sanctum** - API authentication for mobile apps
+- **Laravel Actions** (lorisleiva/laravel-actions) - Business logic encapsulation
+- **Spatie Packages** - Permissions, activity logging, data objects
+- **PostgreSQL 15+** - Primary database with advanced features
+- **Redis** - Caching and session storage
+- **Queue Workers** - Background job processing
 
 ## Architecture
 
 PRIMA follows a modern, modular architecture leveraging Laravel's robust features and additional packages to ensure clean, maintainable, and reusable code:
 
-- **MVC Pattern**: Utilizes Laravel's Model-View-Controller architecture for clear separation of concerns.
-- **Service Layer**: Implements a service layer for complex business logic, particularly for booking calculations and earnings distribution.
-- **Action Pattern**: Leverages the Laravel Actions package by Loris Leiva to encapsulate business logic into versatile, reusable classes.
-- **Event-Driven**: Utilizes Laravel's event system for decoupled, scalable operations.
-- **API-First**: Designed with API endpoints to support mobile applications and potential third-party integrations.
-- **Admin Panel**: Uses FilamentPHP for a powerful, customizable admin interface.
+- **MVC Pattern**: Laravel's Model-View-Controller architecture for clear separation of concerns
+- **Multi-Platform Integration Layer**: Unified interface for different restaurant management systems
+- **Action Pattern**: Laravel Actions package for encapsulating business logic into versatile, reusable classes
+- **Event-Driven Architecture**: Laravel's event system for booking lifecycle and earnings calculations
+- **API-First Design**: RESTful APIs supporting mobile applications and third-party integrations
+- **Queue-Based Processing**: Background jobs for SMS, notifications, and platform synchronization
+- **Multi-Currency Support**: Built-in currency conversion and regional pricing
+- **Admin Panel**: Filament 3 for powerful, customizable administrative interface
 
 ### Action Pattern and Code Reuse
 
@@ -127,12 +148,14 @@ This approach to using Actions has significantly improved our ability to maintai
 
 ## Core Components
 
-1. **Booking Management**: Uses Actions to handle prime and non-prime reservations, ensuring consistent logic across web interfaces and API endpoints.
-2. **User Management**: Employs role-specific Actions for managing restaurants, concierges, and partners, maintaining consistency between admin operations and API functionalities.
-3. **[Earnings/Booking Calculation](./docs/booking_calculations.md)**: Utilizes complex Actions for calculating and distributing earnings, which can be triggered from various parts of the application including scheduled tasks and manual admin operations.
-4. **Reporting and Analytics**: Leverages Actions for data aggregation and processing, allowing the same reports to be generated for the admin panel and API responses.
-5. **Notification System**: Uses notification-specific Actions that can be triggered from multiple contexts, ensuring consistent communication logic across the platform.
-6. **Integration Layer**: Implements Actions for standardized data exchange with restaurant management systems, usable both in background jobs and real-time API interactions.
+1. **Platform Abstraction Layer**: Unified booking interface across different restaurant management systems (CoverManager, Restoo)
+2. **Auto-Approval Engine**: Intelligent booking processing based on party size, venue integration, and business rules
+3. **Earnings Engine**: Multi-stakeholder revenue calculation and distribution system with real-time processing
+4. **Customer Attribution System**: Maintains customer-concierge relationships across bookings for loyalty and repeat business
+5. **QR Discovery Network**: Location-based booking generation through strategically placed QR codes
+6. **[Booking Calculation System](./docs/booking_calculations.md)**: Complex revenue sharing algorithms supporting venues, concierges, partners, and referrals
+7. **Notification Engine**: Multi-channel communication (SMS, email, push) with automated and manual triggers
+8. **Analytics & Reporting**: Real-time performance metrics for all stakeholders with currency conversion support
 
 ## Venue Management
 
@@ -219,7 +242,7 @@ Ensure you have the following installed on your development machine:
 - **PHP**: Version 8.3 or higher
 - **Composer**: Dependency manager for PHP
 - **Node.js and npm**: For front-end dependencies
-- **MySQL**: Version 8.0 or higher
+- **PostgreSQL**: Version 15 or higher
 
 ### Installation Steps
 
@@ -302,10 +325,21 @@ Ensure you have the following installed on your development machine:
 
 ### Additional Setup
 
-- **Horizon**: If you are using Laravel Horizon for managing queues, ensure it's set up correctly:
+- **Queue Workers**: PRIMA requires background job processing for SMS, notifications, and platform sync:
+
+    ```bash
+    php artisan queue:work
+    ```
+
+- **Horizon** (Optional): For advanced queue management and monitoring:
 
     ```bash
     php artisan horizon:watch
     ```
+
+- **External Dependencies**: Configure external services in your `.env`:
+    - Stripe (for payments)
+    - SMS provider (Twilio/similar)
+    - Platform APIs (CoverManager, Restoo)
 
 Now you are ready to start developing and testing the PRIMA platform locally.
