@@ -114,7 +114,8 @@ PRIMA revolutionizes restaurant reservation management by:
 - **Laravel Sanctum** - API authentication for mobile apps
 - **Laravel Actions** (lorisleiva/laravel-actions) - Business logic encapsulation
 - **Spatie Packages** - Permissions, activity logging, data objects
-- **PostgreSQL 15+** - Primary database with advanced features
+- **TailwindCSS 3** - Utility-first CSS framework
+- **PostgreSQL 17** - Primary database with advanced features
 - **Redis** - Caching and session storage
 - **Queue Workers** - Background job processing
 
@@ -242,7 +243,7 @@ Ensure you have the following installed on your development machine:
 - **PHP**: Version 8.3 or higher
 - **Composer**: Dependency manager for PHP
 - **Node.js and npm**: For front-end dependencies
-- **PostgreSQL**: Version 15 or higher
+- **PostgreSQL**: Version 17 or higher
 
 ### Installation Steps
 
