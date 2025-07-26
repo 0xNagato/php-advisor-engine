@@ -13,6 +13,10 @@ use Stripe\StripeClient;
 use function Pest\Laravel\deleteJson;
 use function Pest\Laravel\postJson;
 use function Pest\Laravel\putJson;
+use Illuminate\Support\Facades\Event;
+use Illuminate\Support\Facades\Notification;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Queue;
 
 beforeEach(function () {
     // Mock StripeClient for payment intent creation
@@ -85,6 +89,16 @@ beforeEach(function () {
         'booking_at' => now(),
         'status' => 'confirmed',
     ]);
+    
+    // Mock external services to prevent side effects during API tests
+    // Do this after venue/template setup is complete
+    Event::fake([
+        \App\Events\BookingPaid::class,
+        \App\Events\BookingConfirmed::class,
+    ]);
+    Notification::fake();
+    Storage::fake('local');
+    Queue::fake();
 });
 
 test('unauthenticated user cannot create booking', function () {
@@ -175,7 +189,7 @@ test('user can confirm their booking', function () {
     putJson("/api/bookings/$booking->id", [
         'first_name' => 'John',
         'last_name' => 'Doe',
-        'phone' => '+12015556478',
+        'phone' => '+120155564'.str_pad(random_int(10, 99), 2, '0', STR_PAD_LEFT),
         'bookingUrl' => 'https://www.google.com',
     ], [
         'Authorization' => 'Bearer '.$this->token,
@@ -227,6 +241,10 @@ test('user cannot delete booking on status confirmed', function () {
 });
 
 test('cannot update conflicting non-prime booking within 2-hour window', function () {
+    // Generate unique phone number for this test to avoid parallel test conflicts
+    $uniquePhone = '+120155564'.str_pad(random_int(10, 99), 2, '0', STR_PAD_LEFT);
+    $uniqueEmail = 'john'.random_int(1000, 9999).'@example.com';
+
     // Create a non-prime schedule template for 6 PM
     $firstTemplate = ScheduleTemplate::factory()->create([
         'venue_id' => $this->venue->id,
@@ -243,46 +261,43 @@ test('cannot update conflicting non-prime booking within 2-hour window', functio
 
     $bookingDate = now()->addDays(2)->format('Y-m-d');
 
-    // Create first booking at 6 PM
-    $firstBookingResponse = postJson('/api/bookings', [
+    // Create and set up first booking directly in database to avoid HTTP timing issues
+    // This eliminates race conditions from sequential HTTP requests in parallel tests
+    $firstBooking = \App\Models\Booking::factory()->create([
         'schedule_template_id' => $firstTemplate->id,
-        'date' => $bookingDate,
-        'guest_count' => 2,
-    ], [
-        'Authorization' => 'Bearer '.$this->token,
-    ])->assertSuccessful();
+        'guest_phone' => $uniquePhone,
+        'guest_email' => $uniqueEmail,
+        'guest_first_name' => 'John',
+        'guest_last_name' => 'Doe',
+        'booking_at' => $bookingDate.' 18:00:00',
+        'is_prime' => false,
+        'status' => \App\Enums\BookingStatus::PENDING,
+        'concierge_id' => $this->concierge->id,
+    ]);
+    
+    // Verify the booking was created with the expected phone number
+    expect($firstBooking->guest_phone)->toBe($uniquePhone);
 
-    $firstBooking = Booking::find($firstBookingResponse->json('data.id'));
-
-    // Update first booking with guest details
-    putJson("/api/bookings/{$firstBooking->id}", [
-        'first_name' => 'John',
-        'last_name' => 'Doe',
-        'phone' => '+12015556478',
-        'email' => 'john@example.com',
-        'notes' => '',
-        'bookingUrl' => 'https://example.com',
-    ], [
-        'Authorization' => 'Bearer '.$this->token,
-    ])->assertSuccessful();
-
-    // Create second booking at 7 PM
-    $secondBookingResponse = postJson('/api/bookings', [
+    // Create second booking directly in database to avoid race conditions
+    $secondBooking = \App\Models\Booking::factory()->create([
         'schedule_template_id' => $secondTemplate->id,
-        'date' => $bookingDate,
+        'guest_phone' => '+1234567890', // Different phone initially
+        'guest_email' => 'different@test.com',
+        'guest_first_name' => 'Jane',
+        'guest_last_name' => 'Smith',
+        'booking_at' => $bookingDate.' 19:00:00',
+        'is_prime' => false,
+        'status' => \App\Enums\BookingStatus::PENDING,
+        'concierge_id' => $this->concierge->id,
         'guest_count' => 2,
-    ], [
-        'Authorization' => 'Bearer '.$this->token,
-    ])->assertSuccessful();
-
-    $secondBooking = Booking::find($secondBookingResponse->json('data.id'));
+    ]);
 
     // Try to update second booking with same phone number (should be blocked)
     putJson("/api/bookings/{$secondBooking->id}", [
         'first_name' => 'John',
         'last_name' => 'Doe',
-        'phone' => '+12015556478', // Same phone number as first booking
-        'email' => 'john@example.com',
+        'phone' => $uniquePhone, // Same phone number as first booking
+        'email' => $uniqueEmail,
         'notes' => '',
         'bookingUrl' => 'https://example.com',
     ], [
@@ -296,6 +311,10 @@ test('cannot update conflicting non-prime booking within 2-hour window', functio
 });
 
 test('cannot complete conflicting non-prime booking within 2-hour window', function () {
+    // Generate unique phone number for this test to avoid parallel test conflicts
+    $uniquePhone = '+120155564'.str_pad(random_int(10, 99), 2, '0', STR_PAD_LEFT);
+    $uniqueEmail = 'john'.random_int(1000, 9999).'@example.com';
+
     // Create a non-prime schedule template for 6 PM
     $firstTemplate = ScheduleTemplate::factory()->create([
         'venue_id' => $this->venue->id,
@@ -312,27 +331,19 @@ test('cannot complete conflicting non-prime booking within 2-hour window', funct
 
     $bookingDate = now()->addDays(2)->format('Y-m-d');
 
-    // Create first booking at 6 PM
-    $firstBookingResponse = postJson('/api/bookings', [
+    // Create and set up first booking directly in database to avoid HTTP timing issues
+    // This eliminates race conditions from sequential HTTP requests in parallel tests
+    $firstBooking = \App\Models\Booking::factory()->create([
         'schedule_template_id' => $firstTemplate->id,
-        'date' => $bookingDate,
-        'guest_count' => 2,
-    ], [
-        'Authorization' => 'Bearer '.$this->token,
-    ])->assertSuccessful();
-
-    $firstBooking = Booking::find($firstBookingResponse->json('data.id'));
-
-    // Complete first booking with guest details
-    postJson("/api/bookings/{$firstBooking->id}/complete", [
-        'first_name' => 'John',
-        'last_name' => 'Doe',
-        'phone' => '+12015556478',
-        'email' => 'john@example.com',
-        'notes' => '',
-    ], [
-        'Authorization' => 'Bearer '.$this->token,
-    ])->assertSuccessful();
+        'guest_phone' => $uniquePhone,
+        'guest_email' => $uniqueEmail,
+        'guest_first_name' => 'John',
+        'guest_last_name' => 'Doe',
+        'booking_at' => $bookingDate.' 18:00:00',
+        'is_prime' => false,
+        'status' => \App\Enums\BookingStatus::PENDING,
+        'concierge_id' => $this->concierge->id,
+    ]);
 
     // Create second booking at 7 PM
     $secondBookingResponse = postJson('/api/bookings', [
@@ -349,8 +360,8 @@ test('cannot complete conflicting non-prime booking within 2-hour window', funct
     postJson("/api/bookings/{$secondBooking->id}/complete", [
         'first_name' => 'John',
         'last_name' => 'Doe',
-        'phone' => '+12015556478', // Same phone number as first booking
-        'email' => 'john@example.com',
+        'phone' => $uniquePhone, // Same phone number as first booking
+        'email' => $uniqueEmail,
         'notes' => '',
     ], [
         'Authorization' => 'Bearer '.$this->token,

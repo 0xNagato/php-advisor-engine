@@ -38,6 +38,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - Never clear any type of cache locally
 - Do not stage files or commit changes until they have been tested and confirmed
 - Use the MySQL MCP whenever database lookups are needed
+- **NEVER use Co-Authored-By in git commits** - always commit without co-author attribution
 
 ## Configuration Notes
 
@@ -56,3 +57,25 @@ Default configuration: `company,venues,agreement` (excludes booking-hours, prime
 When the incentive step is hidden, the system uses the following defaults:
 - Non-prime incentives: Enabled (true)
 - Per diem amount: $10.00 per guest
+
+### Auto-Approval System
+The booking system includes automatic approval for small party bookings that meet specific criteria:
+
+**Auto-Approval Conditions:**
+- Party size is 7 guests or under
+- Venue has platform integration (Restoo or CoverManager)  
+- Successful API response received from the platform
+- Platform sync completed successfully
+
+**Behavior:**
+- Qualifying bookings are automatically approved (`venue_confirmed_at` set)
+- Custom SMS and email notifications sent to venue contacts
+- Admin notifications sent for tracking
+- Activity logs created for audit trail
+- Bookings with 8+ guests continue using manual approval process
+
+**Key Components:**
+- `AutoApproveSmallPartyBooking` action handles the approval logic
+- `SendAutoApprovalNotificationToVenueContacts` manages notifications
+- `VenueContactBookingAutoApproved` notification with custom SMS/email templates
+- `BookingPlatformSyncListener` triggers auto-approval after successful platform sync

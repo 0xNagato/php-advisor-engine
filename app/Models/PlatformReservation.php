@@ -6,12 +6,15 @@ use App\Services\CoverManagerService;
 use App\Services\RestooService;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Casts\Attribute;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Facades\Log;
 
 class PlatformReservation extends Model
 {
+    use HasFactory;
+
     /**
      * The attributes that are mass assignable.
      *
@@ -477,6 +480,11 @@ class PlatformReservation extends Model
      */
     protected function syncToRestoo(): bool
     {
+        // If already synced, return true
+        if ($this->synced_to_platform && $this->platform_reservation_id) {
+            return true;
+        }
+
         $venue = $this->venue;
 
         if (! $venue->hasPlatform('restoo')) {

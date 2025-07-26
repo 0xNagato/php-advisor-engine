@@ -2,6 +2,7 @@
 
 namespace App\Listeners;
 
+use App\Actions\Booking\AutoApproveSmallPartyBooking;
 use App\Events\BookingConfirmed;
 use App\Factories\BookingPlatformFactory;
 use App\Models\PlatformReservation;
@@ -51,16 +52,19 @@ class BookingPlatformSyncListener implements ShouldQueue
         }
 
         $success = false;
+        $anyPlatformSucceeded = false;
 
         // Process each platform
         foreach ($platforms as $platform) {
+            $platformSuccess = false;
+
             try {
                 switch ($platform->platform_type) {
                     case 'covermanager':
-                        $success = $this->syncToCoverManager($booking);
+                        $platformSuccess = $this->syncToCoverManager($booking);
                         break;
                     case 'restoo':
-                        $success = $this->syncToRestoo($booking);
+                        $platformSuccess = $this->syncToRestoo($booking);
                         break;
                     default:
                         // Unsupported platform
@@ -72,7 +76,12 @@ class BookingPlatformSyncListener implements ShouldQueue
                         continue 2; // Skip to next platform
                 }
 
-                if (! $success) {
+                if ($platformSuccess) {
+                    $anyPlatformSucceeded = true;
+                    $success = true; // Keep existing behavior for job retry logic
+                }
+
+                if (! $platformSuccess) {
                     // Removed duplicate error logging - errors are already logged at the PlatformReservation level with more context
                 }
             } catch (Throwable $e) {
@@ -91,6 +100,22 @@ class BookingPlatformSyncListener implements ShouldQueue
 
                     return;
                 }
+            }
+        }
+
+        // Check for auto-approval after platform sync attempts
+        if ($anyPlatformSucceeded) {
+            try {
+                $autoApproved = AutoApproveSmallPartyBooking::run($booking);
+                if ($autoApproved) {
+                    Log::info("Booking {$booking->id} was auto-approved after successful platform sync");
+                }
+            } catch (Throwable $e) {
+                Log::error("Failed to auto-approve booking {$booking->id} after platform sync: {$e->getMessage()}", [
+                    'booking_id' => $booking->id,
+                    'venue_id' => $venue->id,
+                    'error' => $e->getMessage(),
+                ]);
             }
         }
 

@@ -22,6 +22,9 @@ use Tests\TestCase;
 
 uses(TestCase::class, RefreshDatabase::class)
     ->beforeEach(function () {
+        // Ensure queue uses sync driver for immediate execution
+        config(['queue.default' => 'sync']);
+        
         Role::create(['name' => 'super_admin']);
         Role::create(['name' => 'concierge']);
         Role::create(['name' => 'venue']);
@@ -84,3 +87,4 @@ uses(TestCase::class, RefreshDatabase::class)
 | global functions to help you to reduce the number of lines of code in your test files.
 |
 */
+
