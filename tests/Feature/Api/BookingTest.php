@@ -8,15 +8,15 @@ use App\Models\ScheduleTemplate;
 use App\Models\User;
 use App\Models\Venue;
 use App\Models\VenueTimeSlot;
+use Illuminate\Support\Facades\Event;
+use Illuminate\Support\Facades\Notification;
+use Illuminate\Support\Facades\Queue;
+use Illuminate\Support\Facades\Storage;
 use Stripe\StripeClient;
 
 use function Pest\Laravel\deleteJson;
 use function Pest\Laravel\postJson;
 use function Pest\Laravel\putJson;
-use Illuminate\Support\Facades\Event;
-use Illuminate\Support\Facades\Notification;
-use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Facades\Queue;
 
 beforeEach(function () {
     // Mock StripeClient for payment intent creation
@@ -89,7 +89,7 @@ beforeEach(function () {
         'booking_at' => now(),
         'status' => 'confirmed',
     ]);
-    
+
     // Mock external services to prevent side effects during API tests
     // Do this after venue/template setup is complete
     Event::fake([
@@ -274,7 +274,7 @@ test('cannot update conflicting non-prime booking within 2-hour window', functio
         'status' => \App\Enums\BookingStatus::PENDING,
         'concierge_id' => $this->concierge->id,
     ]);
-    
+
     // Verify the booking was created with the expected phone number
     expect($firstBooking->guest_phone)->toBe($uniquePhone);
 

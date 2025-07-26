@@ -78,7 +78,7 @@ it('does not trigger auto-approval when platform sync fails', function () {
     // Mock Restoo service to return failure for this test
     $this->mock(\App\Services\RestooService::class, function ($mock) {
         $mock->shouldReceive('createReservation')
-             ->andReturn(null); // Return null to simulate failure
+            ->andReturn(null); // Return null to simulate failure
     });
 
     // Use Laravel Actions mocking to verify the action is not called

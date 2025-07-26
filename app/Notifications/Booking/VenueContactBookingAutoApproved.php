@@ -113,15 +113,15 @@ class VenueContactBookingAutoApproved extends Notification implements ShouldQueu
     private function getPlatformName($venue): string
     {
         $enabledPlatforms = $venue->platforms()->where('is_enabled', true)->get();
-        
+
         foreach ($enabledPlatforms as $platform) {
             return match ($platform->platform_type) {
                 'covermanager' => 'CoverManager',
                 'restoo' => 'Restoo',
-                default => ucfirst($platform->platform_type),
+                default => ucfirst((string) $platform->platform_type),
             };
         }
-        
+
         // Fallback if no enabled platforms found
         return 'your booking platform';
     }
