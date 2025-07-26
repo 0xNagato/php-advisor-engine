@@ -7,6 +7,7 @@ use App\Actions\Booking\CheckCustomerHasNonPrimeBooking;
 use App\Actions\Booking\CompleteBooking;
 use App\Actions\Booking\CreateBooking;
 use App\Actions\Booking\CreateStripePaymentIntent;
+use App\Actions\Booking\UpdateBookingConciergeAttribution;
 use App\Data\Booking\CreateBookingReturnData;
 use App\Enums\BookingStatus;
 use App\Enums\VenueStatus;
@@ -433,6 +434,9 @@ class BookingController extends Controller
 
             app(BookingService::class)->processBooking($booking, $formData);
 
+            // Apply customer attribution logic for returning customers
+            UpdateBookingConciergeAttribution::run($booking, $validatedData['phone']);
+
             $booking->update(['concierge_referral_type' => 'app']);
 
             activity()
@@ -715,6 +719,9 @@ class BookingController extends Controller
         }
 
         app(BookingService::class)->processBooking($booking, $validatedData);
+
+        // Apply customer attribution logic for returning customers
+        UpdateBookingConciergeAttribution::run($booking, $validatedData['phone']);
 
         $booking->update(['concierge_referral_type' => 'app']);
 

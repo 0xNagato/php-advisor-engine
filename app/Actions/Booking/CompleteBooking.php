@@ -42,6 +42,9 @@ class CompleteBooking
 
             $formattedPhone = $this->getInternationalFormattedPhoneNumber($formData['phone']);
 
+            // Apply customer attribution logic for returning customers
+            UpdateBookingConciergeAttribution::run($booking, $formattedPhone);
+
             $booking->update([
                 'concierge_referral_type' => $formData['r'],
                 'guest_first_name' => $formData['firstName'],

@@ -271,6 +271,7 @@ return [
     'google_play_store_url' => env('GOOGLE_PLAY_STORE_URL'),
     'house' => [
         'concierge_id' => env('HOUSE_CONCIERGE_ID', 1),
+        'vip_codes' => ['HOME', 'DIRECT'],
     ],
     'venue_booking_notification_phones' => env('VENUE_BOOKING_NOTIFICATION_PHONES', '+17865147601,+19176644415'),
     'widget_cache_timeout_minutes' => (int) env('WIDGET_CACHE_TIMEOUT_MINUTES', 5),
