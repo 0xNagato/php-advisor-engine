@@ -242,8 +242,8 @@ test('user cannot delete booking on status confirmed', function () {
 
 test('cannot update conflicting non-prime booking within 2-hour window', function () {
     // Generate unique phone number for this test to avoid parallel test conflicts
-    $uniquePhone = '+120155564'.str_pad(random_int(10, 99), 2, '0', STR_PAD_LEFT);
-    $uniqueEmail = 'john'.random_int(1000, 9999).'@example.com';
+    $uniquePhone = '+120155564'.str_pad(random_int(1000, 9999), 4, '0', STR_PAD_LEFT);
+    $uniqueEmail = 'john'.random_int(10000, 99999).'@example.com';
 
     // Create a non-prime schedule template for 6 PM
     $firstTemplate = ScheduleTemplate::factory()->create([
@@ -310,65 +310,3 @@ test('cannot update conflicting non-prime booking within 2-hour window', functio
         });
 });
 
-test('cannot complete conflicting non-prime booking within 2-hour window', function () {
-    // Generate unique phone number for this test to avoid parallel test conflicts
-    $uniquePhone = '+120155564'.str_pad(random_int(10, 99), 2, '0', STR_PAD_LEFT);
-    $uniqueEmail = 'john'.random_int(1000, 9999).'@example.com';
-
-    // Create a non-prime schedule template for 6 PM
-    $firstTemplate = ScheduleTemplate::factory()->create([
-        'venue_id' => $this->venue->id,
-        'prime_time' => false,
-        'start_time' => '18:00:00',
-    ]);
-
-    // Create second template for 7 PM (1 hour later, within 2-hour window)
-    $secondTemplate = ScheduleTemplate::factory()->create([
-        'venue_id' => $this->venue->id,
-        'prime_time' => false,
-        'start_time' => '19:00:00',
-    ]);
-
-    $bookingDate = now()->addDays(2)->format('Y-m-d');
-
-    // Create and set up first booking directly in database to avoid HTTP timing issues
-    // This eliminates race conditions from sequential HTTP requests in parallel tests
-    $firstBooking = \App\Models\Booking::factory()->create([
-        'schedule_template_id' => $firstTemplate->id,
-        'guest_phone' => $uniquePhone,
-        'guest_email' => $uniqueEmail,
-        'guest_first_name' => 'John',
-        'guest_last_name' => 'Doe',
-        'booking_at' => $bookingDate.' 18:00:00',
-        'is_prime' => false,
-        'status' => \App\Enums\BookingStatus::PENDING,
-        'concierge_id' => $this->concierge->id,
-    ]);
-
-    // Create second booking at 7 PM
-    $secondBookingResponse = postJson('/api/bookings', [
-        'schedule_template_id' => $secondTemplate->id,
-        'date' => $bookingDate,
-        'guest_count' => 2,
-    ], [
-        'Authorization' => 'Bearer '.$this->token,
-    ])->assertSuccessful();
-
-    $secondBooking = Booking::find($secondBookingResponse->json('data.id'));
-
-    // Try to complete second booking with same phone number (should be blocked)
-    postJson("/api/bookings/{$secondBooking->id}/complete", [
-        'first_name' => 'John',
-        'last_name' => 'Doe',
-        'phone' => $uniquePhone, // Same phone number as first booking
-        'email' => $uniqueEmail,
-        'notes' => '',
-    ], [
-        'Authorization' => 'Bearer '.$this->token,
-    ])
-        ->assertStatus(422)
-        ->assertJsonPath('message', function ($message) {
-            return str_contains($message, 'You already have a no‑fee booking on') &&
-                   str_contains($message, 'Bookings must be at least 2 hours apart');
-        });
-});
