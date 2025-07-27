@@ -3,6 +3,7 @@
 namespace App\Console\Commands;
 
 use App\Models\Venue;
+use App\Services\CoverManagerSyncReporter;
 use Carbon\Carbon;
 use Illuminate\Console\Command;
 use Illuminate\Contracts\Database\Query\Builder;
@@ -64,6 +65,9 @@ class SyncCoverManagerAvailability extends Command
 
         foreach ($venues as $venue) {
             $this->line("\nSyncing venue: {$venue->name}");
+            $venueStartTime = microtime(true);
+            $venueDaysSuccessful = 0;
+            $venueDaysFailed = 0;
 
             $currentDate = $startDate->copy();
 
@@ -73,12 +77,15 @@ class SyncCoverManagerAvailability extends Command
 
                     if ($result) {
                         $synced++;
+                        $venueDaysSuccessful++;
                     } else {
                         $failed++;
+                        $venueDaysFailed++;
                         Log::error("Failed to sync venue {$venue->id} for date {$currentDate->format('Y-m-d')}");
                     }
                 } catch (Throwable $e) {
                     $failed++;
+                    $venueDaysFailed++;
                     Log::error("Exception syncing venue {$venue->id}", [
                         'error' => $e->getMessage(),
                         'date' => $currentDate->format('Y-m-d'),
@@ -88,12 +95,41 @@ class SyncCoverManagerAvailability extends Command
                 $currentDate->addDay();
                 $progressBar->advance();
             }
+            
+            // Show per-venue summary
+            $venueElapsed = round(microtime(true) - $venueStartTime, 2);
+            $venueTemplateCount = $venue->scheduleTemplates()->where('is_available', true)->count();
+            $estimatedSlots = $venueTemplateCount * $daysToSync;
+            
+            if ($venueDaysFailed === 0) {
+                $this->line("  ✓ {$daysToSync} days processed, ~{$estimatedSlots} slots analyzed ({$venueElapsed}s)");
+            } else {
+                $this->line("  ⚠ {$venueDaysSuccessful}/{$daysToSync} days successful, {$venueDaysFailed} failed ({$venueElapsed}s)");
+            }
         }
 
         $progressBar->finish();
 
-        $this->newLine(2);
+        // Generate comprehensive sync report
+        $reporter = new CoverManagerSyncReporter();
+        $report = $reporter->generateSyncReport($venues->toArray(), $startDate, $daysToSync);
+        $reporter->displayReport($report, $this->output);
+
+        // Traditional summary for backward compatibility
+        $this->newLine();
         $this->info("Sync completed. Synced: {$synced}, Failed: {$failed}");
+        
+        // Log summary for external monitoring
+        Log::info("SyncCoverManagerAvailability completed", [
+            'synced' => $synced,
+            'failed' => $failed,
+            'venues_count' => $venues->count(),
+            'days_synced' => $daysToSync,
+            'overrides_created' => $report['overrides_created'],
+            'overrides_removed' => $report['overrides_removed'],
+            'total_slots_analyzed' => $report['total_slots_analyzed'],
+            'override_rate' => $report['total_slots_analyzed'] > 0 ? round(($report['overrides_created'] / $report['total_slots_analyzed']) * 100, 2) : 0
+        ]);
 
         return self::SUCCESS;
     }
