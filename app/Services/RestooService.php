@@ -33,27 +33,6 @@ class RestooService implements BookingPlatformInterface
     }
 
     /**
-     * Check if the platform credentials for the venue are valid
-     */
-    public function checkAuth(Venue $venue): bool
-    {
-        $platform = $venue->getPlatform('restoo');
-
-        if (! $platform) {
-            return false;
-        }
-
-        $apiKey = $platform->getConfig('api_key');
-        $account = $platform->getConfig('account');
-
-        if (blank($apiKey) || blank($account)) {
-            return false;
-        }
-
-        return $this->checkCredentialsValid($apiKey, $account);
-    }
-
-    /**
      * Check availability for a specific venue, date, time and party size
      */
     public function checkAvailability(Venue $venue, Carbon $date, string $time, int $partySize): array
@@ -109,7 +88,7 @@ class RestooService implements BookingPlatformInterface
 
         // Round to nearest 15 minutes as required by Restoo
         $minutes = $bookingTime->minute;
-        $roundedMinutes = round($minutes / 15) * 15;
+        $roundedMinutes = (int) round($minutes / 15) * 15;
         $bookingTime->minute($roundedMinutes)->second(0);
 
         $payload = [
@@ -157,6 +136,21 @@ class RestooService implements BookingPlatformInterface
         }
 
         return $this->cancelReservationRaw($apiKey, $account, $externalReservationId);
+    }
+
+    /**
+     * Create a reservation on the platform bypassing availability checks (force booking)
+     */
+    public function createReservationForce(Venue $venue, Booking $booking): ?array
+    {
+        Log::warning('Force booking not supported by Restoo platform', [
+            'venue_id' => $venue->id,
+            'booking_id' => $booking->id,
+            'platform' => 'restoo',
+        ]);
+
+        // Restoo does not support force booking - fall back to regular reservation creation
+        return $this->createReservation($venue, $booking);
     }
 
     /**

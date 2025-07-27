@@ -39,6 +39,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - Do not stage files or commit changes until they have been tested and confirmed
 - Use the MySQL MCP whenever database lookups are needed
 - **NEVER use Co-Authored-By in git commits** - always commit without co-author attribution
+- **CRITICAL: NEVER delete production data** - If database appears empty, use `./sync-db.sh --import-only` to restore data, then run `php artisan venue-platforms:update-config` to avoid hitting real customer accounts
 
 ## Configuration Notes
 
@@ -79,3 +80,28 @@ The booking system includes automatic approval for small party bookings that mee
 - `SendAutoApprovalNotificationToVenueContacts` manages notifications
 - `VenueContactBookingAutoApproved` notification with custom SMS/email templates
 - `BookingPlatformSyncListener` triggers auto-approval after successful platform sync
+
+### CoverManager Availability Sync
+The booking system includes automated prime/non-prime management based on restaurant availability:
+
+**Sync Logic:**
+- Uses bulk calendar API (`/reserv/availability_calendar_total`) for efficient processing
+- Only creates venue time slot overrides when CoverManager availability differs from template defaults
+- Processes every 30-minute slot across all party sizes during operating hours
+- Respects human overrides and never overwrites manual changes
+
+**Override Patterns:**
+- **Template = Non-Prime + NO CM availability** → Override to Prime (customer pays upfront)
+- **Template = Prime + HAS CM availability** → Override to Non-Prime (customer pays at restaurant)
+- **Template matches CM availability** → No override needed (uses template default)
+
+**Performance:**
+- 14.6% override rate (2,707 overrides out of 18,480 possible slots)
+- 81% of overrides are Non-Prime → Prime (restaurants lack availability)
+- Single API call per venue instead of hundreds of individual calls
+
+**Key Components:**
+- `syncCoverManagerAvailability()` method in Venue model handles bulk processing
+- `parseCalendarAvailabilityResponse()` processes bulk calendar API responses
+- `isHumanCreatedSlot()` protects manual overrides via activity log detection
+- Command: `php artisan app:sync-covermanager-availability --venue-id=X --days=7`

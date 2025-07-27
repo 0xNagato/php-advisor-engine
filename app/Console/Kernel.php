@@ -23,6 +23,11 @@ class Kernel extends ConsoleKernel
             ->everyMinute()
             ->withoutOverlapping();
 
+        // Sync CoverManager availability hourly
+        $schedule->command('app:sync-covermanager-availability')
+            ->hourly()
+            ->withoutOverlapping();
+
         /**
          * Production-only scheduled tasks
          */

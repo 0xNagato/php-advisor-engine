@@ -59,6 +59,7 @@ PRIMA revolutionizes restaurant reservation management by:
 
 ### **Restaurant System Integration**
 - **Platform Connections**: Direct integration with restaurant management systems (CoverManager, Restoo)
+- **Smart Availability Sync**: Automated prime/non-prime management based on real-time restaurant availability
 - **Business Impact**: Eliminates double-entry, reduces errors, provides real-time inventory, and streamlines operations
 
 ### **Location-Based Discovery Network**
@@ -150,13 +151,14 @@ This approach to using Actions has significantly improved our ability to maintai
 ## Core Components
 
 1. **Platform Abstraction Layer**: Unified booking interface across different restaurant management systems (CoverManager, Restoo)
-2. **Auto-Approval Engine**: Intelligent booking processing based on party size, venue integration, and business rules
-3. **Earnings Engine**: Multi-stakeholder revenue calculation and distribution system with real-time processing
-4. **Customer Attribution System**: Maintains customer-concierge relationships across bookings for loyalty and repeat business
-5. **QR Discovery Network**: Location-based booking generation through strategically placed QR codes
-6. **[Booking Calculation System](./docs/booking_calculations.md)**: Complex revenue sharing algorithms supporting venues, concierges, partners, and referrals
-7. **Notification Engine**: Multi-channel communication (SMS, email, push) with automated and manual triggers
-8. **Analytics & Reporting**: Real-time performance metrics for all stakeholders with currency conversion support
+2. **Availability Sync Engine**: Automated prime/non-prime management using bulk calendar APIs with smart override logic
+3. **Auto-Approval Engine**: Intelligent booking processing based on party size, venue integration, and business rules
+4. **Earnings Engine**: Multi-stakeholder revenue calculation and distribution system with real-time processing
+5. **Customer Attribution System**: Maintains customer-concierge relationships across bookings for loyalty and repeat business
+6. **QR Discovery Network**: Location-based booking generation through strategically placed QR codes
+7. **[Booking Calculation System](./docs/booking_calculations.md)**: Complex revenue sharing algorithms supporting venues, concierges, partners, and referrals
+8. **Notification Engine**: Multi-channel communication (SMS, email, push) with automated and manual triggers
+9. **Analytics & Reporting**: Real-time performance metrics for all stakeholders with currency conversion support
 
 ## Venue Management
 
@@ -342,5 +344,15 @@ Ensure you have the following installed on your development machine:
     - Stripe (for payments)
     - SMS provider (Twilio/similar)
     - Platform APIs (CoverManager, Restoo)
+
+- **CoverManager Sync**: To enable automated availability synchronization:
+
+    ```bash
+    # Sync all CoverManager venues for next 7 days
+    php artisan app:sync-covermanager-availability --days=7
+    
+    # Sync specific venue
+    php artisan app:sync-covermanager-availability --venue-id=123 --days=7
+    ```
 
 Now you are ready to start developing and testing the PRIMA platform locally.

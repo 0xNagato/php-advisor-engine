@@ -143,8 +143,12 @@ class PlatformReservation extends Model
             'notes' => $booking->notes,
         ];
 
-        // Call the CoverManager API first
-        $response = $coverManagerService->createReservationRaw($restaurantId, $bookingData);
+        // Use force booking for prime bookings, regular booking for non-prime
+        if ($booking->is_prime) {
+            $response = $coverManagerService->createReservationForceRaw($restaurantId, $bookingData);
+        } else {
+            $response = $coverManagerService->createReservationRaw($restaurantId, $bookingData);
+        }
 
         if (! $response || ! isset($response['id_reserv'])) {
             $errorMessage = 'Unknown error';
@@ -414,8 +418,13 @@ class PlatformReservation extends Model
             'notes' => $platformData['notes'] ?? '',
         ];
 
-        // Call the CoverManager API
-        $response = $coverManagerService->createReservationRaw($restaurantId, $bookingData);
+        // Use force booking for prime bookings, regular booking for non-prime
+        $booking = $this->booking;
+        if ($booking && $booking->is_prime) {
+            $response = $coverManagerService->createReservationForceRaw($restaurantId, $bookingData);
+        } else {
+            $response = $coverManagerService->createReservationRaw($restaurantId, $bookingData);
+        }
 
         if (! $response || ! isset($response['id_reserv'])) {
             $errorMessage = 'Unknown error';

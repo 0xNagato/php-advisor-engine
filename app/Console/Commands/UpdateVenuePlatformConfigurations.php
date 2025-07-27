@@ -7,12 +7,23 @@ use Illuminate\Console\Command;
 
 class UpdateVenuePlatformConfigurations extends Command
 {
-    protected $signature = 'venue-platforms:update-config';
+    protected $signature = 'venue-platforms:update-config {--skip-venue-platforms : Skip updating venue platform configurations entirely}';
 
     protected $description = 'Update platform configurations for existing venue platform connections';
 
     public function handle(): int
     {
+        $skipVenuePlatforms = $this->option('skip-venue-platforms');
+
+        if ($skipVenuePlatforms) {
+            $this->warn('⚠️  SKIP-VENUE-PLATFORMS FLAG ENABLED');
+            $this->warn('   Venue platform configurations will NOT be updated');
+            $this->warn('   All existing platform configs will be preserved');
+            $this->newLine();
+
+            return Command::SUCCESS;
+        }
+
         $venuePlatforms = VenuePlatform::with('venue')->get();
 
         $this->info("Updating platform configurations for {$venuePlatforms->count()} existing venue platform connections...");
@@ -45,7 +56,7 @@ class UpdateVenuePlatformConfigurations extends Command
             }
 
             if ($configurationUpdated) {
-                $this->line("Updated {$venuePlatform->platform_type} config for venue: {$venuePlatform->venue->name}");
+                $this->line("✅ Updated {$venuePlatform->platform_type} config for venue: {$venuePlatform->venue->name}");
                 $updatedCount++;
             }
         }

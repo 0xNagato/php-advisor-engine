@@ -5,6 +5,7 @@ namespace App\Console\Commands;
 use App\Models\Venue;
 use Carbon\Carbon;
 use Illuminate\Console\Command;
+use Illuminate\Contracts\Database\Query\Builder;
 use Illuminate\Support\Facades\Log;
 use Throwable;
 
@@ -33,8 +34,10 @@ class SyncCoverManagerAvailability extends Command
         $daysToSync = (int) $this->option('days');
 
         $query = Venue::query()
-            ->where('uses_covermanager', true)
-            ->where('covermanager_sync_enabled', true);
+            ->whereHas('platforms', function (Builder $q) {
+                $q->where('platform_type', 'covermanager')
+                    ->where('is_enabled', true);
+            });
 
         if ($venueId) {
             $query->where('id', $venueId);

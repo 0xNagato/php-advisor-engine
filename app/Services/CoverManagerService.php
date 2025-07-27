@@ -50,27 +50,6 @@ class CoverManagerService implements BookingPlatformInterface
     }
 
     /**
-     * Check if the platform credentials for the venue are valid
-     */
-    public function checkAuth(Venue $venue): bool
-    {
-        // Get CoverManager restaurant ID from venue platform configuration
-        $platform = $venue->getPlatform('covermanager');
-
-        if (! $platform || ! $platform->is_enabled) {
-            return false;
-        }
-
-        $restaurantId = $platform->getConfig('restaurant_id');
-
-        if (blank($restaurantId)) {
-            return false;
-        }
-
-        return $this->checkCredentialsValid();
-    }
-
-    /**
      * Check availability for a specific venue, date, time and party size
      */
     public function checkAvailability(Venue $venue, Carbon $date, string $time, int $partySize): array
@@ -166,6 +145,41 @@ class CoverManagerService implements BookingPlatformInterface
         }
 
         return $this->cancelReservationRaw($restaurantId, $externalReservationId);
+    }
+
+    /**
+     * Create a reservation on the platform bypassing availability checks (force booking)
+     */
+    public function createReservationForce(Venue $venue, Booking $booking): ?array
+    {
+        // Get CoverManager restaurant ID from venue platform configuration
+        $platform = $venue->getPlatform('covermanager');
+
+        if (! $platform || ! $platform->is_enabled) {
+            return null;
+        }
+
+        $restaurantId = $platform->getConfig('restaurant_id');
+
+        if (blank($restaurantId)) {
+            return null;
+        }
+
+        // Get the schedule template to access start_time
+        $scheduleTemplate = ScheduleTemplate::query()->find($booking->schedule_template_id);
+
+        // Format data for CoverManager API
+        $bookingData = [
+            'name' => $booking->guest_name,
+            'email' => $booking->guest_email,
+            'phone' => $booking->guest_phone,
+            'date' => $booking->booking_at->format('Y-m-d'),
+            'hour' => $scheduleTemplate->start_time,
+            'size' => $booking->guest_count,
+            'notes' => $booking->notes ?? '',
+        ];
+
+        return $this->createReservationForceRaw($restaurantId, $bookingData);
     }
 
     /**
@@ -368,6 +382,62 @@ class CoverManagerService implements BookingPlatformInterface
     }
 
     /**
+     * Create a reservation in CoverManager using force endpoint (internal implementation)
+     */
+    public function createReservationForceRaw(string $restaurantId, array $bookingData): ?array
+    {
+        // Split name into first_name and last_name
+        $nameParts = explode(' ', (string) $bookingData['name'], 2);
+        $firstName = $nameParts[0] ?? '';
+        $lastName = $nameParts[1] ?? '';
+
+        // Format time to HH:MM (remove seconds if present)
+        $formattedTime = Carbon::parse($bookingData['hour'])->format('H:i');
+
+        $requestData = [
+            'restaurant' => $restaurantId,
+            'date' => $bookingData['date'],
+            'hour' => $formattedTime,
+            'people' => (string) $bookingData['size'],
+            'first_name' => $firstName,
+            'last_name' => $lastName,
+            'email' => $bookingData['email'],
+            'int_call_code' => '34', // Default to Spain, should be configurable
+            'phone' => $bookingData['phone'],
+            'source' => 'primavip',
+            'commentary' => $bookingData['notes'] ?? '',
+            'pending' => '0',
+            'discount' => '0',
+            'not_notify' => '0',
+        ];
+
+        $response = $this->makeApiCall(
+            'POST',
+            '/reserv/force',
+            $requestData,
+            ['apikey' => $this->apiKey],
+            'Create Reservation Force'
+        );
+
+        // Handle CoverManager's error response format
+        if ($response && isset($response['resp']) && $response['resp'] === 0) {
+            $errorMessage = $response['error'] ?? $response['status'] ?? 'Unknown error';
+
+            if ($errorMessage === 'Action not permited') {
+                Log::warning('CoverManager force reservation creation - API key lacks permissions', [
+                    'error' => $errorMessage,
+                    'restaurantId' => $restaurantId,
+                    'message' => 'API key does not have force reservation creation permissions. Contact CoverManager support to enable this feature.',
+                ]);
+            }
+
+            return null;
+        }
+
+        return $response;
+    }
+
+    /**
      * Cancel a reservation in CoverManager (internal implementation)
      */
     public function cancelReservationRaw(string $restaurantId, string $reservationId): bool
@@ -402,35 +472,6 @@ class CoverManagerService implements BookingPlatformInterface
         }
 
         return $response !== null;
-    }
-
-    /**
-     * Check if the API credentials are valid (internal implementation)
-     */
-    protected function checkCredentialsValid(): bool
-    {
-        $response = $this->makeApiCall(
-            'GET',
-            "/restaurant/list/{$this->apiKey}/",
-            operationName: 'Check Credentials'
-        );
-
-        // Check if the response indicates success
-        if (! $response) {
-            return false;
-        }
-
-        // Check for HTTP errors
-        if (isset($response['_http_successful']) && ! $response['_http_successful']) {
-            return false;
-        }
-
-        // Check for CoverManager API errors
-        if (isset($response['resp']) && $response['resp'] === 0) {
-            return false;
-        }
-
-        return true;
     }
 
     /**
