@@ -35,24 +35,20 @@ it('sends notifications to all venue contacts with use_for_reservations enabled'
     }
 });
 
-it('logs successful notification sending', function () {
+it('sends notifications without verbose logging', function () {
     // Fake notifications to prevent actual sending
     Notification::fake();
 
-    // Venue factory creates contacts based on factory definition
-    $contactCount = $this->venue->contacts->filter(fn ($c) => $c->use_for_reservations)->count();
-
-    Log::shouldReceive('info')
-        ->times($contactCount)
-        ->with(
-            "Auto-approval notification sent to venue contact for booking {$this->booking->id}",
-            Mockery::type('array')
-        );
-
-    // Allow for potential error logs if notifications fail
+    // We removed the verbose success logging, so only allow error logs if notifications fail
     Log::shouldReceive('error')->zeroOrMoreTimes();
 
     SendAutoApprovalNotificationToVenueContacts::run($this->booking);
+
+    // Verify notifications were sent (this is the important behavior)
+    $contacts = $this->venue->contacts->filter(fn ($c) => $c->use_for_reservations);
+    foreach ($contacts as $contact) {
+        Notification::assertSentTo($contact, VenueContactBookingAutoApproved::class);
+    }
 });
 
 it('logs warning when no venue contacts found', function () {

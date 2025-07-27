@@ -67,7 +67,7 @@ it('triggers auto-approval after successful platform sync', function () {
     $listener->handle($event);
 });
 
-it('does not trigger auto-approval when platform sync fails', function () {
+it('sends regular confirmation SMS when platform sync fails', function () {
     // Create enabled platform
     VenuePlatform::factory()->create([
         'venue_id' => $this->venue->id,
@@ -81,8 +81,15 @@ it('does not trigger auto-approval when platform sync fails', function () {
             ->andReturn(null); // Return null to simulate failure
     });
 
-    // Use Laravel Actions mocking to verify the action is not called
-    AutoApproveSmallPartyBooking::shouldNotRun();
+    // Mock SendConfirmationToVenueContacts to verify it gets called when platform sync fails
+    $this->mock(\App\Actions\Booking\SendConfirmationToVenueContacts::class)
+        ->shouldReceive('handle')
+        ->once()
+        ->with($this->booking);
+
+    // Allow logging
+    Log::shouldReceive('info')->zeroOrMoreTimes();
+    Log::shouldReceive('error')->zeroOrMoreTimes();
 
     $listener = app(BookingPlatformSyncListener::class);
     $event = new BookingConfirmed($this->booking);
@@ -111,7 +118,11 @@ it('logs auto-approval success', function () {
         ->with($this->booking)
         ->andReturn(true);
 
-    // Expect success log
+    // Allow simulation log and expect success log
+    Log::shouldReceive('info')
+        ->with("Simulating platform sync success for booking {$this->booking->id} (development mode)")
+        ->zeroOrMoreTimes(); // May or may not be called depending on config
+        
     Log::shouldReceive('info')
         ->once()
         ->with("Booking {$this->booking->id} was auto-approved after successful platform sync");
