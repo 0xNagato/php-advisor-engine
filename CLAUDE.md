@@ -41,7 +41,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - **CRITICAL: Always run tests after making changes** - Use `./vendor/bin/pest --parallel` to verify changes work
 - **CRITICAL: Double-check which test is failing before deleting** - Match line numbers exactly to error output
 - Use the MySQL MCP whenever database lookups are needed
-- **NEVER use Co-Authored-By in git commits** - always commit without co-author attribution
+- **CRITICAL: NEVER add any attribution to git commits** - No Co-Authored-By, no "Generated with Claude Code", no AI attribution of any kind. Commits should appear as if written entirely by the human developer.
 - **CRITICAL: NEVER delete production data** - If database appears empty, use `./sync-db.sh --import-only` to restore data, then run `php artisan venue-platforms:update-config` to avoid hitting real customer accounts
 
 ## Configuration Notes
