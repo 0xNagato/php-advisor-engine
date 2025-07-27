@@ -8,6 +8,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - **Frontend dev**: I always have assets compiled on file change, no need to worry about this.
 - **Build frontend**: `npm run build`
 - **Run tests**: `./vendor/bin/pest`
+- **Run tests in parallel**: `./vendor/bin/pest --parallel` (use this to verify changes work in parallel execution)
 - **Run single test**: `./vendor/bin/pest tests/Feature/SomeTest.php`
 - **Run specific test method**: `./vendor/bin/pest tests/Feature/SomeTest.php::test_specific_method`
 - **Code linting**: `composer run phpcs`
@@ -37,6 +38,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - Implement Filament resources for admin functionality
 - Never clear any type of cache locally
 - Do not stage files or commit changes until they have been tested and confirmed
+- **CRITICAL: Always run tests after making changes** - Use `./vendor/bin/pest --parallel` to verify changes work
+- **CRITICAL: Double-check which test is failing before deleting** - Match line numbers exactly to error output
 - Use the MySQL MCP whenever database lookups are needed
 - **NEVER use Co-Authored-By in git commits** - always commit without co-author attribution
 - **CRITICAL: NEVER delete production data** - If database appears empty, use `./sync-db.sh --import-only` to restore data, then run `php artisan venue-platforms:update-config` to avoid hitting real customer accounts
