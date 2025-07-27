@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Actions\Venue\SyncCoverManagerAvailabilityAction;
 use App\Models\ScheduleTemplate;
 use App\Models\Venue;
 use App\Models\VenuePlatform;
@@ -78,10 +79,10 @@ class CoverManagerAvailabilitySyncTest extends TestCase
         $date = Carbon::parse('2025-07-28'); // Monday
 
         // Execute sync
-        $result = $this->venue->syncCoverManagerAvailability($date, 1);
+        $result = SyncCoverManagerAvailabilityAction::make()->handle($this->venue, $date, 1);
 
         // Assert sync was successful
-        $this->assertTrue($result);
+        $this->assertTrue($result['success']);
 
         // Assert VenueTimeSlot was created with prime_time = true (no CM availability)
         $venueTimeSlot = VenueTimeSlot::where('schedule_template_id', $this->scheduleTemplate->id)
@@ -92,11 +93,11 @@ class CoverManagerAvailabilitySyncTest extends TestCase
         $this->assertTrue($venueTimeSlot->prime_time);
         $this->assertTrue($venueTimeSlot->is_available);
 
-        // Assert activity log was created
+        // Assert activity log was created (now as summary instead of individual slot logs)
         $this->assertDatabaseHas('activity_log', [
             'subject_type' => Venue::class,
             'subject_id' => $this->venue->id,
-            'description' => 'CoverManager availability synced',
+            'description' => 'CoverManager availability sync completed',
         ]);
     }
 
@@ -135,10 +136,10 @@ class CoverManagerAvailabilitySyncTest extends TestCase
         $date = Carbon::parse('2025-07-28'); // Monday
 
         // Execute sync
-        $result = $this->venue->syncCoverManagerAvailability($date, 1);
+        $result = SyncCoverManagerAvailabilityAction::make()->handle($this->venue, $date, 1);
 
         // Assert sync was successful
-        $this->assertTrue($result);
+        $this->assertTrue($result['success']);
 
         // Assert VenueTimeSlot was created with prime_time = false (CM has availability, overriding template's prime=true)
         $venueTimeSlot = VenueTimeSlot::where('schedule_template_id', $primeTemplate->id)
@@ -187,16 +188,16 @@ class CoverManagerAvailabilitySyncTest extends TestCase
         $this->app->instance(CoverManagerService::class, $mockCoverManagerService);
 
         // Execute sync
-        $result = $this->venue->syncCoverManagerAvailability($date, 1);
+        $result = SyncCoverManagerAvailabilityAction::make()->handle($this->venue, $date, 1);
 
         // Assert sync was successful but slot wasn't modified
-        $this->assertTrue($result);
+        $this->assertTrue($result['success']);
 
         // Assert the existing slot wasn't changed
         $existingSlot->refresh();
         $this->assertTrue($existingSlot->prime_time);
 
-        // Assert no new covermanager_sync activity log was created for THIS SPECIFIC slot
+        // Assert no new individual slot activity log was created (we now use summary logs)
         $syncActivitiesForSlot = Activity::where('subject_type', Venue::class)
             ->where('subject_id', $this->venue->id)
             ->where('description', 'CoverManager availability synced')
@@ -259,10 +260,10 @@ class CoverManagerAvailabilitySyncTest extends TestCase
         $this->app->instance(CoverManagerService::class, $mockCoverManagerService);
 
         // Execute sync
-        $result = $this->venue->syncCoverManagerAvailability($date, 1);
+        $result = SyncCoverManagerAvailabilityAction::make()->handle($this->venue, $date, 1);
 
         // Assert sync was successful
-        $this->assertTrue($result);
+        $this->assertTrue($result['success']);
 
         // Assert the existing override slot was DELETED since CM availability now matches template default
         $this->assertDatabaseMissing('venue_time_slots', [
@@ -286,10 +287,10 @@ class CoverManagerAvailabilitySyncTest extends TestCase
         $date = Carbon::parse('2025-07-28');
 
         // Execute sync
-        $result = $this->venue->syncCoverManagerAvailability($date, 1);
+        $result = SyncCoverManagerAvailabilityAction::make()->handle($this->venue, $date, 1);
 
         // Assert sync failed due to API error
-        $this->assertFalse($result);
+        $this->assertFalse($result['success']);
 
         // Assert no VenueTimeSlot was created due to API error
         $venueTimeSlot = VenueTimeSlot::where('schedule_template_id', $this->scheduleTemplate->id)
@@ -312,10 +313,10 @@ class CoverManagerAvailabilitySyncTest extends TestCase
         $date = Carbon::parse('2025-07-28');
 
         // Execute sync
-        $result = $this->venue->syncCoverManagerAvailability($date, 1);
+        $result = SyncCoverManagerAvailabilityAction::make()->handle($this->venue, $date, 1);
 
         // Assert sync failed due to empty response
-        $this->assertFalse($result);
+        $this->assertFalse($result['success']);
 
         // Assert no VenueTimeSlot was created due to empty response
         $venueTimeSlot = VenueTimeSlot::where('schedule_template_id', $this->scheduleTemplate->id)
@@ -333,10 +334,10 @@ class CoverManagerAvailabilitySyncTest extends TestCase
         $date = Carbon::parse('2025-07-28');
 
         // Execute sync
-        $result = $this->venue->syncCoverManagerAvailability($date, 1);
+        $result = SyncCoverManagerAvailabilityAction::make()->handle($this->venue, $date, 1);
 
         // Assert sync returned false (not enabled)
-        $this->assertFalse($result);
+        $this->assertFalse($result['success']);
 
         // Assert no VenueTimeSlot was created
         $this->assertDatabaseMissing('venue_time_slots', [
@@ -353,10 +354,10 @@ class CoverManagerAvailabilitySyncTest extends TestCase
         $date = Carbon::parse('2025-07-28');
 
         // Execute sync
-        $result = $this->venue->syncCoverManagerAvailability($date, 1);
+        $result = SyncCoverManagerAvailabilityAction::make()->handle($this->venue, $date, 1);
 
         // Assert sync returned false (no platform)
-        $this->assertFalse($result);
+        $this->assertFalse($result['success']);
 
         // Assert no VenueTimeSlot was created
         $this->assertDatabaseMissing('venue_time_slots', [
@@ -409,10 +410,10 @@ class CoverManagerAvailabilitySyncTest extends TestCase
         $startDate = Carbon::parse('2025-07-28'); // Monday
 
         // Execute sync for 2 days
-        $result = $this->venue->syncCoverManagerAvailability($startDate, 2);
+        $result = SyncCoverManagerAvailabilityAction::make()->handle($this->venue, $startDate, 2);
 
         // Assert sync was successful
-        $this->assertTrue($result);
+        $this->assertTrue($result['success']);
 
         // Check Monday slot (should be prime, OVERRIDING template default non-prime, so venue time slot IS created)
         $mondaySlot = VenueTimeSlot::where('schedule_template_id', $this->scheduleTemplate->id)

@@ -2,6 +2,7 @@
 
 namespace Tests\Manual;
 
+use App\Actions\Venue\SyncCoverManagerAvailabilityAction;
 use App\Models\ScheduleTemplate;
 use App\Models\Venue;
 use App\Models\VenuePlatform;
@@ -186,12 +187,12 @@ class CoverManagerRealApiTest extends TestCase
         echo "🏪 Restaurant ID: prima-test\n\n";
 
         // Execute the sync
-        $result = $this->venue->syncCoverManagerAvailability($testDate, 1);
+        $result = SyncCoverManagerAvailabilityAction::make()->handle($this->venue, $testDate, 1);
 
-        if ($result) {
+        if ($result['success']) {
             echo "✅ Sync completed successfully\n";
         } else {
-            echo "❌ Sync failed\n";
+            echo "❌ Sync failed: {$result['message']}\n";
         }
 
         // Check what VenueTimeSlots were created
@@ -210,15 +211,15 @@ class CoverManagerRealApiTest extends TestCase
             echo "\n";
         }
 
-        // Check activity logs
+        // Check activity logs (now summary instead of individual slot logs)
         $activities = \Spatie\Activitylog\Models\Activity::where('subject_type', Venue::class)
             ->where('subject_id', $this->venue->id)
-            ->where('description', 'CoverManager availability synced')
+            ->where('description', 'CoverManager availability sync completed')
             ->get();
 
         echo "\n📋 Activity logs created: ".$activities->count()."\n";
 
-        $this->assertTrue($result, 'Sync should complete successfully');
+        $this->assertTrue($result['success'], 'Sync should complete successfully');
         $this->assertGreaterThan(0, $venueTimeSlots->count(), 'Should create VenueTimeSlots');
     }
 

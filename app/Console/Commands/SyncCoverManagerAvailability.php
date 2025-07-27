@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use App\Actions\Venue\SyncCoverManagerAvailabilityAction;
 use App\Models\Venue;
 use App\Services\CoverManagerSyncReporter;
 use Carbon\Carbon;
@@ -66,35 +67,31 @@ class SyncCoverManagerAvailability extends Command
         foreach ($venues as $venue) {
             $this->line("\nSyncing venue: {$venue->name}");
             $venueStartTime = microtime(true);
-            $venueDaysSuccessful = 0;
-            $venueDaysFailed = 0;
 
-            $currentDate = $startDate->copy();
+            try {
+                $result = SyncCoverManagerAvailabilityAction::make()->handle($venue, $startDate, $daysToSync);
 
-            while ($currentDate->lte($endDate)) {
-                try {
-                    $result = $venue->syncCoverManagerAvailability($currentDate);
-
-                    if ($result) {
-                        $synced++;
-                        $venueDaysSuccessful++;
-                    } else {
-                        $failed++;
-                        $venueDaysFailed++;
-                        Log::error("Failed to sync venue {$venue->id} for date {$currentDate->format('Y-m-d')}");
-                    }
-                } catch (Throwable $e) {
+                if ($result['success']) {
+                    $synced++;
+                    $venueDaysSuccessful = $daysToSync;
+                    $venueDaysFailed = 0;
+                } else {
                     $failed++;
-                    $venueDaysFailed++;
-                    Log::error("Exception syncing venue {$venue->id}", [
-                        'error' => $e->getMessage(),
-                        'date' => $currentDate->format('Y-m-d'),
-                    ]);
+                    $venueDaysSuccessful = 0;
+                    $venueDaysFailed = $daysToSync;
+                    Log::error("Failed to sync venue {$venue->id}: {$result['message']}");
                 }
-
-                $currentDate->addDay();
-                $progressBar->advance();
+            } catch (Throwable $e) {
+                $failed++;
+                $venueDaysSuccessful = 0;
+                $venueDaysFailed = $daysToSync;
+                Log::error("Exception syncing venue {$venue->id}", [
+                    'error' => $e->getMessage(),
+                ]);
             }
+
+            // Advance progress bar for all days at once
+            $progressBar->advance($daysToSync);
             
             // Show per-venue summary
             $venueElapsed = round(microtime(true) - $venueStartTime, 2);
