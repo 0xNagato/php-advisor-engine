@@ -29,14 +29,6 @@ class SendAutoApprovalNotificationToVenueContacts
         foreach ($contacts as $contact) {
             try {
                 $contact->notify(new VenueContactBookingAutoApproved($booking));
-
-                Log::info("Auto-approval notification sent to venue contact for booking {$booking->id}", [
-                    'booking_id' => $booking->id,
-                    'venue_id' => $venue->id,
-                    'venue_name' => $venue->name,
-                    'contact_phone' => $contact->contact_phone,
-                    'contact_email' => $contact->email,
-                ]);
             } catch (Exception $e) {
                 Log::error("Failed to send auto-approval notification to venue contact for booking {$booking->id}: {$e->getMessage()}", [
                     'booking_id' => $booking->id,

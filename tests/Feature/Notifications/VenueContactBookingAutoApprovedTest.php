@@ -1,6 +1,7 @@
 <?php
 
 use App\Constants\SmsTemplates;
+use App\Data\SmsData;
 use App\Models\Booking;
 use App\Models\Venue;
 use App\Notifications\Booking\VenueContactBookingAutoApproved;
@@ -36,9 +37,17 @@ beforeEach(function () {
 it('generates correct SMS message without notes', function () {
     $smsMessage = $this->notification->toSms($this->contact);
 
-    expect($smsMessage)->toBe(
-        'The following reservation has been added to your booking platform: PRIMA Booking @ Test Restaurant Mar 15th @ 7:30 PM, 4 guests, John Doe, +1234567890.'
-    );
+    expect($smsMessage)->toBeInstanceOf(SmsData::class);
+    expect($smsMessage->templateKey)->toBe('venue_contact_booking_auto_approved');
+    expect($smsMessage->templateData)->toEqual([
+        'platform_name' => 'your booking platform',
+        'venue_name' => 'Test Restaurant',
+        'booking_date' => 'Mar 15th',
+        'booking_time' => '7:30 PM',
+        'guest_count' => 4,
+        'guest_name' => 'John Doe',
+        'guest_phone' => '+1234567890',
+    ]);
 });
 
 it('generates correct SMS message with notes', function () {
@@ -46,9 +55,18 @@ it('generates correct SMS message with notes', function () {
 
     $smsMessage = $this->notification->toSms($this->contact);
 
-    expect($smsMessage)->toBe(
-        "The following reservation has been added to your booking platform: PRIMA Booking @ Test Restaurant Mar 15th @ 7:30 PM, 4 guests, John Doe, +1234567890.\n\nNotes: Birthday celebration"
-    );
+    expect($smsMessage)->toBeInstanceOf(SmsData::class);
+    expect($smsMessage->templateKey)->toBe('venue_contact_booking_auto_approved_notes');
+    expect($smsMessage->templateData)->toEqual([
+        'platform_name' => 'your booking platform',
+        'venue_name' => 'Test Restaurant',
+        'booking_date' => 'Mar 15th',
+        'booking_time' => '7:30 PM',
+        'guest_count' => 4,
+        'guest_name' => 'John Doe',
+        'guest_phone' => '+1234567890',
+        'notes' => 'Birthday celebration',
+    ]);
 });
 
 it('uses correct SMS template for bookings without notes', function () {
@@ -111,8 +129,9 @@ it('formats booking time correctly in different timezone', function () {
     $notification = new VenueContactBookingAutoApproved($booking);
     $smsMessage = $notification->toSms($this->contact);
 
-    expect($smsMessage)->toContain('7:30 PM');
-    expect($smsMessage)->toContain('Mar 15th');
+    expect($smsMessage)->toBeInstanceOf(SmsData::class);
+    expect($smsMessage->templateData['booking_time'])->toBe('7:30 PM');
+    expect($smsMessage->templateData['booking_date'])->toBe('Mar 15th');
 });
 
 it('returns correct notification channels for venue contact', function () {
@@ -167,7 +186,8 @@ it('handles edge case with very long venue name', function () {
     $notification = new VenueContactBookingAutoApproved($booking);
     $smsMessage = $notification->toSms($this->contact);
 
-    expect($smsMessage)->toContain('This Is A Really Long Restaurant Name That Might Cause Issues');
+    expect($smsMessage)->toBeInstanceOf(SmsData::class);
+    expect($smsMessage->templateData['venue_name'])->toBe('This Is A Really Long Restaurant Name That Might Cause Issues');
 });
 
 it('handles midnight booking time correctly', function () {
@@ -175,7 +195,8 @@ it('handles midnight booking time correctly', function () {
 
     $smsMessage = $this->notification->toSms($this->contact);
 
-    expect($smsMessage)->toContain('12:00 AM');
+    expect($smsMessage)->toBeInstanceOf(SmsData::class);
+    expect($smsMessage->templateData['booking_time'])->toBe('12:00 AM');
 });
 
 it('handles noon booking time correctly', function () {
@@ -183,7 +204,8 @@ it('handles noon booking time correctly', function () {
 
     $smsMessage = $this->notification->toSms($this->contact);
 
-    expect($smsMessage)->toContain('12:00 PM');
+    expect($smsMessage)->toBeInstanceOf(SmsData::class);
+    expect($smsMessage->templateData['booking_time'])->toBe('12:00 PM');
 });
 
 it('generates correct platform name for CoverManager', function () {
@@ -196,7 +218,8 @@ it('generates correct platform name for CoverManager', function () {
 
     $smsMessage = $this->notification->toSms($this->contact);
 
-    expect($smsMessage)->toContain('The following reservation has been added to CoverManager:');
+    expect($smsMessage)->toBeInstanceOf(SmsData::class);
+    expect($smsMessage->templateData['platform_name'])->toBe('CoverManager');
 });
 
 it('generates correct platform name for Restoo', function () {
@@ -209,12 +232,14 @@ it('generates correct platform name for Restoo', function () {
 
     $smsMessage = $this->notification->toSms($this->contact);
 
-    expect($smsMessage)->toContain('The following reservation has been added to Restoo:');
+    expect($smsMessage)->toBeInstanceOf(SmsData::class);
+    expect($smsMessage->templateData['platform_name'])->toBe('Restoo');
 });
 
 it('falls back to generic platform name when no enabled platforms found', function () {
     // No platforms added to venue, should use fallback
     $smsMessage = $this->notification->toSms($this->contact);
 
-    expect($smsMessage)->toContain('The following reservation has been added to your booking platform:');
+    expect($smsMessage)->toBeInstanceOf(SmsData::class);
+    expect($smsMessage->templateData['platform_name'])->toBe('your booking platform');
 });

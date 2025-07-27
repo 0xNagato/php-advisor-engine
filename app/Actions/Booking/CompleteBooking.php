@@ -64,7 +64,12 @@ class CompleteBooking
             } else {
                 $booking->notify(new CustomerBookingConfirmed);
             }
-            SendConfirmationToVenueContacts::run($booking);
+            
+            // Only send regular confirmation SMS if booking doesn't qualify for auto-approval
+            // Auto-approval eligible bookings will get their notification after platform sync
+            if (! AutoApproveSmallPartyBooking::qualifiesForAutoApproval($booking)) {
+                SendConfirmationToVenueContacts::run($booking);
+            }
 
             if ($booking->concierge && $booking->concierge->bookings()->count() === 1) {
                 $booking->concierge->user->notify(new ConciergeFirstBooking($booking));

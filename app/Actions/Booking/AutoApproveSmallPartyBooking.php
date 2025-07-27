@@ -70,6 +70,26 @@ class AutoApproveSmallPartyBooking
     }
 
     /**
+     * Check if a booking qualifies for auto-approval (public method for early checking).
+     *
+     * This can be called before platform sync to determine if the booking
+     * would qualify for auto-approval, allowing us to skip manual confirmations.
+     */
+    public static function qualifiesForAutoApproval(Booking $booking): bool
+    {
+        // Party size must be 7 or under
+        if ($booking->guest_count > self::MAX_AUTO_APPROVAL_PARTY_SIZE) {
+            return false;
+        }
+
+        // Venue must have at least one enabled platform (restoo or covermanager)
+        return $booking->venue->platforms()
+            ->where('is_enabled', true)
+            ->whereIn('platform_type', ['restoo', 'covermanager'])
+            ->exists();
+    }
+
+    /**
      * Determine if a booking should be auto-approved.
      *
      * Platform sync success is assumed since this action is only
@@ -77,21 +97,12 @@ class AutoApproveSmallPartyBooking
      */
     private function shouldAutoApprove(Booking $booking): bool
     {
-        // Party size must be 7 or under
-        if ($booking->guest_count > self::MAX_AUTO_APPROVAL_PARTY_SIZE) {
-            Log::debug("Booking {$booking->id} not auto-approved: party size {$booking->guest_count} exceeds limit of ".self::MAX_AUTO_APPROVAL_PARTY_SIZE);
-
-            return false;
-        }
-
-        // Venue must have at least one enabled platform (restoo or covermanager)
-        $enabledPlatforms = $booking->venue->platforms()
-            ->where('is_enabled', true)
-            ->whereIn('platform_type', ['restoo', 'covermanager'])
-            ->exists();
-
-        if (! $enabledPlatforms) {
-            Log::debug("Booking {$booking->id} not auto-approved: venue has no enabled platforms (restoo/covermanager)");
+        if (! self::qualifiesForAutoApproval($booking)) {
+            if ($booking->guest_count > self::MAX_AUTO_APPROVAL_PARTY_SIZE) {
+                Log::debug("Booking {$booking->id} not auto-approved: party size {$booking->guest_count} exceeds limit of ".self::MAX_AUTO_APPROVAL_PARTY_SIZE);
+            } else {
+                Log::debug("Booking {$booking->id} not auto-approved: venue has no enabled platforms (restoo/covermanager)");
+            }
 
             return false;
         }

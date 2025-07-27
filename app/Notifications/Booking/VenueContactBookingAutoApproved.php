@@ -3,6 +3,7 @@
 namespace App\Notifications\Booking;
 
 use App\Constants\SmsTemplates;
+use App\Data\SmsData;
 use App\Data\VenueContactData;
 use App\Models\Booking;
 use Carbon\Carbon;
@@ -73,7 +74,7 @@ class VenueContactBookingAutoApproved extends Notification implements ShouldQueu
     /**
      * Get the SMS representation of the notification.
      */
-    public function toSms($notifiable): string
+    public function toSms(VenueContactData $notifiable): SmsData
     {
         $venue = $this->booking->venue;
         $bookingTime = Carbon::createFromFormat(
@@ -82,11 +83,11 @@ class VenueContactBookingAutoApproved extends Notification implements ShouldQueu
             $venue->timezone
         );
 
-        $template = $this->booking->notes
-            ? SmsTemplates::TEMPLATES['venue_contact_booking_auto_approved_notes']
-            : SmsTemplates::TEMPLATES['venue_contact_booking_auto_approved'];
+        $templateKey = $this->booking->notes
+            ? 'venue_contact_booking_auto_approved_notes'
+            : 'venue_contact_booking_auto_approved';
 
-        $variables = [
+        $templateData = [
             'platform_name' => $this->getPlatformName($venue),
             'venue_name' => $venue->name,
             'booking_date' => $bookingTime->format('M jS'),
@@ -97,13 +98,13 @@ class VenueContactBookingAutoApproved extends Notification implements ShouldQueu
         ];
 
         if ($this->booking->notes) {
-            $variables['notes'] = $this->booking->notes;
+            $templateData['notes'] = $this->booking->notes;
         }
 
-        return str_replace(
-            array_map(fn ($key) => "{{$key}}", array_keys($variables)),
-            array_values($variables),
-            $template
+        return new SmsData(
+            phone: $notifiable->contact_phone,
+            templateKey: $templateKey,
+            templateData: $templateData
         );
     }
 
