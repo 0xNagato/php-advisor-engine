@@ -72,6 +72,7 @@ class PartnerRecentBookings extends BaseWidget
                 TextColumn::make('schedule.venue.name')
                     ->label('Venue')
                     ->size('xs')
+                    ->wrap()
                     ->searchable(),
                 TextColumn::make('booking_at')
                     ->label('Date')

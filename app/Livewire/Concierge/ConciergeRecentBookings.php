@@ -69,6 +69,7 @@ class ConciergeRecentBookings extends BaseWidget
                 TextColumn::make('venue.name')
                     ->label('Venue')
                     ->size('xs')
+                    ->wrap()
                     ->searchable(),
                 TextColumn::make('booking_at')
                     ->label('Date')

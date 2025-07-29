@@ -66,6 +66,7 @@ class AdminRecentBookings extends BaseWidget
                 TextColumn::make('venue_name')
                     ->label('Venue')
                     ->size('xs')
+                    ->wrap()
                     ->searchable(),
                 TextColumn::make('booking_at')
                     ->label('Date')
