@@ -103,8 +103,26 @@ class RestooService implements BookingPlatformInterface
             ],
         ];
 
+        // Log the API call attempt for tracking duplicate calls
+        Log::info("[RESTOO API CALL] Creating reservation for booking {$booking->id}", [
+            'booking_id' => $booking->id,
+            'booking_external_id' => "Prima-{$booking->id}",
+            'timestamp' => now()->toISOString(),
+            'venue_id' => $venue->id,
+            'venue_name' => $venue->name,
+            'payload' => $payload,
+        ]);
+
         try {
             $result = $this->createReservationRaw($apiKey, $account, $payload);
+
+            Log::info("[RESTOO API SUCCESS] Reservation created for booking {$booking->id}", [
+                'booking_id' => $booking->id,
+                'booking_external_id' => "Prima-{$booking->id}",
+                'platform_reservation_id' => $result['uuid'] ?? null,
+                'status' => $result['status'] ?? 'unknown',
+                'timestamp' => now()->toISOString(),
+            ]);
 
             return $result;
         } catch (Throwable $e) {

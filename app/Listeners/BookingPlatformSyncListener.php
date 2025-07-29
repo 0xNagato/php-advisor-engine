@@ -152,17 +152,22 @@ class BookingPlatformSyncListener implements ShouldQueue
      */
     protected function syncToCoverManager($booking): bool
     {
-        // Create or update CoverManager reservation record
+        // Check if reservation already exists
         $platformReservation = PlatformReservation::query()
             ->where('booking_id', $booking->id)
             ->where('platform_type', 'covermanager')
-            ->first() ?? PlatformReservation::createFromBooking($booking, 'covermanager');
+            ->first();
 
-        if (! $platformReservation) {
-            return false;
+        if ($platformReservation) {
+            // If already exists, only sync if not already synced
+            return $platformReservation->syncToPlatform();
         }
 
-        return $platformReservation->syncToPlatform();
+        // Create new reservation (this calls the API once)
+        $platformReservation = PlatformReservation::createFromBooking($booking, 'covermanager');
+
+        // Return success based on whether reservation was created
+        return $platformReservation !== null;
     }
 
     /**
@@ -170,16 +175,21 @@ class BookingPlatformSyncListener implements ShouldQueue
      */
     protected function syncToRestoo($booking): bool
     {
-        // Create or update Restoo reservation record
+        // Check if reservation already exists
         $platformReservation = PlatformReservation::query()
             ->where('booking_id', $booking->id)
             ->where('platform_type', 'restoo')
-            ->first() ?? PlatformReservation::createFromBooking($booking, 'restoo');
+            ->first();
 
-        if (! $platformReservation) {
-            return false;
+        if ($platformReservation) {
+            // If already exists, only sync if not already synced
+            return $platformReservation->syncToPlatform();
         }
 
-        return $platformReservation->syncToPlatform();
+        // Create new reservation (this calls the API once)
+        $platformReservation = PlatformReservation::createFromBooking($booking, 'restoo');
+
+        // Return success based on whether reservation was created
+        return $platformReservation !== null;
     }
 }

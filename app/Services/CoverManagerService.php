@@ -123,7 +123,28 @@ class CoverManagerService implements BookingPlatformInterface
             'notes' => $booking->notes ?? '',
         ];
 
-        return $this->createReservationRaw($restaurantId, $bookingData);
+        // Log the API call attempt for tracking duplicate calls
+        Log::info("[COVERMANAGER API CALL] Creating reservation for booking {$booking->id}", [
+            'booking_id' => $booking->id,
+            'timestamp' => now()->toISOString(),
+            'venue_id' => $venue->id,
+            'venue_name' => $venue->name,
+            'restaurant_id' => $restaurantId,
+            'booking_data' => $bookingData,
+        ]);
+
+        $result = $this->createReservationRaw($restaurantId, $bookingData);
+
+        if ($result) {
+            Log::info("[COVERMANAGER API SUCCESS] Reservation created for booking {$booking->id}", [
+                'booking_id' => $booking->id,
+                'restaurant_id' => $restaurantId,
+                'platform_reservation_id' => $result['id'] ?? null,
+                'timestamp' => now()->toISOString(),
+            ]);
+        }
+
+        return $result;
     }
 
     /**
@@ -179,7 +200,30 @@ class CoverManagerService implements BookingPlatformInterface
             'notes' => $booking->notes ?? '',
         ];
 
-        return $this->createReservationForceRaw($restaurantId, $bookingData);
+        // Log the API call attempt for tracking duplicate calls (force booking)
+        Log::info("[COVERMANAGER API CALL] Creating FORCE reservation for booking {$booking->id}", [
+            'booking_id' => $booking->id,
+            'timestamp' => now()->toISOString(),
+            'venue_id' => $venue->id,
+            'venue_name' => $venue->name,
+            'restaurant_id' => $restaurantId,
+            'booking_data' => $bookingData,
+            'force_booking' => true,
+        ]);
+
+        $result = $this->createReservationForceRaw($restaurantId, $bookingData);
+
+        if ($result) {
+            Log::info("[COVERMANAGER API SUCCESS] FORCE reservation created for booking {$booking->id}", [
+                'booking_id' => $booking->id,
+                'restaurant_id' => $restaurantId,
+                'platform_reservation_id' => $result['id'] ?? null,
+                'timestamp' => now()->toISOString(),
+                'force_booking' => true,
+            ]);
+        }
+
+        return $result;
     }
 
     /**
