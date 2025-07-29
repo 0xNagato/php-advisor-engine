@@ -19,6 +19,9 @@ class AppConfigSchema extends SchemaFactory implements Reusable
                 Schema::string('bookings_disabled_message')
                     ->description('Message to display when bookings are disabled')
                     ->example('Bookings are temporarily disabled for maintenance'),
+                Schema::integer('max_reservation_days')
+                    ->description('Maximum number of days in advance that reservations can be made')
+                    ->example(30),
                 Schema::object('login')
                     ->properties(
                         Schema::string('background_image')

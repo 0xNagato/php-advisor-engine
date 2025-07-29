@@ -198,6 +198,13 @@ class ReservationHub extends Page
             $requestedDate = Carbon::createFromFormat('Y-m-d', $this->data['date'], $userTimezone);
             $currentDate = Carbon::now($userTimezone);
 
+            // Check if the selected date is beyond the maximum allowed days
+            $maxDate = $currentDate->copy()->addDays(config('app.max_reservation_days', 30));
+            if ($requestedDate->gt($maxDate)) {
+                $this->resetSchedules();
+                return;
+            }
+
             if ($this->isSameDayReservation($key, $requestedDate,
                 $currentDate) && $this->isPastReservationTime($userTimezone)) {
                 $this->resetSchedules();
@@ -319,7 +326,7 @@ class ReservationHub extends Page
                 ->where('start_time', $this->form->getState()['reservation_time'])
                 ->where('party_size', $guestCount)
                 ->whereDate('booking_date', '>', $currentDate)
-                ->whereDate('booking_date', '<=', $currentDate->addDays(self::AVAILABILITY_DAYS))
+                ->whereDate('booking_date', '<=', $currentDate->addDays(config('app.max_reservation_days', 30)))
                 ->get();
         }
 
@@ -563,5 +570,22 @@ class ReservationHub extends Page
     {
         $key = "processed_booking_{$this->scheduleTemplateId}_{$this->date}_{$this->guestCount}";
         session()->put($key, true);
+    }
+
+    public function isDateBeyondLimit(): bool
+    {
+        if (!isset($this->data['date'])) {
+            return false;
+        }
+
+        $selectedDate = Carbon::createFromFormat('Y-m-d', $this->data['date'], $this->timezone);
+        $maxDate = Carbon::now($this->timezone)->addDays(config('app.max_reservation_days', 30));
+        
+        return $selectedDate->gt($maxDate);
+    }
+
+    public function getMaxReservationDays(): int
+    {
+        return config('app.max_reservation_days', 30);
     }
 }

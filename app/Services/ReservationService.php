@@ -464,7 +464,7 @@ class ReservationService
             ->where('start_time', $startTime)
             ->where('party_size', $this->getGuestCount())
             ->whereDate('booking_date', '>', $currentDate)
-            ->whereDate('booking_date', '<=', $currentDate->addDays(self::AVAILABILITY_DAYS))
+            ->whereDate('booking_date', '<=', $currentDate->addDays(config('app.max_reservation_days', 30)))
             ->orderBy('booking_date')
             ->get();
     }

@@ -25,6 +25,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - **Business Logic**: Place complex business logic in dedicated Action classes (lorisleiva/laravel-actions)
 - **Error handling**: Use typed exceptions with clear messages; catch only specific exceptions
 - **Imports**: Group imports by type (PHP core, Laravel, third-party, app)
+- **Namespaces**: CRITICAL - Always include all required namespaces/imports at the top of files. When using classes like Carbon, Collection, Request, etc., ensure proper `use` statements are added
 - **Indentation**: 4 spaces, PSR-2 compliant with Laravel guidelines
 - **Models**: Define relationships, casts, and fillable properties; use proper type hints
 - **Traits**: Favor composition with traits for reusable functionality

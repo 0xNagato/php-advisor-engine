@@ -22,9 +22,15 @@ class BookingCreateRequest extends FormRequest
 
                     $date = Carbon::createFromFormat('Y-m-d', $value, $timezone);
                     $today = Carbon::now($timezone)->startOfDay();
+                    $maxDate = Carbon::now($timezone)->addDays(config('app.max_reservation_days', 30));
 
                     if ($date->lt($today)) {
                         $fail('The date must not be in the past.');
+                    }
+
+                    if ($date->gt($maxDate)) {
+                        $maxDays = config('app.max_reservation_days', 30);
+                        $fail("We only show availability for the next {$maxDays} days. Please select a date within this range.");
                     }
                 },
             ],

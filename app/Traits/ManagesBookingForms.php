@@ -82,7 +82,7 @@ trait ManagesBookingForms
                 ->weekStartsOnSunday()
                 ->default(now($this->timezone)->format('Y-m-d'))
                 ->minDate(now($this->timezone)->format('Y-m-d'))
-                ->maxDate(now($this->timezone)->addDays(self::MAX_DAYS_IN_ADVANCE)->format('Y-m-d'))
+                ->maxDate(now($this->timezone)->addDays(config('app.max_reservation_days', 30))->format('Y-m-d'))
                 ->hidden(fn (Get $get) => $get('radio_date') !== 'select_date')
                 ->afterStateUpdated(fn ($state, $set) => $set('date', Carbon::parse($state)->format('Y-m-d')))
                 ->prefixIcon('heroicon-m-calendar')

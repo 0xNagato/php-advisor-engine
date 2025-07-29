@@ -85,7 +85,7 @@ test('it creates a prime booking successfully with all earnings', function () {
 });
 
 it('throws exception when booking is more than 30 days in advance', function () {
-    $futureDate = now()->addDays(91)->format('Y-m-d');
+    $futureDate = now()->addDays(31)->format('Y-m-d');
 
     $bookingData = [
         'date' => $futureDate,
@@ -96,7 +96,7 @@ it('throws exception when booking is more than 30 days in advance', function () 
         $this->scheduleTemplate->id,
         $bookingData
     ))
-        ->toThrow(RuntimeException::class, 'Booking cannot be created more than 90 days in advance.');
+        ->toThrow(RuntimeException::class, 'We only show availability for the next 30 days. Please select a date within this range.');
 });
 
 it('creates booking with correct timezone', function () {

@@ -69,9 +69,10 @@ class CreateBooking
         );
         $currentDate = Carbon::now($timezone);
 
+        $maxDays = config('app.max_reservation_days', 30);
         throw_if(
-            $bookingAt->gt($currentDate->copy()->addDays(self::MAX_DAYS_IN_ADVANCE)),
-            new RuntimeException('Booking cannot be created more than '.self::MAX_DAYS_IN_ADVANCE.' days in advance.')
+            $bookingAt->gt($currentDate->copy()->addDays($maxDays)),
+            new RuntimeException('We only show availability for the next '.$maxDays.' days. Please select a date within this range.')
         );
 
         // Validate booking time restrictions for today's bookings

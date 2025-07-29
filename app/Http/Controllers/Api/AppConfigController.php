@@ -29,6 +29,7 @@ class AppConfigController extends Controller
         return $this->cache->remember('app_config', 3600, fn () => response()->json([
             'bookings_enabled' => config('app.bookings_enabled'),
             'bookings_disabled_message' => config('app.bookings_disabled_message'),
+            'max_reservation_days' => config('app.max_reservation_days', 30),
             'login' => [
                 'background_image' => config('app.login.background_image'),
                 'text_color' => config('app.login.text_color'),

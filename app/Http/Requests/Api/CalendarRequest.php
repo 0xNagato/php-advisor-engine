@@ -14,7 +14,24 @@ class CalendarRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'date' => ['required', 'date'],
+            'date' => [
+                'required',
+                'date',
+                function ($attribute, $value, $fail) {
+                    // Get the region for timezone - use the provided region or fall back to the user's region
+                    $regionId = $this->input('region');
+                    $region = $regionId ? Region::query()->where('id', $regionId)->first() : null;
+                    $region = $region ?: GetUserRegion::run();
+
+                    $requestedDate = Carbon::parse($value, $region->timezone);
+                    $maxDate = Carbon::now($region->timezone)->addDays(config('app.max_reservation_days', 30));
+
+                    if ($requestedDate->gt($maxDate)) {
+                        $maxDays = config('app.max_reservation_days', 30);
+                        $fail("We only show availability for the next {$maxDays} days. Please select a date within this range.");
+                    }
+                },
+            ],
             'guest_count' => ['required', 'integer', 'min:1'],
             'reservation_time' => [
                 'required',

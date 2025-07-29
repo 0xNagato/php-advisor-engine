@@ -14,6 +14,7 @@ use Filament\Support\Facades\FilamentView;
 use Filament\View\PanelsRenderHook;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Support\Carbon;
 use Livewire\Attributes\On;
 
 /**
@@ -111,6 +112,17 @@ class AvailabilityCalendar extends Page
         }
 
         if (isset($this->data['reservation_time'], $this->data['date'], $this->data['guest_count'])) {
+            // Check if the selected date is beyond the maximum allowed days
+            $selectedDate = Carbon::parse($this->data['date'], $this->timezone);
+            $maxDate = Carbon::now($this->timezone)->addDays(config('app.max_reservation_days', 30));
+            
+            if ($selectedDate->gt($maxDate)) {
+                // Clear venues and headers when date is beyond limit
+                $this->venues = null;
+                $this->timeslotHeaders = [];
+                return;
+            }
+
             $reservation = new ReservationService(
                 date: $this->data['date'],
                 guestCount: $this->data['guest_count'],
@@ -186,5 +198,22 @@ class AvailabilityCalendar extends Page
             $this->form->fill($this->data);
             $this->updatedData($this->data, 'neighborhood');
         }
+    }
+
+    public function isDateBeyondLimit(): bool
+    {
+        if (!isset($this->data['date'])) {
+            return false;
+        }
+
+        $selectedDate = Carbon::parse($this->data['date'], $this->timezone);
+        $maxDate = Carbon::now($this->timezone)->addDays(config('app.max_reservation_days', 30));
+        
+        return $selectedDate->gt($maxDate);
+    }
+
+    public function getMaxReservationDays(): int
+    {
+        return config('app.max_reservation_days', 30);
     }
 }
