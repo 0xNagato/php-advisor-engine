@@ -30,6 +30,9 @@ class Neighborhood extends Model
         return $this->belongsTo(Region::class, 'region', 'id');
     }
 
+    /**
+     * @var array<int, array{id: string, region: string, name: string}>
+     */
     protected array $rows = [
         // Miami
         [
@@ -121,6 +124,16 @@ class Neighborhood extends Model
             'id' => 'fort_lauderdale',
             'region' => 'miami',
             'name' => 'Fort Lauderdale',
+        ],
+        [
+            'id' => 'south_of_fifth',
+            'region' => 'miami',
+            'name' => 'South of Fifth',
+        ],
+        [
+            'id' => 'midtown_miami',
+            'region' => 'miami',
+            'name' => 'Midtown',
         ],
 
         // Ibiza
