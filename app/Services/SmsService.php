@@ -22,7 +22,7 @@ class SmsService
             );
 
             return null;
-        } elseif ($phoneNumber->country === 'GB') { // Assuming 'GB' for UK country code
+        } elseif (in_array($phoneNumber->country, config('services.clicksend.countries', ['GB']))) {
             // Look up the country-specific 'from' number
             $fromNumber = config('services.clicksend.from_numbers.GB');
 

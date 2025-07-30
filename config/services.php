@@ -83,6 +83,20 @@ return [
         'from_numbers' => [
             'GB' => env('CLICKSEND_FROM_GB'),
         ],
+        'countries' => [
+            'GB', // United Kingdom
+            'JE', // Jersey
+            'GG', // Guernsey
+            'IM', // Isle of Man
+            'GI', // Gibraltar
+            'FK', // Falkland Islands
+            'BM', // Bermuda
+            'KY', // Cayman Islands
+            'VG', // British Virgin Islands
+            'AI', // Anguilla
+            'MS', // Montserrat
+            'TC', // Turks and Caicos
+        ],
     ],
 
     'covermanager' => [
