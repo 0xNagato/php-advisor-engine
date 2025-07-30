@@ -6,6 +6,7 @@ use App\Constants\SmsTemplates;
 use App\Data\SmsData;
 use App\Data\VenueContactData;
 use App\Models\Booking;
+use AshAllenDesign\ShortURL\Facades\ShortURL;
 use Carbon\Carbon;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -87,6 +88,9 @@ class VenueContactBookingAutoApproved extends Notification implements ShouldQueu
             ? 'venue_contact_booking_auto_approved_notes'
             : 'venue_contact_booking_auto_approved';
 
+        $url = route('venues.confirm', ['booking' => $this->booking]);
+        $confirmationUrl = ShortURL::destinationUrl($url)->make()->default_short_url;
+
         $templateData = [
             'platform_name' => $this->getPlatformName($venue),
             'venue_name' => $venue->name,
@@ -95,6 +99,7 @@ class VenueContactBookingAutoApproved extends Notification implements ShouldQueu
             'guest_count' => $this->booking->guest_count,
             'guest_name' => $this->booking->guest_name,
             'guest_phone' => $this->booking->guest_phone,
+            'confirmation_url' => $confirmationUrl,
         ];
 
         if ($this->booking->notes) {

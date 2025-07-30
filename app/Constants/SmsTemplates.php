@@ -42,7 +42,7 @@ class SmsTemplates
         'venue_booking_cancelled' => 'PRIMA Notice: {guest_name} @ {guest_phone} has cancelled the reservation at {venue_name} on {booking_date}. Please update your records. Thank you.',
         'customer_booking_reminder' => 'Your reservation at {venue_name} is coming up in 30 minutes! When checking in, please mention PRIMA VIP to the host for prompt service. Your booking details: {link} Thank you!',
         'customer_booking_follow_up' => 'Hello from PRIMA VIP! We hope you enjoyed {venue_name} yesterday! You are now a VIP and with PRIMA, you get instant access to top restaurants throughout Miami, Los Angeles and Ibiza! Click >> {link} to instantly book at any of our participating restaurants! Learn More about PRIMA here: https://primaapp.com',
-        'venue_contact_booking_auto_approved' => 'The following reservation has been added to {platform_name}: PRIMA Booking @ {venue_name} {booking_date} @ {booking_time}, {guest_count} guests, {guest_name}, {guest_phone}.',
-        'venue_contact_booking_auto_approved_notes' => "The following reservation has been added to {platform_name}: PRIMA Booking @ {venue_name} {booking_date} @ {booking_time}, {guest_count} guests, {guest_name}, {guest_phone}.\n\nNotes: {notes}",
+        'venue_contact_booking_auto_approved' => 'The following reservation has been added to {platform_name}: PRIMA Booking @ {venue_name} {booking_date} @ {booking_time}, {guest_count} guests, {guest_name}, {guest_phone}. View booking details: {confirmation_url}',
+        'venue_contact_booking_auto_approved_notes' => "The following reservation has been added to {platform_name}: PRIMA Booking @ {venue_name} {booking_date} @ {booking_time}, {guest_count} guests, {guest_name}, {guest_phone}. View booking details: {confirmation_url}\n\nNotes: {notes}",
     ];
 }

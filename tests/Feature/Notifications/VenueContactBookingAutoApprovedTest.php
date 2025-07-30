@@ -39,15 +39,24 @@ it('generates correct SMS message without notes', function () {
 
     expect($smsMessage)->toBeInstanceOf(SmsData::class);
     expect($smsMessage->templateKey)->toBe('venue_contact_booking_auto_approved');
-    expect($smsMessage->templateData)->toEqual([
-        'platform_name' => 'your booking platform',
-        'venue_name' => 'Test Restaurant',
-        'booking_date' => 'Mar 15th',
-        'booking_time' => '7:30 PM',
-        'guest_count' => 4,
-        'guest_name' => 'John Doe',
-        'guest_phone' => '+1234567890',
+    expect($smsMessage->templateData)->toHaveKeys([
+        'platform_name',
+        'venue_name',
+        'booking_date',
+        'booking_time',
+        'guest_count',
+        'guest_name',
+        'guest_phone',
+        'confirmation_url',
     ]);
+    expect($smsMessage->templateData['platform_name'])->toBe('your booking platform');
+    expect($smsMessage->templateData['venue_name'])->toBe('Test Restaurant');
+    expect($smsMessage->templateData['booking_date'])->toBe('Mar 15th');
+    expect($smsMessage->templateData['booking_time'])->toBe('7:30 PM');
+    expect($smsMessage->templateData['guest_count'])->toBe(4);
+    expect($smsMessage->templateData['guest_name'])->toBe('John Doe');
+    expect($smsMessage->templateData['guest_phone'])->toBe('+1234567890');
+    expect($smsMessage->templateData['confirmation_url'])->toBeString();
 });
 
 it('generates correct SMS message with notes', function () {
@@ -57,23 +66,33 @@ it('generates correct SMS message with notes', function () {
 
     expect($smsMessage)->toBeInstanceOf(SmsData::class);
     expect($smsMessage->templateKey)->toBe('venue_contact_booking_auto_approved_notes');
-    expect($smsMessage->templateData)->toEqual([
-        'platform_name' => 'your booking platform',
-        'venue_name' => 'Test Restaurant',
-        'booking_date' => 'Mar 15th',
-        'booking_time' => '7:30 PM',
-        'guest_count' => 4,
-        'guest_name' => 'John Doe',
-        'guest_phone' => '+1234567890',
-        'notes' => 'Birthday celebration',
+    expect($smsMessage->templateData)->toHaveKeys([
+        'platform_name',
+        'venue_name',
+        'booking_date',
+        'booking_time',
+        'guest_count',
+        'guest_name',
+        'guest_phone',
+        'confirmation_url',
+        'notes',
     ]);
+    expect($smsMessage->templateData['platform_name'])->toBe('your booking platform');
+    expect($smsMessage->templateData['venue_name'])->toBe('Test Restaurant');
+    expect($smsMessage->templateData['booking_date'])->toBe('Mar 15th');
+    expect($smsMessage->templateData['booking_time'])->toBe('7:30 PM');
+    expect($smsMessage->templateData['guest_count'])->toBe(4);
+    expect($smsMessage->templateData['guest_name'])->toBe('John Doe');
+    expect($smsMessage->templateData['guest_phone'])->toBe('+1234567890');
+    expect($smsMessage->templateData['confirmation_url'])->toBeString();
+    expect($smsMessage->templateData['notes'])->toBe('Birthday celebration');
 });
 
 it('uses correct SMS template for bookings without notes', function () {
     $template = SmsTemplates::TEMPLATES['venue_contact_booking_auto_approved'];
 
     expect($template)->toBe(
-        'The following reservation has been added to {platform_name}: PRIMA Booking @ {venue_name} {booking_date} @ {booking_time}, {guest_count} guests, {guest_name}, {guest_phone}.'
+        'The following reservation has been added to {platform_name}: PRIMA Booking @ {venue_name} {booking_date} @ {booking_time}, {guest_count} guests, {guest_name}, {guest_phone}. View booking details: {confirmation_url}'
     );
 });
 
@@ -81,7 +100,7 @@ it('uses correct SMS template for bookings with notes', function () {
     $template = SmsTemplates::TEMPLATES['venue_contact_booking_auto_approved_notes'];
 
     expect($template)->toBe(
-        "The following reservation has been added to {platform_name}: PRIMA Booking @ {venue_name} {booking_date} @ {booking_time}, {guest_count} guests, {guest_name}, {guest_phone}.\n\nNotes: {notes}"
+        "The following reservation has been added to {platform_name}: PRIMA Booking @ {venue_name} {booking_date} @ {booking_time}, {guest_count} guests, {guest_name}, {guest_phone}. View booking details: {confirmation_url}\n\nNotes: {notes}"
     );
 });
 
