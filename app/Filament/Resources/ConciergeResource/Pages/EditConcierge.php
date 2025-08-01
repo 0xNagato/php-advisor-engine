@@ -30,6 +30,14 @@ class EditConcierge extends EditRecord
                             ->placeholder('Hotel Name')
                             ->required(),
                     ]),
+                Section::make('Override')
+                    ->icon('heroicon-o-lock-open')
+                    ->schema([
+                        Toggle::make('can_override_duplicate_checks')
+                            ->label('Can Override Duplicate Bookings')
+                            ->helperText('Allow this concierge to bypass duplicate booking restrictions')
+                            ->columnSpanFull(),
+                    ]),
                 Section::make('QR Concierge Configuration')
                     ->icon('heroicon-m-qr-code')
                     ->description('Configure QR Concierge settings')
@@ -48,8 +56,8 @@ class EditConcierge extends EditRecord
                                     ->maxValue(100)
                                     ->default(BookingPercentages::VIP_ACCESS_DEFAULT_PERCENTAGE)
                                     ->suffix('%')
-                                    ->visible(fn (Get $get): bool => $get('is_qr_concierge'))
-                                    ->required(fn (Get $get): bool => $get('is_qr_concierge')),
+                                    ->visible(fn(Get $get): bool => $get('is_qr_concierge'))
+                                    ->required(fn(Get $get): bool => $get('is_qr_concierge')),
                             ]),
                     ])
                     ->collapsible(),

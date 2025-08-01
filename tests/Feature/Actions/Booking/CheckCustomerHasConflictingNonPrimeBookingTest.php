@@ -40,7 +40,7 @@ it('returns null when no existing bookings', function () {
 it('finds conflicting booking within 2-hour window (1 hour before)', function () {
     $bookingTime = Carbon::now()->addDays(2)->setTime(18, 0);
 
-    // Create existing booking 1 hour before
+    // Create an existing booking 1 hour before
     $existingBooking = Booking::factory()->create([
         'guest_phone' => $this->formattedPhoneNumber,
         'is_prime' => false,

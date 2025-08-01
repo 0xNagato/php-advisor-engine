@@ -30,7 +30,21 @@ class Concierge extends Model
         'venue_group_id',
         'is_qr_concierge',
         'revenue_percentage',
+        'can_override_duplicate_checks',
     ];
+
+    /**
+     * The attributes that should be cast.
+     *
+     * @return array<string, string>
+     */
+    protected function casts(): array
+    {
+        return [
+            'allowed_venue_ids' => 'array',
+            'can_override_duplicate_checks' => 'boolean',
+        ];
+    }
 
     /**
      * Ensure allowed_venue_ids are always cast to integers.
@@ -118,8 +132,7 @@ class Concierge extends Model
 
     public function referralEarningsInUSD(): Attribute
     {
-        return Attribute::make(get: fn (
-        ) => app(CurrencyConversionService::class)->convertToUSD($this->referralEarningsByCurrency));
+        return Attribute::make(get: fn () => app(CurrencyConversionService::class)->convertToUSD($this->referralEarningsByCurrency));
     }
 
     public function formattedReferralEarningsInUSD(): Attribute
@@ -194,17 +207,5 @@ class Concierge extends Model
     public function venueGroup(): BelongsTo
     {
         return $this->belongsTo(VenueGroup::class);
-    }
-
-    /**
-     * The attributes that should be cast.
-     *
-     * @return array<string, string>
-     */
-    protected function casts(): array
-    {
-        return [
-            'allowed_venue_ids' => 'array',
-        ];
     }
 }
