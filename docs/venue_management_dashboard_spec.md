@@ -3,7 +3,7 @@
 
 ## 1. Purpose & Scope
 
-Replace Prima's existing venue dashboard with a comprehensive, data-driven interface that lets venue managers monitor concierge performance, partner contributions, and operational metrics in real-time (60-second refresh cycle). This spec covers front-end components, API endpoints, analytics integration, and quality requirements.
+Replace Prima's existing venue dashboard with a comprehensive, data-driven interface that lets venue managers monitor concierge performance, partner contributions, and operational metrics. This spec covers Filament widgets, database queries, and implementation requirements.
 
 **Target Users:**
 - **Venue Managers**: Multi-venue oversight and management  
@@ -36,10 +36,6 @@ Replace Prima's existing venue dashboard with a comprehensive, data-driven inter
 | **PRIME Bookings** | `kpi.prime.bookings` | Count + `$kpi.prime.revenue` | Booking trend (7 days) |
 | **Non-Prime Bookings** | `kpi.nonPrime.bookings` | Count + active concierges | Booking trend (7 days) |
 
-**Styling**:
-- Green sparkline stroke: `#22C55E` (Tailwind `emerald-500`)
-- Subtext: `text-muted-foreground` (`#6B7280`)
-- Cards: `bg-white border rounded-lg shadow-sm p-6`
 
 ### 3.2 Hotel Partners Table
 
@@ -101,9 +97,6 @@ class VenueDashboard extends Page
 {
     protected static ?string $navigationIcon = 'heroicon-o-chart-bar';
     protected static string $view = 'filament.pages.venue.dashboard';
-    
-    // Add 60-second auto-refresh
-    protected int $refreshInterval = 60;
     
     // Date range filtering
     public $dateRange = '30d';
@@ -271,50 +264,20 @@ Cache::remember(
 );
 ```
 
-## 6. UI/UX Specifications
+## 6. Interactive Elements
 
-### 6.1 Responsive Design
-
-**Breakpoints** (Tailwind):
-- **Mobile** (< 640px): Single column, full-width cards
-- **Tablet** (640px - 1024px): 2-column KPI cards, stacked tables
-- **Desktop** (≥ 1024px): 3-column KPI cards, side-by-side tables
-
-### 6.2 Color Scheme & Typography
-
-**Colors**:
-- Primary: `emerald-600` (#059669)
-- Success: `emerald-500` (#10B981)
-- Warning: `amber-500` (#F59E0B)
-- Danger: `red-500` (#EF4444)
-- Muted: `gray-500` (#6B7280)
-
-**Typography**:
-- Headers: `text-lg font-semibold text-gray-900`
-- Metrics: `text-2xl font-bold text-gray-900`
-- Subtext: `text-sm text-muted-foreground`
-
-### 6.3 Interactive Elements
-
-**Table Interactions**:
-- Sortable column headers with arrow indicators
-- Row hover: `hover:bg-gray-50`
-- Clickable partner rows expand to show concierges
-- Loading states with skeleton screens
-
-**Real-time Updates**:
-- Auto-refresh every 60 seconds
-- Subtle flash animation on data updates
-- Connection status indicator
+**Table Features**:
+- Sortable column headers 
+- Row highlighting for trouble rates >15%
+- Loading states during data refresh
 
 ## 7. Performance Requirements
 
 ### 7.1 Loading Targets
 
 - **Initial Page Load**: < 2 seconds
-- **KPI Cards Refresh**: < 500ms
+- **Widget Load Time**: < 500ms
 - **Table Data Refresh**: < 1 second
-- **Real-time Updates**: 60-second intervals
 
 ### 7.2 Scalability Considerations
 
@@ -324,9 +287,8 @@ Cache::remember(
 - Query result caching with Redis
 
 **Frontend Performance**:
-- Lazy loading for below-the-fold content
-- Virtual scrolling for large datasets
-- Debounced search and filtering
+- Lazy loading for large tables
+- Efficient Livewire component updates
 
 ## 8. Testing Requirements
 
@@ -354,8 +316,8 @@ public function test_highlights_high_trouble_rates(): void
 ```php
 public function test_venue_manager_can_access_dashboard(): void
 public function test_venue_owner_sees_only_own_venue_data(): void
-public function test_api_endpoints_require_authentication(): void
-public function test_real_time_updates_work_correctly(): void
+public function test_widgets_load_correctly(): void
+public function test_data_filtering_works(): void
 ```
 
 ## 9. Migration & Deployment
