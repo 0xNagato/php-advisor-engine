@@ -20,7 +20,7 @@ class CheckCustomerHasNonPrimeBooking
             return null;
         }
 
-        // Create the date range in local timezone
+        // Create the date range in the local timezone
         $date = Carbon::parse($bookingDate, $timezone ?: 'UTC');
         $startOfDay = $date->copy()->startOfDay();
         $endOfDay = $date->copy()->endOfDay();

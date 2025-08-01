@@ -35,7 +35,7 @@ class ListConcierges extends ListRecords
     public function table(Table $table): Table
     {
         return $table
-            ->recordUrl(fn (Concierge $record) => ViewConcierge::getUrl(['record' => $record]))
+            ->recordUrl(fn(Concierge $record) => ViewConcierge::getUrl(['record' => $record]))
             ->query($this->getConciergesQuery())
             ->columns([
                 TextColumn::make('user.name')
@@ -43,20 +43,28 @@ class ListConcierges extends ListRecords
                     ->searchable(['first_name', 'last_name', 'phone']),
                 IconColumn::make('is_qr_concierge')
                     ->label('QR')
-                    ->icon(fn (bool $state): string => $state ? 'heroicon-o-check-circle' : 'heroicon-o-x-circle')
-                    ->color(fn (bool $state): string => $state ? 'success' : 'gray')
-                    ->tooltip(fn (Concierge $record): string => $record->is_qr_concierge
-                            ? "QR Concierge: {$record->revenue_percentage}% revenue"
-                            : 'Regular concierge'
-                    )
+                    ->icon(fn(bool $state): string => $state ? 'heroicon-o-check-circle' : 'heroicon-o-x-circle')
+                    ->color(fn(bool $state): string => $state ? 'success' : 'gray')
+                    ->tooltip(fn(Concierge $record): string => $record->is_qr_concierge
+                        ? "QR Concierge: {$record->revenue_percentage}% revenue"
+                        : 'Regular concierge')
                     ->grow(false)
                     ->alignCenter(),
+                IconColumn::make('can_override_duplicate_checks')
+                    ->label('Override')
+                    ->boolean()
+                    ->icon(fn(bool $state): string => $state ? 'heroicon-o-check-circle' : 'heroicon-o-x-circle')
+                    ->color(fn(bool $state): string => $state ? 'success' : 'gray')
+                    ->tooltip('Can bypass duplicate checks')
+                    ->grow(false)
+                    ->alignCenter()
+                    ->visibleFrom('sm'),
                 TextColumn::make('user.referrer.name')
                     ->sortable(['referrer_first_name'])
-                    ->url(fn (Concierge $concierge) => $concierge->user->referral?->referrer_route)
+                    ->url(fn(Concierge $concierge) => $concierge->user->referral?->referrer_route)
                     ->grow(false)
                     ->size('xs')
-                    ->default(fn (Concierge $concierge) => new HtmlString(<<<'HTML'
+                    ->default(fn(Concierge $concierge) => new HtmlString(<<<'HTML'
                         <div class='text-xs italic text-gray-600'>
                             PRIMA CREATED
                         </div>
@@ -66,7 +74,7 @@ class ListConcierges extends ListRecords
                 TextColumn::make('id')->label('Earned')
                     ->grow(false)
                     ->size('xs')
-                    ->formatStateUsing(fn (Concierge $concierge) => $concierge->formatted_total_earnings_in_u_s_d),
+                    ->formatStateUsing(fn(Concierge $concierge) => $concierge->formatted_total_earnings_in_u_s_d),
                 TextColumn::make('bookings_count')->label('Bookings')
                     ->visibleFrom('sm')
                     ->grow(false)
@@ -83,9 +91,9 @@ class ListConcierges extends ListRecords
                     ->action(Action::make('viewReferrals')
                         ->iconButton()
                         ->icon('heroicon-o-receipt-refund')
-                        ->modalHeading(fn (Concierge $concierge) => $concierge->user->name)
+                        ->modalHeading(fn(Concierge $concierge) => $concierge->user->name)
                         ->modalContent(function (Concierge $concierge) {
-                            $referralsBookings = $concierge->concierges->map(fn ($concierge
+                            $referralsBookings = $concierge->concierges->map(fn($concierge
                             ) => $concierge->bookings()->confirmed()->count())->sum();
 
                             return view('partials.concierge-referrals-table-modal-view', [
@@ -130,21 +138,21 @@ class ListConcierges extends ListRecords
             ->filters([
                 Filter::make('qr_concierges')
                     ->label('QR Concierges Only')
-                    ->query(fn (Builder $query): Builder => $query->where('is_qr_concierge', true))
+                    ->query(fn(Builder $query): Builder => $query->where('is_qr_concierge', true))
                     ->toggle(),
             ])
             ->actions([
                 Action::make('impersonate')
                     ->iconButton()
                     ->icon('impersonate-icon')
-                    ->action(fn (Concierge $record) => $this->impersonate($record->user))
-                    ->hidden(fn () => isPrimaApp()),
+                    ->action(fn(Concierge $record) => $this->impersonate($record->user))
+                    ->hidden(fn() => isPrimaApp()),
                 EditAction::make('edit')
                     ->iconButton(),
                 Action::make('viewConcierge')
                     ->iconButton()
                     ->icon('tabler-maximize')
-                    ->modalHeading(fn (Concierge $concierge) => $concierge->user->name)
+                    ->modalHeading(fn(Concierge $concierge) => $concierge->user->name)
                     ->registerModalActions([
                         EditAction::make('edit')
                             ->size('sm'),
@@ -163,7 +171,7 @@ class ListConcierges extends ListRecords
                         $avgEarnPerBooking = $concierge->bookings_count > 0
                             ? $concierge->total_earnings_in_u_s_d / $concierge->bookings_count
                             : 0;
-                        $referralsBookings = $concierge->concierges->map(fn ($concierge
+                        $referralsBookings = $concierge->concierges->map(fn($concierge
                         ) => $concierge->bookings()->confirmed()->count())->sum();
 
                         return view('partials.concierge-table-modal-view', [
@@ -179,7 +187,7 @@ class ListConcierges extends ListRecords
                             'last_login' => $lastLogin,
                         ]);
                     })
-                    ->modalContentFooter(fn (Action $action) => view(
+                    ->modalContentFooter(fn(Action $action) => view(
                         'partials.modal-actions-footer',
                         ['action' => $action]
                     ))
