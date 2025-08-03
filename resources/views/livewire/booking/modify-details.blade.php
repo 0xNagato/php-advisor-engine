@@ -106,11 +106,6 @@
                         @else
                             <span class="block text-xs font-medium text-gray-800 sm:text-sm dark:text-gray-200">
                                 Non-Prime
-                                @if (isset($record->meta['non_prime_incentive']))
-                                    <span class="text-xs text-gray-500">
-                                        ({{ money($record->meta['non_prime_incentive']['fee_per_head'] * 100 ?? 0, $record->currency) }}/guest)
-                                    </span>
-                                @endif
                             </span>
                         @endif
                     </div>
@@ -119,7 +114,7 @@
                 <div>
                     <span class="block text-xs text-gray-500 uppercase">Created At:</span>
                     <span class="block text-xs font-medium text-gray-800 sm:text-sm dark:text-gray-200">
-                        {{ $record->created_at->setTimezone(auth()->user()?->timezone ?? 'America/New_York')->format('M d, Y g:i A') }}
+                        {{ $record->created_at->setTimezone($record->venue->timezone ?? 'America/New_York')->format('M d, Y g:i A') }}
                     </span>
                 </div>
 
@@ -134,7 +129,7 @@
                     <span
                         class="block text-xs text-gray-500 uppercase">{{ $record->is_prime ? 'Date Paid' : 'Date Confirmed' }}:</span>
                     <span class="block text-xs font-medium text-gray-800 sm:text-sm dark:text-gray-200">
-                        {{ $record->confirmed_at?->setTimezone(auth()->user()?->timezone ?? 'America/New_York')->format('M d, Y g:i A') }}
+                        {{ $record->confirmed_at?->setTimezone($record->venue->timezone ?? 'America/New_York')->format('M d, Y g:i A') }}
                     </span>
                 </div>
 
@@ -176,15 +171,6 @@
                             {{ $record->refunded_at->format('M d, Y g:i A') }}
                         </span>
                     </div>
-
-                    @if (auth()->check() && auth()->user()->hasActiveRole('super_admin'))
-                        <div>
-                            <span class="block text-xs text-gray-500 uppercase">Internal Notes:</span>
-                            <span class="block text-xs font-medium text-gray-800 sm:text-sm dark:text-gray-200">
-                                {{ $record->refund_reason }}
-                            </span>
-                        </div>
-                    @endif
                 @else
                     <div>
                         <span class="block text-xs text-gray-500 uppercase">Status:</span>
@@ -202,72 +188,6 @@
                     <p class="mb-3 text-xs text-gray-800 sm:text-xs dark:text-gray-200">{{ $record->notes }}
                     </p>
                 @endif
-
-                <h4 class="text-xs font-semibold text-gray-800 uppercase dark:text-gray-200">Summary</h4>
-
-                <ul class="flex flex-col mt-3 overflow-hidden border rounded-lg">
-                    <li
-                        class="inline-flex items-center px-4 py-3 text-xs text-gray-800 border-b sm:text-sm gap-x-2 last:border-b-0 dark:border-gray-700 dark:text-gray-200">
-                        <div class="flex flex-col w-full">
-                            <div class="flex items-center justify-between w-full">
-                                <span class="font-medium">
-                                    {{ $record->venue->name }} ({{ $record->guest_count }} guests)
-                                </span>
-                                <span class="font-medium">
-                                    {{ money($record->total_fee, $record->currency) }}
-                                </span>
-                            </div>
-                            @if ($record->is_prime)
-                                <div class="mt-1 text-xs text-gray-500">
-                                    {{ money($record->venue->booking_fee * 100, $record->currency) }} for 2 guests
-                                    @if ($record->guest_count > 2)
-                                        +
-                                        {{ money($record->venue->increment_fee * 100, $record->currency) }}/additional
-                                        guest
-                                    @endif
-                                </div>
-                            @endif
-                        </div>
-                    </li>
-                    @if ($record->tax > 0)
-                        <li
-                            class="inline-flex items-center px-4 py-3 text-xs text-gray-800 border-b sm:text-sm last:border-b-0 dark:border-gray-700 dark:text-gray-200">
-                            <div class="flex items-center justify-between w-full">
-                                <span>{{ $region->tax_rate_term }} ({{ $record->tax * 100 }}%)</span>
-                                <span>
-                                    {{ money($record->tax_amount_in_cents, $record->currency) }}
-                                </span>
-                            </div>
-                        </li>
-                    @endif
-                    @if (in_array($record->status, [BookingStatus::REFUNDED, BookingStatus::PARTIALLY_REFUNDED]))
-                        <li
-                            class="inline-flex items-center px-4 py-3 text-xs text-gray-800 border-b sm:text-sm last:border-b-0 dark:border-gray-700 dark:text-gray-200">
-                            <div class="flex items-center justify-between w-full">
-                                <span>{{ $record->status->label() }}</span>
-                                <span class="text-red-500">
-                                    -{{ money($record->total_refunded, $record->currency) }}
-                                </span>
-                            </div>
-                        </li>
-                    @endif
-                    @if (!in_array($record->status, [BookingStatus::PENDING, BookingStatus::GUEST_ON_PAGE, BookingStatus::ABANDONED]))
-                        <li
-                            class="inline-flex items-center px-4 py-3 text-xs font-semibold text-gray-800 sm:text-sm bg-gray-50 dark:bg-slate-800 dark:text-gray-200">
-                            <div class="flex items-center justify-between w-full">
-                                <span>Amount Paid</span>
-                                <span>
-                                    @if (in_array($record->status, [BookingStatus::REFUNDED, BookingStatus::PARTIALLY_REFUNDED]))
-                                        {{ money($record->final_total, $record->currency) }}
-                                    @else
-                                        {{ money($record->total_with_tax_in_cents, $record->currency) }}
-                                    @endif
-                                </span>
-                            </div>
-                        </li>
-                    @endif
-                </ul>
-
 
                 <div class="mt-4 font-semibold text-center">
                     @if ($record->venue->is_omakase)
