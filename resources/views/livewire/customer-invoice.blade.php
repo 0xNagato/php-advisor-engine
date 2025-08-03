@@ -292,7 +292,7 @@
                             </div>
                         </li>
                     @endif
-                </ul>
+                    </ul>
                 @endif
 
                 @if (isset($customerInvoice) || $download)
