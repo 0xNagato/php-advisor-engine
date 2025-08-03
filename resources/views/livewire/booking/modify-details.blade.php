@@ -78,10 +78,10 @@
                     </div>
                 </div>
 
-                <div>
-                    <span class="block text-xs text-gray-500 uppercase">Payment Method:</span>
-                    <div class="flex items-center gap-x-2">
-                        @if ($record->prime_time)
+                @if ($record->prime_time)
+                    <div>
+                        <span class="block text-xs text-gray-500 uppercase">Payment Method:</span>
+                        <div class="flex items-center gap-x-2">
                             @if ($record->stripe_charge && $record->stripe_charge->paymentMethodDetails->card)
                                 @if ($record->stripe_charge->paymentMethodDetails->card->brand === 'visa')
                                     <x-fab-cc-visa class="w-6 h-6" />
@@ -103,13 +103,9 @@
                                     Credit Card
                                 </span>
                             @endif
-                        @else
-                            <span class="block text-xs font-medium text-gray-800 sm:text-sm dark:text-gray-200">
-                                Non-Prime
-                            </span>
-                        @endif
+                        </div>
                     </div>
-                </div>
+                @endif
 
                 <div>
                     <span class="block text-xs text-gray-500 uppercase">Created At:</span>
