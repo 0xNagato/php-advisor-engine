@@ -48,7 +48,7 @@ class CustomerBookingConfirmed extends Notification
             (bool) $notifiable->is_non_prime_big_group => 'customer_booking_confirmed_non_prime_big_group',
             (bool) $notifiable->is_prime && (bool) $notifiable->venue->is_omakase => 'customer_booking_confirmed_prime_omakase',
             (bool) $notifiable->is_prime => 'customer_booking_confirmed_prime',
-            default => 'customer_booking_confirmed_non_prime',
+            default => $this->getNonPrimeTemplateKey($notifiable),
         };
 
         $invoiceUrl = route('customer.invoice', $notifiable->uuid);
@@ -67,5 +67,17 @@ class CustomerBookingConfirmed extends Notification
                 'concierge_name' => $notifiable->concierge->user->name,
             ]
         );
+    }
+
+    private function getNonPrimeTemplateKey(Booking $booking): string
+    {
+        $regionalSmsRegions = config('app.regional_sms.non_prime_regions', []);
+        $venueRegion = $booking->venue->region;
+
+        if (in_array($venueRegion, $regionalSmsRegions)) {
+            return 'customer_booking_received_non_prime';
+        }
+
+        return 'customer_booking_confirmed_non_prime';
     }
 }

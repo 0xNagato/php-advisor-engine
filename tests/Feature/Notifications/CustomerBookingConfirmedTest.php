@@ -98,3 +98,77 @@ it('ensures the customer_booking_confirmed_non_prime SMS content is correct', fu
         ->and($smsData->templateKey)->toBe('customer_booking_confirmed_non_prime')
         ->and($parsedMessage)->toBe($expectedMessage);
 });
+
+it('uses regional SMS template for venues in configured regions', function () {
+    // Create Ibiza venue
+    $ibizaVenue = Venue::factory()->create([
+        'name' => 'Ibiza Beach Club',
+        'region' => 'ibiza',
+        'payout_venue' => 60,
+        'non_prime_fee_per_head' => 10,
+        'timezone' => 'UTC',
+    ]);
+
+    // Create schedule template for Ibiza venue
+    $baseTemplate = ScheduleTemplate::where([
+        'venue_id' => $ibizaVenue->id,
+        'start_time' => '14:00:00',
+        'party_size' => 0,
+    ])->get()->first();
+
+    $ibizaTemplate = ScheduleTemplate::where([
+        'venue_id' => $ibizaVenue->id,
+        'start_time' => '14:00:00',
+        'day_of_week' => $baseTemplate->day_of_week,
+        'party_size' => 2,
+    ])->get()->first();
+
+    // Set as non-prime
+    ScheduleTemplate::where('venue_id', $ibizaVenue->id)
+        ->where('start_time', $ibizaTemplate->start_time)
+        ->where('day_of_week', $ibizaTemplate->day_of_week)
+        ->update(['prime_time' => 0]);
+
+    $result = $this->action::run(
+        $ibizaTemplate->id,
+        [
+            'date' => now()->addDay()->format('Y-m-d'),
+            'guest_count' => 3,
+        ]
+    );
+    $booking = $result->booking;
+    $booking->update(['guest_phone' => '+12015557894']);
+
+    // Test the notification
+    $notification = new CustomerBookingConfirmed;
+    $smsData = $notification->toSMS($booking);
+
+    expect($smsData->templateKey)->toBe('customer_booking_received_non_prime');
+});
+
+it('uses standard SMS template for venues not in configured regions', function () {
+    // Miami venue should use standard template
+    $guestCount = 3;
+
+    // Set as non-prime
+    ScheduleTemplate::where('venue_id', $this->venue->id)
+        ->where('start_time', $this->scheduleTemplate->start_time)
+        ->where('day_of_week', $this->scheduleTemplate->day_of_week)
+        ->update(['prime_time' => 0]);
+
+    $result = $this->action::run(
+        $this->scheduleTemplate->id,
+        [
+            'date' => now()->addDay()->format('Y-m-d'),
+            'guest_count' => $guestCount,
+        ]
+    );
+    $booking = $result->booking;
+    $booking->update(['guest_phone' => '+12015557894']);
+
+    // Test the notification
+    $notification = new CustomerBookingConfirmed;
+    $smsData = $notification->toSMS($booking);
+
+    expect($smsData->templateKey)->toBe('customer_booking_confirmed_non_prime');
+});

@@ -418,4 +418,17 @@ return [
         'session_duration_hours' => env('VIP_SESSION_DURATION_HOURS', 24),
     ],
 
+    /*
+    |--------------------------------------------------------------------------
+    | Regional SMS Configuration
+    |--------------------------------------------------------------------------
+    |
+    | Configuration for region-specific SMS templates. Defines which regions
+    | should use alternative SMS messaging for certain booking types.
+    |
+    */
+    'regional_sms' => [
+        'non_prime_regions' => explode(',', env('REGIONAL_SMS_NON_PRIME_REGIONS', 'ibiza')),
+    ],
+
 ];
