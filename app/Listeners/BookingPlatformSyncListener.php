@@ -57,7 +57,9 @@ class BookingPlatformSyncListener implements ShouldQueue
 
         // Check if we should simulate platform sync success in development
         if (config('app.simulate_platform_sync_success')) {
-            Log::info("Simulating platform sync success for booking {$booking->id} (development mode)");
+            Log::info("Simulating platform sync success for booking {$booking->id} (development mode)", [
+                'booking_id' => $booking->id,
+            ]);
             $success = true;
             $anyPlatformSucceeded = true;
         } else {
@@ -118,11 +120,15 @@ class BookingPlatformSyncListener implements ShouldQueue
                 try {
                     $autoApproved = AutoApproveSmallPartyBooking::run($booking);
                     if ($autoApproved) {
-                        Log::info("Booking {$booking->id} was auto-approved after successful platform sync");
+                        Log::info("Booking {$booking->id} was auto-approved after successful platform sync", [
+                            'booking_id' => $booking->id,
+                        ]);
                         // Auto-approval notification is sent by AutoApproveSmallPartyBooking action
                     } else {
                         // Auto-approval failed despite platform success - send regular confirmation
-                        Log::info("Auto-approval failed for booking {$booking->id} despite platform sync success - sending regular confirmation SMS");
+                        Log::info("Auto-approval failed for booking {$booking->id} despite platform sync success - sending regular confirmation SMS", [
+                            'booking_id' => $booking->id,
+                        ]);
                         SendConfirmationToVenueContacts::run($booking);
                     }
                 } catch (Throwable $e) {
@@ -135,9 +141,21 @@ class BookingPlatformSyncListener implements ShouldQueue
                     SendConfirmationToVenueContacts::run($booking);
                 }
             } else {
-                // Platform sync failed for auto-approval eligible booking - send regular confirmation
-                Log::info("Platform sync failed for auto-approval eligible booking {$booking->id} - sending regular confirmation SMS");
-                SendConfirmationToVenueContacts::run($booking);
+                // Only send SMS on final failure (when job is about to be marked as failed)
+                if ($this->attempts() >= $this->tries) {
+                    Log::info("Platform sync failed for auto-approval eligible booking {$booking->id} on final attempt - sending regular confirmation SMS", [
+                        'booking_id' => $booking->id,
+                        'attempt' => $this->attempts(),
+                        'max_tries' => $this->tries,
+                    ]);
+                    SendConfirmationToVenueContacts::run($booking);
+                } else {
+                    Log::info("Platform sync failed for auto-approval eligible booking {$booking->id} - will retry (attempt {$this->attempts()}/{$this->tries})", [
+                        'booking_id' => $booking->id,
+                        'attempt' => $this->attempts(),
+                        'max_tries' => $this->tries,
+                    ]);
+                }
             }
         }
 

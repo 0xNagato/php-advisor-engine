@@ -67,7 +67,7 @@ it('triggers auto-approval after successful platform sync', function () {
     $listener->handle($event);
 });
 
-it('sends regular confirmation SMS when platform sync fails', function () {
+it('does not send SMS on non-final platform sync failure attempts', function () {
     // Create enabled platform
     VenuePlatform::factory()->create([
         'venue_id' => $this->venue->id,
@@ -81,7 +81,39 @@ it('sends regular confirmation SMS when platform sync fails', function () {
             ->andReturn(null); // Return null to simulate failure
     });
 
-    // Mock SendConfirmationToVenueContacts to verify it gets called when platform sync fails
+    // Mock SendConfirmationToVenueContacts to verify it does NOT get called on non-final attempts
+    $this->mock(\App\Actions\Booking\SendConfirmationToVenueContacts::class)
+        ->shouldReceive('handle')
+        ->never();
+
+    // Allow logging
+    Log::shouldReceive('info')->zeroOrMoreTimes();
+    Log::shouldReceive('error')->zeroOrMoreTimes();
+
+    // Create a listener instance and mock it to return attempt 1 (not final)
+    $listener = \Mockery::mock(BookingPlatformSyncListener::class)->makePartial();
+    $listener->shouldReceive('attempts')->andReturn(1); // First attempt, not final
+    $listener->tries = 3;
+    
+    $event = new BookingConfirmed($this->booking);
+    $listener->handle($event);
+});
+
+it('sends SMS on final platform sync failure attempt', function () {
+    // Create enabled platform
+    VenuePlatform::factory()->create([
+        'venue_id' => $this->venue->id,
+        'platform_type' => 'restoo',
+        'is_enabled' => true,
+    ]);
+
+    // Mock Restoo service to return failure for this test
+    $this->mock(\App\Services\RestooService::class, function ($mock) {
+        $mock->shouldReceive('createReservation')
+            ->andReturn(null); // Return null to simulate failure
+    });
+
+    // Mock SendConfirmationToVenueContacts to verify it gets called on final attempt
     $this->mock(\App\Actions\Booking\SendConfirmationToVenueContacts::class)
         ->shouldReceive('handle')
         ->once()
@@ -91,9 +123,12 @@ it('sends regular confirmation SMS when platform sync fails', function () {
     Log::shouldReceive('info')->zeroOrMoreTimes();
     Log::shouldReceive('error')->zeroOrMoreTimes();
 
-    $listener = app(BookingPlatformSyncListener::class);
+    // Create a listener instance and mock it to return final attempt
+    $listener = \Mockery::mock(BookingPlatformSyncListener::class)->makePartial();
+    $listener->shouldReceive('attempts')->andReturn(3); // Final attempt
+    $listener->tries = 3;
+    
     $event = new BookingConfirmed($this->booking);
-
     $listener->handle($event);
 });
 
@@ -120,12 +155,16 @@ it('logs auto-approval success', function () {
 
     // Allow simulation log and expect success log
     Log::shouldReceive('info')
-        ->with("Simulating platform sync success for booking {$this->booking->id} (development mode)")
+        ->with("Simulating platform sync success for booking {$this->booking->id} (development mode)", [
+            'booking_id' => $this->booking->id,
+        ])
         ->zeroOrMoreTimes(); // May or may not be called depending on config
         
     Log::shouldReceive('info')
         ->once()
-        ->with("Booking {$this->booking->id} was auto-approved after successful platform sync");
+        ->with("Booking {$this->booking->id} was auto-approved after successful platform sync", [
+            'booking_id' => $this->booking->id,
+        ]);
 
     $listener = app(BookingPlatformSyncListener::class);
     $event = new BookingConfirmed($this->booking);
