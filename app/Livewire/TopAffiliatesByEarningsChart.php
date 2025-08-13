@@ -7,7 +7,6 @@ use Livewire\Attributes\On;
 
 class TopAffiliatesByEarningsChart extends ApexChartWidget
 {
-
     protected static ?string $chartId = 'topAffiliatesByEarnings';
 
     protected static ?string $heading = 'Top 10 Affiliates by Total Earnings';

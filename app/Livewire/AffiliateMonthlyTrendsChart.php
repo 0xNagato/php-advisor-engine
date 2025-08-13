@@ -9,7 +9,6 @@ use Livewire\Attributes\On;
 
 class AffiliateMonthlyTrendsChart extends ApexChartWidget
 {
-
     protected static ?string $chartId = 'affiliateMonthlyTrends';
 
     protected static ?string $heading = 'Direct vs Referral Bookings';
