@@ -26,6 +26,9 @@ use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Facades\Excel;
 use Filament\Tables\Actions\Action;
+use App\Livewire\AffiliateMonthlyTrendsChart;
+use App\Livewire\TopAffiliatesByBookingsChart;
+use App\Livewire\TopAffiliatesByEarningsChart;
 
 class AffiliatePerformanceReport extends Page implements HasTable
 {
@@ -83,6 +86,40 @@ class AffiliatePerformanceReport extends Page implements HasTable
         $this->tableFilters = $this->data ?? [];
     }
 
+    public function getHeaderWidgetsColumns(): int|string|array
+    {
+        return 12;
+    }
+
+    protected function getHeaderWidgets(): array
+    {
+        $startMonth = (string) ($this->data['startMonth'] ?? now()->subMonths(5)->format('Y-m'));
+        $numberOfMonths = (int) ($this->data['numberOfMonths'] ?? 6);
+        $region = (string) ($this->data['region'] ?? '');
+        $search = (string) ($this->data['search'] ?? '');
+
+        return [
+            AffiliateMonthlyTrendsChart::make([
+                'startMonth' => $startMonth,
+                'numberOfMonths' => $numberOfMonths,
+                'region' => $region,
+                'search' => $search,
+            ]),
+            TopAffiliatesByBookingsChart::make([
+                'startMonth' => $startMonth,
+                'numberOfMonths' => $numberOfMonths,
+                'region' => $region,
+                'search' => $search,
+            ]),
+            TopAffiliatesByEarningsChart::make([
+                'startMonth' => $startMonth,
+                'numberOfMonths' => $numberOfMonths,
+                'region' => $region,
+                'search' => $search,
+            ]),
+        ];
+    }
+
     public function getHeading(): string|Htmlable
     {
         return 'Affiliate Performance Report';
@@ -117,6 +154,7 @@ class AffiliatePerformanceReport extends Page implements HasTable
                     ->live(debounce: 500)
                     ->afterStateUpdated(function () {
                         $this->resetTable();
+                        $this->dispatch('$refresh');
                     }),
                 Select::make('region')
                     ->label('Region')
@@ -129,6 +167,7 @@ class AffiliatePerformanceReport extends Page implements HasTable
                     ->live()
                     ->afterStateUpdated(function () {
                         $this->resetTable();
+                        $this->dispatch('$refresh');
                     }),
                 Select::make('startMonth')
                     ->label('Start Month')
@@ -137,6 +176,7 @@ class AffiliatePerformanceReport extends Page implements HasTable
                     ->live()
                     ->afterStateUpdated(function () {
                         $this->resetTable();
+                        $this->dispatch('$refresh');
                     }),
                 Select::make('numberOfMonths')
                     ->label('Number of Months')
@@ -150,6 +190,7 @@ class AffiliatePerformanceReport extends Page implements HasTable
                         $newStartMonth = now($timezone)->subMonths((int)$state - 1)->format('Y-m');
                         $this->data['startMonth'] = $newStartMonth;
                         $this->resetTable();
+                        $this->dispatch('$refresh');
                     }),
             ])
             ->columns(4)
