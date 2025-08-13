@@ -20,13 +20,15 @@ class BusinessIntelligence extends Page implements HasTable
 {
     use InteractsWithTable;
 
-    protected static ?string $navigationIcon = 'heroicon-o-chart-bar';
+    protected static ?string $navigationIcon = 'heroicon-o-presentation-chart-line';
 
     protected static ?string $title = 'Business Intelligence';
 
-    protected static ?int $navigationSort = 45;
+    protected static ?int $navigationSort = 2;
 
     protected static string $view = 'filament.pages.admin.business-intelligence';
+
+    protected static ?string $navigationGroup = 'Affiliate Reporting';
 
     public bool $isLoading = false;
 

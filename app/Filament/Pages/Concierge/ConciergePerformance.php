@@ -3,6 +3,7 @@
 namespace App\Filament\Pages\Concierge;
 
 use App\Enums\BookingStatus;
+use App\Filament\Pages\AffiliatePerformanceReport;
 use App\Models\Concierge;
 use Carbon\Carbon;
 use Filament\Pages\Page;
@@ -21,6 +22,9 @@ class ConciergePerformance extends Page
     protected static ?int $navigationSort = 3;
 
     protected static ?string $navigationGroup = 'Advanced Tools';
+
+    // Hide from navigation since this just redirects
+    protected static bool $shouldRegisterNavigation = false;
 
     public array $weekRanges = [];
 
@@ -46,7 +50,13 @@ class ConciergePerformance extends Page
         return static::$title.' ('.$startDate.' - '.$endDate.')';
     }
 
-    public function mount(): void
+    public function mount()
+    {
+        // Redirect to the new Monthly Report
+        return redirect(AffiliatePerformanceReport::getUrl());
+    }
+
+    public function mountOriginal(): void
     {
         // Don't clear the cache on every page load
         $this->weekRanges = $this->getWeekRanges();

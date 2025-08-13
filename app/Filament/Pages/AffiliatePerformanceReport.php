@@ -35,13 +35,13 @@ class AffiliatePerformanceReport extends Page implements HasTable
     #[Url()]
     public ?array $data = [];
 
-    protected static ?string $navigationIcon = 'heroicon-o-chart-bar';
+    protected static ?string $navigationIcon = 'heroicon-o-calendar-days';
 
     protected static ?string $title = 'Affiliate Performance Report';
 
     protected static ?string $navigationLabel = 'Monthly Report';
 
-    protected static ?int $navigationSort = 20;
+    protected static ?int $navigationSort = 1;
 
     protected static string $view = 'filament.pages.affiliate-performance-report';
 
