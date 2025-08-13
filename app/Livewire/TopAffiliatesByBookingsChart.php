@@ -2,24 +2,26 @@
 
 namespace App\Livewire;
 
-use App\Enums\EarningType;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use Leandrocfe\FilamentApexCharts\Widgets\ApexChartWidget;
+use Livewire\Attributes\On;
 
 class TopAffiliatesByBookingsChart extends ApexChartWidget
 {
-
     protected static ?string $chartId = 'topAffiliatesByBookings';
+
     protected static ?string $heading = 'Top 10 Affiliates by Total Bookings';
+
     protected static ?int $contentHeight = 250;
+
     protected int|string|array $columnSpan = 4;
 
-	public ?string $startMonth = null;
-	public ?int $numberOfMonths = null;
-	public ?string $region = null;
-	public ?string $search = null;
-	public bool $useMockData = false;
+    public ?string $startMonth = null;
+    public ?int $numberOfMonths = null;
+    public ?string $region = null;
+    public ?string $search = null;
+    public bool $useMockData = false;
 
     public function getColumnSpan(): int|string|array
     {
@@ -31,92 +33,102 @@ class TopAffiliatesByBookingsChart extends ApexChartWidget
         return static::$contentHeight;
     }
 
-	protected function getOptions(): array
-	{
-		if ($this->useMockData) {
-			return [
-				'chart' => [ 'type' => 'bar', 'height' => 250, 'stacked' => true, 'toolbar' => [ 'show' => false ] ],
-				'colors' => ['#6366F1', '#8B5CF6'],
-				'series' => [
-					[ 'name' => 'Direct Bookings', 'data' => [120, 90, 70, 110, 95, 80, 60, 40, 35, 25] ],
-					[ 'name' => 'Referral Bookings', 'data' => [760, 720, 310, 160, 140, 120, 100, 90, 80, 70] ],
-				],
-				'xaxis' => [
-					'categories' => ['PRIMA VIP Admin','Dee Amadi','Paul Onemnik','Paula Abrantes','Brian Bean','Robert Yeadon','John David Ibañez','Amelia Nunez','Luis Carreras','Laísla Ibiza'],
-					'labels' => [ 'rotate' => -45, 'style' => [ 'fontSize' => '12px' ] ],
-				],
-				'yaxis' => [ 'title' => [ 'text' => 'Bookings' ] ],
-				'plotOptions' => [ 'bar' => [ 'horizontal' => false ] ],
-				'dataLabels' => [ 'enabled' => false ],
-				'legend' => [ 'show' => true, 'position' => 'top' ],
-				'tooltip' => [ 'shared' => true, 'intersect' => false ],
-			];
-		}
+    #[On('filtersUpdated')]
+    public function updateFilters($data)
+    {
+        $this->startMonth = $data['startMonth'] ?? null;
+        $this->numberOfMonths = $data['numberOfMonths'] ?? null;
+        $this->region = $data['region'] ?? null;
+        $this->search = $data['search'] ?? null;
+    }
 
-		if (!$this->startMonth || !$this->numberOfMonths) {
-			return [
-				'chart' => ['type' => 'bar', 'height' => 250, 'stacked' => true],
-				'series' => [],
-				'xaxis' => ['categories' => []],
-				'noData' => ['text' => 'No data available']
-			];
-		}
+    protected function getOptions(): array
+    {
+        if ($this->useMockData) {
+            return [
+                'chart' => ['type' => 'bar', 'height' => 250, 'stacked' => true, 'toolbar' => ['show' => false]],
+                'colors' => ['#6366F1', '#8B5CF6'],
+                'series' => [
+                    ['name' => 'Direct Bookings', 'data' => [120, 90, 70, 110, 95, 80, 60, 40, 35, 25]],
+                    ['name' => 'Referral Bookings', 'data' => [760, 720, 310, 160, 140, 120, 100, 90, 80, 70]],
+                ],
+                'xaxis' => [
+                    'categories' => ['PRIMA VIP Admin', 'Dee Amadi', 'Paul Onemnik', 'Paula Abrantes', 'Brian Bean', 'Robert Yeadon', 'John David Ibañez', 'Amelia Nunez', 'Luis Carreras', 'Laísla Ibiza'],
+                    'labels' => ['rotate' => -45, 'style' => ['fontSize' => '12px']],
+                ],
+                'yaxis' => ['title' => ['text' => 'Bookings']],
+                'plotOptions' => ['bar' => ['horizontal' => false]],
+                'dataLabels' => ['enabled' => false],
+                'legend' => ['show' => true, 'position' => 'top'],
+                'tooltip' => ['shared' => true, 'intersect' => false],
+            ];
+        }
+
+        if (! $this->startMonth || ! $this->numberOfMonths) {
+            return [
+                'chart' => ['type' => 'bar', 'height' => 250, 'stacked' => true],
+                'series' => [],
+                'xaxis' => ['categories' => []],
+                'noData' => ['text' => 'No data available'],
+            ];
+        }
 
         try {
             $data = $this->getChartData();
         } catch (\Exception $e) {
-            \Log::error('TopAffiliatesByBookingsChart error: ' . $e->getMessage());
-			return [
-				'chart' => ['type' => 'bar', 'height' => 250, 'stacked' => true],
-				'series' => [],
-				'xaxis' => ['categories' => []],
-				'noData' => ['text' => 'Error loading data']
-			];
+            \Log::error('TopAffiliatesByBookingsChart error: '.$e->getMessage());
+
+            return [
+                'chart' => ['type' => 'bar', 'height' => 250, 'stacked' => true],
+                'series' => [],
+                'xaxis' => ['categories' => []],
+                'noData' => ['text' => 'Error loading data'],
+            ];
         }
 
-		if (empty($data['affiliateNames'])) {
-			return [
-				'chart' => ['type' => 'bar', 'height' => 250, 'stacked' => true],
-				'series' => [],
-				'xaxis' => ['categories' => []],
-				'noData' => ['text' => 'No data available']
-			];
-		}
+        if (empty($data['affiliateNames'])) {
+            return [
+                'chart' => ['type' => 'bar', 'height' => 250, 'stacked' => true],
+                'series' => [],
+                'xaxis' => ['categories' => []],
+                'noData' => ['text' => 'No data available'],
+            ];
+        }
 
-		return [
-			'chart' => [
-				'type' => 'bar',
-				'height' => 250,
-				'stacked' => true,
-				'toolbar' => [ 'show' => false ],
-			],
-			'colors' => ['#7C3AED', '#10B981'],
-			'series' => [
-				[
-					'name' => 'Direct Bookings',
-					'data' => $data['directBookings'],
-				],
-				[
-					'name' => 'Referral Bookings',
-					'data' => $data['referralBookings'],
-				],
-			],
-			'xaxis' => [
-				'categories' => $data['affiliateNames'],
-				'labels' => [ 'rotate' => -45, 'style' => [ 'fontSize' => '12px' ] ],
-			],
-			'yaxis' => [ 'title' => [ 'text' => 'Bookings' ] ],
-			'plotOptions' => [ 'bar' => [ 'horizontal' => false ] ],
-			'dataLabels' => [ 'enabled' => false ],
-			'legend' => [ 'show' => true, 'position' => 'top', 'horizontalAlign' => 'right', 'markers' => ['width' => 12, 'height' => 12, 'radius' => 12] ],
-			'tooltip' => [ 'shared' => true, 'intersect' => false ],
-		];
+        return [
+            'chart' => [
+                'type' => 'bar',
+                'height' => 250,
+                'stacked' => true,
+                'toolbar' => ['show' => false],
+            ],
+            'colors' => ['#7C3AED', '#10B981'],
+            'series' => [
+                [
+                    'name' => 'Direct Bookings',
+                    'data' => $data['directBookings'],
+                ],
+                [
+                    'name' => 'Referral Bookings',
+                    'data' => $data['referralBookings'],
+                ],
+            ],
+            'xaxis' => [
+                'categories' => $data['affiliateNames'],
+                'labels' => ['rotate' => -45, 'style' => ['fontSize' => '12px']],
+            ],
+            'yaxis' => ['title' => ['text' => 'Bookings']],
+            'plotOptions' => ['bar' => ['horizontal' => false]],
+            'dataLabels' => ['enabled' => false],
+            'legend' => ['show' => true, 'position' => 'top', 'horizontalAlign' => 'right', 'markers' => ['width' => 12, 'height' => 12, 'radius' => 12]],
+            'tooltip' => ['shared' => true, 'intersect' => false],
+        ];
     }
 
     private function getChartData(): array
     {
         $timezone = auth()->user()->timezone ?? config('app.default_timezone');
-        $startDate = Carbon::parse($this->startMonth . '-01', $timezone)->startOfDay()->setTimezone('UTC');
+        $startDate = Carbon::parse($this->startMonth.'-01', $timezone)->startOfDay()->setTimezone('UTC');
         $endDate = $startDate->copy()->addMonths($this->numberOfMonths)->subSecond();
 
         // Use the same proven SQL pattern as the working chart and main table
@@ -143,35 +155,35 @@ class TopAffiliatesByBookingsChart extends ApexChartWidget
 
         // Add region filter if specified
         if ($this->region) {
-            $sql .= " AND EXISTS (
+            $sql .= ' AND EXISTS (
                 SELECT 1 FROM schedule_templates st
                 JOIN venues v ON st.venue_id = v.id
                 WHERE b.schedule_template_id = st.id AND v.region = ?
-            )";
+            )';
             $params[] = $this->region;
         }
 
         // Add search filter if specified
         if ($this->search) {
             $searchLower = strtolower($this->search);
-            $sql .= " AND (
+            $sql .= ' AND (
                 LOWER(u.first_name) LIKE ? OR
                 LOWER(u.last_name) LIKE ? OR
                 LOWER(u.email) LIKE ? OR
                 LOWER(u.phone) LIKE ?
-            )";
+            )';
             $params[] = "%{$searchLower}%";
             $params[] = "%{$searchLower}%";
             $params[] = "%{$searchLower}%";
             $params[] = "%{$searchLower}%";
         }
 
-        $sql .= "
+        $sql .= '
             GROUP BY c.id, u.first_name, u.last_name
             HAVING COUNT(DISTINCT e.booking_id) > 0
             ORDER BY total_bookings DESC
             LIMIT 10
-        ";
+        ';
 
         $results = DB::select($sql, $params);
 

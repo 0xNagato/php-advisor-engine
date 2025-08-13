@@ -5,12 +5,17 @@ namespace App\Livewire;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use Leandrocfe\FilamentApexCharts\Widgets\ApexChartWidget;
+use Livewire\Attributes\On;
 
 class AffiliateMonthlyTrendsChart extends ApexChartWidget
 {
+
     protected static ?string $chartId = 'affiliateMonthlyTrends';
+
     protected static ?string $heading = 'Direct vs Referral Bookings';
+
     protected static ?int $contentHeight = 250;
+
     protected int|string|array $columnSpan = 4;
 
     public ?string $startMonth = null;
@@ -23,26 +28,36 @@ class AffiliateMonthlyTrendsChart extends ApexChartWidget
         return $this->columnSpan;
     }
 
+    #[On('filtersUpdated')]
+    public function updateFilters($data)
+    {
+        $this->startMonth = $data['startMonth'] ?? null;
+        $this->numberOfMonths = $data['numberOfMonths'] ?? null;
+        $this->region = $data['region'] ?? null;
+        $this->search = $data['search'] ?? null;
+    }
+
     protected function getOptions(): array
     {
-        if (!$this->startMonth || !$this->numberOfMonths) {
+        if (! $this->startMonth || ! $this->numberOfMonths) {
             return [
                 'chart' => ['type' => 'line', 'height' => 300],
                 'series' => [],
                 'xaxis' => ['categories' => []],
-                'noData' => ['text' => 'No data available']
+                'noData' => ['text' => 'No data available'],
             ];
         }
 
         try {
             $data = $this->getChartData();
         } catch (\Exception $e) {
-            \Log::error('AffiliateMonthlyTrendsChart error: ' . $e->getMessage());
+            \Log::error('AffiliateMonthlyTrendsChart error: '.$e->getMessage());
+
             return [
                 'chart' => ['type' => 'line', 'height' => 300],
                 'series' => [],
                 'xaxis' => ['categories' => []],
-                'noData' => ['text' => 'Error loading data']
+                'noData' => ['text' => 'Error loading data'],
             ];
         }
 
@@ -110,7 +125,7 @@ class AffiliateMonthlyTrendsChart extends ApexChartWidget
     private function getChartData(): array
     {
         $timezone = auth()->user()->timezone ?? config('app.default_timezone');
-        $startDate = Carbon::parse($this->startMonth . '-01', $timezone)->startOfDay()->setTimezone('UTC');
+        $startDate = Carbon::parse($this->startMonth.'-01', $timezone)->startOfDay()->setTimezone('UTC');
         $endDate = $startDate->copy()->addMonths($this->numberOfMonths)->subSecond();
 
         // Generate monthly data
@@ -118,7 +133,7 @@ class AffiliateMonthlyTrendsChart extends ApexChartWidget
         $directBookings = [];
         $referralBookings = [];
 
-        $currentDate = Carbon::parse($this->startMonth . '-01', $timezone);
+        $currentDate = Carbon::parse($this->startMonth.'-01', $timezone);
 
         for ($i = 0; $i < $this->numberOfMonths; $i++) {
             $monthStart = $currentDate->copy()->startOfDay()->setTimezone('UTC');
@@ -126,7 +141,7 @@ class AffiliateMonthlyTrendsChart extends ApexChartWidget
             $monthLabel = $currentDate->format('M Y');
 
             // Get booking counts for this month
-            $monthData = $this->getMonthlyBookingData($monthStart, $monthEnd);
+            $monthData = $this->getMonthlyBookingData($monthStart, $monthEnd, $this->region, $this->search);
 
             $months[] = $monthLabel;
             $directBookings[] = $monthData['direct'];
@@ -142,7 +157,7 @@ class AffiliateMonthlyTrendsChart extends ApexChartWidget
         ];
     }
 
-    private function getMonthlyBookingData(Carbon $monthStart, Carbon $monthEnd): array
+    private function getMonthlyBookingData(Carbon $monthStart, Carbon $monthEnd, ?string $region = null, ?string $search = null): array
     {
         // Use raw SQL query for better control and debugging
         $sql = "
@@ -163,24 +178,24 @@ class AffiliateMonthlyTrendsChart extends ApexChartWidget
         $params = [$monthStart->toDateTimeString(), $monthEnd->toDateTimeString()];
 
         // Add region filter if specified
-        if ($this->region) {
-            $sql .= " AND EXISTS (
+        if ($region) {
+            $sql .= ' AND EXISTS (
                 SELECT 1 FROM schedule_templates st
                 JOIN venues v ON st.venue_id = v.id
                 WHERE b.schedule_template_id = st.id AND v.region = ?
-            )";
-            $params[] = $this->region;
+            )';
+            $params[] = $region;
         }
 
         // Add search filter if specified
-        if ($this->search) {
-            $searchLower = strtolower($this->search);
-            $sql .= " AND (
+        if ($search) {
+            $searchLower = strtolower($search);
+            $sql .= ' AND (
                 LOWER(u.first_name) LIKE ? OR
                 LOWER(u.last_name) LIKE ? OR
                 LOWER(u.email) LIKE ? OR
                 LOWER(u.phone) LIKE ?
-            )";
+            )';
             $params[] = "%{$searchLower}%";
             $params[] = "%{$searchLower}%";
             $params[] = "%{$searchLower}%";

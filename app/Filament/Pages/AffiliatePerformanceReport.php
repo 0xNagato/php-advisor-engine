@@ -4,15 +4,18 @@ namespace App\Filament\Pages;
 
 use App\Enums\BookingStatus;
 use App\Enums\EarningType;
+use App\Livewire\AffiliateMonthlyTrendsChart;
+use App\Livewire\TopAffiliatesByBookingsChart;
+use App\Livewire\TopAffiliatesByEarningsChart;
 use App\Models\Concierge;
 use App\Models\Region;
 use Carbon\Carbon;
-use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
+use Filament\Pages\Dashboard;
 use Filament\Forms\Form;
-use Filament\Pages\Page;
+use Filament\Tables\Actions\Action;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Concerns\InteractsWithTable;
 use Filament\Tables\Contracts\HasTable;
@@ -21,21 +24,14 @@ use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\HtmlString;
-use Livewire\Attributes\Url;
 use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Facades\Excel;
-use Filament\Tables\Actions\Action;
-use App\Livewire\AffiliateMonthlyTrendsChart;
-use App\Livewire\TopAffiliatesByBookingsChart;
-use App\Livewire\TopAffiliatesByEarningsChart;
 
-class AffiliatePerformanceReport extends Page implements HasTable
+class AffiliatePerformanceReport extends Dashboard implements HasTable
 {
     use InteractsWithTable;
 
-    /** @var array<string, mixed> */
-    #[Url()]
     public ?array $data = [];
 
     protected static ?string $navigationIcon = 'heroicon-o-calendar-days';
@@ -83,7 +79,8 @@ class AffiliatePerformanceReport extends Page implements HasTable
             ];
         }
 
-        $this->tableFilters = $this->data ?? [];
+        // Dispatch initial data to widgets
+        $this->dispatch('filtersUpdated', $this->data);
     }
 
     public function getHeaderWidgetsColumns(): int|string|array
@@ -93,7 +90,8 @@ class AffiliatePerformanceReport extends Page implements HasTable
 
     protected function getHeaderWidgets(): array
     {
-        $startMonth = (string) ($this->data['startMonth'] ?? now()->subMonths(5)->format('Y-m'));
+        $timezone = (string) (auth()->user()->timezone ?? config('app.default_timezone'));
+        $startMonth = (string) ($this->data['startMonth'] ?? now($timezone)->subMonths(5)->format('Y-m'));
         $numberOfMonths = (int) ($this->data['numberOfMonths'] ?? 6);
         $region = (string) ($this->data['region'] ?? '');
         $search = (string) ($this->data['search'] ?? '');
@@ -135,7 +133,7 @@ class AffiliatePerformanceReport extends Page implements HasTable
         $startMonth = (string) $this->data['startMonth'];
         $numberOfMonths = (int) $this->data['numberOfMonths'];
 
-        $startDate = Carbon::parse($startMonth . '-01', $timezone);
+        $startDate = Carbon::parse($startMonth.'-01', $timezone);
         $endDate = $startDate->copy()->addMonths($numberOfMonths)->subDay();
 
         $formattedStartDate = $startDate->format('M Y');
@@ -154,7 +152,7 @@ class AffiliatePerformanceReport extends Page implements HasTable
                     ->live(debounce: 500)
                     ->afterStateUpdated(function () {
                         $this->resetTable();
-                        $this->dispatch('$refresh');
+                        $this->dispatch('filtersUpdated', $this->data);
                     }),
                 Select::make('region')
                     ->label('Region')
@@ -167,7 +165,7 @@ class AffiliatePerformanceReport extends Page implements HasTable
                     ->live()
                     ->afterStateUpdated(function () {
                         $this->resetTable();
-                        $this->dispatch('$refresh');
+                        $this->dispatch('filtersUpdated', $this->data);
                     }),
                 Select::make('startMonth')
                     ->label('Start Month')
@@ -176,11 +174,11 @@ class AffiliatePerformanceReport extends Page implements HasTable
                     ->live()
                     ->afterStateUpdated(function () {
                         $this->resetTable();
-                        $this->dispatch('$refresh');
+                        $this->dispatch('filtersUpdated', $this->data);
                     }),
                 Select::make('numberOfMonths')
                     ->label('Number of Months')
-                    ->options(collect(range(1, 12))->mapWithKeys(fn($i) => [$i => (string) $i])->toArray())
+                    ->options(collect(range(1, 12))->mapWithKeys(fn ($i) => [$i => (string) $i])->toArray())
                     ->default(6)
                     ->required()
                     ->live()
@@ -190,7 +188,7 @@ class AffiliatePerformanceReport extends Page implements HasTable
                         $newStartMonth = now($timezone)->subMonths((int)$state - 1)->format('Y-m');
                         $this->data['startMonth'] = $newStartMonth;
                         $this->resetTable();
-                        $this->dispatch('$refresh');
+                        $this->dispatch('filtersUpdated', $this->data);
                     }),
             ])
             ->columns(4)
@@ -206,13 +204,13 @@ class AffiliatePerformanceReport extends Page implements HasTable
         $search = (string) ($this->data['search'] ?? '');
 
         // Calculate date range
-        $startDate = Carbon::parse($startMonth . '-01', $timezone)->startOfDay()->setTimezone('UTC');
+        $startDate = Carbon::parse($startMonth.'-01', $timezone)->startOfDay()->setTimezone('UTC');
         $endDate = $startDate->copy()->addMonths($numberOfMonths)->subSecond();
 
-                        // Generate monthly columns data
+        // Generate monthly columns data
         $monthlyColumns = [];
         $monthlySelects = [];
-        $currentDate = Carbon::parse($startMonth . '-01', $timezone);
+        $currentDate = Carbon::parse($startMonth.'-01', $timezone);
 
         for ($i = 0; $i < $numberOfMonths; $i++) {
             $monthStart = $currentDate->copy()->startOfDay()->setTimezone('UTC');
@@ -225,12 +223,12 @@ class AffiliatePerformanceReport extends Page implements HasTable
                 'label' => $monthLabel,
                 'start' => $monthStart,
                 'end' => $monthEnd,
-                        ];
+            ];
 
-                        // Add SQL selects for this month's bookings and earnings
+            // Add SQL selects for this month's bookings and earnings
             $monthlySelects[] = "SUM(CASE WHEN bookings.confirmed_at BETWEEN '{$monthStart->toDateTimeString()}' AND '{$monthEnd->toDateTimeString()}' THEN earnings.amount ELSE 0 END) as earnings_{$monthKey}";
 
-                        // Separate direct and referral bookings - use COALESCE to ensure 0 instead of NULL
+            // Separate direct and referral bookings - use COALESCE to ensure 0 instead of NULL
             $monthlySelects[] = "COALESCE(COUNT(DISTINCT CASE WHEN bookings.confirmed_at BETWEEN '{$monthStart->toDateTimeString()}' AND '{$monthEnd->toDateTimeString()}' AND earnings.type IN ('concierge', 'concierge_bounty') THEN earnings.booking_id END), 0) as direct_bookings_{$monthKey}";
             $monthlySelects[] = "COALESCE(COUNT(DISTINCT CASE WHEN bookings.confirmed_at BETWEEN '{$monthStart->toDateTimeString()}' AND '{$monthEnd->toDateTimeString()}' AND earnings.type IN ('concierge_referral_1', 'concierge_referral_2') THEN earnings.booking_id END), 0) as referral_bookings_{$monthKey}";
 
@@ -261,7 +259,7 @@ class AffiliatePerformanceReport extends Page implements HasTable
                 DB::raw('MAX(earnings.currency) as currency'),
                 DB::raw('COUNT(DISTINCT earnings.booking_id) as total_bookings'),
                 DB::raw("CONCAT(users.first_name, ' ', users.last_name) as user_name"),
-            ], array_map(fn($select) => DB::raw($select), $monthlySelects)))
+            ], array_map(fn ($select) => DB::raw($select), $monthlySelects)))
             ->join('users', 'users.id', '=', 'concierges.user_id')
             ->join('earnings', 'earnings.user_id', '=', 'users.id')
             ->join('bookings', 'earnings.booking_id', '=', 'bookings.id')
@@ -274,23 +272,23 @@ class AffiliatePerformanceReport extends Page implements HasTable
                 BookingStatus::NO_SHOW,
                 BookingStatus::CANCELLED,
             ])
-            ->whereIn('earnings.type', array_map(fn($type) => $type->value, $conciergeEarningTypes))
+            ->whereIn('earnings.type', array_map(fn ($type) => $type->value, $conciergeEarningTypes))
             ->when($region, function (Builder $query) use ($region) {
                 $query->join('schedule_templates', 'bookings.schedule_template_id', '=', 'schedule_templates.id')
-                      ->join('venues', 'schedule_templates.venue_id', '=', 'venues.id')
-                      ->where('venues.region', $region);
+                    ->join('venues', 'schedule_templates.venue_id', '=', 'venues.id')
+                    ->where('venues.region', $region);
             })
             ->when($search, function (Builder $query) use ($search) {
                 $searchLower = strtolower($search);
                 $query->where(function (Builder $q) use ($searchLower) {
                     $q->whereRaw('LOWER(users.first_name) like ?', ["%{$searchLower}%"])
-                      ->orWhereRaw('LOWER(users.last_name) like ?', ["%{$searchLower}%"])
-                      ->orWhereRaw('LOWER(users.email) like ?', ["%{$searchLower}%"])
-                      ->orWhereRaw('LOWER(users.phone) like ?', ["%{$searchLower}%"]);
+                        ->orWhereRaw('LOWER(users.last_name) like ?', ["%{$searchLower}%"])
+                        ->orWhereRaw('LOWER(users.email) like ?', ["%{$searchLower}%"])
+                        ->orWhereRaw('LOWER(users.phone) like ?', ["%{$searchLower}%"]);
                 });
             })
             ->groupBy('concierges.id', 'concierges.user_id', 'concierges.hotel_name', 'users.first_name', 'users.last_name')
-                ->havingRaw('SUM(earnings.amount) > 0');
+            ->havingRaw('SUM(earnings.amount) > 0');
 
         return $table
             ->query($baseQuery->with(['user']))
@@ -300,11 +298,11 @@ class AffiliatePerformanceReport extends Page implements HasTable
                     ->html()
                     ->formatStateUsing(function (Concierge $record) {
                         $user = $record->user;
-                        if (!$user) {
+                        if (! $user) {
                             return new HtmlString('<div class="text-gray-400">Unknown User</div>');
                         }
 
-                        $name = $user->first_name . ' ' . $user->last_name;
+                        $name = $user->first_name.' '.$user->last_name;
                         $company = $record->hotel_name ?: 'N/A';
 
                         return new HtmlString(sprintf(
@@ -315,9 +313,10 @@ class AffiliatePerformanceReport extends Page implements HasTable
                     })
                     ->searchable(query: function (Builder $query, string $search): Builder {
                         $searchLower = strtolower($search);
+
                         return $query->whereHas('user', function (Builder $query) use ($searchLower) {
                             $query->whereRaw('LOWER(users.first_name) like ?', ["%{$searchLower}%"])
-                                  ->orWhereRaw('LOWER(users.last_name) like ?', ["%{$searchLower}%"]);
+                                ->orWhereRaw('LOWER(users.last_name) like ?', ["%{$searchLower}%"]);
                         });
                     })
                     ->sortable(),
@@ -328,21 +327,21 @@ class AffiliatePerformanceReport extends Page implements HasTable
                 return TextColumn::make("bookings_{$monthKey}")
                     ->label($monthLabel)
                     ->alignCenter()
-                                                                ->formatStateUsing(function (Concierge $record) use ($monthKey) {
-                            $totalBookings = (int) ($record->getAttributes()["bookings_{$monthKey}"] ?? 0);
-                            $totalEarnings = (int) ($record->getAttributes()["earnings_{$monthKey}"] ?? 0);
-                            $currency = (string) ($record->getAttributes()['currency'] ?? 'USD');
+                    ->formatStateUsing(function (Concierge $record) use ($monthKey) {
+                        $totalBookings = (int) ($record->getAttributes()["bookings_{$monthKey}"] ?? 0);
+                        $totalEarnings = (int) ($record->getAttributes()["earnings_{$monthKey}"] ?? 0);
+                        $currency = (string) ($record->getAttributes()['currency'] ?? 'USD');
 
-                            if ($totalBookings === 0 && $totalEarnings === 0) {
-                                return new HtmlString('<div class="space-y-1"><div class="text-xs font-medium">0</div><div class="text-xs text-gray-600">$0.00</div></div>');
-                            }
+                        if ($totalBookings === 0 && $totalEarnings === 0) {
+                            return new HtmlString('<div class="space-y-1"><div class="text-xs font-medium">0</div><div class="text-xs text-gray-600">$0.00</div></div>');
+                        }
 
-                            return new HtmlString(sprintf(
-                                '<div class="space-y-1"><div class="text-xs font-medium">%s</div><div class="text-xs text-gray-600">%s</div></div>',
-                                $totalBookings,
-                                money($totalEarnings, $currency)
-                            ));
-                        })
+                        return new HtmlString(sprintf(
+                            '<div class="space-y-1"><div class="text-xs font-medium">%s</div><div class="text-xs text-gray-600">%s</div></div>',
+                            $totalBookings,
+                            money($totalEarnings, $currency)
+                        ));
+                    })
                     ->html()
                     ->sortable();
             }, $monthlyColumns), [
@@ -357,6 +356,7 @@ class AffiliatePerformanceReport extends Page implements HasTable
                     ->formatStateUsing(function (Concierge $record) {
                         $earnings = (int) ($record->getAttributes()['total_earnings'] ?? 0);
                         $currency = $record->getAttributes()['currency'] ?? 'USD';
+
                         return money($earnings, (string) $currency);
                     }),
             ]))
@@ -368,21 +368,22 @@ class AffiliatePerformanceReport extends Page implements HasTable
             ]);
     }
 
-        private function getExportAction(string $startMonth, int $numberOfMonths, $baseQuery): Action
+    private function getExportAction(string $startMonth, int $numberOfMonths, $baseQuery): Action
     {
         return Action::make('export')
             ->label('Export CSV')
             ->icon('heroicon-o-arrow-down-tray')
             ->action(function () use ($startMonth, $numberOfMonths, $baseQuery) {
                 $timezone = (string) (auth()->user()->timezone ?? config('app.default_timezone'));
-                $startDate = Carbon::parse($startMonth . '-01', $timezone);
+                $startDate = Carbon::parse($startMonth.'-01', $timezone);
                 $endDate = $startDate->copy()->addMonths($numberOfMonths)->subDay();
-                $dateRange = $startDate->format('Y-m') . '_to_' . $endDate->format('Y-m');
+                $dateRange = $startDate->format('Y-m').'_to_'.$endDate->format('Y-m');
 
                 // Get the same data that the table uses
                 $data = $baseQuery->with(['user'])->get();
 
-                $export = new class($data, $startMonth, $numberOfMonths, $timezone) implements FromCollection, WithHeadings {
+                $export = new class($data, $startMonth, $numberOfMonths, $timezone) implements FromCollection, WithHeadings
+                {
                     public function __construct(
                         private $data,
                         private string $startMonth,
@@ -400,8 +401,8 @@ class AffiliatePerformanceReport extends Page implements HasTable
                                 'hotel_name' => $record->hotel_name ?? '',
                             ];
 
-                                                                                                                                            // Add monthly data with separate direct/referral columns
-                            $currentDate = Carbon::parse($this->startMonth . '-01', $this->timezone);
+                            // Add monthly data with separate direct/referral columns
+                            $currentDate = Carbon::parse($this->startMonth.'-01', $this->timezone);
                             for ($i = 0; $i < $this->numberOfMonths; $i++) {
                                 $monthKey = $currentDate->format('Y_m');
                                 $attributes = $record->getAttributes();
@@ -417,11 +418,11 @@ class AffiliatePerformanceReport extends Page implements HasTable
                                 $row["direct_bookings_{$monthKey}"] = (string) $directBookings;
                                 $row["referral_bookings_{$monthKey}"] = (string) $referralBookings;
                                 $row["direct_earnings_{$monthKey}"] = $directEarnings > 0 ?
-                                    number_format($directEarnings / 100, 2) . ' ' . $currency :
-                                    '0.00 ' . $currency;
+                                    number_format($directEarnings / 100, 2).' '.$currency :
+                                    '0.00 '.$currency;
                                 $row["referral_earnings_{$monthKey}"] = $referralEarnings > 0 ?
-                                    number_format($referralEarnings / 100, 2) . ' ' . $currency :
-                                    '0.00 ' . $currency;
+                                    number_format($referralEarnings / 100, 2).' '.$currency :
+                                    '0.00 '.$currency;
 
                                 $currentDate->addMonth();
                             }
@@ -432,8 +433,8 @@ class AffiliatePerformanceReport extends Page implements HasTable
 
                             $row['total_bookings'] = (string) ((int) ($record->getAttributes()['total_bookings'] ?? 0));
                             $row['total_earnings'] = $totalEarnings > 0 ?
-                                number_format($totalEarnings / 100, 2) . ' ' . $currency :
-                                '0.00 ' . $currency;
+                                number_format($totalEarnings / 100, 2).' '.$currency :
+                                '0.00 '.$currency;
                             $row['email'] = $record->user?->email ?? '';
                             $row['phone'] = $record->user?->phone ?? '';
                             $row['city'] = $record->user?->city ?? '';
@@ -450,7 +451,7 @@ class AffiliatePerformanceReport extends Page implements HasTable
                         $headers = ['First Name', 'Last Name', 'Hotel / Company'];
 
                         // Add monthly headers with separate direct/referral columns
-                        $currentDate = Carbon::parse($this->startMonth . '-01', $this->timezone);
+                        $currentDate = Carbon::parse($this->startMonth.'-01', $this->timezone);
                         for ($i = 0; $i < $this->numberOfMonths; $i++) {
                             $monthLabel = $currentDate->format('M Y');
                             $headers[] = "{$monthLabel} Direct Bookings";
@@ -469,7 +470,7 @@ class AffiliatePerformanceReport extends Page implements HasTable
                             'City',
                             'State',
                             'Zip',
-                            'Date Signed Up'
+                            'Date Signed Up',
                         ]);
 
                         return $headers;
@@ -489,12 +490,12 @@ class AffiliatePerformanceReport extends Page implements HasTable
         $search = (string) ($this->data['search'] ?? '');
 
         // Calculate date range
-        $startDate = Carbon::parse($startMonth . '-01', $timezone)->startOfDay()->setTimezone('UTC');
+        $startDate = Carbon::parse($startMonth.'-01', $timezone)->startOfDay()->setTimezone('UTC');
         $endDate = $startDate->copy()->addMonths($numberOfMonths)->subSecond();
 
         // Generate monthly columns data
         $monthlySelects = [];
-        $currentDate = Carbon::parse($startMonth . '-01', $timezone);
+        $currentDate = Carbon::parse($startMonth.'-01', $timezone);
 
         for ($i = 0; $i < $numberOfMonths; $i++) {
             $monthStart = $currentDate->copy()->startOfDay()->setTimezone('UTC');
@@ -525,7 +526,7 @@ class AffiliatePerformanceReport extends Page implements HasTable
                 DB::raw('MAX(earnings.currency) as currency'),
                 DB::raw('COUNT(DISTINCT earnings.booking_id) as total_bookings'),
                 DB::raw("CONCAT(users.first_name, ' ', users.last_name) as user_name"),
-            ], array_map(fn($select) => DB::raw($select), $monthlySelects)))
+            ], array_map(fn ($select) => DB::raw($select), $monthlySelects)))
             ->join('users', 'users.id', '=', 'concierges.user_id')
             ->join('earnings', 'earnings.user_id', '=', 'users.id')
             ->join('bookings', 'earnings.booking_id', '=', 'bookings.id')
@@ -538,19 +539,19 @@ class AffiliatePerformanceReport extends Page implements HasTable
                 BookingStatus::NO_SHOW,
                 BookingStatus::CANCELLED,
             ])
-            ->whereIn('earnings.type', array_map(fn($type) => $type->value, $conciergeEarningTypes))
+            ->whereIn('earnings.type', array_map(fn ($type) => $type->value, $conciergeEarningTypes))
             ->when($region, function (Builder $query) use ($region) {
                 $query->join('schedule_templates', 'bookings.schedule_template_id', '=', 'schedule_templates.id')
-                      ->join('venues', 'schedule_templates.venue_id', '=', 'venues.id')
-                      ->where('venues.region', $region);
+                    ->join('venues', 'schedule_templates.venue_id', '=', 'venues.id')
+                    ->where('venues.region', $region);
             })
             ->when($search, function (Builder $query) use ($search) {
                 $searchLower = strtolower($search);
                 $query->where(function (Builder $q) use ($searchLower) {
                     $q->whereRaw('LOWER(users.first_name) like ?', ["%{$searchLower}%"])
-                      ->orWhereRaw('LOWER(users.last_name) like ?', ["%{$searchLower}%"])
-                      ->orWhereRaw('LOWER(users.email) like ?', ["%{$searchLower}%"])
-                      ->orWhereRaw('LOWER(users.phone) like ?', ["%{$searchLower}%"]);
+                        ->orWhereRaw('LOWER(users.last_name) like ?', ["%{$searchLower}%"])
+                        ->orWhereRaw('LOWER(users.email) like ?', ["%{$searchLower}%"])
+                        ->orWhereRaw('LOWER(users.phone) like ?', ["%{$searchLower}%"]);
                 });
             })
             ->groupBy('concierges.id', 'concierges.user_id', 'concierges.hotel_name', 'users.first_name', 'users.last_name')
