@@ -13,7 +13,7 @@ use Carbon\Carbon;
 use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
-use Filament\Pages\Dashboard;
+use Filament\Pages\Page;
 use Filament\Forms\Form;
 use Filament\Tables\Actions\Action;
 use Filament\Tables\Columns\TextColumn;
@@ -28,7 +28,7 @@ use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Facades\Excel;
 
-class AffiliatePerformanceReport extends Dashboard implements HasTable
+class AffiliatePerformanceReport extends Page implements HasTable
 {
     use InteractsWithTable;
 
@@ -83,40 +83,6 @@ class AffiliatePerformanceReport extends Dashboard implements HasTable
         $this->dispatch('filtersUpdated', $this->data);
     }
 
-    public function getHeaderWidgetsColumns(): int|string|array
-    {
-        return 12;
-    }
-
-    protected function getHeaderWidgets(): array
-    {
-        $timezone = (string) (auth()->user()->timezone ?? config('app.default_timezone'));
-        $startMonth = (string) ($this->data['startMonth'] ?? now($timezone)->subMonths(5)->format('Y-m'));
-        $numberOfMonths = (int) ($this->data['numberOfMonths'] ?? 6);
-        $region = (string) ($this->data['region'] ?? '');
-        $search = (string) ($this->data['search'] ?? '');
-
-        return [
-            AffiliateMonthlyTrendsChart::make([
-                'startMonth' => $startMonth,
-                'numberOfMonths' => $numberOfMonths,
-                'region' => $region,
-                'search' => $search,
-            ]),
-            TopAffiliatesByBookingsChart::make([
-                'startMonth' => $startMonth,
-                'numberOfMonths' => $numberOfMonths,
-                'region' => $region,
-                'search' => $search,
-            ]),
-            TopAffiliatesByEarningsChart::make([
-                'startMonth' => $startMonth,
-                'numberOfMonths' => $numberOfMonths,
-                'region' => $region,
-                'search' => $search,
-            ]),
-        ];
-    }
 
     public function getHeading(): string|Htmlable
     {
