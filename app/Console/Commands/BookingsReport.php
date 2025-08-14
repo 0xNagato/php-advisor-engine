@@ -51,7 +51,7 @@ class BookingsReport extends Command
 
         $rows = $bookings->map(function (Booking $b) use ($tz) {
             $created = Carbon::parse($b->created_at)->timezone($tz)->format('M j, Y g:ia');
-            $bookingDate = Carbon::parse($b->booking_at)->timezone($tz)->format('M j, Y g:ia');
+            $bookingDate = Carbon::parse($b->booking_at)->format('M j, Y g:ia');
 
             $regionName = '';
             if ($b->venue && $b->venue->region) {
