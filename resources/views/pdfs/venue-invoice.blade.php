@@ -81,9 +81,12 @@
                             <tbody>
                                 @foreach ($nonPrimeBookings as $booking)
                                     @php
-                                        $amount = abs($booking->earnings->where('type', \App\Enums\EarningType::VENUE_PAID->value)->sum('amount'));
-                                        $processingFee = $amount * (\App\Constants\BookingPercentages::NON_PRIME_PROCESSING_FEE_PERCENTAGE / 100);
-                                        $incentiveFee = $amount - $processingFee;
+                                        // Calculate incentive fee (stored in cents)
+                                        $incentiveFee = $booking->guest_count * ($venue->non_prime_fee_per_head * 100);
+
+                                        // Calculate PRIMA fee (10% of incentive fee)
+                                        $processingFee = $incentiveFee * (\App\Constants\BookingPercentages::NON_PRIME_PROCESSING_FEE_PERCENTAGE / 100);
+
                                         $totalAmount = $incentiveFee + $processingFee;
                                     @endphp
                                     <tr class="border-b border-gray-100">
