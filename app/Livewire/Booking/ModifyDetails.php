@@ -46,7 +46,7 @@ class ModifyDetails extends Component implements HasActions, HasForms
     public function mount(string $token): void
     {
         $this->record = Booking::query()->where('uuid', $token)
-            ->with('earnings.user')
+            ->with(['earnings.user', 'venue.venueGroup'])
             ->firstOrFail();
 
         $this->region = Region::query()->find($this->record->city)

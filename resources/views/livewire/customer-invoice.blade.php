@@ -96,6 +96,9 @@
                     <span class="block text-xs text-gray-500 uppercase">Venue:</span>
                     <span class="block text-xs font-medium text-gray-800 sm:text-sm dark:text-gray-200">
                         {{ $booking->venue->name }}
+                        @if ($booking->venue->venueGroup)
+                            ({{ $booking->venue->venueGroup->name }})
+                        @endif
                     </span>
                 </div>
 

@@ -34,7 +34,7 @@ class CustomerInvoice extends Component implements HasForms
     public function mount(string $token): void
     {
         $this->booking = Booking::query()->where('uuid', $token)
-            ->with('earnings.user')
+            ->with(['earnings.user', 'venue.venueGroup'])
             ->firstOrFail();
 
         // Try to find region by city first, fallback to venue region if needed

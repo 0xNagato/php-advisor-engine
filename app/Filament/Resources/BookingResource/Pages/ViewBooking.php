@@ -72,7 +72,7 @@ class ViewBooking extends ViewRecord
 
     public function mount(string|int $record): void
     {
-        $this->record = Booking::with('earnings.user')
+        $this->record = Booking::with(['earnings.user', 'venue.venueGroup'])
             ->firstWhere('id', $record);
 
         if (auth()->user()->hasActiveRole('super_admin') || auth()->user()->hasActiveRole('partner') || auth()->user()->hasActiveRole('concierge')) {
