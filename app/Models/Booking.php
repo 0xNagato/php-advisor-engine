@@ -292,6 +292,47 @@ class Booking extends Model
         return Attribute::make(get: fn () => $this->getLocalFormattedPhoneNumber($this->guest_phone));
     }
 
+    /**
+     * Gross revenue flowing through PRIMA for this booking (in cents).
+     * Prime: customer payment minus any refunds. Non-prime: absolute value of venue_earnings (venue payment).
+     */
+    protected function grossRevenue(): Attribute
+    {
+        return Attribute::make(
+            get: function (): int {
+                // Match booking detail view logic:
+                // Prime: total_fee; Non-prime: ABS(venue_earnings)
+                if ($this->is_prime) {
+                    return (int) $this->total_fee;
+                }
+
+                return (int) abs($this->venue_earnings);
+            }
+        );
+    }
+
+    /**
+     * PRIMA net platform revenue (in cents), adjusted for refunds when applicable.
+     */
+    protected function primaNetRevenue(): Attribute
+    {
+        return Attribute::make(
+            get: function (): int {
+                return $this->is_refunded_or_partially_refunded
+                    ? (int) $this->final_platform_earnings_total
+                    : (int) $this->platform_earnings;
+            }
+        );
+    }
+
+    /**
+     * Human-friendly prime status label.
+     */
+    protected function primeStatusLabel(): Attribute
+    {
+        return Attribute::make(get: fn (): string => $this->is_prime ? 'Prime' : 'Non-Prime');
+    }
+
     public static function calculateNonPrimeEarnings(Booking $booking, $reconfirm = false): void
     {
         app(BookingCalculationService::class)->calculateNonPrimeEarnings($booking);
