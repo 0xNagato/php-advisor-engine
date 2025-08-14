@@ -238,6 +238,39 @@
 
                     <div class="p-6 border border-gray-200 rounded-lg bg-gray-50">
                         <h4 class="mb-3 font-medium">Payment Information</h4>
+                        @php
+                            $regionCurrency = \App\Models\Region::query()->find($venue->region)?->currency ?? 'USD';
+                        @endphp
+                        @if($regionCurrency === 'EUR')
+                        {{-- European Banking Information --}}
+                        <table class="text-xs">
+                            <tr>
+                                <td class="pr-3 pb-1.5 text-gray-500">Name:</td>
+                                <td class="pb-1.5">PRIMA VIP INC</td>
+                            </tr>
+                            <tr>
+                                <td class="pr-3 pb-1.5 text-gray-500">IBAN:</td>
+                                <td class="pb-1.5">BE62 9055 8141 3761</td>
+                            </tr>
+                            <tr>
+                                <td class="pr-3 pb-1.5 text-gray-500">Swift/BIC:</td>
+                                <td class="pb-1.5">TRWIBEB1XXX</td>
+                            </tr>
+                            <tr>
+                                <td class="pr-3 pb-1.5 text-gray-500">Note:</td>
+                                <td class="pb-1.5">Use when sending money from outside SEPA</td>
+                            </tr>
+                            <tr>
+                                <td class="pr-3 text-gray-500 align-top">Bank:</td>
+                                <td class="pb-1.5">
+                                    Wise<br>
+                                    Rue du Trône 100, 3rd floor<br>
+                                    Brussels, 1050, Belgium
+                                </td>
+                            </tr>
+                        </table>
+                        @else
+                        {{-- US Banking Information --}}
                         <table class="text-xs">
                             <tr>
                                 <td class="pr-3 pb-1.5 text-gray-500">Name:</td>
@@ -269,6 +302,7 @@
                                 </td>
                             </tr>
                         </table>
+                        @endif
                     </div>
 
                     <div
