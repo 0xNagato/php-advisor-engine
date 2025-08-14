@@ -26,7 +26,7 @@ class GenerateVenueGroupInvoice
     public function handle(VenueGroup $venueGroup, string $startDate, string $endDate): VenueInvoice
     {
         // Get the user's timezone
-        $userTimezone = auth()->user()->timezone ?? config('app.timezone');
+        $userTimezone = auth()->user()?->timezone ?? config('app.timezone');
 
         // Parse dates in user's timezone - store them as UTC date at start/end of day
         // but maintain the actual date as selected by the user
@@ -38,13 +38,13 @@ class GenerateVenueGroupInvoice
         $endDateUtc = (clone $endDateCarbon)->endOfDay()->setTimezone('UTC');
 
         // Get all venues in the group
-        $venues = $venueGroup->venues;
+        $venues = $venueGroup->venues()->with('user')->get();
 
         throw_if($venues->isEmpty(), new RuntimeException('No venues found in this venue group.'));
 
         /** @var User $primaryManager */
         $primaryManager = $venueGroup->primaryManager;
-        throw_if(! $primaryManager, new RuntimeException('Venue group does not have a primary manager.'));
+        throw_unless($primaryManager, new RuntimeException('Venue group does not have a primary manager.'));
 
         // Get the first venue to use as a reference venue
         $referenceVenue = $venues->first();
@@ -58,11 +58,15 @@ class GenerateVenueGroupInvoice
 
         // Process each venue
         foreach ($venues as $venue) {
+            // Get the venue owner (not the primary manager)
+            $venueOwner = $venue->user;
+            throw_unless($venueOwner, new RuntimeException("Venue {$venue->name} does not have an associated user."));
+
             // Get bookings for this venue through the HasManyThrough relationship
             $bookings = $venue->bookings()
-                ->with(['earnings' => function ($query) use ($primaryManager) {
-                    // Only get earnings for the primary manager
-                    $query->where('user_id', $primaryManager->id)
+                ->with(['earnings' => function ($query) use ($venueOwner) {
+                    // Get earnings for the VENUE OWNER (not primary manager)
+                    $query->where('user_id', $venueOwner->id)
                         ->where(function ($q) {
                             $q->where('type', EarningType::VENUE_PAID->value)
                                 ->orWhere('type', EarningType::VENUE->value);
@@ -108,9 +112,9 @@ class GenerateVenueGroupInvoice
             $primeBookings = $bookings->where('is_prime', true);
             $nonPrimeBookings = $bookings->where('is_prime', false);
 
-            // Calculate totals for each type - using the same calculation method from GenerateVenueInvoice
-            $venuePrimeTotal = $this->calculateTotal($primeBookings, $primaryManager);
-            $venueNonPrimeTotal = $this->calculateTotal($nonPrimeBookings, $primaryManager);
+            // Calculate totals for each type - using the VENUE OWNER (not primary manager)
+            $venuePrimeTotal = $this->calculateTotal($primeBookings, $venueOwner);
+            $venueNonPrimeTotal = $this->calculateTotal($nonPrimeBookings, $venueOwner);
 
             // Add to aggregate totals
             $primeTotalAmount += $venuePrimeTotal;
@@ -140,7 +144,7 @@ class GenerateVenueGroupInvoice
             $invoice = VenueInvoice::query()->create([
                 'venue_id' => $referenceVenue->id, // Use the first venue's ID
                 'venue_group_id' => $venueGroup->id,
-                'created_by' => auth()->user()->id,
+                'created_by' => auth()->user()?->id,
                 'start_date' => $startDateCarbon->format('Y-m-d'), // Store only the date portion
                 'end_date' => $endDateCarbon->format('Y-m-d'),     // Store only the date portion
                 'prime_total' => $primeTotalAmount,
@@ -154,7 +158,7 @@ class GenerateVenueGroupInvoice
             ]);
 
             // Generate and store PDF
-            $pdfPath = config('app.env').'/venue-invoices/'.$invoice->name().'.pdf';
+            $pdfPath = (config('app.env') ?? 'local').'/venue-invoices/'.$invoice->name().'.pdf';
 
             pdf()
                 ->view('pdfs.venue-group-invoice', [
@@ -183,16 +187,16 @@ class GenerateVenueGroupInvoice
             // It does NOT send any emails or invoices through Stripe
             /** @var User $primaryManager */
             $primaryManager = $venueGroup->primaryManager;
-            if ($primaryManager && $primaryManager->email) {
+            if ($primaryManager?->email) {
                 $stripeInvoiceData = CreateStripeVenueInvoice::run(
                     $invoice,
                     app()->isProduction() ? $primaryManager->email : config('app.test_stripe_email')
                 );
 
-                if ($stripeInvoiceData) {
+                if ($stripeInvoiceData && is_array($stripeInvoiceData)) {
                     $invoice->update([
-                        'stripe_invoice_id' => $stripeInvoiceData['invoice_id'],
-                        'stripe_invoice_url' => $stripeInvoiceData['invoice_url'],
+                        'stripe_invoice_id' => $stripeInvoiceData['invoice_id'] ?? null,
+                        'stripe_invoice_url' => $stripeInvoiceData['invoice_url'] ?? null,
                     ]);
 
                     // Regenerate the PDF now that we have the payment link
@@ -226,20 +230,25 @@ class GenerateVenueGroupInvoice
      *
      * @param  Collection<Booking>  $bookings
      */
-    private function calculateTotal(Collection $bookings, User $user): float
+    private function calculateTotal(Collection $bookings, User $user): int
     {
-        return $bookings->sum(function ($booking) use ($user) {
+        return (int) $bookings->sum(function ($booking) use ($user) {
+            // Ensure earnings relation is loaded if not already
+            $booking->loadMissing(['earnings' => function ($query) use ($user) {
+                $query->where('user_id', $user->id);
+            }]);
+
+            // Calculate a sum based on loaded earnings for the specific user
             if ($booking->is_prime) {
                 // For prime bookings, we pay the venue (positive amount)
-                // Use EXACTLY the same calculation as GenerateVenueInvoice
                 return abs($booking->earnings
-                    ->where('user_id', $user->id)
+                    // Already filtered by user_id in loadMissing or eager loading
                     ->where('type', EarningType::VENUE->value)
                     ->sum('amount'));
             } else {
-                // For non-prime bookings, venue pays us (negative amount)
+                // For non-prime bookings, the venue pays us (negative amount)
                 return -abs($booking->earnings
-                    ->where('user_id', $user->id)
+                    // Already filtered by user_id in loadMissing or eager loading
                     ->where('type', EarningType::VENUE_PAID->value)
                     ->sum('amount'));
             }
@@ -249,11 +258,13 @@ class GenerateVenueGroupInvoice
     /**
      * Prepare the data needed for the venue group invoice view.
      * This can be used both by the PDF generator and the HTML preview.
+     *
+     * @return array<string, mixed>
      */
     public static function prepareViewData(VenueGroup $venueGroup, Carbon $startDate, Carbon $endDate, VenueInvoice $invoice): array
     {
         // Get all venues in the group
-        $venues = $venueGroup->venues;
+        $venues = $venueGroup->venues()->with('user')->get();
 
         throw_if($venues->isEmpty(), new RuntimeException('No venues found in this venue group.'));
 
@@ -277,11 +288,15 @@ class GenerateVenueGroupInvoice
 
         // Process each venue
         foreach ($venues as $venue) {
+            // Get the venue owner (not the primary manager)
+            $venueOwner = $venue->user;
+            throw_unless($venueOwner, new RuntimeException("Venue {$venue->name} does not have an associated user."));
+
             // Get bookings for this venue through the HasManyThrough relationship
             $bookings = $venue->bookings()
-                ->with(['earnings' => function ($query) use ($primaryManager) {
-                    // Only get earnings for the primary manager
-                    $query->where('user_id', $primaryManager->id)
+                ->with(['earnings' => function ($query) use ($venueOwner) {
+                    // Get earnings for the VENUE OWNER (not primary manager)
+                    $query->where('user_id', $venueOwner->id)
                         ->where(function ($q) {
                             $q->where('type', EarningType::VENUE_PAID->value)
                                 ->orWhere('type', EarningType::VENUE->value);
@@ -314,10 +329,10 @@ class GenerateVenueGroupInvoice
             $primeBookings = $bookings->where('is_prime', true);
             $nonPrimeBookings = $bookings->where('is_prime', false);
 
-            // Use the user instance to call the calculateTotal method
+            // Use the venue owner instance to call the calculateTotal method
             $instance = new self;
-            $venuePrimeTotal = $instance->calculateTotal($primeBookings, $primaryManager);
-            $venueNonPrimeTotal = $instance->calculateTotal($nonPrimeBookings, $primaryManager);
+            $venuePrimeTotal = $instance->calculateTotal($primeBookings, $venueOwner);
+            $venueNonPrimeTotal = $instance->calculateTotal($nonPrimeBookings, $venueOwner);
 
             // Add to venue data
             $bookingsByVenue[$venue->id] = [

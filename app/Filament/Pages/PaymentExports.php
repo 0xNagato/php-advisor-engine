@@ -413,9 +413,7 @@ class PaymentExports extends Page implements HasTable
                     FROM venues v
                     JOIN schedule_templates st ON st.venue_id = v.id
                     JOIN bookings b            ON b.schedule_template_id = st.id
-                    JOIN earnings e            ON e.booking_id = b.id AND e.user_id = (
-                        SELECT vg.primary_manager_id FROM venue_groups vg WHERE vg.id = v.venue_group_id
-                    )
+                    JOIN earnings e            ON e.booking_id = b.id AND e.user_id = v.user_id
                     WHERE b.status IN ('".implode("','",
                     array_map(fn ($s) => $s->value, BookingStatus::PAYOUT_STATUSES))."')
                       AND e.type IN ('".implode("','", [EarningType::VENUE->value, EarningType::VENUE_PAID->value])."')
