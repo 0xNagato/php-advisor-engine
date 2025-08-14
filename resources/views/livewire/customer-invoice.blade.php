@@ -86,6 +86,13 @@
                 </div>
 
                 <div>
+                    <span class="block text-xs text-gray-500 uppercase">Guest Count:</span>
+                    <span class="block text-xs font-medium text-gray-800 sm:text-sm dark:text-gray-200">
+                        {{ $booking->guest_count }} {{ Str::plural('guest', $booking->guest_count) }}
+                    </span>
+                </div>
+
+                <div>
                     <span class="block text-xs text-gray-500 uppercase">Payment Method:</span>
                     <div class="flex gap-x-2 items-center">
                         @if ($booking->prime_time)
