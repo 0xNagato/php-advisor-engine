@@ -50,6 +50,10 @@ class ScheduleManager extends Component
         'template_id' => null,
     ];
 
+    public bool $changeAllFields = true;
+
+    public array $changedFields = [];
+
     public ?float $dayPricePerHead = null;
 
     public ?float $weeklyPricePerHead = null;
@@ -107,6 +111,11 @@ class ScheduleManager extends Component
             // Clear calendar data when switching to the template view
             $this->calendarSchedules = [];
         }
+    }
+
+    public function updatedEditingSlot($value, $field): void
+    {
+        $this->changedFields[] = $field;
     }
 
     protected function getOperatingHours(): array
@@ -203,6 +212,7 @@ class ScheduleManager extends Component
                     'minimum_spend_per_guest' => $template->minimum_spend_per_guest,
                 ])
                 ->toArray();
+            $fieldsToUpdate = [];
 
             // Existing save logic
             // Get only the time slots we're actually modifying
@@ -230,21 +240,44 @@ class ScheduleManager extends Component
                 ];
             }
 
-            // Single bulk update query for all affected slots
-            $this->venue->scheduleTemplates()
-                ->where('day_of_week', $this->selectedDay)
-                ->where('start_time', $this->editingSlot['time'])
-                ->when($this->editingSlot['size'] !== '*', function (Builder $query) {
-                    $query->where('party_size', $this->editingSlot['size']);
-                })
-                ->update([
+            if ($this->editingSlot['size'] !== '*' || $this->changeAllFields) {
+                $fieldsToUpdate = [
                     'is_available' => $updates[0]['data']['is_available'],
                     'prime_time' => $updates[0]['data']['is_prime'],
                     'available_tables' => $updates[0]['data']['available_tables'],
                     'price_per_head' => $updates[0]['data']['price_per_head'] ?? $this->venue->non_prime_fee_per_head,
                     'minimum_spend_per_guest' => $updates[0]['data']['minimum_spend_per_guest'] ?? 0,
                     'updated_at' => now(),
-                ]);
+                ];
+            } else {
+                foreach ($this->changedFields as $field) {
+                    switch ($field) {
+                        case 'is_available':
+                            $fieldsToUpdate['is_available'] = $updates[0]['data']['is_available'];
+                            break;
+                        case 'is_prime':
+                            $fieldsToUpdate['prime_time'] = $updates[0]['data']['is_prime'];
+                            break;
+                        case 'available_tables':
+                            $fieldsToUpdate['available_tables'] = $updates[0]['data']['available_tables'];
+                            break;
+                        case 'price_per_head':
+                            $fieldsToUpdate['price_per_head'] = $updates[0]['data']['price_per_head'] ?? $this->venue->non_prime_fee_per_head;
+                            break;
+                        case 'minimum_spend_per_guest':
+                            $fieldsToUpdate['minimum_spend_per_guest'] = $updates[0]['data']['minimum_spend_per_guest'] ?? 0;
+                            break;
+                    }
+                }
+            }
+
+            $this->venue->scheduleTemplates()
+                ->where('day_of_week', $this->selectedDay)
+                ->where('start_time', $this->editingSlot['time'])
+                ->when($this->editingSlot['size'] !== '*', function (Builder $query) {
+                    $query->where('party_size', $this->editingSlot['size']);
+                })
+                ->update($fieldsToUpdate);
 
             // Log the activity
             $this->getActivityLogger()
@@ -321,6 +354,8 @@ class ScheduleManager extends Component
             'minimum_spend_per_guest' => 0,
             'template_id' => null,
         ];
+        $this->changedFields = [];
+        $this->changeAllFields = true;
     }
 
     public function saveEditingSlot(): void
@@ -335,14 +370,22 @@ class ScheduleManager extends Component
                             continue;
                         }
 
-                        $this->schedules[$this->selectedDay][$this->editingSlot['time']][$size] = [
-                            'is_available' => $this->editingSlot['is_available'],
-                            'is_prime' => $this->editingSlot['is_prime'],
-                            'available_tables' => $this->editingSlot['available_tables'],
-                            'minimum_spend_per_guest' => $this->editingSlot['minimum_spend_per_guest'],
-                            'price_per_head' => $this->editingSlot['price_per_head'],
-                            'template_id' => $this->editingSlot['template_id'],
+                        $fields = [
+                            'is_available',
+                            'is_prime',
+                            'available_tables',
+                            'minimum_spend_per_guest',
+                            'price_per_head',
+                            'template_id',
                         ];
+                        $originalValue = $this->schedules[$this->selectedDay][$this->editingSlot['time']][$size];
+
+                        $newSlot = [];
+                        foreach ($fields as $field) {
+                            $newSlot[$field] = $this->shouldUpdateField($field, $originalValue);
+                        }
+
+                        $this->schedules[$this->selectedDay][$this->editingSlot['time']][$size] = $newSlot;
                     }
                 } else {
                     // Single party size edit
@@ -557,16 +600,22 @@ class ScheduleManager extends Component
                     // Template mode (original logic remains for batch updates across templates)
                     foreach ($this->timeSlots as $slot) {
                         $time = $slot['time'];
-
-                        // Update the schedule for each time slot
-                        $this->schedules[$this->selectedDay][$time][$this->editingSlot['size']] = [
-                            'is_available' => $this->editingSlot['is_available'],
-                            'is_prime' => $this->editingSlot['is_prime'],
-                            'available_tables' => $this->editingSlot['available_tables'],
-                            'minimum_spend_per_guest' => $this->editingSlot['minimum_spend_per_guest'],
-                            'price_per_head' => $this->editingSlot['price_per_head'],
-                            'template_id' => $this->schedules[$this->selectedDay][$time][$this->editingSlot['size']]['template_id'] ?? null,
+                        $fields = [
+                            'is_available',
+                            'is_prime',
+                            'available_tables',
+                            'minimum_spend_per_guest',
+                            'price_per_head',
+                            'template_id',
                         ];
+                        $originalValue = $this->schedules[$this->selectedDay][$time][$this->editingSlot['size']] ?? [];
+
+                        $newSlot = [];
+                        foreach ($fields as $field) {
+                            $newSlot[$field] = $this->shouldUpdateField($field, $originalValue);
+                        }
+
+                        $this->schedules[$this->selectedDay][$time][$this->editingSlot['size']] = $newSlot;
                     }
 
                     // Persist the changes to the database
@@ -580,13 +629,21 @@ class ScheduleManager extends Component
                             ->first();
 
                         if ($template) {
-                            $template->update([
-                                'is_available' => $this->editingSlot['is_available'],
-                                'prime_time' => $this->editingSlot['is_prime'],
-                                'available_tables' => $this->editingSlot['available_tables'],
-                                'minimum_spend_per_guest' => $this->editingSlot['minimum_spend_per_guest'],
-                                'price_per_head' => $this->editingSlot['price_per_head'],
-                            ]);
+                            $fields = [
+                                'is_available',
+                                'prime_time',
+                                'available_tables',
+                                'minimum_spend_per_guest',
+                                'price_per_head',
+                            ];
+                            $originalValue = $template->toArray();
+
+                            $updateData = [];
+                            foreach ($fields as $field) {
+                                $updateData[$field] = $this->shouldUpdateField($field, $originalValue);
+                            }
+
+                            $template->update($updateData);
                         }
                     }
 
@@ -736,7 +793,6 @@ class ScheduleManager extends Component
             ARRAY_FILTER_USE_BOTH
         ));
         $schedule = $this->schedules[$this->selectedDay][$time][$firstSize] ?? null;
-
         if (! $schedule) {
             Notification::make()
                 ->title('No Schedule Found')
@@ -1470,5 +1526,16 @@ class ScheduleManager extends Component
                 ->danger()
                 ->send();
         }
+    }
+
+    private function shouldUpdateField($field, $originalValue)
+    {
+        if ($field === 'prime_time') {
+            $field = 'is_prime';
+        }
+
+        return $this->changeAllFields || in_array($field, $this->changedFields, true)
+            ? $this->editingSlot[$field] ?? $originalValue[$field]
+            : $originalValue[$field];
     }
 }
