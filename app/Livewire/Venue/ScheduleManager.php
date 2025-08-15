@@ -115,7 +115,9 @@ class ScheduleManager extends Component
 
     public function updatedEditingSlot($value, $field): void
     {
-        $this->changedFields[] = $field;
+        if (!in_array($field, $this->changedFields, true)) {
+            $this->changedFields[] = $field;
+        }
     }
 
     protected function getOperatingHours(): array
