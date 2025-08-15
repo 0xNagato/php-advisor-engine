@@ -638,7 +638,13 @@ class ScheduleManager extends Component
                                 'minimum_spend_per_guest',
                                 'price_per_head',
                             ];
-                            $originalValue = $template->toArray();
+                            $originalValue = [
+                                'is_available' => $template->is_available,
+                                'available_tables' => $template->available_tables,
+                                'prime_time' => $template->prime_time,
+                                'price_per_head' => $template->price_per_head,
+                                'minimum_spend_per_guest' => $template->minimum_spend_per_guest,
+                            ];
 
                             $updateData = [];
                             foreach ($fields as $field) {
