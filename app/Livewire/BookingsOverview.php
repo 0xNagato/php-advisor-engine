@@ -43,7 +43,7 @@ class BookingsOverview extends BaseWidget
             ->select(
                 DB::raw('COUNT(*) as count'),
                 DB::raw('SUM(CASE WHEN is_prime = true THEN total_fee - total_refunded ELSE 0 END) as prime_bookings'),
-                DB::raw('SUM(CASE WHEN is_prime = true THEN total_fee - total_refunded ELSE ABS(venue_earnings) END) as gross_revenue'),
+                DB::raw('SUM(CASE WHEN is_prime = true THEN total_fee - total_refunded ELSE ABS(venue_earnings) END) as gross_revenue_total'),
                 DB::raw('SUM(platform_earnings - platform_earnings_refunded) as prima_share'),
                 'currency'
             )
@@ -53,7 +53,7 @@ class BookingsOverview extends BaseWidget
         $totalBookings = $bookings->sum('count');
 
         $currencyService = app(CurrencyConversionService::class);
-        $grossRevenueUSD = $currencyService->convertToUSD($bookings->pluck('gross_revenue', 'currency')->toArray());
+        $grossRevenueUSD = $currencyService->convertToUSD($bookings->pluck('gross_revenue_total', 'currency')->toArray());
         $primaShareUSD = $currencyService->convertToUSD($bookings->pluck('prima_share', 'currency')->toArray());
 
         // Pass the converted UTC dates into the chart data query
@@ -70,7 +70,7 @@ class BookingsOverview extends BaseWidget
                 ->chart($chartData['amounts'])
                 ->color('success'),
             $this->createCompoundStat('Revenue', $grossRevenueUSD, $primaShareUSD, 'USD',
-                $bookings->pluck('gross_revenue', 'currency')->toArray(),
+                $bookings->pluck('gross_revenue_total', 'currency')->toArray(),
                 $bookings->pluck('prima_share', 'currency')->toArray())
                 ->chart($chartData['earnings'])
                 ->color('success'),
@@ -86,7 +86,7 @@ class BookingsOverview extends BaseWidget
                 DB::raw('DATE(confirmed_at) as date'),
                 DB::raw('COUNT(*) as bookings'),
                 DB::raw('SUM(CASE WHEN is_prime = true THEN total_fee ELSE 0 END) as prime_bookings'),
-                DB::raw('SUM(CASE WHEN is_prime = true THEN total_fee ELSE ABS(venue_earnings) END) as gross_revenue'),
+                DB::raw('SUM(CASE WHEN is_prime = true THEN total_fee ELSE ABS(venue_earnings) END) as gross_revenue_total'),
                 DB::raw('SUM(platform_earnings) as prima_share'),
                 'currency'
             )
@@ -99,7 +99,7 @@ class BookingsOverview extends BaseWidget
         $chartData = $dailyData->groupBy('date')->map(function ($dayData) use ($currencyService) {
             $bookings = $dayData->sum('bookings');
             $primeBookings = $currencyService->convertToUSD($dayData->pluck('prime_bookings', 'currency')->toArray());
-            $grossRevenue = $currencyService->convertToUSD($dayData->pluck('gross_revenue', 'currency')->toArray());
+            $grossRevenue = $currencyService->convertToUSD($dayData->pluck('gross_revenue_total', 'currency')->toArray());
             $primaShare = $currencyService->convertToUSD($dayData->pluck('prima_share', 'currency')->toArray());
 
             return [
