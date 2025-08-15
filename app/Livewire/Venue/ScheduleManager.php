@@ -292,7 +292,6 @@ class ScheduleManager extends Component
                     'bulk_edit' => $this->editingSlot['size'] === '*',
                 ])
                 ->log('Schedule template updated');
-
         } catch (Exception $e) {
             Log::error('Error saving schedule template', [
                 'error' => $e->getMessage(),
@@ -509,7 +508,6 @@ class ScheduleManager extends Component
             }
 
             $this->closeEditModal();
-
         } catch (Exception $e) {
             Log::error('Error saving schedule', [
                 'error' => $e->getMessage(),
@@ -532,8 +530,10 @@ class ScheduleManager extends Component
             if ($this->editingSlot['time'] === '*' && $this->editingSlot['size']) {
                 if ($this->activeView === 'calendar') {
                     // Calendar mode: Update "VenueTimeSlot" overrides for a specific date
-                    throw_unless($this->editingSlot['date'],
-                        new Exception('The booking date must be provided for calendar overrides.'));
+                    throw_unless(
+                        $this->editingSlot['date'],
+                        new Exception('The booking date must be provided for calendar overrides.')
+                    );
 
                     $originalData = [];
                     $newData = [];
@@ -657,7 +657,6 @@ class ScheduleManager extends Component
             }
 
             $this->closeEditModal();
-
         } catch (Exception|Throwable $e) {
             Log::error('Error saving party size schedule', [
                 'error' => $e->getMessage(),
@@ -974,7 +973,6 @@ class ScheduleManager extends Component
                 ->title('All time slots have been closed for this day')
                 ->success()
                 ->send();
-
         } catch (Exception $e) {
             Log::error('Error closing day', [
                 'error' => $e->getMessage(),
@@ -1048,7 +1046,6 @@ class ScheduleManager extends Component
                 ->title('All available time slots have been set to prime time')
                 ->success()
                 ->send();
-
         } catch (Exception $e) {
             Log::error('Error setting prime time', [
                 'error' => $e->getMessage(),
@@ -1123,7 +1120,6 @@ class ScheduleManager extends Component
                 ->title('All time slots have been marked as sold out')
                 ->success()
                 ->send();
-
         } catch (Exception $e) {
             Log::error('Error marking day as sold out', [
                 'error' => $e->getMessage(),
@@ -1198,7 +1194,6 @@ class ScheduleManager extends Component
                 ->title('All available time slots have been set to non-prime time')
                 ->success()
                 ->send();
-
         } catch (Exception $e) {
             Log::error('Error setting non-prime time', [
                 'error' => $e->getMessage(),
@@ -1256,7 +1251,6 @@ class ScheduleManager extends Component
                 ->title('All available time slots in weekly template have been set to non-prime time')
                 ->success()
                 ->send();
-
         } catch (Exception $e) {
             Log::error('Error setting weekly template to non-prime time', [
                 'error' => $e->getMessage(),
@@ -1528,14 +1522,12 @@ class ScheduleManager extends Component
         }
     }
 
-    private function shouldUpdateField($field, $originalValue)
+    private function shouldUpdateField(string $field, array $original)
     {
-        if ($field === 'prime_time') {
-            $field = 'is_prime';
-        }
+        $alias = ['prime_time' => 'is_prime'][$field] ?? $field;
 
-        return $this->changeAllFields || in_array($field, $this->changedFields, true)
-            ? $this->editingSlot[$field] ?? $originalValue[$field]
-            : $originalValue[$field];
+        return ($this->changeAllFields || in_array($alias, $this->changedFields, true))
+            ? ($this->editingSlot[$alias] ?? ($original[$field] ?? null))
+            : ($original[$field] ?? null);
     }
 }
