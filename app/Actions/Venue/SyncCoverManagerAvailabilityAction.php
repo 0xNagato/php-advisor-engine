@@ -5,9 +5,7 @@ namespace App\Actions\Venue;
 use App\Models\ScheduleTemplate;
 use App\Models\Venue;
 use App\Models\VenueTimeSlot;
-use App\Services\CoverManagerService;
 use Carbon\Carbon;
-use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Log;
 use Lorisleiva\Actions\Concerns\AsAction;
 use Spatie\Activitylog\Models\Activity;
@@ -85,15 +83,15 @@ class SyncCoverManagerAvailabilityAction
                 // For each schedule template, check availability in bulk calendar data
                 foreach ($scheduleTemplates as $template) {
                     $slotResult = $this->processScheduleTemplate($venue, $template, $currentDate, $dateKey, $calendarData);
-                    
+
                     if ($slotResult['override_created']) {
                         $stats['overrides_created']++;
                     }
-                    
+
                     if ($slotResult['override_removed']) {
                         $stats['overrides_removed']++;
                     }
-                    
+
                     if ($slotResult['skipped_human_override']) {
                         $stats['human_overrides_preserved']++;
                     }

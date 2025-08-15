@@ -3,9 +3,11 @@
 namespace App\Livewire;
 
 use Carbon\Carbon;
+use Exception;
 use Illuminate\Support\Facades\DB;
 use Leandrocfe\FilamentApexCharts\Widgets\ApexChartWidget;
 use Livewire\Attributes\On;
+use Log;
 
 class AffiliateMonthlyTrendsChart extends ApexChartWidget
 {
@@ -18,8 +20,11 @@ class AffiliateMonthlyTrendsChart extends ApexChartWidget
     protected int|string|array $columnSpan = 4;
 
     public ?string $startMonth = null;
+
     public ?int $numberOfMonths = null;
+
     public ?string $region = null;
+
     public ?string $search = null;
 
     public function getColumnSpan(): int|string|array
@@ -49,8 +54,8 @@ class AffiliateMonthlyTrendsChart extends ApexChartWidget
 
         try {
             $data = $this->getChartData();
-        } catch (\Exception $e) {
-            \Log::error('AffiliateMonthlyTrendsChart error: '.$e->getMessage());
+        } catch (Exception $e) {
+            Log::error('AffiliateMonthlyTrendsChart error: '.$e->getMessage());
 
             return [
                 'chart' => ['type' => 'line', 'height' => 300],

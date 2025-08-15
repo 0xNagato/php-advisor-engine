@@ -10,7 +10,7 @@ use Illuminate\Support\Str;
 
 beforeEach(function () {
     Event::fake();
-    
+
     $this->venue = Venue::factory()->create();
     $this->scheduleTemplate = \App\Models\ScheduleTemplate::factory()->create([
         'venue_id' => $this->venue->id,
@@ -34,7 +34,7 @@ it('skips regular confirmation SMS for auto-approval eligible bookings in Comple
         'booking_at' => now()->addDay(),
     ]);
 
-    // Mock SendConfirmationToVenueContacts to ensure it's NOT called  
+    // Mock SendConfirmationToVenueContacts to ensure it's NOT called
     // SMS will be handled by the platform sync listener after platform sync
     $this->mock(SendConfirmationToVenueContacts::class)
         ->shouldNotReceive('handle');
@@ -42,7 +42,7 @@ it('skips regular confirmation SMS for auto-approval eligible bookings in Comple
     // Complete booking (non-prime, no payment intent needed)
     $result = CompleteBooking::run($booking, '', [
         'firstName' => 'John',
-        'lastName' => 'Doe', 
+        'lastName' => 'Doe',
         'phone' => '+1234567890',
         'email' => 'john@example.com',
         'r' => 'organic',
@@ -76,7 +76,7 @@ it('sends regular confirmation SMS for non-eligible bookings in CompleteBooking'
     // Complete booking (non-prime, no payment intent needed)
     $result = CompleteBooking::run($booking, '', [
         'firstName' => 'Jane',
-        'lastName' => 'Smith', 
+        'lastName' => 'Smith',
         'phone' => '+1234567890',
         'email' => 'jane@example.com',
         'r' => 'organic',

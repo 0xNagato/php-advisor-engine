@@ -121,7 +121,7 @@ class ReservationHub extends Page
 
         // This is used by the availability calendar to pre-fill the form
         // this should eventually be refactored into its own service.
-        if ($this->scheduleTemplateId && $this->date && !$this->hasAlreadyProcessedTheseParameters()) {
+        if ($this->scheduleTemplateId && $this->date && ! $this->hasAlreadyProcessedTheseParameters()) {
             $this->markParametersAsProcessed();
 
             $schedule = ScheduleTemplate::query()->find($this->scheduleTemplateId);
@@ -208,7 +208,7 @@ class ReservationHub extends Page
             }
 
             if ($this->isSameDayReservation($key, $requestedDate,
-                    $currentDate) && $this->isPastReservationTime($userTimezone)) {
+                $currentDate) && $this->isPastReservationTime($userTimezone)) {
                 $this->resetSchedules();
 
                 return;
@@ -319,10 +319,9 @@ class ReservationHub extends Page
     protected function getSchedulesThisWeek(
         Carbon $requestedDate,
         Carbon $currentDate,
-               $venueId,
-               $guestCount
-    ): Collection
-    {
+        $venueId,
+        $guestCount
+    ): Collection {
         if ($requestedDate->isSameDay($currentDate)) {
             return ScheduleWithBookingMV::with('venue')
                 ->where('venue_id', $venueId)
@@ -343,11 +342,10 @@ class ReservationHub extends Page
     }
 
     public function createBooking(
-        int     $scheduleTemplateId,
+        int $scheduleTemplateId,
         ?string $date = null,
         ?string $source = 'reservation_hub'
-    ): void
-    {
+    ): void {
         $data = $this->form->getState();
         $data['date'] = $date ?? $data['date'];
 
@@ -377,7 +375,7 @@ class ReservationHub extends Page
      */
     public function completeBooking($form): void
     {
-        if (!config('app.bookings_enabled')) {
+        if (! config('app.bookings_enabled')) {
             $this->dispatch('open-modal', id: 'bookings-disabled-modal');
             $this->isLoading = false;
 
@@ -402,9 +400,9 @@ class ReservationHub extends Page
         // Update the form with the formatted phone number
         $form['phone'] = $formattedPhone;
 
-        if (!$this->booking->prime_time) {
+        if (! $this->booking->prime_time) {
             // Check for real customer confirmation
-            if (!($form['real_customer_confirmation'] ?? false)) {
+            if (! ($form['real_customer_confirmation'] ?? false)) {
                 Notification::make()
                     ->title('Confirmation Required')
                     ->body('Please confirm that you are booking for a real customer.')
@@ -418,7 +416,7 @@ class ReservationHub extends Page
             // Check if the concierge can override duplicate checks
             $canOverride = CheckIfConciergeCanOverrideDuplicateChecks::run($this->booking, $formattedPhone);
 
-            if (!$canOverride) {
+            if (! $canOverride) {
                 // Check for existing non-prime booking
                 $hasExistingBooking = CheckCustomerHasNonPrimeBooking::run(
                     $form['phone'],
@@ -480,7 +478,7 @@ class ReservationHub extends Page
     {
         $this->booking = $this->booking->fresh();
 
-        if (!in_array($this->booking->status, [BookingStatus::PENDING, BookingStatus::GUEST_ON_PAGE])) {
+        if (! in_array($this->booking->status, [BookingStatus::PENDING, BookingStatus::GUEST_ON_PAGE])) {
             return;
         }
 
@@ -566,7 +564,7 @@ class ReservationHub extends Page
 
     protected function hasAlreadyProcessedTheseParameters(): bool
     {
-        if (!$this->scheduleTemplateId || !$this->date) {
+        if (! $this->scheduleTemplateId || ! $this->date) {
             return false;
         }
 
@@ -583,7 +581,7 @@ class ReservationHub extends Page
 
     public function isDateBeyondLimit(): bool
     {
-        if (!isset($this->data['date'])) {
+        if (! isset($this->data['date'])) {
             return false;
         }
 

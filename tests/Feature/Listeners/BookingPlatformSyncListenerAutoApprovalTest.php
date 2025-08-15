@@ -94,7 +94,7 @@ it('does not send SMS on non-final platform sync failure attempts', function () 
     $listener = \Mockery::mock(BookingPlatformSyncListener::class)->makePartial();
     $listener->shouldReceive('attempts')->andReturn(1); // First attempt, not final
     $listener->tries = 3;
-    
+
     $event = new BookingConfirmed($this->booking);
     $listener->handle($event);
 });
@@ -127,7 +127,7 @@ it('sends SMS on final platform sync failure attempt', function () {
     $listener = \Mockery::mock(BookingPlatformSyncListener::class)->makePartial();
     $listener->shouldReceive('attempts')->andReturn(3); // Final attempt
     $listener->tries = 3;
-    
+
     $event = new BookingConfirmed($this->booking);
     $listener->handle($event);
 });
@@ -159,7 +159,7 @@ it('logs auto-approval success', function () {
             'booking_id' => $this->booking->id,
         ])
         ->zeroOrMoreTimes(); // May or may not be called depending on config
-        
+
     Log::shouldReceive('info')
         ->once()
         ->with("Booking {$this->booking->id} was auto-approved after successful platform sync", [

@@ -56,8 +56,8 @@ class EditConcierge extends EditRecord
                                     ->maxValue(100)
                                     ->default(BookingPercentages::VIP_ACCESS_DEFAULT_PERCENTAGE)
                                     ->suffix('%')
-                                    ->visible(fn(Get $get): bool => $get('is_qr_concierge'))
-                                    ->required(fn(Get $get): bool => $get('is_qr_concierge')),
+                                    ->visible(fn (Get $get): bool => $get('is_qr_concierge'))
+                                    ->required(fn (Get $get): bool => $get('is_qr_concierge')),
                             ]),
                     ])
                     ->collapsible(),

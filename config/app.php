@@ -428,7 +428,7 @@ return [
     |
     */
     'regional_sms' => [
-        'non_prime_regions' => explode(',', env('REGIONAL_SMS_NON_PRIME_REGIONS', 'ibiza')),
+        'non_prime_regions' => explode(',', (string) env('REGIONAL_SMS_NON_PRIME_REGIONS', 'ibiza')),
     ],
 
 ];

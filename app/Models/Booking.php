@@ -317,11 +317,9 @@ class Booking extends Model
     protected function primaNetRevenue(): Attribute
     {
         return Attribute::make(
-            get: function (): int {
-                return $this->is_refunded_or_partially_refunded
-                    ? (int) $this->final_platform_earnings_total
-                    : (int) $this->platform_earnings;
-            }
+            get: fn (): int => $this->is_refunded_or_partially_refunded
+                ? (int) $this->final_platform_earnings_total
+                : (int) $this->platform_earnings
         );
     }
 

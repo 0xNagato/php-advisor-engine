@@ -11,7 +11,7 @@ use Illuminate\Support\Str;
 
 beforeEach(function () {
     Event::fake();
-    
+
     $this->venue = Venue::factory()->create();
     $this->scheduleTemplate = \App\Models\ScheduleTemplate::factory()->create([
         'venue_id' => $this->venue->id,
@@ -41,7 +41,7 @@ it('skips regular confirmation SMS for auto-approval eligible bookings', functio
         ->shouldNotReceive('handle');
 
     // Process booking
-    $bookingService = new BookingService();
+    $bookingService = new BookingService;
     $bookingService->processBooking($booking, [
         'first_name' => 'John',
         'last_name' => 'Doe',
@@ -77,7 +77,7 @@ it('sends regular confirmation SMS for non-auto-approval eligible bookings', fun
         ->with($booking);
 
     // Process booking
-    $bookingService = new BookingService();
+    $bookingService = new BookingService;
     $bookingService->processBooking($booking, [
         'first_name' => 'Jane',
         'last_name' => 'Smith',
@@ -110,7 +110,7 @@ it('sends regular confirmation SMS for large party bookings', function () {
         ->with($booking);
 
     // Process booking
-    $bookingService = new BookingService();
+    $bookingService = new BookingService;
     $bookingService->processBooking($booking, [
         'first_name' => 'Bob',
         'last_name' => 'Johnson',

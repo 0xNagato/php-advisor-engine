@@ -115,11 +115,12 @@ class AvailabilityCalendar extends Page
             // Check if the selected date is beyond the maximum allowed days
             $selectedDate = Carbon::parse($this->data['date'], $this->timezone);
             $maxDate = Carbon::now($this->timezone)->addDays(config('app.max_reservation_days', 30));
-            
+
             if ($selectedDate->gt($maxDate)) {
                 // Clear venues and headers when date is beyond limit
                 $this->venues = null;
                 $this->timeslotHeaders = [];
+
                 return;
             }
 
@@ -202,13 +203,13 @@ class AvailabilityCalendar extends Page
 
     public function isDateBeyondLimit(): bool
     {
-        if (!isset($this->data['date'])) {
+        if (! isset($this->data['date'])) {
             return false;
         }
 
         $selectedDate = Carbon::parse($this->data['date'], $this->timezone);
         $maxDate = Carbon::now($this->timezone)->addDays(config('app.max_reservation_days', 30));
-        
+
         return $selectedDate->gt($maxDate);
     }
 

@@ -4,17 +4,13 @@ namespace App\Filament\Pages;
 
 use App\Enums\BookingStatus;
 use App\Enums\EarningType;
-use App\Livewire\AffiliateMonthlyTrendsChart;
-use App\Livewire\TopAffiliatesByBookingsChart;
-use App\Livewire\TopAffiliatesByEarningsChart;
 use App\Models\Concierge;
 use App\Models\Region;
 use Carbon\Carbon;
-use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
-use Filament\Pages\Page;
 use Filament\Forms\Form;
+use Filament\Pages\Page;
 use Filament\Tables\Actions\Action;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Concerns\InteractsWithTable;
@@ -83,7 +79,6 @@ class AffiliatePerformanceReport extends Page implements HasTable
         $this->dispatch('filtersUpdated', $this->data);
     }
 
-
     public function getHeading(): string|Htmlable
     {
         return 'Affiliate Performance Report';
@@ -151,7 +146,7 @@ class AffiliatePerformanceReport extends Page implements HasTable
                     ->afterStateUpdated(function ($state) {
                         // When months change, adjust start month to maintain recent period
                         $timezone = (string) (auth()->user()->timezone ?? config('app.default_timezone'));
-                        $newStartMonth = now($timezone)->subMonths((int)$state - 1)->format('Y-m');
+                        $newStartMonth = now($timezone)->subMonths((int) $state - 1)->format('Y-m');
                         $this->data['startMonth'] = $newStartMonth;
                         $this->resetTable();
                         $this->dispatch('filtersUpdated', $this->data);
@@ -352,9 +347,9 @@ class AffiliatePerformanceReport extends Page implements HasTable
                 {
                     public function __construct(
                         private $data,
-                        private string $startMonth,
-                        private int $numberOfMonths,
-                        private string $timezone
+                        private readonly string $startMonth,
+                        private readonly int $numberOfMonths,
+                        private readonly string $timezone
                     ) {}
 
                     public function collection()

@@ -3,9 +3,11 @@
 namespace App\Livewire;
 
 use Carbon\Carbon;
+use Exception;
 use Illuminate\Support\Facades\DB;
 use Leandrocfe\FilamentApexCharts\Widgets\ApexChartWidget;
 use Livewire\Attributes\On;
+use Log;
 
 class TopAffiliatesByBookingsChart extends ApexChartWidget
 {
@@ -18,9 +20,13 @@ class TopAffiliatesByBookingsChart extends ApexChartWidget
     protected int|string|array $columnSpan = 4;
 
     public ?string $startMonth = null;
+
     public ?int $numberOfMonths = null;
+
     public ?string $region = null;
+
     public ?string $search = null;
+
     public bool $useMockData = false;
 
     public function getColumnSpan(): int|string|array
@@ -75,8 +81,8 @@ class TopAffiliatesByBookingsChart extends ApexChartWidget
 
         try {
             $data = $this->getChartData();
-        } catch (\Exception $e) {
-            \Log::error('TopAffiliatesByBookingsChart error: '.$e->getMessage());
+        } catch (Exception $e) {
+            Log::error('TopAffiliatesByBookingsChart error: '.$e->getMessage());
 
             return [
                 'chart' => ['type' => 'bar', 'height' => 250, 'stacked' => true],

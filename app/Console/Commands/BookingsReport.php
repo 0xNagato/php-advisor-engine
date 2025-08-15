@@ -7,11 +7,9 @@ use App\Models\Booking;
 use App\Models\Region;
 use Carbon\Carbon;
 use Illuminate\Console\Command;
+use Illuminate\Contracts\Database\Query\Builder;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Storage;
-use Maatwebsite\Excel\Concerns\FromCollection;
-use Maatwebsite\Excel\Concerns\WithHeadings;
-use Maatwebsite\Excel\Facades\Excel;
 
 class BookingsReport extends Command
 {
@@ -42,11 +40,11 @@ class BookingsReport extends Command
         $query = Booking::query()
             ->with(['venue', 'concierge.user'])
             ->whereIn('status', [BookingStatus::CONFIRMED, BookingStatus::VENUE_CONFIRMED])
-            ->when($regionId, fn($q) => $q->whereHas('venue', fn($vq) => $vq->where('region', $regionId)))
+            ->when($regionId, fn ($q) => $q->whereHas('venue', fn (Builder $vq) => $vq->where('region', $regionId)))
             ->orderByDesc('created_at')
             ->limit($limit);
 
-        /** @var Collection<int, \App\Models\Booking> $bookings */
+        /** @var Collection<int, Booking> $bookings */
         $bookings = $query->get();
 
         $rows = $bookings->map(function (Booking $b) use ($tz) {
@@ -82,10 +80,8 @@ class BookingsReport extends Command
             ];
         });
 
-
-
         if (! $output) {
-            $suffix = $regionId ? $regionId : 'all';
+            $suffix = $regionId ?: 'all';
             $timestamp = now('America/New_York')->format('Ymd_His');
             $dir = 'reports';
             if (! Storage::disk('local')->exists($dir)) {
@@ -123,10 +119,8 @@ class BookingsReport extends Command
 
         fclose($file);
 
-        $this->info("Exported ".$bookings->count()." rows (plus total) to: {$output}");
+        $this->info('Exported '.$bookings->count()." rows (plus total) to: {$output}");
 
         return self::SUCCESS;
     }
 }
-
-

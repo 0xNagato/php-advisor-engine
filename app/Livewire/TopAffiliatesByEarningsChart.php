@@ -2,8 +2,12 @@
 
 namespace App\Livewire;
 
+use Carbon\Carbon;
+use Exception;
+use Illuminate\Support\Facades\DB;
 use Leandrocfe\FilamentApexCharts\Widgets\ApexChartWidget;
 use Livewire\Attributes\On;
+use Log;
 
 class TopAffiliatesByEarningsChart extends ApexChartWidget
 {
@@ -16,9 +20,13 @@ class TopAffiliatesByEarningsChart extends ApexChartWidget
     protected int|string|array $columnSpan = 4;
 
     public ?string $startMonth = null;
+
     public ?int $numberOfMonths = null;
+
     public ?string $region = null;
+
     public ?string $search = null;
+
     public bool $useMockData = false;
 
     public function getColumnSpan(): int|string|array
@@ -62,8 +70,8 @@ class TopAffiliatesByEarningsChart extends ApexChartWidget
 
         try {
             $data = $this->getChartData();
-        } catch (\Exception $e) {
-            \Log::error('TopAffiliatesByEarningsChart error: '.$e->getMessage());
+        } catch (Exception $e) {
+            Log::error('TopAffiliatesByEarningsChart error: '.$e->getMessage());
 
             return [
                 'chart' => ['type' => 'bar', 'height' => 250],
@@ -100,7 +108,7 @@ class TopAffiliatesByEarningsChart extends ApexChartWidget
     private function getChartData(): array
     {
         $timezone = auth()->user()->timezone ?? config('app.default_timezone');
-        $startDate = \Carbon\Carbon::parse($this->startMonth.'-01', $timezone)->startOfDay()->setTimezone('UTC');
+        $startDate = Carbon::parse($this->startMonth.'-01', $timezone)->startOfDay()->setTimezone('UTC');
         $endDate = $startDate->copy()->addMonths($this->numberOfMonths)->subSecond();
 
         $sql = "
@@ -151,7 +159,7 @@ class TopAffiliatesByEarningsChart extends ApexChartWidget
             LIMIT 10
         ';
 
-        $results = \Illuminate\Support\Facades\DB::select($sql, $params);
+        $results = DB::select($sql, $params);
 
         $affiliateNames = [];
         $earnings = [];

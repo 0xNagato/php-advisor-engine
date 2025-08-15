@@ -92,12 +92,12 @@ class SyncCoverManagerAvailability extends Command
 
             // Advance progress bar for all days at once
             $progressBar->advance($daysToSync);
-            
+
             // Show per-venue summary
             $venueElapsed = round(microtime(true) - $venueStartTime, 2);
             $venueTemplateCount = $venue->scheduleTemplates()->where('is_available', true)->count();
             $estimatedSlots = $venueTemplateCount * $daysToSync;
-            
+
             if ($venueDaysFailed === 0) {
                 $this->line("  ✓ {$daysToSync} days processed, ~{$estimatedSlots} slots analyzed ({$venueElapsed}s)");
             } else {
@@ -108,16 +108,16 @@ class SyncCoverManagerAvailability extends Command
         $progressBar->finish();
 
         // Generate comprehensive sync report
-        $reporter = new CoverManagerSyncReporter();
+        $reporter = new CoverManagerSyncReporter;
         $report = $reporter->generateSyncReport($venues->toArray(), $startDate, $daysToSync);
         $reporter->displayReport($report, $this->output);
 
         // Traditional summary for backward compatibility
         $this->newLine();
         $this->info("Sync completed. Synced: {$synced}, Failed: {$failed}");
-        
+
         // Log summary for external monitoring
-        Log::info("SyncCoverManagerAvailability completed", [
+        Log::info('SyncCoverManagerAvailability completed', [
             'synced' => $synced,
             'failed' => $failed,
             'venues_count' => $venues->count(),
@@ -125,7 +125,7 @@ class SyncCoverManagerAvailability extends Command
             'overrides_created' => $report['overrides_created'],
             'overrides_removed' => $report['overrides_removed'],
             'total_slots_analyzed' => $report['total_slots_analyzed'],
-            'override_rate' => $report['total_slots_analyzed'] > 0 ? round(($report['overrides_created'] / $report['total_slots_analyzed']) * 100, 2) : 0
+            'override_rate' => $report['total_slots_analyzed'] > 0 ? round(($report['overrides_created'] / $report['total_slots_analyzed']) * 100, 2) : 0,
         ]);
 
         return self::SUCCESS;

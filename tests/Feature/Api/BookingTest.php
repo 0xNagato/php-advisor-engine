@@ -239,5 +239,3 @@ test('user cannot delete booking on status confirmed', function () {
             'message' => 'Booking cannot be abandoned in its current status',
         ]);
 });
-
-

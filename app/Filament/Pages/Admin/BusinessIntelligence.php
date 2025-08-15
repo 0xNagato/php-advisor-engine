@@ -53,7 +53,7 @@ class BusinessIntelligence extends Page implements HasTable
 
     public function getSubheading(): string|Htmlable|null
     {
-        if (!isset($this->filters['startDate'], $this->filters['endDate'])) {
+        if (! isset($this->filters['startDate'], $this->filters['endDate'])) {
             return null;
         }
 
@@ -63,7 +63,7 @@ class BusinessIntelligence extends Page implements HasTable
         $formattedStartDate = $startDate->format('M j');
         $formattedEndDate = $endDate->format('M j');
 
-        return $formattedStartDate . ' - ' . $formattedEndDate;
+        return $formattedStartDate.' - '.$formattedEndDate;
     }
 
     protected function getHeaderWidgets(): array
@@ -106,7 +106,7 @@ class BusinessIntelligence extends Page implements HasTable
                     })
                     ->groupBy('concierges.id')
             )
-            ->recordUrl(fn(Concierge $record) => route('filament.admin.pages.booking-search', [
+            ->recordUrl(fn (Concierge $record) => route('filament.admin.pages.booking-search', [
                 'filters' => [
                     'concierge_search' => $record->user->name,
                     'start_date' => $this->filters['startDate'] ?? null,
@@ -116,7 +116,7 @@ class BusinessIntelligence extends Page implements HasTable
             ->columns([
                 TextColumn::make('user.first_name')
                     ->label('Concierge')
-                    ->formatStateUsing(fn($record) => new HtmlString(<<<HTML
+                    ->formatStateUsing(fn ($record) => new HtmlString(<<<HTML
                             <div class="space-y-0 text-xs">
                                 <div class="font-medium">{$record->user->name}</div>
                                 <div class="text-gray-500">{$record->hotel_name}</div>
@@ -124,7 +124,7 @@ class BusinessIntelligence extends Page implements HasTable
                             </div>
                         HTML
                     ))
-                    ->searchable(query: fn(Builder $query, string $search): Builder => $query->whereHas('user',
+                    ->searchable(query: fn (Builder $query, string $search): Builder => $query->whereHas('user',
                         function (Builder $query) use ($search) {
                             $search = strtolower($search);
                             $query->whereRaw('LOWER(users.first_name) like ?', ["%{$search}%"])
@@ -148,13 +148,13 @@ class BusinessIntelligence extends Page implements HasTable
                     ->sortable(),
                 TextColumn::make('average_diners')
                     ->label('Avg. Diners')
-                    ->formatStateUsing(fn($state) => number_format((float)$state, 1))
+                    ->formatStateUsing(fn ($state) => number_format((float) $state, 1))
                     ->size('xs')
                     ->alignCenter()
                     ->sortable(),
                 TextColumn::make('problem_percentage')
                     ->label('Problem %')
-                    ->formatStateUsing(fn($state) => $state ? $state . '%' : '0%')
+                    ->formatStateUsing(fn ($state) => $state ? $state.'%' : '0%')
                     ->size('xs')
                     ->alignCenter()
                     ->sortable(),

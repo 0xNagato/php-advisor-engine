@@ -2,7 +2,6 @@
 
 namespace App\Notifications\Booking;
 
-use App\Constants\SmsTemplates;
 use App\Data\SmsData;
 use App\Data\VenueContactData;
 use App\Models\Booking;
