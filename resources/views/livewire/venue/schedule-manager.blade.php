@@ -369,6 +369,16 @@
                     </div>
                 </div>
             </div>
+            @if( $editingSlot['time'] === '*' ||  $editingSlot['size'] === '*' )
+                <div class="grid grid-cols-2 gap-2">
+                    <div class="space-y-2">
+                        <label class="flex items-center gap-2 p-2 rounded-lg cursor-pointer bg-gray-50">
+                            <x-filament::input.checkbox wire:model="changeAllFields" class="w-4 h-4" />
+                            <span class="text-sm font-medium">Change all fields</span>
+                        </label>
+                    </div>
+                </div>
+            @endif
         </div>
 
         <x-slot name="footer">

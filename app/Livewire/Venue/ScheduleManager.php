@@ -50,6 +50,10 @@ class ScheduleManager extends Component
         'template_id' => null,
     ];
 
+    public bool $changeAllFields = true;
+
+    public array $changedFields = [];
+
     public ?float $dayPricePerHead = null;
 
     public ?float $weeklyPricePerHead = null;
@@ -81,7 +85,7 @@ class ScheduleManager extends Component
         if ($value === 'calendar') {
             $timezone = $this->venue->timezone ?? config('app.timezone');
 
-            if (! $this->selectedDate) {
+            if (!$this->selectedDate) {
                 $today = now($timezone);
 
                 // If a venue is closed today, find the next open day
@@ -106,6 +110,13 @@ class ScheduleManager extends Component
         } else {
             // Clear calendar data when switching to the template view
             $this->calendarSchedules = [];
+        }
+    }
+
+    public function updatedEditingSlot($value, $field): void
+    {
+        if (!in_array($field, $this->changedFields, true)) {
+            $this->changedFields[] = $field;
         }
     }
 
@@ -194,7 +205,7 @@ class ScheduleManager extends Component
                     $query->where('party_size', $this->editingSlot['size']);
                 })
                 ->get()
-                ->map(fn ($template) => [
+                ->map(fn($template) => [
                     'id' => $template->id,
                     'is_available' => $template->is_available,
                     'prime_time' => $template->prime_time,
@@ -203,6 +214,7 @@ class ScheduleManager extends Component
                     'minimum_spend_per_guest' => $template->minimum_spend_per_guest,
                 ])
                 ->toArray();
+            $fieldsToUpdate = [];
 
             // Existing save logic
             // Get only the time slots we're actually modifying
@@ -230,21 +242,46 @@ class ScheduleManager extends Component
                 ];
             }
 
-            // Single bulk update query for all affected slots
-            $this->venue->scheduleTemplates()
-                ->where('day_of_week', $this->selectedDay)
-                ->where('start_time', $this->editingSlot['time'])
-                ->when($this->editingSlot['size'] !== '*', function (Builder $query) {
-                    $query->where('party_size', $this->editingSlot['size']);
-                })
-                ->update([
+            if ($this->editingSlot['size'] !== '*' || $this->changeAllFields) {
+                $fieldsToUpdate = [
                     'is_available' => $updates[0]['data']['is_available'],
                     'prime_time' => $updates[0]['data']['is_prime'],
                     'available_tables' => $updates[0]['data']['available_tables'],
                     'price_per_head' => $updates[0]['data']['price_per_head'] ?? $this->venue->non_prime_fee_per_head,
                     'minimum_spend_per_guest' => $updates[0]['data']['minimum_spend_per_guest'] ?? 0,
                     'updated_at' => now(),
-                ]);
+                ];
+            } else {
+                foreach ($this->changedFields as $field) {
+                    switch ($field) {
+                        case 'is_available':
+                            $fieldsToUpdate['is_available'] = $updates[0]['data']['is_available'];
+                            break;
+                        case 'is_prime':
+                            $fieldsToUpdate['prime_time'] = $updates[0]['data']['is_prime'];
+                            break;
+                        case 'available_tables':
+                            $fieldsToUpdate['available_tables'] = $updates[0]['data']['available_tables'];
+                            break;
+                        case 'price_per_head':
+                            $fieldsToUpdate['price_per_head'] = $updates[0]['data']['price_per_head'] ?? $this->venue->non_prime_fee_per_head;
+                            break;
+                        case 'minimum_spend_per_guest':
+                            $fieldsToUpdate['minimum_spend_per_guest'] = $updates[0]['data']['minimum_spend_per_guest'] ?? 0;
+                            break;
+                    }
+                }
+            }
+
+            if (!empty($fieldsToUpdate)) {
+                $this->venue->scheduleTemplates()
+                    ->where('day_of_week', $this->selectedDay)
+                    ->where('start_time', $this->editingSlot['time'])
+                    ->when($this->editingSlot['size'] !== '*', function (Builder $query) {
+                        $query->where('party_size', $this->editingSlot['size']);
+                    })
+                    ->update($fieldsToUpdate);
+            }
 
             // Log the activity
             $this->getActivityLogger()
@@ -259,7 +296,6 @@ class ScheduleManager extends Component
                     'bulk_edit' => $this->editingSlot['size'] === '*',
                 ])
                 ->log('Schedule template updated');
-
         } catch (Exception $e) {
             Log::error('Error saving schedule template', [
                 'error' => $e->getMessage(),
@@ -281,7 +317,7 @@ class ScheduleManager extends Component
             $dayOfWeek = strtolower(Carbon::parse($date)->format('l'));
         }
 
-        if (! $schedule) {
+        if (!$schedule) {
             Notification::make()
                 ->title('No Schedule Found')
                 ->body('No schedule exists for these slot.')
@@ -321,6 +357,8 @@ class ScheduleManager extends Component
             'minimum_spend_per_guest' => 0,
             'template_id' => null,
         ];
+        $this->changedFields = [];
+        $this->changeAllFields = true;
     }
 
     public function saveEditingSlot(): void
@@ -335,14 +373,22 @@ class ScheduleManager extends Component
                             continue;
                         }
 
-                        $this->schedules[$this->selectedDay][$this->editingSlot['time']][$size] = [
-                            'is_available' => $this->editingSlot['is_available'],
-                            'is_prime' => $this->editingSlot['is_prime'],
-                            'available_tables' => $this->editingSlot['available_tables'],
-                            'minimum_spend_per_guest' => $this->editingSlot['minimum_spend_per_guest'],
-                            'price_per_head' => $this->editingSlot['price_per_head'],
-                            'template_id' => $this->editingSlot['template_id'],
+                        $fields = [
+                            'is_available',
+                            'is_prime',
+                            'available_tables',
+                            'minimum_spend_per_guest',
+                            'price_per_head',
+                            'template_id',
                         ];
+                        $originalValue = $this->schedules[$this->selectedDay][$this->editingSlot['time']][$size];
+
+                        $newSlot = [];
+                        foreach ($fields as $field) {
+                            $newSlot[$field] = $this->shouldUpdateField($field, $originalValue);
+                        }
+
+                        $this->schedules[$this->selectedDay][$this->editingSlot['time']][$size] = $newSlot;
                     }
                 } else {
                     // Single party size edit
@@ -370,7 +416,7 @@ class ScheduleManager extends Component
                 if ($this->editingSlot['size'] === '*') {
                     // Bulk edit for all party sizes
                     $templates = $this->venue->scheduleTemplates()
-                        ->where('day_of_week', strtolower((string) $this->editingSlot['day']))
+                        ->where('day_of_week', strtolower((string)$this->editingSlot['day']))
                         ->where('start_time', $this->editingSlot['time'])
                         ->get();
 
@@ -406,7 +452,7 @@ class ScheduleManager extends Component
                     }
                 } else {
                     $template = $this->venue->scheduleTemplates
-                        ->where('day_of_week', strtolower((string) $this->editingSlot['day']))
+                        ->where('day_of_week', strtolower((string)$this->editingSlot['day']))
                         ->where('start_time', $this->editingSlot['time'])
                         ->where('party_size', $this->editingSlot['size'])
                         ->first();
@@ -466,7 +512,6 @@ class ScheduleManager extends Component
             }
 
             $this->closeEditModal();
-
         } catch (Exception $e) {
             Log::error('Error saving schedule', [
                 'error' => $e->getMessage(),
@@ -489,8 +534,10 @@ class ScheduleManager extends Component
             if ($this->editingSlot['time'] === '*' && $this->editingSlot['size']) {
                 if ($this->activeView === 'calendar') {
                     // Calendar mode: Update "VenueTimeSlot" overrides for a specific date
-                    throw_unless($this->editingSlot['date'],
-                        new Exception('The booking date must be provided for calendar overrides.'));
+                    throw_unless(
+                        $this->editingSlot['date'],
+                        new Exception('The booking date must be provided for calendar overrides.')
+                    );
 
                     $originalData = [];
                     $newData = [];
@@ -499,7 +546,7 @@ class ScheduleManager extends Component
                         $time = $slot['time'];
 
                         $template = $this->venue->scheduleTemplates()
-                            ->where('day_of_week', strtolower((string) $this->editingSlot['day']))
+                            ->where('day_of_week', strtolower((string)$this->editingSlot['day']))
                             ->where('start_time', $time)
                             ->where('party_size', $this->editingSlot['size'])
                             ->first();
@@ -557,16 +604,22 @@ class ScheduleManager extends Component
                     // Template mode (original logic remains for batch updates across templates)
                     foreach ($this->timeSlots as $slot) {
                         $time = $slot['time'];
-
-                        // Update the schedule for each time slot
-                        $this->schedules[$this->selectedDay][$time][$this->editingSlot['size']] = [
-                            'is_available' => $this->editingSlot['is_available'],
-                            'is_prime' => $this->editingSlot['is_prime'],
-                            'available_tables' => $this->editingSlot['available_tables'],
-                            'minimum_spend_per_guest' => $this->editingSlot['minimum_spend_per_guest'],
-                            'price_per_head' => $this->editingSlot['price_per_head'],
-                            'template_id' => $this->schedules[$this->selectedDay][$time][$this->editingSlot['size']]['template_id'] ?? null,
+                        $fields = [
+                            'is_available',
+                            'is_prime',
+                            'available_tables',
+                            'minimum_spend_per_guest',
+                            'price_per_head',
+                            'template_id',
                         ];
+                        $originalValue = $this->schedules[$this->selectedDay][$time][$this->editingSlot['size']] ?? [];
+
+                        $newSlot = [];
+                        foreach ($fields as $field) {
+                            $newSlot[$field] = $this->shouldUpdateField($field, $originalValue);
+                        }
+
+                        $this->schedules[$this->selectedDay][$time][$this->editingSlot['size']] = $newSlot;
                     }
 
                     // Persist the changes to the database
@@ -580,13 +633,27 @@ class ScheduleManager extends Component
                             ->first();
 
                         if ($template) {
-                            $template->update([
-                                'is_available' => $this->editingSlot['is_available'],
-                                'prime_time' => $this->editingSlot['is_prime'],
-                                'available_tables' => $this->editingSlot['available_tables'],
-                                'minimum_spend_per_guest' => $this->editingSlot['minimum_spend_per_guest'],
-                                'price_per_head' => $this->editingSlot['price_per_head'],
-                            ]);
+                            $fields = [
+                                'is_available',
+                                'prime_time',
+                                'available_tables',
+                                'minimum_spend_per_guest',
+                                'price_per_head',
+                            ];
+                            $originalValue = [
+                                'is_available' => $template->is_available,
+                                'available_tables' => $template->available_tables,
+                                'prime_time' => $template->prime_time,
+                                'price_per_head' => $template->price_per_head,
+                                'minimum_spend_per_guest' => $template->minimum_spend_per_guest,
+                            ];
+
+                            $updateData = [];
+                            foreach ($fields as $field) {
+                                $updateData[$field] = $this->shouldUpdateField($field, $originalValue);
+                            }
+
+                            $template->update($updateData);
                         }
                     }
 
@@ -600,7 +667,6 @@ class ScheduleManager extends Component
             }
 
             $this->closeEditModal();
-
         } catch (Exception|Throwable $e) {
             Log::error('Error saving party size schedule', [
                 'error' => $e->getMessage(),
@@ -664,12 +730,12 @@ class ScheduleManager extends Component
     {
         $firstSize = array_key_first(array_filter(
             $this->venue->party_sizes,
-            fn ($value, $key) => $key !== 'Special Request',
+            fn($value, $key) => $key !== 'Special Request',
             ARRAY_FILTER_USE_BOTH
         ));
         $schedule = $this->calendarSchedules[$time][$firstSize] ?? null;
 
-        if (! $schedule) {
+        if (!$schedule) {
             Notification::make()
                 ->title('No Schedule Found')
                 ->body("No schedule exists for $time on $day.")
@@ -698,9 +764,9 @@ class ScheduleManager extends Component
     {
         // Retrieve the first matching schedule for the party size on the selected day
         $schedule = collect($this->calendarSchedules)
-            ->first(fn ($timeSlots) => isset($timeSlots[$size]))[$size] ?? null;
+            ->first(fn($timeSlots) => isset($timeSlots[$size]))[$size] ?? null;
 
-        if (! $schedule) {
+        if (!$schedule) {
             Notification::make()
                 ->title('No Schedule Found')
                 ->body("No schedule exists for party size $size on $day.")
@@ -732,12 +798,11 @@ class ScheduleManager extends Component
         // Use the first party size's settings as default
         $firstSize = array_key_first(array_filter(
             $this->venue->party_sizes,
-            fn ($value, $key) => $key !== 'Special Request',
+            fn($value, $key) => $key !== 'Special Request',
             ARRAY_FILTER_USE_BOTH
         ));
         $schedule = $this->schedules[$this->selectedDay][$time][$firstSize] ?? null;
-
-        if (! $schedule) {
+        if (!$schedule) {
             Notification::make()
                 ->title('No Schedule Found')
                 ->body("No schedule exists for $time.")
@@ -767,7 +832,7 @@ class ScheduleManager extends Component
     {
         // Use the first time slot's settings as default
         $firstTimeSlot = $this->timeSlots[0]['time'] ?? null;
-        if (! isset($this->schedules[$this->selectedDay][$firstTimeSlot][$size])) {
+        if (!isset($this->schedules[$this->selectedDay][$firstTimeSlot][$size])) {
             Notification::make()
                 ->title('No Schedule Found')
                 ->body("No schedule exists for party size $size.")
@@ -826,7 +891,7 @@ class ScheduleManager extends Component
             ->get();
 
         // Group templates and overrides for an easier lookup
-        $groupedTemplates = $templates->groupBy(fn ($template) => $template->start_time.'|'.$template->party_size);
+        $groupedTemplates = $templates->groupBy(fn($template) => $template->start_time . '|' . $template->party_size);
 
         $groupedOverrides = $overrides->groupBy('schedule_template_id');
 
@@ -842,7 +907,7 @@ class ScheduleManager extends Component
                 }
 
                 // Find a template for this time and party size
-                $template = $groupedTemplates->get($slot['time'].'|'.$size)?->first();
+                $template = $groupedTemplates->get($slot['time'] . '|' . $size)?->first();
                 $override = null;
 
                 if ($template) {
@@ -918,7 +983,6 @@ class ScheduleManager extends Component
                 ->title('All time slots have been closed for this day')
                 ->success()
                 ->send();
-
         } catch (Exception $e) {
             Log::error('Error closing day', [
                 'error' => $e->getMessage(),
@@ -992,7 +1056,6 @@ class ScheduleManager extends Component
                 ->title('All available time slots have been set to prime time')
                 ->success()
                 ->send();
-
         } catch (Exception $e) {
             Log::error('Error setting prime time', [
                 'error' => $e->getMessage(),
@@ -1067,7 +1130,6 @@ class ScheduleManager extends Component
                 ->title('All time slots have been marked as sold out')
                 ->success()
                 ->send();
-
         } catch (Exception $e) {
             Log::error('Error marking day as sold out', [
                 'error' => $e->getMessage(),
@@ -1142,7 +1204,6 @@ class ScheduleManager extends Component
                 ->title('All available time slots have been set to non-prime time')
                 ->success()
                 ->send();
-
         } catch (Exception $e) {
             Log::error('Error setting non-prime time', [
                 'error' => $e->getMessage(),
@@ -1167,7 +1228,7 @@ class ScheduleManager extends Component
                 ->get();
 
             // Store original data for logging
-            $originalData = $templates->mapWithKeys(fn ($template) => [
+            $originalData = $templates->mapWithKeys(fn($template) => [
                 $template->id => [
                     'time' => $template->start_time,
                     'party_size' => $template->party_size,
@@ -1200,7 +1261,6 @@ class ScheduleManager extends Component
                 ->title('All available time slots in weekly template have been set to non-prime time')
                 ->success()
                 ->send();
-
         } catch (Exception $e) {
             Log::error('Error setting weekly template to non-prime time', [
                 'error' => $e->getMessage(),
@@ -1261,7 +1321,7 @@ class ScheduleManager extends Component
             ->whereIn('schedule_template_id', $this->venue->scheduleTemplates()->pluck('id'))
             ->distinct()
             ->pluck('booking_date')
-            ->map(fn ($date) => $date->format('Y-m-d'))
+            ->map(fn($date) => $date->format('Y-m-d'))
             ->toArray();
     }
 
@@ -1330,7 +1390,7 @@ class ScheduleManager extends Component
                 $isPrime = $override?->prime_time ?? $template->prime_time;
 
                 // Only update if the slot is not prime
-                if (! $isPrime) {
+                if (!$isPrime) {
                     // If override exists, just update price_per_head
                     if ($override) {
                         $override->update([
@@ -1360,7 +1420,7 @@ class ScheduleManager extends Component
                     'price_per_head' => $this->dayPricePerHead,
                     'original_data' => $originalData,
                 ])
-                ->log('Concierge incentive set for non-prime timeslots on '.$this->getFormattedDate($this->selectedDate));
+                ->log('Concierge incentive set for non-prime timeslots on ' . $this->getFormattedDate($this->selectedDate));
 
             // Reset the price per head input
             $this->dayPricePerHead = null;
@@ -1418,7 +1478,7 @@ class ScheduleManager extends Component
                 ->get();
 
             // Store original data for logging
-            $originalData = $templates->mapWithKeys(fn ($template) => [
+            $originalData = $templates->mapWithKeys(fn($template) => [
                 $template->id => [
                     'time' => $template->start_time,
                     'party_size' => $template->party_size,
@@ -1443,7 +1503,7 @@ class ScheduleManager extends Component
                     'price_per_head' => $this->weeklyPricePerHead,
                     'original_data' => $originalData,
                 ])
-                ->log('Concierge incentive set for non-prime timeslots on weekly template for '.ucfirst($this->selectedDay));
+                ->log('Concierge incentive set for non-prime timeslots on weekly template for ' . ucfirst($this->selectedDay));
 
             // Reset the price per head input
             $this->weeklyPricePerHead = null;
@@ -1470,5 +1530,14 @@ class ScheduleManager extends Component
                 ->danger()
                 ->send();
         }
+    }
+
+    private function shouldUpdateField(string $field, array $original)
+    {
+        $alias = ['prime_time' => 'is_prime'][$field] ?? $field;
+
+        return ($this->changeAllFields || in_array($alias, $this->changedFields, true))
+            ? ($this->editingSlot[$alias] ?? ($original[$field] ?? null))
+            : ($original[$field] ?? null);
     }
 }
