@@ -14,6 +14,10 @@ use Filament\Tables\Actions\ViewAction;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\Filter;
+use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\DatePicker;
+use Filament\Forms\Components\Select;
+
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\HtmlString;
@@ -27,6 +31,8 @@ class ListConcierges extends ListRecords
 {
     use ImpersonatesOther;
 
+    public ?array $data = [];
+
     protected static string $resource = ConciergeResource::class;
 
     protected static string $view = 'filament.pages.concierge.list-concierges';
@@ -37,6 +43,22 @@ class ListConcierges extends ListRecords
 
     public ?string $tableSortDirection = 'desc';
 
+    public function mount(): void
+    {
+        parent::mount();
+
+        if (blank($this->data)) {
+            $this->data = [
+                'search' => '',
+                'date_filter' => 'all_time',
+                'start_date' => now()->subDays(30)->format('Y-m-d'),
+                'end_date' => now()->format('Y-m-d'),
+            ];
+        }
+    }
+
+
+
     public function table(Table $table): Table
     {
         return $table
@@ -44,8 +66,7 @@ class ListConcierges extends ListRecords
             ->query($this->getConciergesQuery())
             ->columns([
                 TextColumn::make('user.name')
-                    ->size('xs')->sortable(['last_name'])
-                    ->searchable(['first_name', 'last_name', 'phone']),
+                    ->size('xs')->sortable(['last_name']),
                 IconColumn::make('is_qr_concierge')
                     ->label('QR')
                     ->icon(fn (bool $state): string => $state ? 'heroicon-o-check-circle' : 'heroicon-o-x-circle')
@@ -54,7 +75,8 @@ class ListConcierges extends ListRecords
                         ? "QR Concierge: {$record->revenue_percentage}% revenue"
                         : 'Regular concierge')
                     ->grow(false)
-                    ->alignCenter(),
+                    ->alignCenter()
+                    ->visibleFrom('sm'),
                 IconColumn::make('can_override_duplicate_checks')
                     ->label('Override')
                     ->boolean()
@@ -132,6 +154,7 @@ class ListConcierges extends ListRecords
                     ->default('Never'),
                                 TextColumn::make('user.secured_at')
                     ->label('Date Joined')
+                    ->visibleFrom('sm')
                     ->size('xs')
                     ->formatStateUsing(function ($state) {
                         if (!$state) {
@@ -154,14 +177,20 @@ class ListConcierges extends ListRecords
                     ->icon('heroicon-o-arrow-down-tray')
                     ->color('gray')
                     ->action(function () {
-                        $data = $this->getConciergesQuery()
+                        // Get the current table query which includes all filters
+                        $data = $this->getFilteredTableQuery()
                             ->with(['user'])
                             ->orderBy('users.secured_at', 'desc')
                             ->get();
 
-                        $export = new class($data) implements FromCollection, WithHeadings
+                        // Get filter data for filename and headers
+                        $dateFilter = $this->data['date_filter'] ?? 'all_time';
+                        $startDate = $this->data['start_date'] ?? null;
+                        $endDate = $this->data['end_date'] ?? null;
+
+                        $export = new class($data, $this) implements FromCollection, WithHeadings
                         {
-                            public function __construct(private $data) {}
+                            public function __construct(private $data, private $parent) {}
 
                                                         public function collection()
                             {
@@ -189,8 +218,22 @@ class ListConcierges extends ListRecords
                             }
 
 
-                            public function headings(): array
+                                                        public function headings(): array
                             {
+                                $dateFilter = $this->parent->data['date_filter'] ?? 'all_time';
+                                $dateRangeText = 'All Time';
+
+                                if ($dateFilter === 'date_range') {
+                                    $startDate = $this->parent->data['start_date'] ?? null;
+                                    $endDate = $this->parent->data['end_date'] ?? null;
+
+                                    if ($startDate && $endDate) {
+                                        $start = Carbon::parse($startDate)->format('M j, Y');
+                                        $end = Carbon::parse($endDate)->format('M j, Y');
+                                        $dateRangeText = "{$start} - {$end}";
+                                    }
+                                }
+
                                 return [
                                     'First Name',
                                     'Last Name',
@@ -201,25 +244,31 @@ class ListConcierges extends ListRecords
                                     'Revenue Percentage',
                                     'Can Override Duplicate Checks',
                                     'Referrer Name',
-                                    'Total Earnings',
-                                    'Direct Bookings',
-                                    'Referral Bookings',
-                                    'Total Bookings',
-                                    'Referrals Count',
+                                    "Total Earnings ({$dateRangeText})",
+                                    "Direct Bookings ({$dateRangeText})",
+                                    "Referral Bookings ({$dateRangeText})",
+                                    "Total Bookings ({$dateRangeText})",
+                                    'Referrals Count (All Time)',
                                     'Date Joined',
                                 ];
                             }
                         };
 
-                        return Excel::download($export, 'concierges-export-' . now()->format('Y-m-d-H-i-s') . '.csv');
+                        // Generate filename based on filters
+                        $filename = 'concierges-export-';
+                        if ($dateFilter === 'date_range' && $startDate && $endDate) {
+                            $start = Carbon::parse($startDate)->format('Y-m-d');
+                            $end = Carbon::parse($endDate)->format('Y-m-d');
+                            $filename .= "{$start}_to_{$end}-";
+                        } else {
+                            $filename .= 'all-time-';
+                        }
+                        $filename .= now()->format('Y-m-d-H-i-s') . '.csv';
+
+                        return Excel::download($export, $filename);
                     }),
             ])
-            ->filters([
-                Filter::make('qr_concierges')
-                    ->label('QR Concierges Only')
-                    ->query(fn (Builder $query): Builder => $query->where('is_qr_concierge', true))
-                    ->toggle(),
-            ])
+                        ->searchable(false)
             ->actions([
                 Action::make('impersonate')
                     ->iconButton()
@@ -275,6 +324,159 @@ class ListConcierges extends ListRecords
                     ->modalCancelAction(false)
                     ->slideOver(self::USE_SLIDE_OVER),
             ]);
+    }
+
+    protected function getConciergesQueryWithDateFilter(Builder $baseQuery, string $startDate, string $endDate): Builder
+    {
+        // This method will be called from the date filter to modify the earnings calculations
+        // We need to replace the base query with date-filtered subqueries
+        $earningTypes = [
+            EarningType::CONCIERGE->value,
+            EarningType::CONCIERGE_REFERRAL_1->value,
+            EarningType::CONCIERGE_REFERRAL_2->value,
+            EarningType::CONCIERGE_BOUNTY->value,
+            EarningType::REFUND->value,
+        ];
+
+        return $baseQuery->select([
+            'concierges.id',
+            'concierges.user_id',
+            'concierges.hotel_name',
+            'concierges.is_qr_concierge',
+            'concierges.revenue_percentage',
+            'concierges.can_override_duplicate_checks',
+            DB::raw("CONCAT(users.first_name, ' ', users.last_name) as user_name"),
+            // Referrer name subquery
+            DB::raw('(SELECT u2.first_name FROM users u2
+                JOIN referrals r ON u2.id = r.referrer_id
+                WHERE r.user_id = users.id LIMIT 1) as referrer_first_name'),
+            // Referrals count subquery (always all-time)
+            DB::raw('(SELECT COUNT(*) FROM concierges c2
+                JOIN users u3 ON c2.user_id = u3.id
+                WHERE u3.concierge_referral_id = concierges.id) as referrals_count'),
+            // Date-filtered earnings calculations
+            DB::raw("COALESCE((
+                SELECT SUM(e.amount)
+                FROM earnings e
+                JOIN bookings b ON e.booking_id = b.id
+                WHERE e.user_id = users.id
+                AND b.confirmed_at IS NOT NULL
+                AND b.confirmed_at BETWEEN '{$startDate}' AND '{$endDate}'
+                AND e.type IN ('" . implode("','", $earningTypes) . "')
+                AND b.status NOT IN ('refunded', 'partially_refunded')
+            ), 0) as total_earnings"),
+            // Date-filtered direct bookings
+            DB::raw("COALESCE((
+                SELECT COUNT(DISTINCT b.id)
+                FROM earnings e
+                JOIN bookings b ON e.booking_id = b.id
+                WHERE e.user_id = users.id
+                AND b.confirmed_at IS NOT NULL
+                AND b.confirmed_at BETWEEN '{$startDate}' AND '{$endDate}'
+                AND e.type IN ('concierge', 'concierge_bounty')
+                AND e.type NOT IN ('refund')
+                AND b.status NOT IN ('refunded', 'partially_refunded')
+            ), 0) as direct_bookings"),
+            // Date-filtered referral bookings
+            DB::raw("COALESCE((
+                SELECT COUNT(DISTINCT b.id)
+                FROM earnings e
+                JOIN bookings b ON e.booking_id = b.id
+                WHERE e.user_id = users.id
+                AND b.confirmed_at IS NOT NULL
+                AND b.confirmed_at BETWEEN '{$startDate}' AND '{$endDate}'
+                AND e.type IN ('concierge_referral_1', 'concierge_referral_2')
+                AND b.status NOT IN ('refunded', 'partially_refunded')
+            ), 0) as referral_bookings"),
+            // Date-filtered total bookings
+            DB::raw("COALESCE((
+                SELECT COUNT(DISTINCT b.id)
+                FROM earnings e
+                JOIN bookings b ON e.booking_id = b.id
+                WHERE e.user_id = users.id
+                AND b.confirmed_at IS NOT NULL
+                AND b.confirmed_at BETWEEN '{$startDate}' AND '{$endDate}'
+                AND e.type IN ('" . implode("','", $earningTypes) . "')
+                AND b.status NOT IN ('refunded', 'partially_refunded')
+            ), 0) as total_bookings"),
+        ]);
+    }
+
+        public function getFilteredTableQuery(): Builder
+    {
+        $query = $this->getConciergesQuery();
+
+        // Apply search filter
+        if (filled($this->data['search'] ?? '')) {
+            $search = strtolower($this->data['search']);
+            $query->where(function (Builder $q) use ($search) {
+                $q->whereRaw('LOWER(users.first_name) like ?', ["%{$search}%"])
+                  ->orWhereRaw('LOWER(users.last_name) like ?', ["%{$search}%"])
+                  ->orWhereRaw('LOWER(users.email) like ?', ["%{$search}%"])
+                  ->orWhereRaw('LOWER(users.phone) like ?', ["%{$search}%"])
+                  ->orWhereRaw('LOWER(concierges.hotel_name) like ?', ["%{$search}%"]);
+            });
+        }
+
+        // Apply date filter
+        if (($this->data['date_filter'] ?? 'all_time') === 'date_range' &&
+            filled($this->data['start_date'] ?? '') && filled($this->data['end_date'] ?? '')) {
+            $startDate = Carbon::parse($this->data['start_date'])->startOfDay()->toDateTimeString();
+            $endDate = Carbon::parse($this->data['end_date'])->endOfDay()->toDateTimeString();
+            $query = $this->getConciergesQueryWithDateFilter($query, $startDate, $endDate);
+        }
+
+        return $query;
+    }
+
+    public function resetTable(): void
+    {
+        $this->resetPage();
+
+        // Dispatch filter updates to pending concierges table
+        $this->dispatch('updatePendingFilters', [
+            'search' => $this->data['search'] ?? '',
+            'date_filter' => $this->data['date_filter'] ?? 'all_time',
+            'start_date' => $this->data['start_date'] ?? '',
+            'end_date' => $this->data['end_date'] ?? '',
+        ]);
+    }
+
+    public function updatedData(): void
+    {
+        // Dispatch filter updates whenever data changes
+        $this->dispatch('updatePendingFilters', [
+            'search' => $this->data['search'] ?? '',
+            'date_filter' => $this->data['date_filter'] ?? 'all_time',
+            'start_date' => $this->data['start_date'] ?? '',
+            'end_date' => $this->data['end_date'] ?? '',
+        ]);
+    }
+
+        public function getSubheading(): ?string
+    {
+        // Only show date range subheading if not all time
+        if (($this->data['date_filter'] ?? 'all_time') === 'date_range' &&
+            filled($this->data['start_date'] ?? '') && filled($this->data['end_date'] ?? '')) {
+
+            $startDate = Carbon::parse($this->data['start_date']);
+            $endDate = Carbon::parse($this->data['end_date']);
+
+            // Check if years are different
+            if ($startDate->year === $endDate->year) {
+                // Same year - don't show years
+                $formattedStart = $startDate->format('M j');
+                $formattedEnd = $endDate->format('M j');
+            } else {
+                // Different years - show years
+                $formattedStart = $startDate->format('M j, Y');
+                $formattedEnd = $endDate->format('M j, Y');
+            }
+
+            return "{$formattedStart} - {$formattedEnd}";
+        }
+
+        return null;
     }
 
             protected function getConciergesQuery(): Builder
