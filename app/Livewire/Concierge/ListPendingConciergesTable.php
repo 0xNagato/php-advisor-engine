@@ -10,40 +10,26 @@ use Filament\Tables\Actions\Action;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Filament\Widgets\TableWidget as BaseWidget;
-use Filament\Widgets\Concerns\CanPoll;
 use Illuminate\Database\Eloquent\Builder;
-use Livewire\Attributes\On;
 
 class ListPendingConciergesTable extends BaseWidget
 {
-    use CanPoll;
-
     protected static ?string $heading = 'Pending Concierges';
 
-    public ?array $filters = [];
+    public string $search = '';
+    public string $dateFilter = 'all_time';
+    public string $startDate = '';
+    public string $endDate = '';
 
-    public function mount(): void
-    {
-        // Listen for filter updates from the parent page
-        $this->filters = [];
-    }
-
-    #[On('updatePendingFilters')]
-    public function updateFilters(array $filters): void
-    {
-        $this->filters = $filters;
-        $this->resetTable();
-    }
-
-    protected function getTableQuery(): Builder
+        protected function getTableQuery(): Builder
     {
         $query = Referral::query()
             ->where(['type' => 'concierge', 'secured_at' => null])
             ->orderBy('created_at', 'desc'); // Latest first
 
-        // Apply search filter
-        if (filled($this->filters['search'] ?? '')) {
-            $search = strtolower($this->filters['search']);
+        // Apply search filter from properties
+        if (filled($this->search)) {
+            $search = strtolower($this->search);
             $query->where(function (Builder $q) use ($search) {
                 $q->whereRaw('LOWER(first_name) like ?', ["%{$search}%"])
                   ->orWhereRaw('LOWER(last_name) like ?', ["%{$search}%"])
@@ -52,11 +38,10 @@ class ListPendingConciergesTable extends BaseWidget
             });
         }
 
-        // Apply date filter for invitation date
-        if (($this->filters['date_filter'] ?? 'all_time') === 'date_range' &&
-            filled($this->filters['start_date'] ?? '') && filled($this->filters['end_date'] ?? '')) {
-            $startDate = Carbon::parse($this->filters['start_date'])->startOfDay();
-            $endDate = Carbon::parse($this->filters['end_date'])->endOfDay();
+        // Apply date filter for invitation date from properties
+        if ($this->dateFilter === 'date_range' && filled($this->startDate) && filled($this->endDate)) {
+            $startDate = Carbon::parse($this->startDate)->startOfDay();
+            $endDate = Carbon::parse($this->endDate)->endOfDay();
             $query->whereBetween('created_at', [$startDate, $endDate]);
         }
 
@@ -67,6 +52,7 @@ class ListPendingConciergesTable extends BaseWidget
     {
         return $table
             ->query($this->getTableQuery())
+            ->defaultSort('created_at', 'desc')
             ->columns([
                 TextColumn::make('id')
                     ->label('User')

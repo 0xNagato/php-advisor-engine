@@ -429,28 +429,9 @@ class ListConcierges extends ListRecords
         return $query;
     }
 
-    public function resetTable(): void
+        public function resetTable(): void
     {
         $this->resetPage();
-
-        // Dispatch filter updates to pending concierges table
-        $this->dispatch('updatePendingFilters', [
-            'search' => $this->data['search'] ?? '',
-            'date_filter' => $this->data['date_filter'] ?? 'all_time',
-            'start_date' => $this->data['start_date'] ?? '',
-            'end_date' => $this->data['end_date'] ?? '',
-        ]);
-    }
-
-    public function updatedData(): void
-    {
-        // Dispatch filter updates whenever data changes
-        $this->dispatch('updatePendingFilters', [
-            'search' => $this->data['search'] ?? '',
-            'date_filter' => $this->data['date_filter'] ?? 'all_time',
-            'start_date' => $this->data['start_date'] ?? '',
-            'end_date' => $this->data['end_date'] ?? '',
-        ]);
     }
 
         public function getSubheading(): ?string

@@ -16,7 +16,7 @@
                             <input type="text"
                                    wire:model.live.debounce.500ms="data.search"
                                    placeholder="Search by name, email, phone, or hotel"
-                                   x-on:keyup="$dispatch('updatePendingFilters', { search: $wire.data.search, date_filter: $wire.data.date_filter, start_date: $wire.data.start_date, end_date: $wire.data.end_date })"
+
                                    class="fi-input block w-full border-none bg-transparent py-1.5 px-3 text-base text-gray-950 placeholder-gray-400 focus:ring-0 disabled:text-gray-500 disabled:[-webkit-text-fill-color:theme(colors.gray.500)] disabled:placeholder-gray-400 dark:text-white dark:placeholder-gray-500 dark:disabled:text-gray-400 dark:disabled:[-webkit-text-fill-color:theme(colors.gray.400)] dark:disabled:placeholder-gray-500 sm:text-sm sm:leading-6">
                         </div>
                     </div>
@@ -34,7 +34,7 @@
                         <div class="fi-input-wrp flex rounded-lg shadow-sm ring-1 transition duration-75 bg-white dark:bg-white/5 ring-gray-950/10 dark:ring-white/20 focus-within:ring-2 focus-within:ring-primary-600 dark:focus-within:ring-primary-500">
                             <select wire:model.live="data.date_filter"
                                     wire:change="resetTable"
-                                    x-on:change="$dispatch('updatePendingFilters', { search: $wire.data.search, date_filter: $wire.data.date_filter, start_date: $wire.data.start_date, end_date: $wire.data.end_date })"
+
                                     class="fi-select-input block w-full border-none bg-transparent py-1.5 pe-8 ps-3 text-base text-gray-950 focus:ring-0 disabled:text-gray-500 disabled:[-webkit-text-fill-color:theme(colors.gray.500)] dark:text-white dark:disabled:text-gray-400 dark:disabled:[-webkit-text-fill-color:theme(colors.gray.400)] sm:text-sm sm:leading-6">
                                 <option value="all_time">All Time</option>
                                 <option value="date_range">Date Range</option>
@@ -56,7 +56,7 @@
                             <input type="date"
                                    wire:model.live="data.start_date"
                                    wire:change="resetTable"
-                                   x-on:change="$dispatch('updatePendingFilters', { search: $wire.data.search, date_filter: $wire.data.date_filter, start_date: $wire.data.start_date, end_date: $wire.data.end_date })"
+
                                    class="fi-input block w-full border-none bg-transparent py-1.5 px-3 text-base text-gray-950 placeholder-gray-400 focus:ring-0 disabled:text-gray-500 disabled:[-webkit-text-fill-color:theme(colors.gray.500)] disabled:placeholder-gray-400 dark:text-white dark:placeholder-gray-500 dark:disabled:text-gray-400 dark:disabled:[-webkit-text-fill-color:theme(colors.gray.400)] dark:disabled:placeholder-gray-500 sm:text-sm sm:leading-6">
                         </div>
                     </div>
@@ -75,7 +75,7 @@
                             <input type="date"
                                    wire:model.live="data.end_date"
                                    wire:change="resetTable"
-                                   x-on:change="$dispatch('updatePendingFilters', { search: $wire.data.search, date_filter: $wire.data.date_filter, start_date: $wire.data.start_date, end_date: $wire.data.end_date })"
+
                                    class="fi-input block w-full border-none bg-transparent py-1.5 px-3 text-base text-gray-950 placeholder-gray-400 focus:ring-0 disabled:text-gray-500 disabled:[-webkit-text-fill-color:theme(colors.gray.500)] disabled:placeholder-gray-400 dark:text-white dark:placeholder-gray-500 dark:disabled:text-gray-400 dark:disabled:[-webkit-text-fill-color:theme(colors.gray.400)] dark:disabled:placeholder-gray-500 sm:text-sm sm:leading-6">
                         </div>
                     </div>
@@ -121,8 +121,12 @@
 {{--                    <livewire:concierge.list-concierges-table />--}}
                 </div>
 
-                <div :id="$id(tabId + '-content')" x-show="tabContentActive($el)" class="relative" x-cloak>
-                    <livewire:concierge.list-pending-concierges-table />
+                                <div :id="$id(tabId + '-content')" x-show="tabContentActive($el)" class="relative" x-cloak>
+                    <livewire:concierge.list-pending-concierges-table
+                        search="{{ $data['search'] ?? '' }}"
+                        date-filter="{{ $data['date_filter'] ?? 'all_time' }}"
+                        start-date="{{ $data['start_date'] ?? '' }}"
+                        end-date="{{ $data['end_date'] ?? '' }}" />
                 </div>
 
             </div>
