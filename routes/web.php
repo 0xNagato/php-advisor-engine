@@ -48,6 +48,14 @@ Route::get('/concierges', static function () {
     return view('web.concierges');
 })->name('concierges');
 
+Route::get('/alex', static function () {
+    return view('web.alex.index');
+})->name('alex');
+
+Route::get('/alex/concierges', static function () {
+    return view('web.alex.concierge');
+})->name('alex.concierges');
+
 Route::get('/story', Story::class)->name('story');
 
 Route::get('/onboarding/{token?}', VenueOnboarding::class)->name('onboarding');
