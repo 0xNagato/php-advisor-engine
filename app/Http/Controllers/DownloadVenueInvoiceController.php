@@ -16,6 +16,7 @@ use RuntimeException;
 class DownloadVenueInvoiceController extends Controller
 {
     const int PREVIEW_RANDOM_STRING_LENGTH = 8;
+    const int INVOICE_DUE_DAYS = 15;
 
     public function __invoke(Request $request, Venue $venue, string $startDate, string $endDate)
     {
@@ -32,9 +33,9 @@ class DownloadVenueInvoiceController extends Controller
                 'venue_id' => $venue->id,
                 'start_date' => $startDateCarbon->format('Y-m-d'),
                 'end_date' => $endDateCarbon->format('Y-m-d'),
-                'due_date' => now()->addDays(15),
+                'due_date' => now()->addDays(self::INVOICE_DUE_DAYS),
                 'currency' => 'USD',
-                'invoice_number' => 'preview-'.str()->random(self::PREVIEW_RANDOM_STRING_LENGTH),
+                'invoice_number' => 'preview-' . str()->random(self::PREVIEW_RANDOM_STRING_LENGTH),
                 'status' => VenueInvoiceStatus::DRAFT,
             ]);
 
@@ -59,7 +60,7 @@ class DownloadVenueInvoiceController extends Controller
             ->first();
 
         // Regenerate if requested or if the invoice doesn't exist
-        if ($shouldRegenerate || ! $invoice) {
+        if ($shouldRegenerate || !$invoice) {
             // If regenerating and invoice exist, delete the old one
             if ($invoice) {
                 // Delete the old PDF file if it exists
@@ -75,11 +76,11 @@ class DownloadVenueInvoiceController extends Controller
             $invoice = GenerateVenueInvoice::run($venue, $startDate, $endDate);
         }
 
-        throw_unless(Storage::disk('do')->exists($invoice->pdf_path), new RuntimeException('Invoice PDF not found for path: '.$invoice->pdf_path));
+        throw_unless(Storage::disk('do')->exists($invoice->pdf_path), new RuntimeException('Invoice PDF not found for path: ' . $invoice->pdf_path));
 
         return Storage::disk('do')->download(
             $invoice->pdf_path,
-            $invoice->name().'.pdf'
+            $invoice->name() . '.pdf'
         );
     }
 }
