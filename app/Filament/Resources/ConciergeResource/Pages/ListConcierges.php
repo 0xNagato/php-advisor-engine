@@ -2,9 +2,9 @@
 
 namespace App\Filament\Resources\ConciergeResource\Pages;
 
+use App\Enums\EarningType;
 use App\Filament\Resources\ConciergeResource;
 use App\Models\Concierge;
-use App\Models\User;
 use App\Traits\ImpersonatesOther;
 use Carbon\Carbon;
 use Filament\Resources\Pages\ListRecords;
@@ -13,19 +13,13 @@ use Filament\Tables\Actions\EditAction;
 use Filament\Tables\Actions\ViewAction;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Filters\Filter;
-use Filament\Forms\Components\TextInput;
-use Filament\Forms\Components\DatePicker;
-use Filament\Forms\Components\Select;
-
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\HtmlString;
 use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Facades\Excel;
-use App\Enums\EarningType;
-use Illuminate\Support\Facades\DB;
 
 class ListConcierges extends ListRecords
 {
@@ -56,8 +50,6 @@ class ListConcierges extends ListRecords
             ];
         }
     }
-
-
 
     public function table(Table $table): Table
     {
@@ -152,12 +144,12 @@ class ListConcierges extends ListRecords
                         return 'Never';
                     })
                     ->default('Never'),
-                                TextColumn::make('user.secured_at')
+                TextColumn::make('user.secured_at')
                     ->label('Date Joined')
                     ->visibleFrom('sm')
                     ->size('xs')
                     ->formatStateUsing(function ($state) {
-                        if (!$state) {
+                        if (! $state) {
                             return '-';
                         }
 
@@ -192,7 +184,7 @@ class ListConcierges extends ListRecords
                         {
                             public function __construct(private $data, private $parent) {}
 
-                                                        public function collection()
+                            public function collection()
                             {
                                 return $this->data->map(function ($record) {
                                     $attrs = $record->getAttributes();
@@ -204,21 +196,20 @@ class ListConcierges extends ListRecords
                                         'phone' => $record->user?->phone ?? '',
                                         'hotel_name' => $record->hotel_name ?? '',
                                         'is_qr_concierge' => $record->is_qr_concierge ? 'Yes' : 'No',
-                                        'revenue_percentage' => (string)($record->revenue_percentage ?? 0),
+                                        'revenue_percentage' => (string) ($record->revenue_percentage ?? 0),
                                         'can_override_duplicate_checks' => $record->can_override_duplicate_checks ? 'Yes' : 'No',
                                         'referrer_name' => $attrs['referrer_first_name'] ?? '',
                                         'total_earnings' => money($attrs['total_earnings'] ?? 0, 'USD'),
-                                        'direct_bookings' => (string)($attrs['direct_bookings'] ?? 0),
-                                        'referral_bookings' => (string)($attrs['referral_bookings'] ?? 0),
-                                        'total_bookings' => (string)($attrs['total_bookings'] ?? 0),
-                                        'referrals_count' => (string)($attrs['referrals_count'] ?? 0),
+                                        'direct_bookings' => (string) ($attrs['direct_bookings'] ?? 0),
+                                        'referral_bookings' => (string) ($attrs['referral_bookings'] ?? 0),
+                                        'total_bookings' => (string) ($attrs['total_bookings'] ?? 0),
+                                        'referrals_count' => (string) ($attrs['referrals_count'] ?? 0),
                                         'date_joined' => $record->user?->secured_at?->format('Y-m-d H:i:s') ?? '',
                                     ];
                                 });
                             }
 
-
-                                                        public function headings(): array
+                            public function headings(): array
                             {
                                 $dateFilter = $this->parent->data['date_filter'] ?? 'all_time';
                                 $dateRangeText = 'All Time';
@@ -263,12 +254,12 @@ class ListConcierges extends ListRecords
                         } else {
                             $filename .= 'all-time-';
                         }
-                        $filename .= now()->format('Y-m-d-H-i-s') . '.csv';
+                        $filename .= now()->format('Y-m-d-H-i-s').'.csv';
 
                         return Excel::download($export, $filename);
                     }),
             ])
-                        ->searchable(false)
+            ->searchable(false)
             ->actions([
                 Action::make('impersonate')
                     ->iconButton()
@@ -295,7 +286,7 @@ class ListConcierges extends ListRecords
                             ->orderByDesc('confirmed_at')
                             ->get();
 
-                                                $lastLogin = $concierge->user->authentications()->latest('login_at')->first()->login_at ?? null;
+                        $lastLogin = $concierge->user->authentications()->latest('login_at')->first()->login_at ?? null;
                         $attrs = $concierge->getAttributes();
                         $directBookings = $attrs['direct_bookings'] ?? 0;
                         $referralBookings = $attrs['referral_bookings'] ?? 0;
@@ -362,7 +353,7 @@ class ListConcierges extends ListRecords
                 WHERE e.user_id = users.id
                 AND b.confirmed_at IS NOT NULL
                 AND b.confirmed_at BETWEEN '{$startDate}' AND '{$endDate}'
-                AND e.type IN ('" . implode("','", $earningTypes) . "')
+                AND e.type IN ('".implode("','", $earningTypes)."')
                 AND b.status NOT IN ('refunded', 'partially_refunded')
             ), 0) as total_earnings"),
             // Date-filtered direct bookings
@@ -396,25 +387,25 @@ class ListConcierges extends ListRecords
                 WHERE e.user_id = users.id
                 AND b.confirmed_at IS NOT NULL
                 AND b.confirmed_at BETWEEN '{$startDate}' AND '{$endDate}'
-                AND e.type IN ('" . implode("','", $earningTypes) . "')
+                AND e.type IN ('".implode("','", $earningTypes)."')
                 AND b.status NOT IN ('refunded', 'partially_refunded')
             ), 0) as total_bookings"),
         ]);
     }
 
-        public function getFilteredTableQuery(): Builder
+    public function getFilteredTableQuery(): Builder
     {
         $query = $this->getConciergesQuery();
 
         // Apply search filter
         if (filled($this->data['search'] ?? '')) {
-            $search = strtolower($this->data['search']);
+            $search = strtolower((string) $this->data['search']);
             $query->where(function (Builder $q) use ($search) {
                 $q->whereRaw('LOWER(users.first_name) like ?', ["%{$search}%"])
-                  ->orWhereRaw('LOWER(users.last_name) like ?', ["%{$search}%"])
-                  ->orWhereRaw('LOWER(users.email) like ?', ["%{$search}%"])
-                  ->orWhereRaw('LOWER(users.phone) like ?', ["%{$search}%"])
-                  ->orWhereRaw('LOWER(concierges.hotel_name) like ?', ["%{$search}%"]);
+                    ->orWhereRaw('LOWER(users.last_name) like ?', ["%{$search}%"])
+                    ->orWhereRaw('LOWER(users.email) like ?', ["%{$search}%"])
+                    ->orWhereRaw('LOWER(users.phone) like ?', ["%{$search}%"])
+                    ->orWhereRaw('LOWER(concierges.hotel_name) like ?', ["%{$search}%"]);
             });
         }
 
@@ -429,12 +420,12 @@ class ListConcierges extends ListRecords
         return $query;
     }
 
-        public function resetTable(): void
+    public function resetTable(): void
     {
         $this->resetPage();
     }
 
-        public function getSubheading(): ?string
+    public function getSubheading(): ?string
     {
         // Only show date range subheading if not all time
         if (($this->data['date_filter'] ?? 'all_time') === 'date_range' &&
@@ -460,7 +451,7 @@ class ListConcierges extends ListRecords
         return null;
     }
 
-            protected function getConciergesQuery(): Builder
+    protected function getConciergesQuery(): Builder
     {
         // Build a comprehensive query that includes earnings calculations directly
         $earningTypes = [
@@ -495,7 +486,7 @@ class ListConcierges extends ListRecords
                     JOIN bookings b ON e.booking_id = b.id
                     WHERE e.user_id = users.id
                     AND b.confirmed_at IS NOT NULL
-                    AND e.type IN (\'' . implode('\',\'', $earningTypes) . '\')
+                    AND e.type IN (\''.implode('\',\'', $earningTypes).'\')
                     AND b.status NOT IN (\'refunded\', \'partially_refunded\')
                 ), 0) as total_earnings'),
                 // Direct bookings count
@@ -526,7 +517,7 @@ class ListConcierges extends ListRecords
                     JOIN bookings b ON e.booking_id = b.id
                     WHERE e.user_id = users.id
                     AND b.confirmed_at IS NOT NULL
-                    AND e.type IN (\'' . implode('\',\'', $earningTypes) . '\')
+                    AND e.type IN (\''.implode('\',\'', $earningTypes).'\')
                     AND b.status NOT IN (\'refunded\', \'partially_refunded\')
                 ), 0) as total_bookings'),
             ])
@@ -540,7 +531,6 @@ class ListConcierges extends ListRecords
             ]);
     }
 
-
     private function getReferrerName($record): string
     {
         // Try different ways to get referrer name
@@ -553,11 +543,7 @@ class ListConcierges extends ListRecords
         }
 
         // Check attributes for referrer_first_name from the query
-        if (isset($record->getAttributes()['referrer_first_name'])) {
-            return $record->getAttributes()['referrer_first_name'];
-        }
-
-        return '';
+        return $record->getAttributes()['referrer_first_name'] ?? '';
     }
 
     private function getFormattedEarnings($record): string
@@ -569,7 +555,7 @@ class ListConcierges extends ListRecords
 
         // Manual fallback calculation
         $totalEarnings = $record->total_earnings_in_u_s_d ?? 0;
-        return '$' . number_format($totalEarnings / 100, 2);
-    }
 
+        return '$'.number_format($totalEarnings / 100, 2);
+    }
 }

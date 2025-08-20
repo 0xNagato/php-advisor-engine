@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Http\Controllers;
 
 use App\Actions\GenerateVenueInvoice;
+use App\Enums\VenueInvoiceStatus;
 use App\Models\Venue;
 use App\Models\VenueInvoice;
 use Carbon\Carbon;
@@ -14,6 +15,9 @@ use RuntimeException;
 
 class DownloadVenueInvoiceController extends Controller
 {
+    const int PREVIEW_RANDOM_STRING_LENGTH = 8;
+    const int INVOICE_DUE_DAYS = 15;
+
     public function __invoke(Request $request, Venue $venue, string $startDate, string $endDate)
     {
         // Get the user's timezone
@@ -22,6 +26,28 @@ class DownloadVenueInvoiceController extends Controller
         // Parse dates in the user's timezone to get the correct date components
         $startDateCarbon = Carbon::parse($startDate, $userTimezone);
         $endDateCarbon = Carbon::parse($endDate, $userTimezone);
+
+        // NEW: Request-driven preview
+        if ($request->boolean('preview')) {
+            $tempInvoice = new VenueInvoice([
+                'venue_id' => $venue->id,
+                'start_date' => $startDateCarbon->format('Y-m-d'),
+                'end_date' => $endDateCarbon->format('Y-m-d'),
+                'due_date' => now()->addDays(self::INVOICE_DUE_DAYS),
+                'currency' => 'USD',
+                'invoice_number' => 'preview-' . str()->random(self::PREVIEW_RANDOM_STRING_LENGTH),
+                'status' => VenueInvoiceStatus::DRAFT,
+            ]);
+
+            $data = GenerateVenueInvoice::prepareViewData(
+                $venue,
+                $startDateCarbon,
+                $endDateCarbon,
+                $tempInvoice
+            );
+
+            return view('pdfs.venue-invoice', $data);
+        }
 
         // Check if regeneration is requested
         $shouldRegenerate = $request->boolean('regenerate', false);
@@ -34,7 +60,7 @@ class DownloadVenueInvoiceController extends Controller
             ->first();
 
         // Regenerate if requested or if the invoice doesn't exist
-        if ($shouldRegenerate || ! $invoice) {
+        if ($shouldRegenerate || !$invoice) {
             // If regenerating and invoice exist, delete the old one
             if ($invoice) {
                 // Delete the old PDF file if it exists
@@ -50,20 +76,11 @@ class DownloadVenueInvoiceController extends Controller
             $invoice = GenerateVenueInvoice::run($venue, $startDate, $endDate);
         }
 
-        // Check if we're in HTML preview mode (for development)
-        if (config('app.invoice_html_preview')) {
-            // Use the static method from the action to prepare the view data
-            $data = GenerateVenueInvoice::prepareViewData($venue, $startDateCarbon, $endDateCarbon, $invoice);
-
-            // Return the HTML view directly
-            return view('pdfs.venue-invoice', $data);
-        }
-
-        throw_unless(Storage::disk('do')->exists($invoice->pdf_path), new RuntimeException('Invoice PDF not found for path: '.$invoice->pdf_path));
+        throw_unless(Storage::disk('do')->exists($invoice->pdf_path), new RuntimeException('Invoice PDF not found for path: ' . $invoice->pdf_path));
 
         return Storage::disk('do')->download(
             $invoice->pdf_path,
-            $invoice->name().'.pdf'
+            $invoice->name() . '.pdf'
         );
     }
 }

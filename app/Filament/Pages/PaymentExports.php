@@ -131,22 +131,32 @@ class PaymentExports extends Page implements HasTable
                         ->label('Download Invoice')
                         ->icon('heroicon-m-arrow-down-on-square')
                         ->color('indigo')
-                        ->visible(fn (Venue $venue) => $this->hasExistingVenueInvoice($venue, $startDate, $endDate))
-                        ->action(fn (Venue $venue) => $this->downloadVenueInvoiceForVenue($venue)),
+                        ->visible(fn(Venue $venue) => $this->hasExistingVenueInvoice($venue, $startDate, $endDate))
+                        ->action(fn(Venue $venue) => $this->downloadVenueInvoiceForVenue($venue)),
                     Action::make('generate')
                         ->label('Generate Invoice')
                         ->icon('heroicon-m-document-plus')
                         ->color('indigo')
                         ->requiresConfirmation()
-                        ->modalHeading(fn (Venue $venue) => "Generate Invoice for $venue->name")
-                        ->modalDescription(fn (Venue $venue) => $this->getVenueInvoiceModalDescriptionForVenue($venue))
+                        ->modalHeading(fn(Venue $venue) => "Generate Invoice for $venue->name")
+                        ->modalDescription(fn(Venue $venue) => $this->getVenueInvoiceModalDescriptionForVenue($venue))
                         ->successNotification(
                             Notification::make()
                                 ->success()
                                 ->title('Invoice Generated')
                                 ->body('The invoice has been generated and will open in a new tab.')
                         )
-                        ->action(fn (Venue $venue) => $this->generateVenueInvoiceForVenue($venue)),
+                        ->action(fn(Venue $venue) => $this->generateVenueInvoiceForVenue($venue)),
+                    Action::make('preview')
+                        ->label('Preview Invoice')
+                        ->icon('heroicon-m-eye')
+                        ->color('gray')
+                        ->url(fn(Venue $venue) => route('venue.invoice.download', [
+                            'venue' => $venue->id,
+                            'startDate' => $this->data['startDate'],
+                            'endDate' => $this->data['endDate'],
+                            'preview' => true,
+                        ]))->openUrlInNewTab(),
                 ])->icon('heroicon-m-ellipsis-vertical')->tooltip('Invoice Actions'),
             ];
         }
@@ -159,14 +169,14 @@ class PaymentExports extends Page implements HasTable
                         ->label('Download Group Invoice')
                         ->icon('heroicon-m-arrow-down-on-square')
                         ->color('indigo')
-                        ->visible(fn (User $user) => $this->hasExistingVenueGroupInvoice($user, $startDate, $endDate))
-                        ->action(fn (User $user) => $this->downloadVenueGroupInvoice($user)),
+                        ->visible(fn(User $user) => $this->hasExistingVenueGroupInvoice($user, $startDate, $endDate))
+                        ->action(fn(User $user) => $this->downloadVenueGroupInvoice($user)),
                     Action::make('generateGroupInvoice')
                         ->label('Generate Group Invoice')
                         ->icon('heroicon-m-document-plus')
                         ->color('indigo')
                         ->requiresConfirmation()
-                        ->modalHeading(fn (User $user) => $this->getVenueGroupModalHeading($user))
+                        ->modalHeading(fn(User $user) => $this->getVenueGroupModalHeading($user))
                         ->modalDescription(function (User $user) {
                             $userTimezone = auth()->user()->timezone ?? config('app.timezone');
 
@@ -178,7 +188,23 @@ class PaymentExports extends Page implements HasTable
                                 ->title('Group Invoice Generated')
                                 ->body('The group invoice has been generated and will open in a new tab.')
                         )
-                        ->action(fn (User $user) => $this->generateVenueGroupInvoice($user)),
+                        ->action(fn(User $user) => $this->generateVenueGroupInvoice($user)),
+                    Action::make('previewGroupInvoice')
+                        ->label('Preview Group Invoice')
+                        ->icon('heroicon-m-eye')
+                        ->color('gray')
+                        ->url(function (User $user) {
+                            $venueGroup = VenueGroup::query()->where('primary_manager_id', $user->id)->first();
+                            if (!$venueGroup) {
+                                return null;
+                            }
+                            return route('venue-group.invoice.download', [
+                                'venueGroup' => $venueGroup->id,
+                                'startDate' => $this->data['startDate'],
+                                'endDate' => $this->data['endDate'],
+                                'preview' => true,
+                            ]);
+                        })->openUrlInNewTab(),
                 ])->icon('heroicon-m-ellipsis-vertical')->tooltip('Invoice Actions'),
             ];
         }
@@ -236,8 +262,8 @@ class PaymentExports extends Page implements HasTable
             TextColumn::make('total_earnings')
                 ->label('Earnings')
                 ->sortable()
-                ->formatStateUsing(fn ($record) => money($record->total_earnings,
-                    $record->currency).' '.$record->currency),
+                ->formatStateUsing(fn($record) => money($record->total_earnings,
+                        $record->currency) . ' ' . $record->currency),
         ];
     }
 
@@ -246,7 +272,7 @@ class PaymentExports extends Page implements HasTable
     {
         return [
             TextColumn::make('name') // This will be the User's name, but formatted to show group info
-                ->label('Venue Group')
+            ->label('Venue Group')
                 ->sortable(['first_name', 'last_name'])
                 ->html()
                 ->formatStateUsing(function (User $record): string {
@@ -267,8 +293,8 @@ class PaymentExports extends Page implements HasTable
                         }
 
                         return new HtmlString(
-                            "<div class='flex flex-col gap-1'><span>$groupName</span>".
-                            ($subtext ? "<span class='text-[10px] sm:text-xs text-gray-500'>$subtext</span>" : '').
+                            "<div class='flex flex-col gap-1'><span>$groupName</span>" .
+                            ($subtext ? "<span class='text-[10px] sm:text-xs text-gray-500'>$subtext</span>" : '') .
                             '</div>'
                         );
                     }
@@ -280,7 +306,6 @@ class PaymentExports extends Page implements HasTable
                 ->label('Bookings')
                 ->url(function (User $user): string {
                     $venueGroup = $user->primaryManagedVenueGroups->first();
-                    $venueIds = $venueGroup ? $venueGroup->venues->pluck('id')->toArray() : [];
 
                     $filters = [
                         // Match filters expected by BookingSearch.php
@@ -299,8 +324,8 @@ class PaymentExports extends Page implements HasTable
             TextColumn::make('total_earnings')
                 ->label('Earnings')
                 ->sortable()
-                ->formatStateUsing(fn ($record) => money($record->total_earnings,
-                    $record->currency).' '.$record->currency),
+                ->formatStateUsing(fn($record) => money($record->total_earnings,
+                        $record->currency) . ' ' . $record->currency),
         ];
     }
 
@@ -316,7 +341,7 @@ class PaymentExports extends Page implements HasTable
                 ->size('xs')
                 ->wrap()
                 ->html()
-                ->formatStateUsing(fn (User $record) => $record->name),
+                ->formatStateUsing(fn(User $record) => $record->name),
             TextColumn::make('bookings_count')
                 ->label('Bookings')
                 ->url(function (User $user): string {
@@ -338,8 +363,8 @@ class PaymentExports extends Page implements HasTable
             TextColumn::make('total_earnings')
                 ->label('Earnings')
                 ->sortable()
-                ->formatStateUsing(fn ($record) => money($record->total_earnings,
-                    $record->currency).' '.$record->currency),
+                ->formatStateUsing(fn($record) => money($record->total_earnings,
+                        $record->currency) . ' ' . $record->currency),
         ];
     }
 
@@ -367,7 +392,7 @@ class PaymentExports extends Page implements HasTable
                 ->whereIn('b.status', BookingStatus::PAYOUT_STATUSES)
                 ->whereIn('e.type', [EarningType::VENUE->value, EarningType::VENUE_PAID->value])
                 ->when($search, function ($q) use ($search) {
-                    $search = strtolower((string) $search);
+                    $search = strtolower((string)$search);
                     $q->where(function ($qq) use ($search) {
                         $qq->whereRaw('LOWER(venues.name) like ?', ["%$search%"])
                             ->orWhereRaw('LOWER(users.first_name) like ?', ["%$search%"])
@@ -405,8 +430,8 @@ class PaymentExports extends Page implements HasTable
                 ->join('venue_groups', 'users.id', '=', 'venue_groups.primary_manager_id')
                 ->leftJoin(DB::raw("(
                     SELECT v.venue_group_id,
-                           SUM(CASE WHEN b.is_prime = true AND e.type = '".EarningType::VENUE->value."' THEN e.amount
-                                    WHEN b.is_prime = false AND e.type = '".EarningType::VENUE_PAID->value."' THEN -ABS(e.amount)
+                           SUM(CASE WHEN b.is_prime = true AND e.type = '" . EarningType::VENUE->value . "' THEN e.amount
+                                    WHEN b.is_prime = false AND e.type = '" . EarningType::VENUE_PAID->value . "' THEN -ABS(e.amount)
                                     ELSE 0 END)               as total_earnings,
                            COUNT(DISTINCT e.booking_id)      as bookings_count,
                            e.currency
@@ -414,10 +439,10 @@ class PaymentExports extends Page implements HasTable
                     JOIN schedule_templates st ON st.venue_id = v.id
                     JOIN bookings b            ON b.schedule_template_id = st.id
                     JOIN earnings e            ON e.booking_id = b.id AND e.user_id = v.user_id
-                    WHERE b.status IN ('".implode("','",
-                    array_map(fn ($s) => $s->value, BookingStatus::PAYOUT_STATUSES))."')
-                      AND e.type IN ('".implode("','", [EarningType::VENUE->value, EarningType::VENUE_PAID->value])."')
-                      AND b.booking_at_utc BETWEEN '".$startUtc->format('Y-m-d H:i:s')."' AND '".$endUtc->format('Y-m-d H:i:s')."'
+                    WHERE b.status IN ('" . implode("','",
+                        array_map(fn($s) => $s->value, BookingStatus::PAYOUT_STATUSES)) . "')
+                      AND e.type IN ('" . implode("','", [EarningType::VENUE->value, EarningType::VENUE_PAID->value]) . "')
+                      AND b.booking_at_utc BETWEEN '" . $startUtc->format('Y-m-d H:i:s') . "' AND '" . $endUtc->format('Y-m-d H:i:s') . "'
                     GROUP BY v.venue_group_id, e.currency
                 ) as venue_earnings"), 'venue_groups.id', '=', 'venue_earnings.venue_group_id')
                 ->select([
@@ -430,7 +455,7 @@ class PaymentExports extends Page implements HasTable
                 ])
                 ->when($search, function (Builder $query) use ($search) {
                     // Search both primary manager name and venue group name
-                    $search = strtolower((string) $search);
+                    $search = strtolower((string)$search);
                     $query->where(function ($q) use ($search) {
                         $q->whereRaw('LOWER(users.first_name) like ?', ["%$search%"])
                             ->orWhereRaw('LOWER(users.last_name) like ?', ["%$search%"])
@@ -464,8 +489,8 @@ class PaymentExports extends Page implements HasTable
                 DB::raw('SUM(earnings.amount) as total_earnings'),
                 DB::raw('COUNT(DISTINCT earnings.booking_id) as bookings_count'),
             ])
-            ->when($role === 'concierge', fn ($q) => $q->has('concierge'))
-            ->when($role === 'partner', fn ($q) => $q->has('partner'))
+            ->when($role === 'concierge', fn($q) => $q->has('concierge'))
+            ->when($role === 'partner', fn($q) => $q->has('partner'))
             ->groupBy('users.id', 'earnings.currency');
 
         $builder = User::query()
@@ -502,7 +527,7 @@ class PaymentExports extends Page implements HasTable
     protected function hasExistingVenueGroupInvoice(User $user, string $startDate, string $endDate): bool
     {
         $venueGroup = $user->primaryManagedVenueGroups()->first();
-        if (! $venueGroup) {
+        if (!$venueGroup) {
             return false;
         }
 
@@ -520,7 +545,7 @@ class PaymentExports extends Page implements HasTable
     protected function downloadVenueInvoiceForVenue(Venue $venue): void
     {
         // Ensure venue owner exists (needed for the current route structure)
-        if (! $venue->user) {
+        if (!$venue->user) {
             Notification::make()
                 ->warning()
                 ->title('Venue Owner Not Found')
@@ -542,7 +567,7 @@ class PaymentExports extends Page implements HasTable
     protected function generateVenueInvoiceForVenue(Venue $venue): void
     {
         // Ensure venue owner exists
-        if (! $venue->user) {
+        if (!$venue->user) {
             Notification::make()
                 ->warning()
                 ->title('Venue Owner Not Found')
@@ -595,14 +620,14 @@ class PaymentExports extends Page implements HasTable
             </div>
         HTML;
 
-        return new HtmlString($warningHtml.$standardHtml);
+        return new HtmlString($warningHtml . $standardHtml);
     }
 
     protected function downloadVenueGroupInvoice(User $record): void
     {
         $venueGroup = VenueGroup::query()->where('primary_manager_id', $record->id)->first();
 
-        if (! $venueGroup) {
+        if (!$venueGroup) {
             return;
         }
 
@@ -620,7 +645,7 @@ class PaymentExports extends Page implements HasTable
     {
         $venueGroup = VenueGroup::query()->where('primary_manager_id', $record->id)->first();
 
-        if (! $venueGroup) {
+        if (!$venueGroup) {
             return;
         }
 
@@ -652,7 +677,7 @@ class PaymentExports extends Page implements HasTable
         // Get the venue group
         $venueGroup = VenueGroup::query()->where('primary_manager_id', $record->id)->first();
 
-        if (! $venueGroup) {
+        if (!$venueGroup) {
             return new HtmlString('<p>No venue group found for this user.</p>');
         }
 
@@ -675,7 +700,7 @@ class PaymentExports extends Page implements HasTable
         HTML;
 
         // Combine both HTML blocks
-        $combinedHtml = $warningHtml.$standardHtml;
+        $combinedHtml = $warningHtml . $standardHtml;
 
         return new HtmlString($combinedHtml);
     }
@@ -710,7 +735,8 @@ class PaymentExports extends Page implements HasTable
     protected function generateOverlappingInvoicesWarning(
         $overlappingInvoices,
         string $title = 'Overlapping Invoices Found'
-    ): HtmlString {
+    ): HtmlString
+    {
         if ($overlappingInvoices->count() === 0) {
             return new HtmlString('');
         }
@@ -718,9 +744,9 @@ class PaymentExports extends Page implements HasTable
         $invoiceItems = [];
         foreach ($overlappingInvoices as $i => $invoice) {
             $invoiceStartDate = Carbon::createFromFormat('Y-m-d',
-                substr((string) $invoice->start_date, 0, 10))->format('M d, Y');
+                substr((string)$invoice->start_date, 0, 10))->format('M d, Y');
             $invoiceEndDate = Carbon::createFromFormat('Y-m-d',
-                substr((string) $invoice->end_date, 0, 10))->format('M d, Y');
+                substr((string)$invoice->end_date, 0, 10))->format('M d, Y');
 
             $divider = $i > 0 ? '<div class="border-t border-blue-100"></div>' : '';
 
@@ -804,7 +830,7 @@ class PaymentExports extends Page implements HasTable
                 Column::make('user.phone')->heading('Owner Phone'),
                 Column::make('bookings_count')->heading('Bookings Count'),
                 Column::make('total_earnings')
-                    ->formatStateUsing(fn (Model $record) => money($record->total_earnings, $record->currency)),
+                    ->formatStateUsing(fn(Model $record) => money($record->total_earnings, $record->currency)),
                 Column::make('currency')->heading('Currency'),
                 // Address Info (from User)
                 Column::make('user.address_1')->heading('Address 1'),
@@ -821,8 +847,8 @@ class PaymentExports extends Page implements HasTable
                 Column::make('user.payout.routing_number')->heading('Routing Number'),
             ]);
 
-            $exportMissingConfig->modifyQueryUsing(fn ($query) => $query->whereHas('user', function ($q) {
-                $q->where(fn ($qq) => $qq->whereNull('payout')->orWhere('payout', '=', '')->orWhere('payout', '=',
+            $exportMissingConfig->modifyQueryUsing(fn($query) => $query->whereHas('user', function ($q) {
+                $q->where(fn($qq) => $qq->whereNull('payout')->orWhere('payout', '=', '')->orWhere('payout', '=',
                     '{}'));
             }))
                 ->withColumns([
@@ -840,7 +866,7 @@ class PaymentExports extends Page implements HasTable
                 Column::make('phone')->heading('Manager Phone'),
                 Column::make('bookings_count')->heading('Total Bookings (Group)'),
                 Column::make('total_earnings')
-                    ->formatStateUsing(fn (Model $record) => money($record->total_earnings, $record->currency)),
+                    ->formatStateUsing(fn(Model $record) => money($record->total_earnings, $record->currency)),
                 Column::make('currency')->heading('Currency'),
                 // Address Info (from User)
                 Column::make('address_1')->heading('Address 1'),
@@ -857,7 +883,7 @@ class PaymentExports extends Page implements HasTable
                 Column::make('payout.routing_number')->heading('Routing Number'),
             ]);
 
-            $exportMissingConfig->modifyQueryUsing(fn ($query) => $query->where(function ($q) {
+            $exportMissingConfig->modifyQueryUsing(fn($query) => $query->where(function ($q) {
                 $q->whereNull('payout')->orWhere('payout', '=', '')->orWhere('payout', '=', '{}');
             }))
                 ->withColumns([
@@ -872,9 +898,9 @@ class PaymentExports extends Page implements HasTable
                 // Use original formatting closure for name
                 Column::make('name')->heading('Name')->formatStateUsing(function (User $record) {
                     if ($record->hasRole('concierge')) {
-                        return $record->name." - Hotel/Company: {$record->concierge?->hotel_name}";
+                        return $record->name . " - Hotel/Company: {$record->concierge?->hotel_name}";
                     } elseif ($record->hasRole('partner')) {
-                        return $record->name.' - Partner';
+                        return $record->name . ' - Partner';
                     }
 
                     return $record->name;
@@ -883,7 +909,7 @@ class PaymentExports extends Page implements HasTable
                 Column::make('phone')->heading('Phone'),
                 Column::make('bookings_count')->heading('Bookings Count'),
                 Column::make('total_earnings')
-                    ->formatStateUsing(fn (Model $record) => money($record->total_earnings, $record->currency)),
+                    ->formatStateUsing(fn(Model $record) => money($record->total_earnings, $record->currency)),
                 Column::make('currency')->heading('Currency'),
                 // Address Info
                 Column::make('address_1')->heading('Address 1'),
@@ -900,16 +926,16 @@ class PaymentExports extends Page implements HasTable
                 Column::make('payout.routing_number')->heading('Routing Number'),
             ]);
 
-            $exportMissingConfig->modifyQueryUsing(fn ($query) => $query->where(function ($q) {
+            $exportMissingConfig->modifyQueryUsing(fn($query) => $query->where(function ($q) {
                 $q->whereNull('payout')->orWhere('payout', '=', '')->orWhere('payout', '=', '{}');
             }))
                 ->withColumns([
                     // Use original formatting closure for name
                     Column::make('name')->heading('Name')->formatStateUsing(function (User $record) {
                         if ($record->hasRole('concierge')) {
-                            return $record->name." - Hotel/Company: {$record->concierge?->hotel_name}";
+                            return $record->name . " - Hotel/Company: {$record->concierge?->hotel_name}";
                         } elseif ($record->hasRole('partner')) {
-                            return $record->name.' - Partner';
+                            return $record->name . ' - Partner';
                         }
 
                         return $record->name;
