@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Http\Controllers;
 
 use App\Actions\GenerateVenueInvoice;
+use App\Enums\VenueInvoiceStatus;
 use App\Models\Venue;
 use App\Models\VenueInvoice;
 use Carbon\Carbon;
@@ -22,6 +23,28 @@ class DownloadVenueInvoiceController extends Controller
         // Parse dates in the user's timezone to get the correct date components
         $startDateCarbon = Carbon::parse($startDate, $userTimezone);
         $endDateCarbon = Carbon::parse($endDate, $userTimezone);
+
+        // NEW: Request-driven preview
+        if ($request->boolean('preview')) {
+            $tempInvoice = new VenueInvoice([
+                'venue_id' => $venue->id,
+                'start_date' => $startDateCarbon->format('Y-m-d'),
+                'end_date' => $endDateCarbon->format('Y-m-d'),
+                'due_date' => now()->addDays(15),
+                'currency' => 'USD',
+                'invoice_number' => 'preview-'.str()->random(8),
+                'status' => VenueInvoiceStatus::DRAFT,
+            ]);
+
+            $data = GenerateVenueInvoice::prepareViewData(
+                $venue,
+                $startDateCarbon,
+                $endDateCarbon,
+                $tempInvoice
+            );
+
+            return view('pdfs.venue-invoice', $data);
+        }
 
         // Check if regeneration is requested
         $shouldRegenerate = $request->boolean('regenerate', false);
@@ -48,15 +71,6 @@ class DownloadVenueInvoiceController extends Controller
 
             // Generate new invoice
             $invoice = GenerateVenueInvoice::run($venue, $startDate, $endDate);
-        }
-
-        // Check if we're in HTML preview mode (for development)
-        if (config('app.invoice_html_preview')) {
-            // Use the static method from the action to prepare the view data
-            $data = GenerateVenueInvoice::prepareViewData($venue, $startDateCarbon, $endDateCarbon, $invoice);
-
-            // Return the HTML view directly
-            return view('pdfs.venue-invoice', $data);
         }
 
         throw_unless(Storage::disk('do')->exists($invoice->pdf_path), new RuntimeException('Invoice PDF not found for path: '.$invoice->pdf_path));

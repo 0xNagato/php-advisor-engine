@@ -147,6 +147,19 @@ class PaymentExports extends Page implements HasTable
                                 ->body('The invoice has been generated and will open in a new tab.')
                         )
                         ->action(fn (Venue $venue) => $this->generateVenueInvoiceForVenue($venue)),
+                    Action::make('preview')
+                        ->label('Preview Invoice')
+                        ->icon('heroicon-m-eye')
+                        ->color('gray')
+                        ->action(function (Venue $venue) {
+                            $url = route('venue.invoice.download', [
+                                'venue' => $venue->id,
+                                'startDate' => $this->data['startDate'],
+                                'endDate' => $this->data['endDate'],
+                                'preview' => true,
+                            ]);
+                            $this->js("window.open('$url', '_blank')");
+                        }),
                 ])->icon('heroicon-m-ellipsis-vertical')->tooltip('Invoice Actions'),
             ];
         }
@@ -179,6 +192,23 @@ class PaymentExports extends Page implements HasTable
                                 ->body('The group invoice has been generated and will open in a new tab.')
                         )
                         ->action(fn (User $user) => $this->generateVenueGroupInvoice($user)),
+                    Action::make('previewGroupInvoice')
+                        ->label('Preview Group Invoice')
+                        ->icon('heroicon-m-eye')
+                        ->color('gray')
+                        ->action(function (User $user) {
+                            $venueGroup = VenueGroup::query()->where('primary_manager_id', $user->id)->first();
+                            if (! $venueGroup) {
+                                return;
+                            }
+                            $url = route('venue-group.invoice.download', [
+                                'venueGroup' => $venueGroup->id,
+                                'startDate' => $this->data['startDate'],
+                                'endDate' => $this->data['endDate'],
+                                'preview' => true,
+                            ]);
+                            $this->js("window.open('$url', '_blank')");
+                        }),
                 ])->icon('heroicon-m-ellipsis-vertical')->tooltip('Invoice Actions'),
             ];
         }
@@ -280,7 +310,6 @@ class PaymentExports extends Page implements HasTable
                 ->label('Bookings')
                 ->url(function (User $user): string {
                     $venueGroup = $user->primaryManagedVenueGroups->first();
-                    $venueIds = $venueGroup ? $venueGroup->venues->pluck('id')->toArray() : [];
 
                     $filters = [
                         // Match filters expected by BookingSearch.php

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Http\Controllers;
 
 use App\Actions\GenerateVenueGroupInvoice;
+use App\Enums\VenueInvoiceStatus;
 use App\Models\VenueGroup;
 use App\Models\VenueInvoice;
 use Carbon\Carbon;
@@ -22,6 +23,30 @@ class DownloadVenueGroupInvoiceController extends Controller
         // Parse dates in the user's timezone to get the correct date components
         $startDateCarbon = Carbon::parse($startDate, $userTimezone);
         $endDateCarbon = Carbon::parse($endDate, $userTimezone);
+
+        if ($request->boolean('preview')) {
+            $referenceVenue = $venueGroup->venues()->first();
+
+            $tempInvoice = new VenueInvoice([
+                'venue_id' => $referenceVenue?->id,
+                'venue_group_id' => $venueGroup->id,
+                'start_date' => $startDateCarbon->format('Y-m-d'),
+                'end_date' => $endDateCarbon->format('Y-m-d'),
+                'due_date' => now()->addDays(15),
+                'currency' => 'USD',
+                'invoice_number' => 'preview-'.str()->random(8),
+                'status' => VenueInvoiceStatus::DRAFT,
+            ]);
+
+            $data = GenerateVenueGroupInvoice::prepareViewData(
+                $venueGroup,
+                $startDateCarbon,
+                $endDateCarbon,
+                $tempInvoice
+            );
+
+            return view('pdfs.venue-group-invoice', $data);
+        }
 
         // Check if regeneration is requested
         $shouldRegenerate = $request->boolean('regenerate');
@@ -48,15 +73,6 @@ class DownloadVenueGroupInvoiceController extends Controller
 
             // Generate new invoice
             $invoice = GenerateVenueGroupInvoice::run($venueGroup, $startDate, $endDate);
-        }
-
-        // Check if we're in HTML preview mode (for development)
-        if (config('app.invoice_html_preview')) {
-            // Use the static method from the action to prepare the view data
-            $data = GenerateVenueGroupInvoice::prepareViewData($venueGroup, $startDateCarbon, $endDateCarbon, $invoice);
-
-            // Return the HTML view directly
-            return view('pdfs.venue-group-invoice', $data);
         }
 
         throw_unless(Storage::disk('do')->exists($invoice->pdf_path), new RuntimeException('Invoice PDF not found'));
