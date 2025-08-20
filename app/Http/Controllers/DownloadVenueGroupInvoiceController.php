@@ -27,6 +27,10 @@ class DownloadVenueGroupInvoiceController extends Controller
         if ($request->boolean('preview')) {
             $referenceVenue = $venueGroup->venues()->first();
 
+            if (!$referenceVenue) {
+                abort(400, 'Cannot generate invoice preview: Venue group has no venues.');
+            }
+
             $tempInvoice = new VenueInvoice([
                 'venue_id' => $referenceVenue?->id,
                 'venue_group_id' => $venueGroup->id,
@@ -34,7 +38,7 @@ class DownloadVenueGroupInvoiceController extends Controller
                 'end_date' => $endDateCarbon->format('Y-m-d'),
                 'due_date' => now()->addDays(15),
                 'currency' => 'USD',
-                'invoice_number' => 'preview-'.str()->random(8),
+                'invoice_number' => 'preview-' . str()->random(8),
                 'status' => VenueInvoiceStatus::DRAFT,
             ]);
 
@@ -59,7 +63,7 @@ class DownloadVenueGroupInvoiceController extends Controller
             ->first();
 
         // Regenerate if requested or if the invoice doesn't exist
-        if ($shouldRegenerate || ! $invoice) {
+        if ($shouldRegenerate || !$invoice) {
             // If regenerating and invoice exist, delete the old one
             if ($invoice) {
                 // Delete the old PDF file if it exists
@@ -79,7 +83,7 @@ class DownloadVenueGroupInvoiceController extends Controller
 
         return Storage::disk('do')->download(
             $invoice->pdf_path,
-            $invoice->name().'.pdf'
+            $invoice->name() . '.pdf'
         );
     }
 }
