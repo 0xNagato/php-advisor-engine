@@ -15,6 +15,8 @@ use RuntimeException;
 
 class DownloadVenueGroupInvoiceController extends Controller
 {
+    const int PREVIEW_RANDOM_STRING_LENGTH = 8;
+
     public function __invoke(Request $request, VenueGroup $venueGroup, string $startDate, string $endDate)
     {
         // Get the user's timezone
@@ -32,13 +34,13 @@ class DownloadVenueGroupInvoiceController extends Controller
             }
 
             $tempInvoice = new VenueInvoice([
-                'venue_id' => $referenceVenue?->id,
+                'venue_id' => $referenceVenue->id,
                 'venue_group_id' => $venueGroup->id,
                 'start_date' => $startDateCarbon->format('Y-m-d'),
                 'end_date' => $endDateCarbon->format('Y-m-d'),
                 'due_date' => now()->addDays(15),
                 'currency' => 'USD',
-                'invoice_number' => 'preview-' . str()->random(8),
+                'invoice_number' => 'preview-' . str()->random(self::PREVIEW_RANDOM_STRING_LENGTH),
                 'status' => VenueInvoiceStatus::DRAFT,
             ]);
 
