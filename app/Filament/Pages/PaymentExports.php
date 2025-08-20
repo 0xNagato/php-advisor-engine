@@ -151,15 +151,12 @@ class PaymentExports extends Page implements HasTable
                         ->label('Preview Invoice')
                         ->icon('heroicon-m-eye')
                         ->color('gray')
-                        ->action(function (Venue $venue) {
-                            $url = route('venue.invoice.download', [
-                                'venue' => $venue->id,
-                                'startDate' => $this->data['startDate'],
-                                'endDate' => $this->data['endDate'],
-                                'preview' => true,
-                            ]);
-                            $this->js("window.open(" . json_encode($url) . ", '_blank')");
-                        }),
+                        ->url(fn(Venue $venue) => route('venue.invoice.download', [
+                            'venue' => $venue->id,
+                            'startDate' => $this->data['startDate'],
+                            'endDate' => $this->data['endDate'],
+                            'preview' => true,
+                        ]))->openUrlInNewTab(),
                 ])->icon('heroicon-m-ellipsis-vertical')->tooltip('Invoice Actions'),
             ];
         }
@@ -196,19 +193,18 @@ class PaymentExports extends Page implements HasTable
                         ->label('Preview Group Invoice')
                         ->icon('heroicon-m-eye')
                         ->color('gray')
-                        ->action(function (User $user) {
+                        ->url(function (User $user) {
                             $venueGroup = VenueGroup::query()->where('primary_manager_id', $user->id)->first();
                             if (!$venueGroup) {
-                                return;
+                                return null;
                             }
-                            $url = route('venue-group.invoice.download', [
+                            return route('venue-group.invoice.download', [
                                 'venueGroup' => $venueGroup->id,
                                 'startDate' => $this->data['startDate'],
                                 'endDate' => $this->data['endDate'],
                                 'preview' => true,
                             ]);
-                            $this->js("window.open(" . json_encode($url) . ", '_blank')");
-                        }),
+                        })->openUrlInNewTab(),
                 ])->icon('heroicon-m-ellipsis-vertical')->tooltip('Invoice Actions'),
             ];
         }
