@@ -198,6 +198,16 @@ class CreateVenue extends CreateRecord
                             ->helperText('Flat fee paid to concierge for each Omakase booking')
                             ->required(fn (Get $get): bool => $get('is_omakase')),
                     ]),
+
+                Section::make('Tax / VAT')
+                    ->icon('heroicon-m-receipt-percent')
+                    ->schema([
+                        TextInput::make('vat')
+                            ->label('VAT Number')
+                            ->maxLength(100)
+                            ->nullable()
+                            ->helperText('Shown on invoices'),
+                    ]),
             ]);
     }
 
@@ -248,6 +258,7 @@ class CreateVenue extends CreateRecord
                 ],
                 'daily_prime_bookings_cap' => $data['daily_prime_bookings_cap'] ?? null,
                 'daily_non_prime_bookings_cap' => $data['daily_non_prime_bookings_cap'] ?? null,
+                'vat' => $data['vat'] ?? null,
             ]);
         });
     }

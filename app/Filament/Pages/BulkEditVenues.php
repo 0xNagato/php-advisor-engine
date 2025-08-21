@@ -15,6 +15,7 @@ use Filament\Forms\Components\Group;
 use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\TextInput;
 use Filament\Forms\Form;
 use Filament\Notifications\Notification;
 use Filament\Pages\Page;
@@ -116,13 +117,13 @@ class BulkEditVenues extends Page
 
             $this->venuesData[$venue->id] = [
                 'address' => $freshVenue->address ?? '',
+                'vat' => $freshVenue->vat ?? '',
                 'description' => $freshVenue->description ?? '',
                 'images' => $freshVenue->images ?? [],
                 'neighborhood' => $freshVenue->neighborhood,
                 'cuisines' => $freshVenue->cuisines ?? [],
                 'specialty' => $freshVenue->specialty ?? [],
             ];
-
         }
     }
 
@@ -186,7 +187,15 @@ class BulkEditVenues extends Page
                             ->rows(3)
                             ->placeholder('Enter venue description...')
                             ->columnSpan(1),
-                    ])->columns(2),
+                    ])->columns(),
+
+                    Group::make([
+                        TextInput::make("venuesData.{$venue->id}.vat")
+                            ->label('VAT Number')
+                            ->maxLength(100)
+                            ->placeholder('e.g., GB123456789')
+                            ->columnSpan(1),
+                    ])->columns(),
 
                     FileUpload::make("venuesData.{$venue->id}.images")
                         ->label('Images')
@@ -291,7 +300,6 @@ class BulkEditVenues extends Page
                                     Storage::disk('do')->setVisibility($path, 'public');
 
                                     $newImages[] = $path;
-
                                 } catch (Exception $e) {
                                     logger()->error('Failed to store uploaded file', [
                                         'venue_id' => $venue->id,
@@ -313,6 +321,7 @@ class BulkEditVenues extends Page
                     // Update venue
                     $venue->update([
                         'address' => $data['address'] ?? $venue->address,
+                        'vat' => $data['vat'] ?? $venue->vat,
                         'description' => $data['description'] ?? $venue->description,
                         'images' => $finalImages,
                         'neighborhood' => $data['neighborhood'] ?? $venue->neighborhood,
@@ -331,7 +340,6 @@ class BulkEditVenues extends Page
                             'updated_by' => auth()->user()->name,
                         ])
                         ->log('Venue bulk edited');
-
                 } catch (Exception $e) {
                     $errorCount++;
                     logger()->error("Failed to update venue {$venue->name}: ".$e->getMessage());
@@ -362,7 +370,6 @@ class BulkEditVenues extends Page
 
             // Ensure all images are public after save
             $this->makeAllImagesPublic();
-
         } catch (Exception $e) {
             DB::rollBack();
 
