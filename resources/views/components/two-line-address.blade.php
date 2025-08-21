@@ -10,7 +10,7 @@
     {!! nl2br(e($address)) !!}
 @else
     @php
-        $parts = \Illuminate\Support\Str::of($address ?? '')
+        $parts = \Illuminate\Support\Str::of($address)
             ->explode(',')
             ->map(fn($s) => trim($s))
             ->filter()
