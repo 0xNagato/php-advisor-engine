@@ -1,4 +1,3 @@
-{{-- file: `resources/views/components/two-line-address.blade.php` --}}
 @props(['address'])
 
 @php
