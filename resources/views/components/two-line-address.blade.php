@@ -21,7 +21,7 @@
             $line1 = $parts->slice(0, $parts->count() - 2)->implode(', ');
             if ($line1 !== '') { $line1 .= ','; }
         } else {
-            $line1 = (string) ($address ?? '');
+            $line1 = $address;
             $line2 = null;
         }
     @endphp
