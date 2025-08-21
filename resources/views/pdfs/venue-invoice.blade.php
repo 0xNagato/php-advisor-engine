@@ -47,30 +47,8 @@
                     <span class="mt-3 mb-1 text-2xl font-bold">INVOICE</span>
                     <p class="text-base opacity-90">{{ $venue->name }}</p>
                     @if($venue->address)
-                        @php
-                            $parts = \Illuminate\Support\Str::of($venue->address)
-                                ->explode(',')
-                                ->map(fn($s) => trim($s))
-                                ->filter()
-                                ->values();
-
-                            if ($parts->count() >= 2) {
-                                $line2 = $parts->slice(-2)->implode(', ');
-                                $line1 = $parts->slice(0, $parts->count() - 2)->implode(', ');
-                                if ($line1 !== '') {
-                                    $line1 .= ',';
-                                }
-                            } else {
-                                $line1 = (string) $venue->address;
-                                $line2 = null;
-                            }
-                        @endphp
                         <div class="mb-4 ml-1 text-xs">
-                            {{ $line1 }}
-                            @if($line2)
-                                <br>
-                                {{ $line2 }}
-                            @endif
+                            <x-two-line-address :address="$venue->address" />
                         </div>
                     @endif
                     <div class="mt-2">
