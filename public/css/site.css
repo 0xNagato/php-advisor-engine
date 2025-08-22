@@ -1,0 +1,106 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Outfit:wght@100..900&display=swap');
+
+/* ==========================
+   Base Styles
+========================== */
+
+html,
+body {
+    margin: 0;
+    padding: 0;
+    scroll-behavior: smooth;
+    font-family: 'Outfit', sans-serif;
+    overflow-x: hidden;
+}
+
+a {
+    transition: color 0.3s, text-decoration-color 0.3s, background 0.3s;
+}
+/* .nav_menu-item:hover,.language-links a:hover, .active{
+  color:#4f46e5!important
+} */
+ .nav_menu-item:hover, .active{
+  color:#4f46e5!important
+}
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+    font-family: Outfit;
+    font-weight: 700;
+}
+.header-logo{
+    font-family: "Inter", sans-serif;
+    font-weight: 800;
+}
+
+.collapsible {
+      max-height: 0;
+      opacity: 0;
+      overflow: hidden;
+      transition: max-height .35s ease, opacity .25s ease;
+    }
+
+    .collapsible.open {
+      max-height: 100vh;
+      opacity: 1;
+      overflow: visible;
+    }
+
+    #panelHeader {
+      position: fixed;
+      top: 0;
+      right: 0;
+      height: 100vh;
+      width: 100%;
+      max-width: 480px;
+      z-index: 100;
+      background: #fff;
+      box-shadow: -2px 0 16px rgba(0, 0, 0, 0.10);
+      transform: translateX(100%);
+      transition: transform 0.4s cubic-bezier(.4, 0, .2, 1);
+      border-left: 1px solid #e2e8f0;
+      opacity: 1;
+    }
+
+    #panelHeader.open {
+      transform: translateX(0);
+      opacity: 1;
+    }
+
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: rgba(30, 41, 59, 0.8);
+      z-index: 90;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s;
+    }
+
+    .modal-overlay.open {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+.splash {
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(circle at 20% 30%, rgba(99, 102, 241, 0.25), transparent 40%),
+        radial-gradient(circle at 80% 20%, rgba(139, 92, 246, 0.25), transparent 40%),
+        radial-gradient(circle at 50% 80%, rgba(14, 165, 233, 0.25), transparent 40%);
+    z-index: 0;
+}
+
+/* Custom Stripe Section Gradient */
+.stripe-gradient-bg {
+  background:
+    radial-gradient(circle at 20% 30%, rgba(99, 102, 241, 0.25), transparent 40%),
+    radial-gradient(circle at 80% 20%, rgba(139, 92, 246, 0.25), transparent 40%),
+    radial-gradient(circle at 50% 80%, rgba(14, 165, 233, 0.25), transparent 40%);
+}

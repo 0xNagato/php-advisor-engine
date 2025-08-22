@@ -48,6 +48,29 @@ Route::get('/concierges', static function () {
     return view('web.concierges');
 })->name('concierges');
 
+// Site routes for Prima-web pages
+Route::prefix('site')->name('site.')->group(function () {
+    Route::get('/', static function () {
+        return view('site.index');
+    })->name('index');
+    
+    Route::get('/hotels', static function () {
+        return view('site.hotels');
+    })->name('hotels');
+    
+    Route::get('/restaurants', static function () {
+        return view('site.restaurants');
+    })->name('restaurants');
+    
+    Route::get('/concierges', static function () {
+        return view('site.concierges');
+    })->name('concierges');
+    
+    Route::get('/influencers', static function () {
+        return view('site.influencers');
+    })->name('influencers');
+});
+
 Route::get('/alex', static function () {
     return view('web.alex.index');
 })->name('alex');
