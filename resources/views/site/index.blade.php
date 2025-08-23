@@ -196,7 +196,7 @@
             <li>Generate new revenue streams through partnerships</li>
             <li>Provide clear reporting and accountability</li>
           </ul>
-          <a href="hotels.html" class="inline-block mt-4 mr-2 px-6 py-3 rounded-full bg-gradient-to-r from-emerald-500 to-green-600 text-white text-lg font-semibold shadow-[3px_3px_0_#047857] hover:opacity-90 active:translate-x-[3px] active:translate-y-[3px] active:shadow-none transition-all duration-150">Learn
+          <a href="{{ route('hotels') }}" class="inline-block mt-4 mr-2 px-6 py-3 rounded-full bg-gradient-to-r from-emerald-500 to-green-600 text-white text-lg font-semibold shadow-[3px_3px_0_#047857] hover:opacity-90 active:translate-x-[3px] active:translate-y-[3px] active:shadow-none transition-all duration-150">Learn
             More</a>
           <a type="button" data-target="panelHeader" class="inline-block mt-4 cursor-pointer px-6 py-3 rounded-full bg-gradient-to-r from-emerald-500 to-green-600 text-white text-lg font-semibold shadow-[3px_3px_0_#047857] hover:opacity-90 active:translate-x-[3px] active:translate-y-[3px] active:shadow-none transition-all duration-150">Join
             PRIMA</a>
@@ -257,7 +257,7 @@
             <li>Track performance with transparent reporting</li>
             <li>Reduce no-shows with PRIMA’s bookings</li>
           </ul>
-          <a href="restaurants.html" class="inline-block mt-4 mr-2 px-6 py-3 rounded-full bg-gradient-to-r from-emerald-500 to-green-600 text-white text-lg font-semibold shadow-[3px_3px_0_#047857] hover:opacity-90 active:translate-x-[3px] active:translate-y-[3px] active:shadow-none transition-all duration-150">Learn
+          <a href="{{ route('restaurants') }}" class="inline-block mt-4 mr-2 px-6 py-3 rounded-full bg-gradient-to-r from-emerald-500 to-green-600 text-white text-lg font-semibold shadow-[3px_3px_0_#047857] hover:opacity-90 active:translate-x-[3px] active:translate-y-[3px] active:shadow-none transition-all duration-150">Learn
             More</a>
           <a type="button" data-target="panelHeader" class="inline-block mt-4 cursor-pointer px-6 py-3 rounded-full bg-gradient-to-r from-emerald-500 to-green-600 text-white text-lg font-semibold shadow-[3px_3px_0_#047857] hover:opacity-90 active:translate-x-[3px] active:translate-y-[3px] active:shadow-none transition-all duration-150">Join
             PRIMA</a>
@@ -280,7 +280,7 @@
             <li>Streamline workflows with real-time availability</li>
             <li>Enhance guest experiences through premium access</li>
           </ul>
-          <a href="concierges.html" class="inline-block mt-4 mr-2 px-6 py-3 rounded-full bg-gradient-to-r from-emerald-500 to-green-600 text-white text-lg font-semibold shadow-[3px_3px_0_#047857] hover:opacity-90 active:translate-x-[3px] active:translate-y-[3px] active:shadow-none transition-all duration-150">Learn
+          <a href="{{ route('concierges') }}" class="inline-block mt-4 mr-2 px-6 py-3 rounded-full bg-gradient-to-r from-emerald-500 to-green-600 text-white text-lg font-semibold shadow-[3px_3px_0_#047857] hover:opacity-90 active:translate-x-[3px] active:translate-y-[3px] active:shadow-none transition-all duration-150">Learn
             More</a>
           <a type="button" data-target="panelHeader" class="inline-block mt-4 cursor-pointer px-6 py-3 rounded-full bg-gradient-to-r from-emerald-500 to-green-600 text-white text-lg font-semibold shadow-[3px_3px_0_#047857] hover:opacity-90 active:translate-x-[3px] active:translate-y-[3px] active:shadow-none transition-all duration-150">Join
             PRIMA</a>
@@ -304,7 +304,7 @@
             <li>Monetize your influence with real results</li>
             <li>Partner with top restaurants and hotels worldwide</li>
           </ul>
-          <a href="influencers.html" class="inline-block mt-4 mr-2 px-6 py-3 rounded-full bg-gradient-to-r from-emerald-500 to-green-600 text-white text-lg font-semibold shadow-[3px_3px_0_#047857] hover:opacity-90 active:translate-x-[3px] active:translate-y-[3px] active:shadow-none transition-all duration-150">Learn
+          <a href="{{ route('influencers') }}" class="inline-block mt-4 mr-2 px-6 py-3 rounded-full bg-gradient-to-r from-emerald-500 to-green-600 text-white text-lg font-semibold shadow-[3px_3px_0_#047857] hover:opacity-90 active:translate-x-[3px] active:translate-y-[3px] active:shadow-none transition-all duration-150">Learn
             More</a>
           <a type="button" data-target="panelHeader" class="inline-block mt-4 cursor-pointer px-6 py-3 rounded-full bg-gradient-to-r from-emerald-500 to-green-600 text-white text-lg font-semibold shadow-[3px_3px_0_#047857] hover:opacity-90 active:translate-x-[3px] active:translate-y-[3px] active:shadow-none transition-all duration-150">Join
             PRIMA</a>

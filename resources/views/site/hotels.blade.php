@@ -374,8 +374,8 @@
         <p class="text-lg text-black mb-6 max-w-2xl mx-auto">We are currently onboarding properties in Miami, New York,
           London, Los Angeles and Ibiza and are planning on launching in more markets in Q1 of 2026. To begin working
           with us, please schedule a call with our team, we’d love to talk to you.</p>
-        <a href="#" class="inline-block px-6 py-3 rounded-full bg-gradient-to-r from-emerald-500 to-green-600 text-white text-lg font-semibold shadow-[3px_3px_0_#047857] hover:opacity-90 active:translate-x-[3px] active:translate-y-[3px] active:shadow-none transition-all duration-150">Schedule
-          A Call</a>
+        <button type="button" data-target="panelHeader"  class="inline-block px-6 py-3 rounded-full bg-gradient-to-r from-emerald-500 to-green-600 text-white text-lg font-semibold shadow-[3px_3px_0_#047857] hover:opacity-90 active:translate-x-[3px] active:translate-y-[3px] active:shadow-none transition-all duration-150">Schedule
+          A Call</button>
       </div>
     </div>
   </section>

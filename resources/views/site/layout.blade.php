@@ -92,12 +92,12 @@
           <li><a href="{{ route('concierges') }}" class="nav_menu-item @if(request()->routeIs('concierges')) active @endif">Concierges</a></li>
           <li><a href="{{ route('influencers') }}" class="nav_menu-item @if(request()->routeIs('influencers')) active @endif">Influencers</a></li>
           <li><a href="https://primavip.co/platform/login" target="_blank" class="nav_menu-item">Login</a></li>
-          <li><a data-target="panelHeader" href="javascript:void(0)" class="nav_menu-item">Work With PRIMA</a></li>
+          <li><a data-target="panelHeader" href="#" class="nav_menu-item">Work With PRIMA</a></li>
         </ul>
         <!-- ...existing code... (removed buttons from mobile menu) -->
       </nav>
     </div>
-
+    
 
   </header>
 

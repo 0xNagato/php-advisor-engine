@@ -150,13 +150,9 @@ class SyncDesignerUpdates extends Command
         // Extract lead form if it exists
         $leadForm = $this->extractLeadForm($htmlContent);
 
-        // Convert asset paths to Laravel helpers
-        $bodyContent = $this->convertAssetPaths($bodyContent);
-        $leadForm = $this->convertAssetPaths($leadForm);
-
-        // Convert booking URLs to query parameter format
-        $bodyContent = $this->convertBookingUrls($bodyContent);
-        $leadForm = $this->convertBookingUrls($leadForm);
+        // Convert HTML to Blade (includes asset paths, booking URLs, HTML links, etc.)
+        $bodyContent = $this->convertHtmlToBlade($bodyContent);
+        $leadForm = $this->convertHtmlToBlade($leadForm);
 
         // Note: Tailwind conflict resolution will run once at the end for efficiency
 
