@@ -97,7 +97,7 @@
         <!-- ...existing code... (removed buttons from mobile menu) -->
       </nav>
     </div>
-    
+
 
   </header>
 
