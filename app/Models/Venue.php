@@ -92,6 +92,7 @@ class Venue extends Model
         'covermanager_sync_enabled',
         'last_covermanager_sync',
         'tier',
+        'vat',
     ];
 
     protected function casts(): array
