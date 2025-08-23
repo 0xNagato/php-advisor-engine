@@ -1,24 +1,32 @@
 {
-    "semi": true,
-    "trailingComma": "all",
-    "singleQuote": true,
-    "plugins": ["@prettier/plugin-php", "@shufo/prettier-plugin-blade"],
-    "tabWidth": 2,
-    "overrides": [
-        {
-            "files": ["*.php"],
-            "options": {
-                "phpVersion": "8.3",
-                "trailingCommaPHP": true,
-                "printWidth": 120
-            }
-        },
-        {
-            "files": ["*.blade.php"],
-            "options": {
-                "parser": "blade",
-                "tabWidth": 4
-            }
-        }
-    ]
+  "plugins": [
+    "@prettier/plugin-php",
+    "@shufo/prettier-plugin-blade",
+    "prettier-plugin-tailwindcss"
+  ],
+  "overrides": [
+    {
+      "files": "*.blade.php",
+      "options": {
+        "parser": "blade",
+        "printWidth": 120,
+        "tabWidth": 2,
+        "useTabs": false,
+        "singleQuote": false,
+        "trailingComma": "es5",
+        "bracketSameLine": true,
+        "htmlWhitespaceSensitivity": "ignore",
+        "wrapAttributes": "preserve-aligned"
+      }
+    },
+    {
+      "files": "*.php",
+      "options": {
+        "parser": "php",
+        "printWidth": 120,
+        "tabWidth": 4
+      }
+    }
+  ],
+  "tailwindFunctions": ["clsx", "cn", "cva", "tw"]
 }

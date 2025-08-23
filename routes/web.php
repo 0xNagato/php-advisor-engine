@@ -15,7 +15,6 @@ use App\Livewire\Booking\CustomerInvoice;
 use App\Livewire\Booking\ModifyDetails;
 use App\Livewire\Concierge\ConciergeInvitation;
 use App\Livewire\Concierge\DirectConciergeInvitation;
-use App\Livewire\Story;
 use App\Livewire\Venue\VenueBookingConfirmation;
 use App\Livewire\Venue\VenueContactLogin;
 use App\Livewire\Venue\VenueContactRecentBookings;
@@ -32,54 +31,26 @@ Route::get('/privacy', function () {
 Route::get('/announcement/{message}', [PublicAnnouncementController::class, 'show'])
     ->name('public.announcement');
 
-Route::get('/about-us', static function () {
-    return view('web.about-us');
-})->name('about-us');
-Route::get('/contact', static function () {
-    return view('web.contact');
-})->name('contact');
-Route::get('/consumers', static function () {
-    return view('web.consumers');
-})->name('consumers');
+// Marketing site routes (promoted to root)
+Route::get('/', static function () {
+    return view('site.index');
+})->name('home');
+
+Route::get('/hotels', static function () {
+    return view('site.hotels');
+})->name('hotels');
+
 Route::get('/restaurants', static function () {
-    return view('web.restaurants');
+    return view('site.restaurants');
 })->name('restaurants');
+
 Route::get('/concierges', static function () {
-    return view('web.concierges');
+    return view('site.concierges');
 })->name('concierges');
 
-// Site routes for Prima-web pages
-Route::prefix('site')->name('site.')->group(function () {
-    Route::get('/', static function () {
-        return view('site.index');
-    })->name('index');
-    
-    Route::get('/hotels', static function () {
-        return view('site.hotels');
-    })->name('hotels');
-    
-    Route::get('/restaurants', static function () {
-        return view('site.restaurants');
-    })->name('restaurants');
-    
-    Route::get('/concierges', static function () {
-        return view('site.concierges');
-    })->name('concierges');
-    
-    Route::get('/influencers', static function () {
-        return view('site.influencers');
-    })->name('influencers');
-});
-
-Route::get('/alex', static function () {
-    return view('web.alex.index');
-})->name('alex');
-
-Route::get('/alex/concierges', static function () {
-    return view('web.alex.concierge');
-})->name('alex.concierges');
-
-Route::get('/story', Story::class)->name('story');
+Route::get('/influencers', static function () {
+    return view('site.influencers');
+})->name('influencers');
 
 Route::get('/onboarding/{token?}', VenueOnboarding::class)->name('onboarding');
 /**
@@ -105,10 +76,6 @@ Route::domain(config('app.domain'))->group(function () {
     Route::get('/t/{shortURLKey}', ShortURLController::class)
         ->middleware(config('short-url.middleware', []));
 });
-
-Route::get('/', static function () {
-    return view('web.home');
-})->name('home');
 
 Route::redirect('/login', '/platform/login');
 

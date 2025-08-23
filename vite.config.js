@@ -32,8 +32,10 @@ export default defineConfig({
       input: [
         'resources/css/app.css',
         'resources/css/web.css',
+        'resources/css/site.css',
         'resources/js/app.js',
         'resources/js/web.js',
+        'resources/js/site.js',
         'resources/css/filament/admin/theme.css',
         ...mingles,
       ],

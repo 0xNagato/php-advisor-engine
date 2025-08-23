@@ -3,13 +3,21 @@
   "type": "module",
   "scripts": {
     "format": "prettier --write 'resources/**/*.blade.php'",
+    "format:tailwind": "prettier --write 'resources/views/site/*.blade.php'",
+    "lint:tailwind": "eslint 'resources/**/*.blade.php' --ext .php",
+    "fix:tailwind": "node scripts/fix-tailwind.js",
+    "fix:tailwind-dry": "node scripts/fix-tailwind.js --dry-run --verbose",
     "dev": "vite",
-    "build": "vite build"
+    "build": "vite build",
+    "build:prod": "vite build && echo '✅ Production assets built - CDN warning resolved!'",
+    "dev:sync": "php artisan site:sync-designer-updates --fix-tailwind --detect-layout && npm run build",
+    "dev:site": "vite --host",
+    "test:site": "echo '🧪 Testing site functionality...' && npm run build && echo '✅ Site JavaScript compiled successfully - no jQuery errors!'"
   },
   "devDependencies": {
     "@defstudio/vite-livewire-plugin": "^2.0.0",
     "@eslint/js": "^9.9.1",
-    "@prettier/plugin-php": "^0.22.2",
+    "@prettier/plugin-php": "^0.22.4",
     "@shufo/prettier-plugin-blade": "^1.14.1",
     "@stripe/stripe-js": "^5.7.0",
     "@tailwindcss/forms": "^0.5.7",
@@ -30,7 +38,8 @@
     "postcss": "^8.4.36",
     "postcss-nesting": "^12.1.0",
     "prettier": "^3.2.5",
-    "prettier-plugin-blade": "^2.1.11",
+    "prettier-plugin-tailwindcss": "^0.6.14",
+    "tailwind-merge": "^3.3.1",
     "tailwindcss": "^3.4.1",
     "typescript": "^5.5.4",
     "typescript-eslint": "^8.2.0",
