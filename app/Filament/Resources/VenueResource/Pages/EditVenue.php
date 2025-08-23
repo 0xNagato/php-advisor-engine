@@ -214,9 +214,8 @@ class EditVenue extends EditRecord
                                     } else {
                                         return new HtmlString('<span class="inline-flex items-center px-2.5 py-0.5 text-xs font-medium text-yellow-800 bg-yellow-100 rounded-full">Gold tier (database only)</span>');
                                     }
-                                }
-                                // Check if venue is in Silver tier (DB tier=2 OR config tier_2)
-                                elseif ($venue->tier === 2 || $tier2Position !== false) {
+                                    // Check if the venue is in Silver tier (DB tier=2 OR config tier_2)
+                                } elseif ($venue->tier === 2 || $tier2Position !== false) {
                                     if ($tier2Position !== false) {
                                         return new HtmlString('<span class="inline-flex items-center px-2.5 py-0.5 text-xs font-medium text-gray-800 bg-gray-100 rounded-full">Position '.($tier2Position + 1).' in Silver (configured)</span>');
                                     } else {
@@ -360,11 +359,18 @@ class EditVenue extends EditRecord
                                     ->required(),
                                 TextInput::make('fee')
                                     ->label('Fee')
-                                    ->prefix(fn (
-                                    ) => Region::getCurrencySymbolForRegion($this->getRecord()->region ?? 'miami'))
+                                    ->prefix(fn () => Region::getCurrencySymbolForRegion($this->getRecord()->region ?? 'miami'))
                                     ->numeric()
                                     ->required(),
                             ]),
+                    ]),
+                Section::make('Tax / VAT')
+                    ->icon('heroicon-m-receipt-percent')
+                    ->schema([
+                        TextInput::make('vat')
+                            ->label('VAT Number')
+                            ->maxLength(100)
+                            ->nullable(),
                     ]),
             ]);
     }
