@@ -278,7 +278,7 @@
         <!-- Fourth -->
         <div class="flex items-start gap-4 p-4 rounded-xl border border-slate-200 bg-white transition hover:bg-violet-100">
           <div class="flex flex-col h-full">
-            <span class="flex items-center justify-center rounded-full w-[80px] h-[80px] bg-yellow-500 text-white text-1xl md:text-[20px] font-extrabold">
+            <span class="flex items-center justify-center rounded-full w-[80px] h-[80px] bg-amber-600 text-white text-1xl md:text-[20px] font-extrabold">
               44%
             </span>
           </div>

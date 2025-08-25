@@ -256,6 +256,20 @@ class SyncDesignerUpdates extends Command
     }
 
     /**
+     * Fix problematic Tailwind CSS classes
+     */
+    protected function fixTailwindClasses(string $html): string
+    {
+        // Replace bg-yellow-500 with bg-amber-600 for better contrast/visibility
+        $html = str_replace('bg-yellow-500', 'bg-amber-600', $html);
+
+        // Add other problematic class fixes here in the future
+        // Example: $html = str_replace('text-gray-300', 'text-gray-600', $html);
+
+        return $html;
+    }
+
+    /**
      * Replace HTML contact forms with Livewire Talk to PRIMA component
      */
     protected function replaceForms(string $html): string
@@ -578,6 +592,9 @@ class SyncDesignerUpdates extends Command
 
         // Convert booking URLs to query parameter format
         $html = $this->convertBookingUrls($html);
+
+        // Fix problematic Tailwind classes
+        $html = $this->fixTailwindClasses($html);
 
         // Replace contact forms with Livewire Talk to PRIMA component
         $html = $this->replaceForms($html);
