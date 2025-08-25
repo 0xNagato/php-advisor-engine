@@ -232,7 +232,7 @@ return [
     'default_timezone' => env('LOCAL_ENV_TIMEZONE', 'America/New_York'),
     'default_region' => env('LOCAL_ENV_REGION', 'miami'),
     'no_tax' => env('NO_TAX', false),
-    'active_regions' => ['miami', 'los_angeles', 'ibiza'],
+    'active_regions' => ['miami', 'los_angeles', 'ibiza', 'new_york', 'london'],
 
     /*
     |--------------------------------------------------------------------------
