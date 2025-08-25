@@ -52,13 +52,11 @@
             @if ($this->isPastBookingTime)
                 <div
                     class="flex flex-col justify-center items-center p-3 space-y-1 text-sm bg-red-50 rounded-lg border border-red-200">
-                    <p class="text-red-600">
-                        This reservation cannot be confirmed
-                    </p>
-                    <p class="text-red-500">
+                    <p class="text-red-500 mb-2">
                         Confirmation time has passed. Bookings must be confirmed at least
                         {{ self::MINUTES_BEFORE_BOOKING_CUTOFF }} minutes before the reservation time.
                     </p>
+                    {{ $this->confirmBookingAction }}
                 </div>
             @else
                 <div

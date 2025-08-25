@@ -189,8 +189,10 @@ class VenueBookingConfirmation extends Page
 
     public function confirmBookingAction(): Action
     {
+        $label = $this->isPastBookingTime() ? 'Confirm Booking Anyways' : 'Confirm Booking Now';
+
         return Action::make('confirmBooking')
-            ->label('Confirm Booking Now')
+            ->label($label)
             ->color('success')
             ->button()
             ->size('lg')
