@@ -567,6 +567,11 @@ class Neighborhood extends Model
             'region' => 'new_york',
             'name' => 'East Village',
         ],
+        [
+            'id' => 'meat_packing_district',
+            'region' => 'new_york',
+            'name' => 'Meat Packing District',
+        ],
 
         // Los Angeles
         [
