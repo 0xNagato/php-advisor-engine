@@ -49,20 +49,27 @@
                 @endif
             </div>
         @else
-            <div
-                class="flex flex-col justify-center items-center p-3 space-y-1 text-sm bg-gray-50 rounded-lg border border-gray-200">
-                <p class="mb-2 text-center text-gray-600">
-                    @if ($this->isPastBookingTime)
-                        Confirm booking
-                    @else
+            @if ($this->isPastBookingTime)
+                <div
+                    class="flex flex-col justify-center items-center p-3 space-y-1 text-sm bg-red-50 rounded-lg border border-red-200">
+                    <p class="text-red-500 mb-2">
+                        Confirmation time has passed. Bookings must be confirmed at least
+                        {{ self::MINUTES_BEFORE_BOOKING_CUTOFF }} minutes before the reservation time.
+                    </p>
+                    {{ $this->confirmBookingAction }}
+                </div>
+            @else
+                <div
+                    class="flex flex-col justify-center items-center p-3 space-y-1 text-sm bg-gray-50 rounded-lg border border-gray-200">
+                    <p class="mb-2 text-center text-gray-600">
                         Please confirm this booking before<br>{{ $cutoffTime }}
                         <span class="text-gray-500">
                             ({{ self::MINUTES_BEFORE_BOOKING_CUTOFF }} minutes before the reservation time)
                         </span>
-                    @endif
-                </p>
-                {{ $this->confirmBookingAction }}
-            </div>
+                    </p>
+                    {{ $this->confirmBookingAction }}
+                </div>
+            @endif
         @endif
 
         <div
