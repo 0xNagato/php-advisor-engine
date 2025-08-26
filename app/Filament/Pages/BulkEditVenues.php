@@ -9,9 +9,11 @@ use App\Models\Region;
 use App\Models\Specialty;
 use App\Models\Venue;
 use Exception;
+use Filament\Forms\Components\BaseFileUpload;
 use Filament\Forms\Components\CheckboxList;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Group;
+use Filament\Forms\Components\KeyValue;
 use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
@@ -127,10 +129,12 @@ class BulkEditVenues extends Page
         }
     }
 
-    public function updated(): void
+    public function updated($property): void
     {
-        $this->currentPage = 1;
-        $this->loadVenues();
+        if (in_array($property, ['statusFilter', 'regionFilter', 'searchFilter', 'perPage', 'currentPage'])) {
+            $this->currentPage = 1;
+            $this->loadVenues();
+        }
     }
 
     public function applyFilters(): void
@@ -210,10 +214,18 @@ class BulkEditVenues extends Page
                         ->moveFiles()
                         ->multiple()
                         ->imageEditor()
-                        ->acceptedFileTypes(['image/jpeg', 'image/png', 'image/webp'])
+                        ->image()
                         ->maxSize(8192)
                         ->maxFiles(5)
                         ->imagePreviewHeight('80')
+                        ->getUploadedFileUsing(static function (BaseFileUpload $component, string $file): ?array {
+                            return [
+                                'name' => basename($file),
+                                'size' => 0,
+                                'type' => null,
+                                'url' => $file,
+                            ];
+                        })
                         ->columnSpanFull(),
 
                     Group::make([

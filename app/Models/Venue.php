@@ -348,7 +348,14 @@ class Venue extends Model
                     return [];
                 }
 
-                return array_map(fn ($imagePath) => Storage::disk('do')->url($imagePath), $images);
+                return array_map(
+                    fn ($imagePath) => (
+                        str_contains($imagePath, 'prima-bucket.nyc3.digitaloceanspaces.com')
+                            ? $imagePath
+                            : Storage::disk('do')->url($imagePath)
+                    ),
+                    $images
+                );
             }
         );
     }
