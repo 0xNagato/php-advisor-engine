@@ -31,6 +31,7 @@ class VerifyCsrfToken extends Middleware
      */
     protected $excludedComponents = [
         'talk-to-prima',
+        'site-contact-form',
     ];
 
     /**
