@@ -17,18 +17,26 @@ class FixVenueImages extends Command
     protected $description = 'Detect and fix duplicated bucket host prefixes in venue images JSON array field.';
 
     private const string BUCKET_HOST = 'https://prima-bucket.nyc3.digitaloceanspaces.com/';
+
     private const string HOST_PATTERN = '/^(https:\\/\\/prima-bucket\.nyc3\.digitaloceanspaces\.com\\/)+/';
 
     // Runtime state
     private bool $dryRun = false;
+
     private bool $showDetails = false;
+
     private ?int $limit = null;
+
     private int $chunkSize = 200;
+
     private array $onlyIds = [];
 
     private int $processed = 0;
+
     private int $updatedVenues = 0;
+
     private int $modifiedImages = 0;
+
     private array $details = [];
 
     public function handle(): int
@@ -189,6 +197,7 @@ class FixVenueImages extends Command
                 $count++;
             }
         }
+
         return $count;
     }
 
@@ -203,6 +212,7 @@ class FixVenueImages extends Command
                 $pairs[] = ['before' => $b, 'after' => $a];
             }
         }
+
         return $pairs;
     }
 
