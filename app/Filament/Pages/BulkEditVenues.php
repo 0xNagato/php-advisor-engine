@@ -98,7 +98,7 @@ class BulkEditVenues extends Page
         }
 
         if (filled($this->searchFilter)) {
-            $query->where('name', 'ilike', '%' . $this->searchFilter . '%');
+            $query->whereRaw('LOWER(name) LIKE ?', ['%' . $this->searchFilter . '%']);
         }
 
         return $query->paginate($this->perPage, ['*'], 'page', $this->currentPage);
@@ -125,6 +125,12 @@ class BulkEditVenues extends Page
                 'specialty' => $freshVenue->specialty ?? [],
             ];
         }
+    }
+
+    public function updated(): void
+    {
+        $this->currentPage = 1;
+        $this->loadVenues();
     }
 
     public function applyFilters(): void
