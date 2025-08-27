@@ -226,6 +226,24 @@ class BulkEditVenues extends Page
                                 'url' => $file,
                             ];
                         })
+                        ->deleteUploadedFileUsing(static function (BaseFileUpload $component, string $file): void {
+                            $disk = Storage::disk('do');
+
+                            $path = parse_url($file, PHP_URL_PATH) ?: $file;
+                            $path = ltrim($path, '/');
+
+                            if ($disk->exists($path)) {
+                                try {
+                                    $disk->delete($path);
+                                } catch (\Throwable $e) {
+                                    \Log::warning('Failed to delete image', [
+                                        'path' => $path,
+                                        'error' => $e->getMessage(),
+                                    ]);
+                                }
+                            }
+                            // Nothing to return; Filament will remove it from the form state.
+                        })
                         ->columnSpanFull(),
 
                     Group::make([
@@ -294,58 +312,76 @@ class BulkEditVenues extends Page
                 }
 
                 try {
-                    // Handle file uploads manually like VenueOnboarding
-                    $existingImages = $venue->images ?? [];
-                    $newImages = [];
+                    $updates = [
+                        'address' => $data['address'] ?? $venue->address,
+                        'vat' => $data['vat'] ?? $venue->vat,
+                        'description' => $data['description'] ?? $venue->description,
+                        'neighborhood' => $data['neighborhood'] ?? $venue->neighborhood,
+                        'cuisines' => $data['cuisines'] ?? ($venue->cuisines ?? []),
+                        'specialty' => $data['specialty'] ?? ($venue->specialty ?? []),
+                    ];
 
-                    // Process uploaded images if any
-                    if (isset($data['images']) && filled($data['images'])) {
-                        $imageFiles = is_array($data['images']) ? $data['images'] : [$data['images']];
+                    // Images: only process if the key exists (even if empty array).
+                    if (array_key_exists('images', $data)) {
+                        $submitted = $data['images']; // can be [], list of strings, list w/ TemporaryUploadedFile, or single value
+                        $finalImages = [];
+                        $keptExisting = []; // existing paths the user kept (strings passed back)
 
-                        foreach ($imageFiles as $imageFile) {
-                            if (is_object($imageFile) && method_exists($imageFile, 'storeAs')) {
-                                // This is a TemporaryUploadedFile - manually store it
+                        $disk = Storage::disk('do');
+
+                        $items = is_array($submitted) ? $submitted : (filled($submitted) ? [$submitted] : []);
+
+                        foreach ($items as $item) {
+                            if (is_object($item) && method_exists($item, 'storeAs')) {
+                                // New upload
                                 try {
-                                    $fileName = $venue->slug . '-' . time() . '-' . uniqid() . '.' . $imageFile->getClientOriginalExtension();
-
-                                    $path = $imageFile->storeAs(
+                                    $fileName = $venue->slug . '-' . time() . '-' . uniqid() . '.' . $item->getClientOriginalExtension();
+                                    $path = $item->storeAs(
                                         app()->environment() . '/venues/images',
                                         $fileName,
                                         ['disk' => 'do']
                                     );
-
-                                    // Set visibility to public
-                                    Storage::disk('do')->setVisibility($path, 'public');
-
-                                    $newImages[] = $path;
+                                    $disk->setVisibility($path, 'public');
+                                    $finalImages[] = $path;
                                 } catch (Exception $e) {
                                     logger()->error('Failed to store uploaded file', [
                                         'venue_id' => $venue->id,
                                         'error' => $e->getMessage(),
                                     ]);
                                 }
-                            } elseif (is_string($imageFile) && filled($imageFile)) {
-                                // Existing file path - keep it
-                                if (Storage::disk('do')->exists($imageFile)) {
-                                    $newImages[] = $imageFile;
+                            } elseif (is_string($item) && filled($item)) {
+                                // Existing path retained
+                                $normalized = ltrim(parse_url($item, PHP_URL_PATH) ?: $item, '/');
+                                if ($disk->exists($normalized)) {
+                                    $finalImages[] = $normalized;
+                                    $keptExisting[] = $normalized;
                                 }
                             }
                         }
+
+                        // Delete removed images (those that were previously stored but not kept)
+                        $previousImages = $venue->images ?? [];
+                        $removed = array_diff($previousImages, $keptExisting);
+                        foreach ($removed as $removedPath) {
+                            try {
+                                if ($disk->exists($removedPath)) {
+                                    $disk->delete($removedPath);
+                                }
+                            } catch (\Throwable $e) {
+                                logger()->warning('Failed to delete removed image', [
+                                    'venue_id' => $venue->id,
+                                    'path' => $removedPath,
+                                    'error' => $e->getMessage(),
+                                ]);
+                            }
+                        }
+
+                        // If user deleted all, $finalImages will be []
+                        $updates['images'] = $finalImages;
                     }
 
-                    // Combine existing and new images
-                    $finalImages = array_merge($existingImages, $newImages);
-
                     // Update venue
-                    $venue->update([
-                        'address' => $data['address'] ?? $venue->address,
-                        'vat' => $data['vat'] ?? $venue->vat,
-                        'description' => $data['description'] ?? $venue->description,
-                        'images' => $finalImages,
-                        'neighborhood' => $data['neighborhood'] ?? $venue->neighborhood,
-                        'cuisines' => $data['cuisines'] ?? $venue->cuisines ?? [],
-                        'specialty' => $data['specialty'] ?? $venue->specialty ?? [],
-                    ]);
+                    $venue->update($updates);
 
                     $updatedCount++;
 
