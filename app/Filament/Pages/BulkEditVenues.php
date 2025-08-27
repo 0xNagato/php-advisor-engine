@@ -13,7 +13,6 @@ use Filament\Forms\Components\BaseFileUpload;
 use Filament\Forms\Components\CheckboxList;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Group;
-use Filament\Forms\Components\KeyValue;
 use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
@@ -24,6 +23,8 @@ use Filament\Pages\Page;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Livewire\Attributes\Computed;
+use Log;
+use Throwable;
 
 class BulkEditVenues extends Page
 {
@@ -100,7 +101,7 @@ class BulkEditVenues extends Page
         }
 
         if (filled($this->searchFilter)) {
-            $query->whereRaw('LOWER(name) LIKE ?', ['%' . $this->searchFilter . '%']);
+            $query->whereRaw('LOWER(name) LIKE ?', ['%'.$this->searchFilter.'%']);
         }
 
         return $query->paginate($this->perPage, ['*'], 'page', $this->currentPage);
@@ -182,7 +183,7 @@ class BulkEditVenues extends Page
 
         foreach ($venues as $venue) {
             $formSchema[] = Section::make($venue->name)
-                ->description($venue->formattedRegion . ($venue->formattedNeighborhood ? ' • ' . $venue->formattedNeighborhood : ''))
+                ->description($venue->formattedRegion.($venue->formattedNeighborhood ? ' • '.$venue->formattedNeighborhood : ''))
                 ->icon('heroicon-m-building-storefront')
                 ->schema([
                     Group::make([
@@ -210,7 +211,7 @@ class BulkEditVenues extends Page
                     FileUpload::make("venuesData.{$venue->id}.images")
                         ->label('Images')
                         ->disk('do')
-                        ->directory(app()->environment() . '/venues/images')
+                        ->directory(app()->environment().'/venues/images')
                         ->moveFiles()
                         ->multiple()
                         ->imageEditor()
@@ -235,8 +236,8 @@ class BulkEditVenues extends Page
                             if ($disk->exists($path)) {
                                 try {
                                     $disk->delete($path);
-                                } catch (\Throwable $e) {
-                                    \Log::warning('Failed to delete image', [
+                                } catch (Throwable $e) {
+                                    Log::warning('Failed to delete image', [
                                         'path' => $path,
                                         'error' => $e->getMessage(),
                                     ]);
@@ -250,7 +251,7 @@ class BulkEditVenues extends Page
                         Select::make("venuesData.{$venue->id}.neighborhood")
                             ->label('Neighborhood')
                             ->options(function () use ($venue) {
-                                if (!$venue->region) {
+                                if (! $venue->region) {
                                     return [];
                                 }
 
@@ -265,7 +266,7 @@ class BulkEditVenues extends Page
                         Select::make("venuesData.{$venue->id}.specialty")
                             ->label('Specialties')
                             ->options(function () use ($venue) {
-                                if (!$venue->region) {
+                                if (! $venue->region) {
                                     return [];
                                 }
 
@@ -307,7 +308,7 @@ class BulkEditVenues extends Page
             foreach ($this->venuesData as $venueId => $data) {
                 $venue = Venue::query()->find($venueId);
 
-                if (!$venue) {
+                if (! $venue) {
                     continue;
                 }
 
@@ -317,13 +318,21 @@ class BulkEditVenues extends Page
                         'vat' => $data['vat'] ?? $venue->vat,
                         'description' => $data['description'] ?? $venue->description,
                         'neighborhood' => $data['neighborhood'] ?? $venue->neighborhood,
-                        'cuisines' => $data['cuisines'] ?? ($venue->cuisines ?? []),
-                        'specialty' => $data['specialty'] ?? ($venue->specialty ?? []),
+                        'cuisines' => $data['cuisines'] ?? $venue->cuisines ?? [],
+                        'specialty' => $data['specialty'] ?? $venue->specialty ?? [],
                     ];
 
-                    // Images: only process if the key exists (even if empty array).
+                    /**
+                     * The 'images' key in $data can take several forms:
+                     * - []: An empty array (no images submitted)
+                     * - array of strings: Existing image paths retained by the user
+                     * - array with TemporaryUploadedFile objects: Newly uploaded images
+                     * - single string or TemporaryUploadedFile: A single image, either existing or new
+                     *
+                     * The following logic normalizes these possibilities into a consistent array of image paths.
+                     */
                     if (array_key_exists('images', $data)) {
-                        $submitted = $data['images']; // can be [], list of strings, list w/ TemporaryUploadedFile, or single value
+                        $submitted = $data['images'];
                         $finalImages = [];
                         $keptExisting = []; // existing paths the user kept (strings passed back)
 
@@ -335,9 +344,9 @@ class BulkEditVenues extends Page
                             if (is_object($item) && method_exists($item, 'storeAs')) {
                                 // New upload
                                 try {
-                                    $fileName = $venue->slug . '-' . time() . '-' . uniqid() . '.' . $item->getClientOriginalExtension();
+                                    $fileName = $venue->slug.'-'.time().'-'.uniqid().'.'.$item->getClientOriginalExtension();
                                     $path = $item->storeAs(
-                                        app()->environment() . '/venues/images',
+                                        app()->environment().'/venues/images',
                                         $fileName,
                                         ['disk' => 'do']
                                     );
@@ -367,7 +376,7 @@ class BulkEditVenues extends Page
                                 if ($disk->exists($removedPath)) {
                                     $disk->delete($removedPath);
                                 }
-                            } catch (\Throwable $e) {
+                            } catch (Throwable $e) {
                                 logger()->warning('Failed to delete removed image', [
                                     'venue_id' => $venue->id,
                                     'path' => $removedPath,
@@ -390,13 +399,13 @@ class BulkEditVenues extends Page
                         ->performedOn($venue)
                         ->withProperties([
                             'bulk_edit' => true,
-                            'updated_fields' => array_keys(array_filter($data, fn($value) => filled($value))),
+                            'updated_fields' => array_keys(array_filter($data, fn ($value) => filled($value))),
                             'updated_by' => auth()->user()->name,
                         ])
                         ->log('Venue bulk edited');
                 } catch (Exception $e) {
                     $errorCount++;
-                    logger()->error("Failed to update venue {$venue->name}: " . $e->getMessage());
+                    logger()->error("Failed to update venue {$venue->name}: ".$e->getMessage());
                 }
             }
 
@@ -406,7 +415,7 @@ class BulkEditVenues extends Page
                 Notification::make()
                     ->success()
                     ->title('Venues Updated Successfully')
-                    ->body("Updated {$updatedCount} venues" . ($errorCount > 0 ? " with {$errorCount} errors" : ''))
+                    ->body("Updated {$updatedCount} venues".($errorCount > 0 ? " with {$errorCount} errors" : ''))
                     ->send();
             }
 
@@ -430,7 +439,7 @@ class BulkEditVenues extends Page
             Notification::make()
                 ->danger()
                 ->title('Bulk Update Failed')
-                ->body('An error occurred: ' . $e->getMessage())
+                ->body('An error occurred: '.$e->getMessage())
                 ->send();
         }
     }
