@@ -359,7 +359,7 @@ class BulkEditVenues extends Page
                                 }
                             } elseif (is_string($item) && filled($item)) {
                                 // Existing path retained
-                                $normalized = ltrim(parse_url($item, PHP_URL_PATH) ?: $item, '/');
+                                $normalized = ltrim(parse_url($item, PHP_URL_PATH) ?? $item ?? '', '/');
                                 if ($disk->exists($normalized)) {
                                     $finalImages[] = $normalized;
                                     $keptExisting[] = $normalized;
@@ -369,7 +369,11 @@ class BulkEditVenues extends Page
 
                         // Delete removed images (those that were previously stored but not kept)
                         $previousImages = $venue->images ?? [];
-                        $removed = array_diff($previousImages, $keptExisting);
+                        // Normalize previous images to match the format of $keptExisting
+                        $normalizedPreviousImages = array_map(function ($item) {
+                            return ltrim(parse_url($item, PHP_URL_PATH) ?: $item, '/');
+                        }, $previousImages);
+                        $removed = array_diff($normalizedPreviousImages, $keptExisting);
                         foreach ($removed as $removedPath) {
                             try {
                                 if ($disk->exists($removedPath)) {
