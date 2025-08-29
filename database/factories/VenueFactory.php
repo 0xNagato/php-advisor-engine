@@ -55,7 +55,41 @@ class VenueFactory extends Factory
                 ],
             ],
 
+            'metadata' => fake()->optional(0.7)->passthrough([
+                'rating' => fake()->randomFloat(1, 3.5, 5.0),
+                'priceLevel' => fake()->numberBetween(1, 4),
+                'reviewCount' => fake()->numberBetween(10, 500),
+                'googlePlaceId' => 'ChIJ'.fake()->lexify('????????????????'),
+                'lastSyncedAt' => now()->subHours(fake()->numberBetween(1, 48))->toISOString(),
+            ]),
+
             'user_id' => User::factory(),
         ];
+    }
+
+    /**
+     * Indicate that the venue has high ratings and is expensive
+     */
+    public function highEnd(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'metadata' => [
+                'rating' => fake()->randomFloat(1, 4.5, 5.0),
+                'priceLevel' => 4,
+                'reviewCount' => fake()->numberBetween(200, 1000),
+                'googlePlaceId' => 'ChIJ'.fake()->lexify('????????????????'),
+                'lastSyncedAt' => now()->toISOString(),
+            ],
+        ]);
+    }
+
+    /**
+     * Indicate that the venue has no metadata yet
+     */
+    public function withoutMetadata(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'metadata' => null,
+        ]);
     }
 }

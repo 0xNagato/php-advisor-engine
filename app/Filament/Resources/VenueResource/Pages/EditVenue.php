@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\VenueResource\Pages;
 
 use App\Actions\Venue\DeleteVenueAction;
+use App\Actions\Venue\GenerateVenueDescriptionWithAI;
 use App\Actions\Venue\UpdateVenueGroupEarnings;
 use App\Enums\VenueStatus;
 use App\Filament\Resources\VenueResource;
@@ -16,11 +17,13 @@ use App\Models\Specialty;
 use App\Models\User;
 use App\Models\Venue;
 use App\Models\VenueGroup;
+use App\Services\GooglePlacesService;
 use App\Services\ReservationService;
 use Carbon\Carbon;
 use Exception;
 use Filament\Actions\Action;
 use Filament\Actions\ActionGroup;
+use Filament\Forms\Components\BaseFileUpload;
 use Filament\Forms\Components\CheckboxList;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Grid;
@@ -156,6 +159,16 @@ class EditVenue extends EditRecord
                             ->label('Venue Name')
                             ->required()
                             ->maxLength(255),
+                        Textarea::make('address')
+                            ->label('Address')
+                            ->rows(3)
+                            ->placeholder("123 Main Street\nNew York, NY 10001\nUnited States")
+                            ->columnSpanFull(),
+                        Textarea::make('description')
+                            ->label('Description')
+                            ->rows(3)
+                            ->placeholder('Enter venue description...')
+                            ->columnSpanFull(),
                         Select::make('region')
                             ->placeholder('Select Region')
                             ->options(Region::all()->sortBy('id')->pluck('name', 'id'))
@@ -226,6 +239,56 @@ class EditVenue extends EditRecord
                                 }
                             })
                             ->helperText('This shows if the venue is configured in the tier ordering system. Contact admin to change tier positions.'),
+                        FileUpload::make('images')
+                            ->label('Images')
+                            ->disk('do')
+                            ->directory(app()->environment() . '/venues/images')
+                            ->moveFiles()
+                            ->multiple()
+                            ->imageEditor()
+                            ->image()
+                            ->acceptedFileTypes(['image/jpeg', 'image/png', 'image/webp'])
+                            ->maxSize(8192)
+                            ->maxFiles(5)
+                            ->imagePreviewHeight('80')
+                            ->columnSpanFull()
+                            ->getUploadedFileNameForStorageUsing(
+                                fn (
+                                    Venue $record,
+                                    TemporaryUploadedFile $file
+                                ): string => $record->slug.'-'.time().'-'.uniqid().'.'.$file->getClientOriginalExtension()
+                            )
+                            ->getUploadedFileUsing(static function (BaseFileUpload $component, string $file): ?array {
+                                // Handle both raw paths and full URLs
+                                $url = $file;
+                                if (!str_contains($file, 'prima-bucket.nyc3.digitaloceanspaces.com')) {
+                                    $url = Storage::disk('do')->url($file);
+                                }
+                                
+                                return [
+                                    'name' => basename($file),
+                                    'size' => 0,
+                                    'type' => null,
+                                    'url' => $url,
+                                ];
+                            })
+                            ->deleteUploadedFileUsing(static function (BaseFileUpload $component, string $file): void {
+                                $disk = Storage::disk('do');
+
+                                $path = parse_url($file, PHP_URL_PATH) ?: $file;
+                                $path = ltrim($path, '/');
+
+                                if ($disk->exists($path)) {
+                                    try {
+                                        $disk->delete($path);
+                                    } catch (\Throwable $e) {
+                                        logger()->warning('Failed to delete image', [
+                                            'path' => $path,
+                                            'error' => $e->getMessage(),
+                                        ]);
+                                    }
+                                }
+                            }),
                         TextInput::make('primary_contact_name')
                             ->label('Primary Contact Name')
                             ->required(),
@@ -854,6 +917,224 @@ class EditVenue extends EditRecord
                     ->modalHeading('Change Venue Status')
                     ->modalDescription('Are you sure you want to change the status of this venue?'),
 
+                Action::make('syncGoogleData')
+                    ->label('Sync Google Data')
+                    ->icon('heroicon-o-arrow-path')
+                    ->color('info')
+                    ->form([
+                        Section::make('Current Data')
+                            ->schema([
+                                Placeholder::make('current_rating')
+                                    ->label('Current Rating')
+                                    ->content(fn () => $venue->metadata?->rating ? 
+                                        $venue->metadata->rating . '/5 (' . $venue->metadata->reviewCount . ' reviews)' : 
+                                        'No rating data'),
+                                Placeholder::make('current_description')
+                                    ->label('Current Description')
+                                    ->content(fn () => $venue->description ?: 'No description'),
+                                Placeholder::make('last_synced')
+                                    ->label('Last Synced')
+                                    ->content(fn () => $venue->metadata?->lastSyncedAt ? 
+                                        \Carbon\Carbon::parse($venue->metadata->lastSyncedAt)->diffForHumans() : 
+                                        'Never synced'),
+                            ])
+                            ->collapsible(),
+                        Section::make('Sync Options')
+                            ->schema([
+                                Toggle::make('skip_photos')
+                                    ->label('Skip Photos')
+                                    ->helperText('Skip downloading and uploading photos')
+                                    ->default(false),
+                                Toggle::make('overwrite_description')
+                                    ->label('Overwrite Description')
+                                    ->helperText('Overwrite existing descriptions with Google data')
+                                    ->default(false),
+                                Toggle::make('ratings_only')
+                                    ->label('Ratings Only')
+                                    ->helperText('Only update ratings, skip everything else')
+                                    ->default(false),
+                            ]),
+                    ])
+                    ->action(function (array $data, GooglePlacesService $googlePlaces) use ($venue) {
+                        try {
+                            // Build search query
+                            $searchQuery = $venue->name;
+                            if ($venue->address) {
+                                $searchQuery .= ' '.$venue->address;
+                            }
+
+                            // Search for the venue
+                            $placeData = $googlePlaces->searchPlace($searchQuery, $venue->region);
+
+                            if (!$placeData) {
+                                Notification::make()
+                                    ->title('No Results')
+                                    ->body('No Google Places results found for this venue.')
+                                    ->warning()
+                                    ->send();
+                                return;
+                            }
+
+                            // Get detailed place data if needed
+                            if ($placeData->placeId && !$placeData->rating) {
+                                $detailedData = $googlePlaces->getPlaceDetails($placeData->placeId);
+                                if ($detailedData) {
+                                    $placeData = $detailedData;
+                                }
+                            }
+
+                            if ($data['ratings_only']) {
+                                // Only update rating in metadata
+                                $metadata = $venue->metadata ?? new \App\Data\VenueMetadata();
+                                if ($placeData->rating !== null) {
+                                    $metadata->rating = $placeData->rating;
+                                    $metadata->reviewCount = $placeData->userRatingsTotal;
+                                    $metadata->lastSyncedAt = now()->toISOString();
+                                    $venue->metadata = $metadata;
+                                }
+                            } else {
+                                // Update address if missing
+                                if (blank($venue->address) && $placeData->formattedAddress) {
+                                    $venue->address = $placeData->formattedAddress;
+                                }
+
+                                // Update description based on flags
+                                if ($placeData->editorialSummary || $placeData->generativeSummary) {
+                                    if ($data['overwrite_description'] || blank($venue->description)) {
+                                        $venue->description = $placeData->editorialSummary ?? $placeData->generativeSummary;
+                                    }
+                                }
+
+                                // Update metadata
+                                $venue->updateMetadataFromGoogle($placeData, $data['skip_photos']);
+                            }
+
+                            $venue->save();
+
+                            Notification::make()
+                                ->title('Google Data Synced')
+                                ->body('Successfully synced venue data from Google Places.')
+                                ->success()
+                                ->send();
+
+                            // Redirect to refresh the page
+                            $this->redirect(VenueResource::getUrl('edit', ['record' => $venue->id]));
+                        } catch (Exception $e) {
+                            Notification::make()
+                                ->title('Sync Failed')
+                                ->body('Failed to sync Google data: '.$e->getMessage())
+                                ->danger()
+                                ->send();
+                        }
+                    })
+                    ->modalHeading('Sync Google Data')
+                    ->modalDescription('This will fetch the latest information from Google Places API and update the venue.'),
+
+                Action::make('generateAIDescription')
+                    ->label('Generate AI Description')
+                    ->icon('heroicon-o-sparkles')
+                    ->color('success')
+                    ->form([
+                        Section::make('Current Description')
+                            ->schema([
+                                Placeholder::make('current_description')
+                                    ->hiddenLabel()
+                                    ->content(function () use ($venue) {
+                                        if (blank($venue->description)) {
+                                            return 'No description currently set.';
+                                        }
+                                        return new HtmlString(
+                                            '<div class="prose prose-sm max-w-none">' . 
+                                            nl2br(e($venue->description)) . 
+                                            '</div>'
+                                        );
+                                    }),
+                            ])
+                            ->visible(fn () => !blank($venue->description)),
+                        Section::make('Venue Information')
+                            ->schema([
+                                Placeholder::make('venue_info')
+                                    ->hiddenLabel()
+                                    ->content(function () use ($venue) {
+                                        $info = [];
+                                        if ($venue->metadata?->rating) {
+                                            $info[] = '⭐ ' . $venue->metadata->rating . '/5 (' . $venue->metadata->reviewCount . ' reviews)';
+                                        }
+                                        if ($venue->cuisines) {
+                                            $cuisineNames = \App\Models\Cuisine::whereIn('id', $venue->cuisines)->pluck('name')->join(', ');
+                                            $info[] = '🍽️ ' . $cuisineNames;
+                                        }
+                                        if ($venue->specialty) {
+                                            $info[] = '✨ ' . implode(', ', $venue->specialty);
+                                        }
+                                        if ($venue->metadata?->priceLevel) {
+                                            $info[] = '💰 ' . str_repeat('$', $venue->metadata->priceLevel);
+                                        }
+                                        return new HtmlString(implode('<br>', $info) ?: 'Limited information available for AI generation.');
+                                    }),
+                            ])
+                            ->collapsible(),
+                        Section::make('Generation Options')
+                            ->schema([
+                                Select::make('provider')
+                                    ->label('AI Provider')
+                                    ->options([
+                                        'anthropic' => 'Claude (Anthropic)',
+                                        'openai' => 'OpenAI GPT-4',
+                                    ])
+                                    ->default('anthropic')
+                                    ->required(),
+                                Toggle::make('overwrite')
+                                    ->label('Overwrite Existing')
+                                    ->helperText('Replace the current description even if one exists')
+                                    ->default(false)
+                                    ->visible(fn () => !blank($venue->description)),
+                            ]),
+                    ])
+                    ->action(function (array $data, GenerateVenueDescriptionWithAI $generator) use ($venue) {
+                        try {
+                            // Check if we should proceed
+                            if (!$data['overwrite'] && !blank($venue->description)) {
+                                Notification::make()
+                                    ->title('Description Exists')
+                                    ->body('This venue already has a description. Enable "Overwrite Existing" to replace it.')
+                                    ->warning()
+                                    ->send();
+                                return;
+                            }
+
+                            $description = $generator->handle($venue, $data['provider']);
+
+                            if ($description) {
+                                $venue->description = $description;
+                                $venue->save();
+
+                                Notification::make()
+                                    ->title('Description Generated')
+                                    ->body('AI-generated description has been saved successfully.')
+                                    ->success()
+                                    ->send();
+
+                                // Redirect to refresh the page
+                                $this->redirect(VenueResource::getUrl('edit', ['record' => $venue->id]));
+                            } else {
+                                Notification::make()
+                                    ->title('Generation Failed')
+                                    ->body('Failed to generate description. Please try again.')
+                                    ->danger()
+                                    ->send();
+                            }
+                        } catch (Exception $e) {
+                            Notification::make()
+                                ->title('Error')
+                                ->body('Failed to generate description: '.$e->getMessage())
+                                ->danger()
+                                ->send();
+                        }
+                    })
+                    ->modalHeading('Generate AI Description')
+                    ->modalDescription('Generate a professional description for this venue using AI based on its metadata and features.'),
+
                 Action::make('downloadLogo')
                     ->label('Download Logo')
                     ->icon('heroicon-o-arrow-down-tray')
@@ -953,6 +1234,15 @@ class EditVenue extends EditRecord
             $data['specialtyOptions'] = Specialty::getSpecialtiesByRegion($data['region']);
         }
 
+        // Get raw images data from the database instead of the mutated accessor
+        $venue = $this->getRecord();
+        $rawImages = $venue->getRawOriginal('images');
+        
+        if ($rawImages !== null) {
+            $images = is_string($rawImages) ? json_decode($rawImages, true) : $rawImages;
+            $data['images'] = is_array($images) ? $images : [];
+        }
+
         if (! isset($data['contacts'])) {
             return $data;
         }
@@ -966,8 +1256,20 @@ class EditVenue extends EditRecord
 
     protected function afterSave(): void
     {
-        if ($this->getRecord()->logo_path) {
-            Storage::disk('do')->setVisibility($this->getRecord()->logo_path, 'public');
+        $venue = $this->getRecord();
+        
+        // Make logo public
+        if ($venue->logo_path) {
+            Storage::disk('do')->setVisibility($venue->logo_path, 'public');
+        }
+        
+        // Make all images public
+        if ($venue->images && is_array($venue->images)) {
+            foreach ($venue->images as $imagePath) {
+                if ($imagePath && Storage::disk('do')->exists($imagePath)) {
+                    Storage::disk('do')->setVisibility($imagePath, 'public');
+                }
+            }
         }
     }
 }

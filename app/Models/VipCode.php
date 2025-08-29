@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Data\AffiliateBrandingData;
 use App\Enums\BookingStatus;
 use App\Services\CurrencyConversionService;
 use Illuminate\Contracts\Database\Query\Builder;
@@ -12,16 +13,20 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 
+/**
+ * @property AffiliateBrandingData|null $branding
+ */
 class VipCode extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['code', 'concierge_id', 'is_active'];
+    protected $fillable = ['code', 'concierge_id', 'is_active', 'branding'];
 
     protected function casts(): array
     {
         return [
             'is_active' => 'boolean',
+            'branding' => AffiliateBrandingData::class,
         ];
     }
 
@@ -41,6 +46,14 @@ class VipCode extends Model
     public function concierge(): BelongsTo
     {
         return $this->belongsTo(Concierge::class);
+    }
+
+    /**
+     * @return HasMany<VenueCollection, $this>
+     */
+    public function venueCollections(): HasMany
+    {
+        return $this->hasMany(VenueCollection::class);
     }
 
     /**

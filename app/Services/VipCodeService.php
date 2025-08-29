@@ -5,7 +5,6 @@ namespace App\Services;
 use App\Models\VipCode;
 use App\Models\VipSession;
 use Illuminate\Support\Facades\Log;
-use Laravel\Sanctum\PersonalAccessToken;
 
 class VipCodeService
 {
@@ -27,34 +26,28 @@ class VipCodeService
 
     public function findByCode(string $code): ?VipCode
     {
-        return VipCode::with('concierge.user')
+        // Don't load the user relationship to avoid session interference
+        // The user relationship is not needed for VIP session creation
+        return VipCode::with('concierge')
             ->active()
             ->whereRaw('LOWER(code) = ?', [strtolower($code)])
             ->first();
     }
 
     /**
-     * Create a VIP session and return a Sanctum token
+     * Create a VIP analytics session for tracking customer journey
      */
     public function createVipSession(string $code): ?array
     {
         $vipCode = $this->findByCode($code);
 
         if (! $vipCode) {
-            // Log failed attempt for analytics
-            $this->logVipSessionEvent('vip_session_invalid_code_attempted', [
-                'code' => $code,
-                'ip_address' => request()->ip(),
-                'user_agent' => request()->userAgent(),
-            ]);
-
             // Try fallback code if configured
             $fallbackCode = $this->getFallbackCode();
             if ($fallbackCode) {
                 $vipCode = $this->findByCode($fallbackCode);
 
                 if ($vipCode) {
-                    // Log that we're using fallback code
                     $this->logVipSessionEvent('vip_session_fallback_code_used', [
                         'original_code' => $code,
                         'fallback_code' => $fallbackCode,
@@ -65,6 +58,11 @@ class VipCodeService
             }
 
             if (! $vipCode) {
+                $this->logVipSessionEvent('vip_session_invalid_code_attempted', [
+                    'code' => $code,
+                    'ip_address' => request()->ip(),
+                    'user_agent' => request()->userAgent(),
+                ]);
                 return null;
             }
         }
@@ -72,47 +70,67 @@ class VipCodeService
         // Clean up expired sessions for this VIP code
         $vipCode->cleanExpiredSessions();
 
-        // Create a Sanctum token for the concierge user
-        $user = $vipCode->concierge->user;
+        // Create anonymous analytics tracking token
         $sessionDuration = $this->getSessionDurationHours();
-        $token = $user->createToken('vip-session-'.$code, ['*'], now()->addHours($sessionDuration));
+        $sessionToken = $this->generateAnonymousTrackingToken($vipCode, $code);
 
-        // Store session tracking info
-        VipSession::query()->create([
+        // Store analytics session for conversion tracking
+        $session = VipSession::query()->create([
             'vip_code_id' => $vipCode->id,
-            'token' => hash('sha256', (string) $token->plainTextToken), // Store hash for tracking
+            'token' => $sessionToken,
             'expires_at' => now()->addHours($sessionDuration),
-            'sanctum_token_id' => $token->accessToken->id, // Link to Sanctum token
+            'sanctum_token_id' => null, // Analytics sessions are never linked to user accounts
+            'ip_address' => request()->ip(),
+            'user_agent' => request()->userAgent(),
+            'started_at' => now(),
         ]);
 
-        // Log successful session creation for analytics
+        // Log analytics session creation
         $this->logVipSessionEvent('vip_session_created', [
+            'session_id' => $session->id,
             'vip_code_id' => $vipCode->id,
             'concierge_id' => $vipCode->concierge_id,
             'code' => $code,
-            'sanctum_token_id' => $token->accessToken->id,
             'ip_address' => request()->ip(),
             'user_agent' => request()->userAgent(),
         ]);
 
+        // Load the user relationship only for the API response
+        $vipCode->load('concierge.user');
+
         return [
-            'token' => $token->plainTextToken, // Return the actual Sanctum token
+            'token' => $sessionToken,
             'expires_at' => now()->addHours($sessionDuration)->toISOString(),
             'vip_code' => $vipCode,
-            'is_demo' => false,
         ];
     }
 
     /**
-     * Validate a VIP session token (now validates Sanctum tokens)
+     * Generate a secure anonymous tracking token for analytics
+     */
+    private function generateAnonymousTrackingToken(VipCode $vipCode, string $code): string
+    {
+        // Generate a unique, secure token for analytics tracking (not authentication)
+        $randomBytes = random_bytes(32);
+        $timestamp = time();
+        $vipCodeHash = hash('sha256', $vipCode->id . $code);
+        $sessionId = uniqid('vip_', true);
+
+        return hash('sha256', $randomBytes . $timestamp . $vipCodeHash . $sessionId . config('app.key'));
+    }
+
+    /**
+     * Validate a VIP analytics session token
      */
     public function validateSessionToken(string $token): ?array
     {
-        // Find the Sanctum token
-        $sanctumToken = PersonalAccessToken::findToken($token);
+        // Find analytics session by token
+        $session = VipSession::with('vipCode.concierge.user')
+            ->where('token', $token)
+            ->where('expires_at', '>', now())
+            ->first();
 
-        if (! $sanctumToken || $sanctumToken->expires_at < now()) {
-            // Log failed validation for analytics
+        if (! $session) {
             $this->logVipSessionEvent('vip_session_invalid_token_attempted', [
                 'token_hash' => substr(hash('sha256', $token), 0, 8).'...', // Only log partial hash for security
                 'ip_address' => request()->ip(),
@@ -121,28 +139,19 @@ class VipCodeService
             return null;
         }
 
-        // Find our VIP session record
-        $session = VipSession::with('vipCode.concierge.user')
-            ->where('sanctum_token_id', $sanctumToken->id)
-            ->first();
+        // Update last activity for analytics
+        $session->update(['last_activity_at' => now()]);
 
-        if (! $session) {
-            // This might be a demo token or another non-VIP token
-            return null;
-        }
-
-        // Log successful validation
+        // Log successful validation for analytics
         $this->logVipSessionEvent('vip_session_validated', [
+            'session_id' => $session->id,
             'vip_code_id' => $session->vip_code_id,
             'concierge_id' => $session->vipCode->concierge_id,
-            'session_id' => $session->id,
-            'sanctum_token_id' => $sanctumToken->id,
         ]);
 
         return [
             'session' => $session,
             'vip_code' => $session->vipCode,
-            'is_demo' => false,
         ];
     }
 
@@ -163,7 +172,33 @@ class VipCodeService
     }
 
     /**
-     * Clean up all expired sessions (can be run via a scheduled task)
+     * Track analytics event for a VIP session
+     */
+    public function trackEvent(string $token, string $event, array $data = []): bool
+    {
+        $session = VipSession::where('token', $token)
+            ->where('expires_at', '>', now())
+            ->first();
+
+        if (! $session) {
+            return false;
+        }
+
+        // Update last activity
+        $session->update(['last_activity_at' => now()]);
+
+        // Log the analytics event
+        $this->logVipSessionEvent($event, array_merge($data, [
+            'session_id' => $session->id,
+            'vip_code_id' => $session->vip_code_id,
+            'concierge_id' => $session->vipCode->concierge_id,
+        ]));
+
+        return true;
+    }
+
+    /**
+     * Clean up expired analytics sessions
      */
     public function cleanupExpiredSessions(): int
     {
@@ -171,14 +206,7 @@ class VipCodeService
         $expiredSessions = VipSession::query()->where('expires_at', '<', now())->get();
         $count = $expiredSessions->count();
 
-        foreach ($expiredSessions as $session) {
-            // Delete the corresponding Sanctum token
-            if ($session->sanctum_token_id) {
-                PersonalAccessToken::query()->where('id', $session->sanctum_token_id)->delete();
-            }
-        }
-
-        // Delete expired VIP session records
+        // Delete expired analytics session records
         VipSession::query()->where('expires_at', '<', now())->delete();
 
         if ($count > 0) {

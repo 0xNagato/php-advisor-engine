@@ -28,12 +28,18 @@ class VipSession extends Model
         'token',
         'sanctum_token_id',
         'expires_at',
+        'ip_address',
+        'user_agent',
+        'started_at',
+        'last_activity_at',
     ];
 
     protected function casts(): array
     {
         return [
             'expires_at' => 'datetime',
+            'started_at' => 'datetime',
+            'last_activity_at' => 'datetime',
         ];
     }
 

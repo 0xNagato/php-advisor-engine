@@ -96,7 +96,7 @@
 
     <div class="rounded-2xl overflow-hidden shadow-md border border-slate-300">
       <div class="grid grid-cols-1 sm:grid-cols-3 gap-[1px]">
-        <a href="https://book.primaapp.com/?region=miami" target="_blank" class="group relative p-4 transition overflow-hidden wow animate__animated animate__fadeInLeft" style="background-image: url('{{ asset('images/site/miami.jpg') }}' ); background-size: cover; background-position: center;">
+        <a href="{{ config('app.booking_url') }}/?region=miami" target="_blank" class="group relative p-4 transition overflow-hidden wow animate__animated animate__fadeInLeft" style="background-image: url('{{ asset('images/site/miami.jpg') }}' ); background-size: cover; background-position: center;">
           <div class="absolute inset-0 bg-black opacity-35 group-hover:opacity-70 pointer-events-none transition-opacity duration-300">
           </div>
           <div class="relative z-10 flex items-start justify-between">
@@ -105,7 +105,7 @@
           </div>
           <div class="relative z-10 mt-1 text-xl sm:text-2xl font-extrabold text-white">Miami</div>
         </a>
-        <a href="https://book.primaapp.com/?region=los-angeles" target="_blank" class="group relative p-4 transition overflow-hidden wow animate__animated animate__fadeInUp" style="background-image: url('{{ asset('images/site/los-angeles.jpg') }}' ); background-size: cover; background-position: center;">
+        <a href="{{ config('app.booking_url') }}/?region=los-angeles" target="_blank" class="group relative p-4 transition overflow-hidden wow animate__animated animate__fadeInUp" style="background-image: url('{{ asset('images/site/los-angeles.jpg') }}' ); background-size: cover; background-position: center;">
           <div class="absolute inset-0 bg-black opacity-35 group-hover:opacity-70 pointer-events-none transition-opacity duration-300">
           </div>
           <div class="relative z-10 flex items-start justify-between">
@@ -114,7 +114,7 @@
           </div>
           <div class="relative z-10 mt-1 text-xl sm:text-2xl font-extrabold text-white">Los Angeles</div>
         </a>
-        <a href="https://book.primaapp.com/?region=ibiza" target="_blank" class="group relative p-4 transition overflow-hidden wow animate__animated animate__fadeInRight" style="background-image: url('{{ asset('images/site/Ibiza.webp') }}' ); background-size: cover; background-position: center;">
+        <a href="{{ config('app.booking_url') }}/?region=ibiza" target="_blank" class="group relative p-4 transition overflow-hidden wow animate__animated animate__fadeInRight" style="background-image: url('{{ asset('images/site/Ibiza.webp') }}' ); background-size: cover; background-position: center;">
           <div class="absolute inset-0 bg-black opacity-35 group-hover:opacity-70 pointer-events-none transition-opacity duration-300">
           </div>
           <div class="relative z-10 flex items-start justify-between">

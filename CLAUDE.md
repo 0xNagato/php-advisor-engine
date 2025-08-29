@@ -2,6 +2,23 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+## Available MCP (Model Context Protocol) Tools
+
+This project has access to several MCP servers providing specialized tools:
+
+### Laravel Boost MCP (`mcp__laravel-boost__*`)
+Comprehensive Laravel development tools for configuration, database operations, debugging, and documentation. See the "Laravel Boost" section for detailed tool descriptions.
+
+### Laravel Herd MCP (`mcp__herd__*`)
+Tools for managing PHP versions and Laravel Herd site configurations. See the "Laravel Herd" section for detailed tool descriptions.
+
+### PostgreSQL MCP (`mcp__postgres__query`)
+Direct read-only SQL query access to the PostgreSQL database.
+
+### General MCP Tools
+- **`ListMcpResourcesTool`** - List available resources from configured MCP servers
+- **`ReadMcpResourceTool`** - Read specific resources from MCP servers
+
 ## Build/Test/Lint Commands
 
 - **Development server**: This project is run via Laravel Herd it's always available
@@ -39,9 +56,10 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - Implement Filament resources for admin functionality
 - Never clear any type of cache locally
 - Do not stage files or commit changes until they have been tested and confirmed
+- **CRITICAL: Do not commit changes until after the user has reviewed them** - Always wait for explicit approval before creating commits
 - **CRITICAL: Always run tests after making changes** - Use `./vendor/bin/pest --parallel` to verify changes work
 - **CRITICAL: Double-check which test is failing before deleting** - Match line numbers exactly to error output
-- Use the MySQL MCP whenever database lookups are needed
+- Use the PostgreSQL MCP (`mcp__postgres__query`) for database lookups when available
 - **CRITICAL: NEVER add any attribution to git commits** - No Co-Authored-By, no "Generated with Claude Code", no AI attribution of any kind. Commits should appear as if written entirely by the human developer.
 - **CRITICAL: NEVER delete production data** - If database appears empty, use `./sync-db.sh --import-only` to restore data, then run `php artisan venue-platforms:update-config` to avoid hitting real customer accounts
 
@@ -162,19 +180,43 @@ This application is a Laravel application and its main Laravel ecosystems packag
 ## Laravel Boost
 - Laravel Boost is an MCP server that comes with powerful tools designed specifically for this application. Use them.
 
-## Artisan
-- Use the `list-artisan-commands` tool when you need to call an Artisan command to double check the available parameters.
+### Available Laravel Boost Tools
 
-## URLs
-- Whenever you share a project URL with the user you should use the `get-absolute-url` tool to ensure you're using the correct scheme, domain / IP, and port.
+#### Configuration & Information Tools
+- **`list-available-config-keys`** - List all available Laravel configuration keys (from config/*.php) in dot notation
+- **`get-config`** - Get the value of a specific config variable using dot notation (e.g., "app.name", "database.default")
+- **`list-available-env-vars`** - List all available environment variable names from a given .env file
+- **`application-info`** - Get comprehensive application information including PHP version, Laravel version, database engine, all installed packages with their versions, and all Eloquent models. Use this on each new chat to understand the project context
 
-## Tinker / Debugging
-- You should use the `tinker` tool when you need to execute PHP to debug code or query Eloquent models directly.
-- Use the `database-query` tool when you only need to read from the database.
+#### Database Tools
+- **`database-schema`** - Read the database schema including table names, columns, data types, indexes, foreign keys
+- **`database-query`** - Execute read-only SQL queries against the configured database
+- **`database-connections`** - List the configured database connection names
+- **`tinker`** - Execute PHP code in the Laravel application context (like artisan tinker). Use for debugging, checking if functions exist, and testing code snippets
 
-## Reading Browser Logs With the `browser-logs` Tool
-- You can read browser logs, errors, and exceptions using the `browser-logs` tool from Boost.
-- Only recent browser logs will be useful - ignore old logs.
+#### Debugging & Error Tools
+- **`last-error`** - Get details of the last error/exception created in this application on the backend
+- **`browser-logs`** - Read the last N log entries from the BROWSER log for debugging frontend/JS issues
+- **`read-log-entries`** - Read the last N log entries from the application log, correctly handling multi-line PSR-3 formatted logs
+
+#### Documentation & Help Tools
+- **`search-docs`** - Search for up-to-date version-specific Laravel ecosystem documentation. Perfect for Laravel, Inertia, Pest, Livewire, Filament, Nova, Tailwind, etc. Always use this before other documentation approaches
+- **`report-feedback`** - Report user feedback about Boost or Laravel experience (only for Boost/Laravel ecosystem feedback)
+
+#### Artisan & Routes
+- **`list-artisan-commands`** - List all available Artisan commands registered in this application
+- **`list-routes`** - List all available routes defined in the application, including Folio routes if used
+
+#### URLs
+- **`get-absolute-url`** - Get the absolute URL for a given relative path or named route. Always use this when sharing URLs with the user
+
+### Best Practices for Laravel Boost Tools
+- Use `application-info` at the start of each chat to understand the project context
+- Prefer `tinker` for debugging and testing code snippets over creating temporary files
+- Use `database-query` for read-only database operations instead of `tinker` when possible
+- Always use `search-docs` before implementing Laravel ecosystem features to ensure you follow best practices
+- Use `get-absolute-url` whenever you need to share a URL with the user
+- Check `last-error` and `browser-logs` when debugging issues
 
 ## Searching Documentation (Critically Important)
 - Boost comes with a powerful `search-docs` tool you should use before any other approaches. This tool automatically passes a list of installed packages and their versions to the remote Boost API, so it returns only version-specific documentation specific for the user's circumstance. You should pass an array of packages to filter on if you know you need docs for particular packages.
@@ -201,6 +243,23 @@ This application is a Laravel application and its main Laravel ecosystems packag
 - The application is served by Laravel Herd and will be available at: https?://[kebab-case-project-dir].test. Use the `get-absolute-url` tool to generate URLs for the user to ensure valid URLs.
 - You must not run any commands to make the site available via HTTP(s). It is _always_ available through Laravel Herd.
 
+### Available Laravel Herd MCP Tools
+
+#### PHP Management
+- **`mcp__herd__get_all_php_versions`** - Get a list of all PHP versions and their status (installed, in-use, etc.)
+- **`mcp__herd__install_php_version`** - Install or update a specific PHP version (e.g., "8.3", "8.4")
+
+#### Site Management
+- **`mcp__herd__get_all_sites`** - Get a list of all sites managed by Laravel Herd with their configurations
+- **`mcp__herd__get_site_information`** - Get information about the current project including URL, path, secure status, PHP version, etc.
+- **`mcp__herd__secure_or_unsecure_site`** - Enable or disable HTTPS for the current site
+- **`mcp__herd__isolate_or_unisolate_site`** - Isolate site to use specific PHP version or use global PHP version
+
+### Laravel Herd Best Practices
+- Use `mcp__herd__get_site_information` to understand the current project's Herd configuration
+- Check available PHP versions before attempting to isolate a site to a specific version
+- The site URL is automatically determined by Herd based on the directory name
+
 
 === filament/core rules ===
 
@@ -209,6 +268,7 @@ This application is a Laravel application and its main Laravel ecosystems packag
 - Filament is a Server-Driven UI (SDUI) framework for Laravel. It allows developers to define user interfaces in PHP using structured configuration objects. It is built on top of Livewire, Alpine.js, and Tailwind CSS.
 - You can use the `search-docs` tool to get information from the official Filament documentation when needed. This is very useful for Artisan command arguments, specific code examples, testing functionality, relationship management, and ensuring you're following idiomatic practices.
 - Utilize static `make()` methods for consistent component initialization.
+- **CRITICAL: Always follow "The Filament Way"** - Before implementing any Filament-related functionality, use the `search-docs` tool to verify you're following proper Filament patterns and conventions. If existing code doesn't follow Filament best practices, confirm with the user whether you should refactor it to use proper Filament approaches.
 
 ### Artisan
 - You must use the Filament specific Artisan commands to create new files or components for Filament. You can find these with the `list-artisan-commands` tool, or with `php artisan` and the `--help` option.

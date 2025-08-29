@@ -1,11 +1,13 @@
 <?php
 
 use App\Enums\VenueStatus;
+use App\Models\Concierge;
 use App\Models\Cuisine;
 use App\Models\Neighborhood;
 use App\Models\Specialty;
 use App\Models\User;
 use App\Models\Venue;
+use App\Models\VipCode;
 
 use function Pest\Laravel\getJson;
 
@@ -16,11 +18,32 @@ beforeEach(function () {
 
     // Create an authentication token
     $this->token = $this->user->createToken('test-token')->plainTextToken;
+
+    // Create VIP code for VIP session authentication
+    $this->concierge = Concierge::factory()->create();
+    $this->vipCode = VipCode::create([
+        'code' => 'TESTCODE',
+        'concierge_id' => $this->concierge->id,
+        'is_active' => true,
+    ]);
+
+    // Create VIP session
+    $vipSessionResponse = $this->postJson('/api/vip/sessions', [
+        'vip_code' => 'TESTCODE',
+    ]);
+    $this->vipSessionToken = $vipSessionResponse->json('data.session_token');
 });
 
 test('unauthenticated user cannot access availability calendar', function () {
     getJson('/api/calendar')
-        ->assertUnauthorized();
+        ->assertStatus(401); // Authentication required
+});
+
+test('VIP session user can access availability calendar (returns validation error)', function () {
+    getJson('/api/calendar', [
+        'Authorization' => 'Bearer '.$this->vipSessionToken,
+    ])
+        ->assertStatus(422); // Validation error for missing required parameters
 });
 
 test('authenticated user can fetch availability calendar', function () {

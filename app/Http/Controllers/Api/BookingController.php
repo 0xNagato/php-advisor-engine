@@ -46,6 +46,21 @@ use Vyuldashev\LaravelOpenApi\Attributes\Response as OpenApiResponse;
 class BookingController extends Controller
 {
     /**
+     * Get VIP context from request if this is a VIP session
+     */
+    private function getVipContext(): ?array
+    {
+        return request()->attributes->get('vip_context');
+    }
+
+    /**
+     * Check if this is a VIP session request
+     */
+    private function isVipSession(): bool
+    {
+        return request()->attributes->get('is_vip_session', false);
+    }
+    /**
      * Create a new booking.
      */
     #[OpenApi\Operation(
@@ -110,9 +125,10 @@ class BookingController extends Controller
                 ])
                 ->log('API - Booking creation failed - Exception');
 
+            // Return the specific error message from the exception
             return response()->json([
-                'message' => 'Booking failed',
-            ], 404);
+                'message' => $e->getMessage(),
+            ], 422);
         }
 
         // Get the booking's venue region for proper tax info display

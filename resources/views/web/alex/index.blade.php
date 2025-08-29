@@ -76,7 +76,7 @@
       <p class="text-2xl font-semibold mb-6">PRIMA is LIVE in:</p>
       <div class="flex flex-col sm:flex-row gap-6 justify-center">
         <!-- Miami -->
-        <a href="https://book.primaapp.com/miami" target="_blank" class="flex-1 group rounded-2xl overflow-hidden shadow-md hover:shadow-lg transition max-w-xs">
+        <a href="{{ config('app.booking_url') }}/miami" target="_blank" class="flex-1 group rounded-2xl overflow-hidden shadow-md hover:shadow-lg transition max-w-xs">
           <img src="https://images.unsplash.com/photo-1503602642458-232111445657?q=80&w=1200&auto=format&fit=crop" alt="Miami" class="w-full h-40 object-cover" />
           <div class="bg-white p-4 flex items-center justify-between">
             <span class="text-lg font-semibold text-slate-900">Miami</span>
@@ -84,7 +84,7 @@
           </div>
         </a>
         <!-- Los Angeles -->
-        <a href="https://book.primaapp.com/los-angeles" target="_blank" class="flex-1 group rounded-2xl overflow-hidden shadow-md hover:shadow-lg transition max-w-xs">
+        <a href="{{ config('app.booking_url') }}/los-angeles" target="_blank" class="flex-1 group rounded-2xl overflow-hidden shadow-md hover:shadow-lg transition max-w-xs">
           <img src="https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?q=80&w=1200&auto=format&fit=crop" alt="Los Angeles" class="w-full h-40 object-cover" />
         	<div class="bg-white p-4 flex items-center justify-between">
             <span class="text-lg font-semibold text-slate-900">Los Angeles</span>
@@ -92,7 +92,7 @@
           </div>
         </a>
         <!-- Ibiza -->
-        <a href="https://book.primaapp.com/ibiza" target="_blank" class="flex-1 group rounded-2xl overflow-hidden shadow-md hover:shadow-lg transition max-w-xs">
+        <a href="{{ config('app.booking_url') }}/ibiza" target="_blank" class="flex-1 group rounded-2xl overflow-hidden shadow-md hover:shadow-lg transition max-w-xs">
           <img src="https://images.unsplash.com/photo-1500375592092-40eb2168fd21?q=80&w=1200&auto=format&fit=crop" alt="Ibiza" class="w-full h-40 object-cover" />
           <div class="bg-white p-4 flex items-center justify-between">
             <span class="text-lg font-semibold text-slate-900">Ibiza</span>

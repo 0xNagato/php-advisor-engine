@@ -6,7 +6,7 @@ use Illuminate\Database\QueryException;
 
 test('vip code has fillable attributes', function () {
     $vipCode = new VipCode;
-    expect($vipCode->getFillable())->toBe(['code', 'concierge_id', 'is_active']);
+    expect($vipCode->getFillable())->toBe(['code', 'concierge_id', 'is_active', 'branding']);
 });
 
 test('vip code has correct link attribute', function () {

@@ -249,8 +249,11 @@ class SyncDesignerUpdates extends Command
      */
     protected function convertBookingUrls(string $content): string
     {
-        // Convert book.primaapp.com URLs from /region to /?region=region format
-        $content = preg_replace('/href=[\'"]https:\/\/book\.primaapp\.com\/(miami|los-angeles|ibiza)[\'"]/', 'href="https://book.primaapp.com/?region=$1"', $content);
+        $bookingUrl = config('app.booking_url');
+        $escapedUrl = preg_quote($bookingUrl, '/');
+
+        // Convert booking URLs from /region to /?region=region format
+        $content = preg_replace('/href=[\'"]'.$escapedUrl.'\/(miami|los-angeles|ibiza)[\'"]/', 'href="'.$bookingUrl.'/?region=$1"', $content);
 
         return $content;
     }

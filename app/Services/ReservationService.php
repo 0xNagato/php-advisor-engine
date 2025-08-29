@@ -30,6 +30,11 @@ class ReservationService
     public const int MINUTES_PAST = 35;
 
     /**
+     * Array storing venue ID to collection position mapping when using venue collections
+     */
+    private ?array $venueCollectionOrder = null;
+
+    /**
      * The number of days in advance that reservations can be made.
      */
     public const int AVAILABILITY_DAYS = 3;
@@ -42,6 +47,9 @@ class ReservationService
      * @param  string  $reservationTime  The reservation time
      * @param  int  $timeslotCount  The number of timeslots to display
      * @param  int  $timeSlotOffset  The offset for the time slot
+     * @param  array|null  $vipContext  VIP context for venue collection filtering
+     * @param  float|null  $userLatitude  User's latitude for distance calculations
+     * @param  float|null  $userLongitude  User's longitude for distance calculations
      */
     public function __construct(
         public string|Carbon $date,
@@ -52,7 +60,10 @@ class ReservationService
         public array $cuisines = [],
         public ?string $neighborhood = '',
         public ?Region $region = null,
-        public array|string|null $specialty = []
+        public array|string|null $specialty = [],
+        public ?array $vipContext = null,
+        public ?float $userLatitude = null,
+        public ?float $userLongitude = null
     ) {
         $this->region ??= GetUserRegion::run();
 
@@ -138,6 +149,37 @@ class ReservationService
                     }
                 });
             })
+            // Filter by venue collection if VIP context is provided
+            ->when($this->vipContext, function ($query) {
+                $vipCode = $this->vipContext['vip_code'];
+                $concierge = $this->vipContext['concierge'];
+
+                // Check for VIP code-level collection first (overrides concierge-level)
+                $collection = $vipCode->venueCollections()->with(['items.venue'])->first();
+
+                if (! $collection || ! $collection->is_active) {
+                    // Fall back to concierge-level collection
+                    $collection = $concierge->venueCollections()->with(['items.venue'])->first();
+                }
+
+                if ($collection && $collection->is_active) {
+                    $collectionItems = $collection->items()
+                        ->active()
+                        ->ordered()
+                        ->get();
+
+                    $venueIds = $collectionItems->pluck('venue_id')->toArray();
+
+                    if (! empty($venueIds)) {
+                        // Store the venue collection order for later use in sorting
+                        $this->venueCollectionOrder = $collectionItems
+                            ->pluck('position', 'venue_id')
+                            ->toArray();
+
+                        $query->whereIn('id', $venueIds);
+                    }
+                }
+            })
             ->withSchedulesForDate(
                 date: $this->date,
                 partySize: $this->getGuestCount(),
@@ -150,6 +192,11 @@ class ReservationService
 
         // Filter out venues that have no schedules/timeslots
         $venues = $venues->filter(fn ($venue) => $venue->schedules && $venue->schedules->count() > 0);
+
+        // Attach collection notes to venues if VIP context is provided
+        if ($this->vipContext) {
+            $this->attachCollectionNotesToVenues($venues);
+        }
 
         // Mark schedules as sold out if the venue is past cutoff time
         $venues->each(function ($venue) use ($currentTime) {
@@ -223,6 +270,27 @@ class ReservationService
             );
         });
 
+        // If using venue collections, sort by collection position first
+        if ($this->venueCollectionOrder !== null) {
+            $venues = $venues->sortBy(function ($venue) {
+                return $this->venueCollectionOrder[$venue->id] ?? 999; // Put unordered venues at the end
+            });
+
+            $finalVenues = Collection::make($venues->values()->all());
+            
+            // Calculate approximate drive times if user coordinates are provided
+            if ($this->userLatitude && $this->userLongitude) {
+                $finalVenues = \App\Actions\Venue\CalculateApproximateDriveTime::run(
+                    $finalVenues,
+                    $this->userLatitude,
+                    $this->userLongitude
+                );
+            }
+
+            // For venue collections, return with distance calculations applied
+            return $finalVenues;
+        }
+
         $sorted = $venues
             // Group venues based on the assigned group
             ->groupBy(fn ($venue) => $venue->current_group)
@@ -261,7 +329,18 @@ class ReservationService
             });
 
         // Convert back to Eloquent Collection
-        return Collection::make($sorted->values()->all());
+        $finalVenues = Collection::make($sorted->values()->all());
+
+        // Calculate approximate drive times if user coordinates are provided
+        if ($this->userLatitude && $this->userLongitude) {
+            $finalVenues = \App\Actions\Venue\CalculateApproximateDriveTime::run(
+                $finalVenues,
+                $this->userLatitude,
+                $this->userLongitude
+            );
+        }
+
+        return $finalVenues;
     }
 
     /**
@@ -562,5 +641,42 @@ class ReservationService
         ]);
 
         return $labels[$tier] ?? 'Standard';
+    }
+
+    /**
+     * Attach collection notes to venues when they're part of a venue collection
+     *
+     * @param  Collection  $venues  The collection of venues
+     */
+    private function attachCollectionNotesToVenues($venues): void
+    {
+        $vipCode = $this->vipContext['vip_code'];
+        $concierge = $this->vipContext['concierge'];
+
+        // Check for VIP code-level collection first (overrides concierge-level)
+        $collection = $vipCode->venueCollections()->with(['items.venue'])->first();
+
+        if (! $collection || ! $collection->is_active) {
+            // Fall back to concierge-level collection
+            $collection = $concierge->venueCollections()->with(['items.venue'])->first();
+        }
+
+        if (! $collection || ! $collection->is_active) {
+            return;
+        }
+
+        // Create a map of venue IDs to collection notes
+        $venueNotes = $collection->items()
+            ->active()
+            ->ordered()
+            ->pluck('note', 'venue_id')
+            ->toArray();
+
+        // Attach notes to venues
+        $venues->each(function ($venue) use ($venueNotes) {
+            if (isset($venueNotes[$venue->id])) {
+                $venue->collection_note = $venueNotes[$venue->id];
+            }
+        });
     }
 }

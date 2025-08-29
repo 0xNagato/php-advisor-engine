@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Data\AffiliateBrandingData;
 use App\Enums\BookingStatus;
 use App\Enums\EarningType;
 use App\Models\Traits\HasEarnings;
@@ -31,6 +32,11 @@ class Concierge extends Model
         'is_qr_concierge',
         'revenue_percentage',
         'can_override_duplicate_checks',
+        'branding',
+        'can_manage_own_branding',
+        'can_manage_own_collections',
+        'can_manage_vip_branding',
+        'can_manage_vip_collections',
     ];
 
     /**
@@ -43,6 +49,11 @@ class Concierge extends Model
         return [
             'allowed_venue_ids' => 'array',
             'can_override_duplicate_checks' => 'boolean',
+            'branding' => AffiliateBrandingData::class,
+            'can_manage_own_branding' => 'boolean',
+            'can_manage_own_collections' => 'boolean',
+            'can_manage_vip_branding' => 'boolean',
+            'can_manage_vip_collections' => 'boolean',
         ];
     }
 
@@ -207,5 +218,13 @@ class Concierge extends Model
     public function venueGroup(): BelongsTo
     {
         return $this->belongsTo(VenueGroup::class);
+    }
+
+    /**
+     * @return HasMany<VenueCollection, $this>
+     */
+    public function venueCollections(): HasMany
+    {
+        return $this->hasMany(VenueCollection::class);
     }
 }

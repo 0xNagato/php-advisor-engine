@@ -23,6 +23,8 @@ use Illuminate\Support\Facades\Route;
 // VIP Session endpoints (public - no authentication required)
 Route::post('/vip/sessions', [VipSessionController::class, 'createSession']);
 Route::post('/vip/sessions/validate', [VipSessionController::class, 'validateSession']);
+Route::post('/vip/sessions/track', [VipSessionController::class, 'trackEvent']);
+
 
 Route::post('/login', [AuthController::class, 'login']);
 
@@ -34,21 +36,25 @@ Route::get('/specialties', SpecialtyController::class);
 Route::get('/timeslots', TimeslotController::class);
 Route::get('/app-config', AppConfigController::class)->name('app-config');
 
-Route::middleware('auth:sanctum')->group(function () {
-    // Add the new logout route here
-    Route::post('/logout', [AuthController::class, 'logout']);
-
-    Route::post('/regions', [RegionController::class, 'store']);
+// Endpoints that work with both Sanctum auth and VIP session tokens
+Route::middleware('vip.auth')->group(function () {
+    Route::get('/calendar', AvailabilityCalendarController::class);
     Route::get('/venues', [VenueController::class, 'index']);
     Route::get('/venues/{id}', [VenueController::class, 'show']);
-    Route::get('/calendar', AvailabilityCalendarController::class);
-    Route::get('/hub', ReservationHubController::class);
     Route::post('/bookings', [BookingController::class, 'store']);
     Route::put('/bookings/{booking}', [BookingController::class, 'update']);
     Route::post('/bookings/{booking}/complete', [BookingController::class, 'complete']);
     Route::get('/bookings/{booking}/invoice-status', [BookingController::class, 'invoiceStatus']);
     Route::post('/bookings/{booking}/email-invoice', [BookingController::class, 'emailInvoice']);
     Route::delete('/bookings/{booking}', [BookingController::class, 'destroy']);
+});
+
+Route::middleware('auth:sanctum')->group(function () {
+    // Add the new logout route here
+    Route::post('/logout', [AuthController::class, 'logout']);
+
+    Route::post('/regions', [RegionController::class, 'store']);
+    Route::get('/hub', ReservationHubController::class);
     Route::post('/contact', [ContactFormController::class, 'submit']);
     Route::get('/profiles', [RoleProfileController::class, 'index']);
     Route::post('/profiles/{profile}/switch', [RoleProfileController::class, 'switch']);

@@ -28,6 +28,16 @@ class Kernel extends ConsoleKernel
             ->hourly()
             ->withoutOverlapping();
 
+        // Sync venue data from Google Places daily at 2 AM
+        $schedule->command('venues:sync-google-data')
+            ->dailyAt('02:00')
+            ->withoutOverlapping();
+
+        // Generate AI descriptions for venues daily at 3 AM
+        $schedule->command('venues:generate-descriptions')
+            ->dailyAt('03:00')
+            ->withoutOverlapping();
+
         /**
          * Production-only scheduled tasks
          */

@@ -9,6 +9,8 @@ use App\Http\Requests\Api\TimeslotRequest;
 use App\Models\Region;
 use App\OpenApi\Parameters\TimeslotParameter;
 use App\OpenApi\Responses\TimeslotResponse;
+use App\Services\ReservationService;
+use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Vyuldashev\LaravelOpenApi\Attributes as OpenApi;
 use Vyuldashev\LaravelOpenApi\Attributes\Parameters;
@@ -83,16 +85,28 @@ class TimeslotController extends Controller
     private function availableTimeslots(string $date, Region $region): array
     {
         $isCurrentDay = $date === now($region->timezone)->format('Y-m-d');
-        $currentTime = now($region->timezone)->format('H:i:s');
+        $currentTime = now($region->timezone);
+        $minimumBookingTime = $currentTime->copy()->addMinutes(ReservationService::MINUTES_PAST);
 
         $timeslots = GetReservationTimeOptions::run(date: $date);
 
         return collect($timeslots)
-            ->map(fn ($formattedTime, $time) => [
-                'label' => $formattedTime,
-                'value' => $time,
-                'available' => ! ($isCurrentDay && $time < $currentTime),
-            ])
+            ->map(function ($formattedTime, $time) use ($isCurrentDay, $minimumBookingTime, $date, $region) {
+                // For current day, check if the timeslot is more than MINUTES_PAST in the future
+                if ($isCurrentDay) {
+                    $timeslotDateTime = Carbon::parse($date . ' ' . $time, $region->timezone);
+                    $available = $timeslotDateTime->gt($minimumBookingTime);
+                } else {
+                    // For future dates, all timeslots are available
+                    $available = true;
+                }
+                
+                return [
+                    'label' => $formattedTime,
+                    'value' => $time,
+                    'available' => $available,
+                ];
+            })
             ->values()
             ->all();
     }

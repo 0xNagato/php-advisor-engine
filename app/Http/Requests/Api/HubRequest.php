@@ -30,7 +30,7 @@ class HubRequest extends FormRequest
             ],
             'guest_count' => ['required', 'integer', 'min:1'],
             'reservation_time' => ['required', 'date_format:H:i:s'],
-            'timeslot_count' => ['sometimes', 'integer', 'min:1', 'max:10'],
+            'timeslot_count' => ['sometimes', 'integer', 'min:1', 'max:30'],
             'time_slot_offset' => ['sometimes', 'integer', 'min:0', 'max:10'],
             'venue_id' => ['required', 'exists:venues,id'],
         ];

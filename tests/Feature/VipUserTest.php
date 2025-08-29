@@ -24,7 +24,7 @@ test('can access booking page with valid vip code', function () {
     $response = $this->get($vipCode->link);
 
     $response->assertStatus(302);
-    $response->assertRedirect('https://book.primaapp.com/vip/VALIDCODE');
+    $response->assertRedirect(config('app.booking_url').'/vip/VALIDCODE');
 });
 
 test('cannot access booking page with invalid vip code', function () {

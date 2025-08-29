@@ -108,4 +108,8 @@ return [
         'base_url' => env('RESTOO_BASE_URL', 'https://integration-dev.myrestoo.net'),
         'partner_id' => env('RESTOO_PARTNER_ID', 'prima'),
     ],
+
+    'google' => [
+        'places_api_key' => env('GOOGLE_PLACES_API_KEY'),
+    ],
 ];

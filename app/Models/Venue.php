@@ -3,6 +3,8 @@
 namespace App\Models;
 
 use App\Casts\VenueContactCollection;
+use App\Data\GooglePlaceData;
+use App\Data\VenueMetadata;
 use App\Enums\BookingStatus;
 use App\Enums\VenueStatus;
 use App\Enums\VenueType;
@@ -93,6 +95,9 @@ class Venue extends Model
         'last_covermanager_sync',
         'tier',
         'vat',
+        'metadata',
+        'latitude',
+        'longitude',
     ];
 
     protected function casts(): array
@@ -113,6 +118,7 @@ class Venue extends Model
             'covermanager_sync_enabled' => 'boolean',
             'last_covermanager_sync' => 'datetime',
             'images' => 'array',
+            'metadata' => VenueMetadata::class,
         ];
     }
 
@@ -685,5 +691,110 @@ class Venue extends Model
             ->orWhere(function ($query) {
                 $query->where('company_name', $this->name);
             });
+    }
+
+    /**
+     * Update metadata from Google Places data.
+     *
+     * @return $this
+     */
+    public function updateMetadataFromGoogle(GooglePlaceData $placeData, bool $skipPhotos = false): self
+    {
+        // Build attributes array from boolean fields
+        $attributes = [];
+        if ($placeData->servesCocktails !== null) {
+            $attributes['serves_cocktails'] = $placeData->servesCocktails;
+        }
+        if ($placeData->servesWine !== null) {
+            $attributes['serves_wine'] = $placeData->servesWine;
+        }
+        if ($placeData->servesBeer !== null) {
+            $attributes['serves_beer'] = $placeData->servesBeer;
+        }
+        if ($placeData->outdoorSeating !== null) {
+            $attributes['outdoor_seating'] = $placeData->outdoorSeating;
+        }
+        if ($placeData->liveMusic !== null) {
+            $attributes['live_music'] = $placeData->liveMusic;
+        }
+
+        // Get existing google photo URLs to track what we've already processed
+        $existingGooglePhotoUrls = $this->metadata?->googlePhotoUrls ?? [];
+
+        $this->metadata = VenueMetadata::from([
+            'rating' => $placeData->rating ?? $this->metadata?->rating,
+            'priceLevel' => $placeData->priceLevel ?? $this->metadata?->priceLevel,
+            'reviewCount' => $placeData->userRatingsTotal ?? $this->metadata?->reviewCount,
+            'googlePlaceId' => $placeData->placeId ?? $this->metadata?->googlePlaceId,
+            'googleDescription' => $placeData->editorialSummary ?? $this->metadata?->googleDescription,
+            'googleEditorialSummary' => $placeData->editorialSummary ?? $this->metadata?->googleEditorialSummary,
+            'googleGenerativeSummary' => $placeData->generativeSummary ?? $this->metadata?->googleGenerativeSummary,
+            'googleTypes' => $placeData->types ?? $this->metadata?->googleTypes,
+            'googlePrimaryType' => $placeData->primaryType ?? $this->metadata?->googlePrimaryType,
+            'googleAttributes' => ! empty($attributes) ? $attributes : $this->metadata?->googleAttributes,
+            'googlePhotoUrls' => $existingGooglePhotoUrls, // Will be updated if photos are processed
+            'lastSyncedAt' => now()->toISOString(),
+        ]);
+
+        // Map Google Places data to existing cuisine and specialty fields
+        $mapper = app(\App\Services\GooglePlacesToCuisineMapper::class);
+
+        // Update cuisines - merge with existing or set if empty
+        $mappedCuisines = $mapper->mapToCuisines($placeData->types);
+        if (! empty($mappedCuisines)) {
+            $existingCuisines = is_array($this->cuisines) ? $this->cuisines : [];
+            $this->cuisines = array_values(array_unique(array_merge($existingCuisines, $mappedCuisines)));
+        }
+
+        // Update specialties - merge with existing or set if empty
+        $mappedSpecialties = $mapper->mapToSpecialties($placeData->types, $attributes);
+        if (! empty($mappedSpecialties)) {
+            $existingSpecialties = is_array($this->specialty) ? $this->specialty : [];
+            $this->specialty = array_values(array_unique(array_merge($existingSpecialties, $mappedSpecialties)));
+        }
+
+        // Update images - download and upload Google Places photos to Digital Ocean
+        if (! $skipPhotos && ! empty($placeData->photos)) {
+            // Get raw images from database (not the processed accessor)
+            $rawImages = $this->getRawOriginal('images');
+            $existingImages = [];
+
+            if ($rawImages) {
+                $parsed = is_string($rawImages) ? json_decode($rawImages, true) : $rawImages;
+                $existingImages = is_array($parsed) ? $parsed : [];
+            }
+
+            // If getRawOriginal doesn't work (e.g., in tests), try the attributes directly
+            if (empty($existingImages) && isset($this->attributes['images'])) {
+                $parsed = is_string($this->attributes['images'])
+                    ? json_decode($this->attributes['images'], true)
+                    : $this->attributes['images'];
+                $existingImages = is_array($parsed) ? $parsed : [];
+            }
+
+            // Filter out photos we've already processed
+            $newPhotoUrls = array_diff($placeData->photos, $existingGooglePhotoUrls);
+
+            if (! empty($newPhotoUrls)) {
+                // Upload only new Google Places photos to Digital Ocean
+                $uploader = app(\App\Services\GooglePlacesImageUploader::class);
+                $uploadedPaths = $uploader->uploadGooglePhotos($newPhotoUrls, $this->slug);
+
+                if (! empty($uploadedPaths)) {
+                    // Merge existing images with newly uploaded photos, avoiding duplicates
+                    $allImages = array_unique(array_merge($existingImages, $uploadedPaths));
+
+                    // Update the raw images attribute (bypass the accessor)
+                    $this->attributes['images'] = json_encode(array_values($allImages));
+
+                    // Update metadata to track which Google photo URLs we've processed
+                    $updatedMetadata = $this->metadata->toArray();
+                    $updatedMetadata['googlePhotoUrls'] = array_merge($existingGooglePhotoUrls, $newPhotoUrls);
+                    $this->metadata = VenueMetadata::from($updatedMetadata);
+                }
+            }
+        }
+
+        return $this;
     }
 }

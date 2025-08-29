@@ -161,8 +161,8 @@ class CreateBooking
         ];
         $meta['concierge'] = [
             'id' => $conciergeId,
-            'name' => $concierge->user->name ?? 'Unknown',
-            'hotel_name' => $concierge->hotel_name ?? 'Unknown',
+            'name' => $concierge?->user->name ?? 'Unknown',
+            'hotel_name' => $concierge?->hotel_name ?? 'Unknown',
         ];
         if (! $scheduleTemplate->prime_time) {
             $meta['non_prime_incentive'] = [
@@ -244,12 +244,19 @@ class CreateBooking
             return $vipCode->concierge_id;
         }
 
+        // Check if we have an authenticated user
+        $user = auth()->user();
+        if (!$user) {
+            // No authenticated user (e.g., VIP session without VIP code)
+            return config('app.house.concierge_id');
+        }
+
         // Second priority: Partner check
-        if (auth()->user()->hasActiveRole('partner')) {
+        if ($user->hasActiveRole('partner')) {
             return config('app.house.concierge_id');
         }
 
         // Default: Regular concierge
-        return Auth::user()->concierge->id ?? config('app.house.concierge_id');
+        return $user->concierge->id ?? config('app.house.concierge_id');
     }
 }

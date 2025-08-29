@@ -11,6 +11,8 @@ use App\OpenApi\Responses\VenueListResponse;
 use Illuminate\Http\JsonResponse;
 use Vyuldashev\LaravelOpenApi\Attributes as OpenApi;
 use Vyuldashev\LaravelOpenApi\Attributes\Response as OpenApiResponse;
+use App\Models\Cuisine;
+use App\Models\Specialty;
 
 #[OpenApi\PathItem]
 class VenueController extends Controller
@@ -44,10 +46,20 @@ class VenueController extends Controller
             }
         }
 
-        $venues = $query->orderBy('name')->get(['id', 'name']);
+        $venues = $query->orderBy('name')->get(['id', 'name', 'metadata']);
 
         return response()->json([
-            'data' => $venues,
+            'data' => $venues->map(function ($venue) {
+                return [
+                    'id' => $venue->id,
+                    'name' => $venue->name,
+                    'rating' => $venue->metadata?->rating,
+                    'price_level' => $venue->metadata?->priceLevel,
+                    'price_level_display' => $venue->metadata?->getPriceLevelDisplay(),
+                    'rating_display' => $venue->metadata?->getRatingDisplay(),
+                    'review_count' => $venue->metadata?->reviewCount,
+                ];
+            }),
         ]);
     }
 
@@ -78,13 +90,59 @@ class VenueController extends Controller
                 'description' => $venue->description,
                 'images' => $venue->images ?? [],
                 'logo' => $venue->logo,
-                'cuisines' => $venue->cuisines ?? [],
-                'specialty' => $venue->specialty ?? [],
+                'cuisines' => $this->formatCuisines($venue->cuisines ?? []),
+                'specialty' => $this->formatSpecialties($venue->specialty ?? []),
                 'neighborhood' => $venue->neighborhood,
                 'region' => $venue->region,
                 'status' => $venue->status->value,
                 'formatted_location' => $venue->getFormattedLocation(),
+                'rating' => $venue->metadata?->rating,
+                'price_level' => $venue->metadata?->priceLevel,
+                'price_level_display' => $venue->metadata?->getPriceLevelDisplay(),
+                'rating_display' => $venue->metadata?->getRatingDisplay(),
+                'review_count' => $venue->metadata?->reviewCount,
+                'google_place_id' => $venue->metadata?->googlePlaceId,
             ],
         ]);
+    }
+
+    /**
+     * Format cuisines as key-value pairs
+     */
+    private function formatCuisines(array $cuisines): array
+    {
+        $formatted = [];
+        $cuisinesList = Cuisine::getNamesList();
+        
+        foreach ($cuisines as $cuisineId) {
+            if (isset($cuisinesList[$cuisineId])) {
+                $formatted[] = [
+                    'id' => $cuisineId,
+                    'name' => $cuisinesList[$cuisineId]
+                ];
+            }
+        }
+        
+        return $formatted;
+    }
+
+    /**
+     * Format specialties as key-value pairs
+     */
+    private function formatSpecialties(array $specialties): array
+    {
+        $formatted = [];
+        $specialtiesList = Specialty::query()->pluck('name', 'id');
+        
+        foreach ($specialties as $specialtyId) {
+            if (isset($specialtiesList[$specialtyId])) {
+                $formatted[] = [
+                    'id' => $specialtyId,
+                    'name' => $specialtiesList[$specialtyId]
+                ];
+            }
+        }
+        
+        return $formatted;
     }
 }

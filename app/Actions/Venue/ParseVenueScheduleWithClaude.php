@@ -72,7 +72,7 @@ class ParseVenueScheduleWithClaude
             'anthropic-version' => '2023-06-01',
             'x-api-key' => config('services.anthropic.api_key'),
         ])->post('https://api.anthropic.com/v1/messages', [
-            'model' => 'claude-3-sonnet-20240229',
+            'model' => 'claude-opus-4-1-20250805',
             'max_tokens' => 4096,
             'messages' => [
                 [

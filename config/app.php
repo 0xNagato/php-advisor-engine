@@ -67,6 +67,8 @@ return [
 
     'asset_url' => env('ASSET_URL'),
 
+    'booking_url' => env('BOOKING_URL', 'https://book.primaapp.com'),
+
     /*
     |--------------------------------------------------------------------------
     | Application Timezone

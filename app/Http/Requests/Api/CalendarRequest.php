@@ -69,7 +69,7 @@ class CalendarRequest extends FormRequest
                     }
                 },
             ],
-            'timeslot_count' => ['sometimes', 'integer', 'min:1', 'max:20'],
+            'timeslot_count' => ['sometimes', 'integer', 'min:1', 'max:30'],
             'time_slot_offset' => ['sometimes', 'integer', 'min:0', 'max:10'],
             'cuisine' => ['sometimes', 'array'],
             'cuisine.*' => ['string'],
@@ -86,6 +86,8 @@ class CalendarRequest extends FormRequest
                     }
                 },
             ],
+            'user_latitude' => ['sometimes', 'numeric', 'between:-90,90'],
+            'user_longitude' => ['sometimes', 'numeric', 'between:-180,180'],
         ];
     }
 

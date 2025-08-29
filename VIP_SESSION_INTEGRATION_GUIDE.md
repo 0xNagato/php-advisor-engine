@@ -1,8 +1,8 @@
-# VIP Session Token System - React Integration
+# VIP Session Analytics System - React Integration
 
 ## What This Is
 
-We've implemented a new VIP session token system that allows users to access the booking platform using VIP codes provided by concierges. This replaces the current demo concierge authentication approach with dynamic VIP session-based authentication.
+We've implemented a VIP session analytics system that tracks customer journeys when using VIP codes provided by concierges. This system provides conversion funnel tracking and attribution analytics while keeping customers completely anonymous (no authentication required).
 
 ## Current React Implementation vs New System
 
@@ -30,7 +30,7 @@ const BEARER_TOKEN = '970|YGALEbH9Gnm0x8V2SrUSJJrNtx5tItovFlXruhJo77303af4';
 
 export const api = axios.create({
   headers: {
-    'Authorization': `Bearer ${BEARER_TOKEN}`, // Always the same demo concierge
+    Authorization: `Bearer ${BEARER_TOKEN}`, // Always the same demo concierge
   },
 });
 ```
@@ -43,7 +43,7 @@ const getVipSessionToken = () => localStorage.getItem('vip_session_token');
 
 export const api = axios.create({
   headers: {
-    'Authorization': `Bearer ${getVipSessionToken()}`, // Dynamic based on VIP session
+    Authorization: `Bearer ${getVipSessionToken()}`, // Dynamic based on VIP session
   },
 });
 ```
@@ -85,11 +85,13 @@ Instead of:
 
 ```javascript
 // Current approach
-const BEARER_TOKEN = import.meta.env.VITE_BEARER_TOKEN || '970|YGALEbH9Gnm0x8V2SrUSJJrNtx5tItovFlXruhJo77303af4';
+const BEARER_TOKEN =
+  import.meta.env.VITE_BEARER_TOKEN ||
+  '970|YGALEbH9Gnm0x8V2SrUSJJrNtx5tItovFlXruhJo77303af4';
 
 export const api = axios.create({
   headers: {
-    'Authorization': `Bearer ${BEARER_TOKEN}`,
+    Authorization: `Bearer ${BEARER_TOKEN}`,
   },
 });
 ```
@@ -106,7 +108,7 @@ const getAuthToken = () => {
 
 export const api = axios.create({
   headers: {
-    'Authorization': `Bearer ${getAuthToken()}`,
+    Authorization: `Bearer ${getAuthToken()}`,
   },
 });
 ```
@@ -119,16 +121,16 @@ Add logic to extract the VIP code from the first URL segment:
 // Extract VIP code from URL slug
 const getVipCodeFromUrl = () => {
   const path = window.location.pathname;
-  const segments = path.split('/').filter(segment => segment.length > 0);
-  
+  const segments = path.split('/').filter((segment) => segment.length > 0);
+
   // First segment is the VIP code
   const vipCode = segments[0];
-  
+
   // Validate VIP code format (4-12 characters, alphanumeric)
   if (vipCode && /^[A-Za-z0-9]{4,12}$/.test(vipCode)) {
     return vipCode.toUpperCase();
   }
-  
+
   return null;
 };
 ```
@@ -141,41 +143,56 @@ Create VIP session when the app loads if VIP code is in URL:
 // Step 1: Create VIP session from URL slug
 const initializeVipSession = async () => {
   const vipCode = getVipCodeFromUrl();
-  
+
   if (!vipCode) {
     // No VIP code in URL, use demo token
     console.log('No VIP code found, using demo mode');
     return;
   }
-  
+
   // Check if we already have a valid session for this VIP code
-  const existingSession = JSON.parse(localStorage.getItem('vip_session_data') || '{}');
-  if (existingSession.vip_code?.code === vipCode && new Date(existingSession.expires_at) > new Date()) {
+  const existingSession = JSON.parse(
+    localStorage.getItem('vip_session_data') || '{}',
+  );
+  if (
+    existingSession.vip_code?.code === vipCode &&
+    new Date(existingSession.expires_at) > new Date()
+  ) {
     console.log('Using existing VIP session for:', vipCode);
     return;
   }
-  
+
   try {
-    const response = await fetch('https://staging-julio.primavip.co/api/vip/sessions', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ vip_code: vipCode })
-    });
-    
+    const response = await fetch(
+      'https://staging-julio.primavip.co/api/vip/sessions',
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ vip_code: vipCode }),
+      },
+    );
+
     const data = await response.json();
-    
+
     if (data.success) {
       // Store the session token for API authentication
       localStorage.setItem('vip_session_token', data.data.session_token);
       localStorage.setItem('vip_session_data', JSON.stringify(data.data));
-      
+
       // Update axios instance to use new token
-      api.defaults.headers['Authorization'] = `Bearer ${data.data.session_token}`;
-      
+      api.defaults.headers['Authorization'] =
+        `Bearer ${data.data.session_token}`;
+
       if (data.data.is_demo) {
-        console.log('Invalid VIP code, using demo mode:', data.data.demo_message);
+        console.log(
+          'Invalid VIP code, using demo mode:',
+          data.data.demo_message,
+        );
       } else {
-        console.log('VIP session created for:', data.data.vip_code.concierge.name);
+        console.log(
+          'VIP session created for:',
+          data.data.vip_code.concierge.name,
+        );
       }
     }
   } catch (error) {
@@ -200,15 +217,24 @@ api.interceptors.request.use(
     config.headers['Authorization'] = `Bearer ${currentToken}`;
 
     if (process.env.NODE_ENV === 'development') {
-      const sessionData = JSON.parse(localStorage.getItem('vip_session_data') || '{}');
+      const sessionData = JSON.parse(
+        localStorage.getItem('vip_session_data') || '{}',
+      );
       const vipCode = getVipCodeFromUrl();
-      console.log(`🚀 API Request: ${config.method?.toUpperCase()} ${config.url}`);
+      console.log(
+        `🚀 API Request: ${config.method?.toUpperCase()} ${config.url}`,
+      );
       console.log('🔗 URL VIP Code:', vipCode || 'None');
-      console.log('🔑 Using token for:', sessionData.is_demo ? 'Demo Mode' : `VIP Code: ${sessionData.vip_code?.code}`);
+      console.log(
+        '🔑 Using token for:',
+        sessionData.is_demo
+          ? 'Demo Mode'
+          : `VIP Code: ${sessionData.vip_code?.code}`,
+      );
     }
     return config;
   },
-  (error) => Promise.reject(error)
+  (error) => Promise.reject(error),
 );
 ```
 
@@ -224,14 +250,14 @@ import { BrowserRouter, Routes, Route, useParams } from 'react-router-dom';
 
 const VipCodeHandler = () => {
   const { vipCode } = useParams();
-  
+
   useEffect(() => {
     if (vipCode) {
       // VIP code found in URL, create session
       initializeVipSession();
     }
   }, [vipCode]);
-  
+
   return <YourMainComponent />;
 };
 
@@ -256,13 +282,13 @@ useEffect(() => {
   const handleUrlChange = () => {
     initializeVipSession();
   };
-  
+
   // Initialize on mount
   handleUrlChange();
-  
+
   // Listen for navigation events
   window.addEventListener('popstate', handleUrlChange);
-  
+
   return () => {
     window.removeEventListener('popstate', handleUrlChange);
   };
@@ -276,11 +302,14 @@ useEffect(() => {
 **When to call**: When app loads and VIP code is detected in URL
 
 ```javascript
-const response = await fetch('https://staging-julio.primavip.co/api/vip/sessions', {
-  method: 'POST',
-  headers: { 'Content-Type': 'application/json' },
-  body: JSON.stringify({ vip_code: extractedVipCode })
-});
+const response = await fetch(
+  'https://staging-julio.primavip.co/api/vip/sessions',
+  {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ vip_code: extractedVipCode }),
+  },
+);
 ```
 
 ### 2. Session Response Handling
