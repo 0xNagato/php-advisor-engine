@@ -40,7 +40,7 @@ class BookingAnalyticsWidget extends Widget
 
     public function getAnalytics(): array
     {
-        // Parse dates in user timezone then convert to UTC for database queries
+        // Parse dates in the user timezone then convert to UTC for database queries
         $startDateUTC = Carbon::parse(
             $this->filters['startDate'] ?? now($this->userTimezone)->subDays(30)->format('Y-m-d'),
             $this->userTimezone
@@ -96,7 +96,7 @@ class BookingAnalyticsWidget extends Widget
             ];
         }
 
-        // Sort by booking count and take top 5
+        // Sort by booking count and take the top 5
         $venueCounts = collect($venueCounts)->sortByDesc('count')->take(5);
 
         // Format results
@@ -119,7 +119,7 @@ class BookingAnalyticsWidget extends Widget
 
         // Group by hour using Carbon
         $timeGroups = $bookings->groupBy(function ($booking) {
-            // Convert from UTC to user timezone before formatting
+            // Convert from UTC to the user timezone before formatting
             $time = Carbon::parse($booking->booking_at)->setTimezone($this->userTimezone);
 
             // Format as "7:00 PM" - group by hour
@@ -129,7 +129,7 @@ class BookingAnalyticsWidget extends Widget
         // Count each time slot
         $timeSlotCounts = $timeGroups->map->count()->sortDesc();
 
-        // Take top 5
+        // Take the top 5
         $popularTimes = $timeSlotCounts->take(5);
 
         $total = $bookings->count();
@@ -246,7 +246,7 @@ class BookingAnalyticsWidget extends Widget
             // This returns positive days when booking is after creation
             $daysInAdvance = $createdDate->diffInDays($bookingDate, false);
 
-            // Check if booking was made for same day
+            // Check if booking was made for the same day
             if ($daysInAdvance == 0) {
                 $categories['Same day']++;
             } elseif ($daysInAdvance == 1) {
@@ -287,13 +287,13 @@ class BookingAnalyticsWidget extends Widget
     {
         $dateColumn = $this->getDateColumn();
 
-        // Get bookings within date range
+        // Get bookings within the date range
         $bookings = Booking::query()->select($dateColumn)
             ->whereBetween($dateColumn, [$startDate, $endDate])
             ->whereIn('status', [BookingStatus::CONFIRMED, BookingStatus::VENUE_CONFIRMED])
             ->get();
 
-        // Map bookings to their day of week
+        // Map bookings to their day of the week
         $dayNames = $bookings->map(function ($booking) {
             // Get the appropriate date field
             $date = $booking->{$this->getShowBookingTimeProperty() ? 'booking_at' : 'created_at'};
@@ -311,7 +311,7 @@ class BookingAnalyticsWidget extends Widget
         $orderedDays = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
         $results = [];
 
-        // Build results array with proper ordering
+        // Build result array with proper ordering
         foreach ($orderedDays as $day) {
             $count = $dayCounts->get($day, 0);
             $results[] = [
@@ -328,7 +328,7 @@ class BookingAnalyticsWidget extends Widget
     {
         $dateColumn = $this->getDateColumn();
 
-        // Get bookings within date range
+        // Get bookings within the date range
         $bookings = Booking::query()->select($dateColumn)
             ->whereBetween($dateColumn, [$startDate, $endDate])
             ->whereIn('status', [BookingStatus::CONFIRMED, BookingStatus::VENUE_CONFIRMED])
@@ -338,7 +338,7 @@ class BookingAnalyticsWidget extends Widget
         $dateGroups = $bookings->groupBy(function ($booking) {
             $date = $booking->{$this->getShowBookingTimeProperty() ? 'booking_at' : 'created_at'};
 
-            // Convert from UTC to user timezone before formatting
+            // Convert from UTC to the user timezone before formatting
             return Carbon::parse($date)->setTimezone($this->userTimezone)->format('Y-m-d');
         });
 
@@ -357,9 +357,7 @@ class BookingAnalyticsWidget extends Widget
         }
 
         // Sort by calendar date
-        $results = collect($results)->sortBy('calendar_date')->values()->toArray();
-
-        return $results;
+        return collect($results)->sortBy('calendar_date')->values()->toArray();
     }
 
     protected function getStatusAnalysis(Carbon $startDate, Carbon $endDate): array
@@ -374,7 +372,7 @@ class BookingAnalyticsWidget extends Widget
         // Group by status and count
         $statusGroups = $bookings->groupBy(fn ($booking) => $booking->status->value);
 
-        // Count the number of each status
+        // Count the amount of each status
         $statusCounts = $statusGroups->map->count();
 
         $total = $bookings->count();
@@ -437,7 +435,7 @@ class BookingAnalyticsWidget extends Widget
             ];
         }
 
-        // Sort by booking count and take top 5
+        // Sort by booking count and take the top 5
         return collect($conciergeData)->sortByDesc('booking_count')->take(5)->values()->toArray();
     }
 

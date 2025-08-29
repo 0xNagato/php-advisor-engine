@@ -141,7 +141,7 @@
             <h3 class="text-base font-semibold text-gray-900">Calendar Day</h3>
         </div>
         <div class="p-4">
-            <div class="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
+            <div class="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-7">
                 @foreach ($this->getAnalytics()['calendarDayAnalysis'] as $day)
                     <a href="{{ route('filament.admin.pages.booking-search', [
                         'filters' => [
