@@ -129,21 +129,20 @@ class ListConcierges extends ListRecords
                         ->modalSubmitAction(false)
                         ->modalCancelAction(false)
                         ->slideOver(self::USE_SLIDE_OVER)),
-                TextColumn::make('user.authentications.login_at')
+                TextColumn::make('last_login')
                     ->label('Last Login')
                     ->sortable()
                     ->visibleFrom('sm')
                     ->grow(false)
                     ->size('xs')
-                    ->formatStateUsing(function (Concierge $record) {
-                        $lastLogin = $record->user->authentications()->orderByDesc('login_at')->first();
-                        if ($lastLogin && $lastLogin->login_at) {
-                            return Carbon::parse($lastLogin->login_at, auth()->user()->timezone)->diffForHumans();
+                    ->default('Never')
+                    ->formatStateUsing(function ($state): string {
+                        if (blank($state) || $state === 'Never') {
+                            return 'Never';
                         }
 
-                        return 'Never';
-                    })
-                    ->default('Never'),
+                        return Carbon::parse($state, auth()->user()->timezone)->diffForHumans();
+                    }),
                 TextColumn::make('user.secured_at')
                     ->label('Date Joined')
                     ->visibleFrom('sm')
@@ -286,7 +285,7 @@ class ListConcierges extends ListRecords
                             ->orderByDesc('confirmed_at')
                             ->get();
 
-                        $lastLogin = $concierge->user->authentications()->latest('login_at')->first()->login_at ?? null;
+                        $lastLogin = $concierge->last_login;
                         $attrs = $concierge->getAttributes();
                         $directBookings = $attrs['direct_bookings'] ?? 0;
                         $referralBookings = $attrs['referral_bookings'] ?? 0;
@@ -427,10 +426,9 @@ class ListConcierges extends ListRecords
 
     public function getSubheading(): ?string
     {
-        // Only show date range subheading if not all time
+        // Only show date range subheading if not all the time
         if (($this->data['date_filter'] ?? 'all_time') === 'date_range' &&
             filled($this->data['start_date'] ?? '') && filled($this->data['end_date'] ?? '')) {
-
             $startDate = Carbon::parse($this->data['start_date']);
             $endDate = Carbon::parse($this->data['end_date']);
 
@@ -445,7 +443,7 @@ class ListConcierges extends ListRecords
                 $formattedEnd = $endDate->format('M j, Y');
             }
 
-            return "{$formattedStart} - {$formattedEnd}";
+            return "$formattedStart - $formattedEnd";
         }
 
         return null;
@@ -510,7 +508,7 @@ class ListConcierges extends ListRecords
                     AND e.type IN (\'concierge_referral_1\', \'concierge_referral_2\')
                     AND b.status NOT IN (\'refunded\', \'partially_refunded\')
                 ), 0) as referral_bookings'),
-                // Total bookings (direct + referral)
+                // Total bookings (direct and referral)
                 DB::raw('COALESCE((
                     SELECT COUNT(DISTINCT b.id)
                     FROM earnings e
@@ -520,11 +518,15 @@ class ListConcierges extends ListRecords
                     AND e.type IN (\''.implode('\',\'', $earningTypes).'\')
                     AND b.status NOT IN (\'refunded\', \'partially_refunded\')
                 ), 0) as total_bookings'),
+                // Last login subquery
+                DB::raw("(select max(login_at)
+                    from authentication_log
+                    where concierges.user_id = authentication_log.authenticatable_id
+                      and authentication_log.authenticatable_type = 'App\\Models\\User') as last_login"),
             ])
             ->join('users', 'users.id', '=', 'concierges.user_id')
             ->whereNotNull('users.secured_at')
             ->with([
-                'user.authentications',
                 'user.referral.referrer.partner',
                 'user.referral.referrer.concierge',
                 'user.referrer',
@@ -533,7 +535,7 @@ class ListConcierges extends ListRecords
 
     private function getReferrerName($record): string
     {
-        // Try different ways to get referrer name
+        // Try different ways to get a referrer name
         if ($record->user?->referrer?->name ?? null) {
             return $record->user->referrer->name;
         }
