@@ -155,9 +155,9 @@ class VenueOnboarding extends Component
         $this->initializeSteps();
 
         // Initialize available regions
-        $this->availableRegions = Region::active()
+        $this->availableRegions = Region::query()
             ->get()
-            ->map(fn (Region $region) => [
+            ->map(fn(Region $region) => [
                 'value' => $region->id,
                 'label' => $region->name,
             ])
@@ -170,8 +170,7 @@ class VenueOnboarding extends Component
         if (Auth::check() && Auth::user()->hasActiveRole('venue_manager')) {
             $this->isExistingVenueManager = true;
             $this->handleExistingVenueManager();
-        }
-        // Otherwise, continue with normal onboarding flow
+        } // Otherwise, continue with normal onboarding flow
         else {
             // Check if a token was provided in the route
             if ($token) {
@@ -181,10 +180,9 @@ class VenueOnboarding extends Component
                     $this->validatePartnerById($partnerId);
                 } catch (Exception $e) {
                     // If decryption fails, log it but continue without a partner
-                    Log::warning('Failed to decrypt partner token: '.$e->getMessage());
+                    Log::warning('Failed to decrypt partner token: ' . $e->getMessage());
                 }
-            }
-            // For backward compatibility, also check query params
+            } // For backward compatibility, also check query params
             elseif (request()->has('partner_id')) {
                 $partnerId = request()->get('partner_id');
                 $this->validatePartnerById($partnerId);
@@ -206,7 +204,7 @@ class VenueOnboarding extends Component
             $this->step = $savedState['step'] ?? 'company';
 
             // Ensure the step is valid based on current configuration
-            if (! array_key_exists($this->step, $this->steps)) {
+            if (!array_key_exists($this->step, $this->steps)) {
                 $this->step = array_key_first($this->steps) ?: 'company';
             }
         } else {
@@ -221,7 +219,7 @@ class VenueOnboarding extends Component
             $initialStep = $this->isExistingVenueManager ? 'venues' : 'company';
 
             // If the initial step doesn't exist in configured steps, use the first step
-            if (! array_key_exists($initialStep, $this->steps)) {
+            if (!array_key_exists($initialStep, $this->steps)) {
                 $initialStep = array_key_first($this->steps) ?: 'company';
             }
 
@@ -240,7 +238,7 @@ class VenueOnboarding extends Component
                 return sprintf('%02d:%02d:00', $hour, $minutes);
             })
             ->filter(function ($time) {
-                $hour = (int) substr($time, 0, 2);
+                $hour = (int)substr($time, 0, 2);
 
                 return $hour >= 11 && $hour < 23;
             })
@@ -255,7 +253,7 @@ class VenueOnboarding extends Component
     {
         // Get configured steps from the config or use default
         $configSteps = config('app.venue_onboarding_steps', 'company,venues,incentive,agreement');
-        $stepKeys = array_filter(explode(',', (string) $configSteps));
+        $stepKeys = array_filter(explode(',', (string)$configSteps));
 
         // Build the steps array from the available steps, keeping only configured ones
         foreach ($stepKeys as $stepKey) {
@@ -288,7 +286,7 @@ class VenueOnboarding extends Component
             ->first();
 
         if ($partner) {
-            $this->partner_id = (string) $partner->id; // Cast to string to avoid type issues
+            $this->partner_id = (string)$partner->id; // Cast to string to avoid type issues
             $this->partner_name = "{$partner->first_name} {$partner->last_name}";
         }
     }
@@ -303,7 +301,7 @@ class VenueOnboarding extends Component
 
         // Ensure all venues have booking hours
         for ($i = 0; $i < $this->venue_count; $i++) {
-            if (! isset($this->venue_booking_hours[$i])) {
+            if (!isset($this->venue_booking_hours[$i])) {
                 $this->venue_booking_hours[$i] = self::DEFAULT_BOOKING_HOURS;
 
                 continue;
@@ -311,7 +309,7 @@ class VenueOnboarding extends Component
 
             // Ensure all days are set for each venue
             foreach (array_keys(self::DEFAULT_BOOKING_HOURS) as $day) {
-                if (! isset($this->venue_booking_hours[$i][$day])) {
+                if (!isset($this->venue_booking_hours[$i][$day])) {
                     $this->venue_booking_hours[$i][$day] = self::DEFAULT_BOOKING_HOURS[$day];
                 }
             }
@@ -554,7 +552,7 @@ class VenueOnboarding extends Component
             'partner_id' => $this->partner_id,
             'venue_booking_hours' => $this->venue_booking_hours,
             // Add a note that this was submitted by an existing venue manager
-            'additional_notes' => 'Submitted by existing venue manager (ID: '.$user->id.') for venue group (ID: '.$venueGroup->id.')',
+            'additional_notes' => 'Submitted by existing venue manager (ID: ' . $user->id . ') for venue group (ID: ' . $venueGroup->id . ')',
             'venue_group_id' => $venueGroup->id,
         ]);
 
@@ -635,7 +633,7 @@ class VenueOnboarding extends Component
                     'string',
                     function ($attribute, $value, $fail) {
                         $phone = phone($value, config('app.countries')[0]);
-                        if (! $phone->isValid()) {
+                        if (!$phone->isValid()) {
                             $fail('The phone number is invalid.');
                         }
 
@@ -694,7 +692,7 @@ class VenueOnboarding extends Component
                     'required_if:venue_booking_hours.*.*.closed,false',
                     function ($attribute, $value, $fail) {
                         try {
-                            if ($value && ! preg_match('/^\d{2}:\d{2}:\d{2}$/', $value)) {
+                            if ($value && !preg_match('/^\d{2}:\d{2}:\d{2}$/', $value)) {
                                 $parts = explode('.', $attribute);
                                 $this->venue_booking_hours[$parts[1]][$parts[2]]['start'] =
                                     $this->formatTimeToHis($value);
@@ -708,7 +706,7 @@ class VenueOnboarding extends Component
                     'required_if:venue_booking_hours.*.*.closed,false',
                     function ($attribute, $value, $fail) {
                         try {
-                            if ($value && ! preg_match('/^\d{2}:\d{2}:\d{2}$/', $value)) {
+                            if ($value && !preg_match('/^\d{2}:\d{2}:\d{2}$/', $value)) {
                                 $parts = explode('.', $attribute);
                                 $this->venue_booking_hours[$parts[1]][$parts[2]]['end'] =
                                     $this->formatTimeToHis($value);
@@ -750,7 +748,7 @@ class VenueOnboarding extends Component
         $publicOnboardingEnabled = config('app.public_venue_onboarding_enabled', false);
         $hasAccess = Auth::check() && Auth::user()->hasActiveRole('venue_manager');
 
-        if (! $publicOnboardingEnabled && ! $hasAccess) {
+        if (!$publicOnboardingEnabled && !$hasAccess) {
             // If onboarding is disabled for public users, render a contact form
             return view('livewire.venue-onboarding-contact')->layout('components.layouts.app', [
                 'title' => 'Contact Us About Venue Onboarding',
@@ -762,10 +760,10 @@ class VenueOnboarding extends Component
 
         $partners = User::query()
             ->select(['id', 'first_name', 'last_name'])
-            ->whereHas('roles', fn (\Illuminate\Contracts\Database\Query\Builder $query) => $query->where('name', 'partner'))
+            ->whereHas('roles', fn(\Illuminate\Contracts\Database\Query\Builder $query) => $query->where('name', 'partner'))
             ->orderBy('first_name')
             ->get()
-            ->map(fn ($user) => [
+            ->map(fn($user) => [
                 'id' => $user->id,
                 'name' => "{$user->first_name} {$user->last_name}",
             ]);
@@ -830,7 +828,7 @@ class VenueOnboarding extends Component
 
     public function updatedHasLogos(bool $value): void
     {
-        if (! $value) {
+        if (!$value) {
             $this->logo_files = array_fill(0, $this->venue_count, null);
         }
     }
@@ -858,11 +856,11 @@ class VenueOnboarding extends Component
             $random = Str::random(6);
 
             $fileName = implode('-', [
-                $region,
-                $venue,
-                $company,
-                $random,
-            ]).'.'.$file->getClientOriginalExtension();
+                    $region,
+                    $venue,
+                    $company,
+                    $random,
+                ]) . '.' . $file->getClientOriginalExtension();
 
             $path = $file->storeAs(
                 'onboarded_venues',
@@ -909,7 +907,7 @@ class VenueOnboarding extends Component
                 $slotTime = Carbon::createFromFormat('H:i:s', $time);
 
                 return $slotTime->greaterThanOrEqualTo($startTime) &&
-                       $slotTime->lessThan($endTime);
+                    $slotTime->lessThan($endTime);
             })
             ->values()
             ->toArray();
