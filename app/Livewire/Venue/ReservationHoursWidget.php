@@ -67,10 +67,21 @@ class ReservationHoursWidget extends Widget implements HasActions, HasForms
     {
         foreach (['start_time', 'end_time'] as $timeKey) {
             if (isset($value[$timeKey])) {
-                $timeSegment = substr((string) $value[$timeKey], 0, 5);
-                $formattedTime = Carbon::createFromFormat('H:i', $timeSegment)->format('H:i:s');
+                try {
+                    $timeSegment = substr((string) $value[$timeKey], 0, 5);
+                    $formattedTime = Carbon::createFromFormat('H:i', $timeSegment)->format('H:i:s');
 
-                data_set($this->openingHours, "{$key}.{$timeKey}", $formattedTime);
+                    data_set($this->openingHours, "{$key}.{$timeKey}", $formattedTime);
+                } catch (Exception $e) {
+                    // Log the error or handle it as needed.
+                    // This prevents an invalid time format from crashing the component.
+                    report($e);
+                    Notification::make()
+                        ->title('Invalid Time Format')
+                        ->body('Please enter a valid time.')
+                        ->danger()
+                        ->send();
+                }
             }
         }
     }

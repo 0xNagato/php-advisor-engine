@@ -6,6 +6,7 @@ use App\Models\Concierge;
 use App\Models\VenueCollection;
 use App\Models\VenueCollectionItem;
 use Illuminate\Support\Facades\Log;
+use InvalidArgumentException;
 
 trait ManagesVenueCollections
 {
@@ -25,11 +26,11 @@ trait ManagesVenueCollections
             $ownerType.'_id' => $ownerId,
         ], [
             'name' => $data['collection_name'] ?? ($owner instanceof Concierge
-                ? $owner->user->name.' Collection'
-                : $owner->code.' Collection'),
+                    ? $owner->user->name.' Collection'
+                    : $owner->code.' Collection'),
             'description' => $data['collection_description'] ?? null,
             'is_active' => $data['collection_is_active'] ?? false,
-            'region' => $data['collection_region_id'] ?? throw new \InvalidArgumentException('Region is required for venue collections'),
+            'region' => $data['collection_region_id'] ?? throw new InvalidArgumentException('Region is required for venue collections'),
         ]);
 
         Log::info('Venue collection saved', [

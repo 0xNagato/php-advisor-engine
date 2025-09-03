@@ -63,6 +63,7 @@ class VipCodeService
                     'ip_address' => request()->ip(),
                     'user_agent' => request()->userAgent(),
                 ]);
+
                 return null;
             }
         }
@@ -113,10 +114,10 @@ class VipCodeService
         // Generate a unique, secure token for analytics tracking (not authentication)
         $randomBytes = random_bytes(32);
         $timestamp = time();
-        $vipCodeHash = hash('sha256', $vipCode->id . $code);
+        $vipCodeHash = hash('sha256', $vipCode->id.$code);
         $sessionId = uniqid('vip_', true);
 
-        return hash('sha256', $randomBytes . $timestamp . $vipCodeHash . $sessionId . config('app.key'));
+        return hash('sha256', $randomBytes.$timestamp.$vipCodeHash.$sessionId.config('app.key'));
     }
 
     /**
@@ -176,7 +177,7 @@ class VipCodeService
      */
     public function trackEvent(string $token, string $event, array $data = []): bool
     {
-        $session = VipSession::where('token', $token)
+        $session = VipSession::query()->where('token', $token)
             ->where('expires_at', '>', now())
             ->first();
 

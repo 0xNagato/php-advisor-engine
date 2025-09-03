@@ -368,9 +368,7 @@ class BulkEditVenues extends Page
                         // Delete removed images (those that were previously stored but not kept)
                         $previousImages = $venue->images ?? [];
                         // Normalize previous images to match the format of $keptExisting
-                        $normalizedPreviousImages = array_map(function ($item) {
-                            return ltrim(parse_url($item, PHP_URL_PATH) ?? $item, '/');
-                        }, $previousImages);
+                        $normalizedPreviousImages = array_map(fn ($item) => ltrim((string) (parse_url((string) $item, PHP_URL_PATH) ?? $item), '/'), $previousImages);
                         $removed = array_diff($normalizedPreviousImages, $keptExisting);
                         foreach ($removed as $removedPath) {
                             try {

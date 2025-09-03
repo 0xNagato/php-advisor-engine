@@ -10,6 +10,8 @@ use App\Enums\VenueStatus;
 use App\Enums\VenueType;
 use App\Models\Traits\HasEarnings;
 use App\Services\CoverManagerService;
+use App\Services\GooglePlacesImageUploader;
+use App\Services\GooglePlacesToCuisineMapper;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -737,7 +739,7 @@ class Venue extends Model
         ]);
 
         // Map Google Places data to existing cuisine and specialty fields
-        $mapper = app(\App\Services\GooglePlacesToCuisineMapper::class);
+        $mapper = app(GooglePlacesToCuisineMapper::class);
 
         // Update cuisines - merge with existing or set if empty
         $mappedCuisines = $mapper->mapToCuisines($placeData->types);
@@ -777,7 +779,7 @@ class Venue extends Model
 
             if (! empty($newPhotoUrls)) {
                 // Upload only new Google Places photos to Digital Ocean
-                $uploader = app(\App\Services\GooglePlacesImageUploader::class);
+                $uploader = app(GooglePlacesImageUploader::class);
                 $uploadedPaths = $uploader->uploadGooglePhotos($newPhotoUrls, $this->slug);
 
                 if (! empty($uploadedPaths)) {
