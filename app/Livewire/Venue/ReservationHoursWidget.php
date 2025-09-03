@@ -65,9 +65,14 @@ class ReservationHoursWidget extends Widget implements HasActions, HasForms
 
     public function updatedOpeningHours($value, $key): void
     {
-        $value = Carbon::createFromFormat('H:i', substr((string) $value, 0, 5))->format('H:i:s');
+        foreach (['start_time', 'end_time'] as $timeKey) {
+            if (isset($value[$timeKey])) {
+                $timeSegment = substr((string) $value[$timeKey], 0, 5);
+                $formattedTime = Carbon::createFromFormat('H:i', $timeSegment)->format('H:i:s');
 
-        data_set($this->openingHours, $key, $value);
+                data_set($this->openingHours, "{$key}.{$timeKey}", $formattedTime);
+            }
+        }
     }
 
     public function addTimeBlock(string $day): void
