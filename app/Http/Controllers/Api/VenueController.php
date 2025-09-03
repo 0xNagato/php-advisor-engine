@@ -49,17 +49,15 @@ class VenueController extends Controller
         $venues = $query->orderBy('name')->get(['id', 'name', 'metadata']);
 
         return response()->json([
-            'data' => $venues->map(function ($venue) {
-                return [
-                    'id' => $venue->id,
-                    'name' => $venue->name,
-                    'rating' => $venue->metadata?->rating,
-                    'price_level' => $venue->metadata?->priceLevel,
-                    'price_level_display' => $venue->metadata?->getPriceLevelDisplay(),
-                    'rating_display' => $venue->metadata?->getRatingDisplay(),
-                    'review_count' => $venue->metadata?->reviewCount,
-                ];
-            }),
+            'data' => $venues->map(fn($venue) => [
+                'id' => $venue->id,
+                'name' => $venue->name,
+                'rating' => $venue->metadata?->rating,
+                'price_level' => $venue->metadata?->priceLevel,
+                'price_level_display' => $venue->metadata?->getPriceLevelDisplay(),
+                'rating_display' => $venue->metadata?->getRatingDisplay(),
+                'review_count' => $venue->metadata?->reviewCount,
+            ]),
         ]);
     }
 
@@ -75,7 +73,7 @@ class VenueController extends Controller
     {
         $venue = Venue::query()->find($id);
 
-        if (! $venue) {
+        if (!$venue) {
             return response()->json([
                 'message' => 'Venue not found',
             ], 404);
@@ -113,7 +111,7 @@ class VenueController extends Controller
     {
         $formatted = [];
         $cuisinesList = Cuisine::getNamesList();
-        
+
         foreach ($cuisines as $cuisineId) {
             if (isset($cuisinesList[$cuisineId])) {
                 $formatted[] = [
@@ -122,7 +120,7 @@ class VenueController extends Controller
                 ];
             }
         }
-        
+
         return $formatted;
     }
 
@@ -133,7 +131,7 @@ class VenueController extends Controller
     {
         $formatted = [];
         $specialtiesList = Specialty::query()->pluck('name', 'id');
-        
+
         foreach ($specialties as $specialtyId) {
             if (isset($specialtiesList[$specialtyId])) {
                 $formatted[] = [
@@ -142,7 +140,7 @@ class VenueController extends Controller
                 ];
             }
         }
-        
+
         return $formatted;
     }
 }
