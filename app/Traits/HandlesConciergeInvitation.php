@@ -212,17 +212,24 @@ trait HandlesConciergeInvitation
                 };
                 $referrerId = $this->invitingPartner?->user_id ?? $this->invitingConcierge?->user_id ?? $this->invitingVenueManager?->id ?? null;
 
-                throw_if(! $referrerType || ! $referrerId,
-                    new Exception('Could not determine referrer for direct invitation.'));
+                // For generic invitations (QR codes without referrer), create a self-referral
+                if (! $referrerType && ! $referrerId && property_exists($this, 'qrCodeId') && $this->qrCodeId) {
+                    $referrerType = 'self';
+                    $referrerId = null; // Will be updated after user creation
+                } else {
+                    throw_if(! $referrerType || ! $referrerId,
+                        new Exception('Could not determine referrer for direct invitation.'));
+                }
 
                 $inviterRegion = match ($referrerType) {
                     'partner' => $this->invitingPartner?->user?->region,
                     'concierge' => $this->invitingConcierge?->user?->region,
                     'venue_manager' => $this->invitingVenueManager?->region,
+                    'self' => $data['notification_regions'][0] ?? config('app.default_region'),
                     default => null,
                 } ?? config('app.default_region');
 
-                $this->referral = Referral::query()->create([
+                $referralData = [
                     'referrer_id' => $referrerId,
                     'email' => $data['email'],
                     'phone' => $data['phone'],
@@ -231,7 +238,14 @@ trait HandlesConciergeInvitation
                     'type' => 'concierge',
                     'referrer_type' => $referrerType,
                     'region_id' => $inviterRegion,
-                ]);
+                ];
+
+                // Add QR code ID if present
+                if (property_exists($this, 'qrCodeId') && $this->qrCodeId) {
+                    $referralData['qr_code_id'] = $this->qrCodeId;
+                }
+
+                $this->referral = Referral::query()->create($referralData);
             }
 
             $userData = [
@@ -258,10 +272,18 @@ trait HandlesConciergeInvitation
                 'region' => $this->referral->region_id ?? $data['notification_regions'][0],
             ]);
 
-            $this->referral->update([
+            // Update referral with user_id and handle self-referrals
+            $referralUpdateData = [
                 'user_id' => $user->id,
                 'secured_at' => now(),
-            ]);
+            ];
+
+            // For self-referrals from QR codes, update the referrer_id to the new user
+            if ($this->referral->referrer_type === 'self' && ! $this->referral->referrer_id) {
+                $referralUpdateData['referrer_id'] = $user->id;
+            }
+
+            $this->referral->update($referralUpdateData);
 
             // Delete any other referrals with the same email or phone
             Referral::query()
@@ -296,7 +318,24 @@ trait HandlesConciergeInvitation
                 Log::error("Could not determine venue group for venue manager referral: Referral ID {$this->referral->id}, Referrer ID {$this->referral->referrer_id}");
             }
 
-            $user->concierge()->create($conciergeData);
+            $concierge = $user->concierge()->create($conciergeData);
+
+            // Ensure the concierge has a VIP code
+            app(\App\Actions\Concierge\EnsureVipCodeExists::class)->handle($concierge);
+
+            // Handle QR code assignment if this referral came from a QR code
+            if ($this->referral->qr_code_id) {
+                $qrCode = \App\Models\QrCode::find($this->referral->qr_code_id);
+                if ($qrCode && ! $qrCode->concierge_id) {
+                    // Assign the QR code to this new concierge
+                    app(\App\Actions\QrCode\AssignQrCodeToConcierge::class)->handle($qrCode, $concierge);
+
+                    Log::info('QR code assigned to new concierge', [
+                        'qr_code_id' => $qrCode->id,
+                        'concierge_id' => $concierge->id,
+                    ]);
+                }
+            }
 
             $user->notify(new ConciergeRegisteredEmail(
                 sendAgreementCopy: $data['send_agreement_copy'] ?? false,

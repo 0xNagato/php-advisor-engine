@@ -18,14 +18,11 @@ class GenerateQrCodes
      * @param  int  $count  Number of QR codes to generate (default: 30)
      * @param  string  $defaultDestination  Default URL to redirect to
      * @param  string|null  $prefix  Optional prefix for the URL keys
+     * @param  int|null  $referrerConciergeId  Optional referrer concierge for unassigned QR codes
      * @return Collection<QrCode> The created QrCode models
      */
-    public function handle(int $count = 30, string $defaultDestination = '', ?string $prefix = null): Collection
+    public function handle(int $count = 30, string $defaultDestination = '', ?string $prefix = null, ?int $referrerConciergeId = null): Collection
     {
-        // Default to VIP calendar if no destination URL provided
-        if (blank($defaultDestination)) {
-            $defaultDestination = route('v.calendar');
-        }
 
         $qrCodes = collect();
         $generateQrCode = app(GenerateQrCodeWithLogo::class);
@@ -34,20 +31,38 @@ class GenerateQrCodes
             // Generate a unique key for this QR code
             $uniqueKey = $this->generateUniqueKey($prefix);
 
-            // Create a short URL pointing to the default destination
-            $shortUrl = ShortURL::destinationUrl($defaultDestination)
+            // Create the QrCode record first to get the ID
+            $qrCode = QrCode::query()->create([
+                'url_key' => $uniqueKey,
+                'name' => 'Bulk QR #'.($i + 1).' - '.$uniqueKey,
+                'is_active' => true,
+            ]);
+
+            // Store referrer concierge in meta if provided
+            if ($referrerConciergeId && blank($defaultDestination)) {
+                $meta = $qrCode->meta ?? [];
+                $meta['referrer_concierge_id'] = $referrerConciergeId;
+                $qrCode->update(['meta' => $meta]);
+            }
+
+            // Determine the destination URL
+            if (blank($defaultDestination)) {
+                // No destination = unassigned, redirect to invitation form
+                $destinationUrl = route('qr.unassigned', ['qrCode' => $qrCode->id]);
+            } else {
+                // Has destination URL, use it
+                $destinationUrl = $defaultDestination;
+            }
+
+            // Create a short URL pointing to the destination
+            $shortUrl = ShortURL::destinationUrl($destinationUrl)
                 ->urlKey($uniqueKey)
                 ->trackVisits()
                 ->trackIPAddress()
                 ->make();
 
-            // Create the QrCode record first (without QR code path)
-            $qrCode = QrCode::query()->create([
-                'url_key' => $uniqueKey,
-                'short_url_id' => $shortUrl->id,
-                'name' => 'Bulk QR #'.($i + 1).' - '.$uniqueKey,
-                'is_active' => true,
-            ]);
+            // Update the QrCode with the short URL ID
+            $qrCode->update(['short_url_id' => $shortUrl->id]);
 
             // Now generate QR code with the PRIMA logo and QR code ID displayed
             $qrCodeData = $generateQrCode->handle($shortUrl->default_short_url, (string) $qrCode->id);

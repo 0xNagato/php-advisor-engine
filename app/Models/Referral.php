@@ -9,6 +9,7 @@ use App\Traits\FormatsPhoneNumber;
 use Illuminate\Database\Eloquent\Casts\AsArrayObject;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Notifications\Notifiable;
@@ -16,6 +17,7 @@ use Illuminate\Notifications\Notifiable;
 class Referral extends Model
 {
     use FormatsPhoneNumber;
+    use HasFactory;
     use HasUuids;
     use Notifiable;
 
@@ -34,6 +36,7 @@ class Referral extends Model
         'reminded_at',
         'region_id',
         'company_name',
+        'qr_code_id',
         'meta',
     ];
 
@@ -59,6 +62,14 @@ class Referral extends Model
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+
+    /**
+     * @return BelongsTo<QrCode, $this>
+     */
+    public function qrCode(): BelongsTo
+    {
+        return $this->belongsTo(QrCode::class);
     }
 
     public function routeNotificationForTwilio(): string
