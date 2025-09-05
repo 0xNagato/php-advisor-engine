@@ -88,6 +88,7 @@ class CalendarRequest extends FormRequest
             ],
             'user_latitude' => ['sometimes', 'numeric', 'between:-90,90'],
             'user_longitude' => ['sometimes', 'numeric', 'between:-180,180'],
+            'venue_id' => ['sometimes', 'integer', 'exists:venues,id'],
         ];
     }
 

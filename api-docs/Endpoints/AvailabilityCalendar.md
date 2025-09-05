@@ -32,6 +32,7 @@ This endpoint provides information about available venues and timeslots for a sp
 | region           | string              | No       | Region ID to override the concierge's default region and view availability in a different region. When specified, the response will show venues and timeslots for the specified region with timezone adjustments. Valid values: `miami`, `ibiza`, `mykonos`, `paris`, `london`, `st_tropez`, `new_york`, `los_angeles`, `las_vegas` |
 | user_latitude    | float               | No       | User's current latitude for distance calculations (range: -90 to 90)                                                                                                                                                                                                                                                                 |
 | user_longitude   | float               | No       | User's current longitude for distance calculations (range: -180 to 180)                                                                                                                                                                                                                                                              |
+| venue_id         | integer             | No       | Filter results to show availability for a specific venue only. Must be a valid venue ID that exists in the system                                                                                                                                                                                                    |
 
 ### Example Requests
 
@@ -76,6 +77,15 @@ curl -X GET \
 ```bash
 curl -X GET \
   'https://api.example.com/api/calendar?date=2023-06-15&guest_count=4&reservation_time=19:00:00&user_latitude=40.7580&user_longitude=-73.9855' \
+  -H 'Authorization: Bearer your-api-token' \
+  -H 'Accept: application/json'
+```
+
+#### Request with Venue ID Filter
+
+```bash
+curl -X GET \
+  'https://api.example.com/api/calendar?date=2023-06-15&guest_count=4&reservation_time=19:00:00&venue_id=123' \
   -H 'Authorization: Bearer your-api-token' \
   -H 'Accept: application/json'
 ```
