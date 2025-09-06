@@ -4,7 +4,6 @@ namespace App\Livewire;
 
 use Illuminate\Mail\Message;
 use Illuminate\Support\Facades\Mail;
-use Livewire\Attributes\Validate;
 use Livewire\Component;
 
 class SiteContactForm extends Component
@@ -35,19 +34,19 @@ class SiteContactForm extends Component
         'data.notes' => 'nullable|string|max:1000',
     ];
 
-        public function send(): void
+    public function send(): void
     {
         $this->validate();
 
-        $emailBody = "Site Contact Form Submission:\n\n" .
-            "I am a: " . ucfirst($this->data['persona']) . "\n\n" .
-            "Full Name: " . $this->data['fullName'] . "\n\n" .
-            "Email: " . $this->data['email'] . "\n\n" .
-            "Phone: " . ($this->data['phone'] ?? 'Not provided') . "\n\n" .
-            "Company/Property: " . ($this->data['company'] ?? 'Not provided') . "\n\n" .
-            "City: " . ($this->data['city'] ?? 'Not provided') . "\n\n" .
-            "Preferred Contact Time: " . ($this->data['preferredTime'] ?? 'Not provided') . "\n\n" .
-            "Notes: " . ($this->data['notes'] ?? 'Not provided');
+        $emailBody = "Site Contact Form Submission:\n\n".
+            'I am a: '.ucfirst((string) $this->data['persona'])."\n\n".
+            'Full Name: '.$this->data['fullName']."\n\n".
+            'Email: '.$this->data['email']."\n\n".
+            'Phone: '.($this->data['phone'] ?? 'Not provided')."\n\n".
+            'Company/Property: '.($this->data['company'] ?? 'Not provided')."\n\n".
+            'City: '.($this->data['city'] ?? 'Not provided')."\n\n".
+            'Preferred Contact Time: '.($this->data['preferredTime'] ?? 'Not provided')."\n\n".
+            'Notes: '.($this->data['notes'] ?? 'Not provided');
 
         Mail::raw($emailBody, static function (Message $message) {
             $message

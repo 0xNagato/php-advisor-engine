@@ -12,6 +12,7 @@ use App\Models\Venue;
 use App\Models\VipCode;
 use App\Services\CurrencyConversionService;
 use App\Traits\ManagesVenueCollections;
+use Exception;
 use Filament\Forms\Components\ColorPicker;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Grid;
@@ -327,7 +328,7 @@ class VipCodesTable extends TableWidget
                                 ->success()
                                 ->send();
 
-                        } catch (\Exception $e) {
+                        } catch (Exception $e) {
                             Log::error('Error saving VIP code branding', [
                                 'vip_code_id' => $record->id,
                                 'error' => $e->getMessage(),
@@ -425,10 +426,7 @@ class VipCodesTable extends TableWidget
                             ])
                             ->collapsible(),
                     ])
-                    ->fillForm(function (VipCode $record): array {
-                        // Load existing venue collection data using shared trait
-                        return $this->loadVenueCollectionData($record);
-                    })
+                    ->fillForm(fn (VipCode $record): array => $this->loadVenueCollectionData($record))
                     ->action(function (VipCode $record, array $data): void {
                         try {
                             if (isset($data['collection_venues']) && is_array($data['collection_venues'])) {
@@ -440,7 +438,7 @@ class VipCodesTable extends TableWidget
                                     ->success()
                                     ->send();
                             }
-                        } catch (\Exception $e) {
+                        } catch (Exception $e) {
                             Log::error('Error saving venue collection', [
                                 'vip_code_id' => $record->id,
                                 'error' => $e->getMessage(),

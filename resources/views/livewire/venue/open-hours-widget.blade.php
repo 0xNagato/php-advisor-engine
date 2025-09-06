@@ -57,10 +57,10 @@
 
                             <!-- Block: Empty End Time -->
                             <x-form.TimeInputComponent
-                                id="start-time-{{ $day }}-0"
-                                label="Start time:"
-                                model="openingHours.{{ $day }}.0.start_time"
-                                error-key="openingHours.{{ $day }}.0.start_time"
+                                id="end-time-{{ $day }}-0"
+                                label="End time:"
+                                model="openingHours.{{ $day }}.0.end_time"
+                                error-key="openingHours.{{ $day }}.0.end_time"
                             />
                         </div>
                     @endforelse

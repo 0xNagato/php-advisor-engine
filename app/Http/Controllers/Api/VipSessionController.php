@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Enums\VipCodeTemplate;
 use App\Http\Controllers\Controller;
 use App\Models\VipSession;
 use App\OpenApi\RequestBodies\VipSessionCreateRequestBody;
@@ -272,7 +273,7 @@ class VipSessionController extends Controller
         }
 
         // Default template
-        return \App\Enums\VipCodeTemplate::AVAILABILITY_CALENDAR->value;
+        return VipCodeTemplate::AVAILABILITY_CALENDAR->value;
     }
 
     /**

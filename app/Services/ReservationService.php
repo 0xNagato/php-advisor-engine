@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Actions\Region\GetUserRegion;
+use App\Actions\Venue\CalculateApproximateDriveTime;
 use App\Enums\VenueStatus;
 use App\Enums\VenueType;
 use App\Models\Region;
@@ -283,10 +284,10 @@ class ReservationService
             });
 
             $finalVenues = Collection::make($venues->values()->all());
-            
+
             // Calculate approximate drive times if user coordinates are provided
             if ($this->userLatitude && $this->userLongitude) {
-                $finalVenues = \App\Actions\Venue\CalculateApproximateDriveTime::run(
+                $finalVenues = CalculateApproximateDriveTime::run(
                     $finalVenues,
                     $this->userLatitude,
                     $this->userLongitude
@@ -339,7 +340,7 @@ class ReservationService
 
         // Calculate approximate drive times if user coordinates are provided
         if ($this->userLatitude && $this->userLongitude) {
-            $finalVenues = \App\Actions\Venue\CalculateApproximateDriveTime::run(
+            $finalVenues = CalculateApproximateDriveTime::run(
                 $finalVenues,
                 $this->userLatitude,
                 $this->userLongitude

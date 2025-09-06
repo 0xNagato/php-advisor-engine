@@ -5,6 +5,7 @@ namespace App\Filament\Resources\VenueResource\Pages;
 use App\Actions\Venue\DeleteVenueAction;
 use App\Actions\Venue\GenerateVenueDescriptionWithAI;
 use App\Actions\Venue\UpdateVenueGroupEarnings;
+use App\Data\VenueMetadata;
 use App\Enums\VenueStatus;
 use App\Filament\Resources\VenueResource;
 use App\Filament\Resources\VenueResource\Components\VenueContactsForm;
@@ -47,6 +48,7 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\HtmlString;
 use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 use RuntimeException;
+use Throwable;
 use Ysfkaya\FilamentPhoneInput\Forms\PhoneInput;
 use Ysfkaya\FilamentPhoneInput\PhoneInputNumberType;
 
@@ -242,7 +244,7 @@ class EditVenue extends EditRecord
                         FileUpload::make('images')
                             ->label('Images')
                             ->disk('do')
-                            ->directory(app()->environment() . '/venues/images')
+                            ->directory(app()->environment().'/venues/images')
                             ->moveFiles()
                             ->multiple()
                             ->imageEditor()
@@ -261,10 +263,10 @@ class EditVenue extends EditRecord
                             ->getUploadedFileUsing(static function (BaseFileUpload $component, string $file): ?array {
                                 // Handle both raw paths and full URLs
                                 $url = $file;
-                                if (!str_contains($file, 'prima-bucket.nyc3.digitaloceanspaces.com')) {
+                                if (! str_contains($file, 'prima-bucket.nyc3.digitaloceanspaces.com')) {
                                     $url = Storage::disk('do')->url($file);
                                 }
-                                
+
                                 return [
                                     'name' => basename($file),
                                     'size' => 0,
@@ -281,7 +283,7 @@ class EditVenue extends EditRecord
                                 if ($disk->exists($path)) {
                                     try {
                                         $disk->delete($path);
-                                    } catch (\Throwable $e) {
+                                    } catch (Throwable $e) {
                                         logger()->warning('Failed to delete image', [
                                             'path' => $path,
                                             'error' => $e->getMessage(),
@@ -926,16 +928,16 @@ class EditVenue extends EditRecord
                             ->schema([
                                 Placeholder::make('current_rating')
                                     ->label('Current Rating')
-                                    ->content(fn () => $venue->metadata?->rating ? 
-                                        $venue->metadata->rating . '/5 (' . $venue->metadata->reviewCount . ' reviews)' : 
+                                    ->content(fn () => $venue->metadata?->rating ?
+                                        $venue->metadata->rating.'/5 ('.$venue->metadata->reviewCount.' reviews)' :
                                         'No rating data'),
                                 Placeholder::make('current_description')
                                     ->label('Current Description')
                                     ->content(fn () => $venue->description ?: 'No description'),
                                 Placeholder::make('last_synced')
                                     ->label('Last Synced')
-                                    ->content(fn () => $venue->metadata?->lastSyncedAt ? 
-                                        \Carbon\Carbon::parse($venue->metadata->lastSyncedAt)->diffForHumans() : 
+                                    ->content(fn () => $venue->metadata?->lastSyncedAt ?
+                                        Carbon::parse($venue->metadata->lastSyncedAt)->diffForHumans() :
                                         'Never synced'),
                             ])
                             ->collapsible(),
@@ -966,17 +968,18 @@ class EditVenue extends EditRecord
                             // Search for the venue
                             $placeData = $googlePlaces->searchPlace($searchQuery, $venue->region);
 
-                            if (!$placeData) {
+                            if (! $placeData) {
                                 Notification::make()
                                     ->title('No Results')
                                     ->body('No Google Places results found for this venue.')
                                     ->warning()
                                     ->send();
+
                                 return;
                             }
 
                             // Get detailed place data if needed
-                            if ($placeData->placeId && !$placeData->rating) {
+                            if ($placeData->placeId && ! $placeData->rating) {
                                 $detailedData = $googlePlaces->getPlaceDetails($placeData->placeId);
                                 if ($detailedData) {
                                     $placeData = $detailedData;
@@ -985,7 +988,7 @@ class EditVenue extends EditRecord
 
                             if ($data['ratings_only']) {
                                 // Only update rating in metadata
-                                $metadata = $venue->metadata ?? new \App\Data\VenueMetadata();
+                                $metadata = $venue->metadata ?? new VenueMetadata;
                                 if ($placeData->rating !== null) {
                                     $metadata->rating = $placeData->rating;
                                     $metadata->reviewCount = $placeData->userRatingsTotal;
@@ -1043,14 +1046,15 @@ class EditVenue extends EditRecord
                                         if (blank($venue->description)) {
                                             return 'No description currently set.';
                                         }
+
                                         return new HtmlString(
-                                            '<div class="prose prose-sm max-w-none">' . 
-                                            nl2br(e($venue->description)) . 
+                                            '<div class="prose prose-sm max-w-none">'.
+                                            nl2br(e($venue->description)).
                                             '</div>'
                                         );
                                     }),
                             ])
-                            ->visible(fn () => !blank($venue->description)),
+                            ->visible(fn () => ! blank($venue->description)),
                         Section::make('Venue Information')
                             ->schema([
                                 Placeholder::make('venue_info')
@@ -1058,18 +1062,19 @@ class EditVenue extends EditRecord
                                     ->content(function () use ($venue) {
                                         $info = [];
                                         if ($venue->metadata?->rating) {
-                                            $info[] = '⭐ ' . $venue->metadata->rating . '/5 (' . $venue->metadata->reviewCount . ' reviews)';
+                                            $info[] = '⭐ '.$venue->metadata->rating.'/5 ('.$venue->metadata->reviewCount.' reviews)';
                                         }
                                         if ($venue->cuisines) {
-                                            $cuisineNames = \App\Models\Cuisine::whereIn('id', $venue->cuisines)->pluck('name')->join(', ');
-                                            $info[] = '🍽️ ' . $cuisineNames;
+                                            $cuisineNames = Cuisine::query()->whereIn('id', $venue->cuisines)->pluck('name')->join(', ');
+                                            $info[] = '🍽️ '.$cuisineNames;
                                         }
                                         if ($venue->specialty) {
-                                            $info[] = '✨ ' . implode(', ', $venue->specialty);
+                                            $info[] = '✨ '.implode(', ', $venue->specialty);
                                         }
                                         if ($venue->metadata?->priceLevel) {
-                                            $info[] = '💰 ' . str_repeat('$', $venue->metadata->priceLevel);
+                                            $info[] = '💰 '.str_repeat('$', $venue->metadata->priceLevel);
                                         }
+
                                         return new HtmlString(implode('<br>', $info) ?: 'Limited information available for AI generation.');
                                     }),
                             ])
@@ -1088,18 +1093,19 @@ class EditVenue extends EditRecord
                                     ->label('Overwrite Existing')
                                     ->helperText('Replace the current description even if one exists')
                                     ->default(false)
-                                    ->visible(fn () => !blank($venue->description)),
+                                    ->visible(fn () => ! blank($venue->description)),
                             ]),
                     ])
                     ->action(function (array $data, GenerateVenueDescriptionWithAI $generator) use ($venue) {
                         try {
                             // Check if we should proceed
-                            if (!$data['overwrite'] && !blank($venue->description)) {
+                            if (! $data['overwrite'] && ! blank($venue->description)) {
                                 Notification::make()
                                     ->title('Description Exists')
                                     ->body('This venue already has a description. Enable "Overwrite Existing" to replace it.')
                                     ->warning()
                                     ->send();
+
                                 return;
                             }
 
@@ -1237,7 +1243,7 @@ class EditVenue extends EditRecord
         // Get raw images data from the database instead of the mutated accessor
         $venue = $this->getRecord();
         $rawImages = $venue->getRawOriginal('images');
-        
+
         if ($rawImages !== null) {
             $images = is_string($rawImages) ? json_decode($rawImages, true) : $rawImages;
             $data['images'] = is_array($images) ? $images : [];
@@ -1257,12 +1263,12 @@ class EditVenue extends EditRecord
     protected function afterSave(): void
     {
         $venue = $this->getRecord();
-        
+
         // Make logo public
         if ($venue->logo_path) {
             Storage::disk('do')->setVisibility($venue->logo_path, 'public');
         }
-        
+
         // Make all images public
         if ($venue->images && is_array($venue->images)) {
             foreach ($venue->images as $imagePath) {
