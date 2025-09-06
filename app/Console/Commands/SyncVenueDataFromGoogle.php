@@ -21,17 +21,16 @@ class SyncVenueDataFromGoogle extends Command
                             {--force : Force sync even if recently synced}
                             {--skip-photos : Skip downloading and uploading photos}
                             {--overwrite-address : Overwrite existing addresses with Google data}
-                            {--overwrite-description : Overwrite existing descriptions with Google data}
                             {--ratings-only : Only update ratings}
-                            {--descriptions-only : Only update descriptions}
-                            {--location-only : Only update latitude and longitude coordinates}';
+                            {--location-only : Only update latitude and longitude coordinates}
+                            {--daily-sync : Run in daily sync mode (minimal fields only)}';
 
     /**
      * The console command description.
      *
      * @var string
      */
-    protected $description = 'Sync venue data from Google Places API (ratings, descriptions, cuisines, specialties, photos, addresses, coordinates)';
+    protected $description = 'Sync venue data from Google Places API (ratings, cuisines, specialties, photos, addresses, coordinates)';
 
     /**
      * Execute the console command.
@@ -93,13 +92,16 @@ class SyncVenueDataFromGoogle extends Command
                     $searchQuery .= ' '.$venue->address;
                 }
 
+                // Determine which fields to request based on options
+                $fields = $this->determineFieldsToRequest($venue);
+
                 // Search for the venue
-                $placeData = $googlePlaces->searchPlace($searchQuery, $venue->region);
+                $placeData = $googlePlaces->searchPlace($searchQuery, $venue->region, $fields);
 
                 if ($placeData) {
                     // If we have a place_id but need more details, fetch them
                     if ($placeData->placeId && ! $placeData->rating) {
-                        $detailedData = $googlePlaces->getPlaceDetails($placeData->placeId);
+                        $detailedData = $googlePlaces->getPlaceDetails($placeData->placeId, $fields);
                         if ($detailedData) {
                             $placeData = $detailedData;
                         }
@@ -107,20 +109,13 @@ class SyncVenueDataFromGoogle extends Command
 
                     // Check if we're only updating specific fields
                     $ratingsOnly = $this->option('ratings-only');
-                    $descriptionsOnly = $this->option('descriptions-only');
                     $locationOnly = $this->option('location-only');
 
-                    if (! $ratingsOnly && ! $descriptionsOnly && ! $locationOnly) {
+                    if (! $ratingsOnly && ! $locationOnly) {
                         // Normal flow - update everything as appropriate
                         // Handle address updates based on flags
                         if ($this->shouldUpdateAddress($venue, $placeData)) {
                             $venue->address = $placeData->formattedAddress;
-                        }
-
-                        // Handle description updates based on flags
-                        if ($this->shouldUpdateDescription($venue, $placeData)) {
-                            // Try editorialSummary first, fall back to generativeSummary
-                            $venue->description = $placeData->editorialSummary ?? $placeData->generativeSummary;
                         }
 
                         // Update latitude and longitude if available
@@ -142,16 +137,6 @@ class SyncVenueDataFromGoogle extends Command
                             $metadata->lastSyncedAt = now();
                             $venue->metadata = $metadata;
                         }
-                    } elseif ($descriptionsOnly) {
-                        // Only update description
-                        if ($this->shouldUpdateDescription($venue, $placeData)) {
-                            // Try editorialSummary first, fall back to generativeSummary
-                            $venue->description = $placeData->editorialSummary ?? $placeData->generativeSummary;
-                        }
-                        // Update sync timestamp
-                        $metadata = $venue->metadata ?? new VenueMetadata;
-                        $metadata->lastSyncedAt = now();
-                        $venue->metadata = $metadata;
                     } elseif ($locationOnly) {
                         // Only update coordinates
                         if ($placeData->latitude !== null) {
@@ -205,7 +190,6 @@ class SyncVenueDataFromGoogle extends Command
                     ['Failed Syncs', $failCount],
                     ['Photos Skipped', $this->arePhotosSkipped() ? 'Yes' : 'No'],
                     ['Address Updates', $this->getAddressUpdateMode()],
-                    ['Description Updates', $this->getDescriptionUpdateMode()],
                     ['Update Mode', $this->getUpdateMode()],
                 ]
             );
@@ -236,42 +220,11 @@ class SyncVenueDataFromGoogle extends Command
     }
 
     /**
-     * Determine if description should be updated
-     */
-    private function shouldUpdateDescription(Venue $venue, $placeData): bool
-    {
-        // Check if we have any description available
-        $hasDescription = $placeData->editorialSummary || $placeData->generativeSummary;
-        if (! $hasDescription) {
-            return false;
-        }
-
-        if ($this->option('overwrite-description')) {
-            return true;
-        }
-
-        // Only update if venue has no description
-        return blank($venue->description);
-    }
-
-    /**
      * Get address update mode for summary
      */
     private function getAddressUpdateMode(): string
     {
         if ($this->option('overwrite-address')) {
-            return 'Overwrite All';
-        }
-
-        return 'Fill Missing Only';
-    }
-
-    /**
-     * Get description update mode for summary
-     */
-    private function getDescriptionUpdateMode(): string
-    {
-        if ($this->option('overwrite-description')) {
             return 'Overwrite All';
         }
 
@@ -285,11 +238,9 @@ class SyncVenueDataFromGoogle extends Command
     {
         // Photos are skipped if any of these conditions are true:
         // 1. --skip-photos flag is used
-        // 2. --descriptions-only flag is used (only updating descriptions)
-        // 3. --ratings-only flag is used (only updating ratings)
-        // 4. --location-only flag is used (only updating coordinates)
+        // 2. --ratings-only flag is used (only updating ratings)
+        // 3. --location-only flag is used (only updating coordinates)
         return $this->option('skip-photos') ||
-               $this->option('descriptions-only') ||
                $this->option('ratings-only') ||
                $this->option('location-only');
     }
@@ -299,12 +250,12 @@ class SyncVenueDataFromGoogle extends Command
      */
     private function getUpdateMode(): string
     {
-        if ($this->option('ratings-only')) {
-            return 'Ratings Only';
+        if ($this->option('daily-sync')) {
+            return 'Daily Sync (Rating & Price Level Only)';
         }
 
-        if ($this->option('descriptions-only')) {
-            return 'Descriptions Only';
+        if ($this->option('ratings-only')) {
+            return 'Ratings Only';
         }
 
         if ($this->option('location-only')) {
@@ -312,5 +263,59 @@ class SyncVenueDataFromGoogle extends Command
         }
 
         return 'Full Sync';
+    }
+
+    /**
+     * Determine which fields to request based on options and venue state
+     */
+    private function determineFieldsToRequest(Venue $venue): array
+    {
+        // Daily sync mode - minimal fields only
+        if ($this->option('daily-sync')) {
+            return ['rating', 'priceLevel'];
+        }
+
+        // Specific field-only modes
+        if ($this->option('ratings-only')) {
+            return ['rating'];
+        }
+
+        if ($this->option('location-only')) {
+            return ['basic']; // Location is included in basic fields
+        }
+
+        // Default mode - determine fields based on venue data
+        $fields = ['basic', 'rating', 'priceLevel'];
+
+        // Only fetch atmosphere data if venue doesn't have it
+        if (blank($venue->metadata?->googleAttributes)) {
+            $fields[] = 'atmosphere';
+        }
+
+        // Only fetch photos if venue has no images and photos aren't being skipped
+        if (! $this->option('skip-photos') && $this->venueNeedsPhotos($venue)) {
+            $fields[] = 'photos';
+        }
+
+        return $fields;
+    }
+
+    /**
+     * Check if a venue needs photos synced
+     */
+    private function venueNeedsPhotos(Venue $venue): bool
+    {
+        // Get the raw images value to check if venue has any images
+        $rawImages = $venue->getRawOriginal('images');
+
+        if (blank($rawImages)) {
+            return true;
+        }
+
+        // Parse the JSON if it's a string
+        $images = is_string($rawImages) ? json_decode($rawImages, true) : $rawImages;
+
+        // Return true if no images or empty array
+        return ! is_array($images) || count($images) === 0;
     }
 }

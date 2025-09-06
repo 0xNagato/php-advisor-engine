@@ -5,7 +5,6 @@ namespace Tests\Feature;
 use App\Data\GooglePlaceData;
 use App\Data\VenueMetadata;
 use App\Models\Venue;
-use App\Services\GooglePlacesService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -46,41 +45,9 @@ class VenueGoogleDescriptionTest extends TestCase
         $this->assertEquals(3, $venue->metadata->priceLevel);
         $this->assertEquals(150, $venue->metadata->reviewCount);
         $this->assertEquals('test_place_123', $venue->metadata->googlePlaceId);
-        $this->assertEquals(
-            'A wonderful test restaurant serving delicious imaginary food.',
-            $venue->metadata->googleDescription
-        );
+        // We no longer sync descriptions from Google Places API
+        $this->assertNull($venue->metadata->googleDescription);
         $this->assertNotNull($venue->metadata->lastSyncedAt);
-    }
-
-    /** @test */
-    public function google_places_service_includes_editorial_summary_in_search(): void
-    {
-        // Mock the HTTP client
-        $this->mock(\Illuminate\Http\Client\Factory::class, function ($mock) {
-            $mock->shouldReceive('withHeaders')->andReturnSelf();
-            $mock->shouldReceive('post')->andReturn(
-                new \Illuminate\Http\Client\Response(
-                    new \GuzzleHttp\Psr7\Response(200, [], json_encode([
-                        'places' => [[
-                            'id' => 'places/test_123',
-                            'displayName' => ['text' => 'Test Place'],
-                            'formattedAddress' => '123 Test St',
-                            'rating' => 4.5,
-                            'priceLevel' => 'PRICE_LEVEL_EXPENSIVE',
-                            'userRatingCount' => 100,
-                            'editorialSummary' => ['text' => 'Test description from Google'],
-                        ]],
-                    ]))
-                )
-            );
-        });
-
-        $service = new GooglePlacesService;
-        $result = $service->searchPlace('Test Place');
-
-        $this->assertNotNull($result);
-        $this->assertEquals('Test description from Google', $result->editorialSummary);
     }
 
     /** @test */

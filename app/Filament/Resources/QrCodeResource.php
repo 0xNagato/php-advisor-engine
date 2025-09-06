@@ -198,9 +198,18 @@ class QrCodeResource extends Resource
                 TextColumn::make('concierge.hotel_name')
                     ->label('Assigned To')
                     ->html()
-                    ->formatStateUsing(fn ($state, QrCode $record) => $record->concierge
-                        ? "{$record->concierge->user->name}<br><span class=\"text-xs text-gray-500\">{$state}</span>"
-                        : null)
+                    ->formatStateUsing(function ($state, QrCode $record) {
+                        if ($record->concierge) {
+                            return "{$record->concierge->user->name}<br><span class=\"text-xs text-gray-500\">{$state}</span>";
+                        }
+
+                        // Check if it redirects to invitation form
+                        if ($record->shortUrlModel && str_contains($record->shortUrlModel->destination_url, 'qr.unassigned')) {
+                            return '<span class="text-warning-600 dark:text-warning-400">Awaiting Assignment (Invitation)</span>';
+                        }
+
+                        return '<span class="text-gray-400">Not Assigned</span>';
+                    })
                     ->searchable()
                     ->sortable()
                     ->size(TextColumnSize::ExtraSmall),
@@ -239,8 +248,8 @@ class QrCodeResource extends Resource
                     ->form([
                         Select::make('assigned')
                             ->options([
-                                'yes' => 'Assigned',
-                                'no' => 'Unassigned',
+                                'yes' => 'Assigned to Concierge',
+                                'no' => 'Not Assigned',
                             ])
                             ->placeholder('All QR Codes'),
                     ])

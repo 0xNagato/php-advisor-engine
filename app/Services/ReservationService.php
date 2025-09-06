@@ -51,6 +51,7 @@ class ReservationService
      * @param  array|null  $vipContext  VIP context for venue collection filtering
      * @param  float|null  $userLatitude  User's latitude for distance calculations
      * @param  float|null  $userLongitude  User's longitude for distance calculations
+     * @param  int|null  $venueId  Optional specific venue ID to filter by
      */
     public function __construct(
         public string|Carbon $date,
@@ -64,7 +65,8 @@ class ReservationService
         public array|string|null $specialty = [],
         public ?array $vipContext = null,
         public ?float $userLatitude = null,
-        public ?float $userLongitude = null
+        public ?float $userLongitude = null,
+        public ?int $venueId = null
     ) {
         $this->region ??= GetUserRegion::run();
 
@@ -115,6 +117,10 @@ class ReservationService
                 $query->whereIn('status', $statuses);
             })
             ->where('venue_type', '!=', VenueType::HIKE_STATION)
+            // Filter by specific venue ID if provided
+            ->when($this->venueId, function ($query) {
+                $query->where('id', $this->venueId);
+            })
             // Filter venues based on the advance booking window
             ->where(function ($query) use ($dayDifference) {
                 $query->where('advance_booking_window', '=', 0) // Always include venues with 0 (no restrictions)

@@ -239,3 +239,155 @@ test('user cannot delete booking on status confirmed', function () {
             'message' => 'Booking cannot be abandoned in its current status',
         ]);
 });
+
+test('authenticated user can view their own booking', function () {
+    // Create a test booking for the authenticated concierge
+    $booking = Booking::factory()->create([
+        'concierge_id' => $this->concierge->id,
+        'schedule_template_id' => $this->scheduleTemplate->id,
+        'booking_at' => now()->addDay(),
+        'status' => BookingStatus::CONFIRMED,
+        'guest_count' => 4,
+        'total_fee' => 10000, // $100.00
+        'total_with_tax_in_cents' => 11500, // $115.00
+        'tax_amount_in_cents' => 1500, // $15.00
+        'tax' => 15.0,
+        'currency' => 'USD',
+    ]);
+
+    $response = $this->getJson("/api/bookings/{$booking->id}", [
+        'Authorization' => 'Bearer '.$this->token,
+    ]);
+
+    $response->assertSuccessful()
+        ->assertJsonStructure([
+            'data' => [
+                'bookings_enabled',
+                'bookings_disabled_message',
+                'id',
+                'guest_count',
+                'status',
+                'venue',
+                'logo',
+                'total',
+                'subtotal',
+                'bookingUrl',
+                'qrCode',
+                'is_prime',
+                'booking_at',
+                'dayDisplay',
+            ],
+        ])
+        ->assertJson([
+            'data' => [
+                'id' => $booking->id,
+                'guest_count' => $booking->guest_count,
+                'status' => $booking->status->value,
+            ],
+        ]);
+});
+
+test('authenticated user cannot view booking from another concierge', function () {
+    // Create another concierge and their booking
+    $otherConcierge = Concierge::factory()->create();
+    $otherBooking = Booking::factory()->create([
+        'concierge_id' => $otherConcierge->id,
+        'schedule_template_id' => $this->scheduleTemplate->id,
+        'booking_at' => now()->addDay(),
+        'status' => BookingStatus::CONFIRMED,
+    ]);
+
+    $response = $this->getJson("/api/bookings/{$otherBooking->id}", [
+        'Authorization' => 'Bearer '.$this->token,
+    ]);
+
+    $response->assertStatus(404)
+        ->assertJson([
+            'message' => 'Booking not found',
+        ]);
+});
+
+test('unauthenticated user cannot view booking', function () {
+    $booking = Booking::factory()->create([
+        'concierge_id' => $this->concierge->id,
+        'schedule_template_id' => $this->scheduleTemplate->id,
+        'booking_at' => now()->addDay(),
+        'status' => BookingStatus::CONFIRMED,
+    ]);
+
+    $this->getJson("/api/bookings/{$booking->id}")
+        ->assertUnauthorized();
+});
+
+test('VIP session can view booking from associated concierge', function () {
+    // Create VIP code and session
+    $vipCode = \App\Models\VipCode::create([
+        'code' => 'TESTCODE123',
+        'concierge_id' => $this->concierge->id,
+        'is_active' => true,
+    ]);
+
+    $vipSessionResponse = $this->postJson('/api/vip/sessions', [
+        'vip_code' => 'TESTCODE123',
+    ]);
+    $vipSessionToken = $vipSessionResponse->json('data.session_token');
+
+    // Create a booking for the concierge associated with the VIP code
+    $booking = Booking::factory()->create([
+        'concierge_id' => $this->concierge->id,
+        'schedule_template_id' => $this->scheduleTemplate->id,
+        'booking_at' => now()->addDay(),
+        'status' => BookingStatus::CONFIRMED,
+        'guest_count' => 2,
+        'total_fee' => 0, // Non-prime booking
+        'total_with_tax_in_cents' => 0,
+        'tax_amount_in_cents' => 0,
+        'tax' => 0,
+        'currency' => 'USD',
+    ]);
+
+    $response = $this->getJson("/api/bookings/{$booking->id}", [
+        'Authorization' => 'Bearer '.$vipSessionToken,
+    ]);
+
+    $response->assertSuccessful()
+        ->assertJson([
+            'data' => [
+                'id' => $booking->id,
+                'guest_count' => $booking->guest_count,
+                'status' => $booking->status->value,
+            ],
+        ]);
+});
+
+test('VIP session cannot view booking from different concierge', function () {
+    // Create VIP code and session
+    $vipCode = \App\Models\VipCode::create([
+        'code' => 'TESTCODE456',
+        'concierge_id' => $this->concierge->id,
+        'is_active' => true,
+    ]);
+
+    $vipSessionResponse = $this->postJson('/api/vip/sessions', [
+        'vip_code' => 'TESTCODE456',
+    ]);
+    $vipSessionToken = $vipSessionResponse->json('data.session_token');
+
+    // Create a booking for a different concierge
+    $otherConcierge = Concierge::factory()->create();
+    $otherBooking = Booking::factory()->create([
+        'concierge_id' => $otherConcierge->id,
+        'schedule_template_id' => $this->scheduleTemplate->id,
+        'booking_at' => now()->addDay(),
+        'status' => BookingStatus::CONFIRMED,
+    ]);
+
+    $response = $this->getJson("/api/bookings/{$otherBooking->id}", [
+        'Authorization' => 'Bearer '.$vipSessionToken,
+    ]);
+
+    $response->assertStatus(404)
+        ->assertJson([
+            'message' => 'Booking not found',
+        ]);
+});

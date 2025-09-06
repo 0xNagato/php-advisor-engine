@@ -42,6 +42,7 @@ Route::middleware('vip.auth')->group(function () {
     Route::get('/venues', [VenueController::class, 'index']);
     Route::get('/venues/{id}', [VenueController::class, 'show']);
     Route::post('/bookings', [BookingController::class, 'store']);
+    Route::get('/bookings/{booking}', [BookingController::class, 'show']);
     Route::put('/bookings/{booking}', [BookingController::class, 'update']);
     Route::post('/bookings/{booking}/complete', [BookingController::class, 'complete']);
     Route::get('/bookings/{booking}/invoice-status', [BookingController::class, 'invoiceStatus']);

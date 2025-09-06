@@ -109,7 +109,7 @@ test('availability calendar includes metadata in venue resource', function () {
     ]);
 
     $response = $this->getJson('/api/calendar?'.http_build_query([
-        'date' => now()->format('Y-m-d'),
+        'date' => now()->addDay()->format('Y-m-d'),
         'guest_count' => 2,
         'reservation_time' => '19:00',
         'region' => $region->id,

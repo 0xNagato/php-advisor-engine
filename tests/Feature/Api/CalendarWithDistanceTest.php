@@ -64,7 +64,7 @@ it('calculates approximate drive times when user coordinates are provided', func
 
     // Make request with user coordinates (Times Square, NYC)
     $response = getJson('/api/calendar?'.http_build_query([
-        'date' => now()->format('Y-m-d'),
+        'date' => now()->addDay()->format('Y-m-d'),
         'guest_count' => 2,
         'reservation_time' => '19:00',
         'user_latitude' => 40.7580,
@@ -128,7 +128,7 @@ it('does not include approx_minutes when user coordinates are not provided', fun
 
     // Make request without user coordinates
     $response = getJson('/api/calendar?'.http_build_query([
-        'date' => now()->format('Y-m-d'),
+        'date' => now()->addDay()->format('Y-m-d'),
         'guest_count' => 2,
         'reservation_time' => '19:00',
         'region' => $this->region->id,

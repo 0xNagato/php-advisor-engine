@@ -23,7 +23,7 @@ test('availability calendar returns cuisines and specialties as key-value pairs'
     ]);
 
     $response = $this->getJson('/api/calendar?'.http_build_query([
-        'date' => now()->format('Y-m-d'),
+        'date' => now()->addDay()->format('Y-m-d'),
         'guest_count' => 2,
         'reservation_time' => '19:00',
         'region' => $region->id,
@@ -37,10 +37,10 @@ test('availability calendar returns cuisines and specialties as key-value pairs'
                 'venues' => [
                     '*' => [
                         'cuisines' => [
-                            '*' => ['id', 'name']
+                            '*' => ['id', 'name'],
                         ],
                         'specialty' => [
-                            '*' => ['id', 'name']
+                            '*' => ['id', 'name'],
                         ],
                     ],
                 ],
@@ -49,30 +49,30 @@ test('availability calendar returns cuisines and specialties as key-value pairs'
 
     // Check the actual values
     $venueData = $response->json('data.venues.0');
-    
+
     // Check cuisines
     expect($venueData['cuisines'])->toHaveCount(2);
     expect($venueData['cuisines'][0])->toMatchArray([
         'id' => 'mediterranean',
-        'name' => 'Mediterranean'
+        'name' => 'Mediterranean',
     ]);
     expect($venueData['cuisines'][1])->toMatchArray([
         'id' => 'italian',
-        'name' => 'Italian'
+        'name' => 'Italian',
     ]);
-    
+
     // Check specialties
     expect($venueData['specialty'])->toHaveCount(3);
     expect($venueData['specialty'][0])->toMatchArray([
         'id' => 'family_friendly',
-        'name' => 'Family Friendly'
+        'name' => 'Family Friendly',
     ]);
     expect($venueData['specialty'][1])->toMatchArray([
         'id' => 'fine_dining',
-        'name' => 'Fine Dining'
+        'name' => 'Fine Dining',
     ]);
     expect($venueData['specialty'][2])->toMatchArray([
         'id' => 'rooftop',
-        'name' => 'Rooftop'
+        'name' => 'Rooftop',
     ]);
 });

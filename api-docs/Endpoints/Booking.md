@@ -172,6 +172,95 @@ or
 }
 ```
 
+## Get Booking Details
+
+### Request
+
+- **Method:** GET
+- **URL:** `/api/bookings/{booking}`
+- **Authentication:** Required
+
+#### Headers
+
+| Header        | Value            | Required | Description                            |
+| ------------- | ---------------- | -------- | -------------------------------------- |
+| Authorization | Bearer {token}   | Yes      | Authentication token                   |
+| Accept        | application/json | Yes      | Specifies the expected response format |
+
+#### URL Parameters
+
+| Parameter | Type    | Required | Description                          |
+| --------- | ------- | -------- | ------------------------------------ |
+| booking   | integer | Yes      | The ID of the booking to retrieve   |
+
+#### Example Request
+
+```bash
+curl -X GET \
+  https://api.example.com/api/bookings/456 \
+  -H 'Authorization: Bearer your-api-token' \
+  -H 'Accept: application/json'
+```
+
+### Response
+
+#### Success Response
+
+- **Status Code:** 200 OK
+
+##### Response Body
+
+```json
+{
+  "data": {
+    "bookings_enabled": true,
+    "bookings_disabled_message": "Bookings are currently disabled while we are onboarding venues and concierges. We expect to be live by mid-November.",
+    "id": 288706,
+    "guest_count": "4",
+    "dayDisplay": "Sun, Jun 15 at 8:00 pm",
+    "status": "confirmed",
+    "venue": "Gekko",
+    "logo": "https://prima-bucket.nyc3.digitaloceanspaces.com/venues/gekko.png",
+    "total": "$150.00",
+    "subtotal": "$130.43",
+    "tax_rate_term": "NYC Tax",
+    "tax_amount": "$19.57",
+    "bookingUrl": "http://localhost:8000/checkout/ba52e84f-9dd2-41e1-a80f-d928ac2e5a6d?r=sms",
+    "qrCode": "data:image/svg+xml;base64,PD94b...",
+    "is_prime": 1,
+    "booking_at": "2025-06-15T20:00:00.000000Z"
+  }
+}
+```
+
+The response uses the same format as the create booking response, returning all booking details including venue information, pricing, and booking status.
+
+#### Error Responses
+
+##### 401 Unauthorized
+
+```json
+{
+  "message": "Unauthenticated."
+}
+```
+
+##### 404 Not Found
+
+Returned when the booking does not exist or the authenticated user does not have access to view it.
+
+```json
+{
+  "message": "Booking not found"
+}
+```
+
+### Authorization Notes
+
+- **Regular authenticated users** can only view bookings created by their own concierge account
+- **VIP session users** can only view bookings created by the concierge associated with their VIP code
+- Attempting to access a booking that belongs to a different concierge will return a 404 error
+
 ## Update Booking
 
 ### Request

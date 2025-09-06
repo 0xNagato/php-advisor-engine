@@ -57,6 +57,7 @@ class AvailabilityCalendarController extends Controller
             vipContext: $vipContext, // Pass VIP context for venue collection filtering
             userLatitude: $validatedData['user_latitude'] ?? null,
             userLongitude: $validatedData['user_longitude'] ?? null,
+            venueId: $validatedData['venue_id'] ?? null,
         );
 
         return response()->json([

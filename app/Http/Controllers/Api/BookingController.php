@@ -173,6 +173,62 @@ class BookingController extends Controller
     }
 
     /**
+     * Get booking details.
+     */
+    #[OpenApi\Operation(
+        tags: ['Bookings'],
+        security: 'BearerTokenSecurityScheme'
+    )]
+    #[OpenApiResponse(factory: BookingResponse::class)]
+    public function show(Booking $booking): JsonResponse
+    {
+        // Check authorization - booking must belong to the authenticated concierge or be accessible via VIP session
+        if ($this->isVipSession()) {
+            $vipContext = $this->getVipContext();
+            $vipCode = $vipContext['vip_code'] ?? null;
+            
+            // For VIP sessions, check if the booking belongs to the associated concierge
+            if (!$vipCode || $booking->concierge_id !== $vipCode->concierge_id) {
+                return response()->json([
+                    'message' => 'Booking not found',
+                ], 404);
+            }
+        } else {
+            // For regular authenticated users, check if they have access to this booking
+            $user = auth()->user();
+            if (!$user || !$user->concierge || $booking->concierge_id !== $user->concierge->id) {
+                return response()->json([
+                    'message' => 'Booking not found',
+                ], 404);
+            }
+        }
+
+        // Load necessary relationships
+        $booking->load([
+            'venue',
+            'schedule',
+            'vipCode',
+            'concierge',
+            'partnerConcierge',
+            'partnerVenue'
+        ]);
+
+        // Get the booking's venue region for proper display
+        $venueRegion = Region::query()->find($booking->venue->region);
+        $dayDisplay = $this->dayDisplay($venueRegion->timezone, $booking->booking_at);
+
+        $bookingResource = BookingResource::make($booking);
+        $bookingResource = $bookingResource->additional([
+            'region' => $venueRegion,
+            'dayDisplay' => $dayDisplay,
+        ]);
+
+        return response()->json([
+            'data' => $bookingResource,
+        ]);
+    }
+
+    /**
      * Update an existing booking.
      *
      * @throws ApiErrorException

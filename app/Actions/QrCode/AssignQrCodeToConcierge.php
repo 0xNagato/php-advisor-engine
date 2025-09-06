@@ -27,7 +27,7 @@ class AssignQrCodeToConcierge
         return DB::transaction(function () use ($qrCode, $concierge, $newDestination) {
             // If a specific new destination is not provided, use the VIP calendar
             if ($newDestination === null) {
-                // Run the action to ensure VIP code exists
+                // Run the action to ensure VIP code exists (in case concierge was created before we added auto-creation)
                 app(EnsureVipCodeExists::class)->handle($concierge);
 
                 // Get the concierge's VIP code

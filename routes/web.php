@@ -153,8 +153,20 @@ Route::prefix('venue')->name('venue.')->group(function () {
 });
 
 Route::get('/join/{type}/{id}', DirectConciergeInvitation::class)
-    ->name('concierge.join.direct')
-    ->middleware(['signed']);
+    ->name('join.concierge')
+    ->middleware(['signed'])->where('type', 'concierge|partner|venue_manager');
+
+Route::get('/join/generic/{type}', DirectConciergeInvitation::class)
+    ->name('join.generic');
+
+Route::get('/qr/unassigned/{qrCode}', [App\Http\Controllers\QrCodeRedirectController::class, 'handleUnassigned'])
+    ->name('qr.unassigned')
+    ->missing(function () {
+        return response()->view('errors.qr-not-found', [
+            'message' => 'This QR code was not found.',
+            'support_message' => 'Please verify the code or contact support.',
+        ], 404);
+    });
 
 Route::get('/invitation/{referral}', ConciergeInvitation::class)
     ->name('concierge.invitation');
