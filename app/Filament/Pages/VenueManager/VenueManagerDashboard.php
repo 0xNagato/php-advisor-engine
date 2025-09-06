@@ -34,7 +34,7 @@ class VenueManagerDashboard extends Dashboard
 
     public static function getNavigationLabel(): string
     {
-        return (auth()->user()?->currentVenueGroup()?->name ?? 'Venue Group').' Overview';
+        return (auth()->user()?->currentVenueGroup()?->name ?? 'Venue Group') . ' Overview';
     }
 
     public function getTitle(): string
@@ -65,10 +65,10 @@ class VenueManagerDashboard extends Dashboard
         $this->venues = $this->venueGroup?->venues()
             ->when(
                 filled($allowedVenueIds),
-                fn ($query) => $query->whereIn('id', $allowedVenueIds),
-                fn ($query) => $query->whereRaw('1 = 0')
+                fn($query) => $query->whereIn('id', $allowedVenueIds),
+                fn($query) => $query->whereRaw('1 = 0')
             )
-            ->get() ?? new Collection;
+            ->get() ?? new Collection();
 
         $this->filters['startDate'] ??= now()->subDays(30)->format('Y-m-d');
         $this->filters['endDate'] ??= now()->format('Y-m-d');
@@ -76,7 +76,7 @@ class VenueManagerDashboard extends Dashboard
 
     public function getSubheading(): string|null|Htmlable
     {
-        if (! isset($this->filters['startDate'], $this->filters['endDate'])) {
+        if (!isset($this->filters['startDate'], $this->filters['endDate'])) {
             return null;
         }
 
@@ -94,7 +94,7 @@ class VenueManagerDashboard extends Dashboard
                 ->icon('heroicon-o-plus-circle')
                 ->color('primary')
                 ->url(route('venue-manager.add-venue'))
-                ->visible(fn () => auth()->user()->hasActiveRole('venue_manager')),
+                ->visible(fn() => auth()->user()->hasActiveRole('venue_manager')),
             DateRangeFilterAction::make(),
         ];
     }
