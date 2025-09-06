@@ -68,7 +68,7 @@ class VenueManagerDashboard extends Dashboard
                 fn ($query) => $query->whereIn('id', $allowedVenueIds),
                 fn ($query) => $query->whereRaw('1 = 0')
             )
-            ->get() ?? collect();
+            ->get() ?? new Collection;
 
         $this->filters['startDate'] ??= now()->subDays(30)->format('Y-m-d');
         $this->filters['endDate'] ??= now()->format('Y-m-d');
