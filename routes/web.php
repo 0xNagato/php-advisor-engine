@@ -197,6 +197,11 @@ Route::middleware(['auth'])->group(function () {
         ->name('admin.booking-calculator');
 });
 
+// Session keepalive heartbeat to prevent 419s while actively using Filament
+Route::post('/heartbeat', function () {
+    return response()->noContent();
+})->middleware(['web', 'auth'])->name('heartbeat');
+
 // VIP Code print route
 Route::get('/vip-code/print', [App\Http\Controllers\VipCodeController::class, 'printQRCode'])->name('vip-code.print');
 

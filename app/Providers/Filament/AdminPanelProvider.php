@@ -133,6 +133,9 @@ class AdminPanelProvider extends PanelProvider
             $panel->sidebarFullyCollapsibleOnDesktop();
         }
 
+        // Inject keepalive + graceful 419 handler into Filament pages
+        $panel->renderHook('panels::body.end', fn () => view('filament.keepalive'));
+
         return $panel;
     }
 }
