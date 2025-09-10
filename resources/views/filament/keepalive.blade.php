@@ -23,7 +23,7 @@
 </script>
 
 <script>
-    document.addEventListener('livewire:load', () => {
+    document.addEventListener('livewire:init', () => {
         if (window.Livewire && typeof Livewire.onError === 'function') {
             Livewire.onError((status) => {
                 if (status === 419) {
