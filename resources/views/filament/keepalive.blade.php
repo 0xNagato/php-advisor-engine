@@ -1,8 +1,7 @@
 <script>
     (function() {
         const url = @json(route('heartbeat'));
-        // const INTERVAL_MS = 10 * 60 * 1000; // 10 minutes
-        const INTERVAL_MS = 60 * 1000; // 10 minutes
+        const INTERVAL_MS = 10 * 60 * 1000; // 10 minutes
 
         function ping() {
             if (document.hidden) return;
