@@ -9,6 +9,7 @@
                 try {
                     navigator.sendBeacon(url);
                 } catch (e) {
+                    console.error('sendBeacon heartbeat failed:', e);
                 }
             } else {
                 fetch(url, { method: 'POST', headers: { 'X-CSRF-TOKEN': @json(csrf_token()) } }).catch(() => {
