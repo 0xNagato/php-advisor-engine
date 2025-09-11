@@ -1,6 +1,11 @@
 @php use Filament\Support\Facades\FilamentView; @endphp
 @php use Filament\View\PanelsRenderHook; @endphp
 <x-admin.simple>
+    @if (request()->boolean('token_reset'))
+        <div class="mb-4 rounded-lg border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-800">
+            Please try in again. For your security reasons, we refreshed the login access token.
+        </div>
+    @endif
     @if (isPrimaApp())
         <div class="p-4 text-center">
             @if (auth()->check())
@@ -28,9 +33,29 @@
         <x-filament-panels::form wire:submit="authenticate">
             {{ $this->form }}
 
-            <x-filament-panels::form.actions :actions="$this->getCachedFormActions()" :full-width="$this->hasFullWidthFormActions()" />
+            <x-filament-panels::form.actions :actions="$this->getCachedFormActions()"
+                                             :full-width="$this->hasFullWidthFormActions()" />
         </x-filament-panels::form>
 
         {{ FilamentView::renderHook(PanelsRenderHook::AUTH_LOGIN_FORM_AFTER, scopes: $this->getRenderHookScopes()) }}
     @endif
 </x-admin.simple>
+
+<script>
+    // Livewire v3: intercept failed requests and suppress the default 419 confirm modal
+    // Reload with a friendly notice query string.
+    document.addEventListener('livewire:init', () => {
+        if (window.Livewire && typeof Livewire.hook === 'function') {
+            Livewire.hook('request', ({ fail }) => {
+                fail(({ status, preventDefault }) => {
+                    if (status === 419) {
+                        preventDefault();
+                        const url = new URL(window.location.href);
+                        url.searchParams.set('token_reset', '1');
+                        window.location.replace(url.toString());
+                    }
+                });
+            });
+        }
+    });
+</script>
