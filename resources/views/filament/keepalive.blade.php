@@ -23,15 +23,20 @@
 </script>
 
 <script>
+    // Livewire v3: intercept 419s globally while using Filament
+    // Avoid the default confirm modal and simply refresh with a friendly notice.
     document.addEventListener('livewire:init', () => {
-        if (window.Livewire && typeof Livewire.onError === 'function') {
-            Livewire.onError((status) => {
-                if (status === 419) {
-                    window.location.reload();
-                    return true; // prevent default confirm
-                }
+        if (window.Livewire && typeof Livewire.hook === 'function') {
+            Livewire.hook('request', ({ fail }) => {
+                fail(({ status, preventDefault }) => {
+                    if (status === 419) {
+                        preventDefault();
+                        const url = new URL(window.location.href);
+                        url.searchParams.set('token_reset', '1');
+                        window.location.replace(url.toString());
+                    }
+                });
             });
         }
     });
 </script>
-
