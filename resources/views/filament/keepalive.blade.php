@@ -24,7 +24,7 @@
 
 <script>
     // Livewire v3: intercept 419s globally while using Filament
-    // Avoid the default confirm modal and simply refresh with a friendly notice.
+    // Avoid the default confirmation modal and simply refresh with a friendly notice.
     document.addEventListener('livewire:init', () => {
         if (window.Livewire && typeof Livewire.hook === 'function') {
             Livewire.hook('request', ({ fail }) => {

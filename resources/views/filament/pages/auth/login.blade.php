@@ -3,7 +3,7 @@
 <x-admin.simple>
     @if (request()->boolean('token_reset'))
         <div class="mb-4 rounded-lg border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-800">
-            Please try in again. For your security reasons, we refreshed the login access token.
+            Please try again. For your security reasons, we refreshed the login access token.
         </div>
     @endif
     @if (isPrimaApp())
