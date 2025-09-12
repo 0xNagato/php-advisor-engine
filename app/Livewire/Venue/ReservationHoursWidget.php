@@ -65,16 +65,42 @@ class ReservationHoursWidget extends Widget implements HasActions, HasForms
 
     public function updatedOpeningHours($value, $key): void
     {
+        if (is_string($value)) {
+            $this->handleOpeningHoursStringUpdate($value, $key);
+        } elseif (is_array($value)) {
+            $this->handleOpeningHoursArrayUpdate($value, $key);
+        }
+    }
+
+    private function handleOpeningHoursStringUpdate($value, $key): void
+    {
+        $parts = explode('.', $key);
+        if (count($parts) === 3) {
+            [$day, $index, $timeKey] = $parts;
+            try {
+                $timeSegment = substr((string) $value, 0, 5);
+                $formattedTime = Carbon::createFromFormat('H:i', $timeSegment)->format('H:i:s');
+                data_set($this->openingHours, "$day.$index.$timeKey", $formattedTime);
+            } catch (Exception $e) {
+                report($e);
+                Notification::make()
+                    ->title('Invalid Time Format')
+                    ->body('Please enter a valid time.')
+                    ->danger()
+                    ->send();
+            }
+        }
+    }
+
+    private function handleOpeningHoursArrayUpdate($value, $key): void
+    {
         foreach (['start_time', 'end_time'] as $timeKey) {
             if (isset($value[$timeKey])) {
                 try {
                     $timeSegment = substr((string) $value[$timeKey], 0, 5);
                     $formattedTime = Carbon::createFromFormat('H:i', $timeSegment)->format('H:i:s');
-
-                    data_set($this->openingHours, "{$key}.{$timeKey}", $formattedTime);
+                    data_set($this->openingHours, "$key.$timeKey", $formattedTime);
                 } catch (Exception $e) {
-                    // Log the error or handle it as needed.
-                    // This prevents an invalid time format from crashing the component.
                     report($e);
                     Notification::make()
                         ->title('Invalid Time Format')
