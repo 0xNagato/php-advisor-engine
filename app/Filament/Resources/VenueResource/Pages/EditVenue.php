@@ -251,7 +251,6 @@ class EditVenue extends EditRecord
                             ->image()
                             ->acceptedFileTypes(['image/jpeg', 'image/png', 'image/webp'])
                             ->maxSize(8192)
-                            ->maxFiles(5)
                             ->imagePreviewHeight('80')
                             ->columnSpanFull()
                             ->getUploadedFileNameForStorageUsing(

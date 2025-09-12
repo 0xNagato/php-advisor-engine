@@ -42,7 +42,7 @@ class ReferralLinkCard extends Component
                 return '#error-generating-link'; // Or throw an exception
             }
 
-            $url = URL::signedRoute('concierge.join.direct', [
+            $url = URL::signedRoute('join.concierge', [
                 'type' => $type,
                 'id' => $id,
             ]);

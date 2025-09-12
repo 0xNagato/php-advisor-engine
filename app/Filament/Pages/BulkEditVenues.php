@@ -216,7 +216,6 @@ class BulkEditVenues extends Page
                         ->imageEditor()
                         ->image()
                         ->maxSize(8192)
-                        ->maxFiles(5)
                         ->imagePreviewHeight('80')
                         ->getUploadedFileUsing(static fn (BaseFileUpload $component, string $file): ?array => [
                             'name' => basename($file),
