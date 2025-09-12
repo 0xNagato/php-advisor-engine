@@ -22,6 +22,8 @@ class VerifyCsrfToken extends Middleware
         '/concierges',
         '/story',
         '/',
+        // Allow heartbeat pings without CSRF to keep sessions alive
+        '/heartbeat',
     ];
 
     /**
