@@ -69,10 +69,10 @@ class SMSBookingForm extends Widget implements HasForms
             TextInput::make('email')
                 ->hiddenLabel()
                 ->email()
+                ->rules(['required', 'email:rfc,dns'])
                 ->placeholder('Email Address')
                 ->autocomplete(false)
                 ->columnSpan(2)
-                ->required()
                 ->helperText(new HtmlString(<<<'HTML'
                     <span class="text-xs">Email address is mandatory. If you cannot share the guest's email address, please enter prima@primavip.co</span>
                 HTML)),
