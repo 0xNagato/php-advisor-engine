@@ -65,17 +65,20 @@ class SMSBookingForm extends Widget implements HasForms
                 ->required()
                 ->helperText(new HtmlString(<<<'HTML'
                     <span class="text-xs">Guest Phone Number is required. Please do not use concierge phone number here.</span>
-                HTML)),
+                HTML
+                )),
             TextInput::make('email')
                 ->hiddenLabel()
                 ->email()
-                ->rules(['required', 'email:rfc,dns'])
+                ->required()
+                ->rules(['email:rfc,dns'])
                 ->placeholder('Email Address')
                 ->autocomplete(false)
                 ->columnSpan(2)
                 ->helperText(new HtmlString(<<<'HTML'
                     <span class="text-xs">Email address is mandatory. If you cannot share the guest's email address, please enter prima@primavip.co</span>
-                HTML)),
+                HTML
+                )),
             Textarea::make('notes')
                 ->hiddenLabel()
                 ->placeholder('Notes/Special Requests (optional)')
@@ -90,7 +93,7 @@ class SMSBookingForm extends Widget implements HasForms
 
     public function handleSubmit(): void
     {
-        if (! config('app.bookings_enabled')) {
+        if (!config('app.bookings_enabled')) {
             $this->dispatch('open-modal', id: 'bookings-disabled-modal');
 
             return;
