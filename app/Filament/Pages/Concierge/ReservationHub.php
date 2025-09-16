@@ -25,6 +25,7 @@ use Filament\Notifications\Notification;
 use Filament\Pages\Page;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Validator;
 use Livewire\Attributes\On;
 use Livewire\Attributes\Session;
 use Livewire\Attributes\Url;
@@ -395,6 +396,26 @@ class ReservationHub extends Page
             $this->isLoading = false;
 
             return;
+        }
+
+        // Validate the email address
+        $email = $form['email'] ?? '';
+
+        if ($email !== 'prima@primavip.co') {
+            $validator = Validator::make($form, [
+                'email' => ['required', 'email:rfc,dns'],
+            ]);
+
+            if ($validator->fails()) {
+                Notification::make()
+                    ->title('Invalid Email Address')
+                    ->body('Please enter a valid email address.')
+                    ->danger()
+                    ->send();
+                $this->isLoading = false;
+
+                return;
+            }
         }
 
         // Update the form with the formatted phone number

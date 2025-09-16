@@ -17,12 +17,14 @@
                     <div class="text-center py-12">
                         <div class="mx-auto max-w-md">
                             <div class="rounded-lg bg-gray-50 p-6">
-                                <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24"
+                                     stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                          d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                                 </svg>
                                 <h3 class="mt-4 text-lg font-medium text-gray-900">Date Too Far in Advance</h3>
                                 <p class="mt-2 text-sm text-gray-600">
-                                    We only show availability for the next {{ $this->getMaxReservationDays() }} days. 
+                                    We only show availability for the next {{ $this->getMaxReservationDays() }} days.
                                     Please select a date within this range.
                                 </p>
                             </div>
@@ -233,6 +235,22 @@
                                         phoneInput.value = iti.getNumber();
                                     }
 
+                                    // Email validation
+                                    const emailInput = document.querySelector('input[name=email]');
+                                    const emailError = document.getElementById('email-error');
+                                    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+                                    // Reset the email error
+                                    emailError.classList.add('hidden');
+                                    emailError.textContent = '';
+
+                                    if (!emailRegex.test(emailInput.value)) {
+                                        emailError.textContent = 'Please enter a valid email address';
+                                        emailError.classList.remove('hidden');
+                                        $wire.$set('isLoading', false);
+                                        return;
+                                    }
+
                                     $wire.$set('isLoading', true);
 
                                     @if($booking->prime_time)
@@ -310,14 +328,18 @@
                                     </div>
                                 </div>
 
-                                <label class="w-full">
-                                    <input name="email" type="email"
-                                           class="w-full rounded-lg border border-gray-300 text-sm h-[40px] focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
-                                           placeholder="Email Address" required>
-                                </label>
-                                <div class="w-full text-xs text-gray-500">
-                                    Email address is mandatory. If you cannot share the guest's email address, please
-                                    enter prima@primavip.co
+                                <div class="w-full email-input-container">
+                                    <label class="w-full">
+                                        <input name="email" type="email"
+                                               class="w-full rounded-lg border border-gray-300 text-sm h-[40px] focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
+                                               placeholder="Email Address" required>
+                                    </label>
+                                    <div id="email-error" class="hidden mt-1 text-sm text-red-500"></div>
+                                    <div class="w-full text-xs text-gray-500">
+                                        Email address is mandatory. If you cannot share the guest's email address,
+                                        please
+                                        enter prima@primavip.co
+                                    </div>
                                 </div>
 
                                 <label class="w-full">
@@ -486,9 +508,12 @@
                     phoneInput.style.paddingLeft = '';
                 }
 
-                // Validate the phone number on form submit
+                // Validate the phone number on the form submitted
                 const form = phoneInput.closest('form');
                 const phoneError = document.getElementById('phone-error');
+                const emailInput = document.querySelector('input[name=email]');
+                const emailError = document.getElementById('email-error');
+                const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
                 if (form) {
                     form.addEventListener('submit', function(e) {
@@ -500,6 +525,17 @@
                             e.preventDefault();
                             phoneError.textContent = 'Please enter a valid phone number';
                             phoneError.classList.remove('hidden');
+                            return false;
+                        }
+
+                        // Reset the email error
+                        emailError.classList.add('hidden');
+                        emailError.textContent = '';
+
+                        if (!emailRegex.test(emailInput.value)) {
+                            e.preventDefault();
+                            emailError.textContent = 'Please enter a valid email address';
+                            emailError.classList.remove('hidden');
                             return false;
                         }
 
