@@ -10,9 +10,6 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Facades\Storage;
 use InvalidArgumentException;
 
-/**
- * @mixin IdeHelperVenueGroup
- */
 class VenueGroup extends Model
 {
     protected $fillable = [

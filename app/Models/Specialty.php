@@ -6,9 +6,6 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Collection;
 use Sushi\Sushi;
 
-/**
- * @mixin IdeHelperSpecialty
- */
 class Specialty extends Model
 {
     use Sushi;

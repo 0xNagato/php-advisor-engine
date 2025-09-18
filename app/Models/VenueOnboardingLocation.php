@@ -11,9 +11,6 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Facades\Storage;
 
-/**
- * @mixin IdeHelperVenueOnboardingLocation
- */
 class VenueOnboardingLocation extends Model
 {
     use HasFactory;

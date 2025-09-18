@@ -25,9 +25,6 @@ use Spatie\Activitylog\LogOptions;
 use Spatie\Activitylog\Traits\LogsActivity;
 use Throwable;
 
-/**
- * @mixin IdeHelperBooking
- */
 class Booking extends Model
 {
     use FormatsPhoneNumber;

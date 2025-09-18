@@ -29,9 +29,6 @@ use Spatie\Activitylog\LogOptions;
 use Spatie\Activitylog\Traits\LogsActivity;
 use Throwable;
 
-/**
- * @mixin IdeHelperVenue
- */
 class Venue extends Model
 {
     use HasEarnings, HasFactory, LogsActivity;

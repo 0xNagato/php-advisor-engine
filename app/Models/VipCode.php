@@ -15,8 +15,6 @@ use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 
 /**
  * @property AffiliateBrandingData|null $branding
- *
- * @mixin IdeHelperVipCode
  */
 class VipCode extends Model
 {

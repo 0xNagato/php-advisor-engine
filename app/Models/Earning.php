@@ -9,9 +9,6 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 #[CollectedBy(EarningCollection::class)]
-/**
- * @mixin IdeHelperEarning
- */
 class Earning extends Model
 {
     protected $fillable = [

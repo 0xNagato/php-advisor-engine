@@ -11,9 +11,6 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 use Illuminate\Support\Carbon;
 
-/**
- * @mixin IdeHelperPartner
- */
 class Partner extends Model
 {
     use HasFactory;

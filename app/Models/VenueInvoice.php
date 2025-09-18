@@ -12,9 +12,6 @@ use Illuminate\Support\Str;
 use Spatie\Activitylog\LogOptions;
 use Spatie\Activitylog\Traits\LogsActivity;
 
-/**
- * @mixin IdeHelperVenueInvoice
- */
 class VenueInvoice extends Model
 {
     use LogsActivity;

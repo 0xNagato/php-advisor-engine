@@ -18,8 +18,6 @@ use Laravel\Sanctum\PersonalAccessToken;
  * @property Carbon $updated_at
  * @property-read VipCode $vipCode
  * @property-read PersonalAccessToken|null $sanctumToken
- *
- * @mixin IdeHelperVipSession
  */
 class VipSession extends Model
 {
