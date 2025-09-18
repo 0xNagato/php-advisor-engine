@@ -4,17 +4,22 @@ namespace App\Filament\Pages;
 
 use App\Models\Region;
 use App\Models\Venue;
+use Filament\Forms\Components\Grid;
+use Filament\Forms\Components\Section;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Concerns\InteractsWithForms;
+use Filament\Forms\Contracts\HasForms;
+use Filament\Forms\Form;
 use Filament\Pages\Page;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Concerns\InteractsWithTable;
 use Filament\Tables\Contracts\HasTable;
-use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder as EloquentBuilder;
 
-class TierOrdering extends Page implements HasTable
+class TierOrdering extends Page implements HasForms, HasTable
 {
-    use InteractsWithTable;
+    use InteractsWithForms, InteractsWithTable;
 
     protected static ?string $navigationIcon = 'heroicon-o-arrows-up-down';
 
@@ -30,7 +35,7 @@ class TierOrdering extends Page implements HasTable
 
     public ?string $region = null;
 
-    public ?int $tier = 1;
+    public ?int $tier = null;
 
     public static function canAccess(): bool
     {
@@ -44,17 +49,61 @@ class TierOrdering extends Page implements HasTable
 
     public function mount(): void
     {
-        $this->region = $this->region ?? config('app.default_region', 'miami');
-        $this->tier = $this->tier ?? 1;
+        $this->region = null;
+        $this->tier = null;
+    }
+
+    public function form(Form $form): Form
+    {
+        return $form
+            ->schema([
+                Section::make('Filters')
+                    ->schema([
+                        Grid::make(2)
+                            ->schema([
+                                Select::make('region')
+                                    ->label('Region')
+                                    ->options(Region::query()->pluck('name', 'id')->toArray())
+                                    ->native(false)
+                                    ->searchable()
+                                    ->live()
+                                    ->afterStateUpdated(function ($state): void {
+                                        $this->region = $state ?: null;
+                                        $this->resetTable();
+                                    }),
+                                Select::make('tier')
+                                    ->label('Tier')
+                                    ->options([
+                                        1 => 'Gold',
+                                        2 => 'Silver',
+                                    ])
+                                    ->native(false)
+                                    ->live()
+                                    ->afterStateUpdated(function ($state): void {
+                                        $this->tier = $state ? (int) $state : null;
+                                        $this->resetTable();
+                                    }),
+                            ]),
+                    ]),
+            ]);
     }
 
     public function table(Table $table): Table
     {
         return $table
-            ->query(fn (): EloquentBuilder => Venue::query()
-                ->where('region', $this->region)
-                ->where('tier', $this->tier)
-            )
+            ->query(function (): EloquentBuilder {
+                $query = Venue::query();
+
+                if ($this->region && $this->tier) {
+                    $query->where('region', $this->region)
+                        ->where('tier', $this->tier);
+                } else {
+                    // Prevent any records from showing until both filters are selected
+                    $query->whereRaw('1 = 0');
+                }
+
+                return $query;
+            })
             ->reorderable('tier_position')
             ->columns([
                 TextColumn::make('name')
@@ -69,33 +118,8 @@ class TierOrdering extends Page implements HasTable
                     ->formatStateUsing(fn (Venue $record): string => $record->formattedRegion ?: $record->region),
             ])
             ->defaultSort('tier_position', 'asc')
-            ->filters([
-                SelectFilter::make('region')
-                    ->label('Region')
-                    ->options(Region::query()->pluck('name', 'id')->toArray())
-                    ->default($this->region)
-                    ->indicator('Region')
-                    ->query(function (EloquentBuilder $query, array $data) {
-                        if (! empty($data['value'])) {
-                            $this->region = (string) $data['value'];
-                            $query->where('region', $this->region);
-                        }
-                    }),
-                SelectFilter::make('tier')
-                    ->label('Tier')
-                    ->options([
-                        1 => 'Gold',
-                        2 => 'Silver',
-                    ])
-                    ->default($this->tier)
-                    ->indicator('Tier')
-                    ->query(function (EloquentBuilder $query, array $data) {
-                        if (! empty($data['value'])) {
-                            $this->tier = (int) $data['value'];
-                            $query->where('tier', $this->tier);
-                        }
-                    }),
-            ])
+            ->emptyStateHeading('Select Region and Tier')
+            ->emptyStateDescription('Choose a region and tier above to load venues, then drag to reorder.')
             ->paginated(false);
     }
 }
