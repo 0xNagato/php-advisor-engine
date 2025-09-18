@@ -29,6 +29,9 @@ use Spatie\Activitylog\LogOptions;
 use Spatie\Activitylog\Traits\LogsActivity;
 use Throwable;
 
+/**
+ * @mixin IdeHelperVenue
+ */
 class Venue extends Model
 {
     use HasEarnings, HasFactory, LogsActivity;
@@ -96,6 +99,7 @@ class Venue extends Model
         'covermanager_sync_enabled',
         'last_covermanager_sync',
         'tier',
+        'tier_position',
         'vat',
         'metadata',
         'latitude',

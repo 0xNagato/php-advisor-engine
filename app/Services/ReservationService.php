@@ -302,21 +302,16 @@ class ReservationService
             // Group venues based on the assigned group
             ->groupBy(fn ($venue) => $venue->current_group)
             ->map(function ($group, $groupKey) {
-                // Sort tier groups: config venues first (in config order), then others alphabetically
+                // Sort tier groups: explicitly ordered first (tier_position asc), then others by name
                 if (in_array($groupKey, ['gold', 'silver'])) {
-                    $tierNumber = $groupKey === 'gold' ? 1 : 2;
-                    $configVenues = static::getVenuesInTier($this->region->id, $tierNumber);
+                    return $group->sortBy(function ($venue) {
+                        $hasPosition = $venue->tier_position !== null;
 
-                    return $group->sortBy(function ($venue) use ($configVenues) {
-                        $configPosition = array_search($venue->id, $configVenues);
-
-                        if ($configPosition !== false) {
-                            // Venue is in config - use config position
-                            return $configPosition;
-                        } else {
-                            // Venue not in config - sort alphabetically after config venues
-                            return 1000 + ord(strtolower((string) $venue->name[0]));
-                        }
+                        return [
+                            $hasPosition ? 0 : 1,
+                            $hasPosition ? (int) $venue->tier_position : PHP_INT_MAX,
+                            strtolower($venue->name),
+                        ];
                     });
                 }
 
@@ -564,9 +559,12 @@ class ReservationService
      */
     private function isVenueInConfigTier(int $venueId, int $tier): bool
     {
-        $configVenues = static::getVenuesInTier($this->region->id, $tier);
+        // DB-backed: a venue is considered in the tier if its tier field equals the requested tier
+        $venue = $this->region
+            ? Venue::query()->where('id', $venueId)->where('region', $this->region->id)->first()
+            : Venue::query()->find($venueId);
 
-        return in_array($venueId, $configVenues);
+        return (int) ($venue?->tier) === (int) $tier;
     }
 
     /**
@@ -577,34 +575,13 @@ class ReservationService
      */
     private function getVenueTierPosition(int $venueId): array
     {
-        $tierConfig = config('venue-tiers.tiers.'.$this->region->id, []);
+        $venue = $this->region
+            ? Venue::query()->where('id', $venueId)->where('region', $this->region->id)->first()
+            : Venue::query()->find($venueId);
 
-        // Check tier 1
-        if (isset($tierConfig['tier_1'])) {
-            $position = array_search($venueId, $tierConfig['tier_1']);
-            if ($position !== false) {
-                return [
-                    'tier' => 1,
-                    'position' => $position,
-                ];
-            }
-        }
-
-        // Check tier 2
-        if (isset($tierConfig['tier_2'])) {
-            $position = array_search($venueId, $tierConfig['tier_2']);
-            if ($position !== false) {
-                return [
-                    'tier' => 2,
-                    'position' => $position,
-                ];
-            }
-        }
-
-        // Default tier
         return [
-            'tier' => config('venue-tiers.default_tier', 3),
-            'position' => PHP_INT_MAX, // Put at end
+            'tier' => $venue?->tier,
+            'position' => $venue?->tier_position ?? PHP_INT_MAX,
         ];
     }
 
@@ -616,7 +593,8 @@ class ReservationService
      */
     public static function getVenueTierConfig(string $regionId): array
     {
-        return config('venue-tiers.tiers.'.$regionId, []);
+        // Deprecated – no longer used; kept for backward compatibility
+        return [];
     }
 
     /**
@@ -628,9 +606,14 @@ class ReservationService
      */
     public static function getVenuesInTier(string $regionId, int $tier): array
     {
-        $tierConfig = self::getVenueTierConfig($regionId);
-
-        return $tierConfig['tier_'.$tier] ?? [];
+        return Venue::query()
+            ->where('region', $regionId)
+            ->where('tier', $tier)
+            ->orderByRaw('CASE WHEN tier_position IS NULL THEN 1 ELSE 0 END')
+            ->orderBy('tier_position')
+            ->orderBy('name')
+            ->pluck('id')
+            ->toArray();
     }
 
     /**

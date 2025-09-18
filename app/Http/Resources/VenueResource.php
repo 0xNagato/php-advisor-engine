@@ -66,20 +66,8 @@ class VenueResource extends JsonResource
      */
     private function getEffectiveTier(): ?int
     {
-        // Check if venue is in tier 1 configuration (Gold)
-        $tier1Venues = ReservationService::getVenuesInTier($this->resource->region, 1);
-        if (in_array($this->resource->id, $tier1Venues)) {
-            return 1;
-        }
-
-        // Check if venue is in tier 2 configuration (Silver)
-        $tier2Venues = ReservationService::getVenuesInTier($this->resource->region, 2);
-        if (in_array($this->resource->id, $tier2Venues)) {
-            return 2;
-        }
-
-        // Fall back to database tier, or default tier (null for Standard)
-        return $this->resource->tier ?? config('venue-tiers.default_tier');
+        // DB-backed effective tier: use the venue's tier directly
+        return $this->resource->tier;
     }
 
     /**

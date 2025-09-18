@@ -11,6 +11,8 @@ use Sushi\Sushi;
  * @property string $name
  * @property string $region Region ID
  * @property-read Region $regionModel
+ *
+ * @mixin IdeHelperNeighborhood
  */
 class Neighborhood extends Model
 {

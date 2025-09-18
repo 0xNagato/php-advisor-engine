@@ -14,6 +14,8 @@ use Spatie\LaravelData\DataCollection;
 
 /**
  * @property string $uuid
+ *
+ * @mixin IdeHelperSpecialRequest
  */
 class SpecialRequest extends Model
 {

@@ -208,7 +208,7 @@ class EditVenue extends EditRecord
                                 null => 'Standard',
                             ])
                             ->default(null)
-                            ->helperText('Gold venues appear first in search results, followed by Silver, then Standard. Ordering within tiers is managed through configuration.'),
+                            ->helperText('Gold venues appear first in search results, followed by Silver, then Standard. Ordering within tiers is managed in the Tier Ordering tool.'),
                         Placeholder::make('tier_position')
                             ->label('Tier Position')
                             ->content(function () use ($venue) {
@@ -216,31 +216,26 @@ class EditVenue extends EditRecord
                                     return 'Set region first to see tier position';
                                 }
 
-                                $tier1Venues = ReservationService::getVenuesInTier($venue->region, 1);
-                                $tier2Venues = ReservationService::getVenuesInTier($venue->region, 2);
-
-                                $tier1Position = array_search($venue->id, $tier1Venues);
-                                $tier2Position = array_search($venue->id, $tier2Venues);
-
-                                // Check if venue is in Gold tier (DB tier=1 OR config tier_1)
-                                if ($venue->tier === 1 || $tier1Position !== false) {
-                                    if ($tier1Position !== false) {
-                                        return new HtmlString('<span class="inline-flex items-center px-2.5 py-0.5 text-xs font-medium text-yellow-800 bg-yellow-100 rounded-full">Position '.($tier1Position + 1).' in Gold (configured)</span>');
-                                    } else {
-                                        return new HtmlString('<span class="inline-flex items-center px-2.5 py-0.5 text-xs font-medium text-yellow-800 bg-yellow-100 rounded-full">Gold tier (database only)</span>');
-                                    }
-                                    // Check if the venue is in Silver tier (DB tier=2 OR config tier_2)
-                                } elseif ($venue->tier === 2 || $tier2Position !== false) {
-                                    if ($tier2Position !== false) {
-                                        return new HtmlString('<span class="inline-flex items-center px-2.5 py-0.5 text-xs font-medium text-gray-800 bg-gray-100 rounded-full">Position '.($tier2Position + 1).' in Silver (configured)</span>');
-                                    } else {
-                                        return new HtmlString('<span class="inline-flex items-center px-2.5 py-0.5 text-xs font-medium text-gray-800 bg-gray-100 rounded-full">Silver tier (database only)</span>');
-                                    }
-                                } else {
+                                // DB-backed position display
+                                if (! in_array($venue->tier, [1, 2], true)) {
                                     return new HtmlString('<span class="inline-flex items-center px-2.5 py-0.5 text-xs font-medium text-blue-800 bg-blue-100 rounded-full">Standard tier</span>');
                                 }
+
+                                $list = ReservationService::getVenuesInTier($venue->region, (int) $venue->tier);
+                                $position = array_search($venue->id, $list, true);
+
+                                if ($position !== false) {
+                                    $labelClass = $venue->tier === 1 ? 'text-yellow-800 bg-yellow-100' : 'text-gray-800 bg-gray-100';
+                                    $tierLabel = $venue->tier === 1 ? 'Gold' : 'Silver';
+
+                                    return new HtmlString('<span class="inline-flex items-center px-2.5 py-0.5 text-xs font-medium '.$labelClass.' rounded-full">Position '.($position + 1).' in '.$tierLabel.'</span>');
+                                }
+
+                                $tierLabel = $venue->tier === 1 ? 'Gold' : 'Silver';
+
+                                return new HtmlString('<span class="inline-flex items-center px-2.5 py-0.5 text-xs font-medium text-gray-800 bg-gray-100 rounded-full">'.$tierLabel.' tier (not ordered)</span>');
                             })
-                            ->helperText('This shows if the venue is configured in the tier ordering system. Contact admin to change tier positions.'),
+                            ->helperText('This shows the venue\'s position within its tier for the selected region. Use the Tier Ordering tool to change positions.'),
                         FileUpload::make('images')
                             ->label('Images')
                             ->disk('do')
