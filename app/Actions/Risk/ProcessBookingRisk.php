@@ -119,14 +119,18 @@ class ProcessBookingRisk
             $ipAddress
         );
 
-        // Always send Slack notification for all bookings
-        try {
-            SendRiskAlertToSlack::run($booking, $result);
-        } catch (\Exception $e) {
-            Log::error('Failed to send Slack alert', [
-                'booking_id' => $booking->id,
-                'error' => $e->getMessage()
-            ]);
+        // Send Slack notification based on risk level and configuration
+        $shouldSendSlack = $riskState || config('app.send_low_risk_bookings_to_slack', false);
+
+        if ($shouldSendSlack) {
+            try {
+                SendRiskAlertToSlack::run($booking, $result);
+            } catch (\Exception $e) {
+                Log::error('Failed to send Slack alert', [
+                    'booking_id' => $booking->id,
+                    'error' => $e->getMessage()
+                ]);
+            }
         }
 
         // If booking is on hold, handle accordingly

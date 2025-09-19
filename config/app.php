@@ -445,5 +445,6 @@ return [
     'ai_screening_enabled' => env('AI_SCREENING_ENABLED', false),
     'ai_screening_threshold_soft' => (int) env('AI_SCREENING_THRESHOLD_SOFT', 30),
     'ai_screening_threshold_hard' => (int) env('AI_SCREENING_THRESHOLD_HARD', 70),
+    'send_low_risk_bookings_to_slack' => env('SEND_LOW_RISK_BOOKINGS_TO_SLACK', false),
 
 ];
