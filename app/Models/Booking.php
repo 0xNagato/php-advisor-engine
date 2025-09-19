@@ -202,6 +202,7 @@ class Booking extends Model
             BookingStatus::CANCELLED,
             BookingStatus::REFUNDED,
             BookingStatus::PARTIALLY_REFUNDED,
+            // Note: REVIEW_PENDING is intentionally excluded from recent bookings
         ]);
     }
 

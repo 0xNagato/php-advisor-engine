@@ -52,7 +52,7 @@ class CompleteBooking
                 'guest_last_name' => $formData['lastName'],
                 'guest_phone' => $formattedPhone,
                 'guest_email' => $formData['email'],
-                'status' => BookingStatus::CONFIRMED,
+                'status' => BookingStatus::CONFIRMED,  // Default to confirmed, ProcessBookingRisk will override if needed
                 'stripe_payment_intent_id' => $paymentIntentId ?: null,
                 'stripe_charge_id' => $stripeCharge?->id,
                 'stripe_charge' => $stripeCharge?->toArray(),
@@ -60,8 +60,11 @@ class CompleteBooking
                 'notes' => $formData['notes'] ?? null,
             ]);
 
-            // Process risk scoring
+            // Process risk scoring - this will set the status
             ProcessBookingRisk::run($booking);
+
+            // Reload to get updated status
+            $booking->refresh();
 
             // Only send notifications if booking is not on risk hold
             if (!$booking->isOnRiskHold()) {

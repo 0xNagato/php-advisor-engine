@@ -137,7 +137,9 @@ class ProcessBookingRisk
         if ($riskState) {
             $this->handleRiskHold($booking, $riskState, $result);
         } else {
-            // Auto-approve if score is low
+            // Auto-approve if score is low - keep status as confirmed
+            // Status is already CONFIRMED from CompleteBooking, no need to update
+
             RiskAuditLog::createEntry(
                 $booking->id,
                 RiskAuditLog::EVENT_AUTO_APPROVED,
@@ -169,12 +171,10 @@ class ProcessBookingRisk
             $booking->ip_address
         );
 
-        // Update booking status to indicate it needs review
-        if ($booking->status === 'pending') {
-            $booking->update([
-                'status' => 'review_pending'
-            ]);
-        }
+        // Always update booking status to indicate it needs review
+        $booking->update([
+            'status' => \App\Enums\BookingStatus::REVIEW_PENDING
+        ]);
 
         // Slack notification already sent in parent method
 
