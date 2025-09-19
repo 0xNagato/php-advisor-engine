@@ -25,6 +25,11 @@ class RiskBlacklistResource extends Resource
 
     protected static ?int $navigationSort = 3;
 
+    public static function canAccess(): bool
+    {
+        return auth()->user()->hasActiveRole('super_admin');
+    }
+
     public static function form(Form $form): Form
     {
         return $form

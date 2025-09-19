@@ -37,6 +37,11 @@ class RiskReviewResource extends Resource
 
     protected static ?int $navigationSort = 1;
 
+    public static function canAccess(): bool
+    {
+        return auth()->user()->hasActiveRole('super_admin');
+    }
+
     public static function getEloquentQuery(): Builder
     {
         return parent::getEloquentQuery()
@@ -336,12 +341,5 @@ class RiskReviewResource extends Resource
             'index' => Pages\ListRiskReviews::route('/'),
             'view' => Pages\ViewRiskReview::route('/{record}'),
         ];
-    }
-
-    public static function canViewAny(): bool
-    {
-        // Allow authenticated users to view risk reviews
-        // In production, restrict to: auth()->user()?->hasRole(['super_admin', 'admin'])
-        return auth()->check();
     }
 }
