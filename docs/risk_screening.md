@@ -231,6 +231,7 @@ AI_SCREENING_THRESHOLD_HARD=70
 
 # Slack Webhook for Alerts
 LOG_SLACK_RISK_WEBHOOK_URL=https://hooks.slack.com/services/...
+SEND_LOW_RISK_BOOKINGS_TO_SLACK=false  # Only send flagged bookings to Slack
 
 # OpenAI API Configuration (Optional)
 OPENAI_API_KEY=sk-...
@@ -574,7 +575,7 @@ Track these key metrics:
 ### Security Considerations
 
 1. **PII in audit logs** → Automatically masked
-2. **Admin access** → Only authenticated users can review
+2. **Admin access** → Only super admin users can access risk management
 3. **Webhook URL** → Stored in environment variable
 4. **OpenAI data** → Complete booking details sent for context
 5. **Refunds** → Automatically processed on rejection
@@ -704,12 +705,19 @@ php artisan tinker
 4. Run `php artisan config:cache`
 5. (Optional) Add OpenAI API key for enhanced detection
 6. Run seeder for initial blacklist data
-7. Grant admin users access to Risk Review
+7. Grant super admin role to users who need Risk Review access
 8. Test with known suspicious patterns
 9. Monitor initial false positive rate
 10. Adjust thresholds based on data
 
 ## Changelog
+
+### 2025-09-19: Access Control and Slack Notification Updates
+- **Access control**: Risk Review, Risk Whitelist, and Risk Blacklist now restricted to super_admin role only
+- **Slack notifications**: Added config to control low-risk booking notifications (defaults to false)
+- **Slack message clarity**: Updated messages to clarify auto-approval vs manual review requirements
+- **UI improvements**: Changed Risk Review page title from "View Booking" to "Review Booking"
+- **Bug fix**: Fixed risk indicators not displaying due to PostgreSQL JSONB casting issue
 
 ### 2025-09-19: Enhanced Profanity and Velocity Scoring
 - **Weighted profanity detection**: Extreme words (fuck, shit) score 100 points, mild words score 40-60
