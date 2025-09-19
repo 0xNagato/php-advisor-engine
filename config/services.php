@@ -67,7 +67,9 @@ return [
     ],
 
     'openai' => [
-        'api_key' => env('OPENAI_API_KEY'),
+        'key' => env('OPENAI_API_KEY'),
+        'url' => env('OPENAI_API_URL', 'https://api.openai.com/v1/chat/completions'),
+        'model' => env('OPENAI_MODEL', 'gpt-5-mini'),
     ],
 
     'asana' => [
@@ -111,5 +113,9 @@ return [
 
     'google' => [
         'places_api_key' => env('GOOGLE_PLACES_API_KEY'),
+    ],
+
+    'slack' => [
+        'risk_webhook_url' => env('LOG_SLACK_RISK_WEBHOOK_URL'),
     ],
 ];

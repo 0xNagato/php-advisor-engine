@@ -6,6 +6,7 @@ enum BookingStatus: string
 {
     case PENDING = 'pending';
     case GUEST_ON_PAGE = 'guest_on_page';
+    case REVIEW_PENDING = 'review_pending';
 
     case ABANDONED = 'abandoned';
     case CANCELLED = 'cancelled';
@@ -30,6 +31,7 @@ enum BookingStatus: string
     public const array NON_REPORTING_STATUSES = [
         self::PENDING,
         self::GUEST_ON_PAGE,
+        self::REVIEW_PENDING,
         self::ABANDONED,
         self::CANCELLED,
         self::NO_SHOW,
@@ -47,6 +49,7 @@ enum BookingStatus: string
         return match ($this) {
             self::PENDING => 'Pending',
             self::GUEST_ON_PAGE => 'Guest on Page',
+            self::REVIEW_PENDING => 'Risk Review Pending',
             self::CANCELLED => 'Cancelled',
             self::ABANDONED => 'Abandoned',
             self::CONFIRMED => 'Confirmed',

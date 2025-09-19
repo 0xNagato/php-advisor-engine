@@ -2,6 +2,7 @@
 
 namespace App\Actions\Booking;
 
+use App\Actions\Risk\ProcessBookingRisk;
 use App\Enums\BookingStatus;
 use App\Events\BookingConfirmed;
 use App\Events\BookingPaid;
@@ -59,24 +60,32 @@ class CompleteBooking
                 'notes' => $formData['notes'] ?? null,
             ]);
 
-            if ($booking->is_non_prime_big_group) {
-                $booking->notify(new CustomerBookingRequestReceived);
-            } else {
-                $booking->notify(new CustomerBookingConfirmed);
+            // Process risk scoring
+            ProcessBookingRisk::run($booking);
+
+            // Only send notifications if booking is not on risk hold
+            if (!$booking->isOnRiskHold()) {
+                if ($booking->is_non_prime_big_group) {
+                    $booking->notify(new CustomerBookingRequestReceived);
+                } else {
+                    $booking->notify(new CustomerBookingConfirmed);
+                }
+
+                // Only send regular confirmation SMS if booking doesn't qualify for auto-approval
+                // Auto-approval eligible bookings will get their notification after platform sync
+                if (! AutoApproveSmallPartyBooking::qualifiesForAutoApproval($booking)) {
+                    SendConfirmationToVenueContacts::run($booking);
+                }
+
+                if ($booking->concierge && $booking->concierge->bookings()->count() === 1) {
+                    $booking->concierge->user->notify(new ConciergeFirstBooking($booking));
+                }
+
+                BookingConfirmed::dispatch($booking->load('schedule', 'venue'));
             }
 
-            // Only send regular confirmation SMS if booking doesn't qualify for auto-approval
-            // Auto-approval eligible bookings will get their notification after platform sync
-            if (! AutoApproveSmallPartyBooking::qualifiesForAutoApproval($booking)) {
-                SendConfirmationToVenueContacts::run($booking);
-            }
-
-            if ($booking->concierge && $booking->concierge->bookings()->count() === 1) {
-                $booking->concierge->user->notify(new ConciergeFirstBooking($booking));
-            }
-
+            // Always dispatch BookingPaid event regardless of risk hold
             BookingPaid::dispatch($booking);
-            BookingConfirmed::dispatch($booking->load('schedule', 'venue'));
 
             return ['success' => true, 'message' => 'Booking confirmed successfully'];
         } catch (Exception $e) {

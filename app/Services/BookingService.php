@@ -33,24 +33,32 @@ class BookingService
         $stripeCharge = $this->handleStripeCharge($booking, $form);
         $this->updateBooking($booking, $form, $stripeCharge);
 
-        if ($booking->is_non_prime_big_group) {
-            $booking->notify(new CustomerBookingRequestReceived);
-        } else {
-            $booking->notify(new CustomerBookingConfirmed);
+        // Process risk scoring (same as in CompleteBooking)
+        \App\Actions\Risk\ProcessBookingRisk::run($booking);
+
+        // Only send notifications if booking is not on risk hold
+        if (!$booking->isOnRiskHold()) {
+            if ($booking->is_non_prime_big_group) {
+                $booking->notify(new CustomerBookingRequestReceived);
+            } else {
+                $booking->notify(new CustomerBookingConfirmed);
+            }
+
+            // Only send regular confirmation SMS if booking doesn't qualify for auto-approval
+            // Auto-approval eligible bookings will get their notification after platform sync
+            if (! AutoApproveSmallPartyBooking::qualifiesForAutoApproval($booking)) {
+                SendConfirmationToVenueContacts::run($booking);
+            }
+
+            if ($booking->concierge && $booking->concierge->bookings()->count() === 1) {
+                $booking->concierge->user->notify(new ConciergeFirstBooking($booking));
+            }
+
+            BookingConfirmed::dispatch($booking->load('schedule', 'venue'));
         }
 
-        // Only send regular confirmation SMS if booking doesn't qualify for auto-approval
-        // Auto-approval eligible bookings will get their notification after platform sync
-        if (! AutoApproveSmallPartyBooking::qualifiesForAutoApproval($booking)) {
-            SendConfirmationToVenueContacts::run($booking);
-        }
-
-        if ($booking->concierge && $booking->concierge->bookings()->count() === 1) {
-            $booking->concierge->user->notify(new ConciergeFirstBooking($booking));
-        }
-
+        // Always dispatch BookingPaid event regardless of risk hold
         BookingPaid::dispatch($booking);
-        BookingConfirmed::dispatch($booking->load('schedule', 'venue'));
     }
 
     public function convertToNonPrime(Booking $booking): void

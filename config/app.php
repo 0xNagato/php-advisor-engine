@@ -433,4 +433,17 @@ return [
         'non_prime_regions' => explode(',', (string)env('REGIONAL_SMS_NON_PRIME_REGIONS', 'ibiza')),
     ],
 
+    /*
+    |--------------------------------------------------------------------------
+    | Risk Screening Configuration
+    |--------------------------------------------------------------------------
+    |
+    | Configuration for the suspicious booking detection system.
+    |
+    */
+    'risk_screening_enabled' => env('RISK_SCREENING_ENABLED', true),
+    'ai_screening_enabled' => env('AI_SCREENING_ENABLED', false),
+    'ai_screening_threshold_soft' => (int) env('AI_SCREENING_THRESHOLD_SOFT', 30),
+    'ai_screening_threshold_hard' => (int) env('AI_SCREENING_THRESHOLD_HARD', 70),
+
 ];

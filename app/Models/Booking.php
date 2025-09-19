@@ -9,6 +9,7 @@ use App\Services\Booking\BookingCalculationService;
 use App\Traits\FormatsPhoneNumber;
 use App\Traits\HasImmutableBookingProperties;
 use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\AsArrayObject;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -53,6 +54,7 @@ class Booking extends Model
         'guest_last_name',
         'guest_phone',
         'invoice_path',
+        'ip_address',
         'is_prime',
         'no_show',
         'notes',
@@ -60,8 +62,11 @@ class Booking extends Model
         'partner_venue_id',
         'platform_earnings',
         'resent_venue_confirmation_at',
-        'venue_confirmed_at',
-        'venue_earnings',
+        'reviewed_at',
+        'reviewed_by',
+        'risk_reasons',
+        'risk_score',
+        'risk_state',
         'schedule_template_id',
         'status',
         'stripe_charge',
@@ -69,6 +74,9 @@ class Booking extends Model
         'tax',
         'tax_amount_in_cents',
         'total_fee',
+        'user_agent',
+        'venue_confirmed_at',
+        'venue_earnings',
         'total_with_tax_in_cents',
         'vip_code_id',
         'stripe_payment_intent_id',
@@ -83,6 +91,14 @@ class Booking extends Model
         'source',
         'device',
         'booking_at_utc',
+        'risk_score',
+        'risk_state',
+        'risk_reasons',
+        'risk_metadata',
+        'reviewed_at',
+        'reviewed_by',
+        'ip_address',
+        'user_agent',
     ];
 
     protected $appends = ['guest_name', 'local_formatted_guest_phone'];
@@ -370,6 +386,9 @@ class Booking extends Model
             'refunded_at' => 'datetime',
             'refund_data' => 'array',
             'meta' => AsArrayObject::class,
+            'risk_reasons' => 'array',
+            'risk_metadata' => \App\Data\RiskMetadata::class,
+            'reviewed_at' => 'datetime',
         ];
     }
 
@@ -565,5 +584,117 @@ class Booking extends Model
         }
 
         return $platformReservation->syncToPlatform();
+    }
+
+    /**
+     * Scope for bookings pending risk review
+     *
+     * @param  Builder<Booking>  $query
+     * @return Builder<Booking>
+     */
+    public function scopePendingRiskReview(Builder $query): Builder
+    {
+        return $query->whereNotNull('risk_state')
+            ->whereNull('reviewed_at');
+    }
+
+    /**
+     * Scope for bookings with soft risk hold
+     *
+     * @param  Builder<Booking>  $query
+     * @return Builder<Booking>
+     */
+    public function scopeSoftRiskHold(Builder $query): Builder
+    {
+        return $query->where('risk_state', 'soft')
+            ->whereNull('reviewed_at');
+    }
+
+    /**
+     * Scope for bookings with hard risk hold
+     *
+     * @param  Builder<Booking>  $query
+     * @return Builder<Booking>
+     */
+    public function scopeHardRiskHold(Builder $query): Builder
+    {
+        return $query->where('risk_state', 'hard')
+            ->whereNull('reviewed_at');
+    }
+
+    /**
+     * Check if booking is on risk hold
+     */
+    public function isOnRiskHold(): bool
+    {
+        return in_array($this->risk_state, ['soft', 'hard']) && ! $this->reviewed_at;
+    }
+
+    /**
+     * Check if booking needs manual review
+     */
+    public function needsManualReview(): bool
+    {
+        return $this->isOnRiskHold();
+    }
+
+    /**
+     * Get risk level label
+     */
+    public function getRiskLevel(): string
+    {
+        if (! $this->risk_score) {
+            return 'unknown';
+        }
+
+        if ($this->risk_score < 30) {
+            return 'low';
+        } elseif ($this->risk_score < 70) {
+            return 'medium';
+        } else {
+            return 'high';
+        }
+    }
+
+    /**
+     * Get risk reasons as array
+     * This accessor ensures PostgreSQL JSONB is properly decoded
+     */
+    public function getRiskReasonsArrayAttribute(): array
+    {
+        $reasons = $this->attributes['risk_reasons'] ?? null;
+
+        if (!$reasons) {
+            return [];
+        }
+
+        // If it's already an array, return it
+        if (is_array($reasons)) {
+            return $reasons;
+        }
+
+        // If it's a JSON string, decode it
+        if (is_string($reasons)) {
+            $decoded = json_decode($reasons, true);
+            return is_array($decoded) ? $decoded : [];
+        }
+
+        return [];
+    }
+
+    /**
+     * @return BelongsTo<User, $this>
+     */
+    public function reviewedBy(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'reviewed_by');
+    }
+
+    /**
+     * @return HasMany<RiskAuditLog, $this>
+     */
+    public function riskAuditLogs(): HasMany
+    {
+        return $this->hasMany(RiskAuditLog::class);
     }
 }
