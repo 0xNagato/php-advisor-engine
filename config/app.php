@@ -50,7 +50,7 @@ return [
     |
     */
 
-    'debug' => (bool)env('APP_DEBUG', false),
+    'debug' => (bool) env('APP_DEBUG', false),
 
     /*
     |--------------------------------------------------------------------------
@@ -276,7 +276,7 @@ return [
         'vip_codes' => ['HOME', 'DIRECT'],
     ],
     'venue_booking_notification_phones' => env('VENUE_BOOKING_NOTIFICATION_PHONES', '+17865147601,+19176644415'),
-    'widget_cache_timeout_minutes' => (int)env('WIDGET_CACHE_TIMEOUT_MINUTES', 5),
+    'widget_cache_timeout_minutes' => (int) env('WIDGET_CACHE_TIMEOUT_MINUTES', 5),
     'override_venues' => env('OVERRIDE_VENUES', ''),
     'closure_venues' => env('CLOSURE_VENUES', '73,76,95,112,129'),
     'ibiza_top_tier_venues' => env('IBIZA_TOP_TIER_VENUES', '189,195'),
@@ -354,7 +354,7 @@ return [
     | Configuration for reservation calendar date limits
     |
     */
-    'max_reservation_days' => (int)env('MAX_RESERVATION_DAYS', 30),
+    'max_reservation_days' => (int) env('MAX_RESERVATION_DAYS', 30),
 
     /*
     |--------------------------------------------------------------------------
@@ -430,7 +430,7 @@ return [
     |
     */
     'regional_sms' => [
-        'non_prime_regions' => explode(',', (string)env('REGIONAL_SMS_NON_PRIME_REGIONS', 'ibiza')),
+        'non_prime_regions' => explode(',', (string) env('REGIONAL_SMS_NON_PRIME_REGIONS', 'ibiza')),
     ],
 
     /*
@@ -446,5 +446,6 @@ return [
     'ai_screening_threshold_soft' => (int) env('AI_SCREENING_THRESHOLD_SOFT', 30),
     'ai_screening_threshold_hard' => (int) env('AI_SCREENING_THRESHOLD_HARD', 70),
     'send_low_risk_bookings_to_slack' => env('SEND_LOW_RISK_BOOKINGS_TO_SLACK', false),
+    'risk_monitoring_user_ids' => array_filter(array_map('intval', explode(',', env('RISK_MONITORING_USER_IDS', '')))),
 
 ];

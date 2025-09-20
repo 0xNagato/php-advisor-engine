@@ -4,7 +4,6 @@ namespace App\Actions\Risk;
 
 use App\Models\Booking;
 use App\Models\RiskAuditLog;
-use App\Notifications\Risk\BookingOnRiskHold;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Notification;
 use Lorisleiva\Actions\Concerns\AsAction;
@@ -22,19 +21,20 @@ class ProcessBookingRisk
         $riskScreeningEnabled = config('app.risk_screening_enabled', true);
 
         // Skip if risk screening is disabled
-        if (!$riskScreeningEnabled) {
+        if (! $riskScreeningEnabled) {
             if (config('app.debug')) {
                 Log::debug('Risk screening skipped - disabled in config', [
                     'booking_id' => $booking->id,
                 ]);
             }
+
             return;
         }
 
         if (config('app.debug')) {
             Log::debug('Starting risk screening', [
                 'booking_id' => $booking->id,
-                'guest_name' => $booking->guest_first_name . ' ' . $booking->guest_last_name,
+                'guest_name' => $booking->guest_first_name.' '.$booking->guest_last_name,
             ]);
         }
 
@@ -46,7 +46,7 @@ class ProcessBookingRisk
         if ($ipAddress || $userAgent) {
             $booking->update([
                 'ip_address' => $ipAddress,
-                'user_agent' => $userAgent
+                'user_agent' => $userAgent,
             ]);
             // Refresh to ensure we have the latest data
             $booking->refresh();
@@ -128,7 +128,20 @@ class ProcessBookingRisk
             } catch (\Exception $e) {
                 Log::error('Failed to send Slack alert', [
                     'booking_id' => $booking->id,
-                    'error' => $e->getMessage()
+                    'error' => $e->getMessage(),
+                ]);
+            }
+        }
+
+        // Always send to the all-bookings monitoring channel if configured
+        $allBookingsWebhook = config('services.slack.all_bookings_webhook_url');
+        if ($allBookingsWebhook) {
+            try {
+                SendBookingMonitoringAlert::run($booking, $result);
+            } catch (\Exception $e) {
+                Log::error('Failed to send monitoring alert', [
+                    'booking_id' => $booking->id,
+                    'error' => $e->getMessage(),
                 ]);
             }
         }
@@ -173,7 +186,7 @@ class ProcessBookingRisk
 
         // Always update booking status to indicate it needs review
         $booking->update([
-            'status' => \App\Enums\BookingStatus::REVIEW_PENDING
+            'status' => \App\Enums\BookingStatus::REVIEW_PENDING,
         ]);
 
         // Slack notification already sent in parent method

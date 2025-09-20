@@ -122,5 +122,6 @@ return [
 
     'slack' => [
         'risk_webhook_url' => env('LOG_SLACK_RISK_WEBHOOK_URL'),
+        'all_bookings_webhook_url' => env('LOG_SLACK_ALL_BOOKINGS_WEBHOOK_URL'),
     ],
 ];
