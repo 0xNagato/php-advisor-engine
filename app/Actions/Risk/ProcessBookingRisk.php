@@ -186,7 +186,7 @@ class ProcessBookingRisk
 
         // Always update booking status to indicate it needs review
         $booking->update([
-            'status' => \App\Enums\BookingStatus::REVIEW_PENDING,
+            'status' => \App\Enums\BookingStatus::REVIEW_PENDING->value,
         ]);
 
         // Slack notification already sent in parent method

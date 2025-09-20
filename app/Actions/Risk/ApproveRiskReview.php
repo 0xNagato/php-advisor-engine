@@ -26,7 +26,7 @@ class ApproveRiskReview
                 'risk_state' => null,
                 'reviewed_at' => now(),
                 'reviewed_by' => $userId ?? auth()->id(),
-                'status' => BookingStatus::CONFIRMED,
+                'status' => BookingStatus::CONFIRMED->value,
                 'confirmed_at' => now(),
             ]);
 

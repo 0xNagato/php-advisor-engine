@@ -26,7 +26,7 @@ class RejectRiskReview
             $booking->update([
                 'reviewed_at' => now(),
                 'reviewed_by' => $userId ?? auth()->id(),
-                'status' => BookingStatus::CANCELLED,
+                'status' => BookingStatus::CANCELLED->value,
                 'refund_reason' => 'Risk review rejection: ' . $reason,
             ]);
 

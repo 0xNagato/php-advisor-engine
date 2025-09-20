@@ -178,7 +178,8 @@ Based on the calculated risk score:
 
 ### 4. Review Interface (Filament)
 
-The Risk Review page provides:
+#### Risk Review Page
+For bookings requiring manual review (medium/high risk):
 
 - Filterable table with risk scores and reasons
 - Quick approve/reject actions
@@ -187,13 +188,38 @@ The Risk Review page provides:
 - Audit trail viewing
 - Prior booking history
 
+#### Risk Monitoring Page (NEW)
+For comprehensive visibility of ALL bookings with risk scores:
+
+- Shows all bookings with `risk_score > 0`
+- Available to super admins and configured monitoring users
+- Pre-configured tabs for quick filtering:
+  - All bookings
+  - High Risk (70+)
+  - Medium Risk (30-69)
+  - Low Risk (1-29)
+  - Today's Bookings
+  - High Velocity (multiple bookings from same IP)
+- Detailed view shows complete risk assessment breakdown
+- Approve/reject actions only shown for flagged bookings
+- "Low" displayed for null risk_state instead of blank
+- Direct links to full booking details
+
 ### 5. Notification System
 
 #### Slack Integration
-**ALL bookings** now send Slack notifications to #ops-bookings:
-- 🟢 **Green (Low Risk)**: Normal bookings, auto-approved message
+**Dual-channel approach for comprehensive monitoring:**
+
+##### Risk Alerts Channel (#ops-bookings)
+For bookings requiring review (medium/high risk):
 - 🟡 **Yellow (Medium Risk)**: Soft hold bookings with review link
 - 🔴 **Red (High Risk)**: Hard hold bookings marked urgent
+
+##### All Bookings Monitor Channel (#ops-bookings-monitoring)
+For ALL bookings with risk scores (including low-risk):
+- 🟢 **Green (Low Risk)**: Normal bookings, auto-approved message
+- 🟡 **Yellow (Medium Risk)**: Soft hold bookings with monitor link
+- 🔴 **Red (High Risk)**: Hard hold bookings with monitor link
 
 Each notification includes:
 - Risk score and level
@@ -201,8 +227,9 @@ Each notification includes:
 - Venue and booking information
 - **Booking Type**: 💎 Prime (Paid) or 🎟️ Non-Prime
 - **Total amount** for Prime bookings (properly formatted with currency)
-- Appropriate action buttons (View Details or Review Booking)
+- Appropriate action buttons (Monitor or Review)
 - Risk indicators when present
+- IP velocity information for concierge bookings
 
 #### Customer Notifications
 - **Low Risk**: Sent immediately after booking
@@ -230,8 +257,12 @@ AI_SCREENING_THRESHOLD_SOFT=30
 AI_SCREENING_THRESHOLD_HARD=70
 
 # Slack Webhook for Alerts
-LOG_SLACK_RISK_WEBHOOK_URL=https://hooks.slack.com/services/...
-SEND_LOW_RISK_BOOKINGS_TO_SLACK=false  # Only send flagged bookings to Slack
+LOG_SLACK_RISK_WEBHOOK_URL=https://hooks.slack.com/services/...  # For flagged bookings
+LOG_SLACK_ALL_BOOKINGS_WEBHOOK_URL=https://hooks.slack.com/services/...  # For ALL bookings monitoring
+SEND_LOW_RISK_BOOKINGS_TO_SLACK=false  # Only send flagged bookings to risk channel
+
+# Risk Monitoring Access
+RISK_MONITORING_USER_IDS=1,2,204  # User IDs that can view all bookings
 
 # OpenAI API Configuration (Optional)
 OPENAI_API_KEY=sk-...
@@ -686,16 +717,20 @@ php artisan tinker
 ## Quick Reference
 
 ### URLs
-- Risk Review Queue: `/platform/risk-reviews`
+- Risk Review Queue: `/platform/risk-reviews` (flagged bookings only)
+- Risk Monitoring: `/platform/risk-monitoring` (ALL bookings with scores)
 - Whitelist Management: `/platform/risk-whitelists`
 - Blacklist Management: `/platform/risk-blacklists`
 - Individual Booking: `/platform/bookings/{id}`
 
 ### Slack Commands
-- View all bookings: Monitor `#ops-bookings` channel
-- Review urgent: Click red notification links
-- Review medium: Click yellow notification links
-- View normal: Green notifications for transparency
+- **Review channel** (`#ops-bookings`): Only flagged bookings requiring action
+  - Review urgent: Click red notification links
+  - Review medium: Click yellow notification links
+- **Monitor channel** (`#ops-bookings-monitoring`): ALL bookings for visibility
+  - View all bookings with risk scores
+  - Green notifications for normal bookings
+  - Direct links to monitoring interface
 
 ## Deployment Checklist
 
@@ -711,6 +746,15 @@ php artisan tinker
 10. Adjust thresholds based on data
 
 ## Changelog
+
+### 2025-09-19: Comprehensive Risk Monitoring System
+- **New Risk Monitoring resource**: View ALL bookings with risk scores (not just flagged)
+- **Dual Slack channels**: Separate channels for flagged reviews vs all bookings monitoring
+- **Time-window based velocity detection**: Differentiate between bursts (5-min) and steady volume (1-hour)
+- **Concierge-friendly scoring**: Reduced penalties for legitimate concierge booking patterns
+- **Enhanced monitoring tabs**: Quick filters for risk levels, today's bookings, and velocity patterns
+- **Improved UI**: "Low" displayed for null risk_state instead of blank entries
+- **Access control**: Configurable user IDs for monitoring access via RISK_MONITORING_USER_IDS
 
 ### 2025-09-19: Access Control and Slack Notification Updates
 - **Access control**: Risk Review, Risk Whitelist, and Risk Blacklist now restricted to super_admin role only
