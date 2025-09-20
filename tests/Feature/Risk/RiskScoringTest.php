@@ -1,20 +1,9 @@
 <?php
 
-use App\Actions\Risk\ScoreBookingSuspicion;
-use App\Actions\Risk\ProcessBookingRisk;
-use App\Actions\Risk\ApproveRiskReview;
-use App\Actions\Risk\RejectRiskReview;
 use App\Actions\Risk\Analyzers\AnalyzeEmailRisk;
-use App\Actions\Risk\Analyzers\AnalyzePhoneRisk;
-use App\Actions\Risk\Analyzers\AnalyzeNameRisk;
 use App\Actions\Risk\Analyzers\AnalyzeIPRisk;
-use App\Models\Booking;
-use App\Models\RiskWhitelist;
-use App\Models\RiskBlacklist;
-use App\Models\RiskAuditLog;
-use App\Models\User;
-use App\Notifications\Booking\BookingRejectedDueToRisk;
-use Illuminate\Support\Facades\Notification;
+use App\Actions\Risk\Analyzers\AnalyzeNameRisk;
+use App\Actions\Risk\Analyzers\AnalyzePhoneRisk;
 use Illuminate\Support\Facades\Config;
 
 beforeEach(function () {
@@ -206,7 +195,7 @@ describe('LLM Risk Evaluation', function () {
         ];
 
         // Use reflection to test the protected method
-        $evaluator = new \App\Actions\Risk\EvaluateWithLLM();
+        $evaluator = new \App\Actions\Risk\EvaluateWithLLM;
         $reflection = new \ReflectionClass($evaluator);
         $method = $reflection->getMethod('buildUserPrompt');
         $method->setAccessible(true);
@@ -227,7 +216,7 @@ describe('IP Risk Analysis', function () {
     it('detects datacenter IPs', function () {
         $result = AnalyzeIPRisk::run('104.16.1.1'); // Cloudflare IP
 
-        expect($result['score'])->toBeGreaterThanOrEqual(30)
+        expect($result['score'])->toBeGreaterThanOrEqual(15) // Reduced from 30 - many legitimate users use VPNs
             ->and($result['reasons'])->toContain('Datacenter/VPN IP address');
     });
 

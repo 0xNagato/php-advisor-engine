@@ -2,7 +2,6 @@
 
 namespace App\Actions\Risk\Analyzers;
 
-use App\Models\Booking;
 use Illuminate\Support\Facades\Cache;
 use Lorisleiva\Actions\Concerns\AsAction;
 
@@ -69,11 +68,11 @@ class AnalyzeIPRisk
         $reasons = [];
         $features = [];
 
-        if (empty($ipAddress) || !filter_var($ipAddress, FILTER_VALIDATE_IP)) {
+        if (empty($ipAddress) || ! filter_var($ipAddress, FILTER_VALIDATE_IP)) {
             return [
                 'score' => 0, // Don't penalize missing IP
                 'reasons' => [],
-                'features' => ['ip_valid' => false]
+                'features' => ['ip_valid' => false],
             ];
         }
 
@@ -81,8 +80,9 @@ class AnalyzeIPRisk
         $features['ip_version'] = filter_var($ipAddress, FILTER_VALIDATE_IP, FILTER_FLAG_IPV6) ? 6 : 4;
 
         // Check if IP is from datacenter/VPN
+        // Note: Many legitimate users are on VPNs or in offices with datacenter IPs
         if ($this->isDatacenterIP($ipAddress)) {
-            $score += 30;
+            $score += 15;  // Reduced from 30 - many legitimate users use VPNs
             $reasons[] = 'Datacenter/VPN IP address';
             $features['datacenter_ip'] = true;
         }
@@ -127,7 +127,7 @@ class AnalyzeIPRisk
         return [
             'score' => min(100, $score),
             'reasons' => $reasons,
-            'features' => $features
+            'features' => $features,
         ];
     }
 
@@ -150,7 +150,7 @@ class AnalyzeIPRisk
      */
     protected function isPrivateIP(string $ip): bool
     {
-        return !filter_var(
+        return ! filter_var(
             $ip,
             FILTER_VALIDATE_IP,
             FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE
@@ -158,15 +158,15 @@ class AnalyzeIPRisk
     }
 
     /**
-     * Check velocity of bookings from this IP
+     * Check velocity of bookings from this IP using time windows
      */
     protected function checkVelocity(string $ip): array
     {
-        $cacheKey = 'ip_velocity:' . hash('sha256', $ip);
+        $cacheKey = 'ip_velocity:'.hash('sha256', $ip);
         $timestamps = Cache::get($cacheKey, []);
 
         // Clean old entries (older than 1 hour)
-        $timestamps = array_filter($timestamps, fn($ts) => $ts > now()->subHour()->timestamp);
+        $timestamps = array_filter($timestamps, fn ($ts) => $ts > now()->subHour()->timestamp);
 
         // Add current timestamp
         $timestamps[] = now()->timestamp;
@@ -176,45 +176,68 @@ class AnalyzeIPRisk
 
         $count = count($timestamps);
 
-        // Check for burst activity - be more aggressive
-        if ($count > 20) {
-            // Extreme abuse - 20+ bookings
+        // Also check short-term burst (5 minutes)
+        $recentCutoff = now()->subMinutes(5)->timestamp;
+        $recentTimestamps = array_filter($timestamps, fn ($ts) => $ts > $recentCutoff);
+        $recentCount = count($recentTimestamps);
+
+        // Check for short-term bursts first (5-minute window)
+        if ($recentCount > 5) {
+            // 5+ bookings in 5 minutes is ALWAYS suspicious
             return [
                 'is_burst' => true,
-                'score' => 100,  // Maximum score
-                'reason' => "Extreme velocity abuse: {$count} bookings from same IP in last hour",
-                'count' => $count
+                'score' => 90,
+                'reason' => "Extreme burst: {$recentCount} bookings in 5 minutes",
+                'count' => $count,
+                'recent_count' => $recentCount,
             ];
-        } elseif ($count > 10) {
-            // Very high - likely abuse
+        } elseif ($recentCount > 3) {
+            // 3+ bookings in 5 minutes is very suspicious
             return [
                 'is_burst' => true,
-                'score' => 80,
-                'reason' => "Very high velocity: {$count} bookings from same IP in last hour",
-                'count' => $count
-            ];
-        } elseif ($count > 5) {
-            // Suspicious
-            return [
-                'is_burst' => true,
-                'score' => 50,
-                'reason' => "High velocity: {$count} bookings from same IP in last hour",
-                'count' => $count
-            ];
-        } elseif ($count > 3) {
-            // Worth noting
-            return [
-                'is_burst' => true,
-                'score' => 20,
-                'reason' => "Multiple bookings: {$count} from same IP in last hour",
-                'count' => $count
+                'score' => 70,
+                'reason' => "Rapid burst: {$recentCount} bookings in 5 minutes",
+                'count' => $count,
+                'recent_count' => $recentCount,
             ];
         }
 
+        // Check hourly patterns (more lenient for concierges)
+        if ($count > 20) {
+            // 20+ bookings per hour is extreme even for concierges
+            return [
+                'is_burst' => true,
+                'score' => 60,
+                'reason' => "Very high volume: {$count} bookings in last hour",
+                'count' => $count,
+                'recent_count' => $recentCount,
+            ];
+        } elseif ($count > 10) {
+            // 10+ per hour could be a busy concierge
+            return [
+                'is_burst' => true,
+                'score' => 30,
+                'reason' => "High volume: {$count} bookings in last hour",
+                'count' => $count,
+                'recent_count' => $recentCount,
+            ];
+        } elseif ($count > 5) {
+            // 5-10 per hour is normal for concierges
+            return [
+                'is_burst' => true,
+                'score' => 10,
+                'reason' => "Multiple bookings: {$count} from same IP in last hour",
+                'count' => $count,
+                'recent_count' => $recentCount,
+            ];
+        }
+
+        // 5 or fewer per hour is completely normal
         return [
             'is_burst' => false,
             'score' => 0,
-            'count' => $count
+            'count' => $count,
+            'recent_count' => $recentCount,
         ];
     }
 
@@ -227,7 +250,7 @@ class AnalyzeIPRisk
         // For now, just return no mismatch
         return [
             'mismatch' => false,
-            'location' => 'Unknown'
+            'location' => 'Unknown',
         ];
     }
 
@@ -241,7 +264,7 @@ class AnalyzeIPRisk
         $torExits = [
             '192.42.116.16',
             '199.87.154.255',
-            '176.10.99.200'
+            '176.10.99.200',
         ];
 
         return in_array($ip, $torExits);
@@ -254,8 +277,9 @@ class AnalyzeIPRisk
     {
         if (str_contains($range, '/')) {
             [$subnet, $bits] = explode('/', $range);
-            $ip_binary = sprintf("%032b", ip2long($ip));
-            $subnet_binary = sprintf("%032b", ip2long($subnet));
+            $ip_binary = sprintf('%032b', ip2long($ip));
+            $subnet_binary = sprintf('%032b', ip2long($subnet));
+
             return substr($ip_binary, 0, $bits) === substr($subnet_binary, 0, $bits);
         }
 

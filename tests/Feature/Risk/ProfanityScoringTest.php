@@ -141,51 +141,81 @@ describe('Velocity Scoring', function () {
         Cache::flush();
     });
 
-    it('scores extreme IP velocity at 100', function () {
-        // Simulate 25 requests from same IP
+    it('scores extreme burst velocity at 90', function () {
+        // Simulate 6 bookings within 5 minutes (burst)
         $ipAddress = '1.2.3.4';
-        $cacheKey = 'ip_velocity:' . hash('sha256', $ipAddress);
-        $timestamps = array_fill(0, 25, now()->timestamp);
+        $cacheKey = 'ip_velocity:'.hash('sha256', $ipAddress);
+        // All timestamps within last 5 minutes = burst
+        $timestamps = array_fill(0, 6, now()->subMinutes(2)->timestamp);
         Cache::put($cacheKey, $timestamps, now()->addHours(2));
 
         $result = \App\Actions\Risk\Analyzers\AnalyzeIPRisk::run($ipAddress);
 
-        expect($result['score'])->toBe(100)
-            ->and($result['reasons'][0])->toContain('Extreme velocity abuse: 26');
+        expect($result['score'])->toBe(90)
+            ->and($result['reasons'][0])->toContain('Extreme burst: 7 bookings in 5 minutes');
     });
 
-    it('scores very high velocity at 80', function () {
+    it('scores rapid burst at 70', function () {
+        // Simulate 4 bookings within 5 minutes (rapid burst)
         $ipAddress = '1.2.3.5';
-        $cacheKey = 'ip_velocity:' . hash('sha256', $ipAddress);
-        $timestamps = array_fill(0, 15, now()->timestamp);
+        $cacheKey = 'ip_velocity:'.hash('sha256', $ipAddress);
+        // All timestamps within last 5 minutes = rapid burst
+        $timestamps = array_fill(0, 4, now()->subMinutes(3)->timestamp);
         Cache::put($cacheKey, $timestamps, now()->addHours(2));
 
         $result = \App\Actions\Risk\Analyzers\AnalyzeIPRisk::run($ipAddress);
 
-        expect($result['score'])->toBeGreaterThanOrEqual(80)
-            ->and($result['reasons'][0])->toContain('Very high velocity');
+        expect($result['score'])->toBe(70)
+            ->and($result['reasons'][0])->toContain('Rapid burst: 5 bookings in 5 minutes');
     });
 
     it('scores moderate velocity appropriately', function () {
+        // Simulate 7 bookings spread across an hour (normal for concierge)
         $ipAddress = '1.2.3.6';
-        $cacheKey = 'ip_velocity:' . hash('sha256', $ipAddress);
-        $timestamps = array_fill(0, 4, now()->timestamp);
+        $cacheKey = 'ip_velocity:'.hash('sha256', $ipAddress);
+        // Spread timestamps across the hour to avoid burst detection
+        $timestamps = [
+            now()->subMinutes(50)->timestamp,
+            now()->subMinutes(40)->timestamp,
+            now()->subMinutes(30)->timestamp,
+            now()->subMinutes(20)->timestamp,
+            now()->subMinutes(15)->timestamp,
+            now()->subMinutes(10)->timestamp,
+            now()->subMinutes(6)->timestamp, // Keep one outside 5min window
+        ];
         Cache::put($cacheKey, $timestamps, now()->addHours(2));
 
         $result = \App\Actions\Risk\Analyzers\AnalyzeIPRisk::run($ipAddress);
 
-        expect($result['score'])->toBe(20)
-            ->and($result['reasons'][0])->toContain('Multiple bookings');
+        expect($result['score'])->toBe(10)
+            ->and($result['reasons'][0])->toContain('Multiple bookings: 8 from same IP in last hour');
+    });
+
+    it('scores high volume spread across hour at 30', function () {
+        // Simulate 12 bookings spread across an hour (busy concierge)
+        $ipAddress = '1.2.3.7';
+        $cacheKey = 'ip_velocity:'.hash('sha256', $ipAddress);
+        // Spread timestamps to avoid burst detection
+        $timestamps = [];
+        for ($i = 0; $i < 12; $i++) {
+            $timestamps[] = now()->subMinutes(55 - ($i * 4))->timestamp;
+        }
+        Cache::put($cacheKey, $timestamps, now()->addHours(2));
+
+        $result = \App\Actions\Risk\Analyzers\AnalyzeIPRisk::run($ipAddress);
+
+        expect($result['score'])->toBe(30)
+            ->and($result['reasons'][0])->toContain('High volume: 13 bookings in last hour');
     });
 
     it('scores extreme device velocity at 80', function () {
         $device = 'test-device-id';
-        $cacheKey = 'device_velocity:' . $device;
+        $cacheKey = 'device_velocity:'.$device;
         $timestamps = array_fill(0, 25, now()->timestamp);
         Cache::put($cacheKey, $timestamps, now()->addHours(2));
 
         // Create a real booking with device
-        $booking = new \App\Models\Booking();
+        $booking = new \App\Models\Booking;
         $booking->device = $device;
 
         $result = \App\Actions\Risk\Analyzers\AnalyzeBehavioralSignals::run(
@@ -220,7 +250,7 @@ describe('Risk Metadata Storage', function () {
             'ip_address' => '127.0.0.1',
             'user_agent' => 'Test/1.0',
             'booking_at' => now()->addDays(2),
-            'is_prime' => false
+            'is_prime' => false,
         ]);
 
         \App\Actions\Risk\ProcessBookingRisk::run($booking);
