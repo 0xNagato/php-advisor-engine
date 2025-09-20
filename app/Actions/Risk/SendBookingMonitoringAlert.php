@@ -149,7 +149,7 @@ class SendBookingMonitoringAlert
             ],
             [
                 'title' => 'Status',
-                'value' => ucfirst(str_replace('_', ' ', $booking->status)),
+                'value' => ucfirst(str_replace('_', ' ', $booking->status->value)),
                 'short' => true,
             ],
             [
