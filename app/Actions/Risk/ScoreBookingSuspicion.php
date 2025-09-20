@@ -187,11 +187,18 @@ class ScoreBookingSuspicion
         // Apply LLM heuristics if enabled - run on ALL bookings
         $llmUsed = false;
         $llmResponse = null;
+        $aiPrompt = null;
+        $aiResponseRaw = null;
         if (config('app.ai_screening_enabled', false)) {
             try {
-                $llmScore = EvaluateWithLLM::run($this->features);
+                // Use Prism-based LLM evaluation
+                $llmScore = EvaluateWithLLMPrism::run($this->features);
                 $llmUsed = true;
                 $llmResponse = json_encode($llmScore);
+
+                // Store AI prompt and response for database logging
+                $aiPrompt = $llmScore['ai_prompt'] ?? null;
+                $aiResponseRaw = $llmScore['ai_response'] ?? null;
 
                 // ALWAYS consider AI score for ALL bookings
                 // Use weighted combination: 70% rules, 30% AI
@@ -226,9 +233,15 @@ class ScoreBookingSuspicion
             $this->reasons[] = 'Minimum score applied due to extreme profanity';
         }
 
-        // Store LLM usage info
+        // Store LLM usage info including AI prompt and response
         $this->features['llm_used'] = $llmUsed;
         $this->features['llm_response'] = $llmResponse;
+        if ($aiPrompt) {
+            $this->features['ai_prompt'] = $aiPrompt;
+        }
+        if ($aiResponseRaw) {
+            $this->features['ai_response'] = $aiResponseRaw;
+        }
 
         return $this->getResult();
     }

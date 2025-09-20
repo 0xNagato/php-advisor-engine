@@ -69,7 +69,12 @@ return [
     'openai' => [
         'key' => env('OPENAI_API_KEY'),
         'url' => env('OPENAI_API_URL', 'https://api.openai.com/v1/chat/completions'),
-        'model' => env('OPENAI_MODEL', 'gpt-5-mini'),
+        'model' => env('OPENAI_MODEL', 'gpt-4o-mini'),
+    ],
+
+    'prism' => [
+        'provider' => env('PRISM_PROVIDER', 'openai'), // openai, anthropic, ollama, etc.
+        'model' => env('PRISM_MODEL', env('OPENAI_MODEL', 'gpt-4o-mini')), // Falls back to OPENAI_MODEL for compatibility
     ],
 
     'asana' => [

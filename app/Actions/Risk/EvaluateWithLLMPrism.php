@@ -2,128 +2,74 @@
 
 namespace App\Actions\Risk;
 
-use Illuminate\Support\Facades\Http;
+use App\Actions\AI\CallPrismAI;
 use Illuminate\Support\Facades\Log;
 use Lorisleiva\Actions\Concerns\AsAction;
 
-class EvaluateWithLLM
+class EvaluateWithLLMPrism
 {
     use AsAction;
 
     /**
-     * Evaluate risk using LLM heuristics
+     * Evaluate risk using LLM via Prism
      *
      * @param array<string, mixed> $features
-     * @return array{risk_score: int, reasons: array<string>, confidence: string, analysis: string}
+     * @return array{risk_score: int, reasons: array<string>, confidence: string, analysis: string, ai_prompt?: string, ai_response?: string}
      */
     public function handle(array $features): array
     {
         try {
-            // Call LLM API with all features for better context
-            $response = $this->callLLMAPI($features);
-
-            return [
-                'risk_score' => $response['risk_score'] ?? 50,
-                'reasons' => $response['reasons'] ?? [],
-                'confidence' => $response['confidence'] ?? 'medium',
-                'analysis' => $response['analysis'] ?? 'No detailed analysis available'
-            ];
-        } catch (\Exception $e) {
-            Log::error('LLM evaluation failed', [
-                'error' => $e->getMessage()
-            ]);
-
-            // Return neutral score on failure
-            return [
-                'risk_score' => 50,
-                'reasons' => [],
-                'confidence' => 'low',
-                'analysis' => 'LLM evaluation failed'
-            ];
-        }
-    }
-
-    /**
-     * Call LLM API for risk evaluation
-     */
-    protected function callLLMAPI(array $features): array
-    {
-        $apiKey = config('services.openai.key');
-        $apiUrl = config('services.openai.url', 'https://api.openai.com/v1/chat/completions');
-        $model = config('services.openai.model', 'gpt-4o-mini');
-
-        // If no API key configured, fall back to rule-based scoring
-        if (!$apiKey) {
-            return $this->fallbackRuleBasedScoring($features);
-        }
-
-        try {
             $systemPrompt = $this->buildSystemPrompt();
             $userPrompt = $this->buildUserPrompt($features);
 
-            // Debug logging - log what we're sending to AI
-            Log::info('Sending to AI for risk evaluation', [
-                'user_prompt' => $userPrompt,
-                'features' => $features,
-                'model' => $model
-            ]);
+            // Use the new CallPrismAI action
+            $aiResult = CallPrismAI::run(
+                systemPrompt: $systemPrompt,
+                userPrompt: $userPrompt,
+                maxTokens: 300
+            );
 
-            $response = Http::timeout(10)
-                ->withHeaders([
-                    'Authorization' => 'Bearer ' . $apiKey,
-                    'Content-Type' => 'application/json',
-                ])
-                ->post($apiUrl, [
-                    'model' => $model,
-                    'messages' => [
-                        [
-                            'role' => 'system',
-                            'content' => $systemPrompt
-                        ],
-                        [
-                            'role' => 'user',
-                            'content' => $userPrompt
-                        ]
-                    ],
-                    'temperature' => 0.2, // Lower temperature for consistent scoring
-                    'max_completion_tokens' => 300,  // Updated for newer models
-                    'response_format' => ['type' => 'json_object']
-                ]);
-
-            if (!$response->successful()) {
-                Log::warning('LLM API request failed', [
-                    'status' => $response->status(),
-                    'body' => $response->body()
+            // Check if the AI call was successful
+            if (!$aiResult['success']) {
+                Log::warning('AI call failed', [
+                    'error' => $aiResult['error'] ?? 'Unknown error',
+                    'name' => $features['name'] ?? 'Unknown',
                 ]);
                 return $this->fallbackRuleBasedScoring($features);
             }
 
-            $result = $response->json();
-            $content = $result['choices'][0]['message']['content'] ?? '{}';
-            $parsed = json_decode($content, true);
+            // Get the parsed response
+            $parsed = $aiResult['parsed'];
 
-            // Debug logging - log what we received from AI
-            Log::info('Received from AI risk evaluation', [
-                'raw_response' => $content,
-                'parsed_response' => $parsed,
-                'name' => $features['name'] ?? 'Unknown',
-                'email' => $features['email'] ?? 'Unknown'
-            ]);
+            // If not parsed as JSON, try to handle the raw response
+            if (!$parsed && isset($aiResult['response'])) {
+                Log::warning('AI response not in expected JSON format', [
+                    'response' => substr($aiResult['response'], 0, 500),
+                ]);
+                return $this->fallbackRuleBasedScoring($features);
+            }
 
             if (!isset($parsed['risk_score'])) {
-                Log::warning('Invalid LLM response format', ['response' => $content]);
+                Log::warning('Invalid AI response format - missing risk_score', [
+                    'response' => $parsed,
+                ]);
                 return $this->fallbackRuleBasedScoring($features);
             }
+
+            // Build complete prompt for database logging
+            $fullPrompt = "System: {$systemPrompt}\n\nUser: {$userPrompt}";
 
             return [
                 'risk_score' => max(0, min(100, (int) $parsed['risk_score'])),
-                'reasons' => array_slice($parsed['reasons'] ?? [], 0, 5), // Limit to 5 reasons
+                'reasons' => array_slice($parsed['reasons'] ?? [], 0, 5),
                 'confidence' => $parsed['confidence'] ?? 'medium',
-                'analysis' => $parsed['analysis'] ?? 'No detailed analysis provided'
+                'analysis' => $parsed['analysis'] ?? 'No detailed analysis provided',
+                'ai_prompt' => $fullPrompt,
+                'ai_response' => $aiResult['response']
             ];
 
         } catch (\Exception $e) {
-            Log::error('LLM API call failed', [
+            Log::error('Risk evaluation with AI failed', [
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString()
             ]);
@@ -151,11 +97,16 @@ Analyze the provided features and return a JSON response with:
 
 4. "analysis": A brief (1-2 sentences) analysis of the overall risk assessment
 
-Consider these risk indicators:
-- Offensive, profane, or inappropriate names/emails (MAJOR RED FLAG - score 70+)
-- Obviously fake names like "Test User", "Ima Bot", "Fake Name" (HIGH RISK - score 70+)
-- Suspicious email local parts like "spam", "test", "fake", "bot" (HIGH RISK - score 60+)
-- Localhost/private IPs like 127.0.0.1 or 192.168.x.x (HIGH RISK - score 70+)
+CRITICAL RISK INDICATORS (MUST SCORE 90-100):
+- ANY sexual, vulgar, or profane names (e.g., names with "dick", "cock", "pussy", "fuck", etc.) = SCORE 95+
+- Names that are sexual jokes or innuendos (e.g., "Lookat MaDick", "Ben Dover", "Mike Hunt") = SCORE 95+
+- ANY offensive or harassing content in names/emails = SCORE 90+
+- Obviously fake troll names like "Test User", "Ima Bot", "Fake Name" = SCORE 85+
+- Email addresses indicating malicious intent (e.g., "gonnaspamyou", "trolling", "fakeuser") = SCORE 85+
+
+HIGH RISK INDICATORS (SCORE 70-90):
+- Localhost/private IPs like 127.0.0.1, 0.0.0.0 or 192.168.x.x = SCORE 70+
+- Suspicious email patterns like "test", "fake", "bot" in email = SCORE 70+
 - Disposable/temporary email services
 - VPN/datacenter IP addresses
 - Unusual name patterns or test data
@@ -165,7 +116,15 @@ Consider these risk indicators:
 - Behavioral patterns indicating fraud
 - Harassment or abuse indicators
 
-Be conservative - it's better to flag for review than to miss fraud.
+IMPORTANT INSTRUCTIONS:
+1. ALWAYS check names for sexual/vulgar content FIRST. "Lookat MaDick" = "Look at my dick" = SCORE 95+
+2. Read names OUT LOUD to detect sexual jokes. "Mike Hunt" sounds like "My c*nt" = SCORE 95+
+3. Check for word play and innuendo. "Ben Dover" = "Bend over" = SCORE 95+
+4. Email addresses with malicious intent are ALWAYS high risk
+5. Private IPs (127.0.0.1) are ALWAYS suspicious for real bookings
+
+BE EXTREMELY CONSERVATIVE - It's better to flag legitimate users than to miss trolls/fraudsters.
+If a name could possibly be offensive when read aloud or rearranged, SCORE IT HIGH.
 Always return valid JSON matching this structure:
 {"risk_score": 50, "reasons": ["Example reason 1", "Example reason 2"], "confidence": "medium", "analysis": "Brief analysis of the risk assessment"}
 PROMPT;
@@ -235,7 +194,7 @@ PROMPT;
             $prompt .= "- No specific risk indicators detected\n";
         }
 
-        $prompt .= "\nAnalyze the booking details and risk indicators. Provide a risk score and reasons.";
+        $prompt .= "\nAnalyze the booking details and risk indicators. Pay special attention to the actual meaning of the name and email. Provide a risk score and reasons.";
 
         return $prompt;
     }
@@ -304,6 +263,24 @@ PROMPT;
         if (isset($features['voip']) && $features['voip']) {
             $score += 5;
             $reasons[] = 'VoIP number used';
+        }
+
+        // Check for obvious fake names that might not be in features
+        if (isset($features['name'])) {
+            $name = strtolower($features['name']);
+            if (str_contains($name, 'test') || str_contains($name, 'bot') || str_contains($name, 'fake')) {
+                $score += 30;
+                $reasons[] = 'Suspicious name detected';
+            }
+        }
+
+        // Check for obvious fake emails
+        if (isset($features['email'])) {
+            $email = strtolower($features['email']);
+            if (str_contains($email, 'spam') || str_contains($email, 'test') || str_contains($email, 'fake')) {
+                $score += 25;
+                $reasons[] = 'Suspicious email address';
+            }
         }
 
         // Determine confidence based on score clarity
