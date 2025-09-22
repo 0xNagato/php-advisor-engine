@@ -87,8 +87,8 @@ You are an expert fraud detection system for a restaurant reservation platform. 
 
 Analyze the provided features and return a JSON response with:
 1. "risk_score": An integer from 0-100 where:
-   - 0-29: Low risk (likely legitimate)
-   - 30-69: Medium risk (requires review)
+   - 0-39: Low risk (likely legitimate)
+   - 40-69: Medium risk (requires review)
    - 70-100: High risk (likely fraudulent)
 
 2. "reasons": An array of 1-5 concise reasons explaining the risk factors
@@ -97,36 +97,49 @@ Analyze the provided features and return a JSON response with:
 
 4. "analysis": A brief (1-2 sentences) analysis of the overall risk assessment
 
-CRITICAL RISK INDICATORS (MUST SCORE 90-100):
-- ANY sexual, vulgar, or profane names (e.g., names with "dick", "cock", "pussy", "fuck", etc.) = SCORE 95+
-- Names that are sexual jokes or innuendos (e.g., "Lookat MaDick", "Ben Dover", "Mike Hunt") = SCORE 95+
-- ANY offensive or harassing content in names/emails = SCORE 90+
-- Obviously fake troll names like "Test User", "Ima Bot", "Fake Name" = SCORE 85+
-- Email addresses indicating malicious intent (e.g., "gonnaspamyou", "trolling", "fakeuser") = SCORE 85+
+CRITICAL RISK INDICATORS (SCORE 80-100):
+- Obvious sexual/vulgar names with clear malicious intent (e.g., "Fuck You", "Dick Head", "Ass Hole") = SCORE 95+
+- Names that are clear sexual jokes with no legitimate meaning (e.g., "Suck My Balls", "Eat My Pussy") = SCORE 95+
+- Emails with obvious malicious intent (e.g., "gonnaspamyou@domain.com", "fuckyou@domain.com") = SCORE 90+
+- Names that are clearly fake and troll-like ("Test User", "Fake Person", "Robot Bot") = SCORE 80+
 
-HIGH RISK INDICATORS (SCORE 70-90):
-- Localhost/private IPs like 127.0.0.1, 0.0.0.0 or 192.168.x.x = SCORE 70+
-- Suspicious email patterns like "test", "fake", "bot" in email = SCORE 70+
-- Disposable/temporary email services
-- VPN/datacenter IP addresses
-- Unusual name patterns or test data
-- Velocity patterns suggesting automation
-- Geographic mismatches
-- Phone number anomalies
-- Behavioral patterns indicating fraud
-- Harassment or abuse indicators
+HIGH RISK INDICATORS (SCORE 60-80):
+- Private IPs like 127.0.0.1, 0.0.0.0 or 192.168.x.x = SCORE 70+
+- Emails with "test", "fake", "bot" in username (not domain) = SCORE 60+
+- Names with obvious profanity in clear context = SCORE 70+
+- Multiple failed booking attempts (5+) = SCORE 70+
+
+MEDIUM RISK INDICATORS (SCORE 20-50):
+- Datacenter/VPN IP addresses (common for business users) = SCORE 20-30
+- Business email domains (company.com, business.net, etc.) = SCORE 0-10
+- Multiple bookings from same IP/device (3-10 per hour) = SCORE 10-30
+- Geographic location different from venue = SCORE 5-15
+- VoIP or unusual phone number formats = SCORE 10-20
+
+LEGITIMATE PATTERNS TO CONSIDER LOW RISK:
+- Business email addresses (firstname.lastname@company.com, @company.com domains)
+- Professional names (Michael Smith, John Johnson, Paulo Althoff, etc.)
+- Corporate VPN/datacenter IPs (AWS, Google Cloud, Azure ranges)
+- Multiple bookings from same device/IP (3-10 per hour is normal concierge activity)
+- International phone numbers with proper formatting
+- Booking notes mentioning "business dinner", "client meeting", "team celebration", "corporate event"
+- Email domains: @1hotels.com, @blockchainproductagency.com, @gpafactoring.com.br (legitimate businesses)
+- Private IPs (127.0.0.1, 192.168.x.x) during testing/development (should not be heavily penalized)
 
 IMPORTANT INSTRUCTIONS:
-1. ALWAYS check names for sexual/vulgar content FIRST. "Lookat MaDick" = "Look at my dick" = SCORE 95+
-2. Read names OUT LOUD to detect sexual jokes. "Mike Hunt" sounds like "My c*nt" = SCORE 95+
-3. Check for word play and innuendo. "Ben Dover" = "Bend over" = SCORE 95+
-4. Email addresses with malicious intent are ALWAYS high risk
-5. Private IPs (127.0.0.1) are ALWAYS suspicious for real bookings
+1. BE BUSINESS-FRIENDLY: Many legitimate users have business emails, VPNs, and make multiple bookings
+2. CONTEXT MATTERS: "Dick" as first name might be legitimate, "Dick Head" is clearly malicious
+3. CONCIERGE ACTIVITY: Multiple bookings from same device/IP is often legitimate business
+4. PROFESSIONAL CONTEXT: Business emails and professional names are usually legitimate
+5. BALANCED APPROACH: It's better to miss some fraud than to block legitimate business users
 
-BE EXTREMELY CONSERVATIVE - It's better to flag legitimate users than to miss trolls/fraudsters.
-If a name could possibly be offensive when read aloud or rearranged, SCORE IT HIGH.
+READ NAMES CAREFULLY: "Shaz Peksos" might sound like "shah's peck sauce" - that's legitimate, not offensive.
+"Asshogaga" might be a legitimate name or domain - don't assume malice just because it sounds similar to profanity.
+
+NOTES CONTEXT: Booking notes are often legitimate business communications from concierges or customers. Only flag notes if they contain obvious malicious content like threats, spam, or test data. Professional notes, standard booking details, and concierge templates should not be penalized.
+
 Always return valid JSON matching this structure:
-{"risk_score": 50, "reasons": ["Example reason 1", "Example reason 2"], "confidence": "medium", "analysis": "Brief analysis of the risk assessment"}
+{"risk_score": 30, "reasons": ["Example reason"], "confidence": "medium", "analysis": "Brief analysis of the risk assessment"}
 PROMPT;
     }
 
@@ -228,10 +241,11 @@ PROMPT;
             $reasons[] = 'Tor network usage';
         }
 
-        // Medium-risk indicators (10-15 points each)
+        // Medium-risk indicators (5-10 points each)
+        // Datacenter IPs are common for legitimate business users
         if (isset($features['datacenter_ip']) && $features['datacenter_ip']) {
-            $score += 15;
-            $reasons[] = 'Datacenter IP address';
+            $score += 5;  // Greatly reduced - many legitimate users use VPNs
+            $reasons[] = 'Datacenter/VPN IP address (common for business users)';
         }
 
         if (isset($features['gibberish_email']) && $features['gibberish_email']) {
@@ -240,8 +254,8 @@ PROMPT;
         }
 
         if (isset($features['test_name']) && $features['test_name']) {
-            $score += 15;
-            $reasons[] = 'Test name detected';
+            $score += 40; // Increased - test names are suspicious
+            $reasons[] = 'Test name pattern detected';
         }
 
         if (isset($features['venue_hopping']) && $features['venue_hopping']) {
@@ -278,8 +292,17 @@ PROMPT;
         if (isset($features['email'])) {
             $email = strtolower($features['email']);
             if (str_contains($email, 'spam') || str_contains($email, 'test') || str_contains($email, 'fake')) {
-                $score += 25;
+                $score += 35; // Increased - suspicious emails should be flagged
                 $reasons[] = 'Suspicious email address';
+            }
+        }
+
+        // Check for obvious fake names that might not be caught by features
+        if (isset($features['name'])) {
+            $name = strtolower($features['name']);
+            if (str_contains($name, 'test') || str_contains($name, 'fake') || str_contains($name, 'bot')) {
+                $score += 40; // Increased - obvious fake names should be flagged
+                $reasons[] = 'Obvious fake name detected';
             }
         }
 

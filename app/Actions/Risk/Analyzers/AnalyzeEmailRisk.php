@@ -48,6 +48,13 @@ class AnalyzeEmailRisk
         'vagina' => 40,
     ];
 
+    // Test patterns that indicate fake/test emails
+    protected array $testPatterns = [
+        'test', 'testing', 'demo', 'example', 'sample',
+        'fake', 'bot', 'robot', 'user', 'guest',
+        'asdf', 'qwerty', 'abc', 'xyz', 'foo', 'bar'
+    ];
+
     /**
      * Analyze email for risk indicators
      *
@@ -98,6 +105,16 @@ class AnalyzeEmailRisk
             $score += 25;
             $reasons[] = 'No-reply email pattern';
             $features['noreply_pattern'] = true;
+        }
+
+        // Check for test patterns in username
+        foreach ($this->testPatterns as $pattern) {
+            if (str_contains($localPart, $pattern)) {
+                $score += 50; // Test patterns are highly suspicious
+                $reasons[] = 'Test pattern in email username';
+                $features['test_email'] = true;
+                break;
+            }
         }
 
         // Check for gibberish ratio
@@ -151,7 +168,7 @@ class AnalyzeEmailRisk
         // Check MX records (stub for now)
         $features['mx_valid'] = $this->checkMXRecord($domain);
         if (!$features['mx_valid']) {
-            $score += 30;
+            $score += 35; // Increased - invalid MX records are suspicious
             $reasons[] = 'No valid MX records';
         }
 

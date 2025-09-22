@@ -110,24 +110,34 @@ The system analyzes multiple data points to calculate a comprehensive risk score
 - Test name patterns
 
 #### IP Analysis
-- Datacenter/VPN range detection (40-60 points)
+- Datacenter/VPN range detection (15 points - reduced from 30)
 - Geographic location vs venue region mismatch (30-50 points)
-- **Enhanced velocity tracking:**
-  - 20+ bookings in 2 hours: 100 points (extreme abuse)
-  - 10+ bookings: 80 points (very high velocity)
-  - 5+ bookings: 50 points (high velocity)
-  - 3+ bookings: 20 points (moderate)
-- Private IP detection (10 points)
+- **Realistic velocity tracking (concierge-friendly):**
+  - **IP-based** (less reliable, more lenient):
+    - 60+ bookings in 1 hour: 100 points (extreme automation)
+    - 40+ bookings: 60 points (very high volume)
+    - 25+ bookings: 30 points (high volume)
+    - 15+ bookings: 15 points (elevated activity)
+    - 3+ bookings: 0 points (normal concierge activity)
+  - **Device-based** (more reliable, stricter):
+    - 50+ bookings in 1 hour: 100 points (extreme automation)
+    - 30+ bookings: 80 points (extreme volume)
+    - 25+ bookings: 60 points (very high volume)
+    - 15+ bookings: 30 points (high volume)
+    - 3+ bookings: 0 points (normal concierge activity)
+- Private IP detection (30 points for bursts, 0 for normal activity)
 - Tor exit node detection (60 points)
 
 #### Behavioral Analysis
-- Burst submission velocity (3+ in 10 minutes: 10-40 points)
-- Identical notes across bookings (25 points)
-- **Device velocity tracking:**
-  - 20+ bookings from same device: 80 points (extreme)
-  - 10+ bookings: 60 points (very high)
-  - 5+ bookings: 40 points (high)
-  - 3+ bookings: 20 points (moderate)
+- Burst submission velocity (4+ in 5 minutes: 30-40 points)
+- Identical notes across bookings (5 points - only if 3+ identical)
+- **Device velocity tracking (more reliable):**
+  - 50+ bookings from same device: 100 points (extreme automation)
+  - 30+ bookings: 80 points (extreme volume)
+  - 25+ bookings: 60 points (very high volume)
+  - 15+ bookings: 30 points (high volume)
+  - 10+ bookings: 15 points (elevated activity)
+  - 3+ bookings: 0 points (normal concierge activity)
 - Form submission timing (< 5 seconds: 30 points)
 - Venue hopping patterns (3+ venues in 30 min: 25 points)
 
@@ -136,14 +146,19 @@ The system analyzes multiple data points to calculate a comprehensive risk score
 The system uses an intelligent scoring approach:
 
 1. **Multiple Extreme Red Flags**: When 2+ analyzers score ≥80, the system takes the maximum score instead of averaging
-2. **Normal Weighted Scoring**: For less extreme cases, uses weighted average:
-   - Email: 25% weight
-   - Phone: 25% weight
-   - Name: 15% weight
-   - IP: 20% weight
-   - Behavioral: 15% weight
-3. **Minimum Score for Extreme Profanity**: Bookings with extreme profanity get a minimum score of 70, regardless of other factors
-4. **Risk Metadata Storage**: Complete breakdown of individual scores stored in database for admin review
+2. **Business-Friendly Weighted Scoring**: For less extreme cases, uses weighted average:
+   - Email: 20% weight
+   - Phone: 15% weight
+   - Name: 20% weight
+   - IP: 15% weight
+   - Behavioral: 30% weight
+3. **Extreme Profanity Special Handling**: Bookings with extreme profanity (fuck, cunt, etc.) get special treatment:
+   - Name analysis gets 90% weight for extreme profanity
+   - Other factors get 10% weight total
+   - Minimum score of 85 points for extreme profanity
+   - Maximum score of 90+ for maximum profanity
+4. **Test Name Detection**: Obvious fake names ("test user", "john doe") score 80+ points
+5. **Risk Metadata Storage**: Complete breakdown of individual scores stored in database for admin review
 
 ### 2. Automatic Risk Actions
 
@@ -252,9 +267,9 @@ Each notification includes:
 RISK_SCREENING_ENABLED=true
 AI_SCREENING_ENABLED=false
 
-# Thresholds (0-100)
-AI_SCREENING_THRESHOLD_SOFT=30
-AI_SCREENING_THRESHOLD_HARD=70
+# Thresholds (0-100) - Updated for business-friendly scoring
+AI_SCREENING_THRESHOLD_SOFT=35
+AI_SCREENING_THRESHOLD_HARD=75
 
 # Slack Webhook for Alerts
 LOG_SLACK_RISK_WEBHOOK_URL=https://hooks.slack.com/services/...  # For flagged bookings
@@ -642,6 +657,18 @@ php artisan tinker
 
 # View audit trail
 >>> $booking->riskAuditLogs->pluck('event', 'created_at');
+
+# Test risk scoring on recent CONFIRMED bookings
+>>> php artisan app:test-recent-bookings --days=7 --limit=10
+
+# Test risk scoring with enhanced visual output and analysis
+>>> php artisan app:test-risk-scoring
+# Features: Visual risk level icons (🟢 LOW, 🟡 MEDIUM, 🔴 HIGH), detailed breakdown tables,
+# risk level distribution statistics, and comprehensive analysis
+
+# Show current risk scoring thresholds with visual indicators
+>>> php artisan app:test-risk-scoring --thresholds
+# Features: Color-coded risk level icons in the thresholds table
 ```
 
 ### Seed Data
@@ -772,6 +799,27 @@ php artisan tinker
 - **Minimum score enforcement**: Extreme profanity always scores at least 70 points
 - **Risk metadata storage**: Complete breakdown stored in database for admin review
 - **Comprehensive test coverage**: All changes covered by automated tests
+
+### 2025-09-23: Realistic Concierge-Friendly Velocity Thresholds
+- **Realistic velocity thresholds**: Based on actual concierge workflow (2-3 mins per booking)
+  - **IP-based** (lenient): 15+ per hour = 15 points, 25+ = 30 points, 40+ = 60 points, 60+ = 100 points
+  - **Device-based** (stricter): 10+ per hour = 15 points, 15+ = 30 points, 25+ = 60 points, 30+ = 80 points, 50+ = 100 points
+- **Realistic burst detection**:
+  - **IP bursts**: 5+ in 5 minutes = 30 points (allows 2-3 legitimate bookings)
+  - **Device bursts**: 4+ in 5 minutes = 40 points (allows 2 legitimate bookings)
+- **Reduced notes weighting**: Identical notes now only 5 points (was 25) and only flags if 3+ identical
+- **Fixed false positives**: "Hayes Barbara" and "Ogaga Adongbede" now properly handled
+- **Enhanced AI context**: Updated prompt to be more nuanced about edge cases and phonetic similarities
+- **Made formatMessage method public**: For better testability of Slack message formatting
+- **Updated test expectations**: All tests now match actual scoring logic and reason strings
+- **Enhanced documentation**: Updated to reflect all scoring changes and business-friendly approach
+
+### 2025-09-23: False Positive Fixes
+- **Fixed "Hayes Barbara" false positive**: Removed "bar" from test name patterns as it's a legitimate surname component
+- **Fixed "Ogaga Adongbede" false positive**: Updated AI prompt to not assume "asshogaga" is malicious - could be legitimate name/domain
+- **Refined test name detection**: Removed common name components ("user", "guest", "bar") that were causing false positives
+- **Enhanced AI context**: Updated prompt to be more nuanced about edge cases and phonetic similarities
+- **Maintained fraud detection**: Obvious malicious content ("Fuck You", "asshogaga" in clear malicious context) still flagged appropriately
 
 ## Future Enhancements
 

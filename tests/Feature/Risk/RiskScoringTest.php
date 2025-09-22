@@ -90,8 +90,8 @@ describe('Name Risk Analysis', function () {
     it('detects test names', function () {
         $result = AnalyzeNameRisk::run('John Doe');
 
-        expect($result['score'])->toBeGreaterThanOrEqual(50)
-            ->and($result['reasons'])->toContain('Test name pattern');
+        expect($result['score'])->toBeGreaterThanOrEqual(80)
+            ->and($result['reasons'])->toContain('Test name pattern detected');
     });
 
     it('detects single letter names', function () {

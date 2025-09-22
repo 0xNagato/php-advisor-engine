@@ -63,8 +63,9 @@ class ProcessBookingRisk
             $booking
         );
 
-        $softThreshold = config('app.ai_screening_threshold_soft', 30);
-        $hardThreshold = config('app.ai_screening_threshold_hard', 70);
+        // Balanced thresholds - business-friendly but still catches fraud
+        $softThreshold = config('app.ai_screening_threshold_soft', 35);  // Slightly raised from 30
+        $hardThreshold = config('app.ai_screening_threshold_hard', 75);  // Slightly raised from 70
 
         // Determine risk state
         $riskState = null;

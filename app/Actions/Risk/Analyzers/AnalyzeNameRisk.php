@@ -9,40 +9,40 @@ class AnalyzeNameRisk
     use AsAction;
 
     protected array $testNames = [
+        // Obviously fake test names - should be HIGH risk
         'test', 'testing', 'demo', 'example', 'sample',
-        'asdf', 'qwerty', 'abc', 'xyz', 'foo', 'bar',
-        'john doe', 'jane doe', 'test user', 'test test'
+        'asdf', 'qwerty', 'abc', 'xyz', 'foo',
+        'john doe', 'jane doe', 'test user', 'test test',
+        'fake', 'bot', 'robot',
+        'lorem ipsum', 'person', 'customer',
+        'testuser', 'test name', 'fake person'
     ];
 
-    // Weighted profanity patterns - higher score = more offensive
+    // Weighted profanity patterns - balanced scoring
     protected array $profanityPatterns = [
-        // Extreme (100 points) - always offensive, no legitimate use
-        'fuck' => 100,
-        'fucker' => 100,
-        'shit' => 100,
-        'cock' => 100,
-        'pussy' => 100,
-        'cunt' => 100,
-        'whore' => 100,
-        'slut' => 100,
-        'bitch' => 100,
+        // Extreme profanity - always offensive (90-100 points)
+        'fuck' => 100,   // Always offensive
+        'fucker' => 100, // Always offensive
+        'shit' => 90,    // Often offensive
+        'cock' => 90,    // Usually offensive
+        'pussy' => 100,  // Always offensive
+        'cunt' => 100,   // Always offensive
+        'whore' => 90,   // Often offensive
+        'slut' => 90,    // Often offensive
+        'bitch' => 80,   // Could be legitimate in some contexts
+        'dick' => 70,    // Could be legitimate name "Dick"
+        'ass' => 70,     // Could be part of legitimate words
+        'piss' => 80,    // Often offensive
+        'bastard' => 70, // Could be legitimate in some contexts
 
-        // High (80 points) - almost always offensive
-        'dick' => 80,  // Could be legitimate name "Dick"
-        'piss' => 80,
-        'bastard' => 80,
+        // Context-dependent words (50-60 points)
+        'suck' => 60,    // Only offensive at start of name
+        'blow' => 60,    // Could be legitimate surname
+        'damn' => 50,    // Mild profanity
+        'hell' => 50,    // Could be in legitimate names
+        'crap' => 50,    // Mild profanity
 
-        // Medium (60 points) - context-dependent
-        'suck' => 60,  // Bad at start, but could be in legitimate names
-        'blow' => 60,  // Could be surname
-        'ass' => 60,   // Could be part of legitimate words
-
-        // Low (40 points) - often legitimate
-        'damn' => 40,
-        'hell' => 40,  // Could be in "Michelle", "Heller"
-        'crap' => 40,
-
-        // Medical terms (30 points) - sometimes legitimate
+        // Medical terms - usually not offensive in names (30 points)
         'penis' => 30,
         'vagina' => 30,
     ];
@@ -87,11 +87,11 @@ class AnalyzeNameRisk
             $features['single_letter'] = true;
         }
 
-        // Check for test names
+        // Check for test names - these should be HIGH risk
         foreach ($this->testNames as $testName) {
             if (str_contains($nameLower, $testName)) {
-                $score += 50;
-                $reasons[] = 'Test name pattern';
+                $score += 80; // Increased from 50 - test names are suspicious
+                $reasons[] = 'Test name pattern detected';
                 $features['test_name'] = true;
                 break;
             }
@@ -115,7 +115,7 @@ class AnalyzeNameRisk
                 }
 
                 // For context-sensitive words, check word boundaries and position
-                if (in_array($profanity, ['suck', 'blow', 'ass', 'hell', 'dick', 'cock'])) {
+                if (in_array($profanity, ['suck', 'blow', 'ass', 'hell', 'dick', 'cock', 'damn', 'crap'])) {
                     // Check if it's a whole word
                     $beforeChar = $position > 0 ? $nameLower[$position - 1] : ' ';
                     $afterPos = $position + strlen($profanity);
@@ -123,9 +123,10 @@ class AnalyzeNameRisk
 
                     // Skip if part of a larger word
                     if (ctype_alpha($beforeChar) || ctype_alpha($afterChar)) {
-                        continue; // Part of a word like Michelle, Heller, etc.
+                        continue; // Part of a word like Michelle, Heller, Dickerson, etc.
                     }
 
+                    // Be very conservative about flagging - only flag obvious malicious intent
                     // Special cases for legitimate uses
                     if ($profanity === 'dick' && $position === 0) {
                         continue; // "Dick" as a first name is legitimate
@@ -134,8 +135,13 @@ class AnalyzeNameRisk
                         continue; // "Blow" as a surname is legitimate
                     }
                     if ($profanity === 'suck' && $position > 0) {
-                        // Only flag "suck" at the beginning (like "Suck My")
-                        continue;
+                        continue; // Only flag "suck" at the beginning if it's clearly malicious
+                    }
+                    if ($profanity === 'hell' && $position > 0) {
+                        continue; // "Hell" could be part of legitimate names
+                    }
+                    if ($profanity === 'ass' && $position > 0) {
+                        continue; // "Ass" could be part of legitimate words
                     }
 
                     $currentScore = $weight * $positionMultiplier;
@@ -151,15 +157,19 @@ class AnalyzeNameRisk
         }
 
         if ($profanityScore > 0) {
-            $score += min(100, $profanityScore);
+            // Profanity should be flagged appropriately
+            $actualScore = min(100, $profanityScore);
+            $score += $actualScore;
             $features['profanity'] = true;
 
-            if ($profanityScore >= 100) {
+            if ($profanityScore >= 90) {
                 $reasons[] = 'Extreme profanity in name';
-            } elseif ($profanityScore >= 60) {
-                $reasons[] = 'Offensive/profane name';
+            } elseif ($profanityScore >= 70) {
+                $reasons[] = 'Severe profanity in name';
+            } elseif ($profanityScore >= 50) {
+                $reasons[] = 'Profane language detected';
             } else {
-                $reasons[] = 'Inappropriate language in name';
+                $reasons[] = 'Questionable language in name';
             }
         }
 

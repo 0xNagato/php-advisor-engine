@@ -96,6 +96,7 @@ class AnalyzeIPRisk
         }
 
         // Check velocity - how many bookings from this IP recently
+        // Be much more lenient for legitimate concierge activity
         $velocityCheck = $this->checkVelocity($ipAddress);
         if ($velocityCheck['is_burst']) {
             $score += $velocityCheck['score'];
@@ -162,71 +163,84 @@ class AnalyzeIPRisk
      */
     protected function checkVelocity(string $ip): array
     {
-        $cacheKey = 'ip_velocity:'.hash('sha256', $ip);
-        $timestamps = Cache::get($cacheKey, []);
+        // Only count CONFIRMED bookings for velocity calculation
+        $confirmedBookings = \App\Models\Booking::where('ip_address', $ip)
+            ->where('created_at', '>', now()->subHour())
+            ->whereIn('status', [
+                \App\Enums\BookingStatus::CONFIRMED->value,
+                \App\Enums\BookingStatus::VENUE_CONFIRMED->value,
+                \App\Enums\BookingStatus::COMPLETED->value
+            ])
+            ->select('created_at')
+            ->get();
 
-        // Clean old entries (older than 1 hour)
-        $timestamps = array_filter($timestamps, fn ($ts) => $ts > now()->subHour()->timestamp);
-
-        // Add current timestamp
-        $timestamps[] = now()->timestamp;
-
-        // Update cache
-        Cache::put($cacheKey, $timestamps, now()->addHours(2));
-
+        $timestamps = $confirmedBookings->pluck('created_at')->map(fn($dt) => $dt->timestamp)->toArray();
         $count = count($timestamps);
+
+        // Cache the count for performance (2 hour TTL)
+        $cacheKey = 'ip_velocity:'.hash('sha256', $ip);
+        Cache::put($cacheKey, $timestamps, now()->addHours(2));
 
         // Also check short-term burst (5 minutes)
         $recentCutoff = now()->subMinutes(5)->timestamp;
         $recentTimestamps = array_filter($timestamps, fn ($ts) => $ts > $recentCutoff);
         $recentCount = count($recentTimestamps);
 
-        // Check for short-term bursts first (5-minute window)
-        if ($recentCount > 5) {
-            // 5+ bookings in 5 minutes is ALWAYS suspicious
+        // Check for extreme automation first (IP-based is less reliable, so be more lenient)
+        if ($count >= 60) {
             return [
                 'is_burst' => true,
-                'score' => 90,
-                'reason' => "Extreme burst: {$recentCount} bookings in 5 minutes",
-                'count' => $count,
-                'recent_count' => $recentCount,
-            ];
-        } elseif ($recentCount > 3) {
-            // 3+ bookings in 5 minutes is very suspicious
-            return [
-                'is_burst' => true,
-                'score' => 70,
-                'reason' => "Rapid burst: {$recentCount} bookings in 5 minutes",
+                'score' => 100, // Maximum penalty for extreme IP-based automation
+                'reason' => "Extreme IP automation: {$count} CONFIRMED bookings in last hour",
                 'count' => $count,
                 'recent_count' => $recentCount,
             ];
         }
 
-        // Check hourly patterns (more lenient for concierges)
-        if ($count > 20) {
-            // 20+ bookings per hour is extreme even for concierges
+        // Check for short-term bursts first (5-minute window) - IP-based
+        // Realistic: 2-3 mins per booking, so 5 mins = max 2 bookings
+        if ($recentCount >= 5) {
             return [
                 'is_burst' => true,
-                'score' => 60,
-                'reason' => "Very high volume: {$count} bookings in last hour",
+                'score' => 30, // Moderate penalty - IP bursts are less reliable
+                'reason' => "IP burst: {$recentCount} CONFIRMED bookings in 5 minutes",
                 'count' => $count,
                 'recent_count' => $recentCount,
             ];
-        } elseif ($count > 10) {
-            // 10+ per hour could be a busy concierge
+        }
+
+        // Check hourly patterns - IP-based thresholds (more lenient since IP can change)
+        // Realistic: 15-20 bookings per hour for very busy concierge
+        if ($count > 40) {
             return [
                 'is_burst' => true,
-                'score' => 30,
-                'reason' => "High volume: {$count} bookings in last hour",
+                'score' => 60, // High penalty for extreme IP volume
+                'reason' => "Extreme IP volume: {$count} CONFIRMED bookings in last hour",
                 'count' => $count,
                 'recent_count' => $recentCount,
             ];
-        } elseif ($count > 5) {
-            // 5-10 per hour is normal for concierges
+        } elseif ($count > 25) {
             return [
                 'is_burst' => true,
-                'score' => 10,
-                'reason' => "Multiple bookings: {$count} from same IP in last hour",
+                'score' => 30, // Moderate penalty for high IP volume
+                'reason' => "High IP volume: {$count} CONFIRMED bookings in last hour",
+                'count' => $count,
+                'recent_count' => $recentCount,
+            ];
+        } elseif ($count > 15) {
+            return [
+                'is_burst' => true,
+                'score' => 15, // Low penalty for moderate IP volume
+                'reason' => "Elevated IP activity: {$count} CONFIRMED bookings in last hour",
+                'count' => $count,
+                'recent_count' => $recentCount,
+            ];
+        } elseif ($count > 3) {
+            // 3+ per hour is normal concierge activity
+            return [
+                'is_burst' => true,
+                'score' => 0, // No penalty for normal concierge activity
+                'reason' => "Multiple bookings: {$count} CONFIRMED from same IP in last hour",
                 'count' => $count,
                 'recent_count' => $recentCount,
             ];

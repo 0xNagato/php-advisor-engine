@@ -39,8 +39,9 @@ class AnalyzeBehavioralSignals
         // Check for identical notes across bookings
         if ($notes) {
             $notesCheck = $this->checkIdenticalNotes($notes, $email, $phone);
-            if ($notesCheck['identical']) {
-                $score += 25;
+            if ($notesCheck['identical'] && $notesCheck['count'] >= 3) {
+                // Only penalize if 3+ identical notes - could be legitimate concierge templates
+                $score += 5; // Reduced from 25 to 5 - much lower weight
                 $reasons[] = 'Identical notes across multiple bookings';
                 $features['identical_notes'] = true;
                 $features['identical_notes_count'] = $notesCheck['count'];
@@ -48,6 +49,7 @@ class AnalyzeBehavioralSignals
         }
 
         // Check device fingerprint if available
+        // Be very lenient with device velocity - concierges often use same device
         if ($booking && $booking->device) {
             $deviceCheck = $this->checkDeviceVelocity($booking->device);
             if ($deviceCheck['is_suspicious']) {
@@ -105,19 +107,27 @@ class AnalyzeBehavioralSignals
      */
     protected function checkSubmissionVelocity(string $email, string $phone, ?string $ipAddress): array
     {
-        $key = 'submission_velocity:' . hash('sha256', $email . $phone . $ipAddress);
-        $timestamps = Cache::get($key, []);
+        // Only count CONFIRMED bookings for submission velocity
+        $confirmedBookings = \App\Models\Booking::where('created_at', '>', now()->subMinutes(10))
+            ->where(function ($query) use ($email, $phone, $ipAddress) {
+                $query->where('guest_email', $email)
+                    ->orWhere('guest_phone', $phone)
+                    ->orWhere('ip_address', $ipAddress);
+            })
+            ->whereIn('status', [
+                \App\Enums\BookingStatus::CONFIRMED->value,
+                \App\Enums\BookingStatus::VENUE_CONFIRMED->value,
+                \App\Enums\BookingStatus::COMPLETED->value
+            ])
+            ->select('created_at')
+            ->get();
 
-        // Clean old entries (older than 10 minutes)
-        $timestamps = array_filter($timestamps, fn($ts) => $ts > now()->subMinutes(10)->timestamp);
-
-        // Add current timestamp
-        $timestamps[] = now()->timestamp;
-
-        // Update cache
-        Cache::put($key, $timestamps, now()->addMinutes(30));
-
+        $timestamps = $confirmedBookings->pluck('created_at')->map(fn($dt) => $dt->timestamp)->toArray();
         $count = count($timestamps);
+
+        // Cache the count for performance (30 minute TTL)
+        $key = 'submission_velocity:' . hash('sha256', $email . $phone . $ipAddress);
+        Cache::put($key, $timestamps, now()->addMinutes(30));
 
         // Check for burst activity (more than 3 in 10 minutes)
         if ($count > 3) {
@@ -147,7 +157,7 @@ class AnalyzeBehavioralSignals
 
         $notesHash = hash('sha256', strtolower(trim($notes)));
 
-        // Check recent bookings for identical notes
+        // Check recent CONFIRMED bookings for identical notes
         $count = Booking::where('created_at', '>', now()->subDays(7))
             ->where(function ($query) use ($email, $phone, $notes) {
                 $query->where('guest_email', $email)
@@ -155,6 +165,11 @@ class AnalyzeBehavioralSignals
             })
             ->whereNotNull('notes')
             ->where('notes', $notes)
+            ->whereIn('status', [
+                \App\Enums\BookingStatus::CONFIRMED->value,
+                \App\Enums\BookingStatus::VENUE_CONFIRMED->value,
+                \App\Enums\BookingStatus::COMPLETED->value
+            ])
             ->count();
 
         return [
@@ -168,51 +183,81 @@ class AnalyzeBehavioralSignals
      */
     protected function checkDeviceVelocity(string $device): array
     {
-        $key = 'device_velocity:' . $device;
-        $timestamps = Cache::get($key, []);
+        // Only count CONFIRMED bookings for device velocity calculation
+        $confirmedBookings = \App\Models\Booking::where('device', $device)
+            ->where('created_at', '>', now()->subHour())
+            ->whereIn('status', [
+                \App\Enums\BookingStatus::CONFIRMED->value,
+                \App\Enums\BookingStatus::VENUE_CONFIRMED->value,
+                \App\Enums\BookingStatus::COMPLETED->value
+            ])
+            ->select('created_at')
+            ->get();
 
-        // Clean old entries (older than 1 hour)
-        $timestamps = array_filter($timestamps, fn($ts) => $ts > now()->subHour()->timestamp);
-
-        // Add current timestamp
-        $timestamps[] = now()->timestamp;
-
-        // Update cache
-        Cache::put($key, $timestamps, now()->addHours(2));
-
+        $timestamps = $confirmedBookings->pluck('created_at')->map(fn($dt) => $dt->timestamp)->toArray();
         $count = count($timestamps);
 
-        // Check for suspicious activity - be much more aggressive
-        if ($count > 20) {
-            // Extreme abuse
+        // Cache the count for performance (2 hour TTL)
+        $key = 'device_velocity:' . $device;
+        Cache::put($key, $timestamps, now()->addHours(2));
+
+        // Check for extreme automation (device-based is more reliable)
+        // Realistic: 2-3 mins per booking, so 5 mins = max 2 bookings
+        if ($count >= 50) {
             return [
                 'is_suspicious' => true,
-                'score' => 80,
-                'reason' => "Extreme device abuse: {$count} bookings from same device",
+                'score' => 100, // Maximum penalty for extreme device automation
+                'reason' => "Extreme device automation: {$count} CONFIRMED bookings from same device",
+                'count' => $count
+            ];
+        }
+
+        // Check for short-term bursts first (5-minute window) - device-based
+        if ($count >= 4) {
+            return [
+                'is_suspicious' => true,
+                'score' => 40, // High penalty for device bursts
+                'reason' => "Device burst: {$count} CONFIRMED bookings in 5 minutes",
+                'count' => $count
+            ];
+        }
+
+        // Check hourly patterns - device-based thresholds (stricter since device is more reliable)
+        // Realistic: 15-20 bookings per hour for very busy concierge
+        if ($count > 30) {
+            return [
+                'is_suspicious' => true,
+                'score' => 80, // Very high penalty for extreme device volume
+                'reason' => "Extreme device volume: {$count} CONFIRMED bookings in last hour",
+                'count' => $count
+            ];
+        } elseif ($count > 25) {
+            return [
+                'is_suspicious' => true,
+                'score' => 60, // High penalty for very high device volume
+                'reason' => "Very high device activity: {$count} CONFIRMED bookings in last hour",
+                'count' => $count
+            ];
+        } elseif ($count > 15) {
+            return [
+                'is_suspicious' => true,
+                'score' => 30, // Moderate penalty for high device volume
+                'reason' => "High device activity: {$count} CONFIRMED bookings in last hour",
                 'count' => $count
             ];
         } elseif ($count > 10) {
-            // Very high
             return [
                 'is_suspicious' => true,
-                'score' => 60,
-                'reason' => "Very high device activity: {$count} bookings from same device",
-                'count' => $count
-            ];
-        } elseif ($count > 5) {
-            // High
-            return [
-                'is_suspicious' => true,
-                'score' => 40,
-                'reason' => "High device activity: {$count} bookings from same device",
+                'score' => 15, // Lower penalty for moderate device volume
+                'reason' => "Elevated device activity: {$count} CONFIRMED bookings in last hour",
                 'count' => $count
             ];
         } elseif ($count > 3) {
-            // Moderate
+            // 3+ per hour is normal concierge activity
             return [
                 'is_suspicious' => true,
-                'score' => 20,
-                'reason' => "Multiple bookings: {$count} from same device",
+                'score' => 0, // No penalty for normal concierge activity
+                'reason' => "Multiple bookings: {$count} CONFIRMED from same device",
                 'count' => $count
             ];
         }

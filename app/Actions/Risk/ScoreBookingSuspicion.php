@@ -126,14 +126,33 @@ class ScoreBookingSuspicion
                 80  // Minimum for multiple extreme risks
             );
         } else {
-            // Normal weighted scoring for less extreme cases
-            $this->score = (int) round(
-                $emailAnalysis['score'] * 0.25 +
-                $phoneAnalysis['score'] * 0.25 +
-                $nameAnalysis['score'] * 0.15 +
-                $ipAnalysis['score'] * 0.20 +
-                $behavioralAnalysis['score'] * 0.15
-            );
+            // Special handling for extreme cases - apply minimum score FIRST
+            if ($hasExtremeProfanity) {
+                // For extreme profanity, use the name score as the primary indicator
+                // and add other factors as minor contributors
+                $this->score = (int) round($nameAnalysis['score'] * 0.90); // 90% weight for extreme profanity
+
+                // Add other factors as minor penalties
+                $this->score += (int) round(
+                    $emailAnalysis['score'] * 0.05 +
+                    $phoneAnalysis['score'] * 0.05
+                );
+
+                // Velocity factors are de-emphasized for extreme profanity
+                $this->score += min(10, (int) round(
+                    $ipAnalysis['score'] * 0.10 +
+                    $behavioralAnalysis['score'] * 0.10
+                ));
+            } else {
+                // Business-friendly weighted scoring for normal cases
+                $this->score = (int) round(
+                    $emailAnalysis['score'] * 0.20 +  // Reduced from 0.25
+                    $phoneAnalysis['score'] * 0.15 +  // Reduced from 0.25
+                    $nameAnalysis['score'] * 0.20 +   // Normal weight for non-extreme cases
+                    $ipAnalysis['score'] * 0.15 +     // Reduced from 0.20
+                    $behavioralAnalysis['score'] * 0.30 // Increased from 0.15
+                );
+            }
         }
 
         // Merge reasons and features
@@ -227,10 +246,14 @@ class ScoreBookingSuspicion
         // Cap score at 100
         $this->score = min(100, $this->score);
 
-        // Apply minimum score for extreme profanity AFTER all calculations
-        if ($hasExtremeProfanity && $this->score < 70) {
-            $this->score = 70;  // Minimum score for extreme profanity
-            $this->reasons[] = 'Minimum score applied due to extreme profanity';
+        // Apply minimum score for extreme profanity AFTER weighted scoring
+        if ($hasExtremeProfanity) {
+            $this->score = max($this->score, 85);  // Ensure extreme profanity is at least HIGH risk
+            $this->reasons[] = 'Extreme profanity detected - HIGH risk';
+        } elseif ($nameAnalysis['score'] >= 100) {
+            // Special case for maximum profanity score
+            $this->score = max($this->score, 90);  // Ensure maximum profanity is HIGH risk
+            $this->reasons[] = 'Maximum profanity detected - HIGH risk';
         }
 
         // Store LLM usage info including AI prompt and response

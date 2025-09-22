@@ -30,10 +30,13 @@ The platform creates multiple revenue streams through prime-time reservation sal
     - [Partner Referrals](#partner-referrals)
     - [Concierge Referrals](#concierge-referrals)
     - [Referral Calculation Process](#referral-calculation-process)
-  - [Getting Started](#getting-started)
-    - [Prerequisites](#prerequisites)
-    - [Installation Steps](#installation-steps)
-    - [Additional Setup](#additional-setup)
+- [Getting Started](#getting-started)
+  - [Prerequisites](#prerequisites)
+  - [Installation Steps](#installation-steps)
+  - [Additional Setup](#additional-setup)
+- [Development & Testing Commands](#development--testing-commands)
+  - [Risk Scoring Testing](#risk-scoring-testing)
+  - [VIP Session & Token Commands](#vip-session--token-commands)
 
 ## Problem Statement
 
@@ -356,3 +359,45 @@ Ensure you have the following installed on your development machine:
     ```
 
 Now you are ready to start developing and testing the PRIMA platform locally.
+
+## Development & Testing Commands
+
+### Risk Scoring Testing
+
+The platform includes comprehensive risk scoring for fraud detection. Use these commands to test and validate the risk scoring system:
+
+```bash
+# Test risk scoring with enhanced visual output and analysis
+php artisan app:test-risk-scoring
+# Features: Visual risk level icons (🟢 LOW, 🟡 MEDIUM, 🔴 HIGH), detailed breakdown tables,
+# risk level distribution statistics, and comprehensive analysis
+
+# Show current risk scoring thresholds with visual indicators
+php artisan app:test-risk-scoring --thresholds
+# Features: Color-coded risk level icons in the thresholds table
+
+# Test risk scoring on recent CONFIRMED bookings
+php artisan app:test-recent-bookings --days=7 --limit=10
+
+# Create test bookings with various risk levels (for development/testing)
+php artisan test:create-risk-bookings
+# Creates sample bookings with different risk profiles to test the scoring system
+```
+
+### VIP Session & Token Commands
+
+For testing VIP functionality and API access:
+
+```bash
+# Create VIP session tokens for testing
+php artisan vip:create-session-token MIAMI2024
+
+# Search for VIP codes by concierge name, hotel, or email
+php artisan vip:create-session-token SEARCH --search="John Doe"
+
+# List all VIP codes
+php artisan vip:create-session-token LIST --list
+
+# Create user tokens for API testing
+php artisan user:create-token user@example.com --name="test-token" --expires=48
+```

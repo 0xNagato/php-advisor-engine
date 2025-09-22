@@ -47,7 +47,7 @@ class SendBookingMonitoringAlert
     /**
      * Format the comprehensive monitoring message
      */
-    protected function formatMessage(Booking $booking, array $riskResult): array
+    public function formatMessage(Booking $booking, array $riskResult): array
     {
         // Determine risk level and formatting
         $score = $booking->risk_score ?? 0;
@@ -149,7 +149,7 @@ class SendBookingMonitoringAlert
             ],
             [
                 'title' => 'Status',
-                'value' => ucfirst(str_replace('_', ' ', $booking->status->value)),
+                'value' => $booking->status->label(),
                 'short' => true,
             ],
             [

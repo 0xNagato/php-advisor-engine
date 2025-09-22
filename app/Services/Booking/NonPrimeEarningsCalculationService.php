@@ -233,6 +233,10 @@ readonly class NonPrimeEarningsCalculationService
 
     private function getOverride(Booking $booking): ?VenueTimeSlot
     {
+        if (!$booking->booking_at) {
+            return null;
+        }
+
         return VenueTimeSlot::query()
             ->where('schedule_template_id', $booking->schedule_template_id)
             ->where('booking_date', $booking->booking_at->format('Y-m-d'))
