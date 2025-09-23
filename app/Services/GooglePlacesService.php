@@ -10,7 +10,7 @@ use Illuminate\Support\Facades\Log;
 
 class GooglePlacesService
 {
-    private string $apiKey;
+    private readonly string $apiKey;
 
     private string $baseUrl = 'https://places.googleapis.com/v1';
 
@@ -36,7 +36,7 @@ class GooglePlacesService
             ];
 
             if ($region) {
-                $regionData = Region::find($region);
+                $regionData = Region::query()->find($region);
                 if ($regionData) {
                     $body['locationBias'] = [
                         'circle' => [
@@ -256,7 +256,7 @@ class GooglePlacesService
         foreach ($fields as $field) {
             if (isset($fieldGroups[$field])) {
                 $selectedFields = array_merge($selectedFields, $fieldGroups[$field]);
-            } elseif (strpos($field, 'places.') === 0) {
+            } elseif (str_starts_with((string) $field, 'places.')) {
                 // Allow direct field names as well
                 $selectedFields[] = $field;
             }

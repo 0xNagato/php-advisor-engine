@@ -24,7 +24,7 @@ class UpdateUnassignedQrCodeDestination
 
             // Update or create the short URL
             if ($qrCode->short_url_id) {
-                $shortUrl = ShortURL::find($qrCode->short_url_id);
+                $shortUrl = ShortURL::query()->find($qrCode->short_url_id);
                 if ($shortUrl) {
                     $shortUrl->destination_url = $destination;
                     $shortUrl->save();

@@ -5,6 +5,7 @@ namespace App\Actions\Risk;
 use App\Filament\Resources\BookingResource\Pages\ViewBooking;
 use App\Filament\Resources\RiskReviewResource\Pages\ViewRiskReview;
 use App\Models\Booking;
+use Exception;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use Lorisleiva\Actions\Concerns\AsAction;
@@ -36,7 +37,7 @@ class SendBookingMonitoringAlert
                     'response' => $response->body(),
                 ]);
             }
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Log::error('Exception sending booking monitoring alert', [
                 'booking_id' => $booking->id,
                 'error' => $e->getMessage(),
@@ -181,7 +182,7 @@ class SendBookingMonitoringAlert
         if (! empty($riskResult['features']['device'])) {
             $fields[] = [
                 'title' => 'Device ID',
-                'value' => substr($riskResult['features']['device'], 0, 12).'...',
+                'value' => substr((string) $riskResult['features']['device'], 0, 12).'...',
                 'short' => true,
             ];
         }
@@ -192,7 +193,7 @@ class SendBookingMonitoringAlert
             $breakdownText = [];
             foreach ($breakdown as $component => $componentScore) {
                 if ($componentScore > 0) {
-                    $breakdownText[] = ucfirst($component).': '.$componentScore;
+                    $breakdownText[] = ucfirst((string) $component).': '.$componentScore;
                 }
             }
             if (! empty($breakdownText)) {

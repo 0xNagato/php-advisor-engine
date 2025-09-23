@@ -3,6 +3,7 @@
 namespace App\Actions\Risk;
 
 use App\Models\Booking;
+use Exception;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use Lorisleiva\Actions\Concerns\AsAction;
@@ -18,8 +19,9 @@ class SendRiskRejectionToSlack
     {
         $webhookUrl = config('services.slack.risk_webhook_url');
 
-        if (!$webhookUrl) {
+        if (! $webhookUrl) {
             Log::warning('Slack webhook URL not configured for risk alerts');
+
             return;
         }
 
@@ -28,16 +30,16 @@ class SendRiskRejectionToSlack
         try {
             $response = Http::post($webhookUrl, $message);
 
-            if (!$response->successful()) {
+            if (! $response->successful()) {
                 Log::error('Failed to send Slack rejection notification', [
                     'booking_id' => $booking->id,
-                    'response' => $response->body()
+                    'response' => $response->body(),
                 ]);
             }
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Log::error('Exception sending Slack rejection notification', [
                 'booking_id' => $booking->id,
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
             ]);
         }
     }
@@ -60,33 +62,33 @@ class SendRiskRejectionToSlack
                         [
                             'title' => 'Guest',
                             'value' => $booking->guest_name ?? 'Unknown',
-                            'short' => true
+                            'short' => true,
                         ],
                         [
                             'title' => 'Venue',
                             'value' => $booking->venue->name ?? 'Unknown',
-                            'short' => true
+                            'short' => true,
                         ],
                         [
                             'title' => 'Risk Score',
-                            'value' => $booking->risk_score . '/100',
-                            'short' => true
+                            'value' => $booking->risk_score.'/100',
+                            'short' => true,
                         ],
                         [
                             'title' => 'Reviewed By',
                             'value' => $booking->reviewedBy?->name ?? 'System',
-                            'short' => true
+                            'short' => true,
                         ],
                         [
                             'title' => 'Rejection Reason',
                             'value' => $reason,
-                            'short' => false
-                        ]
+                            'short' => false,
+                        ],
                     ],
-                    'footer' => 'Booking ID: ' . $booking->id,
-                    'ts' => now()->timestamp
-                ]
-            ]
+                    'footer' => 'Booking ID: '.$booking->id,
+                    'ts' => now()->timestamp,
+                ],
+            ],
         ];
     }
 }

@@ -4,23 +4,29 @@ namespace App\Filament\Resources;
 
 use App\Actions\Risk\ApproveRiskReview;
 use App\Actions\Risk\RejectRiskReview;
-use App\Filament\Resources\RiskReviewResource\Pages;
+use App\Filament\Resources\RiskReviewResource\Pages\ListRiskReviews;
+use App\Filament\Resources\RiskReviewResource\Pages\ViewRiskReview;
 use App\Models\Booking;
-use App\Models\RiskWhitelist;
 use App\Models\RiskBlacklist;
-use Filament\Forms;
+use App\Models\RiskWhitelist;
+use Filament\Forms\Components\DateTimePicker;
+use Filament\Forms\Components\Section;
+use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\View;
 use Filament\Forms\Form;
 use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
-use Filament\Tables;
 use Filament\Tables\Actions\Action;
+use Filament\Tables\Actions\ActionGroup;
+use Filament\Tables\Actions\BulkAction;
+use Filament\Tables\Actions\ViewAction;
 use Filament\Tables\Columns\BadgeColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\Filter;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\HtmlString;
 
 class RiskReviewResource extends Resource
@@ -52,12 +58,14 @@ class RiskReviewResource extends Resource
     public static function getNavigationBadge(): ?string
     {
         $count = static::getEloquentQuery()->count();
+
         return $count > 0 ? (string) $count : null;
     }
 
     public static function getNavigationBadgeColor(): ?string
     {
         $hardCount = static::getEloquentQuery()->hardRiskHold()->count();
+
         return $hardCount > 0 ? 'danger' : 'warning';
     }
 
@@ -65,60 +73,60 @@ class RiskReviewResource extends Resource
     {
         return $form
             ->schema([
-                Forms\Components\Section::make('Booking Information')
+                Section::make('Booking Information')
                     ->schema([
-                        Forms\Components\TextInput::make('guest_name')
+                        TextInput::make('guest_name')
                             ->label('Guest Name')
                             ->disabled(),
-                        Forms\Components\TextInput::make('guest_email')
+                        TextInput::make('guest_email')
                             ->label('Email')
                             ->disabled(),
-                        Forms\Components\TextInput::make('guest_phone')
+                        TextInput::make('guest_phone')
                             ->label('Phone')
                             ->disabled(),
-                        Forms\Components\TextInput::make('venue.name')
+                        TextInput::make('venue.name')
                             ->label('Venue')
                             ->disabled(),
-                        Forms\Components\DateTimePicker::make('booking_at')
+                        DateTimePicker::make('booking_at')
                             ->label('Booking Date/Time')
                             ->disabled(),
-                        Forms\Components\TextInput::make('guest_count')
+                        TextInput::make('guest_count')
                             ->label('Party Size')
                             ->disabled(),
                     ])
                     ->columns(2),
 
-                Forms\Components\Section::make('Risk Assessment')
+                Section::make('Risk Assessment')
                     ->schema([
-                        Forms\Components\TextInput::make('risk_score')
+                        TextInput::make('risk_score')
                             ->label('Risk Score')
                             ->disabled()
                             ->suffix('/100'),
-                        Forms\Components\TextInput::make('risk_state')
+                        TextInput::make('risk_state')
                             ->label('Risk Level')
                             ->disabled(),
-                        Forms\Components\Textarea::make('risk_reasons')
+                        Textarea::make('risk_reasons')
                             ->label('Risk Reasons')
                             ->rows(4)
                             ->disabled()
                             ->formatStateUsing(fn ($state) => is_array($state) ? implode("\n", $state) : $state),
-                        Forms\Components\TextInput::make('ip_address')
+                        TextInput::make('ip_address')
                             ->label('IP Address')
                             ->disabled(),
                     ])
                     ->columns(2),
 
-                Forms\Components\Section::make('Risk Score Breakdown')
+                Section::make('Risk Score Breakdown')
                     ->schema([
-                        Forms\Components\View::make('filament.components.risk-score-breakdown')
+                        View::make('filament.components.risk-score-breakdown')
                             ->columnSpanFull(),
                     ])
                     ->visible(fn ($record) => $record?->risk_metadata?->breakdown !== null)
                     ->collapsed(),
 
-                Forms\Components\Section::make('Notes')
+                Section::make('Notes')
                     ->schema([
-                        Forms\Components\Textarea::make('notes')
+                        Textarea::make('notes')
                             ->label('Customer Notes')
                             ->rows(3)
                             ->disabled(),
@@ -145,12 +153,11 @@ class RiskReviewResource extends Resource
                 TextColumn::make('guest_name')
                     ->label('Guest')
                     ->searchable()
-                    ->formatStateUsing(fn ($state, $record) =>
-                        new HtmlString(sprintf(
-                            '<div class="text-sm">%s</div><div class="text-xs text-gray-500">%s</div>',
-                            e($state ?: 'Unknown'),
-                            e(substr($record->guest_email ?? '', 0, 25) . (strlen($record->guest_email ?? '') > 25 ? '...' : ''))
-                        ))
+                    ->formatStateUsing(fn ($state, $record) => new HtmlString(sprintf(
+                        '<div class="text-sm">%s</div><div class="text-xs text-gray-500">%s</div>',
+                        e($state ?: 'Unknown'),
+                        e(substr($record->guest_email ?? '', 0, 25).(strlen($record->guest_email ?? '') > 25 ? '...' : ''))
+                    ))
                     )
                     ->html(),
 
@@ -175,7 +182,7 @@ class RiskReviewResource extends Resource
                         'warning' => fn ($state) => $state >= 30 && $state < 70,
                         'danger' => fn ($state) => $state >= 70,
                     ])
-                    ->formatStateUsing(fn ($state) => $state . '/100'),
+                    ->formatStateUsing(fn ($state) => $state.'/100'),
 
                 BadgeColumn::make('risk_state')
                     ->label('Risk')
@@ -183,17 +190,15 @@ class RiskReviewResource extends Resource
                         'warning' => 'soft',
                         'danger' => 'hard',
                     ])
-                    ->formatStateUsing(fn ($state) => strtoupper($state)),
+                    ->formatStateUsing(fn ($state) => strtoupper((string) $state)),
 
                 TextColumn::make('risk_reasons')
                     ->label('Reasons')
-                    ->formatStateUsing(fn ($state) =>
-                        is_array($state)
-                            ? implode(', ', array_slice($state, 0, 1)) . (count($state) > 1 ? '...' : '')
-                            : ($state ? substr($state, 0, 40) . '...' : '')
+                    ->formatStateUsing(fn ($state) => is_array($state)
+                            ? implode(', ', array_slice($state, 0, 1)).(count($state) > 1 ? '...' : '')
+                            : ($state ? substr((string) $state, 0, 40).'...' : '')
                     )
-                    ->tooltip(fn ($state) =>
-                        is_array($state) ? implode("\n", $state) : $state
+                    ->tooltip(fn ($state) => is_array($state) ? implode("\n", $state) : $state
                     )
                     ->wrap(),
             ])
@@ -221,7 +226,7 @@ class RiskReviewResource extends Resource
                     ->query(fn (Builder $query) => $query->whereDate('created_at', today())),
             ])
             ->actions([
-                Tables\Actions\ViewAction::make()
+                ViewAction::make()
                     ->label('View')
                     ->icon('heroicon-o-eye'),
 
@@ -246,7 +251,7 @@ class RiskReviewResource extends Resource
                     ->color('danger')
                     ->requiresConfirmation()
                     ->form([
-                        Forms\Components\Textarea::make('reason')
+                        Textarea::make('reason')
                             ->label('Rejection Reason')
                             ->required()
                             ->rows(3),
@@ -259,14 +264,14 @@ class RiskReviewResource extends Resource
                             ->send();
                     }),
 
-                Tables\Actions\ActionGroup::make([
+                ActionGroup::make([
                     Action::make('whitelist_email')
                         ->label('Whitelist Email Domain')
                         ->icon('heroicon-o-shield-check')
                         ->action(function ($record) {
-                            $domain = substr(strrchr($record->guest_email, '@'), 1);
+                            $domain = substr(strrchr((string) $record->guest_email, '@'), 1);
                             if ($domain) {
-                                RiskWhitelist::create([
+                                RiskWhitelist::query()->create([
                                     'type' => RiskWhitelist::TYPE_DOMAIN,
                                     'value' => $domain,
                                     'notes' => "Added from booking #{$record->id}",
@@ -283,7 +288,7 @@ class RiskReviewResource extends Resource
                         ->label('Whitelist Phone')
                         ->icon('heroicon-o-shield-check')
                         ->action(function ($record) {
-                            RiskWhitelist::create([
+                            RiskWhitelist::query()->create([
                                 'type' => RiskWhitelist::TYPE_PHONE,
                                 'value' => $record->guest_phone,
                                 'notes' => "Added from booking #{$record->id}",
@@ -300,9 +305,9 @@ class RiskReviewResource extends Resource
                         ->icon('heroicon-o-shield-exclamation')
                         ->color('danger')
                         ->action(function ($record) {
-                            $domain = substr(strrchr($record->guest_email, '@'), 1);
+                            $domain = substr(strrchr((string) $record->guest_email, '@'), 1);
                             if ($domain) {
-                                RiskBlacklist::create([
+                                RiskBlacklist::query()->create([
                                     'type' => RiskBlacklist::TYPE_DOMAIN,
                                     'value' => $domain,
                                     'reason' => "Suspicious activity from booking #{$record->id}",
@@ -317,7 +322,7 @@ class RiskReviewResource extends Resource
                 ]),
             ])
             ->bulkActions([
-                Tables\Actions\BulkAction::make('bulk_approve')
+                BulkAction::make('bulk_approve')
                     ->label('Approve Selected')
                     ->icon('heroicon-o-check-circle')
                     ->color('success')
@@ -327,7 +332,7 @@ class RiskReviewResource extends Resource
                             ApproveRiskReview::run($record);
                         }
                         Notification::make()
-                            ->title(count($records) . ' bookings approved')
+                            ->title(count($records).' bookings approved')
                             ->success()
                             ->send();
                     }),
@@ -338,8 +343,8 @@ class RiskReviewResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ListRiskReviews::route('/'),
-            'view' => Pages\ViewRiskReview::route('/{record}'),
+            'index' => ListRiskReviews::route('/'),
+            'view' => ViewRiskReview::route('/{record}'),
         ];
     }
 }

@@ -32,9 +32,10 @@ class TailwindFix extends Command
         $process = new Process($command);
         $process->run();
 
-        if (!$process->isSuccessful()) {
+        if (! $process->isSuccessful()) {
             $this->error('❌ Failed to run Tailwind conflict resolution:');
             $this->line($process->getErrorOutput());
+
             return 1;
         }
 

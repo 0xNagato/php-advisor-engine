@@ -2,11 +2,13 @@
 
 namespace Database\Factories;
 
+use App\Models\Concierge;
+use App\Models\QrCode;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Str;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\QrCode>
+ * @extends Factory<QrCode>
  */
 class QrCodeFactory extends Factory
 {
@@ -43,7 +45,7 @@ class QrCodeFactory extends Factory
     public function assigned(): static
     {
         return $this->state(fn (array $attributes) => [
-            'concierge_id' => \App\Models\Concierge::factory(),
+            'concierge_id' => Concierge::factory(),
             'assigned_at' => now(),
         ]);
     }

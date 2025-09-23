@@ -18,16 +18,18 @@ class RiskAuditLog extends Model
         'ip_hash',
     ];
 
-    protected $casts = [
-        'payload' => 'array',
-    ];
-
     const EVENT_SCORED = 'scored';
+
     const EVENT_APPROVED = 'approved';
+
     const EVENT_REJECTED = 'rejected';
+
     const EVENT_WHITELISTED = 'whitelisted';
+
     const EVENT_BLACKLISTED = 'blacklisted';
+
     const EVENT_AUTO_APPROVED = 'auto_approved';
+
     const EVENT_AUTO_HELD = 'auto_held';
 
     /**
@@ -56,7 +58,7 @@ class RiskAuditLog extends Model
         ?int $userId = null,
         ?string $ipAddress = null
     ): self {
-        return self::create([
+        return self::query()->create([
             'booking_id' => $bookingId,
             'event' => $event,
             'payload' => self::maskPII($payload),
@@ -113,19 +115,19 @@ class RiskAuditLog extends Model
 
         // Mask local part (keep first 2 chars)
         $maskedLocal = strlen($localPart) > 2
-            ? substr($localPart, 0, 2) . str_repeat('*', min(strlen($localPart) - 2, 6))
+            ? substr($localPart, 0, 2).str_repeat('*', min(strlen($localPart) - 2, 6))
             : str_repeat('*', strlen($localPart));
 
         // Mask domain (keep first char and TLD)
         $maskedDomain = strlen($domainParts[0]) > 1
-            ? substr($domainParts[0], 0, 1) . str_repeat('*', min(strlen($domainParts[0]) - 1, 4))
+            ? substr($domainParts[0], 0, 1).str_repeat('*', min(strlen($domainParts[0]) - 1, 4))
             : '*';
 
         if (count($domainParts) > 1) {
-            $maskedDomain .= '.' . end($domainParts);
+            $maskedDomain .= '.'.end($domainParts);
         }
 
-        return $maskedLocal . '@' . $maskedDomain;
+        return $maskedLocal.'@'.$maskedDomain;
     }
 
     /**
@@ -138,7 +140,7 @@ class RiskAuditLog extends Model
         }
 
         // Keep country code and last 4 digits
-        return substr($phone, 0, 2) . str_repeat('*', strlen($phone) - 6) . substr($phone, -4);
+        return substr($phone, 0, 2).str_repeat('*', strlen($phone) - 6).substr($phone, -4);
     }
 
     /**
@@ -151,12 +153,19 @@ class RiskAuditLog extends Model
 
         foreach ($parts as $part) {
             if (strlen($part) > 1) {
-                $masked[] = substr($part, 0, 1) . str_repeat('*', min(strlen($part) - 1, 5));
+                $masked[] = substr($part, 0, 1).str_repeat('*', min(strlen($part) - 1, 5));
             } else {
                 $masked[] = '*';
             }
         }
 
         return implode(' ', $masked);
+    }
+
+    protected function casts(): array
+    {
+        return [
+            'payload' => 'array',
+        ];
     }
 }

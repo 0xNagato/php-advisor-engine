@@ -204,7 +204,7 @@ class QrCodeResource extends Resource
                         }
 
                         // Check if it redirects to invitation form
-                        if ($record->shortUrlModel && str_contains($record->shortUrlModel->destination_url, 'qr.unassigned')) {
+                        if ($record->shortUrlModel && str_contains((string) $record->shortUrlModel->destination_url, 'qr.unassigned')) {
                             return '<span class="text-warning-600 dark:text-warning-400">Awaiting Assignment (Invitation)</span>';
                         }
 

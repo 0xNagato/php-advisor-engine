@@ -1,13 +1,13 @@
 <?php
 
-use App\Models\VipCode;
-use App\Models\VipSession;
-use App\Models\Booking;
-use App\Models\Concierge;
-use App\Models\Venue;
-use App\Models\ScheduleTemplate;
 use App\Enums\BookingStatus;
 use App\Livewire\Concierge\VipCodesTable;
+use App\Models\Booking;
+use App\Models\Concierge;
+use App\Models\ScheduleTemplate;
+use App\Models\Venue;
+use App\Models\VipCode;
+use App\Models\VipSession;
 use Illuminate\Support\Str;
 
 test('parameter analytics counts all sessions even without bookings', function () {
@@ -55,7 +55,7 @@ test('parameter analytics counts all sessions even without bookings', function (
     ]);
 
     // Create instance of VipCodesTable to test the method
-    $table = new VipCodesTable();
+    $table = new VipCodesTable;
 
     // Use reflection to access private method
     $reflection = new ReflectionClass($table);
@@ -146,7 +146,7 @@ test('parameter analytics counts multiple bookings with same parameters correctl
     ]);
 
     // Create instance of VipCodesTable to test the method
-    $table = new VipCodesTable();
+    $table = new VipCodesTable;
 
     // Use reflection to access private method
     $reflection = new ReflectionClass($table);

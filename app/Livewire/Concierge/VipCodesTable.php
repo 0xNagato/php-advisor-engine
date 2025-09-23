@@ -12,6 +12,7 @@ use App\Models\Venue;
 use App\Models\VipCode;
 use App\Traits\ManagesVenueCollections;
 use Carbon\Carbon;
+use DB;
 use Exception;
 use Filament\Forms\Components\ColorPicker;
 use Filament\Forms\Components\FileUpload;
@@ -202,7 +203,7 @@ class VipCodesTable extends TableWidget
                         $bookingsCount = $bookings->count();
 
                         // Calculate earnings by currency - use raw query to avoid GROUP BY issues
-                        $earningsByCurrency = \DB::table('earnings')
+                        $earningsByCurrency = DB::table('earnings')
                             ->join('bookings', 'bookings.id', '=', 'earnings.booking_id')
                             ->where('bookings.vip_code_id', $vipCode->id)
                             ->whereIn('bookings.status', ['confirmed', 'venue_confirmed'])
@@ -669,11 +670,11 @@ class VipCodesTable extends TableWidget
                         // Calculate earnings for this booking by currency
                         foreach ($booking->earnings as $earning) {
                             if (in_array($earning->type, ['concierge', 'concierge_bounty'])) {
-                                if (!isset($paramData[$paramKey]['earnings_by_currency'])) {
+                                if (! isset($paramData[$paramKey]['earnings_by_currency'])) {
                                     $paramData[$paramKey]['earnings_by_currency'] = [];
                                 }
                                 $currency = $earning->currency;
-                                if (!isset($paramData[$paramKey]['earnings_by_currency'][$currency])) {
+                                if (! isset($paramData[$paramKey]['earnings_by_currency'][$currency])) {
                                     $paramData[$paramKey]['earnings_by_currency'][$currency] = 0;
                                 }
                                 $paramData[$paramKey]['earnings_by_currency'][$currency] += $earning->amount;
@@ -701,11 +702,11 @@ class VipCodesTable extends TableWidget
                     // Calculate earnings for this booking by currency
                     foreach ($booking->earnings as $earning) {
                         if (in_array($earning->type, ['concierge', 'concierge_bounty'])) {
-                            if (!isset($paramData[$paramKey]['earnings_by_currency'])) {
+                            if (! isset($paramData[$paramKey]['earnings_by_currency'])) {
                                 $paramData[$paramKey]['earnings_by_currency'] = [];
                             }
                             $currency = $earning->currency;
-                            if (!isset($paramData[$paramKey]['earnings_by_currency'][$currency])) {
+                            if (! isset($paramData[$paramKey]['earnings_by_currency'][$currency])) {
                                 $paramData[$paramKey]['earnings_by_currency'][$currency] = 0;
                             }
                             $paramData[$paramKey]['earnings_by_currency'][$currency] += $earning->amount;

@@ -14,7 +14,7 @@ class AnalyzeEmailRisk
         'maildrop.cc', 'mintemail.com', 'temp-mail.org',
         'fakeinbox.com', 'sharklasers.com', 'guerrillamail.info',
         'spam4.me', 'grr.la', 'mailnesia.com', 'tempmailaddress.com',
-        'dispostable.com', 'slipry.net', 'jetable.org', 'temporaryemail.net'
+        'dispostable.com', 'slipry.net', 'jetable.org', 'temporaryemail.net',
     ];
 
     // Weighted profanity - emails with these are almost always abusive
@@ -52,7 +52,7 @@ class AnalyzeEmailRisk
     protected array $testPatterns = [
         'test', 'testing', 'demo', 'example', 'sample',
         'fake', 'bot', 'robot', 'user', 'guest',
-        'asdf', 'qwerty', 'abc', 'xyz', 'foo', 'bar'
+        'asdf', 'qwerty', 'abc', 'xyz', 'foo', 'bar',
     ];
 
     /**
@@ -69,11 +69,11 @@ class AnalyzeEmailRisk
         // Sanitize and validate email input
         $email = strtolower(trim($email));
 
-        if (empty($email) || !filter_var($email, FILTER_VALIDATE_EMAIL)) {
+        if (empty($email) || ! filter_var($email, FILTER_VALIDATE_EMAIL)) {
             return [
                 'score' => 100,
                 'reasons' => ['Invalid email format'],
-                'features' => ['email_valid' => false]
+                'features' => ['email_valid' => false],
             ];
         }
 
@@ -109,7 +109,7 @@ class AnalyzeEmailRisk
 
         // Check for test patterns in username
         foreach ($this->testPatterns as $pattern) {
-            if (str_contains($localPart, $pattern)) {
+            if (str_contains($localPart, (string) $pattern)) {
                 $score += 50; // Test patterns are highly suspicious
                 $reasons[] = 'Test pattern in email username';
                 $features['test_email'] = true;
@@ -138,7 +138,7 @@ class AnalyzeEmailRisk
             if (str_contains($emailLower, $profanity)) {
                 // For context-sensitive words in email, check word boundaries
                 if (in_array($profanity, ['hell', 'ass', 'blow', 'cock'])) {
-                    $position = strpos($emailLower, $profanity);
+                    $position = strpos($emailLower, (string) $profanity);
                     $beforeChar = $position > 0 ? $emailLower[$position - 1] : '@';
                     $afterPos = $position + strlen($profanity);
                     $afterChar = $afterPos < strlen($emailLower) ? $emailLower[$afterPos] : '@';
@@ -167,7 +167,7 @@ class AnalyzeEmailRisk
 
         // Check MX records (stub for now)
         $features['mx_valid'] = $this->checkMXRecord($domain);
-        if (!$features['mx_valid']) {
+        if (! $features['mx_valid']) {
             $score += 35; // Increased - invalid MX records are suspicious
             $reasons[] = 'No valid MX records';
         }
@@ -178,7 +178,7 @@ class AnalyzeEmailRisk
         return [
             'score' => min(100, $score),
             'reasons' => $reasons,
-            'features' => $features
+            'features' => $features,
         ];
     }
 
@@ -190,23 +190,23 @@ class AnalyzeEmailRisk
         // Remove numbers
         $text = preg_replace('/[0-9]/', '', $text);
 
-        if (strlen($text) < 4) {
+        if (strlen((string) $text) < 4) {
             return false;
         }
 
         // Check for too many consonants in a row
-        if (preg_match('/[bcdfghjklmnpqrstvwxyz]{5,}/i', $text)) {
+        if (preg_match('/[bcdfghjklmnpqrstvwxyz]{5,}/i', (string) $text)) {
             return true;
         }
 
         // Check for repeating patterns
-        if (preg_match('/(.)\1{3,}/', $text)) {
+        if (preg_match('/(.)\1{3,}/', (string) $text)) {
             return true;
         }
 
         // Check for lack of vowels
-        $vowelCount = preg_match_all('/[aeiou]/i', $text);
-        $consonantCount = preg_match_all('/[bcdfghjklmnpqrstvwxyz]/i', $text);
+        $vowelCount = preg_match_all('/[aeiou]/i', (string) $text);
+        $consonantCount = preg_match_all('/[bcdfghjklmnpqrstvwxyz]/i', (string) $text);
 
         if ($consonantCount > 0 && $vowelCount / $consonantCount < 0.2) {
             return true;
@@ -224,7 +224,7 @@ class AnalyzeEmailRisk
         // For now, assume common domains are valid
         $knownValidDomains = [
             'gmail.com', 'yahoo.com', 'hotmail.com', 'outlook.com',
-            'icloud.com', 'aol.com', 'protonmail.com', 'mail.com'
+            'icloud.com', 'aol.com', 'protonmail.com', 'mail.com',
         ];
 
         return in_array($domain, $knownValidDomains) || checkdnsrr($domain, 'MX');

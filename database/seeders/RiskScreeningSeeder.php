@@ -33,16 +33,13 @@ class RiskScreeningSeeder extends Seeder
         ];
 
         foreach ($disposableDomains as $domain) {
-            RiskBlacklist::firstOrCreate(
-                [
-                    'type' => RiskBlacklist::TYPE_DOMAIN,
-                    'value' => $domain,
-                ],
-                [
-                    'reason' => 'Known disposable email domain',
-                    'created_by' => 1, // System user
-                ]
-            );
+            RiskBlacklist::query()->firstOrCreate([
+                'type' => RiskBlacklist::TYPE_DOMAIN,
+                'value' => $domain,
+            ], [
+                'reason' => 'Known disposable email domain',
+                'created_by' => 1, // System user
+            ]);
         }
 
         // Seed known fake/test phone numbers for blacklist
@@ -58,16 +55,13 @@ class RiskScreeningSeeder extends Seeder
         ];
 
         foreach ($testPhones as $phone) {
-            RiskBlacklist::firstOrCreate(
-                [
-                    'type' => RiskBlacklist::TYPE_PHONE,
-                    'value' => $phone,
-                ],
-                [
-                    'reason' => 'Known test/fake phone number',
-                    'created_by' => 1,
-                ]
-            );
+            RiskBlacklist::query()->firstOrCreate([
+                'type' => RiskBlacklist::TYPE_PHONE,
+                'value' => $phone,
+            ], [
+                'reason' => 'Known test/fake phone number',
+                'created_by' => 1,
+            ]);
         }
 
         // Seed test names for blacklist
@@ -81,16 +75,13 @@ class RiskScreeningSeeder extends Seeder
         ];
 
         foreach ($testNames as $name) {
-            RiskBlacklist::firstOrCreate(
-                [
-                    'type' => RiskBlacklist::TYPE_NAME,
-                    'value' => $name,
-                ],
-                [
-                    'reason' => 'Known test/fake name',
-                    'created_by' => 1,
-                ]
-            );
+            RiskBlacklist::query()->firstOrCreate([
+                'type' => RiskBlacklist::TYPE_NAME,
+                'value' => $name,
+            ], [
+                'reason' => 'Known test/fake name',
+                'created_by' => 1,
+            ]);
         }
 
         // Seed some VPN/datacenter IP ranges for blacklist (CIDR notation)
@@ -103,16 +94,13 @@ class RiskScreeningSeeder extends Seeder
         ];
 
         foreach ($vpnRanges as $range) {
-            RiskBlacklist::firstOrCreate(
-                [
-                    'type' => RiskBlacklist::TYPE_IP,
-                    'value' => $range,
-                ],
-                [
-                    'reason' => 'VPN/Datacenter IP range',
-                    'created_by' => 1,
-                ]
-            );
+            RiskBlacklist::query()->firstOrCreate([
+                'type' => RiskBlacklist::TYPE_IP,
+                'value' => $range,
+            ], [
+                'reason' => 'VPN/Datacenter IP range',
+                'created_by' => 1,
+            ]);
         }
 
         // Seed some trusted domains for whitelist
@@ -126,16 +114,13 @@ class RiskScreeningSeeder extends Seeder
         ];
 
         foreach ($trustedDomains as $domain) {
-            RiskWhitelist::firstOrCreate(
-                [
-                    'type' => RiskWhitelist::TYPE_DOMAIN,
-                    'value' => $domain,
-                ],
-                [
-                    'notes' => 'Trusted hotel partner domain',
-                    'created_by' => 1,
-                ]
-            );
+            RiskWhitelist::query()->firstOrCreate([
+                'type' => RiskWhitelist::TYPE_DOMAIN,
+                'value' => $domain,
+            ], [
+                'notes' => 'Trusted hotel partner domain',
+                'created_by' => 1,
+            ]);
         }
 
         $this->command->info('Risk screening seed data created successfully.');

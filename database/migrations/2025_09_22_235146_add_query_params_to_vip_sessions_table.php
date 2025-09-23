@@ -22,7 +22,7 @@ return new class extends Migration
             if (Schema::getConnection()->getDriverName() === 'pgsql') {
                 DB::statement('CREATE INDEX vip_sessions_query_params_gin ON vip_sessions USING GIN (query_params)');
             }
-        } catch (Throwable $e) {
+        } catch (Throwable) {
             // Ignore if not PostgreSQL or extension not available
         }
     }
@@ -36,7 +36,7 @@ return new class extends Migration
             if (Schema::getConnection()->getDriverName() === 'pgsql') {
                 DB::statement('DROP INDEX IF EXISTS vip_sessions_query_params_gin');
             }
-        } catch (Throwable $e) {
+        } catch (Throwable) {
             // Ignore
         }
 

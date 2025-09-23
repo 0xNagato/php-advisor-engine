@@ -1,10 +1,10 @@
 <?php
 
 use App\Actions\Risk\SendBookingMonitoringAlert;
-use App\Models\Booking;
-use App\Models\Venue;
-use App\Models\Concierge;
 use App\Enums\BookingStatus;
+use App\Models\Booking;
+use App\Models\Concierge;
+use App\Models\Venue;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Http;
 
@@ -62,11 +62,11 @@ it('sends booking monitoring alert with correct status formatting', function () 
     config(['services.slack.all_bookings_webhook_url' => 'https://hooks.slack.com/test']);
 
     // Execute the action
-    $action = new SendBookingMonitoringAlert();
+    $action = new SendBookingMonitoringAlert;
     $action->handle($booking, $riskResult);
 
     // Verify the HTTP request was made
-    Http::assertSent(function ($request) use ($booking) {
+    Http::assertSent(function ($request) {
         $payload = $request->data();
 
         // Check that the status is properly formatted using the enum's label() method
@@ -115,7 +115,7 @@ it('handles different booking statuses correctly', function () {
 
         $booking->load('venue', 'concierge');
 
-        $action = new SendBookingMonitoringAlert();
+        $action = new SendBookingMonitoringAlert;
         $message = $action->formatMessage($booking, []);
 
         $statusField = collect($message['attachments'][0]['fields'])

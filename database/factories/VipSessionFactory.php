@@ -17,7 +17,7 @@ class VipSessionFactory extends Factory
     {
         return [
             'vip_code_id' => VipCode::factory(),
-            'token' => hash('sha256', fake()->sha1() . time() . fake()->numberBetween(1, 1000)),
+            'token' => hash('sha256', fake()->sha1().time().fake()->numberBetween(1, 1000)),
             'sanctum_token_id' => null, // No Sanctum token for anonymous sessions
             'expires_at' => now()->addHours(24),
         ];

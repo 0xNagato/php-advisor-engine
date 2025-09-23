@@ -2,16 +2,23 @@
 
 namespace App\Filament\Resources;
 
-use App\Filament\Resources\RiskWhitelistResource\Pages;
-use App\Filament\Resources\RiskWhitelistResource\RelationManagers;
+use App\Filament\Resources\RiskWhitelistResource\Pages\CreateRiskWhitelist;
+use App\Filament\Resources\RiskWhitelistResource\Pages\EditRiskWhitelist;
+use App\Filament\Resources\RiskWhitelistResource\Pages\ListRiskWhitelists;
 use App\Models\RiskWhitelist;
-use Filament\Forms;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Toggle;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
-use Filament\Tables;
+use Filament\Tables\Actions\BulkActionGroup;
+use Filament\Tables\Actions\DeleteBulkAction;
+use Filament\Tables\Actions\EditAction;
+use Filament\Tables\Columns\BadgeColumn;
+use Filament\Tables\Columns\IconColumn;
+use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
 
 class RiskWhitelistResource extends Resource
 {
@@ -34,7 +41,7 @@ class RiskWhitelistResource extends Resource
     {
         return $form
             ->schema([
-                Forms\Components\Select::make('type')
+                Select::make('type')
                     ->label('Type')
                     ->options([
                         RiskWhitelist::TYPE_EMAIL => 'Email',
@@ -46,10 +53,10 @@ class RiskWhitelistResource extends Resource
                     ->required()
                     ->reactive(),
 
-                Forms\Components\TextInput::make('value')
+                TextInput::make('value')
                     ->label('Value')
                     ->required()
-                    ->helperText(fn ($get) => match($get('type')) {
+                    ->helperText(fn ($get) => match ($get('type')) {
                         RiskWhitelist::TYPE_EMAIL => 'Enter full email address (e.g., trusted@example.com)',
                         RiskWhitelist::TYPE_DOMAIN => 'Enter domain only (e.g., marriott.com)',
                         RiskWhitelist::TYPE_PHONE => 'Enter phone with country code (e.g., +1234567890)',
@@ -58,11 +65,11 @@ class RiskWhitelistResource extends Resource
                         default => 'Enter the value to whitelist'
                     }),
 
-                Forms\Components\Textarea::make('notes')
+                Textarea::make('notes')
                     ->label('Notes')
                     ->helperText('Additional notes about why this is whitelisted'),
 
-                Forms\Components\Toggle::make('is_active')
+                Toggle::make('is_active')
                     ->label('Active')
                     ->default(true)
                     ->helperText('Inactive entries will not be checked during risk scoring'),
@@ -73,7 +80,7 @@ class RiskWhitelistResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\BadgeColumn::make('type')
+                BadgeColumn::make('type')
                     ->colors([
                         'primary' => RiskWhitelist::TYPE_EMAIL,
                         'success' => RiskWhitelist::TYPE_DOMAIN,
@@ -81,17 +88,17 @@ class RiskWhitelistResource extends Resource
                         'danger' => RiskWhitelist::TYPE_IP,
                         'secondary' => RiskWhitelist::TYPE_NAME,
                     ]),
-                Tables\Columns\TextColumn::make('value')
+                TextColumn::make('value')
                     ->searchable()
                     ->copyable(),
-                Tables\Columns\TextColumn::make('notes')
+                TextColumn::make('notes')
                     ->limit(50),
-                Tables\Columns\IconColumn::make('is_active')
+                IconColumn::make('is_active')
                     ->boolean(),
-                Tables\Columns\TextColumn::make('createdBy.name')
+                TextColumn::make('createdBy.name')
                     ->label('Created By')
                     ->default('System'),
-                Tables\Columns\TextColumn::make('created_at')
+                TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable(),
             ])
@@ -99,11 +106,11 @@ class RiskWhitelistResource extends Resource
                 //
             ])
             ->actions([
-                Tables\Actions\EditAction::make(),
+                EditAction::make(),
             ])
             ->bulkActions([
-                Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
+                BulkActionGroup::make([
+                    DeleteBulkAction::make(),
                 ]),
             ]);
     }
@@ -118,9 +125,9 @@ class RiskWhitelistResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ListRiskWhitelists::route('/'),
-            'create' => Pages\CreateRiskWhitelist::route('/create'),
-            'edit' => Pages\EditRiskWhitelist::route('/{record}/edit'),
+            'index' => ListRiskWhitelists::route('/'),
+            'create' => CreateRiskWhitelist::route('/create'),
+            'edit' => EditRiskWhitelist::route('/{record}/edit'),
         ];
     }
 }

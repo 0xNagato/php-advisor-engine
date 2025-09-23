@@ -21,7 +21,7 @@ class RiskMetadata extends Data
      */
     public function getFormattedBreakdown(): array
     {
-        if (!$this->breakdown) {
+        if (! $this->breakdown) {
             return [];
         }
 

@@ -25,7 +25,6 @@ Route::post('/vip/sessions', [VipSessionController::class, 'createSession']);
 Route::post('/vip/sessions/validate', [VipSessionController::class, 'validateSession']);
 Route::post('/vip/sessions/track', [VipSessionController::class, 'trackEvent']);
 
-
 Route::post('/login', [AuthController::class, 'login']);
 
 // Public endpoints (no authentication required)

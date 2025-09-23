@@ -5,7 +5,6 @@ namespace App\Models;
 use App\Data\AffiliateBrandingData;
 use App\Enums\BookingStatus;
 use App\Services\CurrencyConversionService;
-use Illuminate\Contracts\Database\Query\Builder;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;

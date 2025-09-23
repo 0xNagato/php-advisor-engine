@@ -3,7 +3,9 @@
 namespace App\Console\Commands;
 
 use App\Actions\Risk\ScoreBookingSuspicion;
+use App\Enums\BookingStatus;
 use App\Models\Booking;
+use Exception;
 use Illuminate\Console\Command;
 
 class TestRecentBookings extends Command
@@ -30,22 +32,22 @@ class TestRecentBookings extends Command
         $days = $this->option('days');
         $limit = $this->option('limit');
 
-        $this->info("Testing Risk Scoring on Recent Bookings");
-        $this->info("=========================================");
+        $this->info('Testing Risk Scoring on Recent Bookings');
+        $this->info('=========================================');
         $this->info("Looking back: {$days} days");
         $this->info("Testing limit: {$limit} bookings");
         $this->newLine();
 
         // Get recent CONFIRMED bookings
-        $this->info("Note: Testing risk scoring logic on recent CONFIRMED bookings only.");
+        $this->info('Note: Testing risk scoring logic on recent CONFIRMED bookings only.');
         $this->newLine();
 
         // Get recent CONFIRMED bookings from the database
-        $recentBookings = Booking::where('created_at', '>', now()->subDays($days))
+        $recentBookings = Booking::query()->where('created_at', '>', now()->subDays($days))
             ->whereIn('status', [
-                \App\Enums\BookingStatus::CONFIRMED->value,
-                \App\Enums\BookingStatus::VENUE_CONFIRMED->value,
-                \App\Enums\BookingStatus::COMPLETED->value
+                BookingStatus::CONFIRMED->value,
+                BookingStatus::VENUE_CONFIRMED->value,
+                BookingStatus::COMPLETED->value,
             ])
             ->orderBy('created_at', 'desc')
             ->limit($limit)
@@ -53,6 +55,7 @@ class TestRecentBookings extends Command
 
         if ($recentBookings->isEmpty()) {
             $this->warn("No recent bookings found in the last {$days} days.");
+
             return;
         }
 
@@ -71,7 +74,7 @@ class TestRecentBookings extends Command
                 $result = ScoreBookingSuspicion::run(
                     $booking->guest_email ?? '',
                     $booking->guest_phone ?? '',
-                    trim(($booking->guest_first_name ?? '') . ' ' . ($booking->guest_last_name ?? '')),
+                    trim(($booking->guest_first_name ?? '').' '.($booking->guest_last_name ?? '')),
                     $booking->ip_address,
                     'Mozilla/5.0 (Booking Browser)',
                     $booking->notes,
@@ -83,8 +86,8 @@ class TestRecentBookings extends Command
                 $this->info("Risk Score: {$result['score']}/100");
                 $this->info("Risk Level: {$riskLevel}");
 
-                if (!empty($result['reasons'])) {
-                    $this->info("Reasons: " . implode(', ', array_slice($result['reasons'], 0, 3)));
+                if (! empty($result['reasons'])) {
+                    $this->info('Reasons: '.implode(', ', array_slice($result['reasons'], 0, 3)));
                 }
 
                 // Categorize the booking
@@ -94,16 +97,16 @@ class TestRecentBookings extends Command
 
                 $results[] = [
                     'booking_id' => $booking->id,
-                    'name' => trim(($booking->guest_first_name ?? '') . ' ' . ($booking->guest_last_name ?? '')),
+                    'name' => trim(($booking->guest_first_name ?? '').' '.($booking->guest_last_name ?? '')),
                     'email' => $booking->guest_email,
                     'score' => $result['score'],
                     'risk_level' => $riskLevel,
-                    'assessment' => $isLegitimate ? 'LEGITIMATE' : 'SUSPICIOUS'
+                    'assessment' => $isLegitimate ? 'LEGITIMATE' : 'SUSPICIOUS',
                 ];
 
                 $totalScore += $result['score'];
 
-            } catch (\Exception $e) {
+            } catch (Exception $e) {
                 $this->error("Error testing booking #{$booking->id}: {$e->getMessage()}");
             }
 
@@ -118,11 +121,11 @@ class TestRecentBookings extends Command
         $suspiciousCount = collect($results)->where('assessment', 'SUSPICIOUS')->count();
         $averageScore = $totalScore / count($results);
 
-        $this->info("Total Bookings Tested: " . count($results));
+        $this->info('Total Bookings Tested: '.count($results));
         $this->info("Legitimate Bookings: {$legitimateCount}");
         $this->info("Suspicious Bookings: {$suspiciousCount}");
-        $this->info("Average Risk Score: " . round($averageScore, 1) . "/100");
-        $this->info("False Positive Rate: " . round(($suspiciousCount / count($results)) * 100, 1) . "%");
+        $this->info('Average Risk Score: '.round($averageScore, 1).'/100');
+        $this->info('False Positive Rate: '.round(($suspiciousCount / count($results)) * 100, 1).'%');
 
         // Show breakdown by risk level
         $this->info("\nRisk Level Distribution:");
@@ -133,18 +136,18 @@ class TestRecentBookings extends Command
         $this->table(
             ['Risk Level', 'Count', 'Percentage'],
             [
-                ['Low (0-39)', $lowRisk, round(($lowRisk / count($results)) * 100, 1) . '%'],
-                ['Medium (40-79)', $mediumRisk, round(($mediumRisk / count($results)) * 100, 1) . '%'],
-                ['High (80+)', $highRisk, round(($highRisk / count($results)) * 100, 1) . '%'],
+                ['Low (0-39)', $lowRisk, round(($lowRisk / count($results)) * 100, 1).'%'],
+                ['Medium (40-79)', $mediumRisk, round(($mediumRisk / count($results)) * 100, 1).'%'],
+                ['High (80+)', $highRisk, round(($highRisk / count($results)) * 100, 1).'%'],
             ]
         );
 
         // Recommendations
         $this->newLine();
         if ($suspiciousCount > ($legitimateCount * 0.3)) {
-            $this->warn("⚠️ High false positive rate detected. Consider further tuning of thresholds.");
+            $this->warn('⚠️ High false positive rate detected. Consider further tuning of thresholds.');
         } else {
-            $this->info("✅ Risk scoring appears to be working well with acceptable false positive rate.");
+            $this->info('✅ Risk scoring appears to be working well with acceptable false positive rate.');
         }
     }
 
@@ -153,7 +156,7 @@ class TestRecentBookings extends Command
      */
     protected function isLegitimateBooking($booking, $score): bool
     {
-        $name = trim(($booking->guest_first_name ?? '') . ' ' . ($booking->guest_last_name ?? ''));
+        $name = trim(($booking->guest_first_name ?? '').' '.($booking->guest_last_name ?? ''));
         $email = $booking->guest_email ?? '';
         $notes = $booking->notes ?? '';
 
@@ -171,12 +174,12 @@ class TestRecentBookings extends Command
         }
 
         // Normal-looking name (not obviously fake)
-        if (strlen($name) > 5 && !preg_match('/(test|fake|bot|robot|lorem|ipsum|example|demo|sample)/i', $name)) {
+        if (strlen($name) > 5 && ! preg_match('/(test|fake|bot|robot|lorem|ipsum|example|demo|sample)/i', $name)) {
             $legitimateIndicators++;
         }
 
         // International phone numbers can be legitimate
-        if (!empty($booking->guest_phone) && strlen($booking->guest_phone) > 10) {
+        if (! empty($booking->guest_phone) && strlen((string) $booking->guest_phone) > 10) {
             $legitimateIndicators++;
         }
 

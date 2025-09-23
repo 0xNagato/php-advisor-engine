@@ -2,16 +2,22 @@
 
 namespace App\Filament\Resources;
 
-use App\Filament\Resources\RiskBlacklistResource\Pages;
-use App\Filament\Resources\RiskBlacklistResource\RelationManagers;
+use App\Filament\Resources\RiskBlacklistResource\Pages\CreateRiskBlacklist;
+use App\Filament\Resources\RiskBlacklistResource\Pages\EditRiskBlacklist;
+use App\Filament\Resources\RiskBlacklistResource\Pages\ListRiskBlacklists;
 use App\Models\RiskBlacklist;
-use Filament\Forms;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Toggle;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
-use Filament\Tables;
+use Filament\Tables\Actions\BulkActionGroup;
+use Filament\Tables\Actions\DeleteBulkAction;
+use Filament\Tables\Actions\EditAction;
+use Filament\Tables\Columns\BadgeColumn;
+use Filament\Tables\Columns\IconColumn;
+use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
 
 class RiskBlacklistResource extends Resource
 {
@@ -34,7 +40,7 @@ class RiskBlacklistResource extends Resource
     {
         return $form
             ->schema([
-                Forms\Components\Select::make('type')
+                Select::make('type')
                     ->label('Type')
                     ->options([
                         RiskBlacklist::TYPE_EMAIL => 'Email',
@@ -46,10 +52,10 @@ class RiskBlacklistResource extends Resource
                     ->required()
                     ->reactive(),
 
-                Forms\Components\TextInput::make('value')
+                TextInput::make('value')
                     ->label('Value')
                     ->required()
-                    ->helperText(fn ($get) => match($get('type')) {
+                    ->helperText(fn ($get) => match ($get('type')) {
                         RiskBlacklist::TYPE_EMAIL => 'Enter full email address (e.g., spam@example.com)',
                         RiskBlacklist::TYPE_DOMAIN => 'Enter domain only (e.g., example.com)',
                         RiskBlacklist::TYPE_PHONE => 'Enter phone with country code (e.g., +1234567890)',
@@ -58,12 +64,12 @@ class RiskBlacklistResource extends Resource
                         default => 'Enter the value to blacklist'
                     }),
 
-                Forms\Components\TextInput::make('reason')
+                TextInput::make('reason')
                     ->label('Reason')
                     ->required()
                     ->helperText('Why is this being blacklisted?'),
 
-                Forms\Components\Toggle::make('is_active')
+                Toggle::make('is_active')
                     ->label('Active')
                     ->default(true)
                     ->helperText('Inactive entries will not be checked during risk scoring'),
@@ -74,7 +80,7 @@ class RiskBlacklistResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\BadgeColumn::make('type')
+                BadgeColumn::make('type')
                     ->colors([
                         'primary' => RiskBlacklist::TYPE_EMAIL,
                         'success' => RiskBlacklist::TYPE_DOMAIN,
@@ -82,17 +88,17 @@ class RiskBlacklistResource extends Resource
                         'danger' => RiskBlacklist::TYPE_IP,
                         'secondary' => RiskBlacklist::TYPE_NAME,
                     ]),
-                Tables\Columns\TextColumn::make('value')
+                TextColumn::make('value')
                     ->searchable()
                     ->copyable(),
-                Tables\Columns\TextColumn::make('reason')
+                TextColumn::make('reason')
                     ->limit(50),
-                Tables\Columns\IconColumn::make('is_active')
+                IconColumn::make('is_active')
                     ->boolean(),
-                Tables\Columns\TextColumn::make('createdBy.name')
+                TextColumn::make('createdBy.name')
                     ->label('Created By')
                     ->default('System'),
-                Tables\Columns\TextColumn::make('created_at')
+                TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable(),
             ])
@@ -100,11 +106,11 @@ class RiskBlacklistResource extends Resource
                 //
             ])
             ->actions([
-                Tables\Actions\EditAction::make(),
+                EditAction::make(),
             ])
             ->bulkActions([
-                Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
+                BulkActionGroup::make([
+                    DeleteBulkAction::make(),
                 ]),
             ]);
     }
@@ -119,9 +125,9 @@ class RiskBlacklistResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ListRiskBlacklists::route('/'),
-            'create' => Pages\CreateRiskBlacklist::route('/create'),
-            'edit' => Pages\EditRiskBlacklist::route('/{record}/edit'),
+            'index' => ListRiskBlacklists::route('/'),
+            'create' => CreateRiskBlacklist::route('/create'),
+            'edit' => EditRiskBlacklist::route('/{record}/edit'),
         ];
     }
 }

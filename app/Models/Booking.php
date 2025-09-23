@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Actions\Booking\CreateBooking;
+use App\Data\RiskMetadata;
 use App\Data\Stripe\StripeChargeData;
 use App\Enums\BookingStatus;
 use App\Services\Booking\BookingCalculationService;
@@ -399,7 +400,7 @@ class Booking extends Model
             'meta' => AsArrayObject::class,
             'query_params' => 'array',
             'risk_reasons' => 'array',
-            'risk_metadata' => \App\Data\RiskMetadata::class,
+            'risk_metadata' => RiskMetadata::class,
             'reviewed_at' => 'datetime',
         ];
     }
@@ -672,27 +673,26 @@ class Booking extends Model
      * Get risk reasons as array
      * This accessor ensures PostgreSQL JSONB is properly decoded
      */
-    public function getRiskReasonsArrayAttribute(): array
+    protected function riskReasonsArray(): Attribute
     {
-        $reasons = $this->attributes['risk_reasons'] ?? null;
+        return Attribute::make(get: function () {
+            $reasons = $this->attributes['risk_reasons'] ?? null;
+            if (! $reasons) {
+                return [];
+            }
+            // If it's already an array, return it
+            if (is_array($reasons)) {
+                return $reasons;
+            }
+            // If it's a JSON string, decode it
+            if (is_string($reasons)) {
+                $decoded = json_decode($reasons, true);
 
-        if (! $reasons) {
+                return is_array($decoded) ? $decoded : [];
+            }
+
             return [];
-        }
-
-        // If it's already an array, return it
-        if (is_array($reasons)) {
-            return $reasons;
-        }
-
-        // If it's a JSON string, decode it
-        if (is_string($reasons)) {
-            $decoded = json_decode($reasons, true);
-
-            return is_array($decoded) ? $decoded : [];
-        }
-
-        return [];
+        });
     }
 
     /**

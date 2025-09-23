@@ -3,7 +3,7 @@
 namespace App\Filament\Resources\RiskBlacklistResource\Pages;
 
 use App\Filament\Resources\RiskBlacklistResource;
-use Filament\Actions;
+use Filament\Actions\DeleteAction;
 use Filament\Resources\Pages\EditRecord;
 
 class EditRiskBlacklist extends EditRecord
@@ -13,7 +13,7 @@ class EditRiskBlacklist extends EditRecord
     protected function getHeaderActions(): array
     {
         return [
-            Actions\DeleteAction::make(),
+            DeleteAction::make(),
         ];
     }
 }

@@ -2,9 +2,9 @@
 
 use App\Actions\Risk\SendRiskAlertToSlack;
 use App\Models\Booking;
-use App\Models\Venue;
-use App\Models\ScheduleTemplate;
 use App\Models\Concierge;
+use App\Models\ScheduleTemplate;
+use App\Models\Venue;
 use Illuminate\Support\Facades\Http;
 
 beforeEach(function () {
@@ -21,7 +21,7 @@ it('sends different slack messages for low risk bookings', function () {
     $concierge = Concierge::factory()->create();
 
     // Create a booking without triggering model events
-    $booking = new Booking();
+    $booking = new Booking;
     $booking->schedule_template_id = $schedule->id;
     $booking->concierge_id = $concierge->id;
     $booking->guest_first_name = 'John';
@@ -42,7 +42,7 @@ it('sends different slack messages for low risk bookings', function () {
     $riskResult = [
         'score' => 15,
         'reasons' => [],
-        'features' => []
+        'features' => [],
     ];
 
     SendRiskAlertToSlack::run($booking->fresh(), $riskResult);
@@ -62,7 +62,7 @@ it('sends different slack messages for low risk bookings', function () {
         // Check primary action is View Details for low risk
         $actions = $attachment['actions'];
         expect($actions[0]['text'])->toContain('View Details');
-        expect($actions[0]['url'])->toContain('/platform/bookings/' . $booking->id);
+        expect($actions[0]['url'])->toContain('/platform/bookings/'.$booking->id);
 
         return true;
     });
@@ -76,7 +76,7 @@ it('sends different slack messages for medium risk bookings', function () {
 
     $concierge = Concierge::factory()->create();
 
-    $booking = new Booking();
+    $booking = new Booking;
     $booking->schedule_template_id = $schedule->id;
     $booking->concierge_id = $concierge->id;
     $booking->guest_first_name = 'Jane';
@@ -97,7 +97,7 @@ it('sends different slack messages for medium risk bookings', function () {
     $riskResult = [
         'score' => 45,
         'reasons' => ['Disposable email domain', 'Large party size'],
-        'features' => []
+        'features' => [],
     ];
 
     SendRiskAlertToSlack::run($booking->fresh(), $riskResult);
@@ -116,7 +116,7 @@ it('sends different slack messages for medium risk bookings', function () {
         // Check primary action is Review Booking for medium risk
         $actions = $attachment['actions'];
         expect($actions[0]['text'])->toContain('Review Booking');
-        expect($actions[0]['url'])->toContain('/platform/risk-reviews/' . $booking->id);
+        expect($actions[0]['url'])->toContain('/platform/risk-reviews/'.$booking->id);
         expect($actions[0]['style'])->toBe('primary');
 
         // Check risk reasons are included
@@ -142,7 +142,7 @@ it('sends different slack messages for high risk bookings', function () {
 
     $concierge = Concierge::factory()->create();
 
-    $booking = new Booking();
+    $booking = new Booking;
     $booking->schedule_template_id = $schedule->id;
     $booking->concierge_id = $concierge->id;
     $booking->guest_first_name = 'Suspicious';
@@ -166,9 +166,9 @@ it('sends different slack messages for high risk bookings', function () {
             'Disposable email domain',
             'Large party size',
             'Suspicious name pattern',
-            'High-risk IP location'
+            'High-risk IP location',
         ],
-        'features' => []
+        'features' => [],
     ];
 
     SendRiskAlertToSlack::run($booking->fresh(), $riskResult);
@@ -187,7 +187,7 @@ it('sends different slack messages for high risk bookings', function () {
         // Check primary action is Review Booking for high risk
         $actions = $attachment['actions'];
         expect($actions[0]['text'])->toContain('Review Booking');
-        expect($actions[0]['url'])->toContain('/platform/risk-reviews/' . $booking->id);
+        expect($actions[0]['url'])->toContain('/platform/risk-reviews/'.$booking->id);
         expect($actions[0]['style'])->toBe('primary');
 
         // Check multiple risk reasons are included
@@ -214,7 +214,7 @@ it('includes booking details in all slack messages', function () {
 
     $concierge = Concierge::factory()->create();
 
-    $booking = new Booking();
+    $booking = new Booking;
     $booking->schedule_template_id = $schedule->id;
     $booking->concierge_id = $concierge->id;
     $booking->guest_first_name = 'Test';
@@ -236,7 +236,7 @@ it('includes booking details in all slack messages', function () {
 
     SendRiskAlertToSlack::run($booking->fresh(), $riskResult);
 
-    Http::assertSent(function ($request) use ($booking, $venue) {
+    Http::assertSent(function ($request) {
         $payload = $request->data();
         $attachment = $payload['attachments'][0];
 

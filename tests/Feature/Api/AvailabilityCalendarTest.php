@@ -378,31 +378,31 @@ test('venues are filtered correctly by specialty', function () {
 
 test('authenticated user can fetch availability calendar with venue_id filter', function () {
     $date = now()->addDay()->format('Y-m-d');
-    
+
     // Create a specific venue
     $venue = Venue::factory()->create([
         'status' => VenueStatus::ACTIVE,
         'region' => 'miami',
     ]);
-    
+
     // Create another venue to ensure filtering works
     $otherVenue = Venue::factory()->create([
         'status' => VenueStatus::ACTIVE,
         'region' => 'miami',
     ]);
-    
+
     // Create schedules for both venues
     $venue->createDefaultSchedules();
     $otherVenue->createDefaultSchedules();
-    
+
     // Test filtering by specific venue_id
     $response = getJson("/api/calendar?date=$date&guest_count=2&reservation_time=14:30:00&venue_id={$venue->id}", [
         'Authorization' => 'Bearer '.$this->token,
     ]);
-    
+
     $response->assertSuccessful();
     $venues = $response->json('data.venues');
-    
+
     // Should return only the specified venue
     $this->assertCount(1, $venues);
     $this->assertEquals($venue->id, $venues[0]['id']);
@@ -410,12 +410,12 @@ test('authenticated user can fetch availability calendar with venue_id filter', 
 
 test('venue_id filter returns empty results when venue does not exist', function () {
     $date = now()->addDay()->format('Y-m-d');
-    
+
     // Use a non-existent venue ID
     $response = getJson("/api/calendar?date=$date&guest_count=2&reservation_time=14:30:00&venue_id=99999", [
         'Authorization' => 'Bearer '.$this->token,
     ]);
-    
+
     $response->assertStatus(422)
         ->assertJson([
             'venue_id' => [
@@ -427,33 +427,33 @@ test('venue_id filter returns empty results when venue does not exist', function
 test('venue_id filter works with other filters', function () {
     $date = now()->addDay()->format('Y-m-d');
     $cuisine = Cuisine::first()->id;
-    
+
     // Create a venue with specific cuisine
     $venue = Venue::factory()->create([
         'cuisines' => [$cuisine],
         'status' => VenueStatus::ACTIVE,
         'region' => 'miami',
     ]);
-    
+
     // Create another venue with different cuisine
     $otherVenue = Venue::factory()->create([
         'cuisines' => [Cuisine::where('id', '!=', $cuisine)->first()->id],
         'status' => VenueStatus::ACTIVE,
         'region' => 'miami',
     ]);
-    
+
     // Create schedules for both venues
     $venue->createDefaultSchedules();
     $otherVenue->createDefaultSchedules();
-    
+
     // Test filtering by venue_id and cuisine (should still return the specific venue)
     $response = getJson("/api/calendar?date=$date&guest_count=2&reservation_time=14:30:00&venue_id={$venue->id}&cuisine[]=$cuisine", [
         'Authorization' => 'Bearer '.$this->token,
     ]);
-    
+
     $response->assertSuccessful();
     $venues = $response->json('data.venues');
-    
+
     // Should return only the specified venue regardless of other filters
     $this->assertCount(1, $venues);
     $this->assertEquals($venue->id, $venues[0]['id']);
@@ -461,35 +461,35 @@ test('venue_id filter works with other filters', function () {
 
 test('venue_id filter respects region boundaries', function () {
     $date = now()->addDay()->format('Y-m-d');
-    
+
     // Create a venue in a different region
     $venueInParis = Venue::factory()->create([
         'status' => VenueStatus::ACTIVE,
         'region' => 'paris',
     ]);
-    
+
     // Create schedules for the venue
     $venueInParis->createDefaultSchedules();
-    
+
     // Test filtering by venue_id with miami region (default for test user)
     $response = getJson("/api/calendar?date=$date&guest_count=2&reservation_time=14:30:00&venue_id={$venueInParis->id}", [
         'Authorization' => 'Bearer '.$this->token,
     ]);
-    
+
     $response->assertSuccessful();
     $venues = $response->json('data.venues');
-    
+
     // Should return empty because venue is in different region
     $this->assertCount(0, $venues);
-    
+
     // Now test with correct region
     $response = getJson("/api/calendar?date=$date&guest_count=2&reservation_time=14:30:00&venue_id={$venueInParis->id}&region=paris", [
         'Authorization' => 'Bearer '.$this->token,
     ]);
-    
+
     $response->assertSuccessful();
     $venues = $response->json('data.venues');
-    
+
     // Should return the venue when region matches
     $this->assertCount(1, $venues);
     $this->assertEquals($venueInParis->id, $venues[0]['id']);

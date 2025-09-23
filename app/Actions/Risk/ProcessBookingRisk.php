@@ -2,10 +2,12 @@
 
 namespace App\Actions\Risk;
 
+use App\Data\RiskMetadata;
+use App\Enums\BookingStatus;
 use App\Models\Booking;
 use App\Models\RiskAuditLog;
+use Exception;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Notification;
 use Lorisleiva\Actions\Concerns\AsAction;
 
 class ProcessBookingRisk
@@ -76,7 +78,7 @@ class ProcessBookingRisk
         }
 
         // Create risk metadata
-        $riskMetadata = new \App\Data\RiskMetadata(
+        $riskMetadata = new RiskMetadata(
             totalScore: $result['score'],
             breakdown: $result['features']['breakdown'] ?? null,
             reasons: $result['reasons'],
@@ -126,7 +128,7 @@ class ProcessBookingRisk
         if ($shouldSendSlack) {
             try {
                 SendRiskAlertToSlack::run($booking, $result);
-            } catch (\Exception $e) {
+            } catch (Exception $e) {
                 Log::error('Failed to send Slack alert', [
                     'booking_id' => $booking->id,
                     'error' => $e->getMessage(),
@@ -139,7 +141,7 @@ class ProcessBookingRisk
         if ($allBookingsWebhook) {
             try {
                 SendBookingMonitoringAlert::run($booking, $result);
-            } catch (\Exception $e) {
+            } catch (Exception $e) {
                 Log::error('Failed to send monitoring alert', [
                     'booking_id' => $booking->id,
                     'error' => $e->getMessage(),
@@ -187,7 +189,7 @@ class ProcessBookingRisk
 
         // Always update booking status to indicate it needs review
         $booking->update([
-            'status' => \App\Enums\BookingStatus::REVIEW_PENDING->value,
+            'status' => BookingStatus::REVIEW_PENDING->value,
         ]);
 
         // Slack notification already sent in parent method

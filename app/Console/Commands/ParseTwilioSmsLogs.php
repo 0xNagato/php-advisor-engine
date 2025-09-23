@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use DateTime;
 use Illuminate\Console\Command;
 
 class ParseTwilioSmsLogs extends Command
@@ -26,19 +27,20 @@ class ParseTwilioSmsLogs extends Command
     public function handle(): int
     {
         $filePath = $this->argument('file') ?? $this->findLatestLogFile();
-        
-        if (!$filePath || !file_exists($filePath)) {
+
+        if (! $filePath || ! file_exists($filePath)) {
             $this->error('SMS log file not found. Please provide a valid file path.');
+
             return 1;
         }
 
         $errorCodeFilter = $this->option('error-code');
-        
+
         $this->info("Parsing SMS log file: {$filePath}");
         if ($errorCodeFilter) {
             $this->info("Filtering by error code: {$errorCodeFilter}");
         }
-        
+
         $errors = $this->parseLogFile($filePath, $errorCodeFilter);
         $this->displayResults($errors, $errorCodeFilter);
 
@@ -48,15 +50,13 @@ class ParseTwilioSmsLogs extends Command
     private function findLatestLogFile(): ?string
     {
         $logDir = storage_path('app');
-        $files = glob($logDir . '/sms-log-*.csv');
-        
+        $files = glob($logDir.'/sms-log-*.csv');
+
         if (empty($files)) {
             return null;
         }
 
-        usort($files, function ($a, $b) {
-            return filemtime($b) - filemtime($a);
-        });
+        usort($files, fn ($a, $b) => filemtime($b) - filemtime($a));
 
         return $files[0];
     }
@@ -65,10 +65,10 @@ class ParseTwilioSmsLogs extends Command
     {
         $handle = fopen($filePath, 'r');
         $header = fgetcsv($handle);
-        
+
         // Map header columns for easy access
         $columns = array_flip($header);
-        
+
         $errors = [];
         $unknownSamples = []; // Store sample phone numbers for unknown codes
         $totalRows = 0;
@@ -78,15 +78,15 @@ class ParseTwilioSmsLogs extends Command
 
         while (($row = fgetcsv($handle)) !== false) {
             $totalRows++;
-            
+
             if (empty($row) || count($row) < count($header)) {
                 continue;
             }
 
             $status = $row[$columns['Status']] ?? '';
-            
+
             // Only process failed and undelivered messages
-            if (!in_array($status, ['failed', 'undelivered'])) {
+            if (! in_array($status, ['failed', 'undelivered'])) {
                 continue;
             }
 
@@ -94,10 +94,10 @@ class ParseTwilioSmsLogs extends Command
             $toNumber = $row[$columns['To']] ?? '';
             $errorCode = $row[$columns['ErrorCode']] ?? '';
             $sentDate = $row[$columns['SentDate']] ?? '';
-            
+
             // Track date range for all error messages
             if ($sentDate) {
-                $dateTime = \DateTime::createFromFormat('Y-m-d\TH:i:sP', $sentDate);
+                $dateTime = DateTime::createFromFormat('Y-m-d\TH:i:sP', $sentDate);
                 if ($dateTime) {
                     if ($startDate === null || $dateTime < $startDate) {
                         $startDate = $dateTime;
@@ -107,38 +107,38 @@ class ParseTwilioSmsLogs extends Command
                     }
                 }
             }
-            
+
             // Apply error code filter if specified
             if ($errorCodeFilter && $errorCode !== $errorCodeFilter) {
                 continue;
             }
-            
+
             $country = $this->extractCountryFromPhoneNumber($toNumber);
-            $key = $country . ' + Error ' . $errorCode;
-            
+            $key = $country.' + Error '.$errorCode;
+
             // Store sample phone numbers for unknown countries
-            if (str_starts_with($country, 'Unknown') && !isset($unknownSamples[$country])) {
+            if (str_starts_with($country, 'Unknown') && ! isset($unknownSamples[$country])) {
                 $unknownSamples[$country] = $toNumber;
             }
-            
-            if (!isset($errors[$key])) {
+
+            if (! isset($errors[$key])) {
                 $errors[$key] = 0;
             }
-            
+
             $errors[$key]++;
         }
 
         fclose($handle);
 
         $this->info("Processed {$totalRows} total rows, found {$errorRows} error rows");
-        
+
         // Show date range
         if ($startDate && $endDate) {
             $this->info("Date range: {$startDate->format('M j, Y H:i')} to {$endDate->format('M j, Y H:i')}");
         }
-        
+
         // Show unknown phone number samples in debug mode
-        if ($this->option('debug') && !empty($unknownSamples)) {
+        if ($this->option('debug') && ! empty($unknownSamples)) {
             $this->line('');
             $this->info('Sample phone numbers for unknown country codes:');
             foreach ($unknownSamples as $country => $sampleNumber) {
@@ -146,21 +146,21 @@ class ParseTwilioSmsLogs extends Command
             }
             $this->line('');
         }
-        
+
         // Sort by count descending
         arsort($errors);
-        
+
         return $errors;
     }
 
     private function extractCountryFromPhoneNumber(string $phoneNumber): string
     {
         $phoneNumber = preg_replace('/[^0-9]/', '', $phoneNumber);
-        
+
         // Map common country codes to country names with ISO codes
         $countryCodes = [
             '1' => 'US/CA (United States/Canada)',
-            '34' => 'ES (Spain)', 
+            '34' => 'ES (Spain)',
             '966' => 'SA (Saudi Arabia)',
             '972' => 'IL (Israel)',
             '971' => 'AE (UAE)',
@@ -184,7 +184,7 @@ class ParseTwilioSmsLogs extends Command
             '58' => 'VE (Venezuela)',
             // Additional country codes from unknown analysis
             '212' => 'MA (Morocco)',
-            '965' => 'KW (Kuwait)', 
+            '965' => 'KW (Kuwait)',
             '595' => 'PY (Paraguay)',
             '30' => 'GR (Greece)',
             '62' => 'ID (Indonesia)',
@@ -206,20 +206,20 @@ class ParseTwilioSmsLogs extends Command
         ];
 
         foreach ($countryCodes as $code => $country) {
-            if (str_starts_with($phoneNumber, $code)) {
+            if (str_starts_with((string) $phoneNumber, $code)) {
                 return $country;
             }
         }
 
         // Extract first 1-3 digits as unknown country code
-        $unknownCode = substr($phoneNumber, 0, 3);
+        $unknownCode = substr((string) $phoneNumber, 0, 3);
         if (strlen($unknownCode) > 1) {
-            $unknownCode = substr($phoneNumber, 0, 2);
+            $unknownCode = substr((string) $phoneNumber, 0, 2);
         }
         if (strlen($unknownCode) > 1) {
-            $unknownCode = substr($phoneNumber, 0, 1);
+            $unknownCode = substr((string) $phoneNumber, 0, 1);
         }
-        
+
         return "Unknown (+{$unknownCode})";
     }
 
@@ -253,6 +253,7 @@ class ParseTwilioSmsLogs extends Command
     {
         if (empty($errors)) {
             $this->warn('No SMS errors found in the log file.');
+
             return;
         }
 
@@ -263,23 +264,23 @@ class ParseTwilioSmsLogs extends Command
             $this->info('Top Country + Error Code combinations:');
         }
         $this->line('');
-        
+
         $headers = ['Country', 'Error Code', 'Description', 'Count'];
         $rows = [];
-        
+
         foreach ($errors as $combination => $count) {
             preg_match('/^(.+) \+ Error (.+)$/', $combination, $matches);
             $country = $matches[1] ?? 'Unknown';
             $errorCode = $matches[2] ?? 'Unknown';
             $description = $this->getTwilioErrorDescription($errorCode);
-            
+
             $rows[] = [$country, $errorCode, $description, $count];
         }
 
         $this->table($headers, $rows);
-        
+
         $this->line('');
-        $this->info('Total unique error combinations: ' . count($errors));
-        $this->info('Total error occurrences: ' . array_sum($errors));
+        $this->info('Total unique error combinations: '.count($errors));
+        $this->info('Total error occurrences: '.array_sum($errors));
     }
 }

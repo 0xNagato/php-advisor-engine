@@ -2,13 +2,13 @@
 
 namespace Database\Factories;
 
+use App\Models\QrCode;
 use App\Models\Referral;
-use App\Models\Region;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Referral>
+ * @extends Factory<Referral>
  */
 class ReferralFactory extends Factory
 {
@@ -59,7 +59,7 @@ class ReferralFactory extends Factory
     public function fromQrCode(): static
     {
         return $this->state(fn (array $attributes) => [
-            'qr_code_id' => \App\Models\QrCode::factory(),
+            'qr_code_id' => QrCode::factory(),
         ]);
     }
 }

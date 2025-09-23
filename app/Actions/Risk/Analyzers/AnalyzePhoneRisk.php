@@ -26,13 +26,13 @@ class AnalyzePhoneRisk
             return [
                 'score' => 100,
                 'reasons' => ['Invalid phone number'],
-                'features' => ['phone_valid' => false]
+                'features' => ['phone_valid' => false],
             ];
         }
 
         // Check E.164 format
         $features['e164_format'] = str_starts_with($phone, '+');
-        if (!$features['e164_format'] && !str_starts_with($phone, '1')) {
+        if (! $features['e164_format'] && ! str_starts_with($phone, '1')) {
             $score += 10;
             $reasons[] = 'Non-standard phone format';
         }
@@ -61,7 +61,7 @@ class AnalyzePhoneRisk
         // Check NANP format for US/CA numbers
         if (str_starts_with($phone, '1') || str_starts_with($phone, '+1')) {
             $nanpCheck = $this->checkNANPFormat($phone);
-            if (!$nanpCheck['valid']) {
+            if (! $nanpCheck['valid']) {
                 $score += 25;
                 $reasons[] = $nanpCheck['reason'];
                 $features['nanp_valid'] = false;
@@ -91,7 +91,7 @@ class AnalyzePhoneRisk
         return [
             'score' => min(100, $score),
             'reasons' => $reasons,
-            'features' => $features
+            'features' => $features,
         ];
     }
 
@@ -104,11 +104,11 @@ class AnalyzePhoneRisk
         $phone = preg_replace('/^\+?1/', '', $phone);
 
         // Check for patterns like 989898, 123123, etc.
-        if (strlen($phone) >= 6) {
+        if (strlen((string) $phone) >= 6) {
             for ($len = 2; $len <= 4; $len++) {
-                $pattern = substr($phone, 0, $len);
-                $repeated = str_repeat($pattern, (int)(strlen($phone) / $len));
-                if (str_starts_with($phone, $repeated) && strlen($repeated) >= strlen($phone) - 1) {
+                $pattern = substr((string) $phone, 0, $len);
+                $repeated = str_repeat($pattern, (int) (strlen((string) $phone) / $len));
+                if (str_starts_with((string) $phone, $repeated) && strlen($repeated) >= strlen((string) $phone) - 1) {
                     return true;
                 }
             }
@@ -129,18 +129,22 @@ class AnalyzePhoneRisk
         $ascending = 0;
         $descending = 0;
 
-        for ($i = 1; $i < strlen($phone); $i++) {
+        for ($i = 1; $i < strlen((string) $phone); $i++) {
             $diff = intval($phone[$i]) - intval($phone[$i - 1]);
             if ($diff == 1) {
                 $ascending++;
-                if ($ascending >= 5) return true;
+                if ($ascending >= 5) {
+                    return true;
+                }
             } else {
                 $ascending = 0;
             }
 
             if ($diff == -1) {
                 $descending++;
-                if ($descending >= 5) return true;
+                if ($descending >= 5) {
+                    return true;
+                }
             } else {
                 $descending = 0;
             }
@@ -159,13 +163,13 @@ class AnalyzePhoneRisk
 
         // Check if all digits are the same
         $firstDigit = $phone[0];
-        for ($i = 1; $i < strlen($phone); $i++) {
+        for ($i = 1; $i < strlen((string) $phone); $i++) {
             if ($phone[$i] !== $firstDigit) {
                 return false;
             }
         }
 
-        return strlen($phone) >= 10;
+        return strlen((string) $phone) >= 10;
     }
 
     /**
@@ -176,7 +180,7 @@ class AnalyzePhoneRisk
         // Remove country code
         $phone = preg_replace('/^\+?1/', '', $phone);
 
-        if (strlen($phone) !== 10) {
+        if (strlen((string) $phone) !== 10) {
             return ['valid' => false, 'reason' => 'Invalid NANP length'];
         }
 
@@ -212,7 +216,7 @@ class AnalyzePhoneRisk
 
         // Known VoIP area codes (partial list)
         $voipAreaCodes = ['567', '762', '445', '564'];
-        $areaCode = substr($phone, 0, 3);
+        $areaCode = substr((string) $phone, 0, 3);
 
         return in_array($areaCode, $voipAreaCodes);
     }
@@ -229,10 +233,11 @@ class AnalyzePhoneRisk
             '1111111111',
             '0000000000',
             '9999999999',
-            '1231231234'
+            '1231231234',
         ];
 
         $cleanPhone = preg_replace('/^\+?1/', '', $phone);
+
         return in_array($cleanPhone, $testNumbers);
     }
 
@@ -245,7 +250,7 @@ class AnalyzePhoneRisk
             // Common country codes
             $countryCodes = ['1', '44', '33', '49', '39', '34', '61', '86', '91', '7'];
             foreach ($countryCodes as $code) {
-                if (str_starts_with($phone, '+' . $code)) {
+                if (str_starts_with($phone, '+'.$code)) {
                     return $code;
                 }
             }

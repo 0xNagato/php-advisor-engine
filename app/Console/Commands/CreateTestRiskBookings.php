@@ -5,14 +5,16 @@ namespace App\Console\Commands;
 use App\Actions\Risk\ProcessBookingRisk;
 use App\Models\Booking;
 use App\Models\Concierge;
+use Exception;
 use Illuminate\Console\Command;
 use Illuminate\Support\Carbon;
-use Illuminate\Support\Str;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 
 class CreateTestRiskBookings extends Command
 {
     protected $signature = 'test:create-risk-bookings';
+
     protected $description = 'Create test bookings with various risk levels';
 
     public function handle()
@@ -22,8 +24,9 @@ class CreateTestRiskBookings extends Command
 
         // Get a concierge for creating bookings
         $concierge = Concierge::with('user')->first();
-        if (!$concierge) {
+        if (! $concierge) {
             $this->error('No concierge found');
+
             return Command::FAILURE;
         }
 
@@ -40,6 +43,7 @@ class CreateTestRiskBookings extends Command
 
         if ($availableSchedules->isEmpty()) {
             $this->error('No available non-prime schedules found for tomorrow');
+
             return Command::FAILURE;
         }
 
@@ -109,7 +113,7 @@ class CreateTestRiskBookings extends Command
 
             try {
                 // Create the booking directly
-                $booking = Booking::create([
+                $booking = Booking::query()->create([
                     'schedule_template_id' => $schedule->schedule_template_id,
                     'uuid' => Str::uuid(),
                     'concierge_id' => $concierge->id,
@@ -141,28 +145,28 @@ class CreateTestRiskBookings extends Command
                 $this->line("  ID: {$booking->id}");
                 $this->line("  Venue: {$booking->venue->name}");
                 $this->line("  Risk Score: {$booking->risk_score}/100");
-                $this->line("  Risk State: " . ($booking->risk_state ?: 'none'));
+                $this->line('  Risk State: '.($booking->risk_state ?: 'none'));
 
                 if ($booking->risk_metadata) {
                     $metadata = $booking->risk_metadata;
 
                     // Check if it's a Laravel Data object or array
                     if (is_object($metadata)) {
-                        $this->line("  AI Used: " . ($metadata->llmUsed ? 'Yes' : 'No'));
+                        $this->line('  AI Used: '.($metadata->llmUsed ? 'Yes' : 'No'));
 
                         if ($metadata->llmUsed && $metadata->llmResponse) {
                             $aiData = json_decode($metadata->llmResponse, true);
                             if ($aiData) {
-                                $this->line("  AI Score: " . ($aiData['risk_score'] ?? 'N/A'));
-                                $this->line("  AI Confidence: " . ($aiData['confidence'] ?? 'N/A'));
+                                $this->line('  AI Score: '.($aiData['risk_score'] ?? 'N/A'));
+                                $this->line('  AI Confidence: '.($aiData['confidence'] ?? 'N/A'));
                             }
                         }
 
                         // Try to get breakdown
                         if (method_exists($metadata, 'getFormattedBreakdown')) {
                             $breakdown = $metadata->getFormattedBreakdown();
-                            if (!empty($breakdown)) {
-                                $this->line("  Risk Breakdown:");
+                            if (! empty($breakdown)) {
+                                $this->line('  Risk Breakdown:');
                                 foreach ($breakdown as $category => $data) {
                                     $this->line("    - {$category}: {$data['score']} (weighted: {$data['weighted']})");
                                 }
@@ -171,12 +175,12 @@ class CreateTestRiskBookings extends Command
                     } else {
                         // Handle as array/json
                         $metadataArray = is_string($metadata) ? json_decode($metadata, true) : (array) $metadata;
-                        $this->line("  AI Used: " . (($metadataArray['llmUsed'] ?? false) ? 'Yes' : 'No'));
+                        $this->line('  AI Used: '.(($metadataArray['llmUsed'] ?? false) ? 'Yes' : 'No'));
                     }
                 }
 
-                if (!empty($booking->risk_reasons)) {
-                    $this->line("  Risk Reasons:");
+                if (! empty($booking->risk_reasons)) {
+                    $this->line('  Risk Reasons:');
                     $reasons = is_string($booking->risk_reasons) ? json_decode($booking->risk_reasons, true) : $booking->risk_reasons;
                     foreach ($reasons as $reason) {
                         $this->line("    - {$reason}");
@@ -184,31 +188,29 @@ class CreateTestRiskBookings extends Command
                 }
 
                 $this->info("  View at: /platform/risk-reviews/{$booking->id}");
-                $this->line("");
+                $this->line('');
 
-            } catch (\Exception $e) {
-                $this->error("  Failed to create booking: " . $e->getMessage());
-                $this->line("");
+            } catch (Exception $e) {
+                $this->error('  Failed to create booking: '.$e->getMessage());
+                $this->line('');
             }
         }
 
         // Show summary
-        $this->info("=== Summary ===");
-        $recentBookings = Booking::whereNotNull('risk_score')
+        $this->info('=== Summary ===');
+        $recentBookings = Booking::query()->whereNotNull('risk_score')
             ->where('created_at', '>=', now()->subMinutes(5))
             ->orderBy('risk_score', 'desc')
             ->get(['id', 'guest_first_name', 'guest_last_name', 'risk_score', 'risk_state']);
 
         $this->table(
             ['ID', 'Guest Name', 'Risk Score', 'Risk State'],
-            $recentBookings->map(function ($b) {
-                return [
-                    $b->id,
-                    "{$b->guest_first_name} {$b->guest_last_name}",
-                    "{$b->risk_score}/100",
-                    $b->risk_state ?: 'none'
-                ];
-            })
+            $recentBookings->map(fn ($b) => [
+                $b->id,
+                "{$b->guest_first_name} {$b->guest_last_name}",
+                "{$b->risk_score}/100",
+                $b->risk_state ?: 'none',
+            ])
         );
 
         return Command::SUCCESS;

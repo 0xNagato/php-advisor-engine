@@ -29,7 +29,6 @@ use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Illuminate\Contracts\Database\Query\Builder;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Validator;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\On;
 use Maatwebsite\Excel\Excel;
@@ -794,12 +793,13 @@ class ListVenues extends ListRecords
         }
 
         $email = $this->bulkEditData['guest_email'] ?? '';
-        if (empty($email) || !filter_var($email, FILTER_VALIDATE_EMAIL)) {
+        if (empty($email) || ! filter_var($email, FILTER_VALIDATE_EMAIL)) {
             Notification::make()
                 ->danger()
                 ->title('Invalid Email')
                 ->body('Please enter a valid email address.')
                 ->send();
+
             return;
         }
 

@@ -3,7 +3,7 @@
 namespace App\Filament\Resources\RiskBlacklistResource\Pages;
 
 use App\Filament\Resources\RiskBlacklistResource;
-use Filament\Actions;
+use Filament\Actions\CreateAction;
 use Filament\Resources\Pages\ListRecords;
 
 class ListRiskBlacklists extends ListRecords
@@ -13,7 +13,7 @@ class ListRiskBlacklists extends ListRecords
     protected function getHeaderActions(): array
     {
         return [
-            Actions\CreateAction::make(),
+            CreateAction::make(),
         ];
     }
 }

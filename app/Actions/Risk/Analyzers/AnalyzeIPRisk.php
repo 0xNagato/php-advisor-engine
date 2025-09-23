@@ -2,6 +2,8 @@
 
 namespace App\Actions\Risk\Analyzers;
 
+use App\Enums\BookingStatus;
+use App\Models\Booking;
 use Illuminate\Support\Facades\Cache;
 use Lorisleiva\Actions\Concerns\AsAction;
 
@@ -164,17 +166,17 @@ class AnalyzeIPRisk
     protected function checkVelocity(string $ip): array
     {
         // Only count CONFIRMED bookings for velocity calculation
-        $confirmedBookings = \App\Models\Booking::where('ip_address', $ip)
+        $confirmedBookings = Booking::query()->where('ip_address', $ip)
             ->where('created_at', '>', now()->subHour())
             ->whereIn('status', [
-                \App\Enums\BookingStatus::CONFIRMED->value,
-                \App\Enums\BookingStatus::VENUE_CONFIRMED->value,
-                \App\Enums\BookingStatus::COMPLETED->value
+                BookingStatus::CONFIRMED->value,
+                BookingStatus::VENUE_CONFIRMED->value,
+                BookingStatus::COMPLETED->value,
             ])
             ->select('created_at')
             ->get();
 
-        $timestamps = $confirmedBookings->pluck('created_at')->map(fn($dt) => $dt->timestamp)->toArray();
+        $timestamps = $confirmedBookings->pluck('created_at')->map(fn ($dt) => $dt->timestamp)->toArray();
         $count = count($timestamps);
 
         // Cache the count for performance (2 hour TTL)

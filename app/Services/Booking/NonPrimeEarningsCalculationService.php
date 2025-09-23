@@ -233,7 +233,7 @@ readonly class NonPrimeEarningsCalculationService
 
     private function getOverride(Booking $booking): ?VenueTimeSlot
     {
-        if (!$booking->booking_at) {
+        if (! $booking->booking_at) {
             return null;
         }
 

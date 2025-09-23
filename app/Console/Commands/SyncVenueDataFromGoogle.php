@@ -5,6 +5,7 @@ namespace App\Console\Commands;
 use App\Data\VenueMetadata;
 use App\Models\Venue;
 use App\Services\GooglePlacesService;
+use Exception;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Log;
 
@@ -164,7 +165,7 @@ class SyncVenueDataFromGoogle extends Command
 
                 // Rate limiting - Google Places API has quotas
                 sleep(1);
-            } catch (\Exception $e) {
+            } catch (Exception $e) {
                 $failCount++;
                 Log::error('Google Places sync error', [
                     'venue_id' => $venue->id,

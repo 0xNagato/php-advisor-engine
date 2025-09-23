@@ -3,6 +3,7 @@
 namespace App\Actions\Venue;
 
 use App\Models\Venue;
+use Exception;
 use Illuminate\Support\Facades\Http;
 use Lorisleiva\Actions\Concerns\AsAction;
 
@@ -10,22 +11,21 @@ class GenerateVenueDescriptionWithAI
 {
     use AsAction;
 
-    private const ANTHROPIC_MODEL = 'claude-opus-4-1-20250805';
-    private const OPENAI_MODEL = 'gpt-4-turbo-preview';
+    private const string ANTHROPIC_MODEL = 'claude-opus-4-1-20250805';
+
+    private const string OPENAI_MODEL = 'gpt-4-turbo-preview';
 
     public function handle(Venue $venue, string $provider = 'anthropic'): ?string
     {
-        $apiKey = $provider === 'anthropic' 
+        $apiKey = $provider === 'anthropic'
             ? config('services.anthropic.api_key')
             : config('services.openai.api_key');
 
-        if (empty($apiKey)) {
-            throw new \Exception("API key for {$provider} is not configured.");
-        }
+        throw_if(empty($apiKey), new Exception("API key for {$provider} is not configured."));
 
         $prompt = $this->buildDetailedPrompt($venue);
 
-        return $provider === 'anthropic' 
+        return $provider === 'anthropic'
             ? $this->generateWithAnthropic($prompt, $apiKey)
             : $this->generateWithOpenAI($prompt, $apiKey);
     }
@@ -50,10 +50,10 @@ class GenerateVenueDescriptionWithAI
 
         // Cuisine and specialties
         if ($venue->cuisines) {
-            $context[] = "Cuisine types: " . implode(', ', array_map(fn($c) => ucwords(str_replace('_', ' ', $c)), $venue->cuisines));
+            $context[] = 'Cuisine types: '.implode(', ', array_map(fn ($c) => ucwords(str_replace('_', ' ', $c)), $venue->cuisines));
         }
         if ($venue->specialty) {
-            $context[] = "Known for: " . implode(', ', $venue->specialty);
+            $context[] = 'Known for: '.implode(', ', $venue->specialty);
         }
 
         // Price level
@@ -62,35 +62,45 @@ class GenerateVenueDescriptionWithAI
                 1 => 'budget-friendly',
                 2 => 'moderately priced',
                 3 => 'upscale',
-                4 => 'fine dining'
+                4 => 'fine dining',
             ];
-            $context[] = "Price range: " . ($priceDescriptions[$metadata->priceLevel] ?? 'varies');
+            $context[] = 'Price range: '.($priceDescriptions[$metadata->priceLevel] ?? 'varies');
         }
 
         // Features and amenities
         $features = [];
         $attrs = $metadata?->googleAttributes ?? [];
-        if ($attrs['serves_wine'] ?? false) $features[] = 'extensive wine selection';
-        if ($attrs['serves_beer'] ?? false) $features[] = 'craft beer menu';
-        if ($attrs['serves_cocktails'] ?? false) $features[] = 'creative cocktails';
-        if ($attrs['outdoor_seating'] ?? false) $features[] = 'outdoor dining';
-        if ($attrs['live_music'] ?? false) $features[] = 'live music entertainment';
+        if ($attrs['serves_wine'] ?? false) {
+            $features[] = 'extensive wine selection';
+        }
+        if ($attrs['serves_beer'] ?? false) {
+            $features[] = 'craft beer menu';
+        }
+        if ($attrs['serves_cocktails'] ?? false) {
+            $features[] = 'creative cocktails';
+        }
+        if ($attrs['outdoor_seating'] ?? false) {
+            $features[] = 'outdoor dining';
+        }
+        if ($attrs['live_music'] ?? false) {
+            $features[] = 'live music entertainment';
+        }
 
-        if (!empty($features)) {
-            $context[] = "Offers: " . implode(', ', $features);
+        if (! empty($features)) {
+            $context[] = 'Offers: '.implode(', ', $features);
         }
 
         // Existing descriptions to reference
         $existingDescriptions = [];
         if ($metadata?->googleEditorialSummary) {
-            $existingDescriptions[] = "Previous summary: " . $metadata->googleEditorialSummary;
+            $existingDescriptions[] = 'Previous summary: '.$metadata->googleEditorialSummary;
         }
         if ($metadata?->googleGenerativeSummary) {
-            $existingDescriptions[] = "AI summary: " . $metadata->googleGenerativeSummary;
+            $existingDescriptions[] = 'AI summary: '.$metadata->googleGenerativeSummary;
         }
 
         $contextText = implode("\n", $context);
-        $existingText = !empty($existingDescriptions) ? "\n\n" . implode("\n", $existingDescriptions) : '';
+        $existingText = ! empty($existingDescriptions) ? "\n\n".implode("\n", $existingDescriptions) : '';
 
         return <<<EOT
 You are a professional restaurant copywriter creating descriptions for a restaurant booking platform.
@@ -131,18 +141,17 @@ EOT;
             ],
         ]);
 
-        if (!$response->successful()) {
-            throw new \Exception('Anthropic API error: ' . $response->body());
-        }
+        throw_unless($response->successful(), new Exception('Anthropic API error: '.$response->body()));
 
         $data = $response->json();
+
         return trim($data['content'][0]['text'] ?? '');
     }
 
     private function generateWithOpenAI(string $prompt, string $apiKey): ?string
     {
         $response = Http::timeout(30)->withHeaders([
-            'Authorization' => 'Bearer ' . $apiKey,
+            'Authorization' => 'Bearer '.$apiKey,
         ])->post('https://api.openai.com/v1/chat/completions', [
             'model' => self::OPENAI_MODEL,
             'messages' => [
@@ -159,11 +168,10 @@ EOT;
             'temperature' => 0.7,
         ]);
 
-        if (!$response->successful()) {
-            throw new \Exception('OpenAI API error: ' . $response->body());
-        }
+        throw_unless($response->successful(), new Exception('OpenAI API error: '.$response->body()));
 
         $data = $response->json();
+
         return trim($data['choices'][0]['message']['content'] ?? '');
     }
 }

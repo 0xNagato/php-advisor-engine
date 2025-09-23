@@ -5,14 +5,14 @@ namespace App\Http\Controllers\Api;
 use App\Actions\Region\GetUserRegion;
 use App\Enums\VenueStatus;
 use App\Http\Controllers\Controller;
+use App\Models\Cuisine;
+use App\Models\Specialty;
 use App\Models\Venue;
 use App\OpenApi\Responses\ShowVenueResponse;
 use App\OpenApi\Responses\VenueListResponse;
 use Illuminate\Http\JsonResponse;
 use Vyuldashev\LaravelOpenApi\Attributes as OpenApi;
 use Vyuldashev\LaravelOpenApi\Attributes\Response as OpenApiResponse;
-use App\Models\Cuisine;
-use App\Models\Specialty;
 
 #[OpenApi\PathItem]
 class VenueController extends Controller
@@ -49,7 +49,7 @@ class VenueController extends Controller
         $venues = $query->orderBy('name')->get(['id', 'name', 'metadata']);
 
         return response()->json([
-            'data' => $venues->map(fn($venue) => [
+            'data' => $venues->map(fn ($venue) => [
                 'id' => $venue->id,
                 'name' => $venue->name,
                 'rating' => $venue->metadata?->rating,
@@ -73,7 +73,7 @@ class VenueController extends Controller
     {
         $venue = Venue::query()->find($id);
 
-        if (!$venue) {
+        if (! $venue) {
             return response()->json([
                 'message' => 'Venue not found',
             ], 404);
@@ -116,7 +116,7 @@ class VenueController extends Controller
             if (isset($cuisinesList[$cuisineId])) {
                 $formatted[] = [
                     'id' => $cuisineId,
-                    'name' => $cuisinesList[$cuisineId]
+                    'name' => $cuisinesList[$cuisineId],
                 ];
             }
         }
@@ -136,7 +136,7 @@ class VenueController extends Controller
             if (isset($specialtiesList[$specialtyId])) {
                 $formatted[] = [
                     'id' => $specialtyId,
-                    'name' => $specialtiesList[$specialtyId]
+                    'name' => $specialtiesList[$specialtyId],
                 ];
             }
         }

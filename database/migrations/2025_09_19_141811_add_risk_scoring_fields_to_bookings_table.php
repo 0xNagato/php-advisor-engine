@@ -46,7 +46,7 @@ return new class extends Migration
                 'reviewed_at',
                 'reviewed_by',
                 'ip_address',
-                'user_agent'
+                'user_agent',
             ]);
         });
     }

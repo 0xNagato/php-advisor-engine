@@ -3,6 +3,7 @@
 namespace App\Console\Commands;
 
 use App\Actions\Risk\ScoreBookingSuspicion;
+use Exception;
 use Illuminate\Console\Command;
 
 class TestRiskScoring extends Command
@@ -28,6 +29,7 @@ class TestRiskScoring extends Command
     {
         if ($this->option('thresholds')) {
             $this->showThresholds();
+
             return;
         }
 
@@ -105,6 +107,7 @@ class TestRiskScoring extends Command
     {
         $icon = $this->getRiskIcon($score);
         $level = $score >= 80 ? 'HIGH' : ($score >= 40 ? 'MEDIUM' : 'LOW');
+
         return "{$icon} {$level} ({$score}/100)";
     }
 
@@ -119,7 +122,7 @@ class TestRiskScoring extends Command
                 'ip' => '127.0.0.1', // localhost
                 'notes' => 'Testing the booking system',
                 'venue_region' => 'miami',
-                'expected' => 'should_not_flag'
+                'expected' => 'should_not_flag',
             ],
             [
                 'name' => 'Val Diaz',
@@ -128,7 +131,7 @@ class TestRiskScoring extends Command
                 'ip' => '104.16.0.1', // Cloudflare (datacenter)
                 'notes' => 'Business dinner',
                 'venue_region' => 'miami',
-                'expected' => 'should_not_flag'
+                'expected' => 'should_not_flag',
             ],
             [
                 'name' => 'Paulo Althoff',
@@ -137,7 +140,7 @@ class TestRiskScoring extends Command
                 'ip' => '35.0.0.1', // Google Cloud (datacenter)
                 'notes' => 'Client meeting',
                 'venue_region' => 'ibiza',
-                'expected' => 'should_not_flag'
+                'expected' => 'should_not_flag',
             ],
             [
                 'name' => 'Michael Culhane',
@@ -146,7 +149,7 @@ class TestRiskScoring extends Command
                 'ip' => '52.0.0.1', // AWS (datacenter)
                 'notes' => 'Team celebration',
                 'venue_region' => 'miami',
-                'expected' => 'should_not_flag'
+                'expected' => 'should_not_flag',
             ],
             [
                 'name' => 'Shaz Peksos',
@@ -155,7 +158,7 @@ class TestRiskScoring extends Command
                 'ip' => '34.0.0.1', // Google Cloud (datacenter)
                 'notes' => 'VIP booking',
                 'venue_region' => 'ibiza',
-                'expected' => 'should_not_flag'
+                'expected' => 'should_not_flag',
             ],
             // Obviously problematic bookings for comparison
             [
@@ -165,7 +168,7 @@ class TestRiskScoring extends Command
                 'ip' => '127.0.0.1',
                 'notes' => 'Test booking',
                 'venue_region' => 'miami',
-                'expected' => 'should_flag'
+                'expected' => 'should_flag',
             ],
             [
                 'name' => 'Fuck You',
@@ -174,8 +177,8 @@ class TestRiskScoring extends Command
                 'ip' => '127.0.0.1',
                 'notes' => 'Bad booking',
                 'venue_region' => 'miami',
-                'expected' => 'should_flag'
-            ]
+                'expected' => 'should_flag',
+            ],
         ];
 
         $this->info('Testing Risk Scoring Fixes');
@@ -184,7 +187,7 @@ class TestRiskScoring extends Command
         $results = [];
 
         foreach ($testCases as $i => $testCase) {
-            $this->info("Test Case " . ($i + 1) . ": {$testCase['name']} ({$testCase['email']})");
+            $this->info('Test Case '.($i + 1).": {$testCase['name']} ({$testCase['email']})");
             $this->info(str_repeat('-', 50));
 
             try {
@@ -235,8 +238,8 @@ class TestRiskScoring extends Command
                 $this->info("Risk Level: {$this->formatRiskLevel($totalScore)}");
 
                 // Show all reasons from the full analysis
-                if (!empty($result['reasons'])) {
-                    $this->info("All Risk Reasons:");
+                if (! empty($result['reasons'])) {
+                    $this->info('All Risk Reasons:');
                     foreach ($result['reasons'] as $reason) {
                         $this->line("  - {$reason}");
                     }
@@ -244,7 +247,7 @@ class TestRiskScoring extends Command
 
                 // Show AI response if available
                 if ($features['llm_used'] && isset($features['llm_response'])) {
-                    $this->info("AI Response: " . substr($features['llm_response'], 0, 200) . '...');
+                    $this->info('AI Response: '.substr((string) $features['llm_response'], 0, 200).'...');
                 }
 
                 $isFalsePositive = ($totalScore >= 40 && $testCase['expected'] === 'should_not_flag');
@@ -258,10 +261,10 @@ class TestRiskScoring extends Command
                     'risk_display' => $this->formatRiskLevel($totalScore),
                     'expected' => $testCase['expected'],
                     'result' => $isFalsePositive ? 'FALSE_POSITIVE' : 'CORRECT',
-                    'ai_used' => $features['llm_used'] ?? false
+                    'ai_used' => $features['llm_used'] ?? false,
                 ];
 
-            } catch (\Exception $e) {
+            } catch (Exception $e) {
                 $this->error("Error: {$e->getMessage()}");
             }
 
@@ -280,14 +283,14 @@ class TestRiskScoring extends Command
         $this->table(
             ['Risk Level', 'Count', 'Percentage', 'Description'],
             [
-                ['🟢 LOW (0-39)', $lowCount, round(($lowCount / count($results)) * 100, 1) . '%', 'Proceed normally'],
-                ['🟡 MEDIUM (40-79)', $mediumCount, round(($mediumCount / count($results)) * 100, 1) . '%', 'Require manual review'],
-                ['🔴 HIGH (80+)', $highCount, round(($highCount / count($results)) * 100, 1) . '%', 'Likely fraudulent'],
+                ['🟢 LOW (0-39)', $lowCount, round(($lowCount / count($results)) * 100, 1).'%', 'Proceed normally'],
+                ['🟡 MEDIUM (40-79)', $mediumCount, round(($mediumCount / count($results)) * 100, 1).'%', 'Require manual review'],
+                ['🔴 HIGH (80+)', $highCount, round(($highCount / count($results)) * 100, 1).'%', 'Likely fraudulent'],
             ]
         );
 
         $falsePositives = collect($results)->where('result', 'FALSE_POSITIVE')->count();
-        $this->info("False Positives: {$falsePositives}/" . count($results));
+        $this->info("False Positives: {$falsePositives}/".count($results));
 
         // Results breakdown
         $correctCount = collect($results)->where('result', 'CORRECT')->count();
@@ -299,7 +302,7 @@ class TestRiskScoring extends Command
             $this->warn("⚠️ {$falsePositives} false positives detected. May need further tuning.");
         }
 
-        $this->info("✅ Correct Results: {$correctCount}/{$totalCount} (" . round(($correctCount / $totalCount) * 100, 1) . '%)');
+        $this->info("✅ Correct Results: {$correctCount}/{$totalCount} (".round(($correctCount / $totalCount) * 100, 1).'%)');
 
         // Show detailed results summary
         if ($totalCount > 0) {
@@ -309,12 +312,13 @@ class TestRiskScoring extends Command
                 ['Name', 'Score', 'Risk Level', 'Expected', 'Result'],
                 collect($results)->map(function ($result) {
                     $resultIcon = $result['result'] === 'CORRECT' ? '✅' : '❌';
+
                     return [
                         $result['name'],
-                        $result['score'] . '/100',
-                        $this->getRiskIcon($result['score']) . ' ' . $result['risk_level'],
+                        $result['score'].'/100',
+                        $this->getRiskIcon($result['score']).' '.$result['risk_level'],
                         $result['expected'] === 'should_not_flag' ? 'Should Pass' : 'Should Flag',
-                        $resultIcon . ' ' . $result['result']
+                        $resultIcon.' '.$result['result'],
                     ];
                 })->toArray()
             );

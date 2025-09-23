@@ -15,7 +15,7 @@ class AnalyzeNameRisk
         'john doe', 'jane doe', 'test user', 'test test',
         'fake', 'bot', 'robot',
         'lorem ipsum', 'person', 'customer',
-        'testuser', 'test name', 'fake person'
+        'testuser', 'test name', 'fake person',
     ];
 
     // Weighted profanity patterns - balanced scoring
@@ -65,7 +65,7 @@ class AnalyzeNameRisk
             return [
                 'score' => 100,
                 'reasons' => ['Empty name'],
-                'features' => ['name_valid' => false]
+                'features' => ['name_valid' => false],
             ];
         }
 
@@ -89,7 +89,7 @@ class AnalyzeNameRisk
 
         // Check for test names - these should be HIGH risk
         foreach ($this->testNames as $testName) {
-            if (str_contains($nameLower, $testName)) {
+            if (str_contains($nameLower, (string) $testName)) {
                 $score += 80; // Increased from 50 - test names are suspicious
                 $reasons[] = 'Test name pattern detected';
                 $features['test_name'] = true;
@@ -103,7 +103,7 @@ class AnalyzeNameRisk
         foreach ($this->profanityPatterns as $profanity => $weight) {
             if (str_contains($nameLower, $profanity)) {
                 // Check position - profanity at start is worse
-                $position = strpos($nameLower, $profanity);
+                $position = strpos($nameLower, (string) $profanity);
                 $positionMultiplier = 1.0;
 
                 if ($position === 0) {
@@ -205,7 +205,7 @@ class AnalyzeNameRisk
         $nameStructure = $this->analyzeNameStructure($name);
         $features = array_merge($features, $nameStructure);
 
-        if (!$nameStructure['has_first_last']) {
+        if (! $nameStructure['has_first_last']) {
             $score += 10;
             $reasons[] = 'Single name only';
         }
@@ -213,7 +213,7 @@ class AnalyzeNameRisk
         return [
             'score' => min(100, $score),
             'reasons' => $reasons,
-            'features' => $features
+            'features' => $features,
         ];
     }
 
@@ -231,6 +231,7 @@ class AnalyzeNameRisk
     protected function hasExcessiveSpecialChars(string $text): bool
     {
         $specialCount = preg_match_all('/[^a-zA-Z0-9\s\-\']/', $text);
+
         return $specialCount > 2 || ($specialCount > 0 && strlen($text) < 5);
     }
 
@@ -242,18 +243,18 @@ class AnalyzeNameRisk
         // Remove spaces and special chars
         $text = preg_replace('/[^a-zA-Z]/', '', $text);
 
-        if (strlen($text) < 4) {
+        if (strlen((string) $text) < 4) {
             return false;
         }
 
         // Check for too many consonants in a row
-        if (preg_match('/[bcdfghjklmnpqrstvwxyz]{5,}/i', $text)) {
+        if (preg_match('/[bcdfghjklmnpqrstvwxyz]{5,}/i', (string) $text)) {
             return true;
         }
 
         // Check for lack of vowels
-        $vowelCount = preg_match_all('/[aeiou]/i', $text);
-        $consonantCount = preg_match_all('/[bcdfghjklmnpqrstvwxyz]/i', $text);
+        $vowelCount = preg_match_all('/[aeiou]/i', (string) $text);
+        $consonantCount = preg_match_all('/[bcdfghjklmnpqrstvwxyz]/i', (string) $text);
 
         if ($consonantCount > 0 && $vowelCount / $consonantCount < 0.15) {
             return true;
@@ -273,7 +274,7 @@ class AnalyzeNameRisk
             'name_parts' => count($parts),
             'has_first_last' => count($parts) >= 2,
             'name_length' => strlen($name),
-            'avg_part_length' => count($parts) > 0 ? array_sum(array_map('strlen', $parts)) / count($parts) : 0
+            'avg_part_length' => count($parts) > 0 ? array_sum(array_map('strlen', $parts)) / count($parts) : 0,
         ];
     }
 }

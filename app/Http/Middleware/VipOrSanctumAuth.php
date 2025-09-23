@@ -26,7 +26,7 @@ class VipOrSanctumAuth
     public function handle(Request $request, Closure $next): Response
     {
         $authHeader = $request->header('Authorization');
-        if (!$authHeader || !str_starts_with($authHeader, 'Bearer ')) {
+        if (! $authHeader || ! str_starts_with($authHeader, 'Bearer ')) {
             return new JsonResponse(['message' => 'Unauthenticated.'], 401);
         }
 
@@ -38,6 +38,7 @@ class VipOrSanctumAuth
             // Set the authenticated user for this request
             Auth::setUser($accessToken->tokenable);
             $request->attributes->set('is_vip_session', false);
+
             return $next($request);
         }
 
@@ -47,6 +48,7 @@ class VipOrSanctumAuth
             // Store VIP context in request for use by controllers
             $request->attributes->set('vip_context', $sessionData);
             $request->attributes->set('is_vip_session', true);
+
             return $next($request);
         }
 

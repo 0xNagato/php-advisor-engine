@@ -3,15 +3,18 @@
 namespace App\Console\Commands;
 
 use App\Actions\Risk\EvaluateWithLLM;
-use App\Actions\Risk\ScoreBookingSuspicion;
 use App\Actions\Risk\ProcessBookingRisk;
+use App\Actions\Risk\ScoreBookingSuspicion;
 use App\Models\Booking;
+use Exception;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Http;
+use ReflectionClass;
 
 class TestAIScreening extends Command
 {
     protected $signature = 'test:ai-screening {--booking-id=}';
+
     protected $description = 'Test AI screening functionality';
 
     public function handle()
@@ -23,8 +26,8 @@ class TestAIScreening extends Command
 
         // Test configuration
         $this->info('Configuration:');
-        $this->line('  AI Enabled: ' . (config('app.ai_screening_enabled') ? 'YES' : 'NO'));
-        $this->line('  OpenAI API Key: ' . (config('services.openai.key') ? 'SET' : 'NOT SET'));
+        $this->line('  AI Enabled: '.(config('app.ai_screening_enabled') ? 'YES' : 'NO'));
+        $this->line('  OpenAI API Key: '.(config('services.openai.key') ? 'SET' : 'NOT SET'));
 
         // Test direct API call
         $this->info("\nTesting direct OpenAI API call...");
@@ -50,36 +53,37 @@ class TestAIScreening extends Command
     private function testDirectAPI()
     {
         $apiKey = config('services.openai.key');
-        if (!$apiKey) {
+        if (! $apiKey) {
             $this->error('No API key configured!');
+
             return;
         }
 
         try {
             $response = Http::timeout(10)
                 ->withHeaders([
-                    'Authorization' => 'Bearer ' . $apiKey,
+                    'Authorization' => 'Bearer '.$apiKey,
                     'Content-Type' => 'application/json',
                 ])
                 ->post('https://api.openai.com/v1/chat/completions', [
                     'model' => 'gpt-4o-mini',
                     'messages' => [
-                        ['role' => 'user', 'content' => 'Say "test successful" in JSON: {"status": "..."}']
+                        ['role' => 'user', 'content' => 'Say "test successful" in JSON: {"status": "..."}'],
                     ],
                     'temperature' => 0,
                     'max_tokens' => 20,
-                    'response_format' => ['type' => 'json_object']
+                    'response_format' => ['type' => 'json_object'],
                 ]);
 
             if ($response->successful()) {
                 $this->info('✅ Direct API call successful');
                 $content = $response->json()['choices'][0]['message']['content'] ?? '';
-                $this->line('Response: ' . $content);
+                $this->line('Response: '.$content);
             } else {
-                $this->error('❌ API call failed: ' . $response->status());
+                $this->error('❌ API call failed: '.$response->status());
             }
-        } catch (\Exception $e) {
-            $this->error('❌ Exception: ' . $e->getMessage());
+        } catch (Exception $e) {
+            $this->error('❌ Exception: '.$e->getMessage());
         }
     }
 
@@ -94,26 +98,26 @@ class TestAIScreening extends Command
 
         try {
             // First check what config key it's actually using
-            $reflection = new \ReflectionClass(EvaluateWithLLM::class);
+            $reflection = new ReflectionClass(EvaluateWithLLM::class);
             $method = $reflection->getMethod('callLLMAPI');
             $method->setAccessible(true);
 
             // Get the source code to check
             $filename = $reflection->getFileName();
             $lines = file($filename);
-            $this->line('Checking line 51: ' . trim($lines[50])); // Line 51 is index 50
+            $this->line('Checking line 51: '.trim($lines[50])); // Line 51 is index 50
 
             $result = EvaluateWithLLM::run($features);
 
             $this->info('✅ EvaluateWithLLM executed');
-            $this->line('  Risk Score: ' . $result['risk_score']);
-            $this->line('  Confidence: ' . $result['confidence']);
-            $this->line('  Analysis: ' . $result['analysis']);
-            $this->line('  Reasons: ' . implode(', ', $result['reasons']));
-        } catch (\Exception $e) {
-            $this->error('❌ Error: ' . $e->getMessage());
-            $this->line('  File: ' . $e->getFile());
-            $this->line('  Line: ' . $e->getLine());
+            $this->line('  Risk Score: '.$result['risk_score']);
+            $this->line('  Confidence: '.$result['confidence']);
+            $this->line('  Analysis: '.$result['analysis']);
+            $this->line('  Reasons: '.implode(', ', $result['reasons']));
+        } catch (Exception $e) {
+            $this->error('❌ Error: '.$e->getMessage());
+            $this->line('  File: '.$e->getFile());
+            $this->line('  Line: '.$e->getLine());
         }
     }
 
@@ -130,21 +134,22 @@ class TestAIScreening extends Command
         );
 
         $this->info('ScoreBookingSuspicion result:');
-        $this->line('  Score: ' . $result['score']);
-        $this->line('  LLM Used: ' . ($result['features']['llm_used'] ?? false ? 'YES' : 'NO'));
+        $this->line('  Score: '.$result['score']);
+        $this->line('  LLM Used: '.($result['features']['llm_used'] ?? false ? 'YES' : 'NO'));
 
         if (isset($result['features']['llm_response'])) {
-            $ai = json_decode($result['features']['llm_response'], true);
-            $this->line('  AI Score: ' . ($ai['risk_score'] ?? 'N/A'));
-            $this->line('  AI Confidence: ' . ($ai['confidence'] ?? 'N/A'));
+            $ai = json_decode((string) $result['features']['llm_response'], true);
+            $this->line('  AI Score: '.($ai['risk_score'] ?? 'N/A'));
+            $this->line('  AI Confidence: '.($ai['confidence'] ?? 'N/A'));
         }
     }
 
     private function testOnBooking($bookingId)
     {
-        $booking = Booking::find($bookingId);
-        if (!$booking) {
+        $booking = Booking::query()->find($bookingId);
+        if (! $booking) {
             $this->error("Booking #{$bookingId} not found");
+
             return;
         }
 
@@ -160,15 +165,15 @@ class TestAIScreening extends Command
         if (is_string($metadata)) {
             $decoded = json_decode($metadata, true);
             $aiUsed = $decoded['llmUsed'] ?? false;
-            $this->line('AI Used: ' . ($aiUsed ? 'YES' : 'NO'));
+            $this->line('AI Used: '.($aiUsed ? 'YES' : 'NO'));
 
             if ($aiUsed && isset($decoded['llmResponse'])) {
-                $ai = json_decode($decoded['llmResponse'], true);
+                $ai = json_decode((string) $decoded['llmResponse'], true);
                 if ($ai) {
                     $this->info('AI Analysis:');
-                    $this->line('  Score: ' . ($ai['risk_score'] ?? 'N/A'));
-                    $this->line('  Confidence: ' . ($ai['confidence'] ?? 'N/A'));
-                    $this->line('  Analysis: ' . ($ai['analysis'] ?? 'N/A'));
+                    $this->line('  Score: '.($ai['risk_score'] ?? 'N/A'));
+                    $this->line('  Confidence: '.($ai['confidence'] ?? 'N/A'));
+                    $this->line('  Analysis: '.($ai['analysis'] ?? 'N/A'));
                 }
             }
         }

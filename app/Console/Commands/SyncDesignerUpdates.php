@@ -2,11 +2,12 @@
 
 namespace App\Console\Commands;
 
+use DOMDocument;
+use DOMXPath;
+use Exception;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\File;
 use Symfony\Component\Process\Process;
-use DOMDocument;
-use DOMXPath;
 
 class SyncDesignerUpdates extends Command
 {
@@ -42,8 +43,9 @@ class SyncDesignerUpdates extends Command
         $bladeDir = resource_path('views/site');
         $force = $this->option('force');
 
-        if (!File::exists($htmlDir)) {
+        if (! File::exists($htmlDir)) {
             $this->error("❌ HTML directory not found: {$htmlDir}");
+
             return 1;
         }
 
@@ -54,13 +56,15 @@ class SyncDesignerUpdates extends Command
             $htmlPath = "{$htmlDir}/{$htmlFile}";
             $bladePath = "{$bladeDir}/{$bladeFile}";
 
-            if (!File::exists($htmlPath)) {
+            if (! File::exists($htmlPath)) {
                 $this->warn("⚠️  HTML file not found: {$htmlFile}");
+
                 continue;
             }
 
-            if (!File::exists($bladePath)) {
+            if (! File::exists($bladePath)) {
                 $this->warn("⚠️  Blade file not found: {$bladeFile}");
+
                 continue;
             }
 
@@ -68,9 +72,10 @@ class SyncDesignerUpdates extends Command
             $htmlModified = File::lastModified($htmlPath);
             $bladeModified = File::lastModified($bladePath);
 
-            if (!$force && $htmlModified <= $bladeModified) {
+            if (! $force && $htmlModified <= $bladeModified) {
                 $skippedFiles[] = $htmlFile;
                 $this->line("⏭️  Skipping {$htmlFile} (not newer than Blade template)");
+
                 continue;
             }
 
@@ -83,8 +88,8 @@ class SyncDesignerUpdates extends Command
                 $this->syncHtmlToBlade($htmlPath, $bladePath, $htmlFile);
                 $updatedFiles[] = $htmlFile;
                 $this->info("✅ Updated {$bladeFile}");
-            } catch (\Exception $e) {
-                $this->error("❌ Failed to update {$bladeFile}: " . $e->getMessage());
+            } catch (Exception $e) {
+                $this->error("❌ Failed to update {$bladeFile}: ".$e->getMessage());
             }
         }
 
@@ -107,7 +112,7 @@ class SyncDesignerUpdates extends Command
         }
 
         // Build assets if requested and not already built by Tailwind tools
-        if ($this->option('build') && !$this->option('fix-tailwind')) {
+        if ($this->option('build') && ! $this->option('fix-tailwind')) {
             $this->newLine();
             $this->info('🏗️  Rebuilding production assets...');
             $this->executeShellCommand(['npm', 'run', 'build'], '📦 Building optimized CSS and JS...');
@@ -116,15 +121,15 @@ class SyncDesignerUpdates extends Command
         // Summary
         $this->newLine();
         $this->info('📊 Sync Summary:');
-        $this->line("✅ Updated files: " . count($updatedFiles));
-        $this->line("⏭️  Skipped files: " . count($skippedFiles));
+        $this->line('✅ Updated files: '.count($updatedFiles));
+        $this->line('⏭️  Skipped files: '.count($skippedFiles));
 
-        if (!empty($updatedFiles)) {
-            $this->line("Updated: " . implode(', ', $updatedFiles));
+        if (! empty($updatedFiles)) {
+            $this->line('Updated: '.implode(', ', $updatedFiles));
         }
 
-        if (!empty($skippedFiles)) {
-            $this->line("Skipped: " . implode(', ', $skippedFiles));
+        if (! empty($skippedFiles)) {
+            $this->line('Skipped: '.implode(', ', $skippedFiles));
         }
 
         $this->newLine();
@@ -176,6 +181,7 @@ class SyncDesignerUpdates extends Command
         if (preg_match('/<title>(.*?)<\/title>/i', $html, $matches)) {
             return trim($matches[1]);
         }
+
         return 'PRIMA';
     }
 
@@ -184,20 +190,20 @@ class SyncDesignerUpdates extends Command
      */
     protected function extractBodyContent(string $html): string
     {
-        $dom = new DOMDocument();
+        $dom = new DOMDocument;
         @$dom->loadHTML($html, LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD);
         $xpath = new DOMXPath($dom);
 
         // Find body content, excluding header and footer
         $body = $xpath->query('//body')->item(0);
-        if (!$body) {
+        if (! $body) {
             return '';
         }
 
         $content = '';
         foreach ($body->childNodes as $node) {
             if ($node->nodeType === XML_ELEMENT_NODE) {
-                $tagName = strtolower($node->tagName);
+                $tagName = strtolower((string) $node->tagName);
 
                 // Skip header, footer, and script tags
                 if (in_array($tagName, ['header', 'footer', 'script'])) {
@@ -209,7 +215,7 @@ class SyncDesignerUpdates extends Command
                     continue;
                 }
 
-                $content .= $dom->saveHTML($node) . "\n";
+                $content .= $dom->saveHTML($node)."\n";
             }
         }
 
@@ -224,6 +230,7 @@ class SyncDesignerUpdates extends Command
         if (preg_match('/<div[^>]*id="panelHeader"[^>]*>.*?<\/div>\s*<\/div>/s', $html, $matches)) {
             return trim($matches[0]);
         }
+
         return '';
     }
 
@@ -236,10 +243,10 @@ class SyncDesignerUpdates extends Command
         $content = preg_replace('/url\([\'"]images\/([^\'")]+\.(png|jpg|jpeg|webp|svg))[\'"]([^)]*)\)/', 'url(\'{{ asset(\'images/site/$1\') }}\' $3)', $content);
 
         // Convert image src attributes
-        $content = preg_replace('/src=[\'"]images\/([^\'")]+\.(png|jpg|jpeg|webp|svg))[\'"]/', 'src="{{ asset(\'images/site/$1\') }}"', $content);
+        $content = preg_replace('/src=[\'"]images\/([^\'")]+\.(png|jpg|jpeg|webp|svg))[\'"]/', 'src="{{ asset(\'images/site/$1\') }}"', (string) $content);
 
         // Convert CSS href attributes
-        $content = preg_replace('/href=[\'"]css\/([^\'")]+\.css)[\'"]/', 'href="{{ asset(\'css/$1\') }}"', $content);
+        $content = preg_replace('/href=[\'"]css\/([^\'")]+\.css)[\'"]/', 'href="{{ asset(\'css/$1\') }}"', (string) $content);
 
         return $content;
     }
@@ -250,7 +257,7 @@ class SyncDesignerUpdates extends Command
     protected function convertBookingUrls(string $content): string
     {
         $bookingUrl = config('app.booking_url');
-        $escapedUrl = preg_quote($bookingUrl, '/');
+        $escapedUrl = preg_quote((string) $bookingUrl, '/');
 
         // Convert booking URLs from /region to /?region=region format
         $content = preg_replace('/href=[\'"]'.$escapedUrl.'\/(miami|los-angeles|ibiza)[\'"]/', 'href="'.$bookingUrl.'/?region=$1"', $content);
@@ -288,8 +295,8 @@ class SyncDesignerUpdates extends Command
         $html = preg_replace($pattern, $replacement, $html);
 
         // Also update form headings to "Talk to PRIMA"
-        $html = preg_replace('/<h3([^>]*?)>Tell us a bit about you<\/h3>/', '<h3$1>Talk to PRIMA</h3>', $html);
-        $html = preg_replace('/<h3([^>]*?)>Join PRIMA<\/h3>/', '<h3$1>Talk to PRIMA</h3>', $html);
+        $html = preg_replace('/<h3([^>]*?)>Tell us a bit about you<\/h3>/', '<h3$1>Talk to PRIMA</h3>', (string) $html);
+        $html = preg_replace('/<h3([^>]*?)>Join PRIMA<\/h3>/', '<h3$1>Talk to PRIMA</h3>', (string) $html);
 
         return $html;
     }
@@ -305,7 +312,7 @@ class SyncDesignerUpdates extends Command
         $html = preg_replace($pattern, $replacement, $html);
 
         // Remove href attribute from the converted buttons
-        $html = preg_replace('/(<button[^>]+)href=["\'][^"\'^]*["\']([^>]*>)/', '$1$2', $html);
+        $html = preg_replace('/(<button[^>]+)href=["\'][^"\'^]*["\']([^>]*>)/', '$1$2', (string) $html);
 
         return $html;
     }
@@ -323,7 +330,7 @@ class SyncDesignerUpdates extends Command
         // Also handle cases where PRIMA might be in different HTML elements
         $pattern2 = '/<([^>]*class="[^"]*header-logo[^"]*"[^>]*)>(\s*PRIMA\s*)<\/[^>]*>/i';
         $replacement2 = '<a href="{{ route(\'home\') }}"$1 hover:text-indigo-700 transition-colors">$2</a>';
-        $html = preg_replace($pattern2, $replacement2, $html);
+        $html = preg_replace($pattern2, $replacement2, (string) $html);
 
         return $html;
     }
@@ -348,7 +355,7 @@ class SyncDesignerUpdates extends Command
      */
     protected function extractPreservedSections(string $bladePath): array
     {
-        if (!File::exists($bladePath)) {
+        if (! File::exists($bladePath)) {
             return [];
         }
 
@@ -380,23 +387,23 @@ class SyncDesignerUpdates extends Command
 
         foreach ($preservedSections as $sectionId => $sectionContent) {
             // Create the delimiter pattern for this section
-            $sectionIdPart = ($sectionId === 'default' || empty($sectionId)) ? '' : ':' . $sectionId;
+            $sectionIdPart = ($sectionId === 'default' || empty($sectionId)) ? '' : ':'.$sectionId;
             $startDelimiter = "<!-- SYNC:PRESERVE:START{$sectionIdPart} -->";
-            $endDelimiter = "<!-- SYNC:PRESERVE:END -->";
+            $endDelimiter = '<!-- SYNC:PRESERVE:END -->';
 
             // Replace placeholder or add at the end if no delimiter found
-            $pattern = '/<!-- SYNC:PRESERVE:START' . preg_quote($sectionIdPart, '/') . ' -->.*?<!-- SYNC:PRESERVE:END -->/s';
+            $pattern = '/<!-- SYNC:PRESERVE:START'.preg_quote($sectionIdPart, '/').' -->.*?<!-- SYNC:PRESERVE:END -->/s';
 
-            if (preg_match($pattern, $content)) {
+            if (preg_match($pattern, (string) $content)) {
                 // Replace existing placeholder
-                $replacement = $startDelimiter . $sectionContent . $endDelimiter;
-                $content = preg_replace($pattern, $replacement, $content);
+                $replacement = $startDelimiter.$sectionContent.$endDelimiter;
+                $content = preg_replace($pattern, $replacement, (string) $content);
             } else {
                 // Add at the end of content section if no delimiter found
                 $contentEndPattern = '/(@endsection)$/';
-                if (preg_match($contentEndPattern, $content)) {
+                if (preg_match($contentEndPattern, (string) $content)) {
                     $addition = "\n{$startDelimiter}{$sectionContent}{$endDelimiter}\n";
-                    $content = preg_replace($contentEndPattern, $addition . '$1', $content);
+                    $content = preg_replace($contentEndPattern, $addition.'$1', (string) $content);
                 }
             }
         }
@@ -436,8 +443,8 @@ class SyncDesignerUpdates extends Command
         }
 
         $template .= "@section('content')\n";
-        $template .= $content . "\n";
-        $template .= "@endsection";
+        $template .= $content."\n";
+        $template .= '@endsection';
 
         return $template;
     }
@@ -477,7 +484,7 @@ class SyncDesignerUpdates extends Command
             $this->info('🖼️  Syncing images...');
 
             // Create target directory if it doesn't exist
-            if (!File::exists($targetImages)) {
+            if (! File::exists($targetImages)) {
                 File::makeDirectory($targetImages, 0755, true);
             }
 
@@ -486,9 +493,9 @@ class SyncDesignerUpdates extends Command
 
             foreach ($files as $file) {
                 $sourceFile = $file->getPathname();
-                $targetFile = $targetImages . '/' . $file->getFilename();
+                $targetFile = $targetImages.'/'.$file->getFilename();
 
-                if (!File::exists($targetFile) ||
+                if (! File::exists($targetFile) ||
                     $this->option('force') ||
                     File::lastModified($sourceFile) > File::lastModified($targetFile)) {
 
@@ -516,35 +523,39 @@ class SyncDesignerUpdates extends Command
         $htmlFile = storage_path('app/Prima-web/index.html');
         $layoutFile = resource_path('views/site/layout.blade.php');
 
-        if (!File::exists($htmlFile)) {
+        if (! File::exists($htmlFile)) {
             $this->warn('⚠️  HTML file not found for layout sync: index.html');
+
             return;
         }
 
-        if (!File::exists($layoutFile)) {
+        if (! File::exists($layoutFile)) {
             $this->warn('⚠️  Layout file not found: layout.blade.php');
+
             return;
         }
 
         // Read HTML content
         $htmlContent = File::get($htmlFile);
-        $dom = new \DOMDocument();
+        $dom = new DOMDocument;
         libxml_use_internal_errors(true);
         $dom->loadHTML($htmlContent);
         libxml_clear_errors();
 
         // Extract header and footer
-        $xpath = new \DOMXPath($dom);
+        $xpath = new DOMXPath($dom);
         $header = $xpath->query('//header')->item(0);
         $footer = $xpath->query('//footer')->item(0);
 
-        if (!$header) {
+        if (! $header) {
             $this->warn('⚠️  No header found in HTML file');
+
             return;
         }
 
-        if (!$footer) {
+        if (! $footer) {
             $this->warn('⚠️  No footer found in HTML file');
+
             return;
         }
 
@@ -562,7 +573,7 @@ class SyncDesignerUpdates extends Command
         // Replace header content
         $layoutContent = preg_replace(
             '/<!-- HEADER -->.*?<\/header>/s',
-            "<!-- HEADER -->\n    " . $bladeHeader,
+            "<!-- HEADER -->\n    ".$bladeHeader,
             $layoutContent
         );
 
@@ -570,8 +581,8 @@ class SyncDesignerUpdates extends Command
         $bladeFooter = str_replace('mt-[175px]', 'mt-8', $bladeFooter); // Fix footer margin
         $layoutContent = preg_replace(
             '/<!-- FOOTER -->.*?<\/footer>/s',
-            "<!-- FOOTER -->\n    " . $bladeFooter,
-            $layoutContent
+            "<!-- FOOTER -->\n    ".$bladeFooter,
+            (string) $layoutContent
         );
 
         // Preserve custom content sections from existing layout
@@ -610,39 +621,39 @@ class SyncDesignerUpdates extends Command
 
         // Convert navigation links to Laravel routes (now at root level)
         $html = preg_replace('/href="index\.html"/', 'href="{{ route(\'home\') }}"', $html);
-        $html = preg_replace('/href="hotels\.html"/', 'href="{{ route(\'hotels\') }}"', $html);
-        $html = preg_replace('/href="restaurants\.html"/', 'href="{{ route(\'restaurants\') }}"', $html);
-        $html = preg_replace('/href="concierges\.html"/', 'href="{{ route(\'concierges\') }}"', $html);
-        $html = preg_replace('/href="influencers\.html"/', 'href="{{ route(\'influencers\') }}"', $html);
+        $html = preg_replace('/href="hotels\.html"/', 'href="{{ route(\'hotels\') }}"', (string) $html);
+        $html = preg_replace('/href="restaurants\.html"/', 'href="{{ route(\'restaurants\') }}"', (string) $html);
+        $html = preg_replace('/href="concierges\.html"/', 'href="{{ route(\'concierges\') }}"', (string) $html);
+        $html = preg_replace('/href="influencers\.html"/', 'href="{{ route(\'influencers\') }}"', (string) $html);
 
         // Handle Home link with javascript:void(0) - specifically for Home navigation
-        $html = preg_replace('/<a href="javascript:void\(0\)" class="nav_menu-item">Home<\/a>/', '<a href="{{ route(\'home\') }}" class="nav_menu-item">Home</a>', $html);
+        $html = preg_replace('/<a href="javascript:void\(0\)" class="nav_menu-item">Home<\/a>/', '<a href="{{ route(\'home\') }}" class="nav_menu-item">Home</a>', (string) $html);
 
         // Add active state detection for navigation items (now at root level)
         $html = preg_replace(
             '/href="{{ route\(\'home\'\) }}" class="nav_menu-item"/',
             'href="{{ route(\'home\') }}" class="nav_menu-item @if(request()->routeIs(\'home\')) active @endif"',
-            $html
+            (string) $html
         );
         $html = preg_replace(
             '/href="{{ route\(\'hotels\'\) }}" class="nav_menu-item"/',
             'href="{{ route(\'hotels\') }}" class="nav_menu-item @if(request()->routeIs(\'hotels\')) active @endif"',
-            $html
+            (string) $html
         );
         $html = preg_replace(
             '/href="{{ route\(\'restaurants\'\) }}" class="nav_menu-item"/',
             'href="{{ route(\'restaurants\') }}" class="nav_menu-item @if(request()->routeIs(\'restaurants\')) active @endif"',
-            $html
+            (string) $html
         );
         $html = preg_replace(
             '/href="{{ route\(\'concierges\'\) }}" class="nav_menu-item"/',
             'href="{{ route(\'concierges\') }}" class="nav_menu-item @if(request()->routeIs(\'concierges\')) active @endif"',
-            $html
+            (string) $html
         );
         $html = preg_replace(
             '/href="{{ route\(\'influencers\'\) }}" class="nav_menu-item"/',
             'href="{{ route(\'influencers\') }}" class="nav_menu-item @if(request()->routeIs(\'influencers\')) active @endif"',
-            $html
+            (string) $html
         );
 
         return $html;
@@ -681,14 +692,14 @@ class SyncDesignerUpdates extends Command
         $process = new Process($command);
         $process->run();
 
-        if (!$process->isSuccessful()) {
-            $this->warn("Command failed: " . $process->getErrorOutput());
+        if (! $process->isSuccessful()) {
+            $this->warn('Command failed: '.$process->getErrorOutput());
         } else {
             $output = trim($process->getOutput());
-            if (!empty($output)) {
-                $this->info("✅ " . $output);
+            if (! empty($output)) {
+                $this->info('✅ '.$output);
             } else {
-                $this->info("✅ Command completed successfully");
+                $this->info('✅ Command completed successfully');
             }
         }
     }
@@ -698,12 +709,12 @@ class SyncDesignerUpdates extends Command
      */
     protected function detectLayoutChanges(string $htmlPath, string $htmlFile): void
     {
-        if (!$this->option('detect-layout')) {
+        if (! $this->option('detect-layout')) {
             return;
         }
 
         $htmlContent = File::get($htmlPath);
-        $dom = new DOMDocument();
+        $dom = new DOMDocument;
         @$dom->loadHTML($htmlContent, LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD);
         $xpath = new DOMXPath($dom);
 
@@ -733,29 +744,29 @@ class SyncDesignerUpdates extends Command
         // Check for critical CSS classes that are often lost during sync
         $criticalClasses = [
             'header' => ['border-b', 'sticky', 'backdrop-blur'],
-            'footer' => ['border-t', 'mt-[175px]', 'bg-slate-100']
+            'footer' => ['border-t', 'mt-[175px]', 'bg-slate-100'],
         ];
 
         if (isset($criticalClasses[$section])) {
             $missingClasses = [];
             foreach ($criticalClasses[$section] as $class) {
-                if (str_contains($content, $class) && !str_contains($layoutContent, $class)) {
+                if (str_contains($content, $class) && ! str_contains($layoutContent, $class)) {
                     $missingClasses[] = $class;
                 }
             }
 
-            if (!empty($missingClasses)) {
-                $this->warn("⚠️  {$section} in {$htmlFile} contains classes missing from layout: " . implode(', ', $missingClasses));
-                $this->line("   💡 You may need to manually update resources/views/site/layout.blade.php");
+            if (! empty($missingClasses)) {
+                $this->warn("⚠️  {$section} in {$htmlFile} contains classes missing from layout: ".implode(', ', $missingClasses));
+                $this->line('   💡 You may need to manually update resources/views/site/layout.blade.php');
             }
         }
 
         // Original basic checks
-        if ($section === 'header' && !str_contains($layoutContent, 'PRIMA')) {
+        if ($section === 'header' && ! str_contains($layoutContent, 'PRIMA')) {
             $this->warn("⚠️  Header structure may have changed in {$htmlFile} - manual review recommended");
         }
 
-        if ($section === 'footer' && !str_contains($layoutContent, '</footer>')) {
+        if ($section === 'footer' && ! str_contains($layoutContent, '</footer>')) {
             $this->warn("⚠️  Footer structure may have changed in {$htmlFile} - manual review recommended");
         }
     }

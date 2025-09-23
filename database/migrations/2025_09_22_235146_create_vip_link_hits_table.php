@@ -34,7 +34,7 @@ return new class extends Migration
             if (Schema::getConnection()->getDriverName() === 'pgsql') {
                 DB::statement('CREATE INDEX vip_link_hits_query_params_gin ON vip_link_hits USING GIN (query_params)');
             }
-        } catch (Throwable $e) {
+        } catch (Throwable) {
             // Index creation failure should not block migration in non-PgSQL environments
         }
     }
@@ -49,7 +49,7 @@ return new class extends Migration
             if (Schema::getConnection()->getDriverName() === 'pgsql') {
                 DB::statement('DROP INDEX IF EXISTS vip_link_hits_query_params_gin');
             }
-        } catch (Throwable $e) {
+        } catch (Throwable) {
             // Ignore
         }
 

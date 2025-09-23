@@ -6,17 +6,14 @@ use App\Actions\Risk\ApproveRiskReview;
 use App\Actions\Risk\RejectRiskReview;
 use App\Filament\Resources\RiskReviewResource;
 use App\Models\RiskWhitelist;
-use App\Models\RiskBlacklist;
-use Filament\Actions;
 use Filament\Actions\Action;
-use Filament\Forms;
-use Filament\Notifications\Notification;
-use Filament\Resources\Pages\ViewRecord;
-use Filament\Infolists\Infolist;
+use Filament\Forms\Components\Textarea;
 use Filament\Infolists\Components\Section;
 use Filament\Infolists\Components\TextEntry;
-use Filament\Infolists\Components\Grid;
 use Filament\Infolists\Components\ViewEntry;
+use Filament\Infolists\Infolist;
+use Filament\Notifications\Notification;
+use Filament\Resources\Pages\ViewRecord;
 use Illuminate\Support\HtmlString;
 
 class ViewRiskReview extends ViewRecord
@@ -38,18 +35,18 @@ class ViewRiskReview extends ViewRecord
                         TextEntry::make('risk_score')
                             ->label('Risk Score')
                             ->badge()
-                            ->color(fn ($state) => match(true) {
+                            ->color(fn ($state) => match (true) {
                                 $state >= 70 => 'danger',
                                 $state >= 30 => 'warning',
                                 default => 'success'
                             })
-                            ->formatStateUsing(fn ($state) => $state . '/100')
+                            ->formatStateUsing(fn ($state) => $state.'/100')
                             ->size('lg'),
 
                         TextEntry::make('risk_state')
                             ->label('Risk Level')
                             ->badge()
-                            ->color(fn ($state) => match($state) {
+                            ->color(fn ($state) => match ($state) {
                                 'hard' => 'danger',
                                 'soft' => 'warning',
                                 default => 'success'
@@ -81,7 +78,7 @@ class ViewRiskReview extends ViewRecord
 
                         TextEntry::make('guest_count')
                             ->label('Party Size')
-                            ->formatStateUsing(fn ($state) => $state . ' guests'),
+                            ->formatStateUsing(fn ($state) => $state.' guests'),
 
                         TextEntry::make('booking_at')
                             ->label('Booking Date/Time')
@@ -130,7 +127,7 @@ class ViewRiskReview extends ViewRecord
                                 // Get the raw risk_reasons from attributes
                                 $reasons = $record->getAttributes()['risk_reasons'] ?? null;
 
-                                if (!$reasons) {
+                                if (! $reasons) {
                                     return 'No risk indicators';
                                 }
 
@@ -139,13 +136,13 @@ class ViewRiskReview extends ViewRecord
                                     $reasons = json_decode($reasons, true);
                                 }
 
-                                if (!is_array($reasons) || empty($reasons)) {
+                                if (! is_array($reasons) || empty($reasons)) {
                                     return 'No risk indicators';
                                 }
 
                                 return new HtmlString(
-                                    '<ul class="list-disc list-inside space-y-1">' .
-                                    implode('', array_map(fn($reason) => '<li>' . e($reason) . '</li>', $reasons)) .
+                                    '<ul class="list-disc list-inside space-y-1">'.
+                                    implode('', array_map(fn ($reason) => '<li>'.e($reason).'</li>', $reasons)).
                                     '</ul>'
                                 );
                             })
@@ -155,16 +152,20 @@ class ViewRiskReview extends ViewRecord
                 Section::make('Risk Score Breakdown')
                     ->schema([
                         ViewEntry::make('risk_metadata')
-                            ->view('filament.components.risk-score-breakdown')
+                            ->view('filament.components.risk-score-breakdown'),
                     ])
                     ->visible(function ($record) {
                         // Handle both RiskMetadata object and JSON string
                         $metadata = $record?->risk_metadata;
-                        if (!$metadata) return false;
+                        if (! $metadata) {
+                            return false;
+                        }
                         if (is_string($metadata)) {
                             $decoded = json_decode($metadata, true);
+
                             return isset($decoded['breakdown']);
                         }
+
                         return $metadata->breakdown !== null;
                     }),
 
@@ -178,8 +179,10 @@ class ViewRiskReview extends ViewRecord
                                 $metadata = $record->risk_metadata;
                                 if (is_string($metadata)) {
                                     $decoded = json_decode($metadata, true);
+
                                     return $decoded['llmUsed'] ?? false;
                                 }
+
                                 return $metadata?->llmUsed ?? false;
                             })
                             ->color(fn ($state) => $state ? 'success' : 'gray')
@@ -192,25 +195,31 @@ class ViewRiskReview extends ViewRecord
                                 $metadata = $record->risk_metadata;
                                 if (is_string($metadata)) {
                                     $decoded = json_decode($metadata, true);
+
                                     return $decoded['llmResponse'] ?? null;
                                 }
+
                                 return $metadata?->llmResponse ?? null;
                             })
                             ->formatStateUsing(function ($state) {
-                                if (!$state) return 'No AI response available';
+                                if (! $state) {
+                                    return 'No AI response available';
+                                }
 
                                 $response = json_decode($state, true);
-                                if (!$response) return $state;
+                                if (! $response) {
+                                    return $state;
+                                }
 
                                 return new HtmlString(
-                                    '<div class="space-y-2">' .
-                                    '<p><strong>Risk Score:</strong> ' . ($response['risk_score'] ?? 'N/A') . '/100</p>' .
-                                    '<p><strong>Confidence:</strong> ' . ($response['confidence'] ?? 'N/A') . '</p>' .
-                                    '<p><strong>AI Reasons:</strong></p>' .
-                                    '<ul class="list-disc list-inside">' .
-                                    implode('', array_map(fn($reason) => '<li>' . e($reason) . '</li>', $response['reasons'] ?? [])) .
-                                    '</ul>' .
-                                    '<p><strong>Analysis:</strong> ' . e($response['analysis'] ?? 'N/A') . '</p>' .
+                                    '<div class="space-y-2">'.
+                                    '<p><strong>Risk Score:</strong> '.($response['risk_score'] ?? 'N/A').'/100</p>'.
+                                    '<p><strong>Confidence:</strong> '.($response['confidence'] ?? 'N/A').'</p>'.
+                                    '<p><strong>AI Reasons:</strong></p>'.
+                                    '<ul class="list-disc list-inside">'.
+                                    implode('', array_map(fn ($reason) => '<li>'.e($reason).'</li>', $response['reasons'] ?? [])).
+                                    '</ul>'.
+                                    '<p><strong>Analysis:</strong> '.e($response['analysis'] ?? 'N/A').'</p>'.
                                     '</div>'
                                 );
                             })
@@ -220,11 +229,15 @@ class ViewRiskReview extends ViewRecord
                     ->visible(function ($record) {
                         // Handle both RiskMetadata object and JSON string
                         $metadata = $record?->risk_metadata;
-                        if (!$metadata) return false;
+                        if (! $metadata) {
+                            return false;
+                        }
                         if (is_string($metadata)) {
                             $decoded = json_decode($metadata, true);
+
                             return $decoded['llmUsed'] ?? false;
                         }
+
                         return $metadata->llmUsed ?? false;
                     })
                     ->collapsible(),
@@ -237,7 +250,7 @@ class ViewRiskReview extends ViewRecord
                             ->html(),
                     ])
                     ->collapsed()
-                    ->visible(fn ($record) => !empty($record->notes)),
+                    ->visible(fn ($record) => ! empty($record->notes)),
             ]);
     }
 
@@ -269,7 +282,7 @@ class ViewRiskReview extends ViewRecord
                 ->color('danger')
                 ->requiresConfirmation()
                 ->form([
-                    Forms\Components\Textarea::make('reason')
+                    Textarea::make('reason')
                         ->label('Rejection Reason')
                         ->required()
                         ->rows(3),
@@ -285,14 +298,14 @@ class ViewRiskReview extends ViewRecord
                 })
                 ->visible(fn () => $this->record->reviewed_at === null),
 
-            Actions\Action::make('whitelist_email')
+            Action::make('whitelist_email')
                 ->label('Whitelist Domain')
                 ->icon('heroicon-o-shield-check')
                 ->color('info')
                 ->action(function () {
                     $domain = substr(strrchr($this->record->guest_email, '@'), 1);
                     if ($domain) {
-                        RiskWhitelist::create([
+                        RiskWhitelist::query()->create([
                             'type' => RiskWhitelist::TYPE_DOMAIN,
                             'value' => $domain,
                             'notes' => "Added from booking #{$this->record->id}",
@@ -305,7 +318,7 @@ class ViewRiskReview extends ViewRecord
                     }
                 }),
 
-            Actions\Action::make('view_booking')
+            Action::make('view_booking')
                 ->label('View Full Booking')
                 ->icon('heroicon-o-arrow-top-right-on-square')
                 ->url(fn () => route('filament.admin.resources.bookings.view', $this->record))

@@ -67,7 +67,7 @@ class CompleteBooking
             $booking->refresh();
 
             // Only send notifications if booking is not on risk hold
-            if (!$booking->isOnRiskHold()) {
+            if (! $booking->isOnRiskHold()) {
                 if ($booking->is_non_prime_big_group) {
                     $booking->notify(new CustomerBookingRequestReceived);
                 } else {

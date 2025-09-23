@@ -74,7 +74,7 @@ class ReservationHoursWidget extends Widget implements HasActions, HasForms
 
     private function handleOpeningHoursStringUpdate($value, $key): void
     {
-        $parts = explode('.', $key);
+        $parts = explode('.', (string) $key);
         if (count($parts) === 3) {
             [$day, $index, $timeKey] = $parts;
             try {

@@ -2,8 +2,11 @@
 
 namespace App\Traits;
 
+use App\Actions\Concierge\EnsureVipCodeExists;
+use App\Actions\QrCode\AssignQrCodeToConcierge;
 use App\Models\Concierge;
 use App\Models\Partner;
+use App\Models\QrCode;
 use App\Models\Referral;
 use App\Models\Region;
 use App\Models\User;
@@ -321,14 +324,14 @@ trait HandlesConciergeInvitation
             $concierge = $user->concierge()->create($conciergeData);
 
             // Ensure the concierge has a VIP code
-            app(\App\Actions\Concierge\EnsureVipCodeExists::class)->handle($concierge);
+            app(EnsureVipCodeExists::class)->handle($concierge);
 
             // Handle QR code assignment if this referral came from a QR code
             if ($this->referral->qr_code_id) {
-                $qrCode = \App\Models\QrCode::find($this->referral->qr_code_id);
+                $qrCode = QrCode::query()->find($this->referral->qr_code_id);
                 if ($qrCode && ! $qrCode->concierge_id) {
                     // Assign the QR code to this new concierge
-                    app(\App\Actions\QrCode\AssignQrCodeToConcierge::class)->handle($qrCode, $concierge);
+                    app(AssignQrCodeToConcierge::class)->handle($qrCode, $concierge);
 
                     Log::info('QR code assigned to new concierge', [
                         'qr_code_id' => $qrCode->id,

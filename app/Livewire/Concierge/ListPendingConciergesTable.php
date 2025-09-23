@@ -17,11 +17,14 @@ class ListPendingConciergesTable extends BaseWidget
     protected static ?string $heading = 'Pending Concierges';
 
     public string $search = '';
+
     public string $dateFilter = 'all_time';
+
     public string $startDate = '';
+
     public string $endDate = '';
 
-        protected function getTableQuery(): Builder
+    protected function getTableQuery(): Builder
     {
         $query = Referral::query()
             ->where(['type' => 'concierge', 'secured_at' => null])
@@ -32,9 +35,9 @@ class ListPendingConciergesTable extends BaseWidget
             $search = strtolower($this->search);
             $query->where(function (Builder $q) use ($search) {
                 $q->whereRaw('LOWER(first_name) like ?', ["%{$search}%"])
-                  ->orWhereRaw('LOWER(last_name) like ?', ["%{$search}%"])
-                  ->orWhereRaw('LOWER(email) like ?', ["%{$search}%"])
-                  ->orWhereRaw('LOWER(phone) like ?', ["%{$search}%"]);
+                    ->orWhereRaw('LOWER(last_name) like ?', ["%{$search}%"])
+                    ->orWhereRaw('LOWER(email) like ?', ["%{$search}%"])
+                    ->orWhereRaw('LOWER(phone) like ?', ["%{$search}%"]);
             });
         }
 

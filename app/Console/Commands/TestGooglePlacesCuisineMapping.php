@@ -29,7 +29,7 @@ class TestGooglePlacesCuisineMapping extends Command
         }
 
         // Test with venues that have Google metadata
-        $venuesWithGoogleData = Venue::whereNotNull('metadata->googleTypes')
+        $venuesWithGoogleData = Venue::query()->whereNotNull('metadata->googleTypes')
             ->limit(3)
             ->get();
 
@@ -52,7 +52,7 @@ class TestGooglePlacesCuisineMapping extends Command
 
     private function testVenueMapping(int $venueId, GooglePlacesToCuisineMapper $mapper): void
     {
-        $venue = Venue::find($venueId);
+        $venue = Venue::query()->find($venueId);
         if (! $venue) {
             $this->error("Venue {$venueId} not found");
 

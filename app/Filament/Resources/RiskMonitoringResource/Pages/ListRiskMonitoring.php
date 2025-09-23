@@ -44,15 +44,13 @@ class ListRiskMonitoring extends ListRecords
                 ->badge(fn () => $this->getResource()::getEloquentQuery()->whereDate('created_at', today())->count()),
 
             'high_velocity' => Tab::make('High Velocity')
-                ->modifyQueryUsing(function (Builder $query) {
-                    return $query->whereIn('ip_address', function ($subquery) {
-                        $subquery->select('ip_address')
-                            ->from('bookings')
-                            ->where('created_at', '>=', now()->subHour())
-                            ->groupBy('ip_address')
-                            ->havingRaw('COUNT(*) > 3');
-                    });
-                })
+                ->modifyQueryUsing(fn (Builder $query) => $query->whereIn('ip_address', function ($subquery) {
+                    $subquery->select('ip_address')
+                        ->from('bookings')
+                        ->where('created_at', '>=', now()->subHour())
+                        ->groupBy('ip_address')
+                        ->havingRaw('COUNT(*) > 3');
+                }))
                 ->badgeColor('warning'),
         ];
     }

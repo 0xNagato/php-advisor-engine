@@ -4,9 +4,9 @@ namespace App\Console\Commands;
 
 use App\Actions\Booking\CompleteBooking;
 use App\Actions\Booking\CreateBooking;
-use App\Models\Booking;
 use App\Models\Concierge;
 use App\Models\ScheduleTemplate;
+use App\Models\User;
 use App\Models\Venue;
 use App\Models\VipCode;
 use App\Models\VipSession;
@@ -43,7 +43,7 @@ class CreateProperVipTestData extends Command
         $this->info("Creating proper VIP test data for user ID: {$userId} using real venues");
 
         // Find the user and their concierge
-        $user = \App\Models\User::find($userId);
+        $user = User::query()->find($userId);
         if (! $user) {
             $this->error("User with ID {$userId} not found");
 
@@ -62,7 +62,7 @@ class CreateProperVipTestData extends Command
 
         // Find real venues based on region or venue ID
         if ($venueId) {
-            $venue = Venue::find($venueId);
+            $venue = Venue::query()->find($venueId);
             if (! $venue) {
                 $this->error("Venue with ID {$venueId} not found");
 
@@ -72,7 +72,7 @@ class CreateProperVipTestData extends Command
         } else {
             // Use region filter or default to miami
             $targetRegion = $region ?: 'miami';
-            $venues = Venue::where('status', 'active')->where('region', $targetRegion)->limit(3)->get();
+            $venues = Venue::query()->where('status', 'active')->where('region', $targetRegion)->limit(3)->get();
             if ($venues->count() === 0) {
                 $this->error("No active {$targetRegion} venues found");
 
@@ -129,7 +129,7 @@ class CreateProperVipTestData extends Command
             $schedule = $schedules->random();
 
             // Calculate booking date (1-30 days in advance)
-            $daysAhead = rand(1, 30);
+            $daysAhead = random_int(1, 30);
             $bookingDate = now()->addDays($daysAhead);
 
             // Set booking time to the schedule start time
@@ -141,21 +141,21 @@ class CreateProperVipTestData extends Command
             $guestCount = $guestCounts[array_rand($guestCounts)];
 
             // Create VIP session with query parameters
-            $vipCodeModel = VipCode::where('code', $vipCode)->first();
+            $vipCodeModel = VipCode::query()->where('code', $vipCode)->first();
 
             // Generate query parameters for this session
             $queryParams = [
                 'utm_source' => ['facebook', 'instagram', 'google', 'twitter'][array_rand(['facebook', 'instagram', 'google', 'twitter'])],
                 'utm_medium' => 'social',
                 'utm_campaign' => ['summer2024', 'holiday2024', 'winter2025'][array_rand(['summer2024', 'holiday2024', 'winter2025'])],
-                'utm_content' => 'ad_'.rand(1000, 9999),
+                'utm_content' => 'ad_'.random_int(1000, 9999),
                 'cuisine' => [['italian', 'french'], ['mexican', 'asian'], ['american', 'mediterranean']][array_rand([['italian', 'french'], ['mexican', 'asian'], ['american', 'mediterranean']])],
                 'guest_count' => $guestCount,
-                'budget' => rand(100, 300),
+                'budget' => random_int(100, 300),
                 'occasion' => ['date_night', 'business_meeting', 'celebration'][array_rand(['date_night', 'business_meeting', 'celebration'])],
             ];
 
-            $session = VipSession::create([
+            $session = VipSession::query()->create([
                 'vip_code_id' => $vipCodeModel->id,
                 'token' => 'test_session_'.$vipCode.'_'.uniqid(),
                 'expires_at' => now()->addHours(24),
@@ -164,7 +164,7 @@ class CreateProperVipTestData extends Command
                 'query_params' => $queryParams,
                 'landing_url' => 'https://prima.test/vip/'.$vipCode,
                 'referer_url' => 'https://facebook.com/ads/campaign',
-                'started_at' => now()->subMinutes(rand(5, 30)),
+                'started_at' => now()->subMinutes(random_int(5, 30)),
             ]);
 
             // Create the booking using the proper CreateBooking action with VIP session

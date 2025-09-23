@@ -10,6 +10,7 @@ use App\Models\Concierge;
 use App\Models\ScheduleTemplate;
 use App\Models\ScheduleWithBookingMV;
 use App\Models\VipCode;
+use App\Models\VipSession;
 use App\Services\ReservationService;
 use App\Services\SalesTaxService;
 use chillerlan\QRCode\QRCode;
@@ -175,8 +176,8 @@ class CreateBooking
         // Get query params from VIP session if available
         $queryParams = null;
         if ($vipSessionId) {
-            $vipSession = \App\Models\VipSession::find($vipSessionId);
-            if ($vipSession && !empty($vipSession->query_params)) {
+            $vipSession = VipSession::query()->find($vipSessionId);
+            if ($vipSession && ! empty($vipSession->query_params)) {
                 $queryParams = $vipSession->query_params;
             }
         }

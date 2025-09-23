@@ -2,6 +2,7 @@
 
 namespace App\Actions\Risk;
 
+use Exception;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use Lorisleiva\Actions\Concerns\AsAction;
@@ -13,7 +14,7 @@ class EvaluateWithLLM
     /**
      * Evaluate risk using LLM heuristics
      *
-     * @param array<string, mixed> $features
+     * @param  array<string, mixed>  $features
      * @return array{risk_score: int, reasons: array<string>, confidence: string, analysis: string}
      */
     public function handle(array $features): array
@@ -26,11 +27,11 @@ class EvaluateWithLLM
                 'risk_score' => $response['risk_score'] ?? 50,
                 'reasons' => $response['reasons'] ?? [],
                 'confidence' => $response['confidence'] ?? 'medium',
-                'analysis' => $response['analysis'] ?? 'No detailed analysis available'
+                'analysis' => $response['analysis'] ?? 'No detailed analysis available',
             ];
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Log::error('LLM evaluation failed', [
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
             ]);
 
             // Return neutral score on failure
@@ -38,7 +39,7 @@ class EvaluateWithLLM
                 'risk_score' => 50,
                 'reasons' => [],
                 'confidence' => 'low',
-                'analysis' => 'LLM evaluation failed'
+                'analysis' => 'LLM evaluation failed',
             ];
         }
     }
@@ -53,7 +54,7 @@ class EvaluateWithLLM
         $model = config('services.openai.model', 'gpt-4o-mini');
 
         // If no API key configured, fall back to rule-based scoring
-        if (!$apiKey) {
+        if (! $apiKey) {
             return $this->fallbackRuleBasedScoring($features);
         }
 
@@ -65,12 +66,12 @@ class EvaluateWithLLM
             Log::info('Sending to AI for risk evaluation', [
                 'user_prompt' => $userPrompt,
                 'features' => $features,
-                'model' => $model
+                'model' => $model,
             ]);
 
             $response = Http::timeout(10)
                 ->withHeaders([
-                    'Authorization' => 'Bearer ' . $apiKey,
+                    'Authorization' => 'Bearer '.$apiKey,
                     'Content-Type' => 'application/json',
                 ])
                 ->post($apiUrl, [
@@ -78,23 +79,24 @@ class EvaluateWithLLM
                     'messages' => [
                         [
                             'role' => 'system',
-                            'content' => $systemPrompt
+                            'content' => $systemPrompt,
                         ],
                         [
                             'role' => 'user',
-                            'content' => $userPrompt
-                        ]
+                            'content' => $userPrompt,
+                        ],
                     ],
                     'temperature' => 0.2, // Lower temperature for consistent scoring
                     'max_completion_tokens' => 300,  // Updated for newer models
-                    'response_format' => ['type' => 'json_object']
+                    'response_format' => ['type' => 'json_object'],
                 ]);
 
-            if (!$response->successful()) {
+            if (! $response->successful()) {
                 Log::warning('LLM API request failed', [
                     'status' => $response->status(),
-                    'body' => $response->body()
+                    'body' => $response->body(),
                 ]);
+
                 return $this->fallbackRuleBasedScoring($features);
             }
 
@@ -107,11 +109,12 @@ class EvaluateWithLLM
                 'raw_response' => $content,
                 'parsed_response' => $parsed,
                 'name' => $features['name'] ?? 'Unknown',
-                'email' => $features['email'] ?? 'Unknown'
+                'email' => $features['email'] ?? 'Unknown',
             ]);
 
-            if (!isset($parsed['risk_score'])) {
+            if (! isset($parsed['risk_score'])) {
                 Log::warning('Invalid LLM response format', ['response' => $content]);
+
                 return $this->fallbackRuleBasedScoring($features);
             }
 
@@ -119,14 +122,15 @@ class EvaluateWithLLM
                 'risk_score' => max(0, min(100, (int) $parsed['risk_score'])),
                 'reasons' => array_slice($parsed['reasons'] ?? [], 0, 5), // Limit to 5 reasons
                 'confidence' => $parsed['confidence'] ?? 'medium',
-                'analysis' => $parsed['analysis'] ?? 'No detailed analysis provided'
+                'analysis' => $parsed['analysis'] ?? 'No detailed analysis provided',
             ];
 
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Log::error('LLM API call failed', [
                 'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString()
+                'trace' => $e->getTraceAsString(),
             ]);
+
             return $this->fallbackRuleBasedScoring($features);
         }
     }
@@ -191,7 +195,7 @@ PROMPT;
         if (isset($features['ip'])) {
             $prompt .= "IP Address: {$features['ip']}\n";
         }
-        if (isset($features['notes']) && !empty($features['notes'])) {
+        if (isset($features['notes']) && ! empty($features['notes'])) {
             $prompt .= "Booking Notes: {$features['notes']}\n";
         }
 
@@ -220,7 +224,7 @@ PROMPT;
             'identical_notes' => 'Duplicate booking notes across sessions',
             'venue_hopping' => 'Multiple venues targeted quickly',
             'device_velocity' => 'High activity from single device',
-            'time_pattern' => 'Submissions follow automated timing'
+            'time_pattern' => 'Submissions follow automated timing',
         ];
 
         $hasIndicators = false;
@@ -231,7 +235,7 @@ PROMPT;
             }
         }
 
-        if (!$hasIndicators) {
+        if (! $hasIndicators) {
             $prompt .= "- No specific risk indicators detected\n";
         }
 
@@ -325,7 +329,7 @@ PROMPT;
             'risk_score' => min(100, $score),
             'reasons' => array_slice($reasons, 0, 5),
             'confidence' => $confidence,
-            'analysis' => $analysis
+            'analysis' => $analysis,
         ];
     }
 }

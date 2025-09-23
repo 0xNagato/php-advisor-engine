@@ -13,7 +13,7 @@ class GooglePlacesImageUploader
 {
     private string $disk = 'do';
 
-    private string $directory;
+    private readonly string $directory;
 
     public function __construct()
     {
@@ -62,21 +62,15 @@ class GooglePlacesImageUploader
             // Download the image
             $response = Http::timeout(30)->get($photoUrl);
 
-            if (! $response->successful()) {
-                throw new Exception("Failed to download photo: HTTP {$response->status()}");
-            }
+            throw_unless($response->successful(), new Exception("Failed to download photo: HTTP {$response->status()}"));
 
             // Get image content
             $imageContent = $response->body();
-            if (empty($imageContent)) {
-                throw new Exception('Downloaded image is empty');
-            }
+            throw_if(empty($imageContent), new Exception('Downloaded image is empty'));
 
             // Determine file extension from content type
             $extension = $this->getExtensionFromResponse($response);
-            if (! $extension) {
-                throw new Exception('Could not determine image format');
-            }
+            throw_unless($extension, new Exception('Could not determine image format'));
 
             // Generate unique filename
             $filename = $venueSlug.'-google-'.time().'-'.Str::random(6).'.'.$extension;
@@ -85,9 +79,7 @@ class GooglePlacesImageUploader
             // Upload to Digital Ocean
             $disk = Storage::disk($this->disk);
 
-            if (! $disk->put($path, $imageContent)) {
-                throw new Exception('Failed to upload to Digital Ocean');
-            }
+            throw_unless($disk->put($path, $imageContent), new Exception('Failed to upload to Digital Ocean'));
 
             // Set public visibility
             $disk->setVisibility($path, 'public');

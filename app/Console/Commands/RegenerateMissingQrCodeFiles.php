@@ -5,6 +5,7 @@ namespace App\Console\Commands;
 use App\Actions\QrCode\GenerateQrCodeWithLogo;
 use App\Models\QrCode;
 use AshAllenDesign\ShortURL\Models\ShortURL;
+use Exception;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Storage;
 
@@ -34,7 +35,7 @@ class RegenerateMissingQrCodeFiles extends Command
 
         $this->info('Checking for QR codes with missing files...');
 
-        $qrCodes = QrCode::whereNotNull('qr_code_path')
+        $qrCodes = QrCode::query()->whereNotNull('qr_code_path')
             ->whereNotNull('short_url_id')
             ->limit($limit)
             ->get();
@@ -48,7 +49,7 @@ class RegenerateMissingQrCodeFiles extends Command
                 $missing++;
 
                 // Get the short URL
-                $shortUrl = ShortURL::find($qrCode->short_url_id);
+                $shortUrl = ShortURL::query()->find($qrCode->short_url_id);
                 if ($shortUrl) {
                     try {
                         // Regenerate the QR code
@@ -60,7 +61,7 @@ class RegenerateMissingQrCodeFiles extends Command
                         // Update the path
                         $qrCode->update(['qr_code_path' => $qrCodeData['svgPath']]);
                         $regenerated++;
-                    } catch (\Exception $e) {
+                    } catch (Exception $e) {
                         $this->error("\nFailed to regenerate QR code {$qrCode->id}: {$e->getMessage()}");
                     }
                 }

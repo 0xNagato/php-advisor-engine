@@ -96,7 +96,6 @@ test('VIP landing with nonexistent code still redirects', function () {
     $response->assertRedirectContains('param=value');
 });
 
-
 test('VIP session validates query params must be array if provided', function () {
     VipCode::factory()->create(['code' => 'VALIDATE', 'is_active' => true]);
 
@@ -108,7 +107,6 @@ test('VIP session validates query params must be array if provided', function ()
     $response->assertUnprocessable();
     $response->assertJsonValidationErrors(['query_params']);
 });
-
 
 test('VIP session includes landing and referer URLs', function () {
     $vipCode = VipCode::factory()->create(['code' => 'SESSIONURL', 'is_active' => true]);

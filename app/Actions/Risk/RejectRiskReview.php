@@ -6,6 +6,7 @@ use App\Enums\BookingStatus;
 use App\Models\Booking;
 use App\Models\RiskAuditLog;
 use App\Notifications\Booking\BookingRejectedDueToRisk;
+use Exception;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Lorisleiva\Actions\Concerns\AsAction;
@@ -27,7 +28,7 @@ class RejectRiskReview
                 'reviewed_at' => now(),
                 'reviewed_by' => $userId ?? auth()->id(),
                 'status' => BookingStatus::CANCELLED->value,
-                'refund_reason' => 'Risk review rejection: ' . $reason,
+                'refund_reason' => 'Risk review rejection: '.$reason,
             ]);
 
             // Create audit log
@@ -46,10 +47,10 @@ class RejectRiskReview
             // Send Slack notification
             try {
                 SendRiskRejectionToSlack::run($booking, $reason);
-            } catch (\Exception $e) {
+            } catch (Exception $e) {
                 Log::error('Failed to send Slack rejection notification', [
                     'booking_id' => $booking->id,
-                    'error' => $e->getMessage()
+                    'error' => $e->getMessage(),
                 ]);
             }
 
@@ -57,10 +58,10 @@ class RejectRiskReview
             if ($booking->guest_phone && $booking->risk_score < 80) {
                 try {
                     $booking->notify(new BookingRejectedDueToRisk($reason));
-                } catch (\Exception $e) {
+                } catch (Exception $e) {
                     Log::error('Failed to send customer rejection notification', [
                         'booking_id' => $booking->id,
-                        'error' => $e->getMessage()
+                        'error' => $e->getMessage(),
                     ]);
                 }
             }

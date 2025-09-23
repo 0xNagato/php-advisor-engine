@@ -94,13 +94,13 @@ class TimeslotController extends Controller
             ->map(function ($formattedTime, $time) use ($isCurrentDay, $minimumBookingTime, $date, $region) {
                 // For current day, check if the timeslot is more than MINUTES_PAST in the future
                 if ($isCurrentDay) {
-                    $timeslotDateTime = Carbon::parse($date . ' ' . $time, $region->timezone);
+                    $timeslotDateTime = Carbon::parse($date.' '.$time, $region->timezone);
                     $available = $timeslotDateTime->gt($minimumBookingTime);
                 } else {
                     // For future dates, all timeslots are available
                     $available = true;
                 }
-                
+
                 return [
                     'label' => $formattedTime,
                     'value' => $time,

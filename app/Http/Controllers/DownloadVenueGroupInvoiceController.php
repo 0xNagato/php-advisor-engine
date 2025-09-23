@@ -16,6 +16,7 @@ use RuntimeException;
 class DownloadVenueGroupInvoiceController extends Controller
 {
     const int PREVIEW_RANDOM_STRING_LENGTH = 8;
+
     const int INVOICE_DUE_DAYS = 15;
 
     public function __invoke(Request $request, VenueGroup $venueGroup, string $startDate, string $endDate)
@@ -30,9 +31,7 @@ class DownloadVenueGroupInvoiceController extends Controller
         if ($request->boolean('preview')) {
             $referenceVenue = $venueGroup->venues()->first();
 
-            if (!$referenceVenue) {
-                abort(400, 'Cannot generate invoice preview: Venue group has no venues.');
-            }
+            abort_unless($referenceVenue, 400, 'Cannot generate invoice preview: Venue group has no venues.');
 
             $tempInvoice = new VenueInvoice([
                 'venue_id' => $referenceVenue->id,
@@ -41,7 +40,7 @@ class DownloadVenueGroupInvoiceController extends Controller
                 'end_date' => $endDateCarbon->format('Y-m-d'),
                 'due_date' => now()->addDays(self::INVOICE_DUE_DAYS),
                 'currency' => 'USD',
-                'invoice_number' => 'preview-' . str()->random(self::PREVIEW_RANDOM_STRING_LENGTH),
+                'invoice_number' => 'preview-'.str()->random(self::PREVIEW_RANDOM_STRING_LENGTH),
                 'status' => VenueInvoiceStatus::DRAFT,
             ]);
 
@@ -66,7 +65,7 @@ class DownloadVenueGroupInvoiceController extends Controller
             ->first();
 
         // Regenerate if requested or if the invoice doesn't exist
-        if ($shouldRegenerate || !$invoice) {
+        if ($shouldRegenerate || ! $invoice) {
             // If regenerating and invoice exist, delete the old one
             if ($invoice) {
                 // Delete the old PDF file if it exists
@@ -86,7 +85,7 @@ class DownloadVenueGroupInvoiceController extends Controller
 
         return Storage::disk('do')->download(
             $invoice->pdf_path,
-            $invoice->name() . '.pdf'
+            $invoice->name().'.pdf'
         );
     }
 }

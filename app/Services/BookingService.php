@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Actions\Booking\AutoApproveSmallPartyBooking;
 use App\Actions\Booking\CreateBooking;
 use App\Actions\Booking\SendConfirmationToVenueContacts;
+use App\Actions\Risk\ProcessBookingRisk;
 use App\Enums\BookingStatus;
 use App\Events\BookingConfirmed;
 use App\Events\BookingPaid;
@@ -34,10 +35,10 @@ class BookingService
         $this->updateBooking($booking, $form, $stripeCharge);
 
         // Process risk scoring (same as in CompleteBooking)
-        \App\Actions\Risk\ProcessBookingRisk::run($booking);
+        ProcessBookingRisk::run($booking);
 
         // Only send notifications if booking is not on risk hold
-        if (!$booking->isOnRiskHold()) {
+        if (! $booking->isOnRiskHold()) {
             if ($booking->is_non_prime_big_group) {
                 $booking->notify(new CustomerBookingRequestReceived);
             } else {

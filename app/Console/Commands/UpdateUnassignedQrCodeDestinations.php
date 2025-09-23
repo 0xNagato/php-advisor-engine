@@ -29,15 +29,13 @@ class UpdateUnassignedQrCodeDestinations extends Command
         $this->info('Updating QR codes without assigned concierges...');
 
         // Find QR codes without concierges that don't already point to the unassigned route
-        $qrCodes = QrCode::whereNull('concierge_id')
+        $qrCodes = QrCode::query()->whereNull('concierge_id')
             ->whereNotNull('short_url_id')
             ->with('shortUrlModel')
             ->get()
-            ->filter(function ($qrCode) {
-                return $qrCode->shortUrlModel &&
-                    ! str_contains($qrCode->shortUrlModel->destination_url, 'qr.unassigned') &&
-                    ! str_contains($qrCode->shortUrlModel->destination_url, 'v.booking');
-            });
+            ->filter(fn ($qrCode) => $qrCode->shortUrlModel &&
+                ! str_contains((string) $qrCode->shortUrlModel->destination_url, 'qr.unassigned') &&
+                ! str_contains((string) $qrCode->shortUrlModel->destination_url, 'v.booking'));
 
         $updated = 0;
 

@@ -2,9 +2,10 @@
 
 namespace App\Actions\Risk;
 
-use App\Filament\Resources\RiskReviewResource\Pages\ViewRiskReview;
 use App\Filament\Resources\BookingResource\Pages\ViewBooking;
+use App\Filament\Resources\RiskReviewResource\Pages\ViewRiskReview;
 use App\Models\Booking;
+use Exception;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use Lorisleiva\Actions\Concerns\AsAction;
@@ -24,15 +25,16 @@ class SendRiskAlertToSlack
             Log::debug('Attempting to send Slack risk alert', [
                 'booking_id' => $booking->id,
                 'risk_score' => $booking->risk_score,
-                'webhook_configured' => !empty($webhookUrl),
+                'webhook_configured' => ! empty($webhookUrl),
                 'webhook_url_length' => strlen($webhookUrl ?? ''),
             ]);
         }
 
-        if (!$webhookUrl) {
+        if (! $webhookUrl) {
             Log::warning('Slack webhook URL not configured for risk alerts', [
                 'booking_id' => $booking->id,
             ]);
+
             return;
         }
 
@@ -41,16 +43,16 @@ class SendRiskAlertToSlack
         try {
             $response = Http::post($webhookUrl, $message);
 
-            if (!$response->successful()) {
+            if (! $response->successful()) {
                 Log::error('Failed to send Slack risk alert', [
                     'booking_id' => $booking->id,
-                    'response' => $response->body()
+                    'response' => $response->body(),
                 ]);
             }
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Log::error('Exception sending Slack risk alert', [
                 'booking_id' => $booking->id,
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
             ]);
         }
     }
@@ -62,7 +64,7 @@ class SendRiskAlertToSlack
     {
         // Determine risk level and formatting
         $score = $booking->risk_score ?? 0;
-        $isLowRisk = !$booking->risk_state;
+        $isLowRisk = ! $booking->risk_state;
         $isMediumRisk = $booking->risk_state === 'soft';
         $isHighRisk = $booking->risk_state === 'hard';
 
@@ -108,48 +110,48 @@ class SendRiskAlertToSlack
         // Use appropriate URL based on risk level
         $primaryUrl = ($isMediumRisk || $isHighRisk) ? $riskReviewUrl : $bookingDetailUrl;
 
-        $guestName = trim(($booking->guest_first_name ?? '') . ' ' . ($booking->guest_last_name ?? '')) ?: 'Unknown';
+        $guestName = trim(($booking->guest_first_name ?? '').' '.($booking->guest_last_name ?? '')) ?: 'Unknown';
         $fields = [
             [
                 'title' => 'Guest',
-                'value' => $guestName . "\n" . ($booking->guest_email ?? ''),
-                'short' => true
+                'value' => $guestName."\n".($booking->guest_email ?? ''),
+                'short' => true,
             ],
             [
                 'title' => 'Venue',
                 'value' => $booking->venue->name ?? 'Unknown',
-                'short' => true
+                'short' => true,
             ],
             [
                 'title' => 'Date/Time',
                 'value' => $booking->booking_at?->format('M d, Y g:i A') ?? 'Unknown',
-                'short' => true
+                'short' => true,
             ],
             [
                 'title' => 'Party Size',
-                'value' => $booking->guest_count . ' guests',
-                'short' => true
+                'value' => $booking->guest_count.' guests',
+                'short' => true,
             ],
             [
                 'title' => 'Booking Type',
                 'value' => $booking->is_prime ? '💎 Prime (Paid)' : '🎟️ Non-Prime',
-                'short' => true
+                'short' => true,
             ],
             [
                 'title' => 'Total',
                 'value' => $booking->is_prime ? money($booking->total_fee, $booking->currency) : 'N/A',
-                'short' => true
+                'short' => true,
             ],
             [
                 'title' => 'Risk Score',
-                'value' => $score . '/100',
-                'short' => true
+                'value' => $score.'/100',
+                'short' => true,
             ],
             [
                 'title' => 'Risk Level',
                 'value' => $riskLabel,
-                'short' => true
-            ]
+                'short' => true,
+            ],
         ];
 
         // Add auto-approval status for low-risk bookings
@@ -157,21 +159,21 @@ class SendRiskAlertToSlack
             $fields[] = [
                 'title' => 'Auto-Approval',
                 'value' => $qualifiesForAutoApproval ? '✅ Eligible (≤7 guests, platform integrated)' : '❌ Not eligible',
-                'short' => true
+                'short' => true,
             ];
             $fields[] = [
                 'title' => 'Platform Integration',
                 'value' => $hasPlatformIntegration ? '✅ Yes' : '❌ No',
-                'short' => true
+                'short' => true,
             ];
         }
 
         // Add risk reasons if any exist
-        if (!empty($riskResult['reasons']) && count($riskResult['reasons']) > 0) {
+        if (! empty($riskResult['reasons']) && count($riskResult['reasons']) > 0) {
             $fields[] = [
                 'title' => 'Risk Indicators',
-                'value' => '• ' . implode("\n• ", array_slice($riskResult['reasons'], 0, 5)),
-                'short' => false
+                'value' => '• '.implode("\n• ", array_slice($riskResult['reasons'], 0, 5)),
+                'short' => false,
             ];
         }
 
@@ -182,14 +184,14 @@ class SendRiskAlertToSlack
                 'type' => 'button',
                 'text' => '🔍 Review Booking',
                 'url' => $riskReviewUrl,
-                'style' => 'primary'
+                'style' => 'primary',
             ];
         }
         $actions[] = [
             'type' => 'button',
             'text' => '📋 View Details',
             'url' => $bookingDetailUrl,
-            'style' => $isLowRisk ? 'primary' : 'default'
+            'style' => $isLowRisk ? 'primary' : 'default',
         ];
 
         return [
@@ -199,15 +201,15 @@ class SendRiskAlertToSlack
             'attachments' => [
                 [
                     'color' => $color,
-                    'title' => $riskEmoji . ' ' . $riskLabel . ' - Booking #' . $booking->id,
+                    'title' => $riskEmoji.' '.$riskLabel.' - Booking #'.$booking->id,
                     'title_link' => $primaryUrl,
                     'text' => $text,
                     'fields' => $fields,
-                    'footer' => 'Prima Booking System | ' . $booking->venue->region ?? 'Unknown Region',
+                    'footer' => 'Prima Booking System | '.$booking->venue->region ?? 'Unknown Region',
                     'ts' => now()->timestamp,
-                    'actions' => $actions
-                ]
-            ]
+                    'actions' => $actions,
+                ],
+            ],
         ];
     }
 }

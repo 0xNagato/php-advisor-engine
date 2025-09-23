@@ -2,11 +2,12 @@
 
 namespace App\Filament\Resources;
 
-use App\Filament\Resources\RiskMonitoringResource\Pages;
+use App\Filament\Resources\RiskMonitoringResource\Pages\ListRiskMonitoring;
+use App\Filament\Resources\RiskMonitoringResource\Pages\ViewRiskMonitoring;
 use App\Models\Booking;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
-use Filament\Tables;
+use Filament\Tables\Actions\ViewAction;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\Filter;
 use Filament\Tables\Filters\SelectFilter;
@@ -31,7 +32,7 @@ class RiskMonitoringResource extends Resource
     public static function canAccess(): bool
     {
         $user = auth()->user();
-        if (!$user) {
+        if (! $user) {
             return false;
         }
 
@@ -70,30 +71,29 @@ class RiskMonitoringResource extends Resource
                     ->label('Risk Score')
                     ->sortable()
                     ->badge()
-                    ->color(fn ($state) => match(true) {
+                    ->color(fn ($state) => match (true) {
                         $state >= 70 => 'danger',
                         $state >= 30 => 'warning',
                         $state > 0 => 'success',
                         default => 'gray',
                     })
-                    ->formatStateUsing(fn ($state) => $state . '/100'),
+                    ->formatStateUsing(fn ($state) => $state.'/100'),
 
                 TextColumn::make('risk_state')
                     ->label('Risk State')
                     ->badge()
                     ->default('Low')
-                    ->color(fn ($state) => match($state) {
+                    ->color(fn ($state) => match ($state) {
                         'hard' => 'danger',
                         'soft' => 'warning',
                         null, 'Low' => 'success',
                         default => 'success',
                     })
-                    ->formatStateUsing(fn ($state) => $state ? ucfirst($state) : 'Low'),
+                    ->formatStateUsing(fn ($state) => $state ? ucfirst((string) $state) : 'Low'),
 
                 TextColumn::make('guest_first_name')
                     ->label('Guest')
-                    ->formatStateUsing(fn (?string $state, $record): string =>
-                        trim(($record->guest_first_name ?? '') . ' ' . ($record->guest_last_name ?? '')) ?: 'Unknown'
+                    ->formatStateUsing(fn (?string $state, $record): string => trim(($record->guest_first_name ?? '').' '.($record->guest_last_name ?? '')) ?: 'Unknown'
                     )
                     ->searchable(['guest_first_name', 'guest_last_name'])
                     ->sortable(),
@@ -138,7 +138,7 @@ class RiskMonitoringResource extends Resource
                 TextColumn::make('risk_reasons')
                     ->label('Risk Reasons')
                     ->formatStateUsing(function ($state) {
-                        if (!is_array($state) || empty($state)) {
+                        if (! is_array($state) || empty($state)) {
                             return '-';
                         }
                         $reasons = array_slice($state, 0, 2);
@@ -157,7 +157,7 @@ class RiskMonitoringResource extends Resource
 
                 TextColumn::make('status')
                     ->badge()
-                    ->color(fn ($state) => match($state) {
+                    ->color(fn ($state) => match ($state) {
                         'confirmed' => 'success',
                         'review_pending' => 'warning',
                         'cancelled' => 'danger',
@@ -179,16 +179,14 @@ class RiskMonitoringResource extends Resource
                         'soft' => 'Medium Risk (30-69)',
                         'hard' => 'High Risk (70+)',
                     ])
-                    ->query(function (Builder $query, array $data) {
-                        return match ($data['value'] ?? null) {
-                            'clear' => $query->where(function ($q) {
-                                $q->whereNull('risk_state')
-                                  ->orWhere('risk_score', '<', 30);
-                            }),
-                            'soft' => $query->where('risk_state', 'soft'),
-                            'hard' => $query->where('risk_state', 'hard'),
-                            default => $query,
-                        };
+                    ->query(fn (Builder $query, array $data) => match ($data['value'] ?? null) {
+                        'clear' => $query->where(function ($q) {
+                            $q->whereNull('risk_state')
+                                ->orWhere('risk_score', '<', 30);
+                        }),
+                        'soft' => $query->where('risk_state', 'soft'),
+                        'hard' => $query->where('risk_state', 'hard'),
+                        default => $query,
                     }),
 
                 Filter::make('created_today')
@@ -199,7 +197,7 @@ class RiskMonitoringResource extends Resource
             ->striped()
             ->paginated([25, 50, 100])
             ->actions([
-                Tables\Actions\ViewAction::make(),
+                ViewAction::make(),
             ])
             ->bulkActions([])
             ->emptyStateHeading('No scored bookings found')
@@ -214,8 +212,8 @@ class RiskMonitoringResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ListRiskMonitoring::route('/'),
-            'view' => Pages\ViewRiskMonitoring::route('/{record}'),
+            'index' => ListRiskMonitoring::route('/'),
+            'view' => ViewRiskMonitoring::route('/{record}'),
         ];
     }
 }

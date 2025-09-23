@@ -17,7 +17,7 @@ return new class extends Migration
                 // Try to drop foreign key if it exists
                 try {
                     $table->dropForeign(['vip_link_hit_id']);
-                } catch (\Exception $e) {
+                } catch (Exception) {
                     // Foreign key might not exist, continue
                 }
                 $table->dropColumn('vip_link_hit_id');

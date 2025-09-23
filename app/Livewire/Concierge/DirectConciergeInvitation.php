@@ -41,7 +41,7 @@ class DirectConciergeInvitation extends SimplePage
             if ($referrerId) {
                 try {
                     $this->invitingConcierge = Concierge::query()->findOrFail($referrerId);
-                } catch (\Exception $e) {
+                } catch (Exception) {
                     // Invalid referrer ID, ignore it
                 }
             }

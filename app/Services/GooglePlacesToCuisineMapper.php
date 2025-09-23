@@ -10,7 +10,7 @@ class GooglePlacesToCuisineMapper
     /**
      * Map Google Places types to our cuisine IDs
      */
-    private const CUISINE_MAPPING = [
+    private const array CUISINE_MAPPING = [
         'american_restaurant' => 'american',
         'chinese_restaurant' => 'chinese',
         'french_restaurant' => 'french',
@@ -46,7 +46,7 @@ class GooglePlacesToCuisineMapper
     /**
      * Map Google Places attributes and types to our specialty IDs
      */
-    private const SPECIALTY_MAPPING = [
+    private const array SPECIALTY_MAPPING = [
         // Based on attributes
         'live_music' => 'live_music_dj',
         'outdoor_seating' => 'scenic_view',

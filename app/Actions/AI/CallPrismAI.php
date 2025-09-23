@@ -2,9 +2,10 @@
 
 namespace App\Actions\AI;
 
-use Prism\Prism\Prism;
+use Exception;
 use Illuminate\Support\Facades\Log;
 use Lorisleiva\Actions\Concerns\AsAction;
+use Prism\Prism\Prism;
 
 class CallPrismAI
 {
@@ -23,8 +24,8 @@ class CallPrismAI
         int $maxTokens = 300
     ): array {
         // Get configuration
-        $provider = $provider ?? config('services.prism.provider', 'openai');
-        $model = $model ?? config('services.prism.model', 'gpt-5-mini');
+        $provider ??= config('services.prism.provider', 'openai');
+        $model ??= config('services.prism.model', 'gpt-5-mini');
 
         // Build request log
         $requestLog = [
@@ -47,9 +48,7 @@ class CallPrismAI
         try {
             // Check API key configuration
             $apiKey = $this->getApiKey($provider);
-            if (!$apiKey) {
-                throw new \Exception("No API key configured for provider: {$provider}");
-            }
+            throw_unless($apiKey, new Exception("No API key configured for provider: {$provider}"));
 
             // Make the API call
             $response = Prism::text()
@@ -104,7 +103,7 @@ class CallPrismAI
                 'response_log' => $responseLog,
             ];
 
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             // Log the error
             Log::error('Prism AI Call Failed', [
                 'provider' => $provider,

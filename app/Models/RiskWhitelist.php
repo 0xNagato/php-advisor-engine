@@ -19,9 +19,13 @@ class RiskWhitelist extends Model
     ];
 
     const TYPE_EMAIL = 'email';
+
     const TYPE_DOMAIN = 'domain';
+
     const TYPE_PHONE = 'phone';
+
     const TYPE_IP = 'ip';
+
     const TYPE_NAME = 'name';
 
     /**
@@ -37,7 +41,7 @@ class RiskWhitelist extends Model
      */
     public static function isWhitelisted(string $type, string $value): bool
     {
-        return self::where('type', $type)
+        return self::query()->where('type', $type)
             ->where('value', strtolower($value))
             ->exists();
     }

@@ -3,6 +3,7 @@
 namespace App\Actions\Risk;
 
 use App\Actions\AI\CallPrismAI;
+use Exception;
 use Illuminate\Support\Facades\Log;
 use Lorisleiva\Actions\Concerns\AsAction;
 
@@ -13,7 +14,7 @@ class EvaluateWithLLMPrism
     /**
      * Evaluate risk using LLM via Prism
      *
-     * @param array<string, mixed> $features
+     * @param  array<string, mixed>  $features
      * @return array{risk_score: int, reasons: array<string>, confidence: string, analysis: string, ai_prompt?: string, ai_response?: string}
      */
     public function handle(array $features): array
@@ -30,11 +31,12 @@ class EvaluateWithLLMPrism
             );
 
             // Check if the AI call was successful
-            if (!$aiResult['success']) {
+            if (! $aiResult['success']) {
                 Log::warning('AI call failed', [
                     'error' => $aiResult['error'] ?? 'Unknown error',
                     'name' => $features['name'] ?? 'Unknown',
                 ]);
+
                 return $this->fallbackRuleBasedScoring($features);
             }
 
@@ -42,17 +44,19 @@ class EvaluateWithLLMPrism
             $parsed = $aiResult['parsed'];
 
             // If not parsed as JSON, try to handle the raw response
-            if (!$parsed && isset($aiResult['response'])) {
+            if (! $parsed && isset($aiResult['response'])) {
                 Log::warning('AI response not in expected JSON format', [
-                    'response' => substr($aiResult['response'], 0, 500),
+                    'response' => substr((string) $aiResult['response'], 0, 500),
                 ]);
+
                 return $this->fallbackRuleBasedScoring($features);
             }
 
-            if (!isset($parsed['risk_score'])) {
+            if (! isset($parsed['risk_score'])) {
                 Log::warning('Invalid AI response format - missing risk_score', [
                     'response' => $parsed,
                 ]);
+
                 return $this->fallbackRuleBasedScoring($features);
             }
 
@@ -65,14 +69,15 @@ class EvaluateWithLLMPrism
                 'confidence' => $parsed['confidence'] ?? 'medium',
                 'analysis' => $parsed['analysis'] ?? 'No detailed analysis provided',
                 'ai_prompt' => $fullPrompt,
-                'ai_response' => $aiResult['response']
+                'ai_response' => $aiResult['response'],
             ];
 
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Log::error('Risk evaluation with AI failed', [
                 'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString()
+                'trace' => $e->getTraceAsString(),
             ]);
+
             return $this->fallbackRuleBasedScoring($features);
         }
     }
@@ -163,7 +168,7 @@ PROMPT;
         if (isset($features['ip'])) {
             $prompt .= "IP Address: {$features['ip']}\n";
         }
-        if (isset($features['notes']) && !empty($features['notes'])) {
+        if (isset($features['notes']) && ! empty($features['notes'])) {
             $prompt .= "Booking Notes: {$features['notes']}\n";
         }
 
@@ -192,7 +197,7 @@ PROMPT;
             'identical_notes' => 'Duplicate booking notes across sessions',
             'venue_hopping' => 'Multiple venues targeted quickly',
             'device_velocity' => 'High activity from single device',
-            'time_pattern' => 'Submissions follow automated timing'
+            'time_pattern' => 'Submissions follow automated timing',
         ];
 
         $hasIndicators = false;
@@ -203,7 +208,7 @@ PROMPT;
             }
         }
 
-        if (!$hasIndicators) {
+        if (! $hasIndicators) {
             $prompt .= "- No specific risk indicators detected\n";
         }
 
@@ -325,7 +330,7 @@ PROMPT;
             'risk_score' => min(100, $score),
             'reasons' => array_slice($reasons, 0, 5),
             'confidence' => $confidence,
-            'analysis' => $analysis
+            'analysis' => $analysis,
         ];
     }
 }

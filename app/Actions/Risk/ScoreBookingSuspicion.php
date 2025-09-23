@@ -8,9 +8,9 @@ use App\Actions\Risk\Analyzers\AnalyzeIPRisk;
 use App\Actions\Risk\Analyzers\AnalyzeNameRisk;
 use App\Actions\Risk\Analyzers\AnalyzePhoneRisk;
 use App\Models\Booking;
-use App\Models\RiskAuditLog;
 use App\Models\RiskBlacklist;
 use App\Models\RiskWhitelist;
+use Exception;
 use Illuminate\Support\Facades\Log;
 use Lorisleiva\Actions\Concerns\AsAction;
 
@@ -19,7 +19,9 @@ class ScoreBookingSuspicion
     use AsAction;
 
     protected array $reasons = [];
+
     protected array $features = [];
+
     protected int $score = 0;
 
     /**
@@ -51,12 +53,14 @@ class ScoreBookingSuspicion
         if ($this->checkWhitelist($email, $phone, $ipAddress, $name)) {
             $this->score = 0;
             $this->reasons[] = 'Whitelisted entity';
+
             return $this->getResult();
         }
 
         if ($this->checkBlacklist($email, $phone, $ipAddress, $name)) {
             $this->score = 100;
             $this->reasons[] = 'Blacklisted entity';
+
             return $this->getResult();
         }
 
@@ -82,35 +86,43 @@ class ScoreBookingSuspicion
             'email_analysis' => [
                 'score' => $emailAnalysis['score'],
                 'reasons' => $emailAnalysis['reasons'],
-                'email' => $email
+                'email' => $email,
             ],
             'phone_analysis' => [
                 'score' => $phoneAnalysis['score'],
                 'reasons' => $phoneAnalysis['reasons'],
-                'phone' => $phone
+                'phone' => $phone,
             ],
             'name_analysis' => [
                 'score' => $nameAnalysis['score'],
                 'reasons' => $nameAnalysis['reasons'],
-                'name' => $name
+                'name' => $name,
             ],
             'ip_analysis' => [
                 'score' => $ipAnalysis['score'],
                 'reasons' => $ipAnalysis['reasons'],
-                'ip' => $ipAddress
+                'ip' => $ipAddress,
             ],
             'behavioral_analysis' => [
                 'score' => $behavioralAnalysis['score'],
-                'reasons' => $behavioralAnalysis['reasons']
-            ]
+                'reasons' => $behavioralAnalysis['reasons'],
+            ],
         ]);
 
         // Count high-risk indicators
         $highRiskCount = 0;
-        if ($emailAnalysis['score'] >= 80) $highRiskCount++;
-        if ($nameAnalysis['score'] >= 80) $highRiskCount++;
-        if ($ipAnalysis['score'] >= 80) $highRiskCount++;
-        if ($behavioralAnalysis['score'] >= 80) $highRiskCount++;
+        if ($emailAnalysis['score'] >= 80) {
+            $highRiskCount++;
+        }
+        if ($nameAnalysis['score'] >= 80) {
+            $highRiskCount++;
+        }
+        if ($ipAnalysis['score'] >= 80) {
+            $highRiskCount++;
+        }
+        if ($behavioralAnalysis['score'] >= 80) {
+            $highRiskCount++;
+        }
 
         // Store whether we have extreme profanity
         $hasExtremeProfanity = ($emailAnalysis['score'] >= 100 || $nameAnalysis['score'] >= 90);
@@ -231,10 +243,10 @@ class ScoreBookingSuspicion
                     $this->reasons[] = 'AI detected high-risk patterns';
                 }
 
-                if (!empty($llmScore['reasons'])) {
-                    $this->reasons[] = 'AI analysis: ' . implode(', ', $llmScore['reasons']);
+                if (! empty($llmScore['reasons'])) {
+                    $this->reasons[] = 'AI analysis: '.implode(', ', $llmScore['reasons']);
                 }
-            } catch (\Exception $e) {
+            } catch (Exception $e) {
                 Log::warning('LLM heuristic failed, using rules-only score', [
                     'error' => $e->getMessage(),
                     'booking_id' => $booking?->id,
@@ -307,24 +319,28 @@ class ScoreBookingSuspicion
         $emailDomain = substr(strrchr($email, '@'), 1);
         if ($emailDomain && RiskBlacklist::isBlacklisted(RiskBlacklist::TYPE_DOMAIN, $emailDomain)) {
             $this->features['blacklist_match'] = 'email_domain';
+
             return true;
         }
 
         // Check phone
         if (RiskBlacklist::isBlacklisted(RiskBlacklist::TYPE_PHONE, $phone)) {
             $this->features['blacklist_match'] = 'phone';
+
             return true;
         }
 
         // Check IP
         if ($ipAddress && RiskBlacklist::isBlacklisted(RiskBlacklist::TYPE_IP, $ipAddress)) {
             $this->features['blacklist_match'] = 'ip';
+
             return true;
         }
 
         // Check name
         if (RiskBlacklist::isBlacklisted(RiskBlacklist::TYPE_NAME, $name)) {
             $this->features['blacklist_match'] = 'name';
+
             return true;
         }
 

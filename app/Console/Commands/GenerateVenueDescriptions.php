@@ -3,6 +3,7 @@
 namespace App\Console\Commands;
 
 use App\Models\Venue;
+use Exception;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
@@ -18,24 +19,27 @@ class GenerateVenueDescriptions extends Command
 
     protected $description = 'Generate AI-powered descriptions for venues based on their data';
 
-    private const ANTHROPIC_MODEL = 'claude-opus-4-1-20250805';
-    private const OPENAI_MODEL = 'gpt-4-turbo-preview';
+    private const string ANTHROPIC_MODEL = 'claude-opus-4-1-20250805';
+
+    private const string OPENAI_MODEL = 'gpt-4-turbo-preview';
 
     public function handle(): int
     {
         $provider = $this->option('provider');
-        
-        if (!in_array($provider, ['anthropic', 'openai'])) {
+
+        if (! in_array($provider, ['anthropic', 'openai'])) {
             $this->error('Invalid provider. Use "anthropic" or "openai".');
+
             return Command::FAILURE;
         }
 
-        $apiKey = $provider === 'anthropic' 
+        $apiKey = $provider === 'anthropic'
             ? config('services.anthropic.api_key')
             : config('services.openai.api_key');
 
         if (empty($apiKey)) {
             $this->error("API key for {$provider} is not configured.");
+
             return Command::FAILURE;
         }
 
@@ -45,7 +49,7 @@ class GenerateVenueDescriptions extends Command
         // If a specific venue is requested
         if ($venueId = $this->option('venue')) {
             $query->where('id', $venueId);
-        } elseif (!$this->option('force')) {
+        } elseif (! $this->option('force')) {
             // Only process venues without descriptions
             $query->where(function ($q) {
                 $q->whereNull('description')
@@ -58,6 +62,7 @@ class GenerateVenueDescriptions extends Command
 
         if ($venues->isEmpty()) {
             $this->info('No venues to process.');
+
             return Command::SUCCESS;
         }
 
@@ -73,7 +78,7 @@ class GenerateVenueDescriptions extends Command
 
             try {
                 $description = $this->generateDescription($venue, $provider, $apiKey);
-                
+
                 if ($description) {
                     if ($this->option('dry-run')) {
                         $this->newLine();
@@ -90,7 +95,7 @@ class GenerateVenueDescriptions extends Command
 
                 // Rate limiting
                 sleep(1);
-            } catch (\Exception $e) {
+            } catch (Exception $e) {
                 $failCount++;
                 Log::error('AI description generation error', [
                     'venue_id' => $venue->id,
@@ -130,33 +135,43 @@ class GenerateVenueDescriptions extends Command
             $features[] = "Google rating: {$metadata->rating}/5 ({$metadata->reviewCount} reviews)";
         }
         if ($venue->cuisines) {
-            $features[] = "Cuisines: " . implode(', ', $venue->cuisines);
+            $features[] = 'Cuisines: '.implode(', ', $venue->cuisines);
         }
         if ($venue->specialty) {
-            $features[] = "Specialties: " . implode(', ', $venue->specialty);
+            $features[] = 'Specialties: '.implode(', ', $venue->specialty);
         }
         if ($metadata?->priceLevel) {
             $priceMap = [1 => '$', 2 => '$$', 3 => '$$$', 4 => '$$$$'];
-            $features[] = "Price level: " . ($priceMap[$metadata->priceLevel] ?? 'Unknown');
+            $features[] = 'Price level: '.($priceMap[$metadata->priceLevel] ?? 'Unknown');
         }
         if ($metadata?->googlePrimaryType) {
-            $features[] = "Type: " . str_replace('_', ' ', $metadata->googlePrimaryType);
+            $features[] = 'Type: '.str_replace('_', ' ', $metadata->googlePrimaryType);
         }
-        
+
         // Add boolean features
         $booleanFeatures = [];
         $attrs = $metadata?->googleAttributes ?? [];
-        if ($attrs['serves_wine'] ?? false) $booleanFeatures[] = 'wine';
-        if ($attrs['serves_beer'] ?? false) $booleanFeatures[] = 'beer';
-        if ($attrs['serves_cocktails'] ?? false) $booleanFeatures[] = 'cocktails';
-        if ($attrs['outdoor_seating'] ?? false) $booleanFeatures[] = 'outdoor seating';
-        if ($attrs['live_music'] ?? false) $booleanFeatures[] = 'live music';
-        
-        if (!empty($booleanFeatures)) {
-            $features[] = "Features: " . implode(', ', $booleanFeatures);
+        if ($attrs['serves_wine'] ?? false) {
+            $booleanFeatures[] = 'wine';
+        }
+        if ($attrs['serves_beer'] ?? false) {
+            $booleanFeatures[] = 'beer';
+        }
+        if ($attrs['serves_cocktails'] ?? false) {
+            $booleanFeatures[] = 'cocktails';
+        }
+        if ($attrs['outdoor_seating'] ?? false) {
+            $booleanFeatures[] = 'outdoor seating';
+        }
+        if ($attrs['live_music'] ?? false) {
+            $booleanFeatures[] = 'live music';
         }
 
-        $featureText = !empty($features) ? "\n" . implode("\n", $features) : '';
+        if (! empty($booleanFeatures)) {
+            $features[] = 'Features: '.implode(', ', $booleanFeatures);
+        }
+
+        $featureText = ! empty($features) ? "\n".implode("\n", $features) : '';
 
         return <<<EOT
 Write a compelling, SEO-friendly restaurant description for {$venue->name} located in {$venue->region}. 
@@ -187,7 +202,7 @@ EOT;
     private function generateWithOpenAI(string $prompt, string $apiKey): ?string
     {
         $response = Http::withHeaders([
-            'Authorization' => 'Bearer ' . $apiKey,
+            'Authorization' => 'Bearer '.$apiKey,
         ])->post('https://api.openai.com/v1/chat/completions', [
             'model' => self::OPENAI_MODEL,
             'messages' => [

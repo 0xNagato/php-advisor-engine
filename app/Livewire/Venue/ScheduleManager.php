@@ -85,7 +85,7 @@ class ScheduleManager extends Component
         if ($value === 'calendar') {
             $timezone = $this->venue->timezone ?? config('app.timezone');
 
-            if (!$this->selectedDate) {
+            if (! $this->selectedDate) {
                 $today = now($timezone);
 
                 // If a venue is closed today, find the next open day
@@ -115,7 +115,7 @@ class ScheduleManager extends Component
 
     public function updatedEditingSlot($value, $field): void
     {
-        if (!in_array($field, $this->changedFields, true)) {
+        if (! in_array($field, $this->changedFields, true)) {
             $this->changedFields[] = $field;
         }
     }
@@ -205,7 +205,7 @@ class ScheduleManager extends Component
                     $query->where('party_size', $this->editingSlot['size']);
                 })
                 ->get()
-                ->map(fn($template) => [
+                ->map(fn ($template) => [
                     'id' => $template->id,
                     'is_available' => $template->is_available,
                     'prime_time' => $template->prime_time,
@@ -273,7 +273,7 @@ class ScheduleManager extends Component
                 }
             }
 
-            if (!empty($fieldsToUpdate)) {
+            if (! empty($fieldsToUpdate)) {
                 $this->venue->scheduleTemplates()
                     ->where('day_of_week', $this->selectedDay)
                     ->where('start_time', $this->editingSlot['time'])
@@ -317,7 +317,7 @@ class ScheduleManager extends Component
             $dayOfWeek = strtolower(Carbon::parse($date)->format('l'));
         }
 
-        if (!$schedule) {
+        if (! $schedule) {
             Notification::make()
                 ->title('No Schedule Found')
                 ->body('No schedule exists for these slot.')
@@ -416,7 +416,7 @@ class ScheduleManager extends Component
                 if ($this->editingSlot['size'] === '*') {
                     // Bulk edit for all party sizes
                     $templates = $this->venue->scheduleTemplates()
-                        ->where('day_of_week', strtolower((string)$this->editingSlot['day']))
+                        ->where('day_of_week', strtolower((string) $this->editingSlot['day']))
                         ->where('start_time', $this->editingSlot['time'])
                         ->get();
 
@@ -452,7 +452,7 @@ class ScheduleManager extends Component
                     }
                 } else {
                     $template = $this->venue->scheduleTemplates
-                        ->where('day_of_week', strtolower((string)$this->editingSlot['day']))
+                        ->where('day_of_week', strtolower((string) $this->editingSlot['day']))
                         ->where('start_time', $this->editingSlot['time'])
                         ->where('party_size', $this->editingSlot['size'])
                         ->first();
@@ -546,7 +546,7 @@ class ScheduleManager extends Component
                         $time = $slot['time'];
 
                         $template = $this->venue->scheduleTemplates()
-                            ->where('day_of_week', strtolower((string)$this->editingSlot['day']))
+                            ->where('day_of_week', strtolower((string) $this->editingSlot['day']))
                             ->where('start_time', $time)
                             ->where('party_size', $this->editingSlot['size'])
                             ->first();
@@ -730,12 +730,12 @@ class ScheduleManager extends Component
     {
         $firstSize = array_key_first(array_filter(
             $this->venue->party_sizes,
-            fn($value, $key) => $key !== 'Special Request',
+            fn ($value, $key) => $key !== 'Special Request',
             ARRAY_FILTER_USE_BOTH
         ));
         $schedule = $this->calendarSchedules[$time][$firstSize] ?? null;
 
-        if (!$schedule) {
+        if (! $schedule) {
             Notification::make()
                 ->title('No Schedule Found')
                 ->body("No schedule exists for $time on $day.")
@@ -764,9 +764,9 @@ class ScheduleManager extends Component
     {
         // Retrieve the first matching schedule for the party size on the selected day
         $schedule = collect($this->calendarSchedules)
-            ->first(fn($timeSlots) => isset($timeSlots[$size]))[$size] ?? null;
+            ->first(fn ($timeSlots) => isset($timeSlots[$size]))[$size] ?? null;
 
-        if (!$schedule) {
+        if (! $schedule) {
             Notification::make()
                 ->title('No Schedule Found')
                 ->body("No schedule exists for party size $size on $day.")
@@ -798,11 +798,11 @@ class ScheduleManager extends Component
         // Use the first party size's settings as default
         $firstSize = array_key_first(array_filter(
             $this->venue->party_sizes,
-            fn($value, $key) => $key !== 'Special Request',
+            fn ($value, $key) => $key !== 'Special Request',
             ARRAY_FILTER_USE_BOTH
         ));
         $schedule = $this->schedules[$this->selectedDay][$time][$firstSize] ?? null;
-        if (!$schedule) {
+        if (! $schedule) {
             Notification::make()
                 ->title('No Schedule Found')
                 ->body("No schedule exists for $time.")
@@ -832,7 +832,7 @@ class ScheduleManager extends Component
     {
         // Use the first time slot's settings as default
         $firstTimeSlot = $this->timeSlots[0]['time'] ?? null;
-        if (!isset($this->schedules[$this->selectedDay][$firstTimeSlot][$size])) {
+        if (! isset($this->schedules[$this->selectedDay][$firstTimeSlot][$size])) {
             Notification::make()
                 ->title('No Schedule Found')
                 ->body("No schedule exists for party size $size.")
@@ -891,7 +891,7 @@ class ScheduleManager extends Component
             ->get();
 
         // Group templates and overrides for an easier lookup
-        $groupedTemplates = $templates->groupBy(fn($template) => $template->start_time . '|' . $template->party_size);
+        $groupedTemplates = $templates->groupBy(fn ($template) => $template->start_time.'|'.$template->party_size);
 
         $groupedOverrides = $overrides->groupBy('schedule_template_id');
 
@@ -907,7 +907,7 @@ class ScheduleManager extends Component
                 }
 
                 // Find a template for this time and party size
-                $template = $groupedTemplates->get($slot['time'] . '|' . $size)?->first();
+                $template = $groupedTemplates->get($slot['time'].'|'.$size)?->first();
                 $override = null;
 
                 if ($template) {
@@ -1228,7 +1228,7 @@ class ScheduleManager extends Component
                 ->get();
 
             // Store original data for logging
-            $originalData = $templates->mapWithKeys(fn($template) => [
+            $originalData = $templates->mapWithKeys(fn ($template) => [
                 $template->id => [
                     'time' => $template->start_time,
                     'party_size' => $template->party_size,
@@ -1321,7 +1321,7 @@ class ScheduleManager extends Component
             ->whereIn('schedule_template_id', $this->venue->scheduleTemplates()->pluck('id'))
             ->distinct()
             ->pluck('booking_date')
-            ->map(fn($date) => $date->format('Y-m-d'))
+            ->map(fn ($date) => $date->format('Y-m-d'))
             ->toArray();
     }
 
@@ -1390,7 +1390,7 @@ class ScheduleManager extends Component
                 $isPrime = $override?->prime_time ?? $template->prime_time;
 
                 // Only update if the slot is not prime
-                if (!$isPrime) {
+                if (! $isPrime) {
                     // If override exists, just update price_per_head
                     if ($override) {
                         $override->update([
@@ -1420,7 +1420,7 @@ class ScheduleManager extends Component
                     'price_per_head' => $this->dayPricePerHead,
                     'original_data' => $originalData,
                 ])
-                ->log('Concierge incentive set for non-prime timeslots on ' . $this->getFormattedDate($this->selectedDate));
+                ->log('Concierge incentive set for non-prime timeslots on '.$this->getFormattedDate($this->selectedDate));
 
             // Reset the price per head input
             $this->dayPricePerHead = null;
@@ -1478,7 +1478,7 @@ class ScheduleManager extends Component
                 ->get();
 
             // Store original data for logging
-            $originalData = $templates->mapWithKeys(fn($template) => [
+            $originalData = $templates->mapWithKeys(fn ($template) => [
                 $template->id => [
                     'time' => $template->start_time,
                     'party_size' => $template->party_size,
@@ -1503,7 +1503,7 @@ class ScheduleManager extends Component
                     'price_per_head' => $this->weeklyPricePerHead,
                     'original_data' => $originalData,
                 ])
-                ->log('Concierge incentive set for non-prime timeslots on weekly template for ' . ucfirst($this->selectedDay));
+                ->log('Concierge incentive set for non-prime timeslots on weekly template for '.ucfirst($this->selectedDay));
 
             // Reset the price per head input
             $this->weeklyPricePerHead = null;
