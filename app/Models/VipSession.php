@@ -30,6 +30,9 @@ class VipSession extends Model
         'expires_at',
         'ip_address',
         'user_agent',
+        'query_params',
+        'landing_url',
+        'referer_url',
         'started_at',
         'last_activity_at',
     ];
@@ -38,6 +41,7 @@ class VipSession extends Model
     {
         return [
             'expires_at' => 'datetime',
+            'query_params' => 'array',
             'started_at' => 'datetime',
             'last_activity_at' => 'datetime',
         ];

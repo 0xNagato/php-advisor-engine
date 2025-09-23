@@ -1,5 +1,6 @@
 <?php
 
+use App\Actions\Vip\TrackVipLinkHit;
 use App\Filament\Pages\CreatePassword;
 use App\Http\Controllers\Admin\BookingCalculatorController;
 use App\Http\Controllers\Booking\BookingCheckoutController;
@@ -112,6 +113,13 @@ Route::get('vip/login/{code?}', fn ($code = null) => redirect($code ? "/v/$code"
 
 Route::get('vip/{code}', AvailabilityCalendar::class)->name('vip.booking');
 Route::get('v/{code}', function ($code) {
+    // Fire-and-forget tracking of VIP landing with query params
+    try {
+        app(TrackVipLinkHit::class)->handle($code, request());
+    } catch (Throwable $e) {
+        // Never block redirect on tracking failure
+    }
+
     $queryParams = request()->query();
     $redirectUrl = config('app.booking_url')."/vip/{$code}";
 

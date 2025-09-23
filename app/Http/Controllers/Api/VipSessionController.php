@@ -37,9 +37,13 @@ class VipSessionController extends Controller
     {
         $request->validate([
             'vip_code' => ['required', 'string', 'min:4', 'max:12'],
+            'query_params' => ['nullable', 'array'],
         ]);
 
-        $sessionData = $this->vipCodeService->createVipSession($request->input('vip_code'));
+        $sessionData = $this->vipCodeService->createVipSession(
+            $request->input('vip_code'),
+            $request->input('query_params')
+        );
 
         if (! $sessionData) {
             return response()->json([

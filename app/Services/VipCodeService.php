@@ -37,7 +37,10 @@ class VipCodeService
     /**
      * Create a VIP analytics session for tracking customer journey
      */
-    public function createVipSession(string $code): ?array
+    /**
+     * @param  array<string, mixed>|null  $queryParams
+     */
+    public function createVipSession(string $code, ?array $queryParams = null): ?array
     {
         $vipCode = $this->findByCode($code);
 
@@ -83,6 +86,9 @@ class VipCodeService
             'sanctum_token_id' => null, // Analytics sessions are never linked to user accounts
             'ip_address' => request()->ip(),
             'user_agent' => request()->userAgent(),
+            'query_params' => $queryParams,
+            'landing_url' => request()->headers->get('referer') ? request()->fullUrl() : null,
+            'referer_url' => request()->headers->get('referer'),
             'started_at' => now(),
         ]);
 
