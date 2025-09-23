@@ -96,7 +96,17 @@
                                     {{ number_format($analytics['bookings']) }}
                                 </td>
                                 <td class="px-4 py-3 text-center text-sm font-medium text-green-600">
-                                    {{ $analytics['earnings'] > 0 ? money($analytics['earnings'], 'USD') : '-' }}
+                                    @if(isset($analytics['earnings_by_currency']) && !empty($analytics['earnings_by_currency']))
+                                        @php
+                                            $formatted = [];
+                                            foreach($analytics['earnings_by_currency'] as $currency => $amount) {
+                                                $formatted[] = money($amount, $currency);
+                                            }
+                                        @endphp
+                                        {{ implode(', ', $formatted) }}
+                                    @else
+                                        -
+                                    @endif
                                 </td>
                                 <td class="px-4 py-3 text-center text-sm font-medium">
                                     <span

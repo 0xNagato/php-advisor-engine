@@ -10,7 +10,6 @@ use App\Enums\VipCodeTemplate;
 use App\Models\Region;
 use App\Models\Venue;
 use App\Models\VipCode;
-use App\Services\CurrencyConversionService;
 use App\Traits\ManagesVenueCollections;
 use Carbon\Carbon;
 use Exception;
@@ -34,7 +33,6 @@ use Filament\Tables\Concerns\HasFilters;
 use Filament\Tables\Table;
 use Filament\Widgets\TableWidget;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\HtmlString;
@@ -105,12 +103,7 @@ class VipCodesTable extends TableWidget
                     ->alignCenter()
                     ->size('xs')
                     ->default(0)
-                    ->counts('sessions', function (Builder $query) use ($startDate, $endDate) {
-                        $query->whereBetween('created_at', [
-                            Carbon::parse($startDate)->startOfDay(),
-                            Carbon::parse($endDate)->endOfDay(),
-                        ]);
-                    }),
+                    ->counts('sessions'),
                 TextColumn::make('bookings_count')
                     ->label('Bookings')
                     ->visibleFrom('sm')
@@ -133,6 +126,7 @@ class VipCodesTable extends TableWidget
                         }
 
                         $rate = round(($vipCode->bookings_count / $sessionsCount) * 100, 1);
+
                         return $rate.'%';
                     }),
                 TextColumn::make('earnings')
@@ -145,12 +139,10 @@ class VipCodesTable extends TableWidget
                         $endDate = $this->tableFilters['endDate'] ?? now()->format('Y-m-d');
 
                         // Filter earnings by booking date
-                        $filteredEarnings = $vipCode->earnings->filter(function ($earning) use ($startDate, $endDate) {
-                            return $earning->booking->created_at->between(
-                                Carbon::parse($startDate)->startOfDay(),
-                                Carbon::parse($endDate)->endOfDay()
-                            );
-                        });
+                        $filteredEarnings = $vipCode->earnings->filter(fn ($earning) => $earning->booking->created_at->between(
+                            Carbon::parse($startDate)->startOfDay(),
+                            Carbon::parse($endDate)->endOfDay()
+                        ));
 
                         $byCurrency = $filteredEarnings->groupBy('currency')
                             ->map(fn ($currencyGroup) => $currencyGroup->sum('amount'))
@@ -248,7 +240,7 @@ class VipCodesTable extends TableWidget
                         $paramAnalytics = $this->buildParameterAnalytics($allSessions, $bookings->get());
 
                         // Format date range
-                        $dateRange = Carbon::parse($startDate)->format('M j') . ' - ' . Carbon::parse($endDate)->format('M j, Y');
+                        $dateRange = Carbon::parse($startDate)->format('M j').' - '.Carbon::parse($endDate)->format('M j, Y');
 
                         return view('filament.modals.vip-analytics', [
                             'sessions' => $sessions,
@@ -608,25 +600,40 @@ class VipCodesTable extends TableWidget
 
         // First, count all sessions with their parameters
         foreach ($sessions as $session) {
-            if (!empty($session->query_params)) {
+            if (! empty($session->query_params)) {
                 foreach ($session->query_params as $key => $value) {
                     // Convert arrays to strings for display
                     $displayValue = is_array($value) ? implode(', ', $value) : $value;
-                    $paramKey = $key . '|' . $displayValue;
+                    $paramKey = $key.'|'.$displayValue;
 
-                    if (!isset($paramData[$paramKey])) {
+                    if (! isset($paramData[$paramKey])) {
                         $paramData[$paramKey] = [
                             'key' => $key,
                             'value' => $displayValue,
                             'sessions' => 0,
                             'bookings' => 0,
                             'earnings' => 0,
+                            'earnings_by_currency' => [],
                         ];
                     }
 
                     // Increment session count for this parameter
                     $paramData[$paramKey]['sessions']++;
                 }
+            } else {
+                // Track sessions without query params
+                $paramKey = '_no_params_|_none_';
+                if (! isset($paramData[$paramKey])) {
+                    $paramData[$paramKey] = [
+                        'key' => '(no parameters)',
+                        'value' => '-',
+                        'sessions' => 0,
+                        'bookings' => 0,
+                        'earnings' => 0,
+                        'earnings_by_currency' => [],
+                    ];
+                }
+                $paramData[$paramKey]['sessions']++;
             }
         }
 
@@ -637,30 +644,72 @@ class VipCodesTable extends TableWidget
                 ? $sessionMap[$booking->vip_session_id]
                 : null;
 
-            if ($session && !empty($session->query_params)) {
-                foreach ($session->query_params as $key => $value) {
-                    // Convert arrays to strings for display
-                    $displayValue = is_array($value) ? implode(', ', $value) : $value;
-                    $paramKey = $key . '|' . $displayValue;
+            if ($session) {
+                if (! empty($session->query_params)) {
+                    foreach ($session->query_params as $key => $value) {
+                        // Convert arrays to strings for display
+                        $displayValue = is_array($value) ? implode(', ', $value) : $value;
+                        $paramKey = $key.'|'.$displayValue;
 
-                    // Initialize if this param wasn't already tracked
-                    if (!isset($paramData[$paramKey])) {
+                        // Initialize if this param wasn't already tracked
+                        if (! isset($paramData[$paramKey])) {
+                            $paramData[$paramKey] = [
+                                'key' => $key,
+                                'value' => $displayValue,
+                                'sessions' => 0,
+                                'bookings' => 0,
+                                'earnings' => 0,
+                                'earnings_by_currency' => [],
+                            ];
+                        }
+
+                        // Increment booking count
+                        $paramData[$paramKey]['bookings']++;
+
+                        // Calculate earnings for this booking by currency
+                        foreach ($booking->earnings as $earning) {
+                            if (in_array($earning->type, ['concierge', 'concierge_bounty'])) {
+                                if (!isset($paramData[$paramKey]['earnings_by_currency'])) {
+                                    $paramData[$paramKey]['earnings_by_currency'] = [];
+                                }
+                                $currency = $earning->currency;
+                                if (!isset($paramData[$paramKey]['earnings_by_currency'][$currency])) {
+                                    $paramData[$paramKey]['earnings_by_currency'][$currency] = 0;
+                                }
+                                $paramData[$paramKey]['earnings_by_currency'][$currency] += $earning->amount;
+                                $paramData[$paramKey]['earnings'] += $earning->amount; // Keep total for backwards compatibility
+                            }
+                        }
+                    }
+                } else {
+                    // Booking with session but no query params
+                    $paramKey = '_no_params_|_none_';
+                    if (! isset($paramData[$paramKey])) {
                         $paramData[$paramKey] = [
-                            'key' => $key,
-                            'value' => $displayValue,
+                            'key' => '(no parameters)',
+                            'value' => '-',
                             'sessions' => 0,
                             'bookings' => 0,
                             'earnings' => 0,
+                            'earnings_by_currency' => [],
                         ];
                     }
 
                     // Increment booking count
                     $paramData[$paramKey]['bookings']++;
 
-                    // Calculate earnings for this booking
+                    // Calculate earnings for this booking by currency
                     foreach ($booking->earnings as $earning) {
                         if (in_array($earning->type, ['concierge', 'concierge_bounty'])) {
-                            $paramData[$paramKey]['earnings'] += $earning->amount;
+                            if (!isset($paramData[$paramKey]['earnings_by_currency'])) {
+                                $paramData[$paramKey]['earnings_by_currency'] = [];
+                            }
+                            $currency = $earning->currency;
+                            if (!isset($paramData[$paramKey]['earnings_by_currency'][$currency])) {
+                                $paramData[$paramKey]['earnings_by_currency'][$currency] = 0;
+                            }
+                            $paramData[$paramKey]['earnings_by_currency'][$currency] += $earning->amount;
+                            $paramData[$paramKey]['earnings'] += $earning->amount; // Keep total for backwards compatibility
                         }
                     }
                 }
@@ -672,6 +721,7 @@ class VipCodesTable extends TableWidget
             $data['conversion'] = $data['sessions'] > 0
                 ? round(($data['bookings'] / $data['sessions']) * 100, 1)
                 : 0;
+
             return $data;
         })->sortByDesc('sessions')->values();
     }
