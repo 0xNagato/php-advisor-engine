@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Venue Logos Scroll - Web Component Demo</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 2rem;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .demo-section {
+            background: white;
+            border-radius: 1rem;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        }
+
+        .demo-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            color: #1f2937;
+            text-align: center;
+        }
+
+        .demo-description {
+            text-align: center;
+            margin-bottom: 2rem;
+            color: #6b7280;
+        }
+
+        .controls {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-bottom: 2rem;
+        }
+
+        .control-btn {
+            padding: 0.5rem 1rem;
+            border: 1px solid #d1d5db;
+            background: white;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .control-btn:hover {
+            background: #f3f4f6;
+            border-color: #9ca3af;
+        }
+
+        .control-btn.active {
+            background: #3b82f6;
+            color: white;
+            border-color: #3b82f6;
+        }
+
+        .demo-code {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 0.5rem;
+            padding: 1rem;
+            margin-top: 1rem;
+            overflow-x: auto;
+        }
+
+        .demo-code code {
+            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+            font-size: 0.875rem;
+            line-height: 1.5;
+        }
+
+        .demo-footer {
+            text-align: center;
+            margin-top: 3rem;
+            padding-top: 2rem;
+            border-top: 1px solid #e2e8f0;
+            color: #6b7280;
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            body {
+                padding: 1rem;
+            }
+
+            .demo-section {
+                padding: 1rem;
+            }
+
+            .controls {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .control-btn {
+                width: 100%;
+                max-width: 200px;
+            }
+        }
+
+        /* Dark mode toggle */
+        .dark-mode-toggle {
+            position: fixed;
+            top: 1rem;
+            right: 1rem;
+            background: #1f2937;
+            color: white;
+            border: none;
+            padding: 0.5rem;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            z-index: 1000;
+        }
+
+        body.dark {
+            background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+            color: #e2e8f0;
+        }
+
+        body.dark .demo-section {
+            background: #1e293b;
+            color: #e2e8f0;
+        }
+
+        body.dark .demo-title {
+            color: #f9fafb;
+        }
+
+        body.dark .demo-description {
+            color: #9ca3af;
+        }
+
+        body.dark .demo-code {
+            background: #0f172a;
+            border-color: #334155;
+            color: #e2e8f0;
+        }
+    </style>
+</head>
+<body>
+    <button class="dark-mode-toggle" onclick="toggleDarkMode()">🌙 Dark Mode</button>
+
+    <div class="container">
+        <div class="demo-section">
+            <h1 class="demo-title">🏢 Venue Logos Scroll</h1>
+            <p class="demo-description">
+                A responsive web component that displays venue logos in an animated, infinite scroll.
+                Perfect for showcasing partner venues on any website.
+            </p>
+
+            <!-- Dynamic API Example -->
+            <h2 class="demo-title">Dynamic API Example</h2>
+            <p class="demo-description">Fetches real venue data from your Laravel API</p>
+            <venue-logos-scroll
+                api-endpoint="/api/venue-logos"
+                refresh-interval="300"
+                cache-time="600000"
+                loading-text="Loading venues from PRIMA..."
+                pause-on-hover>
+            </venue-logos-scroll>
+
+            <div class="demo-code">
+                <code>&lt;venue-logos-scroll
+    api-endpoint="/api/venue-logos"
+    refresh-interval="300"
+    cache-time="600000"
+    loading-text="Loading venues from PRIMA..."
+    pause-on-hover&gt;
+&lt;/venue-logos-scroll&gt;</code>
+            </div>
+
+        </div>
+
+        <div class="demo-section">
+            <h2 class="demo-title">Static Data Example (for comparison)</h2>
+            <p class="demo-description">Uses hardcoded data instead of API</p>
+            <venue-logos-scroll
+                first-row='[{"id":1,"name":"The Rooftop","logo_path":"https://via.placeholder.com/200x80/667eea/ffffff?text=ROOFTOP"},{"id":2,"name":"Sky Lounge","logo_path":"https://via.placeholder.com/200x80/764ba2/ffffff?text=SKY"},{"id":3,"name":"Garden Bar","logo_path":"https://via.placeholder.com/200x80/4ade80/ffffff?text=GARDEN"}]'
+                second-row='[{"id":4,"name":"Jazz Club","logo_path":"https://via.placeholder.com/200x80/dc2626/ffffff?text=JAZZ"},{"id":5,"name":"Wine House","logo_path":"https://via.placeholder.com/200x80/f59e0b/ffffff?text=WINE"},{"id":6,"name":"Brewery","logo_path":"https://via.placeholder.com/200x80/06b6d4/ffffff?text=BREW"}]'
+                pause-on-hover>
+            </venue-logos-scroll>
+
+            <div class="demo-code">
+                <code>&lt;venue-logos-scroll
+    first-row='[{"id":1,"name":"Venue Name","logo_path":"https://..."}]'
+    second-row='[{"id":2,"name":"Another Venue","logo_path":"https://..."}]'
+    pause-on-hover&gt;
+&lt;/venue-logos-scroll&gt;</code>
+            </div>
+        </div>
+
+        <div class="demo-section">
+            <h2 class="demo-title">With Placeholders</h2>
+            <p class="demo-description">Shows venue names when logos are not available</p>
+
+            <venue-logos-scroll
+                first-row='[{"id":1,"name":"Restaurant A","logo_path":"https://via.placeholder.com/200x80/e11d48/ffffff?text=LOGO"},{"id":2,"name":"Bar & Grill","logo_path":""},{"id":3,"name":"Night Club","logo_path":"https://via.placeholder.com/200x80/7c3aed/ffffff?text=NIGHT"}]'
+                second-row='[{"id":4,"name":"Speakeasy","logo_path":""},{"id":5,"name":"Rooftop Bar","logo_path":"https://via.placeholder.com/200x80/ec4899/ffffff?text=ROOF"},{"id":6,"name":"Pub","logo_path":""}]'
+                pause-on-hover
+                show-placeholders>
+            </venue-logos-scroll>
+
+            <div class="demo-code">
+                <code>&lt;venue-logos-scroll
+    first-row='[{"id":1,"name":"Restaurant","logo_path":"..."},{"id":2,"name":"Bar","logo_path":""}]'
+    second-row='[{"id":3,"name":"Club","logo_path":"..."}]'
+    pause-on-hover
+    show-placeholders&gt;
+&lt;/venue-logos-scroll&gt;</code>
+            </div>
+        </div>
+
+        <div class="demo-section">
+            <h2 class="demo-title">Fast Animation</h2>
+            <p class="demo-description">Faster scrolling animation</p>
+
+            <venue-logos-scroll
+                first-row='[{"id":1,"name":"Fast Food","logo_path":"https://via.placeholder.com/200x80/ef4444/ffffff?text=FAST"},{"id":2,"name":"Quick Bite","logo_path":"https://via.placeholder.com/200x80/f97316/ffffff?text=QUICK"}]'
+                second-row='[{"id":3,"name":"Express","logo_path":"https://via.placeholder.com/200x80/22c55e/ffffff?text=EXPRESS"},{"id":4,"name":"Rapid","logo_path":"https://via.placeholder.com/200x80/3b82f6/ffffff?text=RAPID"}]'
+                speed="fast"
+                pause-on-hover>
+            </venue-logos-scroll>
+
+            <div class="demo-code">
+                <code>&lt;venue-logos-scroll
+    first-row='[{"id":1,"name":"Venue","logo_path":"..."}]'
+    second-row='[{"id":2,"name":"Another","logo_path":"..."}]'
+    speed="fast"
+    pause-on-hover&gt;
+&lt;/venue-logos-scroll&gt;</code>
+            </div>
+        </div>
+
+        <div class="demo-section">
+            <h2 class="demo-title">Same Direction Scrolling</h2>
+            <p class="demo-description">Both rows scroll in the same direction</p>
+
+            <venue-logos-scroll
+                first-row='[{"id":1,"name":"Left 1","logo_path":"https://via.placeholder.com/200x80/8b5cf6/ffffff?text=LEFT1"},{"id":2,"name":"Left 2","logo_path":"https://via.placeholder.com/200x80/06b6d4/ffffff?text=LEFT2"}]'
+                second-row='[{"id":3,"name":"Left 3","logo_path":"https://via.placeholder.com/200x80/10b981/ffffff?text=LEFT3"},{"id":4,"name":"Left 4","logo_path":"https://via.placeholder.com/200x80/f59e0b/ffffff?text=LEFT4"}]'
+                direction="same"
+                pause-on-hover>
+            </venue-logos-scroll>
+
+            <div class="demo-code">
+                <code>&lt;venue-logos-scroll
+    first-row='[{"id":1,"name":"Venue","logo_path":"..."}]'
+    second-row='[{"id":2,"name":"Another","logo_path":"..."}]'
+    direction="same"
+    pause-on-hover&gt;
+&lt;/venue-logos-scroll&gt;</code>
+            </div>
+        </div>
+
+        <div class="demo-section">
+            <h2 class="demo-title">Custom Duration</h2>
+            <p class="demo-description">Custom animation duration in seconds</p>
+
+            <venue-logos-scroll
+                first-row='[{"id":1,"name":"Custom","logo_path":"https://via.placeholder.com/200x80/dc2626/ffffff?text=CUSTOM"}]'
+                second-row='[{"id":2,"name":"Timing","logo_path":"https://via.placeholder.com/200x80/7c2d12/ffffff?text=TIMING"}]'
+                duration="50"
+                pause-on-hover>
+            </venue-logos-scroll>
+
+            <div class="demo-code">
+                <code>&lt;venue-logos-scroll
+    first-row='[{"id":1,"name":"Venue","logo_path":"..."}]'
+    second-row='[{"id":2,"name":"Another","logo_path":"..."}]'
+    duration="50"
+    pause-on-hover&gt;
+&lt;/venue-logos-scroll&gt;</code>
+            </div>
+        </div>
+
+        <div class="demo-section">
+            <h2 class="demo-title">Dark Theme</h2>
+            <p class="demo-description">Dark mode styling</p>
+
+            <venue-logos-scroll
+                class="dark"
+                first-row='[{"id":1,"name":"Dark Venue","logo_path":"https://via.placeholder.com/200x80/1f2937/ffffff?text=DARK"}]'
+                second-row='[{"id":2,"name":"Night Spot","logo_path":"https://via.placeholder.com/200x80/374151/ffffff?text=NIGHT"}]'
+                pause-on-hover>
+            </venue-logos-scroll>
+
+            <div class="demo-code">
+                <code>&lt;venue-logos-scroll
+    class="dark"
+    first-row='[{"id":1,"name":"Venue","logo_path":"..."}]'
+    second-row='[{"id":2,"name":"Another","logo_path":"..."}]'
+    pause-on-hover&gt;
+&lt;/venue-logos-scroll&gt;</code>
+            </div>
+        </div>
+    </div>
+
+    <div class="demo-footer">
+        <p>&copy; 2024 PRIMA Hospitality Platform. All rights reserved.</p>
+        <p>Built with modern web standards for maximum compatibility.</p>
+    </div>
+
+    <!-- Load the web component -->
+    <script src="./venue-logos-scroll.html" type="module"></script>
+
+    <script>
+        function toggleDarkMode() {
+            document.body.classList.toggle('dark');
+        }
+
+        // Add some interactivity to the demo
+        document.addEventListener('DOMContentLoaded', function() {
+            const buttons = document.querySelectorAll('.control-btn');
+
+            buttons.forEach(button => {
+                button.addEventListener('click', function() {
+                    // Remove active class from all buttons
+                    buttons.forEach(b => b.classList.remove('active'));
+                    // Add active class to clicked button
+                    this.classList.add('active');
+                });
+            });
+        });
+    </script>
+</body>
+</html>

@@ -23,6 +23,7 @@ class VenueLogosScroll extends Component
     private array $amountByRegion = [
         'miami' => 20,
         'los_angeles' => 10,
+        'ibiza' => 10,
     ];
 
     public function __construct()

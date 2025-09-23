@@ -1,0 +1,558 @@
+<template id="venue-logos-scroll-template">
+    <style>
+        :host {
+            display: block;
+            width: 100%;
+            overflow: hidden;
+            background-color: var(--background-color, #ffffff);
+        }
+
+        .venue-logos-scroll {
+            position: relative;
+        }
+
+        /* Animation keyframes */
+        @keyframes slide-left {
+            from {
+                transform: translateX(0);
+            }
+            to {
+                transform: translateX(-100%);
+            }
+        }
+
+        @keyframes slide-right {
+            from {
+                transform: translateX(-100%);
+            }
+            to {
+                transform: translateX(0);
+            }
+        }
+
+        @keyframes scroll-left {
+            0% {
+                transform: translateX(0);
+            }
+            100% {
+                transform: translateX(-50%);
+            }
+        }
+
+        @keyframes scroll-right {
+            0% {
+                transform: translateX(0);
+            }
+            100% {
+                transform: translateX(50%);
+            }
+        }
+
+        .animate-scroll-left {
+            animation: scroll-left 35s linear infinite;
+        }
+
+        .animate-scroll-right {
+            animation: scroll-right 35s linear infinite;
+        }
+
+        /* Row containers */
+        .logos-row {
+            overflow: hidden;
+            padding: 1rem 0;
+            position: relative;
+        }
+
+        .logos-container {
+            display: inline-flex;
+            will-change: transform;
+        }
+
+        /* Logo items */
+        .logo-item {
+            flex: none;
+            margin: 0 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .logo-image {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+        }
+
+        .logo-placeholder {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: var(--placeholder-bg, #f3f4f6);
+            color: var(--placeholder-text, #374151);
+            font-weight: 600;
+            text-align: center;
+            border-radius: 0.375rem;
+            font-size: 0.875rem;
+        }
+
+        /* Responsive design */
+        @media (min-width: 640px) {
+            .logo-item {
+                margin: 0 1.5rem;
+            }
+        }
+
+        /* CSS Custom Properties for theming */
+        :host {
+            --background-color: #ffffff;
+            --placeholder-bg: #f3f4f6;
+            --placeholder-text: #374151;
+            --animation-duration: 35s;
+            --animation-easing: linear;
+        }
+
+        :host(.dark) {
+            --background-color: #1f2937;
+            --placeholder-bg: #374151;
+            --placeholder-text: #d1d5db;
+        }
+
+        :host(.fast) {
+            --animation-duration: 20s;
+        }
+
+        :host(.slow) {
+            --animation-duration: 50s;
+        }
+    </style>
+
+    <div class="venue-logos-scroll">
+        <!-- Top Row: Scrolls RIGHT (visual effect) -->
+        <div class="logos-row" id="row1">
+            <div class="logos-container" id="row1-container">
+                <!-- Logos will be dynamically inserted here -->
+            </div>
+        </div>
+
+        <!-- Bottom Row: Scrolls LEFT (normal) -->
+        <div class="logos-row" id="row2">
+            <div class="logos-container" id="row2-container">
+                <!-- Logos will be dynamically inserted here -->
+            </div>
+        </div>
+    </div>
+</template>
+
+<script type="module">
+class VenueLogosScroll extends HTMLElement {
+    constructor() {
+        super();
+        this.attachShadow({ mode: 'open' });
+        this.template = document.getElementById('venue-logos-scroll-template');
+        this.shadowRoot.appendChild(this.template.content.cloneNode(true));
+
+        // Configuration defaults
+        this.config = {
+            firstRow: [],
+            secondRow: [],
+            animationDuration: this.hasAttribute('duration') ? parseInt(this.getAttribute('duration')) : 35,
+            direction: this.getAttribute('direction') || 'opposite', // 'opposite', 'same', 'none'
+            speed: this.getAttribute('speed') || 'normal', // 'slow', 'normal', 'fast'
+            pauseOnHover: this.hasAttribute('pause-on-hover'),
+            showPlaceholders: this.hasAttribute('show-placeholders') !== false,
+            apiEndpoint: this.getAttribute('api-endpoint') || null,
+            refreshInterval: this.hasAttribute('refresh-interval') ? parseInt(this.getAttribute('refresh-interval')) : 0, // 0 = no refresh
+            cacheTime: this.hasAttribute('cache-time') ? parseInt(this.getAttribute('cache-time')) : 300000, // 5 minutes default
+            loadingText: this.getAttribute('loading-text') || 'Loading venues...'
+        };
+
+        this.animationId = null;
+        this.isPaused = false;
+    }
+
+    connectedCallback() {
+        this.init();
+        this.setupEventListeners();
+    }
+
+    disconnectedCallback() {
+        this.stopAnimation();
+    }
+
+    static get observedAttributes() {
+        return ['first-row', 'second-row', 'duration', 'direction', 'speed', 'pause-on-hover', 'show-placeholders', 'api-endpoint', 'refresh-interval', 'cache-time', 'loading-text'];
+    }
+
+    attributeChangedCallback(name, oldValue, newValue) {
+        if (oldValue !== newValue) {
+            switch (name) {
+                case 'first-row':
+                case 'second-row':
+                    this.updateData();
+                    break;
+                case 'api-endpoint':
+                    this.config.apiEndpoint = newValue;
+                    if (newValue) {
+                        this.fetchData();
+                    }
+                    break;
+                case 'refresh-interval':
+                    this.config.refreshInterval = parseInt(newValue) || 0;
+                    this.setupAutoRefresh();
+                    break;
+                case 'cache-time':
+                    this.config.cacheTime = parseInt(newValue) || 300000;
+                    break;
+                case 'loading-text':
+                    this.config.loadingText = newValue;
+                    break;
+                case 'duration':
+                    this.config.animationDuration = parseInt(newValue) || 35;
+                    this.updateAnimationSpeed();
+                    break;
+                case 'direction':
+                    this.config.direction = newValue;
+                    this.restartAnimation();
+                    break;
+                case 'speed':
+                    this.config.speed = newValue;
+                    this.updateAnimationSpeed();
+                    break;
+                case 'pause-on-hover':
+                    this.config.pauseOnHover = newValue !== null;
+                    break;
+                case 'show-placeholders':
+                    this.config.showPlaceholders = newValue !== 'false';
+                    this.updateLogos();
+                    break;
+            }
+        }
+    }
+
+    init() {
+        if (this.config.apiEndpoint) {
+            this.fetchData();
+        } else {
+            this.updateData();
+        }
+        this.updateAnimationSpeed();
+        this.setupAutoRefresh();
+        this.startAnimation();
+    }
+
+    async fetchData() {
+        if (!this.config.apiEndpoint) return;
+
+        try {
+            // Check cache first
+            const cachedData = this.getCachedData();
+            if (cachedData && !this.isCacheExpired(cachedData.timestamp)) {
+                this.processApiData(cachedData.data);
+                return;
+            }
+
+            // Show loading state
+            this.showLoadingState();
+
+            const response = await fetch(this.config.apiEndpoint, {
+                method: 'GET',
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json',
+                },
+                credentials: 'include' // Include cookies for authentication
+            });
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            const data = await response.json();
+            this.cacheData(data);
+            this.processApiData(data);
+
+        } catch (error) {
+            console.error('Error fetching venue data:', error);
+            this.showErrorState(error.message);
+        }
+    }
+
+    processApiData(data) {
+        // Update configuration with fetched data
+        this.config.firstRow = data.first_row || [];
+        this.config.secondRow = data.second_row || [];
+
+        // Trigger data update
+        this.updateData();
+    }
+
+    getCachedData() {
+        try {
+            const cached = localStorage.getItem(`venue-logos-${this.config.apiEndpoint}`);
+            return cached ? JSON.parse(cached) : null;
+        } catch (e) {
+            return null;
+        }
+    }
+
+    cacheData(data) {
+        try {
+            const cacheEntry = {
+                data: data,
+                timestamp: Date.now()
+            };
+            localStorage.setItem(`venue-logos-${this.config.apiEndpoint}`, JSON.stringify(cacheEntry));
+        } catch (e) {
+            // Handle localStorage quota exceeded or disabled
+            console.warn('Could not cache venue data:', e);
+        }
+    }
+
+    isCacheExpired(timestamp) {
+        return Date.now() - timestamp > this.config.cacheTime;
+    }
+
+    showLoadingState() {
+        const container = this.shadowRoot.querySelector('.venue-logos-scroll');
+        if (container) {
+            container.innerHTML = `
+                <div style="display: flex; align-items: center; justify-content: center; padding: 2rem; color: var(--placeholder-text);">
+                    <div>${this.config.loadingText}</div>
+                </div>
+            `;
+        }
+    }
+
+    showErrorState(errorMessage) {
+        const container = this.shadowRoot.querySelector('.venue-logos-scroll');
+        if (container) {
+            container.innerHTML = `
+                <div style="display: flex; align-items: center; justify-content: center; padding: 2rem; color: #ef4444;">
+                    <div>Error loading venues: ${errorMessage}</div>
+                </div>
+            `;
+        }
+    }
+
+    setupAutoRefresh() {
+        if (this.refreshTimer) {
+            clearInterval(this.refreshTimer);
+        }
+
+        if (this.config.refreshInterval > 0) {
+            this.refreshTimer = setInterval(() => {
+                this.fetchData();
+            }, this.config.refreshInterval * 1000);
+        }
+    }
+
+    updateData() {
+        // Parse JSON data from attributes
+        try {
+            if (this.hasAttribute('first-row')) {
+                this.config.firstRow = JSON.parse(this.getAttribute('first-row'));
+            }
+            if (this.hasAttribute('second-row')) {
+                this.config.secondRow = JSON.parse(this.getAttribute('second-row'));
+            }
+        } catch (e) {
+            console.warn('Invalid JSON data for venue logos:', e);
+            this.config.firstRow = [];
+            this.config.secondRow = [];
+        }
+
+        this.updateLogos();
+    }
+
+    updateLogos() {
+        this.renderRow('row1', this.config.firstRow, 'right');
+        this.renderRow('row2', this.config.secondRow, 'left');
+    }
+
+    renderRow(rowId, venues, scrollDirection) {
+        const container = this.shadowRoot.getElementById(`${rowId}-container`);
+        if (!container) return;
+
+        container.innerHTML = '';
+
+        if (!venues || venues.length === 0) {
+            container.innerHTML = '<div class="no-logos">No venues to display</div>';
+            return;
+        }
+
+        // Create main set of logos
+        const mainSet = this.createLogoSet(venues, `${rowId}-main`);
+        container.appendChild(mainSet);
+
+        // Create duplicate set for seamless scrolling
+        const duplicateSet = this.createLogoSet(venues, `${rowId}-duplicate`);
+        container.appendChild(duplicateSet);
+
+        // Store dimensions for animation calculations
+        this[`${rowId}Width`] = mainSet.offsetWidth;
+    }
+
+    createLogoSet(venues, setId) {
+        const setContainer = document.createElement('div');
+        setContainer.className = 'logos-container';
+        setContainer.id = setId;
+
+        venues.forEach((venue, index) => {
+            const logoItem = this.createLogoItem(venue, index, setId);
+            setContainer.appendChild(logoItem);
+        });
+
+        return setContainer;
+    }
+
+    createLogoItem(venue, index, setId) {
+        const logoItem = document.createElement('div');
+        logoItem.className = 'logo-item';
+
+        // Responsive sizing
+        const isMobile = window.innerWidth < 640;
+        logoItem.style.width = isMobile ? '6rem' : '8rem';
+        logoItem.style.height = isMobile ? '3.75rem' : '5rem';
+
+        if (venue.logo_path && venue.logo_path.trim()) {
+            const img = document.createElement('img');
+            img.className = 'logo-image';
+            img.src = venue.logo_path;
+            img.alt = venue.name || 'Venue logo';
+            img.loading = 'lazy';
+            img.onerror = () => {
+                // Fallback to placeholder if image fails to load
+                if (this.config.showPlaceholders) {
+                    this.createPlaceholder(logoItem, venue);
+                }
+            };
+            logoItem.appendChild(img);
+        } else if (this.config.showPlaceholders) {
+            this.createPlaceholder(logoItem, venue);
+        }
+
+        return logoItem;
+    }
+
+    createPlaceholder(container, venue) {
+        container.innerHTML = '';
+        const placeholder = document.createElement('div');
+        placeholder.className = 'logo-placeholder';
+        placeholder.textContent = venue.name || 'Venue';
+        container.appendChild(placeholder);
+    }
+
+    setupEventListeners() {
+        if (this.config.pauseOnHover) {
+            this.shadowRoot.addEventListener('mouseenter', () => this.pauseAnimation());
+            this.shadowRoot.addEventListener('mouseleave', () => this.resumeAnimation());
+        }
+
+        // Handle window resize for responsive behavior
+        window.addEventListener('resize', () => this.handleResize());
+    }
+
+    handleResize() {
+        // Update logo dimensions on resize
+        this.updateLogos();
+    }
+
+    updateAnimationSpeed() {
+        const duration = this.getAnimationDuration();
+        const style = this.shadowRoot.querySelector('style');
+
+        // Update CSS custom properties
+        style.textContent = style.textContent.replace(
+            /--animation-duration: \d+s/g,
+            `--animation-duration: ${duration}s`
+        );
+    }
+
+    getAnimationDuration() {
+        let duration = this.config.animationDuration;
+
+        switch (this.config.speed) {
+            case 'slow':
+                duration = Math.max(duration * 1.5, 50);
+                break;
+            case 'fast':
+                duration = Math.max(duration * 0.6, 15);
+                break;
+            case 'normal':
+            default:
+                // Use configured duration
+                break;
+        }
+
+        return duration;
+    }
+
+    startAnimation() {
+        this.stopAnimation();
+        this.animate();
+    }
+
+    stopAnimation() {
+        if (this.animationId) {
+            cancelAnimationFrame(this.animationId);
+            this.animationId = null;
+        }
+    }
+
+    pauseAnimation() {
+        this.isPaused = true;
+    }
+
+    resumeAnimation() {
+        this.isPaused = false;
+    }
+
+    animate() {
+        if (this.isPaused) {
+            this.animationId = requestAnimationFrame(() => this.animate());
+            return;
+        }
+
+        const speed = 0.25; // pixels per frame
+        const direction = this.config.direction;
+
+        // Update positions
+        if (this.row1Width > 0) {
+            this.row1Pos = (this.row1Pos || 0) + speed;
+            if (this.row1Pos >= this.row1Width) {
+                this.row1Pos = 0;
+            }
+
+            const row1Container = this.shadowRoot.getElementById('row1-container');
+            if (row1Container) {
+                const scrollDirection = direction === 'same' ? 1 : -1;
+                row1Container.style.transform = `translateX(${scrollDirection * -this.row1Pos}px)`;
+            }
+        }
+
+        if (this.row2Width > 0) {
+            this.row2Pos = (this.row2Pos || 0) + speed;
+            if (this.row2Pos >= this.row2Width) {
+                this.row2Pos = 0;
+            }
+
+            const row2Container = this.shadowRoot.getElementById('row2-container');
+            if (row2Container) {
+                const scrollDirection = direction === 'opposite' ? 1 : -1;
+                row2Container.style.transform = `translateX(${scrollDirection * -this.row2Pos}px)`;
+            }
+        }
+
+        this.animationId = requestAnimationFrame(() => this.animate());
+    }
+
+    restartAnimation() {
+        this.row1Pos = 0;
+        this.row2Pos = 0;
+        this.startAnimation();
+    }
+}
+
+// Register the custom element
+customElements.define('venue-logos-scroll', VenueLogosScroll);
+</script>

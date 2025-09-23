@@ -17,6 +17,7 @@ use App\Http\Controllers\Api\TimeslotController;
 use App\Http\Controllers\Api\UpdatePushTokenController;
 use App\Http\Controllers\Api\UserController;
 use App\Http\Controllers\Api\VenueController;
+use App\Http\Controllers\Api\VenueLogosController;
 use App\Http\Controllers\Api\VipSessionController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -35,6 +36,10 @@ Route::get('/cuisines', CuisineController::class);
 Route::get('/specialties', SpecialtyController::class);
 Route::get('/timeslots', TimeslotController::class);
 Route::get('/app-config', AppConfigController::class)->name('app-config');
+
+// Public venue logos endpoint for web component
+Route::get('/venue-logos', [VenueLogosController::class, 'index'])->name('venue-logos');
+Route::post('/venue-logos/clear-cache', [VenueLogosController::class, 'clearCache'])->name('venue-logos.clear-cache');
 
 // Public form submission endpoints (no auth, but referer whitelisted and rate limited)
 Route::post('/public/talk-to-prima', PublicTalkToPrimaController::class)
