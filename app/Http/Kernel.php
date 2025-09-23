@@ -11,6 +11,7 @@ use App\Http\Middleware\TrimStrings;
 use App\Http\Middleware\TrustProxies;
 use App\Http\Middleware\ValidateSignature;
 use App\Http\Middleware\VerifyCsrfToken;
+use App\Http\Middleware\VerifyOriginWhitelist;
 use App\Http\Middleware\VipOrSanctumAuth;
 use Illuminate\Auth\Middleware\AuthenticateWithBasicAuth;
 use Illuminate\Auth\Middleware\Authorize;
@@ -95,5 +96,6 @@ class Kernel extends HttpKernel
         'throttle' => ThrottleRequests::class,
         'verified' => EnsureEmailIsVerified::class,
         'vip.auth' => VipOrSanctumAuth::class,
+        'origin.whitelist' => VerifyOriginWhitelist::class,
     ];
 }

@@ -8,6 +8,7 @@ use App\Http\Controllers\Api\ContactFormController;
 use App\Http\Controllers\Api\CuisineController;
 use App\Http\Controllers\Api\MeController;
 use App\Http\Controllers\Api\NeighborhoodController;
+use App\Http\Controllers\Api\PublicTalkToPrimaController;
 use App\Http\Controllers\Api\RegionController;
 use App\Http\Controllers\Api\ReservationHubController;
 use App\Http\Controllers\Api\RoleProfileController;
@@ -34,6 +35,11 @@ Route::get('/cuisines', CuisineController::class);
 Route::get('/specialties', SpecialtyController::class);
 Route::get('/timeslots', TimeslotController::class);
 Route::get('/app-config', AppConfigController::class)->name('app-config');
+
+// Public form submission endpoints (no auth, but referer whitelisted and rate limited)
+Route::post('/public/talk-to-prima', PublicTalkToPrimaController::class)
+    ->middleware(['origin.whitelist', 'throttle:5,1'])
+    ->name('api.public.talk-to-prima');
 
 // Endpoints that work with both Sanctum auth and VIP session tokens
 Route::middleware('vip.auth')->group(function () {

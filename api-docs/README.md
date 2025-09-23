@@ -24,6 +24,7 @@ These endpoints do not require authentication:
 - [Cuisine](Endpoints/Cuisine.md) - Get cuisines
 - [Specialty](Endpoints/Specialty.md) - Get specialties
 - [Timeslot](Endpoints/Timeslot.md) - Get timeslots
+ - [Public Talk to PRIMA](Endpoints/PublicTalkToPrima.md) - Submit contact form (whitelisted origins)
 
 ### Protected Endpoints
 
