@@ -94,7 +94,11 @@ it('throws exception when booking is more than 30 days in advance', function () 
 
     expect(fn () => CreateBooking::run(
         $this->scheduleTemplate->id,
-        $bookingData
+        $bookingData,
+        null,
+        null,
+        null,
+        null
     ))
         ->toThrow(RuntimeException::class, 'We only show availability for the next 30 days. Please select a date within this range.');
 });
@@ -108,7 +112,11 @@ it('creates booking with correct timezone', function () {
 
     CreateBooking::run(
         $this->scheduleTemplate->id,
-        $bookingData
+        $bookingData,
+        null,
+        null,
+        null,
+        null
     );
 
     $booking = Booking::first();
@@ -132,7 +140,10 @@ it('creates booking with vip code when provided', function () {
     CreateBooking::run(
         $this->scheduleTemplate->id,
         $bookingData,
-        $vipCode
+        $vipCode,
+        null,
+        null,
+        null
     );
 
     assertDatabaseHas('bookings', [

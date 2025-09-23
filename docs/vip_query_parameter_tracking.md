@@ -9,6 +9,7 @@
 - **Partner Success:** Which concierges and venues send us customers who actually book
 - **Customer Preferences:** What amenities, cuisines, or features customers are looking for
 - **Business Optimization:** Data-driven decisions about where to invest marketing dollars
+- **Complete Conversion Funnel:** Track the entire customer journey from click to booking to revenue
 
 **Real-World Example:**
 ```
@@ -24,11 +25,13 @@ This enhanced link tells us:
 - They want to book for 4 people
 
 **How It Helps Your Business:**
-- **Track ROI:** See which marketing channels actually convert to bookings
+- **Track ROI:** See which marketing channels actually convert to bookings, not just clicks
 - **Reward Top Performers:** Identify which concierges drive the most valuable business
 - **Optimize Campaigns:** Focus budget on what works based on real conversion data
 - **Understand Customers:** Learn what features and options customers value most
 - **Improve Partnerships:** Strengthen relationships with venues that attract high-quality leads
+- **Revenue Attribution:** Calculate actual revenue impact of different traffic sources
+- **Business Intelligence:** Make data-driven decisions with complete customer journey analytics
 
 **Privacy & Security:** All data stays within PRIMA's systems. No personal customer information is shared externally. The system is designed to be GDPR-compliant and respects user privacy.
 
@@ -54,6 +57,87 @@ This feature enables comprehensive tracking of query parameters on VIP links and
 - **PostgreSQL-optimized** with JSONB storage and GIN indexes
 - **Efficient querying** of complex parameter structures
 - **Future-ready** foundation for analytics and reporting
+
+## Booking Linkage
+
+### How VIP Sessions Connect to Bookings
+
+The VIP query parameter tracking system provides a complete conversion funnel from link click to booking:
+
+1. **Link Click → VIP Link Hit** (`vip_link_hits` table)
+   - Captures all initial query parameters when someone clicks a VIP link
+   - Stores marketing attribution data (UTM parameters, campaigns, sources)
+   - Records user context (IP, user agent, referer)
+
+2. **Session Creation → VIP Session** (`vip_sessions` table)
+   - When frontend creates a VIP session, query parameters are persisted
+   - Session tokens enable authentication for subsequent API calls
+   - Sessions expire after 24 hours for security
+
+3. **Booking Creation → Linked Booking** (`bookings` table)
+   - Bookings are automatically linked to VIP sessions via `vip_session_id`
+   - Frontend can provide session token in booking request
+   - OR system automatically detects VIP session from Bearer token authentication
+   - Query parameters from original link click are available for analytics
+
+### Frontend Integration for Booking Linkage
+
+```javascript
+// Frontend creates VIP session with captured query parameters
+const queryParams = new URLSearchParams(window.location.search);
+const vipCode = 'MIAMI2024'; // From URL path
+
+const sessionResponse = await fetch('/api/vip/sessions', {
+    method: 'POST',
+    headers: {
+        'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+        vip_code: vipCode,
+        query_params: Object.fromEntries(queryParams.entries())
+    })
+});
+
+// Store session token for booking requests
+const { data: { session_token } } = await sessionResponse.json();
+
+// When user makes a booking, include session token
+const bookingResponse = await fetch('/api/bookings', {
+    method: 'POST',
+    headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${session_token}`
+    },
+    body: JSON.stringify({
+        schedule_template_id: selectedTemplateId,
+        date: selectedDate,
+        guest_count: guestCount,
+        session_token: session_token // Optional but recommended
+    })
+});
+```
+
+### Backend Linkage Logic
+
+The system automatically links bookings to VIP sessions through two methods:
+
+**Method 1: Session Token in Request**
+- Frontend provides `session_token` parameter in booking request
+- System validates token and extracts VIP session ID
+- Booking is created with `vip_session_id` populated
+
+**Method 2: Bearer Token Authentication**
+- If no `session_token` provided, system checks VIP session context from Bearer token
+- VIP session ID is extracted from authentication context
+- Booking is linked to the authenticated VIP session
+
+### Benefits of Complete Linkage
+
+- **Full Conversion Tracking:** Link clicks → sessions → bookings → revenue
+- **Marketing Attribution:** See which campaigns drive actual bookings, not just clicks
+- **Partner ROI:** Measure concierge effectiveness through booking completion
+- **Customer Journey:** Understand the complete path from marketing to conversion
+- **Revenue Analytics:** Calculate actual revenue impact of different traffic sources
 
 ## Implementation Details
 

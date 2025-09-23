@@ -152,7 +152,8 @@ class AvailabilityCalendar extends Page
                 data: $data,
                 vipCode: $this->vipCode,
                 source: 'vip',
-                device: $device
+                device: $device,
+                vipSessionId: $this->vipSessionId ?? null
             );
 
             activity()

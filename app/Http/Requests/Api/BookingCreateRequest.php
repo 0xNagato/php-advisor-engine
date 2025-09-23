@@ -37,6 +37,7 @@ class BookingCreateRequest extends FormRequest
             'schedule_template_id' => ['required', 'integer'],
             'guest_count' => ['required', 'integer'],
             'vip_code' => ['nullable', 'string', 'max:255'],
+            'session_token' => ['nullable', 'string', 'max:255'],
         ];
     }
 

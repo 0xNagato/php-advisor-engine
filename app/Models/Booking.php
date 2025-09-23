@@ -79,6 +79,7 @@ class Booking extends Model
         'venue_earnings',
         'total_with_tax_in_cents',
         'vip_code_id',
+        'vip_session_id',
         'stripe_payment_intent_id',
         'refunded_at',
         'refund_data',
@@ -284,6 +285,14 @@ class Booking extends Model
     public function vipCode(): BelongsTo
     {
         return $this->belongsTo(VipCode::class);
+    }
+
+    /**
+     * @return BelongsTo<VipSession, $this>
+     */
+    public function vipSession(): BelongsTo
+    {
+        return $this->belongsTo(VipSession::class);
     }
 
     /**
@@ -665,7 +674,7 @@ class Booking extends Model
     {
         $reasons = $this->attributes['risk_reasons'] ?? null;
 
-        if (!$reasons) {
+        if (! $reasons) {
             return [];
         }
 
@@ -677,6 +686,7 @@ class Booking extends Model
         // If it's a JSON string, decode it
         if (is_string($reasons)) {
             $decoded = json_decode($reasons, true);
+
             return is_array($decoded) ? $decoded : [];
         }
 

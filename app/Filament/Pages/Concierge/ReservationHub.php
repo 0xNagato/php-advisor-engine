@@ -356,7 +356,8 @@ class ReservationHub extends Page
                 scheduleTemplateId: $scheduleTemplateId,
                 data: $data,
                 source: $source,
-                device: $device
+                device: $device,
+                vipSessionId: null
             );
 
             $this->booking = $result->booking;

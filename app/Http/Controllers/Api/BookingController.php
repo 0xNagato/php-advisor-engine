@@ -22,6 +22,7 @@ use App\Models\Booking;
 use App\Models\Region;
 use App\Models\Venue;
 use App\Models\VipCode;
+use App\Models\VipSession;
 use App\Notifications\Booking\SendCustomerBookingPaymentForm;
 use App\OpenApi\RequestBodies\BookingCompleteRequestBody;
 use App\OpenApi\RequestBodies\BookingCreateRequestBody;
@@ -60,6 +61,7 @@ class BookingController extends Controller
     {
         return request()->attributes->get('is_vip_session', false);
     }
+
     /**
      * Create a new booking.
      */
@@ -80,6 +82,28 @@ class BookingController extends Controller
                 ->where('code', $validatedData['vip_code'])
                 ->where('is_active', true)
                 ->first();
+        }
+
+        // Determine VIP session ID from token or context
+        $vipSessionId = null;
+
+        // First, check if session_token was provided in request
+        if (! empty($validatedData['session_token'])) {
+            $session = VipSession::query()
+                ->where('token', $validatedData['session_token'])
+                ->where('expires_at', '>', now())
+                ->first();
+
+            if ($session) {
+                $vipSessionId = $session->id;
+            }
+        }
+        // If no session_token provided but this is a VIP session request, get from context
+        elseif ($this->isVipSession()) {
+            $vipContext = $this->getVipContext();
+            if ($vipContext && isset($vipContext['session']->id)) {
+                $vipSessionId = $vipContext['session']->id;
+            }
         }
 
         // Get the venue from the schedule template ID
@@ -112,7 +136,8 @@ class BookingController extends Controller
                 $validatedData,
                 $vipCode,
                 'api',
-                $device
+                $device,
+                $vipSessionId
             );
         } catch (Exception $e) {
             activity()
@@ -186,9 +211,9 @@ class BookingController extends Controller
         if ($this->isVipSession()) {
             $vipContext = $this->getVipContext();
             $vipCode = $vipContext['vip_code'] ?? null;
-            
+
             // For VIP sessions, check if the booking belongs to the associated concierge
-            if (!$vipCode || $booking->concierge_id !== $vipCode->concierge_id) {
+            if (! $vipCode || $booking->concierge_id !== $vipCode->concierge_id) {
                 return response()->json([
                     'message' => 'Booking not found',
                 ], 404);
@@ -196,7 +221,7 @@ class BookingController extends Controller
         } else {
             // For regular authenticated users, check if they have access to this booking
             $user = auth()->user();
-            if (!$user || !$user->concierge || $booking->concierge_id !== $user->concierge->id) {
+            if (! $user || ! $user->concierge || $booking->concierge_id !== $user->concierge->id) {
                 return response()->json([
                     'message' => 'Booking not found',
                 ], 404);
@@ -210,7 +235,7 @@ class BookingController extends Controller
             'vipCode',
             'concierge',
             'partnerConcierge',
-            'partnerVenue'
+            'partnerVenue',
         ]);
 
         // Get the booking's venue region for proper display

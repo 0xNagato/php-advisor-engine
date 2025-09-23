@@ -12,6 +12,7 @@ use App\Models\Venue;
 use App\Models\VipCode;
 use App\Services\CurrencyConversionService;
 use App\Traits\ManagesVenueCollections;
+use Carbon\Carbon;
 use Exception;
 use Filament\Forms\Components\ColorPicker;
 use Filament\Forms\Components\FileUpload;
@@ -74,7 +75,10 @@ class VipCodesTable extends TableWidget
             ->withCount([
                 'bookings' => function (Builder $query) use ($startDate, $endDate) {
                     $query->whereIn('status', BookingStatus::REPORTING_STATUSES)
-                        ->whereBetween('created_at', [$startDate, $endDate]);
+                        ->whereBetween('created_at', [
+                            Carbon::parse($startDate)->startOfDay(),
+                            Carbon::parse($endDate)->endOfDay(),
+                        ]);
                 },
             ]);
 

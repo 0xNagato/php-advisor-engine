@@ -15,7 +15,6 @@ use App\Services\SalesTaxService;
 use chillerlan\QRCode\QRCode;
 use Exception;
 use Illuminate\Support\Carbon;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Lorisleiva\Actions\Concerns\AsAction;
 use RuntimeException;
@@ -39,7 +38,8 @@ class CreateBooking
         array $data,
         ?VipCode $vipCode = null,
         ?string $source = null,
-        ?string $device = null
+        ?string $device = null,
+        ?int $vipSessionId = null
     ): CreateBookingReturnData {
         $scheduleTemplate = ScheduleTemplate::query()->with('venue.inRegion')->findOrFail($scheduleTemplateId);
         $venue = $scheduleTemplate->venue;
@@ -181,6 +181,7 @@ class CreateBooking
             'currency' => $currency,
             'is_prime' => $isPrime,
             'vip_code_id' => $vipCode?->id,
+            'vip_session_id' => $vipSessionId,
             'meta' => $meta,
             'source' => $source,
             'device' => $device,
@@ -246,7 +247,7 @@ class CreateBooking
 
         // Check if we have an authenticated user
         $user = auth()->user();
-        if (!$user) {
+        if (! $user) {
             // No authenticated user (e.g., VIP session without VIP code)
             return config('app.house.concierge_id');
         }
