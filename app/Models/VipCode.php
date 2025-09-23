@@ -71,9 +71,6 @@ class VipCode extends Model
     public function earnings(): HasManyThrough
     {
         return $this->hasManyThrough(Earning::class, Booking::class)
-            ->whereHas('booking', function (Builder $query) {
-                $query->confirmed();
-            })
             ->whereIn('earnings.type', ['concierge', 'concierge_bounty']);
     }
 

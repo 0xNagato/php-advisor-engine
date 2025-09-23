@@ -21,9 +21,10 @@ This endpoint provides functionality for creating and validating VIP session tok
 
 #### Parameters
 
-| Parameter | Type   | Required | Description                                            |
-| --------- | ------ | -------- | ------------------------------------------------------ |
-| vip_code  | string | Yes      | The VIP code to create a session for (4-12 characters) |
+| Parameter    | Type   | Required | Description                                                            |
+| ------------ | ------ | -------- | ---------------------------------------------------------------------- |
+| vip_code     | string | Yes      | The VIP code to create a session for (4-12 characters)                |
+| query_params | object | No       | Optional query parameters from the VIP landing page (e.g., utm_source, utm_campaign) |
 
 #### Example Request
 
@@ -33,7 +34,14 @@ curl -X POST \
   -H 'Accept: application/json' \
   -H 'Content-Type: application/json' \
   -d '{
-    "vip_code": "MIAMI2024"
+    "vip_code": "MIAMI2024",
+    "query_params": {
+      "utm_source": "instagram",
+      "utm_campaign": "summer2024",
+      "utm_content": "ad_123",
+      "cuisine": ["italian", "french"],
+      "guest_count": 4
+    }
   }'
 ```
 
@@ -289,6 +297,16 @@ curl -X GET \
 ```
 
 ## Notes
+
+### Query Parameter Tracking
+
+- Query parameters from the VIP landing page can be passed when creating a session
+- These parameters are stored with the session and linked to any resulting bookings for analytics
+- Common tracking parameters include:
+  - Marketing attribution: `utm_source`, `utm_medium`, `utm_campaign`, `utm_content`
+  - Booking preferences: `cuisine`, `guest_count`, `budget`, `occasion`
+- The React app should capture all query parameters from the URL and pass them when creating a session
+- Parameters are stored as JSONB in the database for flexible querying and reporting
 
 ### Session Token Expiration
 

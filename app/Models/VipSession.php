@@ -6,6 +6,7 @@ use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Laravel\Sanctum\PersonalAccessToken;
 
 /**
@@ -56,11 +57,27 @@ class VipSession extends Model
     }
 
     /**
+     * @return BelongsTo<VipLinkHit, $this>
+     */
+    public function vipLinkHit(): BelongsTo
+    {
+        return $this->belongsTo(VipLinkHit::class);
+    }
+
+    /**
      * @return BelongsTo<PersonalAccessToken, $this>
      */
     public function sanctumToken(): BelongsTo
     {
         return $this->belongsTo(PersonalAccessToken::class, 'sanctum_token_id');
+    }
+
+    /**
+     * @return HasMany<Booking, $this>
+     */
+    public function bookings(): HasMany
+    {
+        return $this->hasMany(Booking::class, 'vip_session_id');
     }
 
     /**

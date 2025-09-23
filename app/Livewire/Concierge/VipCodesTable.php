@@ -34,6 +34,7 @@ use Filament\Tables\Concerns\HasFilters;
 use Filament\Tables\Table;
 use Filament\Widgets\TableWidget;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\HtmlString;
@@ -61,16 +62,12 @@ class VipCodesTable extends TableWidget
 
     public function table(Table $table): Table
     {
-        $startDate = $this->tableFilters['startDate'];
-        $endDate = $this->tableFilters['endDate'];
+        $startDate = $this->tableFilters['startDate'] ?? now()->subDays(30)->format('Y-m-d');
+        $endDate = $this->tableFilters['endDate'] ?? now()->format('Y-m-d');
 
         $query = VipCode::with([
             'concierge.user',
-            'earnings' => function ($query) use ($startDate, $endDate) {
-                $query->whereNotNull('earnings.confirmed_at')
-                    ->whereBetween('earnings.created_at', [$startDate, $endDate])
-                    ->get(['amount', 'earnings.currency']);
-            },
+            'earnings.booking',
         ])
             ->withCount([
                 'bookings' => function (Builder $query) use ($startDate, $endDate) {
@@ -103,24 +100,73 @@ class VipCodesTable extends TableWidget
                     ->icon('heroicon-m-clipboard-document-check')
                     ->iconColor('primary')
                     ->iconPosition(IconPosition::After),
+                TextColumn::make('sessions_count')
+                    ->label('Sessions')
+                    ->alignCenter()
+                    ->size('xs')
+                    ->default(0)
+                    ->counts('sessions', function (Builder $query) use ($startDate, $endDate) {
+                        $query->whereBetween('created_at', [
+                            Carbon::parse($startDate)->startOfDay(),
+                            Carbon::parse($endDate)->endOfDay(),
+                        ]);
+                    }),
                 TextColumn::make('bookings_count')
                     ->label('Bookings')
                     ->visibleFrom('sm')
                     ->alignCenter()
                     ->size('xs'),
+                TextColumn::make('conversion_rate')
+                    ->label('Conv %')
+                    ->alignCenter()
+                    ->size('xs')
+                    ->state(function (VipCode $vipCode): string {
+                        $sessionsCount = $vipCode->sessions()
+                            ->whereBetween('created_at', [
+                                Carbon::parse($this->tableFilters['startDate'])->startOfDay(),
+                                Carbon::parse($this->tableFilters['endDate'])->endOfDay(),
+                            ])
+                            ->count();
+
+                        if ($sessionsCount === 0) {
+                            return '-';
+                        }
+
+                        $rate = round(($vipCode->bookings_count / $sessionsCount) * 100, 1);
+                        return $rate.'%';
+                    }),
                 TextColumn::make('earnings')
                     ->label('Earned')
                     ->size('xs')
                     ->alignRight()
-                    ->formatStateUsing(function (VipCode $vipCode): string {
-                        $byCurrency = $vipCode->earnings->groupBy('currency')
-                            ->map(fn ($currencyGroup) => $currencyGroup->sum('amount') * 100)
+                    ->placeholder('-')
+                    ->getStateUsing(function (VipCode $vipCode) {
+                        $startDate = $this->tableFilters['startDate'] ?? now()->subDays(30)->format('Y-m-d');
+                        $endDate = $this->tableFilters['endDate'] ?? now()->format('Y-m-d');
+
+                        // Filter earnings by booking date
+                        $filteredEarnings = $vipCode->earnings->filter(function ($earning) use ($startDate, $endDate) {
+                            return $earning->booking->created_at->between(
+                                Carbon::parse($startDate)->startOfDay(),
+                                Carbon::parse($endDate)->endOfDay()
+                            );
+                        });
+
+                        $byCurrency = $filteredEarnings->groupBy('currency')
+                            ->map(fn ($currencyGroup) => $currencyGroup->sum('amount'))
                             ->toArray();
-                        $currencyService = app(CurrencyConversionService::class);
 
-                        $inUsd = $currencyService->convertToUSD($byCurrency);
+                        if (empty($byCurrency)) {
+                            return null;
+                        }
 
-                        return money($inUsd, 'USD');
+                        // Show each currency's earnings
+                        $formatted = [];
+                        foreach ($byCurrency as $currency => $amount) {
+                            $formatted[] = (string) money($amount, $currency);
+                        }
+
+                        return implode(', ', $formatted);
                     }),
                 ToggleColumn::make('is_active')
                     ->label('Active'),
@@ -130,6 +176,89 @@ class VipCodesTable extends TableWidget
                     ->size('xs'),
             ])
             ->actions([
+                Action::make('viewAnalytics')
+                    ->iconButton()
+                    ->icon('tabler-chart-bar')
+                    ->size('xs')
+                    ->modalHeading(fn (VipCode $vipCode) => 'VIP Analytics - '.$vipCode->code)
+                    ->modalSubmitAction(false)
+                    ->modalCancelActionLabel('Close')
+                    ->modalWidth(MaxWidth::FourExtraLarge)
+                    ->modalContent(function (VipCode $vipCode) {
+                        $startDate = $this->tableFilters['startDate'] ?? now()->subDays(30)->format('Y-m-d');
+                        $endDate = $this->tableFilters['endDate'] ?? now()->format('Y-m-d');
+
+                        // Get sessions count
+                        $sessions = $vipCode->sessions()
+                            ->whereBetween('created_at', [
+                                Carbon::parse($startDate)->startOfDay(),
+                                Carbon::parse($endDate)->endOfDay(),
+                            ])
+                            ->count();
+
+                        // Get bookings with query params and earnings
+                        $bookings = $vipCode->bookings()
+                            ->with(['earnings' => function ($query) {
+                                $query->whereIn('type', ['concierge', 'concierge_bounty']);
+                            }])
+                            ->whereIn('status', BookingStatus::REPORTING_STATUSES)
+                            ->whereBetween('created_at', [
+                                Carbon::parse($startDate)->startOfDay(),
+                                Carbon::parse($endDate)->endOfDay(),
+                            ]);
+
+                        $bookingsCount = $bookings->count();
+
+                        // Calculate earnings by currency - use raw query to avoid GROUP BY issues
+                        $earningsByCurrency = \DB::table('earnings')
+                            ->join('bookings', 'bookings.id', '=', 'earnings.booking_id')
+                            ->where('bookings.vip_code_id', $vipCode->id)
+                            ->whereIn('bookings.status', ['confirmed', 'venue_confirmed'])
+                            ->whereIn('earnings.type', ['concierge', 'concierge_bounty'])
+                            ->whereBetween('bookings.created_at', [
+                                Carbon::parse($startDate)->startOfDay(),
+                                Carbon::parse($endDate)->endOfDay(),
+                            ])
+                            ->selectRaw('SUM(earnings.amount) as total, earnings.currency')
+                            ->groupBy('earnings.currency')
+                            ->get();
+
+                        if ($earningsByCurrency->count() === 0) {
+                            $conciergeEarnings = '-';
+                        } else {
+                            $formatted = [];
+                            foreach ($earningsByCurrency as $earning) {
+                                $formatted[] = (string) money($earning->total, $earning->currency);
+                            }
+                            $conciergeEarnings = implode(', ', $formatted);
+                        }
+
+                        // Calculate conversion rate
+                        $conversionRate = $sessions > 0 ? round(($bookingsCount / $sessions) * 100, 1) : 0;
+
+                        // Get all sessions for parameter analytics
+                        $allSessions = $vipCode->sessions()
+                            ->whereBetween('created_at', [
+                                Carbon::parse($startDate)->startOfDay(),
+                                Carbon::parse($endDate)->endOfDay(),
+                            ])
+                            ->get();
+
+                        // Get parameter analytics from sessions and bookings
+                        $paramAnalytics = $this->buildParameterAnalytics($allSessions, $bookings->get());
+
+                        // Format date range
+                        $dateRange = Carbon::parse($startDate)->format('M j') . ' - ' . Carbon::parse($endDate)->format('M j, Y');
+
+                        return view('filament.modals.vip-analytics', [
+                            'sessions' => $sessions,
+                            'bookings' => $bookingsCount,
+                            'conciergeEarnings' => $conciergeEarnings,
+                            'conversionRate' => $conversionRate,
+                            'paramAnalytics' => $paramAnalytics,
+                            'dateRange' => $dateRange,
+                        ]);
+                    }),
                 Action::make('viewQR')
                     ->iconButton()
                     ->icon('tabler-qrcode')
@@ -468,5 +597,82 @@ class VipCodesTable extends TableWidget
     private function getQr(VipCode $vipCode): array
     {
         return app(GenerateVipReferralQRCode::class)->execute($vipCode);
+    }
+
+    private function buildParameterAnalytics($sessions, $bookings)
+    {
+        $paramData = [];
+
+        // Build a map of session ID to session for quick lookup
+        $sessionMap = $sessions->keyBy('id');
+
+        // First, count all sessions with their parameters
+        foreach ($sessions as $session) {
+            if (!empty($session->query_params)) {
+                foreach ($session->query_params as $key => $value) {
+                    // Convert arrays to strings for display
+                    $displayValue = is_array($value) ? implode(', ', $value) : $value;
+                    $paramKey = $key . '|' . $displayValue;
+
+                    if (!isset($paramData[$paramKey])) {
+                        $paramData[$paramKey] = [
+                            'key' => $key,
+                            'value' => $displayValue,
+                            'sessions' => 0,
+                            'bookings' => 0,
+                            'earnings' => 0,
+                        ];
+                    }
+
+                    // Increment session count for this parameter
+                    $paramData[$paramKey]['sessions']++;
+                }
+            }
+        }
+
+        // Then, count bookings and earnings - match by vip_session_id
+        foreach ($bookings as $booking) {
+            // Get the session for this booking
+            $session = isset($booking->vip_session_id) && isset($sessionMap[$booking->vip_session_id])
+                ? $sessionMap[$booking->vip_session_id]
+                : null;
+
+            if ($session && !empty($session->query_params)) {
+                foreach ($session->query_params as $key => $value) {
+                    // Convert arrays to strings for display
+                    $displayValue = is_array($value) ? implode(', ', $value) : $value;
+                    $paramKey = $key . '|' . $displayValue;
+
+                    // Initialize if this param wasn't already tracked
+                    if (!isset($paramData[$paramKey])) {
+                        $paramData[$paramKey] = [
+                            'key' => $key,
+                            'value' => $displayValue,
+                            'sessions' => 0,
+                            'bookings' => 0,
+                            'earnings' => 0,
+                        ];
+                    }
+
+                    // Increment booking count
+                    $paramData[$paramKey]['bookings']++;
+
+                    // Calculate earnings for this booking
+                    foreach ($booking->earnings as $earning) {
+                        if (in_array($earning->type, ['concierge', 'concierge_bounty'])) {
+                            $paramData[$paramKey]['earnings'] += $earning->amount;
+                        }
+                    }
+                }
+            }
+        }
+
+        // Calculate conversion rates and format data
+        return collect($paramData)->map(function ($data) {
+            $data['conversion'] = $data['sessions'] > 0
+                ? round(($data['bookings'] / $data['sessions']) * 100, 1)
+                : 0;
+            return $data;
+        })->sortByDesc('sessions')->values();
     }
 }

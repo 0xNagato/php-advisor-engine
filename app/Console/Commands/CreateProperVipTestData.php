@@ -21,7 +21,7 @@ class CreateProperVipTestData extends Command
      *
      * @var string
      */
-    protected $signature = 'vip:create-proper-test-data {--user-id=1} {--booking-count=5} {--venue-id=123}';
+    protected $signature = 'vip:create-proper-test-data {--user-id=1} {--booking-count=5} {--venue-id=} {--region=}';
 
     /**
      * The console command description.
@@ -38,6 +38,7 @@ class CreateProperVipTestData extends Command
         $userId = $this->option('user-id');
         $bookingCount = $this->option('booking-count');
         $venueId = $this->option('venue-id');
+        $region = $this->option('region');
 
         $this->info("Creating proper VIP test data for user ID: {$userId} using real venues");
 
@@ -59,25 +60,31 @@ class CreateProperVipTestData extends Command
         $this->info("Found concierge: {$concierge->hotel_name} (ID: {$concierge->id})");
         $this->info('VIP codes: '.implode(', ', $concierge->vipCodes->pluck('code')->toArray()));
 
-        // Find real venues
-        $venues = Venue::where('status', 'active')->where('region', 'miami')->limit(3)->get();
-        if ($venues->count() === 0) {
-            $this->error('No active Miami venues found');
+        // Find real venues based on region or venue ID
+        if ($venueId) {
+            $venue = Venue::find($venueId);
+            if (! $venue) {
+                $this->error("Venue with ID {$venueId} not found");
 
-            return 1;
-        }
+                return 1;
+            }
+            $this->info("Using specified venue: {$venue->name} (ID: {$venue->id}) in {$venue->region}");
+        } else {
+            // Use region filter or default to miami
+            $targetRegion = $region ?: 'miami';
+            $venues = Venue::where('status', 'active')->where('region', $targetRegion)->limit(3)->get();
+            if ($venues->count() === 0) {
+                $this->error("No active {$targetRegion} venues found");
 
-        $this->info("Found {$venues->count()} real Miami venues:");
-        foreach ($venues as $venue) {
-            $this->line("  - {$venue->name} (ID: {$venue->id})");
-        }
+                return 1;
+            }
 
-        // Use the specified venue or pick the first one
-        $venue = Venue::find($venueId) ?? $venues->first();
-        if (! $venue) {
-            $this->error("Venue with ID {$venueId} not found");
+            $this->info("Found {$venues->count()} real {$targetRegion} venues:");
+            foreach ($venues as $v) {
+                $this->line("  - {$v->name} (ID: {$v->id})");
+            }
 
-            return 1;
+            $venue = $venues->first();
         }
 
         $this->info("Using venue: {$venue->name} (ID: {$venue->id})");
@@ -133,24 +140,28 @@ class CreateProperVipTestData extends Command
             $vipCode = $vipCodes[array_rand($vipCodes)];
             $guestCount = $guestCounts[array_rand($guestCounts)];
 
-            // Create VIP session first with query parameters
+            // Create VIP session with query parameters
             $vipCodeModel = VipCode::where('code', $vipCode)->first();
+
+            // Generate query parameters for this session
+            $queryParams = [
+                'utm_source' => ['facebook', 'instagram', 'google', 'twitter'][array_rand(['facebook', 'instagram', 'google', 'twitter'])],
+                'utm_medium' => 'social',
+                'utm_campaign' => ['summer2024', 'holiday2024', 'winter2025'][array_rand(['summer2024', 'holiday2024', 'winter2025'])],
+                'utm_content' => 'ad_'.rand(1000, 9999),
+                'cuisine' => [['italian', 'french'], ['mexican', 'asian'], ['american', 'mediterranean']][array_rand([['italian', 'french'], ['mexican', 'asian'], ['american', 'mediterranean']])],
+                'guest_count' => $guestCount,
+                'budget' => rand(100, 300),
+                'occasion' => ['date_night', 'business_meeting', 'celebration'][array_rand(['date_night', 'business_meeting', 'celebration'])],
+            ];
+
             $session = VipSession::create([
                 'vip_code_id' => $vipCodeModel->id,
                 'token' => 'test_session_'.$vipCode.'_'.uniqid(),
                 'expires_at' => now()->addHours(24),
                 'ip_address' => '192.168.1.100',
                 'user_agent' => 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36',
-                'query_params' => [
-                    'utm_source' => ['facebook', 'instagram', 'google', 'twitter'][array_rand(['facebook', 'instagram', 'google', 'twitter'])],
-                    'utm_medium' => 'social',
-                    'utm_campaign' => ['summer2024', 'holiday2024', 'winter2025'][array_rand(['summer2024', 'holiday2024', 'winter2025'])],
-                    'utm_content' => 'ad_'.rand(1000, 9999),
-                    'cuisine' => [['italian', 'french'], ['mexican', 'asian'], ['american', 'mediterranean']][array_rand([['italian', 'french'], ['mexican', 'asian'], ['american', 'mediterranean']])],
-                    'guest_count' => $guestCount,
-                    'budget' => rand(100, 300),
-                    'occasion' => ['date_night', 'business_meeting', 'celebration'][array_rand(['date_night', 'business_meeting', 'celebration'])],
-                ],
+                'query_params' => $queryParams,
                 'landing_url' => 'https://prima.test/vip/'.$vipCode,
                 'referer_url' => 'https://facebook.com/ads/campaign',
                 'started_at' => now()->subMinutes(rand(5, 30)),

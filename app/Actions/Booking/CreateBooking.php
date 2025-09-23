@@ -172,6 +172,15 @@ class CreateBooking
             ];
         }
 
+        // Get query params from VIP session if available
+        $queryParams = null;
+        if ($vipSessionId) {
+            $vipSession = \App\Models\VipSession::find($vipSessionId);
+            if ($vipSession && !empty($vipSession->query_params)) {
+                $queryParams = $vipSession->query_params;
+            }
+        }
+
         $booking = Booking::query()->create([
             'schedule_template_id' => $scheduleTemplate->id,
             'guest_count' => $data['guest_count'],
@@ -182,6 +191,7 @@ class CreateBooking
             'is_prime' => $isPrime,
             'vip_code_id' => $vipCode?->id,
             'vip_session_id' => $vipSessionId,
+            'query_params' => $queryParams,
             'meta' => $meta,
             'source' => $source,
             'device' => $device,
