@@ -70,7 +70,8 @@ class VipCode extends Model
     public function earnings(): HasManyThrough
     {
         return $this->hasManyThrough(Earning::class, Booking::class)
-            ->whereIn('earnings.type', ['concierge', 'concierge_bounty']);
+            ->whereIn('earnings.type', ['concierge', 'concierge_bounty'])
+            ->whereIn('bookings.status', BookingStatus::REPORTING_STATUSES);
     }
 
     public function totalEarningsGroupedByCurrency(): Attribute
