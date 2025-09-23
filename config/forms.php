@@ -16,6 +16,10 @@ return [
         'www.primavip.co',
         '*.primavip.co',
         '*.primaapp.com',
+        '*.lovable.com',
+        '*.lovable.dev',
+        '*.lovable.app',
+
     ],
 
     /*
