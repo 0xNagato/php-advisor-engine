@@ -12,16 +12,10 @@ class PublicTalkToPrimaMail extends Mailable
 {
     use Queueable, SerializesModels;
 
-    /** @var array{role:string,name:string,company:?string,email:?string,phone:string,city:?string,preferred_contact_time:?string,message:?string} */
-    public array $data;
-
     /**
      * @param  array{role:string,name:string,company:?string,email:?string,phone:string,city:?string,preferred_contact_time:?string,message:?string}  $data
      */
-    public function __construct(array $data)
-    {
-        $this->data = $data;
-    }
+    public function __construct(public array $data) {}
 
     public function envelope(): Envelope
     {

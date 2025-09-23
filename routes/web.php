@@ -33,6 +33,10 @@ Route::get('/announcement/{message}', [PublicAnnouncementController::class, 'sho
 
 // Marketing site routes (promoted to root)
 Route::get('/', static function () {
+    if (app()->environment('production')) {
+        return redirect('https://primaapp.com');
+    }
+
     return view('site.index');
 })->name('home');
 

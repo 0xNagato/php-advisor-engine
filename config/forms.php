@@ -32,7 +32,7 @@ return [
     */
     'notification_emails' => [
         'to' => env('FORMS_NOTIFICATION_TO', 'prima@primavip.co'),
-        'cc' => explode(',', env('FORMS_NOTIFICATION_CC', 'kevin@primavip.co,alex@primavip.co,patrick@primavip.co')),
-        'bcc' => explode(',', env('FORMS_NOTIFICATION_BCC', 'andru.weir@gmail.com')),
+        'cc' => explode(',', (string) env('FORMS_NOTIFICATION_CC', 'kevin@primavip.co,alex@primavip.co,patrick@primavip.co')),
+        'bcc' => explode(',', (string) env('FORMS_NOTIFICATION_BCC', 'andru.weir@gmail.com')),
     ],
 ];

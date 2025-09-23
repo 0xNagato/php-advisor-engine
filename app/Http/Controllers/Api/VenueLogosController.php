@@ -6,8 +6,9 @@ use App\Enums\VenueStatus;
 use App\Http\Controllers\Controller;
 use App\Models\Booking;
 use App\Models\Venue;
-use App\OpenApi\Responses\VenueLogosListResponse;
+use App\OpenApi\Parameters\VenueLogosParameters;
 use App\OpenApi\Responses\VenueLogosCacheClearResponse;
+use App\OpenApi\Responses\VenueLogosListResponse;
 use DB;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -44,7 +45,7 @@ class VenueLogosController extends Controller
         tags: ['Venues']
     )]
     #[OpenApi\Parameters(
-        factory: \App\OpenApi\Parameters\VenueLogosParameters::class
+        factory: VenueLogosParameters::class
     )]
     #[OpenApiResponse(factory: VenueLogosListResponse::class)]
     public function index(Request $request): JsonResponse
@@ -52,9 +53,7 @@ class VenueLogosController extends Controller
         $cacheKey = 'venue-logos-data-api';
         $cacheDuration = $request->has('fresh') ? 0 : 1440; // 24 hours unless fresh requested
 
-        $venues = Cache::remember($cacheKey, $cacheDuration, function () {
-            return $this->getTopVenues();
-        });
+        $venues = Cache::remember($cacheKey, $cacheDuration, fn () => $this->getTopVenues());
 
         // Randomize and split venues equally between first and second row
         $totalVenues = collect($venues)->flatten()->shuffle();
