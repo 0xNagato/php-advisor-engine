@@ -1,6 +1,19 @@
 // Venue Logos Scroll - PROPER Web Component
 // This follows the Web Components specification: https://developer.mozilla.org/en-US/docs/Web/API/Web_components
 
+// Capture the script source URL at load time to determine the API host
+const scriptSrc = document.currentScript?.src || '';
+let apiBaseUrl = '';
+
+if (scriptSrc) {
+    // Extract the base URL from where this script is loaded
+    const url = new URL(scriptSrc);
+    apiBaseUrl = url.origin;
+} else {
+    // Fallback - will only work if script is on same domain
+    apiBaseUrl = window.location.origin;
+}
+
 // Create the HTML template for the component
 const template = document.createElement('template');
 template.innerHTML = `
@@ -145,7 +158,8 @@ class VenueLogosScroll extends HTMLElement {
     }
 
     async init() {
-        const apiEndpoint = this.getAttribute('api-endpoint') || '/api/venue-logos';
+        // Use the API base URL captured when the script was loaded
+        const apiEndpoint = this.getAttribute('api-endpoint') || `${apiBaseUrl}/api/venue-logos`;
 
         try {
             const response = await fetch(apiEndpoint);

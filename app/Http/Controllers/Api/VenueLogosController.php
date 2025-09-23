@@ -71,7 +71,10 @@ class VenueLogosController extends Controller
             'generated_at' => now()->toISOString(),
         ];
 
-        return response()->json($responseData);
+        return response()->json($responseData)
+            ->header('Access-Control-Allow-Origin', '*')
+            ->header('Access-Control-Allow-Methods', 'GET, OPTIONS')
+            ->header('Access-Control-Allow-Headers', 'Content-Type');
     }
 
     /**

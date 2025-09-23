@@ -70,16 +70,21 @@
 
         <div class="instructions">
             <h3>🚀 How to Use on Any Website:</h3>
-            <p><strong>Step 1:</strong> Include the web component script:</p>
+            <p><strong>Step 1:</strong> Include the web component script from PRIMA's server:</p>
             <div class="code-example" id="script-example"></div>
             <script>
                 document.getElementById('script-example').textContent = '<script src="' + window.currentHost + '/venue-logos-scroll.js" type="module"><\/script>';
             </script>
 
-            <p><strong>Step 2:</strong> Add the custom element anywhere:</p>
+            <p><strong>Step 2:</strong> Add the custom element anywhere on your page:</p>
             <div class="code-example">&lt;venue-logos-scroll&gt;&lt;/venue-logos-scroll&gt;</div>
 
-            <p><strong>Step 3:</strong> That's it! The component will automatically fetch and display venue logos with smooth animations.</p>
+            <p><strong>Step 3:</strong> That's it! The component will automatically fetch venue data from PRIMA's API.</p>
+
+            <p style="margin-top: 1rem; padding: 0.5rem; background: #fef3c7; border-left: 3px solid #f59e0b;">
+                <strong>Note:</strong> The component automatically detects where the script is loaded from and fetches data from that same server.
+                This means external sites loading the script from PRIMA will automatically get data from PRIMA's API.
+            </p>
         </div>
 
         <div class="demo-section">
