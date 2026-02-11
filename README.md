@@ -1,18 +1,18 @@
 <p align="center">
-  <img src="https://avatars.githubusercontent.com/u/173698585?s=100&v=4" alt="PRIMA" width="100">
+  <img src="https://avatars.githubusercontent.com/u/173698585?s=100&v=4" alt="Advisor Engine" width="100">
 </p>
 
-# PRIMA Platform
+# Advisor Engine Platform
 
 ## Overview
 
-**PRIMA** (Platform for Restaurant Intermediation and Management Application) is a comprehensive restaurant reservation ecosystem that transforms how venues monetize their inventory while creating sustainable income streams for concierges. Unlike traditional booking platforms, PRIMA addresses three critical business challenges: revenue loss from third-party reservation trading, operational inefficiency from manual booking processes, and untapped revenue during non-prime hours.
+**Advisor Engine** (Platform for Restaurant Intermediation and Management Application) is a comprehensive restaurant reservation ecosystem that transforms how venues monetize their inventory while creating sustainable income streams for concierges. Unlike traditional booking platforms, the platform addresses three critical business challenges: revenue loss from third-party reservation trading, operational inefficiency from manual booking processes, and untapped revenue during non-prime hours.
 
-The platform creates multiple revenue streams through prime-time reservation sales, automated small-party bookings, location-based QR discovery, and relationship-driven repeat business - generating sustainable income for all stakeholders while reducing operational overhead. By facilitating prime-time reservation sales through a trusted concierge network and optimizing non-prime bookings, PRIMA creates a win-win-win situation for restaurants, concierges, and diners.
+The platform creates multiple revenue streams through prime-time reservation sales, automated small-party bookings, location-based QR discovery, and relationship-driven repeat business - generating sustainable income for all stakeholders while reducing operational overhead. By facilitating prime-time reservation sales through a trusted concierge network and optimizing non-prime bookings, The platform creates a win-win-win situation for restaurants, concierges, and diners.
 
 ## Table of Contents
 
-- [PRIMA Platform](#prima-platform)
+- [Advisor Engine Platform](#advisor-engine-platform)
   - [Overview](#overview)
   - [Table of Contents](#table-of-contents)
   - [Problem Statement](#problem-statement)
@@ -48,7 +48,7 @@ The restaurant industry faces significant revenue loss due to:
 
 ## Our Solution
 
-PRIMA revolutionizes restaurant reservation management by:
+Advisor Engine revolutionizes restaurant reservation management by:
 
 - Allowing in-demand restaurants to monetize prime-time reservations
 - Increasing bookings for non-prime reservations
@@ -82,7 +82,7 @@ PRIMA revolutionizes restaurant reservation management by:
 ## How It Works
 
 1. **Reservation Booking**:
-    - Concierges book reservations through the PRIMA hub
+    - Concierges book reservations through the Advisor Engine hub
     - Prime-time slots are available for a fee
     - Non-prime slots are offered free of charge
 
@@ -125,7 +125,7 @@ PRIMA revolutionizes restaurant reservation management by:
 
 ## Architecture
 
-PRIMA follows a modern, modular architecture leveraging Laravel's robust features and additional packages to ensure clean, maintainable, and reusable code:
+Advisor Engine follows a modern, modular architecture leveraging Laravel's robust features and additional packages to ensure clean, maintainable, and reusable code:
 
 - **MVC Pattern**: Laravel's Model-View-Controller architecture for clear separation of concerns
 - **Multi-Platform Integration Layer**: Unified interface for different restaurant management systems
@@ -138,7 +138,7 @@ PRIMA follows a modern, modular architecture leveraging Laravel's robust feature
 
 ### Action Pattern and Code Reuse
 
-PRIMA extensively uses the Laravel Actions package to structure its business logic, promoting code reuse across different parts of the application:
+Advisor Engine extensively uses the Laravel Actions package to structure its business logic, promoting code reuse across different parts of the application:
 
 1. **Unified Business Logic**: Actions encapsulate core functionalities, allowing the same logic to be used in multiple contexts without duplication.
 2. **Versatile Usage**: A single Action can serve as a controller endpoint, a command line operation, a queued job, or a simple function call, promoting consistency across different interfaces.
@@ -165,7 +165,7 @@ This approach to using Actions has significantly improved our ability to maintai
 
 ## Venue Management
 
-The PRIMA platform provides robust tools for managing venues (soon to be refactored from restaurants to venues). This system allows for detailed control over various aspects of venue operations within the platform.
+The Advisor Engine platform provides robust tools for managing venues (soon to be refactored from restaurants to venues). This system allows for detailed control over various aspects of venue operations within the platform.
 
 ### Key Features of Venue Management
 
@@ -194,7 +194,7 @@ The PRIMA platform provides robust tools for managing venues (soon to be refacto
 
 ## Referral System
 
-The PRIMA platform incorporates a multi-level referral system that incentivizes growth and rewards key stakeholders.
+The Advisor Engine platform incorporates a multi-level referral system that incentivizes growth and rewards key stakeholders.
 
 ### Partner Referrals
 
@@ -239,7 +239,7 @@ Concierges can refer other concierges, creating a two-level referral structure:
 
 ## Getting Started
 
-To set up the PRIMA platform locally, follow these steps:
+To set up the Advisor Engine platform locally, follow these steps:
 
 ### Prerequisites
 
@@ -331,7 +331,7 @@ Ensure you have the following installed on your development machine:
 
 ### Additional Setup
 
-- **Queue Workers**: PRIMA requires background job processing for SMS, notifications, and platform sync:
+- **Queue Workers**: Advisor Engine requires background job processing for SMS, notifications, and platform sync:
 
     ```bash
     php artisan queue:work
@@ -358,7 +358,7 @@ Ensure you have the following installed on your development machine:
     php artisan app:sync-covermanager-availability --venue-id=123 --days=7
     ```
 
-Now you are ready to start developing and testing the PRIMA platform locally.
+Now you are ready to start developing and testing the Advisor Engine platform locally.
 
 ## Development & Testing Commands
 
