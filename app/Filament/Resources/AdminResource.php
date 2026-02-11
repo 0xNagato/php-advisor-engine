@@ -5,6 +5,7 @@ namespace App\Filament\Resources;
 use App\Filament\Resources\AdminResource\Pages\CreateAdmin;
 use App\Filament\Resources\AdminResource\Pages\ListAdmins;
 use App\Models\User;
+use Filament\Facades\Filament;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables\Actions\DeleteAction;
@@ -28,7 +29,13 @@ class AdminResource extends Resource
 
     public static function canAccess(): bool
     {
-        return auth()->user()->hasActiveRole('super_admin');
+        $user = Filament::auth()->user();
+
+        if ($user === null) {
+            return false;
+        }
+
+        return $user->hasActiveRole('super_admin');
     }
 
     public static function form(Form $form): Form

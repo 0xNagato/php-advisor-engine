@@ -1,6 +1,7 @@
 <?php
 
 use App\Traits\FormatsPhoneNumber;
+use Illuminate\Support\Str;
 
 if (! function_exists('formatInternationalPhoneNumber')) {
     function formatInternationalPhoneNumber($phoneNumber): string

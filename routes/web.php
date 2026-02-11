@@ -22,11 +22,19 @@ use App\Livewire\Venue\VenueModificationRequestConfirmation;
 use App\Livewire\Venue\VenueSpecialRequestConfirmation;
 use App\Livewire\VenueOnboarding;
 use App\Livewire\Vip\AvailabilityCalendar;
+// use App\Models\User;
 use AshAllenDesign\ShortURL\Controllers\ShortURLController;
+// Removed temporary diagnostics: no longer need DB/Hash/Redis here
+// use Illuminate\Support\Facades\DB;
+// use Illuminate\Support\Facades\Hash;
+// use Illuminate\Support\Facades\Redis as RedisFacade;
+use Illuminate\Support\Facades\Route;
 
 Route::get('/privacy', function () {
     return view('privacy');
 });
+
+// Temporary diagnostics removed after verification
 
 Route::get('/announcement/{message}', [PublicAnnouncementController::class, 'show'])
     ->name('public.announcement');

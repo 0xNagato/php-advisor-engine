@@ -4,6 +4,7 @@ namespace App\Services;
 
 use GuzzleHttp\Client;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Log;
 
 class CurrencyConversionService
 {
@@ -22,18 +23,40 @@ class CurrencyConversionService
 
     private function getExchangeRates(): array
     {
-        return Cache::remember(self::CACHE_KEY, self::CACHE_DURATION, function () {
+        $appId = (string) (config('services.openexchangerates.app_id') ?? '');
+
+        if ($appId === '') {
+            Log::notice('OpenExchangeRates app_id is missing; skipping live rate fetch and using default 1:1 rates.');
+
+            return [];
+        }
+
+        $cached = Cache::get(self::CACHE_KEY);
+        if (is_array($cached) && $cached !== []) {
+            return $cached;
+        }
+
+        try {
             $response = $this->httpClient->get(self::API_URL, [
                 'query' => [
-                    'app_id' => config('services.openexchangerates.app_id'),
+                    'app_id' => $appId,
                     'base' => 'USD',
                 ],
+                'timeout' => 5,
+                'connect_timeout' => 3,
             ]);
 
             $data = json_decode($response->getBody(), true, 512, JSON_THROW_ON_ERROR);
+            $rates = $data['rates'] ?? [];
 
-            return $data['rates'] ?? [];
-        });
+            Cache::put(self::CACHE_KEY, $rates, self::CACHE_DURATION);
+
+            return $rates;
+        } catch (\Throwable $e) {
+            Log::warning('OpenExchangeRates fetch failed: '.$e->getMessage());
+
+            return [];
+        }
     }
 
     public function convertToUSD(array $amounts): float

@@ -11,7 +11,7 @@ use BezhanSalleh\FilamentShield\Traits\HasPanelShield;
 use Filament\Models\Contracts\FilamentUser;
 use Filament\Models\Contracts\HasAvatar;
 use Filament\Panel;
-use Illuminate\Contracts\Database\Query\Builder;
+use Illuminate\Database\Eloquent\Builder as EloquentBuilder;
 use Illuminate\Database\Eloquent\Casts\AsArrayObject;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Collection;
@@ -194,7 +194,7 @@ class User extends Authenticatable implements FilamentUser, HasAvatar
     public function getFilamentAvatarUrl(): ?string
     {
         return $this->profile_photo_path
-            ? Storage::disk('do')->url($this->profile_photo_path)
+            ? Storage::disk('do')->path($this->profile_photo_path)
             : "https://ui-avatars.com/api/?background=312596&color=fff&format=png&name=$this->name";
     }
 
@@ -340,11 +340,13 @@ class User extends Authenticatable implements FilamentUser, HasAvatar
     public function switchProfile(RoleProfile|string $profile): void
     {
         if (is_string($profile)) {
+            $roleName = $profile;
+
             $profile = $this->roleProfiles()
-                ->whereHas('role', fn (Builder $query) => $query->where('name', $profile))
+                ->whereHas('role', fn (EloquentBuilder $query) => $query->where('name', $roleName))
                 ->first();
 
-            throw_unless($profile, new InvalidArgumentException("No profile found for role: {$profile}"));
+            throw_unless($profile, new InvalidArgumentException("No profile found for role: {$roleName}"));
         }
 
         throw_unless($this->roleProfiles->contains($profile),
